@@ -70,7 +70,7 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     /**
      * Should the parser fail on error in server response.
      */
-    final boolean failOnError;
+    boolean failOnError;
 
     private Transport notificationTransport;
 
@@ -142,6 +142,10 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     public void setNotifyPermissionEntities(Transport transport, String message) {
         notificationTransport = transport;
         notificationMessage = message;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
     @Override

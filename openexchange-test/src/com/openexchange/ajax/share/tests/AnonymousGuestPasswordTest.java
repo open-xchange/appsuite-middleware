@@ -112,6 +112,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(
             new ShareTarget(module, String.valueOf(folder.getObjectID())), client.getValues().getTimeZone(), System.currentTimeMillis());
         updateLinkRequest.setPassword("secret");
+        ((AnonymousRecipient) guestPermission.getRecipient()).setPassword("secret"); // for subsequent comparison
         client.execute(updateLinkRequest);
         /*
          * discover & check guest
@@ -125,6 +126,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * update recipient, change password for the anonymous guest
          */
         updateLinkRequest.setPassword("geheim");
+        ((AnonymousRecipient) guestPermission.getRecipient()).setPassword("geheim"); // for subsequent comparison
         client.execute(updateLinkRequest);
         /*
          * discover & check guest
@@ -138,6 +140,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * update recipient remove password for the anonymous guest
          */
         updateLinkRequest.setPassword(null);
+        ((AnonymousRecipient) guestPermission.getRecipient()).setPassword(null); // for subsequent comparison
         client.execute(updateLinkRequest);
         /*
          * discover & check guest

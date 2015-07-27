@@ -843,18 +843,15 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the given user name but
-     * sets no password and simulates the "skip password" behavior.
+     * Resolves the supplied share url without authentication, i.e. expects that no password
+     * exists for the guest user and resolving the share results in a direct redirect into
+     * the App Suite UI.
      *
      * @param url The share URL
-     * @param username The username, or <code>null</code> if not needed
      * @return An authenticated guest client being able to access the share
      */
-    protected GuestClient resolveShare(String url, String username) throws Exception {
-        ClientConfig clientConfig = new GuestClient.ClientConfig(url)
-            .setUsername(username)
-            .setSkipPassword(true);
-        return new GuestClient(clientConfig);
+    protected GuestClient resolveShare(String url) throws Exception {
+        return new GuestClient(new ClientConfig(url));
     }
 
     protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {

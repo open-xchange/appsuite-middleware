@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
 
@@ -72,8 +72,19 @@ import com.openexchange.share.ShareTarget;
 public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     private final ShareTarget target;
-    private boolean failOnError = true;
     private final TimeZone timeZone;
+    private boolean failOnError = true;
+
+    /**
+     * Initializes a new {@link GetLinkRequest} with UTC as time zone
+     *
+     * @param target The share target
+     */
+    public GetLinkRequest(ShareTarget target) {
+        super();
+        this.target = target;
+        this.timeZone = TimeZones.UTC;
+    }
 
     /**
      * Initializes a new {@link GetLinkRequest}.
@@ -119,6 +130,10 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
         return NO_HEADER;
     }
 
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
     private static final class Parser extends AbstractAJAXParser<GetLinkResponse> {
 
         private final TimeZone timeZone;
@@ -135,9 +150,13 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
         @Override
         protected GetLinkResponse createResponse(Response response) throws JSONException {
-            JSONObject json = ResponseWriter.getJSON(response).getJSONObject("data");
-            ShareLink shareLink = new ShareLink(json, timeZone);
-            return new GetLinkResponse(response, shareLink);
+            if (!response.hasError()) {
+                JSONObject data = (JSONObject) response.getData();
+                ShareLink shareLink = new ShareLink(data, timeZone);
+                return new GetLinkResponse(response, shareLink);
+            }
+
+            return new GetLinkResponse(response, null);
         }
 
     }

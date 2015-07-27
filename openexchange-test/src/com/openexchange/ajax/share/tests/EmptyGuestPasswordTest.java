@@ -52,14 +52,15 @@ package com.openexchange.ajax.share.tests;
 import java.util.Collections;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
+import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 
 
@@ -107,42 +108,34 @@ public class EmptyGuestPasswordTest extends ShareTest {
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingPermission.getEntity());
         checkGuestPermission(perm, guest);
         /*
-         * check access to share and skip setting password
+         * check access to share - a login request must not have been performed
          */
-        GuestClient guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
+        GuestClient guestClient = resolveShare(guest.getShareURL());
+        assertNull(guestClient.getLoginResponse());
+        /*
+         * Set password for guest user
+         */
+        String newPW = UUIDs.getUnformattedStringFromRandom();
+        PasswordChangeUpdateRequest pwChangeReq = new PasswordChangeUpdateRequest(newPW, "", true);
+        PasswordChangeUpdateResponse pwChangeResp = guestClient.execute(pwChangeReq);
+        assertFalse(pwChangeResp.hasWarnings());
+        assertFalse(pwChangeResp.hasError());
+        guestClient.logout();
+        /*
+         * Re-login with PW
+         */
+        guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()), newPW);
         LoginResponse response = guestClient.getLoginResponse();
         assertNotNull(response);
         assertFalse(response.hasError());
         assertNotNull(response.getSessionId());
-
-        /*
-         * another login with password skip should fail with LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED
-         */
-        GuestClient guestClient2 = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
-        LoginResponse response2 = guestClient2.getLoginResponse();
-        assertNotNull(response2);
-        assertTrue(response2.hasError());
-        OXException e = response2.getException();
-        assertEquals(LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.getNumber(), e.getCode());
-
-        /*
-         * Set password for guest user
-         */
-        GuestClient guestClient3 = resolveShare(guest, "testGuestPasswordInit" + now + "@example.org", "secret");
-        LoginResponse response3 = guestClient3.getLoginResponse();
-        assertNotNull(response3);
-        assertFalse(response3.hasError());
-        assertNotNull(response3.getSessionId());
-
         /*
          * Empty password should now fail with LoginExceptionCodes.INVALID_CREDENTIALS
          */
-        GuestClient guestClient4 = resolveShare(guest, perm.getRecipient());
-        LoginResponse response4 = guestClient4.getLoginResponse();
-        assertNotNull(response4);
-        assertTrue(response4.hasError());
-        OXException e2 = response4.getException();
-        assertEquals(LoginExceptionCodes.INVALID_CREDENTIALS.getNumber(), e2.getCode());
+        guestClient = resolveShare(guest.getShareURL());
+        response = guestClient.getLoginResponse();
+        assertNotNull(response);
+        assertTrue(response.hasError());
     }
 
 }

@@ -156,12 +156,18 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     public void testResetPassword_passwordReset() throws Exception {
-        //TODO: receive share token from the share redirect location as the UI does
+        // http://localhost/ajax/share/1100ba1e0f0652b8849d7f3f066049e390589313a77026ef
+        URI shareUrl = new URI(guest.getShareURL());
+        String[] pathSegments = shareUrl.getPath().split("/");
         String token = null;
-        Matcher matcher = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE).matcher(guest.getShareURL());
-        if (matcher.matches()) {
-            token = matcher.group();
-        } else {
+        for (String segment : pathSegments) {
+            Matcher matcher = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE).matcher(segment);
+            if (matcher.matches()) {
+                token = matcher.group();
+                break;
+            }
+        }
+        if (token == null) {
             fail("got no token from share link");
         }
         DefaultHttpClient httpClient = getSession().getHttpClient();

@@ -278,8 +278,6 @@ public class GuestClient extends AJAXClient {
 
         private boolean mustLogout;
 
-        private boolean skipPassword;
-
         private String client;
 
         private AJAXSession ajaxSession;
@@ -321,11 +319,6 @@ public class GuestClient extends AJAXClient {
             return this;
         }
 
-        public ClientConfig setSkipPassword(boolean skipPassword) {
-            this.skipPassword = skipPassword;
-            return this;
-        }
-
         public ClientConfig setAJAXSession(AJAXSession ajaxSession) {
             this.ajaxSession = ajaxSession;
             return this;
@@ -341,12 +334,7 @@ public class GuestClient extends AJAXClient {
     private LoginResponse login(ResolveShareResponse shareResponse, ClientConfig config) throws Exception {
         LoginRequest loginRequest = null;
         if ("guest".equals(shareResponse.getLoginType())) {
-            GuestCredentials credentials;
-            if (config.skipPassword) {
-                credentials = new GuestCredentials(config.username);
-            } else {
-                credentials = new GuestCredentials(config.username, config.password);
-            }
+            GuestCredentials credentials = new GuestCredentials(config.username, config.password);
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);

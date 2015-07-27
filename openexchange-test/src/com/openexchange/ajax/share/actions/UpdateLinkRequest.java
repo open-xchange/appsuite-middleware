@@ -62,6 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
 
@@ -77,13 +78,26 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
     private final long timestamp;
     private final TimeZone timeZone;
 
-    private boolean failOnError = true;
+    private final boolean failOnError = true;
     private String password = null;
     private boolean containsPassword;
     private Date expiryDate;
     private boolean containsExpiryDate;
     private Map<String, Object> meta;
     private boolean containsMeta;
+
+    /**
+     * Initializes a new {@link UpdateLinkRequest} with UTC as time zone
+     *
+     * @param target The share target
+     * @param timestamp The client timestamp
+     */
+    public UpdateLinkRequest(ShareTarget target, long timestamp) {
+        super();
+        this.target = target;
+        this.timestamp = timestamp;
+        this.timeZone = TimeZones.UTC;
+    }
 
     /**
      * Initializes a new {@link UpdateLinkRequest}.
