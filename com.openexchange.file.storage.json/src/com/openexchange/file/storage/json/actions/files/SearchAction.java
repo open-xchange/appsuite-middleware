@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
     @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") }, requestBody = "An Object as described in Search contacts.", responseDescription = "")
-public class SearchAction extends AbstractFileAction {
+public class SearchAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {

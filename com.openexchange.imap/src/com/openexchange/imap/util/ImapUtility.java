@@ -199,25 +199,29 @@ public final class ImapUtility {
      */
     public static String prepareImapCommandForLogging(String imapCommand) {
         if (null == imapCommand) {
-            return imapCommand;
+            return "NIL";
         }
         if (imapCommand.startsWith("FETCH ")) {
             int openParenthesis = imapCommand.indexOf('(', 6);
             if (openParenthesis <= 12) {
-                return imapCommand;
+                return surroundWithSingleQuotes(imapCommand);
             }
-            return new StringBuilder(imapCommand.length()).append("FETCH ... ").append(imapCommand.substring(openParenthesis)).toString();
+            return new StringBuilder(imapCommand.length()).append('\'').append("FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
         } else if (imapCommand.startsWith("UID FETCH ")) {
             int openParenthesis = imapCommand.indexOf('(', 6);
             if (openParenthesis <= 16) {
-                return imapCommand;
+                return surroundWithSingleQuotes(imapCommand);
             }
-            return new StringBuilder(imapCommand.length()).append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).toString();
+            return new StringBuilder(imapCommand.length()).append('\'').append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
         } else if (imapCommand.startsWith("UID EXPUNGE ")) {
-            return imapCommand.length() > 32 ? "UID EXPUNGE ..." : imapCommand;
+            return imapCommand.length() > 32 ? "'UID EXPUNGE ...'" : surroundWithSingleQuotes(imapCommand);
         } else {
-            return imapCommand;
+            return surroundWithSingleQuotes(imapCommand);
         }
+    }
+
+    private static String surroundWithSingleQuotes(String imapCommand) {
+        return new StringBuilder(imapCommand.length() + 2).append('\'').append(imapCommand).append('\'').toString();
     }
 
 }

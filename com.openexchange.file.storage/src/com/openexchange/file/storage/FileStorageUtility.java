@@ -51,9 +51,15 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.internal.FileStorageConfigReloadable;
+import com.openexchange.file.storage.osgi.Services;
 import com.openexchange.java.Strings;
 
 
@@ -167,6 +173,106 @@ public final class FileStorageUtility {
         }
 
         return new StringBuilder(filename).insert(index, ' ' + counterString).toString();
+    }
+
+    private static volatile Integer numberOfPregeneratedPreviews;
+
+    /**
+     * Gets the number of previews that are supposed to be generated when listing files in a folder.
+     *
+     * @return The number of previews that are supposed to be generated
+     */
+    public static int getNumberOfPregeneratedPreviews() {
+        Integer tmp = numberOfPregeneratedPreviews;
+        if (null == tmp) {
+            synchronized (FileStorageUtility.class) {
+                tmp = numberOfPregeneratedPreviews;
+                if (null == tmp) {
+                    int defaultNumberOfPregeneratedPreviews = 20;
+                    ConfigurationService service = Services.getOptionalService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultNumberOfPregeneratedPreviews;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.file.storage.numberOfPregeneratedPreviews", defaultNumberOfPregeneratedPreviews));
+                    numberOfPregeneratedPreviews = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Long threshold;
+
+    /**
+     * Gets the size threshold for ZIP archives
+     *
+     * @return The size threshold
+     */
+    public static long threshold() {
+        Long tmp = threshold;
+        if (null == tmp) {
+            synchronized (FileStorageUtility.class) {
+                tmp = threshold;
+                if (null == tmp) {
+                    long defaultThreshold = 1073741824;
+                    ConfigurationService service = Services.getOptionalService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultThreshold;
+                    }
+                    String property = service.getProperty("com.openexchange.file.storage.zipFolderThreshold");
+                    tmp = null == property ? Long.valueOf(defaultThreshold) : Long.valueOf(property.trim());
+                    threshold = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    private static volatile Integer compressionLevel;
+
+    /**
+     * Gets the configured value for "com.openexchange.infostore.zipDocumentsCompressionLevel".
+     *
+     * @return The configured compression level
+     * @throws OXException
+     */
+    public static int getZipDocumentsCompressionLevel() throws OXException {
+        Integer tmp = compressionLevel;
+        if (null == tmp) {
+            synchronized (FileStorageUtility.class) {
+                tmp = compressionLevel;
+                if (null == tmp) {
+                    ConfigurationService configService = Services.getOptionalService(ConfigurationService.class);
+                    if (null == configService) {
+                        return Deflater.DEFAULT_COMPRESSION;
+                    }
+                    int level = configService.getIntProperty("com.openexchange.infostore.zipDocumentsCompressionLevel", Deflater.DEFAULT_COMPRESSION);
+                    if (level < Deflater.DEFAULT_COMPRESSION || level > Deflater.BEST_COMPRESSION) {
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("Invalid configuration for property 'com.openexchange.infostore.zipDocumentsCompressionLevel'");
+                    }
+                    tmp = Integer.valueOf(level);
+                    compressionLevel = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    static {
+        FileStorageConfigReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                numberOfPregeneratedPreviews = null;
+                threshold = null;
+                compressionLevel = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
     }
 
 }
