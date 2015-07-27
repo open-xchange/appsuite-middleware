@@ -104,7 +104,7 @@ public class SendLinkAction extends AbstractDriveAction {
         /*
          * return empty result (including warnings) in case of success
          */
-        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), shareInfo.getShare().getModified(), "json");
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
         result.addWarnings(warnings);
         return result;
     }
