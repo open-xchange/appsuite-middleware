@@ -150,7 +150,11 @@ public final class Conversations {
         fp.add("Message-Id");
         if (null != fields) {
             for (MailField field : fields) {
-                MimeStorageUtility.addFetchItem(fp, field);
+                if (MailField.RECEIVED_DATE.equals(field)) {
+                    fp.add(MailMessageFetchIMAPCommand.INTERNALDATE);
+                } else {
+                    MimeStorageUtility.addFetchItem(fp, field);
+                }
             }
         }
         return fp;

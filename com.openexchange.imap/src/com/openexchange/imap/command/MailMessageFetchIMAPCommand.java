@@ -1200,6 +1200,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     public static final FetchProfile.Item ENVELOPE_ONLY = new MimeStorageUtility.FetchItem("ENVELOPE_ONLY");
 
     /**
+     * This is the INTERNALDATE item.
+     */
+    public static final FetchProfile.Item INTERNALDATE = new MimeStorageUtility.FetchItem("INTERNALDATE");
+
+    /**
      * This is the X-MAILBOX item.
      */
     public static final FetchProfile.Item ORIGINAL_MAILBOX = MimeStorageUtility.ORIGINAL_MAILBOX;
@@ -1235,6 +1240,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             } else {
                 command.append("ENVELOPE INTERNALDATE");
             }
+            sizeIncluded = false;
+        } else if (fp.contains(INTERNALDATE)) {
+            command.append("INTERNALDATE");
             sizeIncluded = false;
         } else {
             command.append("INTERNALDATE");
