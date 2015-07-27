@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
 import java.util.Date;
 import java.util.Map;
@@ -56,9 +56,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class GetLinkAction extends AbstractDriveShareAction {
+public class GetLinkAction extends AbstractDriveAction {
 
     /** The default permission bits to use for anonymous link shares */
     static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
@@ -82,7 +82,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
         /*
          * parse target
          */
-        DriveShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
+        DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
         /*
          * reuse existing or create a new anonymous share as needed
          */
@@ -90,7 +90,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
         DriveShareInfo shareInfo = discoverLink(session, target);
         if (null == shareInfo) {
             AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            shareInfo = getDriveShareService().addShare(session, target, recipient, null);
+            shareInfo = getDriveService().addShare(session, target, recipient, null);
             isNew = true;
         }
         /*

@@ -36,6 +36,10 @@
 
  - Fix for bug 37472: Do not update message flags when saving message as draft
 
+* 2015-07-09 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
+
 * 2015-07-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 39451: Orderly invalidate & removed cached IMAPStore instances which lost connectivity

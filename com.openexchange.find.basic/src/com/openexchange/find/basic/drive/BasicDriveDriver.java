@@ -164,8 +164,8 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Fields
         final int start = searchRequest.getStart();
         List<Field> fields = DEFAULT_FIELDS;
-        final int[] columns = searchRequest.getColumns();
-        if (columns != null) {
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
             fields = Field.get(columns);
         }
 
@@ -254,7 +254,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
     /**
      * Return all folders that are below given folder, including that folder itself.
-     * 
+     *
      * @return
      * @throws OXException
      */

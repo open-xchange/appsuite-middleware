@@ -53,7 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.DriveShareTarget;
 
 /**
  * {@link GetLinkRequest}

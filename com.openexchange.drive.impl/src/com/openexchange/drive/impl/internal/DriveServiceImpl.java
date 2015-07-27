@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
@@ -69,10 +70,13 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.actions.AbstractAction;
@@ -94,6 +98,7 @@ import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.internal.tracking.SyncTracker;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.DriveStorage;
+import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.impl.storage.execute.FileActionExecutor;
 import com.openexchange.drive.impl.sync.DefaultSyncResult;
@@ -103,9 +108,18 @@ import com.openexchange.drive.impl.sync.optimize.OptimizingDirectorySynchronizer
 import com.openexchange.drive.impl.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Reference;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.Entities;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link DriveServiceImpl}
@@ -515,6 +529,105 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return DriveUtilityImpl.getInstance();
+    }
+
+    @Override
+    public List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).getShares(target);
+    }
+
+    @Override
+    public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
+        return new ShareHelper(new SyncSession(session)).addShare(target, recipient, meta);
+    }
+
+    @Override
+    public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, final File metadata, UpdateParameters parameters) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
+
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original file
+                 */
+                List<Field> fields = new ArrayList<Field>();
+                fields.addAll(DriveConstants.FILE_FIELDS);
+                fields.add(Field.OBJECT_PERMISSIONS);
+                File file = syncSession.getStorage().getFileByName(path, fileVersion.getName(), fields, true);
+                if (null == file || false == ChecksumProvider.matches(syncSession, file, fileVersion.getChecksum())) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                }
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                List<Field> updatedFields = Collections.singletonList(Field.OBJECT_PERMISSIONS);
+                DefaultFile updatedFile = new DefaultFile(file);
+                updatedFile.setObjectPermissions(metadata.getObjectPermissions());
+                String fileID = syncSession.getStorage().getFileAccess().saveFileMetadata(updatedFile, file.getSequenceNumber(), updatedFields);
+                /*
+                 * re-get updated file to determine added permissions as needed
+                 */
+                if (notify) {
+                    File reloadedFile = syncSession.getStorage().getFileAccess().getFileMetadata(fileID, FileStorageFileAccess.CURRENT_VERSION);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFile.getFolderId(), reloadedFile.getId()));
+                    return ShareHelper.getAddedPermissions(file, reloadedFile);
+                }
+                return null;
+            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
+        }
+    }
+
+    @Override
+    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, final FileStorageFolder folder, UpdateParameters parameters) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
+
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original directory version
+                 */
+                FileStorageFolder originalFolder = syncSession.getStorage().getFolder(directoryVersion.getPath());
+                ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, syncSession);
+                String folderID = serverVersion.getDirectoryChecksum().getFolderID().toString();
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                DefaultFileStorageFolder updatedFolder = new DefaultFileStorageFolder();
+                updatedFolder.setPermissions(folder.getPermissions());
+                folderID = syncSession.getStorage().getFolderAccess().updateFolder(folderID, updatedFolder);
+                /*
+                 * re-get updated folder to determine added permissions as needed
+                 */
+                if (notify) {
+                    FileStorageFolder reloadedFolder = syncSession.getStorage().getFolderAccess().getFolder(folderID);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFolder.getId()));
+                    return ShareHelper.getAddedPermissions(originalFolder, reloadedFolder);
+                }
+                return null;
+            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
+        }
     }
 
 }

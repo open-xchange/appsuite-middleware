@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.share;
+package com.openexchange.drive;
 
 import java.util.Date;
 import java.util.Map;

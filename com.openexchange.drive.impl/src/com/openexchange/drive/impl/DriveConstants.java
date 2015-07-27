@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 
 
@@ -137,6 +138,11 @@ public class DriveConstants {
      * 4: subfolders action, sharing
      */
     public static final int SUPPORTED_API_VERSION = 4;
+
+    /**
+     * The files module identifier.
+     */
+    public static final int FILES_MODULE = FolderObject.INFOSTORE;
 
     /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.

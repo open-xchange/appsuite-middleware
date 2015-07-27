@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;

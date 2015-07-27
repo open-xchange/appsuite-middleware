@@ -52,17 +52,20 @@ package com.openexchange.share.core.tools;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
@@ -70,6 +73,8 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.InternalRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -316,6 +321,66 @@ public class ShareTool {
         }
 
         return false;
+    }
+
+    /**
+     * Parses a share recipient from JSON, as used in the (object) permissions field sent by clients during file- and folder updates.
+     *
+     * @param jsonObject The JSON object to parse
+     * @param timeZone The timezone to use, or <code>null</code> to not apply timezone offsets to parsed timestamps
+     * @return The parsed share recipient
+     */
+    public static ShareRecipient parseRecipient(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
+        ShareRecipient recipient;
+        RecipientType type = Enums.parse(RecipientType.class, jsonObject.optString("type"), null);
+        if (RecipientType.ANONYMOUS == type) {
+            /*
+             * anonymous recipient for links
+             */
+            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+            anonymousRecipient.setPassword(jsonObject.optString("password", null));
+            if (jsonObject.hasAndNotNull("expiry_date")) {
+                long date = jsonObject.getLong("expiry_date");
+                if (null != timeZone) {
+                    date -= timeZone.getOffset(date);
+                }
+                anonymousRecipient.setExpiryDate(new Date(date));
+            }
+            recipient = anonymousRecipient;
+        } else if (RecipientType.GUEST == type) {
+            /*
+             * guest recipient for invitations
+             */
+            GuestRecipient guestRecipient = new GuestRecipient();
+            if (false == jsonObject.hasAndNotNull("email_address")) {
+                throw OXException.mandatoryField("email_address");
+            }
+            guestRecipient.setEmailAddress(jsonObject.getString("email_address"));
+            guestRecipient.setPassword(jsonObject.optString("password", null));
+            guestRecipient.setDisplayName(jsonObject.optString("display_name", null));
+            guestRecipient.setContactID(jsonObject.optString("contact_id", null));
+            guestRecipient.setContactFolder(jsonObject.optString("contact_folder", null));
+            recipient = guestRecipient;
+        } else {
+            /*
+             * internal recipient pointing to an existing user/group entity
+             */
+            InternalRecipient internalRecipient = new InternalRecipient();
+            if (false == jsonObject.has("entity")) {
+                throw OXException.mandatoryField("entity");
+            }
+            internalRecipient.setEntity(jsonObject.getInt("entity"));
+            if (false == jsonObject.has("group")) {
+                throw OXException.mandatoryField("group");
+            }
+            internalRecipient.setGroup(jsonObject.getBoolean("group"));
+            recipient = internalRecipient;
+        }
+        if (false == jsonObject.hasAndNotNull("bits")) {
+            throw OXException.mandatoryField("bits");
+        }
+        recipient.setBits(jsonObject.getInt("bits"));
+        return recipient;
     }
 
 }

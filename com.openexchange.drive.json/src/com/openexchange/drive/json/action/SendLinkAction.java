@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class SendLinkAction extends AbstractDriveShareAction {
+public class SendLinkAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
@@ -79,12 +79,12 @@ public class SendLinkAction extends AbstractDriveShareAction {
          * parse parameters & target
          */
         JSONObject json = (JSONObject) requestData.requireData();
-        DriveShareTarget target = getParser().parseTarget(json);
-        Transport transport = getParser().parseNotificationTransport(json);
+        DriveShareTarget target = getShareParser().parseTarget(json);
+        Transport transport = getShareParser().parseNotificationTransport(json);
         String message = json.optString("message", null);
         List<Object> transportInfos;
         try {
-            transportInfos = getParser().parseTransportInfos(transport, json.getJSONArray("recipients"));
+            transportInfos = getShareParser().parseTransportInfos(transport, json.getJSONArray("recipients"));
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

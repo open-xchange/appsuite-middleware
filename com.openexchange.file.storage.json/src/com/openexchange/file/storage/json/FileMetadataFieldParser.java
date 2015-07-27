@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,11 +62,8 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.java.Enums;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -128,7 +124,7 @@ public class FileMetadataFieldParser {
                      * parse as guest permission entity
                      */
                     DefaultFileStorageGuestObjectPermission parsedGuestPermission = new DefaultFileStorageGuestObjectPermission();
-                    parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
+                    parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, null)); //TODO: timezone from user/request?
                     parsedGuestPermission.setPermissions(bits);
                     permission = parsedGuestPermission;
                 } else {
@@ -153,47 +149,6 @@ public class FileMetadataFieldParser {
         default:
             return val;
         }
-    }
-
-    /**
-     * Parses a share recipient from JSON.
-     *
-     * @param type The recipient type to parse
-     * @param jsonObject The JSON object to parse
-     * @return The parsed share recipient
-     */
-    private static ShareRecipient parseRecipient(RecipientType type, JSONObject jsonObject) throws OXException, JSONException {
-        ShareRecipient recipient;
-        switch (type) {
-        case ANONYMOUS:
-            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-            anonymousRecipient.setPassword(jsonObject.optString("password", null));
-            if (jsonObject.hasAndNotNull("expiry_date")) {
-                anonymousRecipient.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
-            }
-            recipient = anonymousRecipient;
-            break;
-        case GUEST:
-            GuestRecipient guestRecipient = new GuestRecipient();
-            guestRecipient.setPassword(jsonObject.optString("password", null));
-            if (false == jsonObject.hasAndNotNull("mail_address")) {
-                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("mail_address");
-            }
-            guestRecipient.setEmailAddress(jsonObject.getString("mail_address"));
-            guestRecipient.setPassword(jsonObject.optString("password", null));
-            guestRecipient.setDisplayName(jsonObject.optString("display_name", null));
-            guestRecipient.setContactID(jsonObject.optString("contact_id", null));
-            guestRecipient.setContactFolder(jsonObject.optString("contact_folder", null));
-            recipient = guestRecipient;
-            break;
-        default:
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
-        }
-        if (false == jsonObject.hasAndNotNull("bits")) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("bits");
-        }
-        recipient.setBits(jsonObject.getInt("bits"));
-        return recipient;
     }
 
     private static Object categories(final JSONArray value) throws JSONException {

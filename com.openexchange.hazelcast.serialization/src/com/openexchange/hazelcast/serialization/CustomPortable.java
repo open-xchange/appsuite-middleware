@@ -152,7 +152,7 @@ public interface CustomPortable extends Portable {
      * <li><code>  201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
      *
      * <li><code>  300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
-     * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li
+     * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
      *
      * <li><code>  400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
      * </ul>

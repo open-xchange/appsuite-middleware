@@ -47,73 +47,69 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
-import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link UpdateLinkAction}
+ * {@link UpdateFileAction}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class UpdateLinkAction extends AbstractDriveShareAction {
+public class UpdateFileAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
-         * parse parameters & target
+         * parse parameters & file metadata
          */
-        JSONObject json = (JSONObject) requestData.requireData();
-        DriveShareTarget target = getParser().parseTarget(json);
-        /*
-         * lookup share, assume latest timestamp if client checksum matches
-         */
-        DriveShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+        String path = requestData.getParameter("path");
+        if (Strings.isEmpty(path)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
         }
-        Date clientTimestamp = shareInfo.getShare().getModified();
-        /*
-         * update share based on present data in update request
-         */
-        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
+        String name = requestData.getParameter("name");
+        if (Strings.isEmpty(name)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
+        }
+        String checksum = requestData.getParameter("checksum");
+        if (Strings.isEmpty(checksum)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+        }
+        JSONObject json = (JSONObject) requestData.requireData();
+        File metadata;
+        UpdateParameters parameters = new UpdateParameters();
         try {
-            if (json.has("meta")) {
-                toUpdate.setMeta(json.isNull("meta") ? null : getParser().parseMeta(json.getJSONObject("meta")));
-            }
-            if (json.has("expiry_date")) {
-                if (json.isNull("expiry_date")) {
-                    toUpdate.setExpiryDate(null);
-                } else {
-                    toUpdate.setExpiryDate(new Date(json.getLong("expiry_date")));
-                }
-            }
-            if (json.has("password")) {
-                String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateShare(session.getServerSession(), toUpdate, newPassword, clientTimestamp);
-            } else {
-                getShareService().updateShare(session.getServerSession(), toUpdate, clientTimestamp);
-
+            metadata = Services.getService(FileMetadataParserService.class, true).parse(json.getJSONObject("file"));
+            JSONObject jsonNotification = json.optJSONObject("notification");
+            if (null != jsonNotification) {
+                parameters.setNotificationTransport(getShareParser().parseNotificationTransport(jsonNotification));
+                parameters.setNotificationMessage(jsonNotification.optString("message", null));
             }
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*
-         * return empty result in case of success
+         * update the file, return empty result in case of success
          */
-        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
+        getDriveService().updateFile(session, path, new JsonFileVersion(checksum, name), metadata, parameters);
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+        if (null != result.getWarnings()) {
+            result.addWarnings(parameters.getWarnings());
+        }
+        return result;
     }
 
 }

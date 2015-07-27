@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.share;
+package com.openexchange.drive;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;

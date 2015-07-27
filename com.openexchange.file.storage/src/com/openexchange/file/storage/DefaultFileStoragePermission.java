@@ -91,7 +91,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
     /**
      * Initializes an {@link DefaultFileStoragePermission}.
      */
-    private DefaultFileStoragePermission() {
+    protected DefaultFileStoragePermission() {
         super();
     }
 

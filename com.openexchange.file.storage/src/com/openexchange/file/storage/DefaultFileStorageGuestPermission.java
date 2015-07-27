@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,44 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.file.storage;
 
-import java.util.Date;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link DeleteLinkAction}
+ * {@link DefaultFileStorageGuestPermission}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class DeleteLinkAction extends AbstractDriveShareAction {
+public class DefaultFileStorageGuestPermission extends DefaultFileStoragePermission implements FileStorageGuestPermission {
+
+    private ShareRecipient recipient;
+
+    /**
+     * Initializes a new {@link DefaultFileStorageGuestPermission}.
+     */
+    public DefaultFileStorageGuestPermission() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link DefaultFileStorageGuestPermission}.
+     *
+     * @param recipient The share recipient
+     */
+    public DefaultFileStorageGuestPermission(ShareRecipient recipient) {
+        this();
+        this.recipient = recipient;
+    }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        /*
-         * parse target
-         */
-        DriveShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
-        /*
-         * lookup share, assume latest timestamp if client checksum matches
-         */
-        DriveShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
-        }
-        Date clientTimestamp = shareInfo.getShare().getModified();
-        /*
-         * perform the deletion, return empty result in case of success
-         */
-        getShareService().deleteShare(session.getServerSession(), shareInfo.getShare(), clientTimestamp);
-        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
+    public ShareRecipient getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
 }

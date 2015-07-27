@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.java.Strings;
 
 /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,32 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.filestore.sproxyd.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.List;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.DriveShareInfoResultConverter;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link SharesAction}
+ * {@link SproxydRemoteManagement} - The RMI stub for Sproxyd management.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class SharesAction extends AbstractDriveShareAction {
+public interface SproxydRemoteManagement extends Remote {
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        DriveService driveService = Services.getService(DriveService.class, true);
-        List<DriveShareInfo> shares = null;//driveService.getAllLinks(session);
+    /**
+     * RMI name to be used in the naming lookup.
+     */
+    public static final String RMI_NAME = SproxydRemoteManagement.class.getSimpleName();
 
-        if (null == shares || 0 == shares.size()) {
-            return new AJAXRequestResult(new JSONArray());
-        }
-
-        return new AJAXRequestResult(shares, DriveShareInfoResultConverter.INPUT_FORMAT);
-    }
-
+    /**
+     * Lists the URLs for all known objects stored in specified Sproxyd storage.
+     *
+     * @param adminUser The administrator user name
+     * @param adminPassword The administrator password
+     * @return The list containing the URLs
+     * @throws RemoteException If URLs cannot be returned
+     */
+    List<String> listAllObjectsURLs(String adminUser, String adminPassword) throws RemoteException;
 }

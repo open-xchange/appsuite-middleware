@@ -47,72 +47,73 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
 import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link InviteAction}
+ * {@link UpdateLinkAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class InviteAction extends AbstractDriveShareAction {
+public class UpdateLinkAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * parse parameters & target
+         */
+        JSONObject json = (JSONObject) requestData.requireData();
+        DriveShareTarget target = getShareParser().parseTarget(json);
+        /*
+         * lookup share, assume latest timestamp if client checksum matches
+         */
+        DriveShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+        }
+        Date clientTimestamp = shareInfo.getShare().getModified();
+        /*
+         * update share based on present data in update request
+         */
+        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
         try {
-            JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = getParser().parseRecipients(data.getJSONArray("recipients"));
-            List<DriveShareTarget> targets = getParser().parseTargets(data);
-            String message = data.optString("message", null);
-            /*
-             * create the shares
-             */
-            DriveService driveService = Services.getService(DriveService.class, true);
-            CreatedShares createdShares = null;//driveService.createShare(session, recipients, targets);
-            /*
-             * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
-             */
-            ShareNotificationService shareNotificationService = Services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session.getServerSession(), session.getHostData());
-            /*
-             * construct & return appropriate json result
-             */
-            AJAXRequestResult result = new AJAXRequestResult();
-            result.addWarnings(warnings);
-            JSONArray jTokens = new JSONArray(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                if (recipient.isInternal()) {
-                    jTokens.put(JSONObject.NULL);
+            if (json.has("meta")) {
+                toUpdate.setMeta(json.isNull("meta") ? null : getShareParser().parseMeta(json.getJSONObject("meta")));
+            }
+            if (json.has("expiry_date")) {
+                if (json.isNull("expiry_date")) {
+                    toUpdate.setExpiryDate(null);
                 } else {
-                    CreatedShare share = createdShares.getShare(recipient);
-                    jTokens.put(share.getToken());
+                    toUpdate.setExpiryDate(new Date(json.getLong("expiry_date")));
                 }
             }
-            result.setResultObject(jTokens, "json");
-            result.setTimestamp(new Date());
-            return result;
+            if (json.has("password")) {
+                String newPassword = json.isNull("password") ? null : json.getString("password");
+                getShareService().updateShare(session.getServerSession(), toUpdate, newPassword, clientTimestamp);
+            } else {
+                getShareService().updateShare(session.getServerSession(), toUpdate, clientTimestamp);
+
+            }
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+        /*
+         * return empty result in case of success
+         */
+        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 
 }
