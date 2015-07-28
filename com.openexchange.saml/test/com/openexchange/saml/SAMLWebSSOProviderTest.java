@@ -1,11 +1,17 @@
 package com.openexchange.saml;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -73,10 +79,13 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
 import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.SimStateManagement;
 import com.openexchange.saml.tools.SignatureHelper;
@@ -225,6 +234,7 @@ public class SAMLWebSSOProviderTest {
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
 
         /*
          * Assert final login redirect
@@ -297,6 +307,7 @@ public class SAMLWebSSOProviderTest {
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         provider.handleLogoutResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
 
         /*
          * Assert final logout redirect
@@ -360,6 +371,7 @@ public class SAMLWebSSOProviderTest {
         SimHttpServletRequest logoutHTTPRequest = prepareHTTPRequest("GET", new URI(redirectLocation));
         SimHttpServletResponse logoutHTTPResponse = new SimHttpServletResponse();
         provider.handleLogoutRequest(logoutHTTPRequest, logoutHTTPResponse, Binding.HTTP_REDIRECT);
+        assertCachingDisabledHeaders(logoutHTTPResponse);
         URI responseRedirectURI = new URI(logoutHTTPResponse.getHeader("Location"));
 
         /*
@@ -379,6 +391,86 @@ public class SAMLWebSSOProviderTest {
          * Assert session was terminated
          */
         Assert.assertNull(sessiondService.getSession(session.getSessionID()));
+    }
+
+    @Test
+    public void testCachingHeadersOnInit() throws Exception {
+        InitService initService = new InitService(provider, new DefaultExceptionHandler(), sessiondService);
+        /*
+         * login
+         */
+        SimHttpServletRequest initLoginRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost("example.com")
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "login")
+            .build());
+        SimServletOutputStream responseStream = new SimServletOutputStream();
+        SimHttpServletResponse initLoginResponse = new SimHttpServletResponse();
+        initLoginResponse.setOutputStream(responseStream);
+        initService.service(initLoginRequest, initLoginResponse);
+        Assert.assertEquals(HttpServletResponse.SC_OK, initLoginResponse.getStatus());
+        assertCachingDisabledHeaders(initLoginResponse);
+        /*
+         * re-login
+         */
+        SimHttpServletRequest initReloginRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost("example.com")
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "relogin")
+            .build());
+        responseStream.reset();
+        SimHttpServletResponse initReloginResponse = new SimHttpServletResponse();
+        initReloginResponse.setOutputStream(responseStream);
+        initService.service(initReloginRequest, initReloginResponse);
+        Assert.assertEquals(HttpServletResponse.SC_OK, initReloginResponse.getStatus());
+        assertCachingDisabledHeaders(initReloginResponse);
+        /*
+         * logout
+         */
+        Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+            @Override
+            public void enhanceSession(Session session) {}
+        }));
+        SimHttpServletRequest initLogoutRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost("example.com")
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "logout")
+            .setParameter("session", session.getSessionID())
+            .build());
+        responseStream.reset();
+        SimHttpServletResponse initLogoutResponse = new SimHttpServletResponse();
+        initLogoutResponse.setOutputStream(responseStream);
+        initService.service(initLogoutRequest, initLogoutResponse);
+        Assert.assertEquals(HttpServletResponse.SC_OK, initLogoutResponse.getStatus());
+        assertCachingDisabledHeaders(initLogoutResponse);
+    }
+
+    private void assertCachingDisabledHeaders(SimHttpServletResponse response) {
+        // Pragma: no-cache
+        Assert.assertEquals("no-cache", response.getHeader("Pragma"));
+
+        // Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+        String cacheControl = response.getHeader("Cache-Control");
+        Assert.assertNotNull(cacheControl);
+        List<String> cacheControls = Strings.splitAndTrim(cacheControl, ",");
+        Assert.assertTrue(cacheControls.contains("no-store"));
+        Assert.assertTrue(cacheControls.contains("no-cache"));
+        Assert.assertTrue(cacheControls.contains("must-revalidate"));
+        Assert.assertTrue(cacheControls.contains("post-check=0"));
+        Assert.assertTrue(cacheControls.contains("pre-check=0"));
+
+        // Expires: Tue, 03 May 1988 12:00:00 GMT
+        String expires = response.getHeader("Expires");
+        Assert.assertNotNull(expires);
+        try {
+            Date expiryDate = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).parse(expires);
+            Assert.assertTrue(expiryDate.before(new Date()));
+        } catch (ParseException e) {
+            Assert.fail("Invalid date format for expires header: " + expires);
+        }
     }
 
     private LogoutResponse parseLogoutResponse(SimHttpServletRequest logoutResponseHTTPRequest) throws Exception {
@@ -686,6 +778,29 @@ public class SAMLWebSSOProviderTest {
         Encrypter samlEncrypter = new Encrypter(encParams, kekParams);
         samlEncrypter.setKeyPlacement(KeyPlacement.PEER);
         return samlEncrypter;
+
+    }
+
+    private static final class SimServletOutputStream extends ServletOutputStream {
+
+        private final ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+
+        private SimServletOutputStream() {
+            super();
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            responseStream.write(b);
+        }
+
+        public ByteArrayOutputStream getResponseStream() {
+            return responseStream;
+        }
+
+        public void reset() {
+            responseStream.reset();
+        }
 
     }
 
