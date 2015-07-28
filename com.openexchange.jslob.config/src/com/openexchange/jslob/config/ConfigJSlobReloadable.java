@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,51 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.config;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventAdmin;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobReloadable;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link Reloadable} implementation for appsuite related properties files
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class ConfigJSlobReloadable implements Reloadable {
 
-    /**
-     * Initializes a new {@link ConfigJSlobActivator}.
-     */
-    public ConfigJSlobActivator() {
-        super();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJSlobReloadable.class);
+
+    private final ConfigJSlobService configJSlobService;
+
+    public ConfigJSlobReloadable(ConfigJSlobService configJSlobService) {
+        this.configJSlobService = configJSlobService;
+    }
+
+    private static final String UPSELL_CONFIG_FILE = "upsell-appsuite.properties";
+
+    private static final String APPSUITE_CONFIG_FILE = "appsuite.properties";
+
+    private static final String[] PROPERTIES = new String[] { "all properties in file" };
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            configJSlobService.initPreferenceItems();
+            configJSlobService.initConfigTree(configService);
+        } catch (OXException oxException) {
+            LOG.error("Error while configuration reload!", oxException);
+        }
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        final ConfigJSlobService service = new ConfigJSlobService(this);
-        // Trackers
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
-        openTrackers();
-        // Register service
-        registerService(JSlobService.class, service);
-        registerService(Reloadable.class, new ConfigJSlobReloadable(service));
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(UPSELL_CONFIG_FILE, PROPERTIES);
+        map.put(APPSUITE_CONFIG_FILE, PROPERTIES);
+        return map;
     }
 }

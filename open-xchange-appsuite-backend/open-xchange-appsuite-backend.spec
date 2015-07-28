@@ -84,6 +84,7 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %config(noreplace) /opt/open-xchange/etc/manifests.properties
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
 %config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
+%config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
 %dir /opt/open-xchange/templates/
 %config(noreplace) /opt/open-xchange/templates/*
 
