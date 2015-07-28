@@ -50,7 +50,6 @@
 package com.openexchange.mail.transport.config;
 
 import java.util.Map;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 
 /**
@@ -104,7 +103,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
         String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
         if (null == tmp) {
-            return MailProperties.getInstance().isEnforceSecureConnection();
+            return TransportProperties.getInstance().isEnforceSecureConnection();
         }
 
         return Boolean.parseBoolean(tmp.trim());
