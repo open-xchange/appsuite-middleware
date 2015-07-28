@@ -1,4 +1,8 @@
-* 2015-07-27 - thorben.betten@open-xchange.
+* 2015-07-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39989: Fixed wrong calculation of total size used to check against possible download quota constraints
+
+* 2015-07-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 39545: Dropped Ramp-Up class
 
