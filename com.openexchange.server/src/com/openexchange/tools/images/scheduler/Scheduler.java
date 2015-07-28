@@ -246,40 +246,45 @@ public final class Scheduler {
             // Remember associated worker thread
             Thread currentThread = Thread.currentThread();
 
-            // Perform image processing until aborted
-            boolean aborted = false;
-            while (!aborted) {
-                try {
-                    TaskManager manager = roundRobinQueue.takeFirst();
-                    if (POISON == manager) {
-                        aborted = true;
-                    } else {
-                        // Check next available task
-                        Runnable task;
-                        synchronized (taskManagers) {
-                            task = manager.remove();
-                            if (null == task) {
-                                taskManagers.remove(manager.getExecuterKey());
+            try {
+                // Perform image processing until aborted
+                boolean aborted = false;
+                while (!aborted) {
+                    try {
+                        TaskManager manager = roundRobinQueue.takeFirst();
+                        if (POISON == manager) {
+                            aborted = true;
+                        } else {
+                            // Check next available task
+                            Runnable task;
+                            synchronized (taskManagers) {
+                                task = manager.remove();
+                                if (null == task) {
+                                    taskManagers.remove(manager.getExecuterKey());
+                                }
                             }
+
+                            if (null != task) {
+                                // Re-add to round-robin queue for next processing
+                                roundRobinQueue.offerLast(manager);
+
+                                // Perform image transformation task
+                                task.run();
+                            }
+
+                            // Check thread status
+                            aborted = currentThread.isInterrupted();
                         }
-
-                        if (null != task) {
-                            // Re-add to round-robin queue for next processing
-                            roundRobinQueue.offerLast(manager);
-
-                            // Perform image transformation task
-                            task.run();
-                        }
-
-                        // Check thread status
-                        aborted = currentThread.isInterrupted();
+                    } catch (InterruptedException e) {
+                        // Handle in outer try-catch clause
+                        throw e;
+                    } catch (Exception e) {
+                        LOGGER.info("Image transformation failed", e);
                     }
-                } catch (InterruptedException e) {
-                    currentThread.interrupt();
-                    LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
-                } catch (Exception e) {
-                    LOGGER.info("Image transformation failed", e);
                 }
+            } catch (InterruptedException e) {
+                currentThread.interrupt();
+                LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
             }
 
             LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
