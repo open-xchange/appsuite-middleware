@@ -613,7 +613,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param output The desired preview output
      * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
      */
-    protected static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, IFileHolder fileHolder, PreviewOutput output) {
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, IFileHolder fileHolder, PreviewOutput output) {
         if (previewService instanceof RemoteInternalPreviewService) {
             return (RemoteInternalPreviewService) previewService;
         }
