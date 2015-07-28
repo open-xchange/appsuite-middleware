@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -481,9 +480,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 		try {
 			dumpMetadataToDB();
 			if (propertyHelper.mustWrite()) {
-				final ServerSession session = getSession();
-				final Context ctx = session.getContext();
-				final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(), ctx, session.getUser(), session.getUserPermissionBits());
+				final EffectiveInfostorePermission perm = security.getInfostorePermission(getSession(), getId());
 				if (!perm.canWriteObject()) {
 					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 				}

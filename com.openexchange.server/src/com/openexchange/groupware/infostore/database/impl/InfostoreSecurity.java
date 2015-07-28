@@ -73,8 +73,6 @@ public interface InfostoreSecurity {
      */
     EffectiveInfostorePermission getInfostorePermission(ServerSession session, int id) throws OXException;
 
-    EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
-
     /**
      * Gets the effective infostore permissions for a specific document.
      *
@@ -83,8 +81,6 @@ public interface InfostoreSecurity {
      * @return The effective permissions
      */
     EffectiveInfostorePermission getInfostorePermission(ServerSession session, DocumentMetadata document) throws OXException;
-
-    EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
     List<EffectiveInfostorePermission> getInfostorePermissions(List<DocumentMetadata> documents, Context context, User user, UserPermissionBits permissionBits) throws OXException;
 
