@@ -746,7 +746,7 @@ public final class SessionUtility {
 
                 // Look-up Cookie by expected name
                 Cookie cookie = cookies.get(expectedSecretCookieName);
-                if (null != cookie && 1 == 2) {
+                if (null != cookie) {
                     return cookie.getValue();
                 }
 
