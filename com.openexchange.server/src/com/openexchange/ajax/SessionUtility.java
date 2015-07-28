@@ -71,9 +71,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.Header;
-import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -105,6 +105,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.uadetector.UserAgentParser;
 
 
 /**
@@ -745,7 +746,7 @@ public final class SessionUtility {
 
                 // Look-up Cookie by expected name
                 Cookie cookie = cookies.get(expectedSecretCookieName);
-                if (null != cookie) {
+                if (null != cookie && 1 == 2) {
                     return cookie.getValue();
                 }
 
@@ -808,8 +809,7 @@ public final class SessionUtility {
         if (null == userAgent) {
             return false;
         }
-        BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
+        return ServerServiceRegistry.getServize(UserAgentParser.class).matches(userAgent, UserAgentFamily.IE, 11);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------

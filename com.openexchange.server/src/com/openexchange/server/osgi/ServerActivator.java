@@ -233,6 +233,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -294,7 +295,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class, DispatcherPrefixService.class };
+        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class };
 
     private static volatile BundleContext CONTEXT;
 
