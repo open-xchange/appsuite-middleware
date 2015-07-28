@@ -62,6 +62,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
+import com.openexchange.filestore.sproxyd.impl.SproxydClient;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 

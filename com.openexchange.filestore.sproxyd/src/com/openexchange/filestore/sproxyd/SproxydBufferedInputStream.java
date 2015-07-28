@@ -57,6 +57,7 @@ import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
+import com.openexchange.filestore.sproxyd.impl.SproxydClient;
 import com.openexchange.java.FastBufferedInputStream;
 import com.openexchange.java.Streams;
 

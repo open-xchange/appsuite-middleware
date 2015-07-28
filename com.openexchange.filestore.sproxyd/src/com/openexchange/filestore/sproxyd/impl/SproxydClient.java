@@ -47,32 +47,30 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.sproxyd.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.LockSupport;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpEntity;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.sproxyd.SproxydExceptionCode;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
- * {@link S3FileStorage}
+ * {@link SproxydClient}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -80,18 +78,21 @@ public class SproxydClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydClient.class);
 
-    private final String baseURL;
-    private final DefaultHttpClient httpClient;
+    private final EndpointPool endpoints;
+    private final HttpClient httpClient;
+    private final BackOff backOff;
 
     /**
      * Initializes a new {@link SproxydClient}.
      *
-     * @param baseURL The base URL to use
+     * @param endpoints The endpoints to use
+     * @param httpClient The HTTP client
      */
-    public SproxydClient(String baseURL) {
+    public SproxydClient(EndpointPool endpoints, HttpClient httpClient) {
         super();
-        this.baseURL = baseURL;
-        this.httpClient = HttpClients.getHttpClient(null);
+        this.endpoints = endpoints;
+        this.httpClient = httpClient;
+        this.backOff = new BackOff();
     }
 
     /**
@@ -104,9 +105,10 @@ public class SproxydClient {
     public UUID put(InputStream data, long length) throws OXException {
         UUID id = UUID.randomUUID();
         HttpResponse response = null;
-        HttpPut request = null;;
+        HttpPut request = null;
+        Endpoint endpoint = endpoints.get();
         try {
-            request = new HttpPut(buildURI(id));
+            request = new HttpPut(endpoint.getObjectUrl(id.toString()));
             request.setEntity(new InputStreamEntity(data, length));
             response = httpClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
@@ -117,10 +119,53 @@ public class SproxydClient {
         } catch (ClientProtocolException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            throw handleCommunicationError(endpoint, e);
         } finally {
-            close(request, response);
+            Utils.close(request, response);
         }
+    }
+
+    /**
+     * Stores a new object.
+     *
+     * @param data The content to store
+     * @param length The content length
+     * @return The new identifier of the stored object
+     */
+    private UUID putWithRetry(InputStream data, long length) throws OXException {
+        UUID id = UUID.randomUUID();
+        int tries = 3;
+        HttpPut request = null;;
+        HttpResponse response = null;
+        do {
+            tries--;
+            Endpoint endpoint = endpoints.get();
+            try {
+                request = new HttpPut(endpoint.getObjectUrl(id.toString()));
+                request.setEntity(new InputStreamEntity(data, length));
+                response = httpClient.execute(request);
+                int status = response.getStatusLine().getStatusCode();
+                if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
+                    return id;
+                }
+
+                if (mustNotRetry(response)) {
+                    throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+                }
+
+                LOG.debug("PUT request {} failed with status {}. Retry count {}.", request.getURI(), response.getStatusLine(), tries);
+            } catch (ClientProtocolException e) {
+                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            } catch (IOException e) {
+                throw handleCommunicationError(endpoint, e);
+            } finally {
+                Utils.close(request, response);
+            }
+
+            backOff.await();
+        } while (tries > 0);
+
+        throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
     }
 
     /**
@@ -144,8 +189,9 @@ public class SproxydClient {
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
         HttpGet get = null;
         HttpResponse response = null;
+        Endpoint endpoint = endpoints.get();
         try {
-            get = new HttpGet(buildURI(id));
+            get = new HttpGet(endpoint.getObjectUrl(id.toString()));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
@@ -164,9 +210,9 @@ public class SproxydClient {
         } catch (ClientProtocolException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            throw handleCommunicationError(endpoint, e);
         } finally {
-            close(get, response);
+            Utils.close(get, response);
         }
     }
 
@@ -180,8 +226,9 @@ public class SproxydClient {
     public boolean delete(UUID id) throws OXException {
         HttpDelete delete = null;
         HttpResponse response = null;
+        Endpoint endpoint = endpoints.get();
         try {
-            delete = new HttpDelete(buildURI(id));
+            delete = new HttpDelete(endpoint.getObjectUrl(id.toString()));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status) {
@@ -194,9 +241,9 @@ public class SproxydClient {
         } catch (ClientProtocolException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+            throw handleCommunicationError(endpoint, e);
         } finally {
-            close(delete, response);
+            Utils.close(delete, response);
         }
     }
 
@@ -212,43 +259,54 @@ public class SproxydClient {
     }
 
     /**
-     * Builds an URI for the supplied object identifier.
+     * Handles communication errors. If appropriate the endpoint is blacklisted.
      *
-     * @param id The object identifier to build the URI for
-     * @return The URI
+     * @param endpoint The endpoint for which the exception occurred.
+     * @param e The exception
+     * @return An OXException to re-throw
      */
-    private URI buildURI(UUID id) throws OXException {
-        try {
-            return new URI(baseURL + UUIDs.getUnformattedString(id));
-        } catch (URISyntaxException e) {
-            throw FileStorageCodes.IOERROR.create(e.getMessage(), e);
-        }
+    private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
+        // TODO: check for client-side IOException
+        LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
+        endpoints.blacklist(endpoint);
+        return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
 
-    /**
-     * Closes the supplied HTTP request / response resources silently.
-     *
-     * @param request The HTTP request to reset
-     * @param response The HTTP response to consume and close
-     */
-    private void close(HttpRequestBase request, HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    LOG.debug("Error consuming HTTP response entity", e);
-                }
+    private static boolean mustNotRetry(HttpResponse response) {
+        int status = response.getStatusLine().getStatusCode();
+        if (HttpServletResponse.SC_INTERNAL_SERVER_ERROR == status) {
+            Header retryAllowed = response.getFirstHeader("X-Scal-Retry-Allowed");
+            if (retryAllowed == null || "yes".equalsIgnoreCase(retryAllowed.getValue())) {
+                return false;
             }
         }
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (Exception e) {
-                LOG.debug("Error resetting HTTP request", e);
-            }
+
+        if (423 == status) {
+            // Locked Resource occurs when accesses to the same object are not serialized and a concurrent write makes the requested object temporarily unavailable
+            return false;
         }
+
+        return true;
+    }
+
+    private static final class BackOff {
+
+        private static final int MIN_MS = 100;
+
+        private static final int MAX_MS = 500;
+
+        public long getMillis() {
+            int millis = ThreadLocalRandom.current().nextInt(MAX_MS + 1);
+            if (millis < MIN_MS) {
+                return MIN_MS + millis;
+            }
+            return millis;
+        }
+
+        public void await() {
+            LockSupport.parkUntil(System.currentTimeMillis() + getMillis());
+        }
+
     }
 
 }
