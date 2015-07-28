@@ -208,6 +208,16 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         public String getSSLCipherSuites() {
             return smtpProperties.getSSLCipherSuites();
         }
+
+        @Override
+        public boolean isEnforceSecureConnection() {
+            return false;
+        }
+
+        @Override
+        public void setEnforceSecureConnection(boolean enforceSecureConnection) {
+            // Nothing
+        }
     }
 
 }

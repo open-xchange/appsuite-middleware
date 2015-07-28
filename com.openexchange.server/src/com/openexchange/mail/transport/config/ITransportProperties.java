@@ -59,4 +59,18 @@ public interface ITransportProperties {
      */
     public int getReferencedPartLimit();
 
+    /**
+     * Signals whether secure connections to external accounts are mandatory.
+     *
+     * @return <code>true</code> if secure connections are enforced; otherwise <code>false</code>
+     */
+    public boolean isEnforceSecureConnection();
+
+    /**
+     * Sets whether secure connections to external accounts are mandatory.
+     *
+     * @param enforceSecureConnection <code>true</code> to signal secure connections to external accounts are mandatory; otherwise <code>false</code>
+     */
+    public void setEnforceSecureConnection(boolean enforceSecureConnection);
+
 }
