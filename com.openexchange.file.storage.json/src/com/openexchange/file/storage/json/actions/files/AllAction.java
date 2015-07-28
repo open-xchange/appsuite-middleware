@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.FOLDER_ID;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -100,9 +101,24 @@ public class AllAction extends AbstractListingAction {
 
         int[] indexes = AJAXRequestDataTools.parseFromToIndexes(request.getRequestData());
 
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
         TimedResult<File> documents;
         if ((null == indexes) || Field.CREATED_BY.equals(sortingField)) {
-            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder);
+            documents = fileAccess.getDocuments(folderId, columns, sortingField, sortingOrder);
 
             if (Field.CREATED_BY.equals(sortingField)) {
                 ServerSession serverSession = request.getSession();
@@ -115,7 +131,7 @@ public class AllAction extends AbstractListingAction {
                 documents = slice(documents, indexes);
             }
         } else {
-            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder, Range.valueOf(indexes));
+            documents = fileAccess.getDocuments(folderId, columns, sortingField, sortingOrder, Range.valueOf(indexes));
         }
 
         return result( documents, request );

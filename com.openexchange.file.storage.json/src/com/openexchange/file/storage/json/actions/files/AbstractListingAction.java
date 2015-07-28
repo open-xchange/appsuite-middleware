@@ -53,8 +53,9 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
@@ -73,9 +74,9 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -117,29 +118,22 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
                 SearchIterator<File> results = timedResult.results();
-                int numberOfPregeneratedPreviews = FileStorageUtility.getNumberOfPregeneratedPreviews();
-                List<File> files = new ArrayList<File>(numberOfPregeneratedPreviews);
-
-                boolean closeIter = true;
                 try {
-                    while (numberOfPregeneratedPreviews-- > 0 && results.hasNext()) {
+                    List<File> files = new LinkedList<File>();
+                    while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
                         files.add(fileMetadata);
-                        threadPool.submit(new TriggerPreviewServiceTask(fileMetadata.getId(), request, previewService));
                     }
 
                     SearchIterator<File> sf = new SearchIteratorDelegator<File>(files);
-                    boolean hasNext = results.hasNext();
-                    closeIter = !hasNext;
-                    timedResult = new TimedResultImpl(hasNext ? new CombinedSearchIterator<File>(sf, results) : sf, timedResult.sequenceNumber());
+                    timedResult = new TimedResultImpl(sf, timedResult.sequenceNumber());
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
                 } finally {
-                    if (closeIter) {
-                        SearchIterators.close(results);
-                    }
+                    SearchIterators.close(results);
                 }
-            }
 
+            }
         }
 
         return new AJAXRequestResult(timedResult, "infostore");
@@ -160,26 +154,18 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
-                int numberOfPregeneratedPreviews = FileStorageUtility.getNumberOfPregeneratedPreviews();
-                List<File> files = new ArrayList<File>(numberOfPregeneratedPreviews);
-
-                boolean closeIter = true;
                 try {
-                    while (numberOfPregeneratedPreviews-- > 0 && results.hasNext()) {
+                    List<File> files = new LinkedList<File>();
+                    while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
                         files.add(fileMetadata);
-                        threadPool.submit(new TriggerPreviewServiceTask(fileMetadata.getId(), request, previewService));
                     }
 
-                    SearchIterator<File> sf = new SearchIteratorDelegator<File>(files);
-                    boolean hasNext = results.hasNext();
-                    closeIter = !hasNext;
-                    results = hasNext ? new CombinedSearchIterator<File>(sf, results) : sf;
+                    results = new SearchIteratorDelegator<File>(files);
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
                 } finally {
-                    if (closeIter) {
-                        SearchIterators.close(searchIterator);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
             }
         }
@@ -201,26 +187,18 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
-                int numberOfPregeneratedPreviews = FileStorageUtility.getNumberOfPregeneratedPreviews();
-                List<File> files = new ArrayList<File>(numberOfPregeneratedPreviews);
-
-                boolean closeIter = true;
                 try {
-                    while (numberOfPregeneratedPreviews-- > 0 && results.hasNext()) {
+                    List<File> files = new LinkedList<File>();
+                    while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
                         files.add(fileMetadata);
-                        threadPool.submit(new TriggerPreviewServiceTask(fileMetadata.getId(), request, previewService));
                     }
 
-                    SearchIterator<File> sf = new SearchIteratorDelegator<File>(files);
-                    boolean hasNext = results.hasNext();
-                    closeIter = !hasNext;
-                    results = hasNext ? new CombinedSearchIterator<File>(sf, results) : sf;
+                    results = new SearchIteratorDelegator<File>(files);
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
                 } finally {
-                    if (closeIter) {
-                        SearchIterators.close(searchIterator);
-                    }
+                    SearchIterators.close(searchIterator);
                 }
             }
         }
@@ -244,13 +222,15 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     private static final class TriggerPreviewServiceTask extends AbstractTask<Void> {
 
         final ServerSession session;
-        final String id;
+        private final List<File> files;
         private final AJAXRequestData requestData;
         private final PreviewService previewService;
+        private int numberOfPregeneratedPreviews;
 
-        TriggerPreviewServiceTask(String id, InfostoreRequest request, PreviewService previewService) throws OXException {
+        TriggerPreviewServiceTask(List<File> files, int numberOfPregeneratedPreviews, InfostoreRequest request, PreviewService previewService) throws OXException {
             super();
-            this.id = id;
+            this.files = files;
+            this.numberOfPregeneratedPreviews = numberOfPregeneratedPreviews;
             this.session = request.getSession();
             this.previewService = previewService;
 
@@ -264,27 +244,36 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
         @Override
         public Void call() {
-            try {
-                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+            IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+            for (Iterator<File> iter = files.iterator(); numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                final String id = iter.next().getId();
 
-                IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+                try {
+                    File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                    if (fileMetadata.getFileSize() != 0) {
+                        IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                        InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                            return inputStream;
+                            @Override
+                            public InputStream newStream() throws OXException, IOException {
+                                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                                InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+                                if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                                    return inputStream;
+                                }
+                                return new BufferedInputStream(inputStream, 65536);
+                            }
+                        };
+                        FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+
+                        RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
+                        if (null != candidate) {
+                            AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                            numberOfPregeneratedPreviews--;
                         }
-                        return new BufferedInputStream(inputStream, 65536);
                     }
-                };
-
-                FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-                AbstractPreviewResultConverter.triggerPreviewService(session, new AJAXRequestResult(fileHolder), requestData, previewService, PreviewOutput.IMAGE);
-            } catch (Exception e) {
-                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", id, session.getUserId(), session.getContextId(), e);
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", id, session.getUserId(), session.getContextId(), e);
+                }
             }
             return null;
         }

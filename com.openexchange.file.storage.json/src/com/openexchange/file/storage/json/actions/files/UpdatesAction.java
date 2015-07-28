@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -88,10 +90,26 @@ public class UpdatesAction extends AbstractListingAction {
         long timestamp = request.getTimestamp();
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
+
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
         Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,
-            request.getFieldsToLoad(),
+            columns,
             sortingField,
             sortingOrder,
             request.getIgnore().contains("deleted"));

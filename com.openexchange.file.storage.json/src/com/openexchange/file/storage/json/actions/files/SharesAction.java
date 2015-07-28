@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -78,7 +80,23 @@ public class SharesAction extends AbstractListingAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
         Field sortingField = request.getSortingField();
         SortDirection sortDirection = request.getSortingOrder();
-        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(request.getFieldsToLoad(), sortingField, sortDirection);
+
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
+        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(columns, sortingField, sortDirection);
         if (Field.CREATED_BY.equals(sortingField)) {
             searchIterator = CreatedByComparator.resort(request.getSession(), searchIterator, sortDirection);
         }

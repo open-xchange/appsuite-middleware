@@ -89,7 +89,6 @@ public class ListAction extends AbstractListingAction {
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-
         if(!columns.contains(File.Field.ID)) {
             if(!copy) {
                 columns = new ArrayList<File.Field>(columns);

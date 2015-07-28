@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -79,12 +81,27 @@ public class SearchAction extends AbstractListingAction {
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.COLUMNS);
 
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
         IDBasedFileAccess fileAccess = request.getFileAccess();
         SearchIterator<File> results = fileAccess.search(
             request.getSearchQuery(),
-            request.getFieldsToLoad(),
+            columns,
             request.getSearchFolderId(),
             sortingField,
             sortingOrder,

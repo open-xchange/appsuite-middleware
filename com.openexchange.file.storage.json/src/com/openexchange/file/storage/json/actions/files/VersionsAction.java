@@ -85,10 +85,28 @@ public class VersionsAction extends AbstractListingAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        List<Field> columns = new ArrayList<File.Field>(request.getFieldsToLoad());
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
         if(!columns.contains(File.Field.VERSION)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
             columns.add(File.Field.VERSION);
         }
+
         final Field sortingField = request.getSortingField();
         final SortDirection sortingOrder = request.getSortingOrder();
         TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, sortingField, sortingOrder);

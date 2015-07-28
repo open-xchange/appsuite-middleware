@@ -719,8 +719,10 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * from the cache.
      *
      * @param session The current session
-     * @param cacheKey The cacheKey
-     * @param resourceCache The resourceCache to use
+     * @param result The AJAX result
+     * @param requestData The AJAX request data
+     * @param previewService The remote preview service to use
+     * @param output The desired preview output
      */
     public static void triggerPreviewService(ServerSession session, AJAXRequestResult result, AJAXRequestData requestData, PreviewService previewService, PreviewOutput output) {
         try {
@@ -733,10 +735,30 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 return;
             }
 
+            triggerPreviewService(session, fileHolder, requestData, candidate, output);
+        } catch (OXException e) {
+            LOGGER.debug("Error while triggering RemotePreviewService", e);
+        }
+    }
+
+    /**
+     * Trigger the conversion of a resource from the preview service.
+     * The trigger call is handled asynchronously, future conversion
+     * calls to the preview service may then be handled immediately
+     * from the cache.
+     *
+     * @param session The current session
+     * @param fileHolder The file holder
+     * @param requestData The AJAX request data
+     * @param previewService The remote preview service to use
+     * @param output The desired preview output
+     */
+    public static void triggerPreviewService(ServerSession session, IFileHolder fileHolder, AJAXRequestData requestData, RemoteInternalPreviewService previewService, PreviewOutput output) {
+        try {
             // Prepare properties for preview generation
-            DataProperties dataProperties = new DataProperties(12);
             String srcMimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
 
+            DataProperties dataProperties = new DataProperties(12);
             dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, srcMimeType);
             dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
@@ -750,7 +772,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
             // Generate preview
             Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
-            candidate.triggerGetPreviewFor(data, output, session, 1);
+            previewService.triggerGetPreviewFor(data, output, session, 1);
         } catch (OXException e) {
             LOGGER.debug("Error while triggering RemotePreviewService", e);
         }
