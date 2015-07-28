@@ -93,7 +93,7 @@ public class InitService extends SAMLServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-        Tools.removeCachingHeader(httpResponse);
+        Tools.disableCaching(httpResponse);
 
         String flow = httpRequest.getParameter("flow");
         if (flow == null) {
