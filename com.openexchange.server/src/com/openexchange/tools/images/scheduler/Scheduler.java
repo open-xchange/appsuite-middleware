@@ -50,10 +50,9 @@
 package com.openexchange.tools.images.scheduler;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -256,12 +255,15 @@ public final class Scheduler {
                         aborted = true;
                     } else {
                         // Check next available task
-                        Runnable task = manager.remove();
-                        if (null == task) {
-                            synchronized (runningThreads) {
+                        Runnable task;
+                        synchronized (runningThreads) {
+                            task = manager.remove();
+                            if (null == task) {
                                 runningThreads.remove(manager.getExecuterKey());
                             }
-                        } else {
+                        }
+
+                        if (null != task) {
                             // Re-add to round-robin queue for next processing
                             roundRobinQueue.offerLast(manager);
 
@@ -286,7 +288,7 @@ public final class Scheduler {
 
     private final class TaskManagerImpl implements TaskManager {
 
-        private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<Runnable>();
+        private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
         private final Object taskKey;
 
         TaskManagerImpl(final Runnable task, final Object key) {
@@ -301,12 +303,12 @@ public final class Scheduler {
         }
 
         @Override
-        public Runnable remove() {
+        public Runnable remove() { // Gets only called when holding lock
             return tasks.poll();
         }
 
         @Override
-        public void add(Runnable task) {
+        public void add(Runnable task) { // Gets only called when holding lock
             tasks.offer(task);
         }
     } // End of class TaskManagerImpl
