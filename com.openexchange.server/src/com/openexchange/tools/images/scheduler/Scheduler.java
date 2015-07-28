@@ -157,7 +157,7 @@ public final class Scheduler {
     private final ExecutorService pool;
     private final int numThreads;
     final BlockingDeque<TaskManager> roundRobinQueue;
-    final Map<Object, TaskManager> runningThreads;
+    final Map<Object, TaskManager> taskManagers;
 
     /**
      * Initializes a new {@link Scheduler}.
@@ -174,7 +174,7 @@ public final class Scheduler {
         ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new SchedulerThreadFactory());
         newPool.prestartAllCoreThreads();
         pool = newPool;
-        runningThreads = new HashMap<Object, TaskManager>(256);
+        taskManagers = new HashMap<Object, TaskManager>(256);
         roundRobinQueue = new LinkedBlockingDeque<TaskManager>();
 
         // Start selector threads
@@ -212,12 +212,12 @@ public final class Scheduler {
 
         // Add to task to either an existing or to a newly created task manager
         TaskManager newManager = null;
-        synchronized (runningThreads) {
-            TaskManager existingManager = runningThreads.get(key);
+        synchronized (taskManagers) {
+            TaskManager existingManager = taskManagers.get(key);
             if (existingManager == null) {
                 // None present, yet. Create a new executer.
                 newManager = new TaskManagerImpl(task, key);
-                runningThreads.put(key, newManager);
+                taskManagers.put(key, newManager);
             } else {
                 // Use existing one
                 existingManager.add(task);
@@ -256,10 +256,10 @@ public final class Scheduler {
                     } else {
                         // Check next available task
                         Runnable task;
-                        synchronized (runningThreads) {
+                        synchronized (taskManagers) {
                             task = manager.remove();
                             if (null == task) {
-                                runningThreads.remove(manager.getExecuterKey());
+                                taskManagers.remove(manager.getExecuterKey());
                             }
                         }
 
