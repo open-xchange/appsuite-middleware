@@ -1083,7 +1083,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             final int image_width = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
             final int image_height = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
-            int typeNumber = 1;
+            int typeNumber;
             typeNumber = Integer.valueOf(conf.getString(ContactConfig.Property.SCALE_TYPE));
             ScaleType type = ScaleType.CONTAIN;
             switch (typeNumber) {
