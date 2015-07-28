@@ -73,11 +73,9 @@ public class ContactImageScaleTest extends AbstractContactTest {
 
     public void testCreateContact() throws Exception {
         FileInputStream input = null;
-        try
-        {
+        try {
             final Contact contactObj = createContactObject("testContactWithImage");
-            final java.io.File file = new java.io.File("./testData/", "oxlogo.png");
-            input = new FileInputStream(file);
+            input = new FileInputStream("testData/oxlogo.png");
             final byte bigImage[] = new byte[input.available()];
             input.read(bigImage);
 
@@ -102,13 +100,10 @@ public class ContactImageScaleTest extends AbstractContactTest {
 
     public void testUpdateContact() throws Exception {
         FileInputStream input = null;
-        try
-        {
+        try {
             final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
             final int objectId = insertContact(contactObj);
-
-            final java.io.File file = new java.io.File("./testData/", "oxlogo.png");
-            input = new FileInputStream(file);
+            input = new FileInputStream("testData/oxlogo.png");
             final byte bigImage[] = new byte[input.available()];
             input.read(bigImage);
             contactObj.setImage1(bigImage);
