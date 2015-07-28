@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -121,25 +120,6 @@ final class MovePerformer extends AbstractPerformer {
                 '}').toString();
         }
 
-    }
-
-    private static final class UpdateFolder extends AbstractFolder {
-
-        private static final long serialVersionUID = -6666991788068206301L;
-
-        public UpdateFolder() {
-            super();
-        }
-
-        @Override
-        public boolean isGlobalID() {
-            return false;
-        }
-
-        @Override
-        public boolean isCacheable() {
-            return false;
-        }
     }
 
     private final String realTreeId = FolderStorage.REAL_TREE_ID;

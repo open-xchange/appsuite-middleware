@@ -63,7 +63,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -271,13 +270,27 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param api The folder tree to use
      * @param module The module identifier
      * @param parent The ID of the parent folder
+     * @param name The folder's name
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
+        FolderObject privateFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId());
+        privateFolder.setParentFolderID(parent);
+        return insertFolder(api, privateFolder);
+    }
+
+    /**
+     * Inserts and remembers a new private folder.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
      * @return The inserted folder
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent) throws Exception {
-        FolderObject privateFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId());
-        privateFolder.setParentFolderID(parent);
-        return insertFolder(api, privateFolder);
+        return insertPrivateFolder(api, module, parent, randomUID());
     }
 
     /**
@@ -524,10 +537,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
         GetResponse getResponse = client.execute(new GetRequest(api, objectID));
         FolderObject folder = getResponse.getFolder();
-        JSONObject data = (JSONObject) getResponse.getData();
-        long timestamp = data.getLong("last_modified");
-        folder.setLastModified(new Date(timestamp));
-        return getResponse.getFolder();
+        folder.setLastModified(getResponse.getTimestamp());
+        return folder;
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {

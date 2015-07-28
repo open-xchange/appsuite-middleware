@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -436,6 +437,28 @@ public abstract class AbstractPerformer {
      */
     public FolderStorageDiscoverer getFolderStorageDiscoverer() {
         return folderStorageDiscoverer;
+    }
+
+    protected static final class UpdateFolder extends AbstractFolder {
+
+        private static final long serialVersionUID = -6666991788068206301L;
+
+        /**
+         * Initializes a new {@link UpdateFolder}.
+         */
+        public UpdateFolder() {
+            super();
+        }
+
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+
+        @Override
+        public boolean isCacheable() {
+            return false;
+        }
     }
 
 }

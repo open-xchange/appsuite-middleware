@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -162,14 +163,15 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * create folder hierarchy
          */
-        FolderObject rootFolder = insertPrivateFolder(api, module, parent);
-        FolderObject subLevel1 = insertPrivateFolder(api, module, rootFolder.getObjectID());
-        FolderObject subLevel2 = insertPrivateFolder(api, module, subLevel1.getObjectID());
+        FolderObject rootFolder = insertPrivateFolder(api, module, parent, "Root_" + randomUID());
+        FolderObject subLevel1 = insertPrivateFolder(api, module, rootFolder.getObjectID(), "Sub1" + randomUID());
+        FolderObject subLevel2 = insertPrivateFolder(api, module, subLevel1.getObjectID(), "Sub2" + randomUID());
         /*
          * update root folder, add permission for guest
          */
-        rootFolder = getFolder(api, rootFolder.getObjectID());
+        Date clientLastModified = subLevel2.getLastModified();
         rootFolder.addPermission(guestPermission);
+        rootFolder.setLastModified(clientLastModified);
         rootFolder = updateFolder(api, rootFolder, true);
         /*
          * Reload subfolders
