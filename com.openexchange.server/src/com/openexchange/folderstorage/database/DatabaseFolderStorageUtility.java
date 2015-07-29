@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
@@ -175,15 +176,21 @@ public final class DatabaseFolderStorageUtility {
     /**
      * Extracts the user's permission bits from the supplied storage paramters.
      *
+     * @param connection A readable database connection, or <code>null</code> if not available
      * @param storageParameters The storage parameters
      * @return The permission bits
      */
-    public static UserPermissionBits getUserPermissionBits(StorageParameters storageParameters) throws OXException {
+    public static UserPermissionBits getUserPermissionBits(Connection connection, StorageParameters storageParameters) throws OXException {
         Session session = storageParameters.getSession();
         if (ServerSession.class.isInstance(session)) {
             return ((ServerSession) session).getUserPermissionBits();
         }
-        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(storageParameters.getUserId(), storageParameters.getContext());
+        UserPermissionBitsStorage storage = UserPermissionBitsStorage.getInstance();
+        if (null == connection) {
+            return storage.getUserPermissionBits(storageParameters.getUserId(), storageParameters.getContext());
+        } else {
+            return storage.getUserPermissionBits(connection, storageParameters.getUserId(), storageParameters.getContext());
+        }
     }
 
     /**
