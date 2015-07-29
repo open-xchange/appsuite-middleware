@@ -204,7 +204,14 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
         return false;
     }
 
-    static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
+    /**
+     * Gets the other cluster members
+     *
+     * @param allMembers All known members
+     * @param localMember The local member
+     * @return Other cluster members
+     */
+    public static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
         Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
         if (!otherMembers.remove(localMember)) {
             LOG.warn("Couldn't remove local member from cluster members.");
@@ -212,7 +219,12 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
         return otherMembers;
     }
 
-    static void cancelFutureSafe(Future<Boolean> future) {
+    /**
+     * Cancels given {@link Future} safely
+     *
+     * @param future The {@code Future} to cancel
+     */
+    public static <V> void cancelFutureSafe(Future<V> future) {
         if (null != future) {
             try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
         }

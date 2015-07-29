@@ -75,6 +75,7 @@ import com.openexchange.push.dovecot.DovecotPushManagerService;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
 import com.openexchange.push.dovecot.rest.DovecotPushRESTService;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -221,7 +222,7 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class,
-            ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class };
+            ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class, ObfuscatorService.class };
     }
 
     @Override

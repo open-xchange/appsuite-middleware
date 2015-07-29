@@ -1,9 +1,16 @@
 
 package com.openexchange.push.dovecot.rest;
 
+import static com.openexchange.push.dovecot.locking.AbstractDovecotPushClusterLock.cancelFutureSafe;
+import static com.openexchange.push.dovecot.locking.AbstractDovecotPushClusterLock.getOtherMembers;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
@@ -13,6 +20,10 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -26,9 +37,12 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -104,13 +118,74 @@ public class DovecotPushRESTService {
                             return true;
                         }}
                     );
+
                     if (null == session) {
-                        session = generateSessionFor(userId, contextId);
+                        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
+                        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+                        if (null != hzInstance && null != obfuscatorService) {
+                            Cluster cluster = hzInstance.getCluster();
+
+                            // Get local member
+                            Member localMember = cluster.getLocalMember();
+
+                            // Determine other cluster members
+                            Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+
+                            if (!otherMembers.isEmpty()) {
+                                IExecutorService executor = hzInstance.getExecutorService("default");
+                                Map<Member, Future<PortableSession>> futureMap = executor.submitToMembers(new PortableSessionRemoteLookUp(userId, contextId), otherMembers);
+                                for (Iterator<Entry<Member, Future<PortableSession>>> it = futureMap.entrySet().iterator(); null == session && it.hasNext();) {
+                                    Future<PortableSession> future = it.next().getValue();
+                                    // Check Future's return value
+                                    int retryCount = 3;
+                                    while (retryCount-- > 0) {
+                                        try {
+                                            PortableSession portableSession = future.get();
+                                            retryCount = 0;
+                                            if (null != portableSession) {
+                                                portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                                                session = portableSession;
+                                            }
+                                        } catch (InterruptedException e) {
+                                            // Interrupted - Keep interrupted state
+                                            Thread.currentThread().interrupt();
+                                        } catch (CancellationException e) {
+                                            // Canceled
+                                            retryCount = 0;
+                                        } catch (ExecutionException e) {
+                                            Throwable cause = e.getCause();
+
+                                            // Check for Hazelcast timeout
+                                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                                if (cause instanceof RuntimeException) {
+                                                    throw ((RuntimeException) cause);
+                                                }
+                                                if (cause instanceof Error) {
+                                                    throw (Error) cause;
+                                                }
+                                                throw new IllegalStateException("Not unchecked", cause);
+                                            }
+
+                                            // Timeout while awaiting remote result
+                                            if (retryCount <= 0) {
+                                                // No further retry
+                                                cancelFutureSafe(future);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    Map<String, Object> props = new LinkedHashMap<String, Object>(4);
-                    setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), props);
-                    PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
+                    if (null == session) {
+                        LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
+                    } else {
+                        Map<String, Object> props = new LinkedHashMap<String, Object>(4);
+                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), props);
+                        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
+                        LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
+                    }
                 }
             }
 
