@@ -2196,9 +2196,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (conversationCache.containsCachedConversations(fullName, accountId, session)) {
             int total = imapFolder.getMessageCount();
             long uidNext = imapFolder.getUIDNext();
-            int sentTotal;
-            long sentUidNext;
-
+            int sentTotal = 0;
+            long sentUidNext = 0L;
             if (mergeWithSent) {
                 // Switch folder
                 openReadOnly(sentFullName);
@@ -2208,9 +2207,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
                 // Switch back folder
                 openReadOnly(fullName);
-            } else {
-                sentTotal = 0;
-                sentUidNext = 0L;
             }
 
             String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, total, uidNext, sentTotal, sentUidNext);
