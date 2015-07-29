@@ -61,6 +61,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Charsets;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -127,16 +128,18 @@ public class ConversationCache {
 
     /**
      * Gets the calculated hash string for specified arguments.
+     * @param usedFields
      *
      * @return The calculated hash string
      */
-    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, int total, long uidnext, int sentTotal, long sentUidNext) {
+    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, int total, long uidnext, int sentTotal, long sentUidNext) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(sortField.getKey().getBytes(Charsets.UTF_8));
             md.update(order.name().getBytes(Charsets.UTF_8));
             md.update(intToByteArray(lookAhead));
             md.update(mergeWithSent ? (byte) 1 : 0);
+            md.update(usedFields.toByteArray());
             md.update(intToByteArray(total));
             md.update(longToByteArray(uidnext));
             if (mergeWithSent) {

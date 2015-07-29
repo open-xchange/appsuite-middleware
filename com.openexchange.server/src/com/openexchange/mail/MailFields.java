@@ -201,6 +201,19 @@ public final class MailFields {
         }
     }
 
+    /**
+     * Gets the byte array representation.
+     *
+     * @return The byte array representation
+     */
+    public byte[] toByteArray() {
+        byte[] bytes = new byte[arr.length];
+        for (int i = bytes.length; i-- > 0;) {
+            bytes[i] = arr[i] ? (byte) 1 : 0;
+        }
+        return bytes;
+    }
+
     @Override
     public String toString() {
         return Arrays.toString(toArray());
