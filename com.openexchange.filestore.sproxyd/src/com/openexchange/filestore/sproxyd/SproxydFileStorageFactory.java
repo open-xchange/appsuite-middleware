@@ -58,8 +58,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.DefaultHttpClient;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -67,11 +67,12 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
-import com.openexchange.filestore.sproxyd.impl.Endpoint;
 import com.openexchange.filestore.sproxyd.impl.EndpointPool;
 import com.openexchange.filestore.sproxyd.impl.SproxydClient;
+import com.openexchange.filestore.sproxyd.impl.SproxydConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
@@ -96,6 +97,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
 
     private final ServiceLookup services;
     private final ConcurrentMap<URI, SproxydFileStorage> storages; // local cache may be removed with v7.8.0
+    private final ConcurrentMap<String, SproxydConfig> sproxydConfigs;
 
     /**
      * Initializes a new {@link SproxydFileStorageFactory}.
@@ -106,6 +108,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
         super();
         this.services = services;
         this.storages = new ConcurrentHashMap<URI, SproxydFileStorage>();
+        this.sproxydConfigs = new ConcurrentHashMap<String, SproxydConfig>();
     }
 
 
@@ -200,21 +203,51 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, int contextID, int userID) throws OXException {
-        ConfigurationService config = services.getService(ConfigurationService.class);
-        String protocol = config.getProperty("com.openexchange.filestore.sproxyd." + filestoreID + ".protocol");
-        if (Strings.isEmpty(protocol)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.filestore.sproxyd." + filestoreID + ".protocol");
-        }
-        String path = config.getProperty("com.openexchange.filestore.sproxyd." + filestoreID + ".path");
-        if (Strings.isEmpty(path)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.filestore.sproxyd." + filestoreID + ".path");
-        }
-        String hosts = config.getProperty("com.openexchange.filestore.sproxyd." + filestoreID + ".hosts");
-        if (Strings.isEmpty(hosts)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.filestore.sproxyd." + filestoreID + ".hosts");
+        SproxydConfig sproxydConfig = sproxydConfigs.get(filestoreID);
+        if (sproxydConfig == null) {
+            SproxydConfig newSproxydConfig = initSproxydConfig(filestoreID);
+            sproxydConfig = sproxydConfigs.putIfAbsent(filestoreID, newSproxydConfig);
+            if (sproxydConfig == null) {
+                sproxydConfig = newSproxydConfig;
+            } else {
+                newSproxydConfig.getEndpointPool().close();
+            }
         }
 
-        List<Endpoint> urls = new LinkedList<Endpoint>();
+        return new SproxydClient(sproxydConfig, contextID, userID);
+    }
+
+    /**
+     * Initializes a new HTTP client and endpoint pool for a configured sproxyd filestore.
+     *
+     * @param filestoreID The filestore ID
+     * @return The configured items
+     * @throws OXException
+     */
+    private SproxydConfig initSproxydConfig(String filestoreID) throws OXException {
+        ConfigurationService config = services.getService(ConfigurationService.class);
+        // endpoint config
+        String protocol = config.getProperty(property(filestoreID, "protocol"));
+        if (Strings.isEmpty(protocol)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "protocol"));
+        }
+        String path = config.getProperty(property(filestoreID, "path"));
+        if (Strings.isEmpty(path)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "path"));
+        }
+        String hosts = config.getProperty(property(filestoreID, "hosts"));
+        if (Strings.isEmpty(hosts)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "hosts"));
+        }
+
+        // HTTP client config
+        int maxConnections = config.getIntProperty(property(filestoreID, "maxConnections"), 100);
+        int maxConnectionsPerHost = config.getIntProperty(property(filestoreID, "maxConnectionsPerHost"), 100);
+        int connectionTimeout = config.getIntProperty(property(filestoreID, "connectionTimeout"), 5000);
+        int socketReadTimeout = config.getIntProperty(property(filestoreID, "socketReadTimeout"), 15000);
+        int heartbeatInterval = config.getIntProperty(property(filestoreID, "heartbeatInterval"), 60000);
+
+        List<String> urls = new LinkedList<String>();
         for (String host : Strings.splitAndTrim(hosts, ",")) {
             URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
             String[] hostAndPort = host.split(":");
@@ -230,9 +263,13 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
             }
 
-            uriBuilder.setPath(Strings.trimEnd(path, '/'));
+            uriBuilder.setPath(path);
             try {
-                urls.add(new Endpoint(uriBuilder.build().toString(), contextID, userID));
+                String baseUrl = uriBuilder.build().toString();
+                if (!baseUrl.endsWith("/")) {
+                    baseUrl = baseUrl + '/';
+                }
+                urls.add(baseUrl);
             } catch (URISyntaxException e) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Sproxyd configuration leads to invalid URI: " + uriBuilder.toString());
             }
@@ -242,9 +279,17 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
         }
 
-        DefaultHttpClient httpClient = HttpClients.getHttpClient(null);
-        EndpointPool endpoints = new EndpointPool(filestoreID, urls, httpClient, requireService(TimerService.class, services));
-        return new SproxydClient(endpoints, httpClient);
+        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+            .setMaxTotalConnections(maxConnections)
+            .setMaxConnectionsPerRoute(maxConnectionsPerHost)
+            .setConnectionTimeout(connectionTimeout)
+            .setSocketReadTimeout(socketReadTimeout));
+        EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
+        return new SproxydConfig(httpClient, endpointPool);
+    }
+
+    private static final String property(String filestoreID, String property) {
+        return "com.openexchange.filestore.sproxyd." + filestoreID + '.' + property;
     }
 
     /**

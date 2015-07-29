@@ -58,7 +58,6 @@ import java.util.concurrent.locks.LockSupport;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -80,19 +79,22 @@ public class SproxydClient {
 
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
-    private final BackOff backOff;
+    private final int contextId;
+    private final int userId;
 
     /**
      * Initializes a new {@link SproxydClient}.
      *
-     * @param endpoints The endpoints to use
-     * @param httpClient The HTTP client
+     * @param sproxydConfig The sproxyd config
+     * @param contextId The context ID
+     * @param userId The user ID
      */
-    public SproxydClient(EndpointPool endpoints, HttpClient httpClient) {
+    public SproxydClient(SproxydConfig sproxydConfig, int contextId, int userId) {
         super();
-        this.endpoints = endpoints;
-        this.httpClient = httpClient;
-        this.backOff = new BackOff();
+        this.endpoints = sproxydConfig.getEndpointPool();
+        this.httpClient = sproxydConfig.getHttpClient();
+        this.contextId = contextId;
+        this.userId = userId;
     }
 
     /**
@@ -106,9 +108,9 @@ public class SproxydClient {
         UUID id = UUID.randomUUID();
         HttpResponse response = null;
         HttpPut request = null;
-        Endpoint endpoint = endpoints.get();
+        Endpoint endpoint = getEndpoint();
         try {
-            request = new HttpPut(endpoint.getObjectUrl(id.toString()));
+            request = new HttpPut(endpoint.getObjectUrl(id));
             request.setEntity(new InputStreamEntity(data, length));
             response = httpClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
@@ -116,56 +118,11 @@ public class SproxydClient {
                 return id;
             }
             throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
-        } catch (ClientProtocolException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw handleCommunicationError(endpoint, e);
         } finally {
             Utils.close(request, response);
         }
-    }
-
-    /**
-     * Stores a new object.
-     *
-     * @param data The content to store
-     * @param length The content length
-     * @return The new identifier of the stored object
-     */
-    private UUID putWithRetry(InputStream data, long length) throws OXException {
-        UUID id = UUID.randomUUID();
-        int tries = 3;
-        HttpPut request = null;;
-        HttpResponse response = null;
-        do {
-            tries--;
-            Endpoint endpoint = endpoints.get();
-            try {
-                request = new HttpPut(endpoint.getObjectUrl(id.toString()));
-                request.setEntity(new InputStreamEntity(data, length));
-                response = httpClient.execute(request);
-                int status = response.getStatusLine().getStatusCode();
-                if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
-                    return id;
-                }
-
-                if (mustNotRetry(response)) {
-                    throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
-                }
-
-                LOG.debug("PUT request {} failed with status {}. Retry count {}.", request.getURI(), response.getStatusLine(), tries);
-            } catch (ClientProtocolException e) {
-                throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-            } catch (IOException e) {
-                throw handleCommunicationError(endpoint, e);
-            } finally {
-                Utils.close(request, response);
-            }
-
-            backOff.await();
-        } while (tries > 0);
-
-        throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
     }
 
     /**
@@ -189,9 +146,9 @@ public class SproxydClient {
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
         HttpGet get = null;
         HttpResponse response = null;
-        Endpoint endpoint = endpoints.get();
+        Endpoint endpoint = getEndpoint();
         try {
-            get = new HttpGet(endpoint.getObjectUrl(id.toString()));
+            get = new HttpGet(endpoint.getObjectUrl(id));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
@@ -207,8 +164,6 @@ public class SproxydClient {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(UUIDs.getUnformattedString(id));
             }
             throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
-        } catch (ClientProtocolException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw handleCommunicationError(endpoint, e);
         } finally {
@@ -226,9 +181,9 @@ public class SproxydClient {
     public boolean delete(UUID id) throws OXException {
         HttpDelete delete = null;
         HttpResponse response = null;
-        Endpoint endpoint = endpoints.get();
+        Endpoint endpoint = getEndpoint();
         try {
-            delete = new HttpDelete(endpoint.getObjectUrl(id.toString()));
+            delete = new HttpDelete(endpoint.getObjectUrl(id));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status) {
@@ -238,8 +193,6 @@ public class SproxydClient {
                 return false;
             }
             throw SproxydExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
-        } catch (ClientProtocolException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw handleCommunicationError(endpoint, e);
         } finally {
@@ -259,54 +212,33 @@ public class SproxydClient {
     }
 
     /**
-     * Handles communication errors. If appropriate the endpoint is blacklisted.
+     * Gets an endpoint from the pool.
+     *
+     * @return the endpoint
+     * @throws OXException If no endpoint is available (i.e. all are blacklisted due to connection timeouts).
+     */
+    private Endpoint getEndpoint() throws OXException {
+        Endpoint endpoint = endpoints.get(contextId, userId);
+        if (endpoint == null) {
+            throw SproxydExceptionCode.STORAGE_UNAVAILABLE.create();
+        }
+        return endpoint;
+    }
+
+    /**
+     * Handles communication errors. If the endpoint is not available it is blacklisted.
      *
      * @param endpoint The endpoint for which the exception occurred.
      * @param e The exception
      * @return An OXException to re-throw
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
-        // TODO: check for client-side IOException
-        LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
-        endpoints.blacklist(endpoint);
+        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
+            LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
+            endpoints.blacklist(endpoint.getBaseUrl());
+        }
+
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
-    }
-
-    private static boolean mustNotRetry(HttpResponse response) {
-        int status = response.getStatusLine().getStatusCode();
-        if (HttpServletResponse.SC_INTERNAL_SERVER_ERROR == status) {
-            Header retryAllowed = response.getFirstHeader("X-Scal-Retry-Allowed");
-            if (retryAllowed == null || "yes".equalsIgnoreCase(retryAllowed.getValue())) {
-                return false;
-            }
-        }
-
-        if (423 == status) {
-            // Locked Resource occurs when accesses to the same object are not serialized and a concurrent write makes the requested object temporarily unavailable
-            return false;
-        }
-
-        return true;
-    }
-
-    private static final class BackOff {
-
-        private static final int MIN_MS = 100;
-
-        private static final int MAX_MS = 500;
-
-        public long getMillis() {
-            int millis = ThreadLocalRandom.current().nextInt(MAX_MS + 1);
-            if (millis < MIN_MS) {
-                return MIN_MS + millis;
-            }
-            return millis;
-        }
-
-        public void await() {
-            LockSupport.parkUntil(System.currentTimeMillis() + getMillis());
-        }
-
     }
 
 }

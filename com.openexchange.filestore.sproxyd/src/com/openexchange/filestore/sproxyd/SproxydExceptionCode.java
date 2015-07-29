@@ -86,6 +86,10 @@ public enum SproxydExceptionCode implements DisplayableOXExceptionCode {
      * No next chunk for chunk: %1$s
      */
     NO_NEXT_CHUNK("No next chunk for chunk: %1$s", CATEGORY_ERROR, 6, SproxydExceptionMessages.NO_NEXT_CHUNK_MSG),
+    /**
+     * All configured sproxyd endpoints are currently unavailable.
+     */
+    STORAGE_UNAVAILABLE("All configured sproxyd endpoints are currently unavailable.", Category.CATEGORY_SERVICE_DOWN, 7),
     ;
 
     private static final String PREFIX = "SPROXYD";
