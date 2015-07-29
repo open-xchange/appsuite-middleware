@@ -250,6 +250,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
                                 IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
+                                ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
                             }
                         }
                     }

@@ -260,10 +260,11 @@ public class ConversationCache {
     /**
      * Removes the cached conversations for a user.
      *
-     * @param session The associated session
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public void removeUserConversations(Session session) {
-        CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
+    public void removeUserConversations(int userId, int contextId) {
+        CacheKey mapKey = getMapKey(userId, contextId);
         Object obj = cache.get(mapKey);
         if (!(obj instanceof ConcurrentMap)) {
             return;
