@@ -1,37 +1,46 @@
 
-Name:          open-xchange
-BuildArch:     noarch
-#!BuildIgnore: post-build-checks
+Name:             open-xchange
+BuildArch:        noarch
+#!BuildIgnore:    post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires: ant
+BuildRequires:    ant
 %else
-BuildRequires: ant-nodeps
+BuildRequires:    ant-nodeps
 %endif
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+BuildRequires:    java7-devel
 %else
-BuildRequires: java-devel >= 1.7.0
+BuildRequires:    java-devel >= 1.7.0
 %endif
-Version:       @OXVERSION@
-%define        ox_release 0
-Release:       %{ox_release}_<CI_CNT>.<B_CNT>
-Group:         Applications/Productivity
-License:       GPL-2.0
-BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/
-Source:        %{name}_%{version}.orig.tar.bz2
-Source1:       open-xchange.init
-Summary:       The Open-Xchange backend
-Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-authentication
-Requires:      open-xchange-authorization
-Requires:      open-xchange-mailstore
-Requires:      open-xchange-httpservice
-Requires:      open-xchange-smtp >= @OXVERSION@
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires:    systemd-rpm-macros
+%endif
+Version:          @OXVERSION@
+%define           ox_release 0
+Release:          %{ox_release}_<CI_CNT>.<B_CNT>
+Group:            Applications/Productivity
+License:          GPL-2.0
+BuildRoot:        %{_tmppath}/%{name}-%{version}-build
+URL:              http://www.open-xchange.com/
+Source:           %{name}_%{version}.orig.tar.bz2
+Source1:          open-xchange.init
+Source2:          open-xchange.service
+Summary:          The Open-Xchange backend
+Requires:         open-xchange-core >= @OXVERSION@
+Requires:         open-xchange-authentication
+Requires:         open-xchange-authorization
+Requires:         open-xchange-mailstore
+Requires:         open-xchange-httpservice
+Requires:         open-xchange-smtp >= @OXVERSION@
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+Requires(pre):    systemd
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
+%endif
 %if 0%{?rhel_version}
 # Bug #23216
-Requires:      redhat-lsb
+Requires:         redhat-lsb
 %endif
 
 %description
@@ -49,22 +58,43 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
+mkdir -p %{buildroot}%{_sbindir}
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%__install -D -m 444 %{SOURCE2} %{buildroot}/usr/lib/systemd/system/open-xchange.service
+ln -sf /usr/sbin/service %{buildroot}%{_sbindir}/rcopen-xchange
+%else
 mkdir -p %{buildroot}/etc/init.d
-mkdir -p %{buildroot}/sbin
-
 install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
-ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
+ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
+%endif
 
 %post
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%service_add_post open-xchange.service
+%endif
+
+%preun
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%service_del_preun open-xchange.service
+%endif
+
+%postun
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+%service_del_postun open-xchange.service
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
+%if (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >= 1210)
+/usr/lib/systemd/system/open-xchange.service
+/usr/sbin/rcopen-xchange
+%else
 /etc/init.d/open-xchange
-/sbin/rcopen-xchange
+/usr/sbin/rcopen-xchange
+%endif
 
 %changelog
 * Wed Jul 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
