@@ -387,6 +387,61 @@ public class InternetHeaders {
     }
 
     /**
+     * Read and parse the given RFC822 message stream till the
+     * blank line separating the header from the body. Store the
+     * header lines inside this InternetHeaders object. The order
+     * of header lines is preserved. <p>
+     *
+     * Note that the header lines are added into this InternetHeaders
+     * object, so any existing headers in this object will not be
+     * affected.  Headers are added to the end of the existing list
+     * of headers, in order.
+     *
+     * @param   is  RFC822 input stream
+     * @return The list of parsed headers
+     * @exception   MessagingException for any I/O error reading the stream
+     */
+    public static java.util.List<Header> parse(InputStream is) throws MessagingException {
+        // Read header lines until a blank line. It is valid
+        // to have BodyParts with no header lines.
+        String line;
+        LineInputStream lis = new LineInputStream(is);
+        String prevline = null;// the previous header line, as a string
+        // a buffer to accumulate the header in, when we know it's needed
+        StringBuilder lineBuffer = new StringBuilder();
+
+        try {
+            //while ((line = lis.readLine()) != null) {
+            java.util.List<Header> headers = new java.util.LinkedList<Header>();
+            do {
+                line = lis.readLine();
+                if (line != null && (line.startsWith(" ") || line.startsWith("\t"))) {
+                    // continuation of header
+                    if (prevline != null) {
+                        lineBuffer.append(prevline);
+                        prevline = null;
+                    }
+                    lineBuffer.append("\r\n");
+                    lineBuffer.append(line);
+                } else {
+                    // new header
+                    if (prevline != null)
+                        headers.add(new InternetHeader(prevline));
+                    else if (lineBuffer.length() > 0) {
+                        // store previous header first
+                        headers.add(new InternetHeader(lineBuffer.toString()));
+                        lineBuffer.setLength(0);
+                    }
+                    prevline = line;
+                }
+            } while (line != null && !isEmpty(line));
+            return headers;
+        } catch (IOException ioex) {
+            throw new MessagingException("Error in input stream", ioex);
+        }
+    }
+
+    /**
      * Is this line an empty (blank) line?
      */
     private static final boolean isEmpty(String line) {
