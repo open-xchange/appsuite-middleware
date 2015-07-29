@@ -9,7 +9,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%exception{full}</pattern>
+            <pattern>%date{HH:mm:ss.SSS} %-5level %C{0}.%method\(%line\) %message%n%exception{full}</pattern>
         </encoder>
     </appender>
 
