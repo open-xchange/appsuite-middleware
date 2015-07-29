@@ -120,6 +120,10 @@ public class DovecotPushRESTService {
                     );
 
                     if (null == session) {
+                        session = generateSessionFor(userId, contextId);
+                    }
+
+                    if (null == session) {
                         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
                         ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
                         if (null != hzInstance && null != obfuscatorService) {
@@ -232,9 +236,17 @@ public class DovecotPushRESTService {
         }
     }
 
-    private Session generateSessionFor(int userId, int contextId) throws OXException {
-        PushListenerService pushListenerService = services.getService(PushListenerService.class);
-        return pushListenerService.generateSessionFor(new PushUser(userId, contextId));
+    private Session generateSessionFor(int userId, int contextId) {
+        try {
+            PushListenerService pushListenerService = services.getService(PushListenerService.class);
+            return pushListenerService.generateSessionFor(new PushUser(userId, contextId));
+        } catch (OXException e) {
+            LOGGER.debug("Unable to generate a session", e);
+            return null;
+        } catch (RuntimeException e) {
+            LOGGER.warn("Unable to generate a session", e);
+            return null;
+        }
     }
 
 }
