@@ -50,6 +50,7 @@
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
@@ -99,7 +100,7 @@ public class PortableSessionRemoteLookUp extends AbstractCustomPortable implemen
 
         @Override
         public Set<Flag> flags() {
-            return SessionMatcher.ALL_FLAGS;
+            return EnumSet.of(Flag.IGNORE_SESSION_STORAGE);
         }
 
         @Override
