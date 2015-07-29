@@ -55,13 +55,6 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFieldsForSearch;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.procedure.TLongObjectProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -94,9 +87,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
@@ -149,10 +139,14 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
+import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -186,6 +180,8 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.version.Version;
@@ -201,6 +197,16 @@ import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.ReadableMime;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.procedure.TLongObjectProcedure;
+import gnu.trove.set.hash.TIntHashSet;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
@@ -2192,7 +2198,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
         // Check cache
-        ConversationCache conversationCache = ConversationCache.getInstance();
+        final ConversationCache conversationCache = ConversationCache.getInstance();
         if (conversationCache.containsCachedConversations(fullName, accountId, session)) {
             int total = imapFolder.getMessageCount();
             long uidNext = imapFolder.getUIDNext();
@@ -2224,7 +2230,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final boolean byEnvelope = false;
 
         // Grab conversations
-        String argsHash;
+        final String argsHash;
         List<Conversation> conversations;
         {
             // Retrieve from actual folder
@@ -2289,7 +2295,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Comparator
         MailMessageComparator threadComparator = COMPARATOR_DESC;
         // Sort
-        List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
+        final List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
         for (final Conversation conversation : conversations) {
             list.add(conversation.getMessages(threadComparator));
         }
@@ -2305,12 +2311,80 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Body requested - Do not cache at all
             return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, usedFields, body, isRev1);
         }
-        // Fill
-        fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
-        // Put into cache
-        conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
-        // Slice
-        return sliceMessages(list, indexRange);
+
+        // Check for requested slice
+        if (null == indexRange) {
+            // Fill
+            fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
+            // Put into cache
+            conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
+            // All
+            return list;
+        }
+
+        // Load slices in a separate thread?
+        boolean loadSeparately = true;
+        if (!loadSeparately) {
+            // Fill
+            fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
+            // Put into cache
+            conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
+            // Slice
+            return sliceMessages(list, indexRange);
+        }
+
+        // Use a separate thread...
+        Object[] parts = slicePartsFrom(list, indexRange);
+        @SuppressWarnings("unchecked")
+        final List<List<MailMessage>> first = (List<List<MailMessage>>) parts[0];
+        @SuppressWarnings("unchecked")
+        List<List<MailMessage>> slice = (List<List<MailMessage>>) parts[1];
+        @SuppressWarnings("unchecked")
+        final List<List<MailMessage>> rest = (List<List<MailMessage>>) parts[2];
+        parts = null;
+
+        // Fill slice with this thread
+        fillMessages(slice, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
+
+        // Fill others with another thread & put complete list into cache after all filled
+        if (null != first || null != rest) {
+            final MailAccount mailAccount = getMailAccount();
+            final Session ses = session;
+            AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = MailAccess.getInstance(ses, accountId);
+                        mailAccess.connect();
+                        IMAPStore imapStore = getImapMessageStorageFrom(mailAccess).getImapStore();
+
+                        if (null != first) {
+                            fillMessagesStatic(first, fullName, sentFullName, mergeWithSent, usedFields, isRev1, imapStore, imapServerInfo, mailAccount);
+                        }
+                        if (null != rest) {
+                            fillMessagesStatic(rest, fullName, sentFullName, mergeWithSent, usedFields, isRev1, imapStore, imapServerInfo, mailAccount);
+                        }
+                    } finally {
+                        if (null != mailAccess) {
+                            mailAccess.close(true);
+                        }
+                    }
+
+                    // Put into cache
+                    conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
+
+                    return null;
+                }
+            };
+            ThreadPools.getThreadPool().submit(t);
+        } else {
+            // Put into cache
+            conversationCache.putCachedConversations(slice, fullName, accountId, argsHash, session);
+        }
+
+        return slice;
     }
 
     private List<List<MailMessage>> sliceAndFill(List<List<MailMessage>> listOfConversations, String fullName, IndexRange indexRange, String sentFullName, boolean mergeWithSent, MailFields usedFields, boolean body, boolean isRev1) throws MessagingException, OXException {
@@ -2320,6 +2394,26 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
         // Return list
         return list;
+    }
+
+    private Object[] slicePartsFrom(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
+        List<List<MailMessage>> list = listOfConversations;
+        // Check for index range
+        int fromIndex = indexRange.start;
+        int toIndex = indexRange.end;
+        int size = list.size();
+        if ((fromIndex) > size) {
+            // Return empty iterator if start is out of range
+            return new Object[] { list, null, null };
+        }
+        // Reset end index if out of range
+        if (toIndex >= size) {
+            if (fromIndex == 0) {
+                return new Object[] { null, list, null };
+            }
+            toIndex = size;
+        }
+        return new Object[] { fromIndex > 0 ? list.subList(0, fromIndex) : null, list.subList(fromIndex, toIndex), toIndex < size ? list.subList(toIndex, size) : null };
     }
 
     private List<List<MailMessage>> sliceMessages(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
@@ -2335,12 +2429,56 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             // Reset end index if out of range
             if (toIndex >= size) {
+                if (fromIndex == 0) {
+                    return list;
+                }
                 toIndex = size;
             }
             list = list.subList(fromIndex, toIndex);
         }
         // Return list
         return list;
+    }
+
+    static void fillMessagesStatic(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, boolean isRev1, IMAPStore imapStore, IMAPServerInfo imapServerInfo, MailAccount mailAccount) throws MessagingException, OXException {
+        IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
+        imapFolder.open(IMAPFolder.READ_ONLY);
+        try {
+            if (mergeWithSent) {
+                FetchProfile fetchProfile = checkFetchProfile(getFetchProfile(usedFields.toArray(), true));
+                List<MailMessage> msgs = new LinkedList<MailMessage>();
+                List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
+                for (List<MailMessage> conversation : list) {
+                    for (MailMessage m : conversation) {
+                        if (sentFullName.equals(m.getFolder())) {
+                            sentmsgs.add(m);
+                        } else {
+                            msgs.add(m);
+                        }
+                    }
+                }
+                new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
+                if (!sentmsgs.isEmpty()) {
+                    // Switch folder
+                    imapFolder.close(false);
+                    imapFolder = (IMAPFolder) imapStore.getFolder(sentFullName);
+                    imapFolder.open(IMAPFolder.READ_ONLY);
+                    new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
+                }
+            } else {
+                List<MailMessage> msgs = new LinkedList<MailMessage>();
+                for (List<MailMessage> conversation : list) {
+                    msgs.addAll(conversation);
+                }
+                new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), true), imapServerInfo, imapFolder).doCommand();
+            }
+            /*
+             * Apply account identifier
+             */
+            setAccountInfo2(list, mailAccount);
+        } finally {
+            imapFolder.close(false);
+        }
     }
 
     private void fillMessages(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, boolean body, boolean isRev1) throws MessagingException, OXException {
@@ -4486,7 +4624,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws OXException If mail account cannot be obtained
      */
     private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col) throws OXException {
-        final MailAccount account = getMailAccount();
+        return setAccountInfo2(col, getMailAccount());
+    }
+
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     *
+     * @param mailMessages The {@link MailMessage} instances
+     * @return The given instances of {@link MailMessage} each with account ID and name set
+     * @throws OXException If mail account cannot be obtained
+     */
+    private static <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col, MailAccount account) throws OXException {
         final String name = account.getName();
         final int id = account.getId();
         for (final C mailMessages : col) {
@@ -4631,6 +4779,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    protected static IMAPMessageStorage getImapMessageStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        IMailMessageStorage mstore = mailAccess.getMessageStorage();
+        if (!(mstore instanceof IMAPMessageStorage)) {
+            if (!(mstore instanceof IMailMessageStorageDelegator)) {
+                return null;
+            }
+            mstore = ((IMailMessageStorageDelegator) mstore).getDelegateMessageStorage();
+            if (!(mstore instanceof IMAPMessageStorage)) {
+                return null;
+            }
+        }
+        return (IMAPMessageStorage) mstore;
     }
 
 }
