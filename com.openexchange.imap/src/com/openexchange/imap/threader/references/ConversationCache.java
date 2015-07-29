@@ -233,11 +233,6 @@ public class ConversationCache {
         return cache.newCacheKey(cid, userId);
     }
 
-    private CacheKey getEntryKey(int accountId, String fullName) {
-        Cache cache = this.cache;
-        return cache.newCacheKey(accountId, fullName);
-    }
-
     /**
      * Checks if a cached conversation is contained for given arguments
      *
@@ -253,7 +248,13 @@ public class ConversationCache {
             return false;
         }
 
-        return ((ConcurrentMap<CacheKey, CacheEntry>) obj).containsKey(getEntryKey(accountId, fullName));
+        ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>> accounts = (ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj;
+        ConcurrentMap<String, CacheEntry> folders = accounts.get(Integer.valueOf(accountId));
+        if (null == folders) {
+            return false;
+        }
+
+        return folders.containsKey(fullName);
     }
 
     /**
@@ -261,14 +262,29 @@ public class ConversationCache {
      *
      * @param session The associated session
      */
-    public void removeUserMessages(Session session) {
+    public void removeUserConversations(Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
         Object obj = cache.get(mapKey);
         if (!(obj instanceof ConcurrentMap)) {
             return;
         }
 
-        ((ConcurrentMap<CacheKey, CacheEntry>) obj).clear();
+        ((ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj).clear();
+    }
+
+    /**
+     * Removes the cached conversations for an account.
+     *
+     * @param session The associated session
+     */
+    public void removeAccountConversations(int accountId, Session session) {
+        CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
+        Object obj = cache.get(mapKey);
+        if (!(obj instanceof ConcurrentMap)) {
+            return;
+        }
+
+        ((ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj).remove(Integer.valueOf(accountId));
     }
 
     /**
@@ -287,15 +303,19 @@ public class ConversationCache {
             return null;
         }
 
-        ConcurrentMap<CacheKey, CacheEntry> cacheEntries = (ConcurrentMap<CacheKey, CacheEntry>) obj;
-        CacheKey entryKey = getEntryKey(accountId, fullName);
-        CacheEntry cacheEntry = cacheEntries.get(entryKey);
+        ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>> accounts = (ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj;
+        ConcurrentMap<String, CacheEntry> cacheEntries = accounts.get(Integer.valueOf(accountId));
+        if (null == cacheEntries) {
+            return null;
+        }
+
+        CacheEntry cacheEntry = cacheEntries.get(fullName);
         if (null == cacheEntry) {
             return null;
         }
 
         if (false == argsHash.equals(cacheEntry.argsHash)) {
-            cacheEntries.remove(entryKey, cacheEntry);
+            cacheEntries.remove(fullName, cacheEntry);
             return null;
         }
 
@@ -314,59 +334,32 @@ public class ConversationCache {
     public void putCachedConversations(List<List<MailMessage>> conversations, String fullName, int accountId, String argsHash, Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
 
-        ConcurrentMap<CacheKey, CacheEntry> cacheEntries;
+        ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>> accounts;
         Object obj = cache.get(mapKey);
         if (obj instanceof ConcurrentMap) {
-            cacheEntries = (ConcurrentMap<CacheKey, CacheEntry>) obj;
+            accounts = (ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj;
         } else {
             try {
-                ConcurrentHashMap<CacheKey, CacheEntry> newCacheEntries = new ConcurrentHashMap<CacheKey, CacheEntry>(16, 0.9F, 1);
-                cacheEntries = newCacheEntries;
-                cache.putSafe(mapKey, newCacheEntries);
+                ConcurrentHashMap<Integer, ConcurrentMap<String, CacheEntry>> newAccountEntries = new ConcurrentHashMap<Integer, ConcurrentMap<String, CacheEntry>>(8, 0.9F, 1);
+                accounts = newAccountEntries;
+                cache.putSafe(mapKey, newAccountEntries);
             } catch (OXException e) {
                 obj = cache.get(mapKey);
-                cacheEntries = (ConcurrentMap<CacheKey, CacheEntry>) obj;
+                accounts = (ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj;
+            }
+        }
+
+        ConcurrentMap<String, CacheEntry> cacheEntries = accounts.get(Integer.valueOf(accountId));
+        if (null == cacheEntries) {
+            ConcurrentMap<String, CacheEntry> newCacheEntries = new ConcurrentHashMap<String, CacheEntry>(16, 0.9F, 1);
+            cacheEntries = accounts.putIfAbsent(Integer.valueOf(accountId), newCacheEntries);
+            if (null == cacheEntries) {
+                cacheEntries = newCacheEntries;
             }
         }
 
         // Put the given one
-        CacheKey entryKey = getEntryKey(accountId, fullName);
-        cacheEntries.put(entryKey, new CacheEntry(conversations, argsHash));
-    }
-
-    /**
-     * Puts the conversations into cache and clears other remaining entries associated with the user.
-     *
-     * @param conversations The conversations to put
-     * @param fullName The full name
-     * @param accountId The account identifier
-     * @param argsHash The arguments hash
-     * @param session The associated session
-     */
-    public void putCachedConversationsAndClearOther(List<List<MailMessage>> conversations, String fullName, int accountId, String argsHash, Session session) {
-        CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
-
-        ConcurrentMap<CacheKey, CacheEntry> cacheEntries;
-        Object obj = cache.get(mapKey);
-        if (obj instanceof ConcurrentMap) {
-            cacheEntries = (ConcurrentMap<CacheKey, CacheEntry>) obj;
-        } else {
-            try {
-                ConcurrentHashMap<CacheKey, CacheEntry> newCacheEntries = new ConcurrentHashMap<CacheKey, CacheEntry>(16, 0.9F, 1);
-                cacheEntries = newCacheEntries;
-                cache.putSafe(mapKey, newCacheEntries);
-            } catch (OXException e) {
-                obj = cache.get(mapKey);
-                cacheEntries = (ConcurrentMap<CacheKey, CacheEntry>) obj;
-            }
-        }
-
-        // Clear other remaining entries
-        cacheEntries.clear();
-
-        // Put the given one
-        CacheKey entryKey = getEntryKey(accountId, fullName);
-        cacheEntries.put(entryKey, new CacheEntry(conversations, argsHash));
+        cacheEntries.put(fullName, new CacheEntry(conversations, argsHash));
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------

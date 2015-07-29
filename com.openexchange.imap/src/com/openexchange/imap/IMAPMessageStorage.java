@@ -2222,7 +2222,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // No suitable cache content - Generate from scratch
-        conversationCache.removeUserMessages(session);
+        conversationCache.removeAccountConversations(accountId, session);
 
         // Define the behavior how to query the conversation-relevant information from IMAP; either via ENVELOPE or by dedicated headers
         final boolean byEnvelope = false;
