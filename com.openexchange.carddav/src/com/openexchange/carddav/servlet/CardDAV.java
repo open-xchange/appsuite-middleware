@@ -54,12 +54,15 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
+import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.osgi.CarddavActivator;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -95,6 +98,11 @@ public class CardDAV extends OXServlet {
     @Override
     protected boolean useCookies() {
         return false;
+    }
+
+    @Override
+    protected boolean allowOAuthAccess() {
+        return true;
     }
 
     @Override
@@ -189,7 +197,7 @@ public class CardDAV extends OXServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        if (null == session || false == checkPermission(session)) {
+        if (null == session || false == checkPermission(request, session)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -202,10 +210,11 @@ public class CardDAV extends OXServlet {
     /**
      * Gets a value indicating whether CardDAV is enabled for the supplied session.
      *
+     * @param request the HTTP request
      * @param session The session to check permissions for
      * @return <code>true</code> if CardDAV is enabled, <code>false</code>, otherwise
      */
-    private boolean checkPermission(ServerSession session) {
+    private boolean checkPermission(HttpServletRequest request, ServerSession session) {
         if (false == session.getUserPermissionBits().hasContact()) {
             return false;
         }
@@ -217,12 +226,21 @@ public class CardDAV extends OXServlet {
         try {
             ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
             ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.carddav.enabled", boolean.class);
-            return property.isDefined() && property.get();
+            if (property.isDefined() && property.get()) {
+                OAuthGrant oAuthGrant = (OAuthGrant) request.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
+                if (oAuthGrant == null) {
+                    // basic auth took place
+                    return true;
+                } else {
+                    return oAuthGrant.getScope().has(Tools.OAUTH_SCOPE);
+                }
+            }
         } catch (OXException e) {
             getLogger(CardDAV.class).error("Error checking if CardDAV is enabled for user {} in context {}: {}",
                 session.getUserId(), session.getContextId(), e.getMessage(), e);
-            return false;
         }
+
+        return false;
     }
 
 }

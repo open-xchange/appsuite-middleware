@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -287,7 +286,7 @@ public class EffectiveObjectPermissions {
      */
     public static Map<Integer, Map<Integer, EffectiveObjectPermission>> load(Context ctx, User user, UserPermissionBits permissionBits, int module, List<Pair<Integer, Integer>> folderAndObjectIds, Connection con) throws OXException {
         if (folderAndObjectIds.isEmpty()) {
-            return Collections.emptyMap();
+            return new HashMap<Integer, Map<Integer, EffectiveObjectPermission>>();
         }
 
         Map<Integer, List<Integer>> objectIdsByFolder = new HashMap<Integer, List<Integer>>(folderAndObjectIds.size());

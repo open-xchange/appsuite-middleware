@@ -167,12 +167,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
-        final InheritedPriorityBlockingQueue availableQueue = this.availableQueue;
-        if (null == availableQueue) {
-            return;
-        }
-        IMAPStoreWrapper wrapper;
-        while ((wrapper = availableQueue.poll()) != null) {
+        InheritedPriorityBlockingQueue availableQueue = this.availableQueue;
+        for (IMAPStoreWrapper wrapper; (wrapper = availableQueue.poll()) != null;) {
             closeSafe(wrapper.imapStore);
         }
     }

@@ -49,7 +49,11 @@
 
 package com.openexchange.filestore.sproxyd.osgi;
 
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageProvider;
@@ -57,10 +61,13 @@ import com.openexchange.filestore.sproxyd.SproxydFileStorageFactory;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
 import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
+import com.openexchange.filestore.sproxyd.rmi.SproxydRemoteManagement;
+import com.openexchange.filestore.sproxyd.rmi.impl.SproxydRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SproxydActivator}
@@ -80,12 +87,16 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.filestore.sproxyd");
+
+        // Trackers
+        trackService(ContextService.class);
+        openTrackers();
 
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new SproxydCreateTableService());
@@ -94,6 +105,13 @@ public class SproxydActivator extends HousekeepingActivator {
 
         // Register factory
         registerService(FileStorageProvider.class, new SproxydFileStorageFactory(this));
+
+        // Register RMI
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("RMIName", SproxydRemoteManagement.RMI_NAME);
+            registerService(Remote.class, new SproxydRemoteImpl(this), props);
+        }
     }
 
     @Override

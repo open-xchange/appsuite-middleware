@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.drive.action;
 
+import java.util.Date;
+import java.util.Map;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -61,12 +63,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public class GetLinkResponse extends AbstractAJAXResponse {
 
     private String url;
-
-    private String token;
+    private boolean isNew;
+    private String password;
+    private Date expiryDate;
+    private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link GetLinkResponse}.
-     * 
+     *
      * @param response
      */
     protected GetLinkResponse(Response response) {
@@ -81,12 +85,76 @@ public class GetLinkResponse extends AbstractAJAXResponse {
         this.url = url;
     }
 
-    public String getToken() {
-        return token;
+    /**
+     * Gets the isNew
+     *
+     * @return The isNew
+     */
+    public boolean isNew() {
+        return isNew;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    /**
+     * Sets the isNew
+     *
+     * @param isNew The isNew to set
+     */
+    public void setNew(boolean isNew) {
+        this.isNew = isNew;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Gets the expiryDate
+     *
+     * @return The expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the expiryDate
+     *
+     * @param expiryDate The expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    /**
+     * Gets the meta
+     *
+     * @return The meta
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets the meta
+     *
+     * @param meta The meta to set
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
 }

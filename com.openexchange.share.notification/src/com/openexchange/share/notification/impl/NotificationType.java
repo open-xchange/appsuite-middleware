@@ -64,6 +64,13 @@ public enum NotificationType {
     SHARE_CREATED("share-created"),
 
     /**
+     * Notification type for a newly created link.
+     * Use to send notifications about a new link to
+     * a recipient of any type.
+     */
+    LINK_CREATED("link-created"),
+
+    /**
      * Notification type for a password-reset that needs to be confirmed.
      * Use to send a request to confirm the password-reset to the share's recipient.
      */

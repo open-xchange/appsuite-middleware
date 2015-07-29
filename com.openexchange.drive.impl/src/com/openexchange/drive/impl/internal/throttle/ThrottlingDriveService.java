@@ -69,9 +69,11 @@ import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.CreatedShares;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -175,6 +177,27 @@ public class ThrottlingDriveService implements DriveService {
         return delegate.getUtility();
     }
 
+    @Override
+    public List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException {
+        return delegate.getShares(session, target);
+    }
+
+    @Override
+    public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
+        return delegate.addShare(session, target, recipient, meta);
+    }
+
+    @Override
+    public void updateFile(DriveSession session, String path, FileVersion fileVersion, File metadata, UpdateParameters parameters) throws OXException {
+        delegate.updateFile(session, path, fileVersion, metadata, parameters);
+
+    }
+
+    @Override
+    public void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, FileStorageFolder metadata, UpdateParameters parameters) throws OXException {
+        delegate.updateDirectory(session, directoryVersion, metadata, parameters);
+    }
+
     private void enterSyncOperation() throws OXException {
         int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations();
         if (0 < maxConcurrentSyncOperations && maxConcurrentSyncOperations < currentSyncOperations.incrementAndGet()) {
@@ -184,26 +207,6 @@ public class ThrottlingDriveService implements DriveService {
 
     private void leaveSyncOperation() {
         currentSyncOperations.decrementAndGet();
-    }
-
-    @Override
-    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
-        return delegate.createShare(session, recipients, targets);
-    }
-
-    @Override
-    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-        delegate.updateShare(session, clientTimestamp, token, expiry, meta, password, bits);
-    }
-
-    @Override
-    public void deleteLinks(DriveSession session, List<String> singletonList) throws OXException {
-        delegate.deleteLinks(session, singletonList);
-    }
-
-    @Override
-    public List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException {
-        return delegate.getAllLinks(session);
     }
 
 }

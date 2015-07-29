@@ -130,6 +130,7 @@ import com.openexchange.imap.sort.IMAPSort.ImapSortResult;
 import com.openexchange.imap.threader.Threadable;
 import com.openexchange.imap.threader.Threadables;
 import com.openexchange.imap.threader.references.Conversation;
+import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.threader.references.Conversations;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
@@ -262,23 +263,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
-    private static volatile Boolean byEnvelope;
-    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>true</code> */
-    static boolean byEnvelope() {
-        Boolean b = byEnvelope;
-        if (null == b) {
-            synchronized (IMAPMessageStorage.class) {
-                b = byEnvelope;
-                if (null == b) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useReferenceOnlyThreaderByEnvelope", true));
-                    byEnvelope = b;
-                }
-            }
-        }
-        return b.booleanValue();
-    }
-
     private static volatile Boolean allowESORT;
     /** Whether ESORT is allowed to be utilized */
     static boolean allowESORT() {
@@ -319,7 +303,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
-                byEnvelope = null;
                 useImapThreaderIfSupported = null;
                 allowESORT = null;
                 allowSORTDISPLAY = null;
@@ -2144,6 +2127,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     };
 
+    private static final int CONVERSATION_CACHE_THRESHOLD = 10000;
+
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         IMAPFolder sentFolder = null;
@@ -2204,18 +2189,66 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (body && mergeWithSent) {
             throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
-        final boolean byEnvelope = byEnvelope();
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
-        List<Conversation> conversations;
-        {
-            // Retrieve from actual folder
-            FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
-            conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
-            // Retrieve from sent folder
+        // Check cache
+        ConversationCache conversationCache = ConversationCache.getInstance();
+        if (conversationCache.containsCachedConversations(fullName, accountId, session)) {
+            int total = imapFolder.getMessageCount();
+            long uidNext = imapFolder.getUIDNext();
+            int sentTotal;
+            long sentUidNext;
+
             if (mergeWithSent) {
                 // Switch folder
                 openReadOnly(sentFullName);
+
+                sentTotal = imapFolder.getMessageCount();
+                sentUidNext = imapFolder.getUIDNext();
+
+                // Switch back folder
+                openReadOnly(fullName);
+            } else {
+                sentTotal = 0;
+                sentUidNext = 0L;
+            }
+
+            String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, total, uidNext, sentTotal, sentUidNext);
+            List<List<MailMessage>> list = conversationCache.getCachedConversations(fullName, accountId, argsHash, session);
+            if (null != list) {
+                // Slice & fill
+                return sliceMessages(list, indexRange);
+            }
+        }
+
+        // No suitable cache content - Generate from scratch
+        conversationCache.removeUserMessages(session);
+
+        // Define the behavior how to query the conversation-relevant information from IMAP; either via ENVELOPE or by dedicated headers
+        final boolean byEnvelope = false;
+
+        // Grab conversations
+        String argsHash;
+        List<Conversation> conversations;
+        {
+            // Retrieve from actual folder
+            int total = imapFolder.getMessageCount();
+            long uidNext = imapFolder.getUIDNext();
+            FetchProfile fp;
+            if (byEnvelope) {
+                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            } else {
+                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            }
+            conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
+            // Retrieve from sent folder
+            int sentTotal = 0;
+            long sentUidNext = 0L;
+            if (mergeWithSent) {
+                // Switch folder
+                openReadOnly(sentFullName);
+                sentTotal = imapFolder.getMessageCount();
+                sentUidNext = imapFolder.getUIDNext();
                 // Get sent messages
                 List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
                 if (false == sentMessages.isEmpty()) {
@@ -2253,6 +2286,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Switch back folder
                 openReadOnly(fullName);
             }
+            argsHash = body ? null : ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, total, uidNext, sentTotal, sentUidNext);
         }
         // Fold it
         Conversations.fold(conversations);
@@ -2270,6 +2304,30 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
             Collections.sort(list, listComparator);
         }
+        // Slice & fill
+        if (body || (lookAhead > CONVERSATION_CACHE_THRESHOLD)) {
+            // Body requested - Do not cache at all
+            return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, usedFields, body, isRev1);
+        }
+        // Fill
+        fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
+        // Put into cache
+        conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
+        // Slice
+        return sliceMessages(list, indexRange);
+    }
+
+    private List<List<MailMessage>> sliceAndFill(List<List<MailMessage>> listOfConversations, String fullName, IndexRange indexRange, String sentFullName, boolean mergeWithSent, MailFields usedFields, boolean body, boolean isRev1) throws MessagingException, OXException {
+        // Check for index range
+        List<List<MailMessage>> list = sliceMessages(listOfConversations, indexRange);
+        // Fill requested fields
+        fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
+        // Return list
+        return list;
+    }
+
+    private List<List<MailMessage>> sliceMessages(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
+        List<List<MailMessage>> list = listOfConversations;
         // Check for index range
         if (null != indexRange) {
             int fromIndex = indexRange.start;
@@ -2285,14 +2343,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             list = list.subList(fromIndex, toIndex);
         }
-        // Fill selected chunk
+        // Return list
+        return list;
+    }
+
+    private void fillMessages(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, boolean body, boolean isRev1) throws MessagingException, OXException {
+        // Fill messages
         if (mergeWithSent) {
             FetchProfile fetchProfile = checkFetchProfile(getFetchProfile(usedFields.toArray(), true));
             List<MailMessage> msgs = new LinkedList<MailMessage>();
             List<MailMessage> sentmsgs = new LinkedList<MailMessage>();
             for (List<MailMessage> conversation : list) {
                 for (MailMessage m : conversation) {
-                    if (mergeWithSent && sentFullName.equals(m.getFolder())) {
+                    if (sentFullName.equals(m.getFolder())) {
                         sentmsgs.add(m);
                     } else {
                         msgs.add(m);
@@ -2304,6 +2367,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Switch folder
                 openReadOnly(sentFullName);
                 new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
+                // Switch back folder
+                openReadOnly(fullName);
             }
         } else {
             if (body) {
@@ -2328,8 +2393,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Apply account identifier
          */
         setAccountInfo2(list);
-        // Return list
-        return list;
     }
 
     private List<List<MailMessage>> doImapThreadSort(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final String sentFullName, final int messageCount, int lookAhead, final boolean mergeWithSent, final MailField[] mailFields) throws OXException, MessagingException {
@@ -2343,12 +2406,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (body && mergeWithSent) {
             throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
-        final boolean byEnvelope = byEnvelope();
+        final boolean byEnvelope = false;
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
         List<List<MailMessage>> list;
         if (mergeWithSent) {
-            FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            FetchProfile fp;
+            if (byEnvelope) {
+                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            } else {
+                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            }
             List<Conversation> conversations = ThreadSorts.getConversationList(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, fp, imapServerInfo);
             // Merge with sent folder
             {

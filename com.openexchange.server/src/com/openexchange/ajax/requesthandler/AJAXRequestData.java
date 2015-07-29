@@ -77,6 +77,8 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
@@ -182,6 +184,9 @@ public class AJAXRequestData {
     /** The decorator identifiers */
     private final @NonNull List<String> decoratorIds;
 
+    /** The port number to which the request was sent */
+    private int serverPort;
+
     /** The multipart flag. */
     private boolean multipart;
 
@@ -193,6 +198,9 @@ public class AJAXRequestData {
 
     /** The request's last-modified time stamp as parsed from <code>"If-Modified-Since"</code> request header */
     private @Nullable Long lastModified;
+
+    /** The requests host data **/
+    private @Nullable HostData hostData;
 
     /** The maximum allowed size of a single uploaded file or <code>-1</code> */
     private long maxUploadFileSize = -1L;
@@ -209,6 +217,7 @@ public class AJAXRequestData {
     public AJAXRequestData(final @Nullable JSONObject json) throws OXException {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
+        serverPort = -1;
     }
 
     /**
@@ -219,6 +228,7 @@ public class AJAXRequestData {
     public AJAXRequestData(final @Nullable Object data) {
         this();
         this.data = data;
+        serverPort = -1;
     }
 
     /**
@@ -232,6 +242,7 @@ public class AJAXRequestData {
         files = new LinkedList<UploadFile>();
         decoratorIds = new LinkedList<String>();
         expires = -1;
+        serverPort = -1;
     }
 
     /**
@@ -267,6 +278,7 @@ public class AJAXRequestData {
         copy.route = route;
         copy.servletRequestUri = servletRequestUri;
         copy.userAgent = userAgent;
+        copy.serverPort = serverPort;
         /*
          * Not sure about following members, therefore leave to null
          */
@@ -310,6 +322,25 @@ public class AJAXRequestData {
      */
     public @Nullable String getUserAgent() {
         return userAgent;
+    }
+
+
+    /**
+     * Gets the port number to which the request was sent
+     *
+     * @return The port or <code>-1</code> if not set
+     */
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    /**
+     * Sets the port number to which the request was sent
+     *
+     * @param serverPort The port to set
+     */
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
     }
 
     /**
@@ -542,6 +573,9 @@ public class AJAXRequestData {
     public void setHttpServletRequest(final @Nullable HttpServletRequest httpServletRequest) {
         examineServletRequest(httpServletRequest);
         this.httpServletRequest = httpServletRequest;
+        if (null != httpServletRequest && serverPort < 0) {
+            serverPort = httpServletRequest.getServerPort();
+        }
     }
 
     /**
@@ -1442,6 +1476,24 @@ public class AJAXRequestData {
      */
     public String getHostname() {
         return hostname;
+    }
+
+    /**
+     * Gets the host data. The result will not be <code>null</code> on instances
+     * created by the dispatcher on normal HTTP requests.
+     *
+     * @return The host data
+     */
+    public @Nullable HostData getHostData() {
+        if (hostData == null) {
+            synchronized (this) {
+                if (hostData == null && hostname != null && route != null && prefix != null) {
+                    hostData = new HostDataImpl(secure, hostname, serverPort, route, prefix);
+                }
+            }
+        }
+
+        return hostData;
     }
 
     /**

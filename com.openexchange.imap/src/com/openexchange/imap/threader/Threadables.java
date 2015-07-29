@@ -51,6 +51,7 @@ package com.openexchange.imap.threader;
 
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;
@@ -81,6 +82,7 @@ import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -390,16 +392,19 @@ public final class Threadables {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return null;
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
                 }
                 return null;
@@ -541,16 +546,19 @@ public final class Threadables {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return null;
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
                 }
                 return null;

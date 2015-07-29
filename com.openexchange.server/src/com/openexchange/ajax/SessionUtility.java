@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
@@ -69,9 +71,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.Header;
-import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -103,6 +105,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.uadetector.UserAgentParser;
 
 
 /**
@@ -699,6 +702,27 @@ public final class SessionUtility {
     }
 
     /**
+     * Extracts the secret string from the cookies supplied with the HTTP servlet request, based on the remembered hash-, client-
+     * and original user-agent-values stored in the session.
+     *
+     * @param hashSource The hash source for the secret cookie
+     * @param request The underlying HTTP servlet request
+     * @return The secret string, or <code>null</code> if no matching secret cookie was found in the request
+     */
+    public static String extractSecret(CookieHashSource hashSource, HttpServletRequest request, Session session) {
+        String hash = session.getHash();
+        String client = session.getClient();
+        String originalUserAgent = (String) session.getParameter("user-agent");
+        String[] additionalsForHash;
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+        } else {
+            additionalsForHash = null;
+        }
+        return extractSecret(hashSource, request, hash, client, originalUserAgent, additionalsForHash);
+    }
+
+    /**
      * Extracts the secret string from specified cookies using given hash string.
      *
      * @param hashSource The hash source for the secret cookie
@@ -785,8 +809,7 @@ public final class SessionUtility {
         if (null == userAgent) {
             return false;
         }
-        BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
+        return ServerServiceRegistry.getServize(UserAgentParser.class).matches(userAgent, UserAgentFamily.IE, 11);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -840,7 +863,7 @@ public final class SessionUtility {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, getPublicSessionCookieName(req)));
+        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, SHARE_PREFIX + hash, getPublicSessionCookieName(req)));
     }
 
     /**

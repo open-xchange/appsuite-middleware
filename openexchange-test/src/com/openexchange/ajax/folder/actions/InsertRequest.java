@@ -50,10 +50,13 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -67,23 +70,96 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     /**
      * Should the parser fail on error in server response.
      */
-    final boolean failOnError;
+    boolean failOnError;
+
+    private Transport notificationTransport;
+
+    private String notificationMessage;
 
     /**
-     * Default constructor.
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
      */
     public InsertRequest(API api, FolderObject folder) {
         this(api, folder, true);
     }
 
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param failOnError <code>true</code> to let the the test fail in case of an erroneous response, <code>false</code>, otherwise
+     */
     public InsertRequest(API api, FolderObject folder, boolean failOnError) {
         super(api);
         this.failOnError = failOnError;
         this.folder = folder;
     }
 
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param timeZone The client timezone
+     */
+    public InsertRequest(API api, FolderObject folder, TimeZone timeZone) {
+        this(api, folder, timeZone, true);
+    }
+
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param timeZone The client timezone
+     * @param failOnError <code>true</code> to let the the test fail in case of an erroneous response, <code>false</code>, otherwise
+     */
+    public InsertRequest(API api, FolderObject folder, TimeZone timeZone, boolean failOnError) {
+        super(api, timeZone);
+        this.failOnError = failOnError;
+        this.folder = folder;
+    }
+
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     */
+    public void setNotifyPermissionEntities(Transport transport) {
+        setNotifyPermissionEntities(transport, null);
+    }
+
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     * @param message The user-defined message
+     */
+    public void setNotifyPermissionEntities(Transport transport, String message) {
+        notificationTransport = transport;
+        notificationMessage = message;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
     @Override
     public Object getBody() throws JSONException {
+        if (notificationTransport != null) {
+            JSONObject data = new JSONObject();
+            data.put("folder", convert(folder));
+            JSONObject jNotification = new JSONObject();
+            jNotification.put("transport", notificationTransport.getID());
+            jNotification.put("message", notificationMessage);
+            data.put("notification", jNotification);
+            return data;
+        }
+
         return convert(folder);
     }
 

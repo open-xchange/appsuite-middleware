@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -80,7 +79,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -159,7 +158,9 @@ public class InviteTest extends ShareTest {
         recipient.setEntity(userId2);
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new InviteRequest(targets, Collections.<ShareRecipient>singletonList(recipient)));
+        for (ShareTarget target : targets) {
+            client.execute(new InviteRequest(target, recipient));
+        }
 
         /*
          * Reload folders with second client and check permissions
@@ -178,7 +179,7 @@ public class InviteTest extends ShareTest {
         recipient.setEntity(userId2);
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        client.execute(new InviteRequest(Collections.<ShareTarget>singletonList(target), Collections.<ShareRecipient>singletonList(recipient)));
+        client.execute(new InviteRequest(target, recipient));
         checkFilePermission(userId2, ObjectPermission.READ, itm.getAction(file.getId()));
     }
 
@@ -195,14 +196,18 @@ public class InviteTest extends ShareTest {
         int userId2 = client2.getValues().getUserId();
         internalRecipient.setEntity(userId2);
         internalRecipient.setBits(FOLDER_READ_PERMISSION);
-        AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-        anonymousRecipient.setBits(FOLDER_READ_PERMISSION);
-        anonymousRecipient.setPassword("1234");
+        GuestRecipient guestRecipient = new GuestRecipient();
+        guestRecipient.setBits(FOLDER_READ_PERMISSION);
+        guestRecipient.setEmailAddress(randomUID() + "@example.com");
         List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(2);
         recipients.add(internalRecipient);
-        recipients.add(anonymousRecipient);
+        recipients.add(guestRecipient);
 
-        client.execute(new InviteRequest(targets, recipients));
+        for (ShareRecipient recipient : recipients) {
+            for (ShareTarget target : targets) {
+                client.execute(new InviteRequest(target, recipient));
+            }
+        }
 
         /*
          * Assert that all shares have been created and create client for anonymous guest
@@ -210,7 +215,7 @@ public class InviteTest extends ShareTest {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         List<ParsedShare> shares = getSharesForTargets(allShares, targets);
         assertEquals(targets.size(), shares.size());
-        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), null, anonymousRecipient.getPassword());
+        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), guestRecipient);
 
         /*
          * Check folder permissions for internal recipient
@@ -251,7 +256,7 @@ public class InviteTest extends ShareTest {
         recipient.setEntity(client.getValues().getUserId());
         recipient.setBits(FOLDER_READ_PERMISSION);
 
-        InviteResponse response = client.execute(new InviteRequest(Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient), false));
+        InviteResponse response = client.execute(new InviteRequest(target, recipient, false));
         assertTrue(response.hasError());
         assertTrue(ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.equals(response.getException()));
 

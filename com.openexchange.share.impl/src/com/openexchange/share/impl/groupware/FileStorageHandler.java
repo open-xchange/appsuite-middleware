@@ -161,6 +161,24 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
+    public boolean mayAdjust(ShareTarget target, Session session) throws OXException {
+        FileID fileID = new FileID(target.getItem());
+        if (null == fileID.getFolderId()) {
+            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+        }
+        IDBasedFileAccess fileAccess = getFileAccess(session);
+        try {
+            File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+            return file.isShareable();
+        } catch (OXException e) {
+            if ("IFO-0400".equals(e.getErrorCode())) { // InfostoreExceptionCodes.NO_READ_PERMISSION
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    @Override
     public boolean exists(ShareTarget target, Session session) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (null == fileID.getFolderId()) {

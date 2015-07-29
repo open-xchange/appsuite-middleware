@@ -53,6 +53,7 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.drive.DriveShareTarget;
 
 /**
  * {@link DeleteLinkRequest}
@@ -62,35 +63,29 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> {
 
-    private String token;
     private boolean failOnError;
+    private DriveShareTarget target;
 
-    /**
-     * Initializes a new {@link DeleteLinkRequest}.
-     * 
-     * @param token
-     */
-    public DeleteLinkRequest(Integer root, String token) {
-        this(root, token, true);
+    public DeleteLinkRequest(Integer root, DriveShareTarget target) {
+        this(root, target, true);
     }
 
-    public DeleteLinkRequest(Integer root, String token, boolean failOnError) {
+    public DeleteLinkRequest(Integer root, DriveShareTarget target, boolean failOnError) {
         super(root);
-        this.token = token;
+        this.target = target;
         this.failOnError = failOnError;
     }
 
     @Override
     public Method getMethod() {
-        return Method.GET;
+        return Method.PUT;
     }
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"),
-            new Parameter("root", root),
-            new Parameter("token", token)
+            new Parameter("root", root)
         };
     }
 
@@ -101,7 +96,9 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
 
     @Override
     public JSONObject getBody() throws IOException, JSONException {
-        return null;
+        JSONObject retval = new JSONObject();
+        DriveShareWriter.writeDriveTarget(target, retval);
+        return retval;
     }
 
 }

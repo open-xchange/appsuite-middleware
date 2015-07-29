@@ -54,6 +54,7 @@ import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtili
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
 import static com.openexchange.groupware.container.FolderObject.SYSTEM_MODULE;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
@@ -76,12 +77,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -912,7 +915,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
 
             final DatabaseFolder retval;
 
@@ -1005,7 +1008,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
             /*
              * Either from working or from backup storage type
@@ -1038,19 +1040,25 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * Batch load
                  */
-                provider = getConnection(Mode.READ, storageParameters);
-                final Connection con = provider.getConnection();
-                if (!map.isEmpty()) {
-                    final Session session = storageParameters.getSession();
-                    for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con, storageParameters)) {
-                        if (null != folderObject) {
-                            final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userPermissionBits, ctx, session, altNames, con);
+                if (0 < map.size()) {
+                    provider = getConnection(Mode.READ, storageParameters);
+                    try {
+                        Connection con = provider.getConnection();
+                        Session session = storageParameters.getSession();
+                        UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+                        for (FolderObject folder : getFolderObjects(map.keys(), ctx, con, storageParameters)) {
+                            if (null != folder) {
+                                int index = map.get(folder.getObjectID());
+                                ret[index] = DatabaseFolderConverter.convert(folder, user, userPermissionBits, ctx, session, altNames, con);
+                            }
+                        }
+                    } finally {
+                        if (null != provider) {
+                            provider.close();
+                            provider = null;
                         }
                     }
                 }
-                provider.close();
-                provider = null;
                 /*
                  * Set proper tree identifier
                  */
@@ -1131,7 +1139,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
             final List<FolderObject> list =
@@ -1223,26 +1231,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         SearchIterator<FolderObject> searchIterator = null;
         try {
             /*
-             * load folders of content type
+             * load & filter user shared folders of content type
              */
             Connection connection = provider.getConnection();
             User user = storageParameters.getUser();
-            UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
-            List<FolderObject> folders = new ArrayList<FolderObject>();
+            UserPermissionBits userPermissionBits = getUserPermissionBits(connection, storageParameters);
             searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(),
                 userPermissionBits.getAccessibleModules(), getModuleByContentType(contentType), storageParameters.getContext(), connection);
-            while (searchIterator.hasNext()) {
-                /*
-                 * only include shared folders created by the user
-                 */
-                FolderObject folder = searchIterator.next();
-                if (folder.getCreatedBy() == user.getId()) {
-                    OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
-                    if (null != permissions && 1 < permissions.length) {
-                        folders.add(folder);
-                    }
-                }
-            }
+            List<FolderObject> folders = getUserSharedFolders(searchIterator, connection, storageParameters);
             /*
              * localize / sort folders & return their sortable identifiers
              */
@@ -1266,8 +1262,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
             final Connection con = provider.getConnection();
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final List<FolderIdNamePair> subfolderIds =
                     SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
@@ -1800,7 +1796,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final boolean retval;
 
             if (StorageType.WORKING.equals(storageType)) {
@@ -1907,7 +1903,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(storageParameters);
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
 
             final Queue<FolderObject> q =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
@@ -2077,6 +2073,79 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return FolderObject.SHARED;
         }
         return getTypeByFolderType(type);
+    }
+
+    /**
+     * Reads the supplied search iterator and filters those folders that are considered as "shared" by the user, i.e. non-public folders
+     * of the user that have been shared to at least one other entity.
+     *
+     * @param searchIterator The search iterator to process
+     * @param connection An opened database connection to use
+     * @param storageParameters The storage parameters as passed from the client
+     * @return The shared folders of the user
+     */
+    private static List<FolderObject> getUserSharedFolders(SearchIterator<FolderObject> searchIterator, Connection connection, StorageParameters storageParameters) throws OXException {
+        List<FolderObject> folders = new ArrayList<FolderObject>();
+        Set<Integer> knownPublicFolders = new HashSet<Integer>();
+        while (searchIterator.hasNext()) {
+            /*
+             * only include shared, non-public folders created by the user
+             */
+            FolderObject folder = searchIterator.next();
+            if (folder.getCreatedBy() == storageParameters.getUserId()) {
+                OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
+                if (null != permissions && 1 < permissions.length && false == considerPublic(folder, knownPublicFolders, connection, storageParameters)) {
+                    folders.add(folder);
+                }
+            }
+        }
+        return folders;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder can be considered as a "public" one, i.e. he is marked directly as such, or is
+     * an infostore folder somewhere in the "public" subtree below {@link FolderObject#SYSTEM_PUBLIC_FOLDER_ID} /
+     * {@link FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID}.
+     *
+     * @param folder The folder to check
+     * @param knownPublicFolders A set of already known public folders (from previous checks)
+     * @param connection An opened database connection to use
+     * @param storageParameters The storage parameters as passed from the client
+     * @return <code>true</code> if the folder can be considered as "public", <code>false</code>, otherwise
+     */
+    private static boolean considerPublic(FolderObject folder, Set<Integer> knownPublicFolders, Connection connection, StorageParameters storageParameters) throws OXException {
+        if (FolderObject.INFOSTORE == folder.getModule()) {
+            /*
+             * infostore folders are always of "public" type, so check if they're somewhere in the "public" subtree
+             */
+            knownPublicFolders.add(I(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+            knownPublicFolders.add(I(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+            if (knownPublicFolders.contains(I(folder.getObjectID()))) {
+                return true;
+            } else if (knownPublicFolders.contains(I(folder.getParentFolderID()))) {
+                knownPublicFolders.add(I(folder.getObjectID()));
+                return true;
+            } else {
+                int parentFolderID = folder.getParentFolderID();
+                while (FolderObject.MIN_FOLDER_ID < parentFolderID) {
+                    FolderObject parentFolder = getFolderObject(parentFolderID, storageParameters.getContext(), connection, storageParameters);
+                    if (knownPublicFolders.contains(I(parentFolder.getObjectID()))) {
+                        return true;
+                    } else if (knownPublicFolders.contains(I(parentFolder.getParentFolderID()))) {
+                        knownPublicFolders.add(I(folder.getObjectID()));
+                        return true;
+                    } else {
+                        parentFolderID = parentFolder.getParentFolderID();
+                    }
+                }
+            }
+            return false;
+        } else {
+            /*
+             * always consider non-infostore "public" folders as public
+             */
+            return FolderObject.PUBLIC == folder.getType(storageParameters.getUserId());
+        }
     }
 
     private static final class FolderObjectComparator implements Comparator<FolderObject> {

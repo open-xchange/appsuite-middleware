@@ -49,11 +49,13 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -64,22 +66,19 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug23167Test}
- * 
- * Unable to calculate given position. Seems to be a delete exception or outside range 
- * 
+ *
+ * Unable to calculate given position. Seems to be a delete exception or outside range
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23167Test extends CalDAVTest {
 
-	public Bug23167Test(String name) {
-		super(name);
-	}	
-	
+	@Test
 	public void testUpdateOldChangeException() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create appointment series on server
 		 */
@@ -136,7 +135,7 @@ public class Bug23167Test extends CalDAVTest {
         vEventException.setProperty("DTSTAMP", formatAsUTC(new Date()));
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
-         * verify exception on server        
+         * verify exception on server
          */
         List<Appointment> updates = super.getManager().updates(parse(getDefaultFolderID()), clientLastModified, false);
         assertNotNull("no updates found on server", updates);

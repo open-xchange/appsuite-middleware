@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -129,6 +130,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
+import com.openexchange.groupware.infostore.validation.ObjectPermissionValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -171,7 +173,6 @@ import com.openexchange.tx.UndoableAction;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    private static final ValidationChain VALIDATION = new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator());
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
@@ -241,14 +242,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public boolean exists(final int id, final int version, final ServerSession session) throws OXException {
+    public boolean exists(int id, int version, ServerSession session) throws OXException {
         try {
-            return security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits()).canReadObject();
-        } catch (final OXException x) {
-            if (InfostoreExceptionCodes.NOT_EXIST.equals(x)) {
+            return security.getInfostorePermission(session, id).canReadObject();
+        } catch (OXException e) {
+            if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 return false;
             }
-            throw x;
+            throw e;
         }
     }
 
@@ -262,8 +263,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * check permissions
          */
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            document, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, document);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -276,7 +276,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * add further metadata and return
          */
-        document.setShareable(permission.canWriteObject());
+        document.setShareable(permission.canShareObject());
         return numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null);
     }
 
@@ -313,8 +313,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * get needed metadata & check read permissions
          */
         DocumentMetadata metadata = load(id, version, session.getContext());
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -351,7 +350,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * get needed metadata (including object permissions) & check read permissions
          */
         DocumentMetadata metadata = objectPermissionLoader.add(load(id, version, context), context, null);
-        EffectiveInfostorePermission permission = security.getInfostorePermission(metadata, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -361,7 +360,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == permission.canReadObjectInFolder()) {
             metadata.setFolderId(getSharedFilesFolderID(session));
         }
-        metadata.setShareable(permission.canWriteObject());
+        metadata.setShareable(permission.canShareObject());
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
          * check client E-Tag if supplied
@@ -389,11 +388,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public void lock(final int id, final long diff, final ServerSession session) throws OXException {
         Context context = session.getContext();
         User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            id,
-            context,
-            user,
-            session.getUserPermissionBits());
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
         if (!infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING.create();
         }
@@ -421,14 +416,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public void unlock(final int id, final ServerSession session) throws OXException {
-        final Context context = session.getContext();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            id,
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!infoPerm.canWriteObject()) {
+    public void unlock(int id, ServerSession session) throws OXException {
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
+        if (false == infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_UNLOCK_MISSING.create();
         }
         checkMayUnlock(id, session);
@@ -556,14 +546,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Insert NEW document
         final Context context = session.getContext();
-        security.checkFolderId(document.getFolderId(), context);
-        final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
-            document.getFolderId(),
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!isperm.canCreateObjects()) {
+        EffectiveInfostoreFolderPermission targetFolderPermission = security.getFolderPermission(session, document.getFolderId());
+        if (FolderObject.INFOSTORE != targetFolderPermission.getPermission().getFolderModule()) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(document.getFolderId()));
+        }
+        if (false == targetFolderPermission.canCreateObjects()) {
             throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+        if (null != document.getObjectPermissions() && false == targetFolderPermission.canShareOwnObjects()) {
+            throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
         }
 
         {
@@ -578,8 +569,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         setDefaults(document);
-
-        VALIDATION.validate(document);
+        getValidationChain().validate(session, document);
         CheckSizeSwitch.checkSizes(document, this, context);
 
         FilenameReserver filenameReserver = null;
@@ -635,7 +625,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0), session), true);
 
             if (data != null) {
-                SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getFolderOwner(), session.getContextId()), data, document.getFileSize());
+                SaveFileAction saveFile = new SaveFileAction(getFileStorage(targetFolderPermission.getFolderOwner(), session.getContextId()), data, document.getFileSize());
                 perform(saveFile, false);
                 document.setVersion(1);
                 document.setFilestoreLocation(saveFile.getFileStorageID());
@@ -776,14 +766,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return saveDocument(document, data, sequenceNumber, session);
         }
 
-        // Check permission
+        // Check permissions
         Context context = session.getContext();
-        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            document.getId(),
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!infoPerm.canWriteObject()) {
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, document.getId());
+        if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && false == infoPerm.canShareObject()) {
             throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
         }
 
@@ -797,16 +783,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
                 modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
             } else if (document.getFolderId() != -1 && infoPerm.getObject().getFolderId() != document.getFolderId()) {
-                security.checkFolderId(document.getFolderId(), context);
-                final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
-                    document.getFolderId(),
-                    context,
-                    session.getUser(),
-                    session.getUserPermissionBits());
-                if (!(isperm.canCreateObjects())) {
+                EffectiveInfostoreFolderPermission targetFolderPermission = security.getFolderPermission(session, document.getFolderId());
+                if (FolderObject.INFOSTORE != targetFolderPermission.getPermission().getFolderModule()) {
+                    throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
+                }
+                if (false == targetFolderPermission.canCreateObjects()) {
                     throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
                 }
-                if (!infoPerm.canDeleteObject()) {
+                if (false == infoPerm.canDeleteObject()) {
                     throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
                 }
             }
@@ -823,7 +807,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        VALIDATION.validate(document);
+        getValidationChain().validate(session, document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
@@ -860,7 +844,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(load(document.getId(), context), context, null);
         return saveModifiedDocument(new SaveParameters(context, null, document, oldDocument, sequenceNumber, updatedCols, security.getFolderOwner(folderId, context)));
@@ -1530,8 +1513,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         } catch (OXException x) {
             return versionIds;
         }
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            metadata, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canDeleteObject()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
         }
@@ -1733,11 +1715,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
         }
         if (addShareable) {
+            final boolean hasSharedFolderAccess = session.getUserConfiguration().hasFullSharedFolderAccess();
             timedResult = new CustomizableTimedResult<DocumentMetadata>(timedResult, new Customizer<DocumentMetadata>() {
 
                 @Override
                 public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (sharedFilesFolderID == folderId) {
+                    if (false == hasSharedFolderAccess) {
+                        /*
+                         * no permissions to share
+                         */
+                        document.setShareable(false);
+                    } else if (sharedFilesFolderID == folderId) {
                         /*
                          * set "shareable" flag based on object permissions
                          */
@@ -1800,21 +1788,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
         Context context = session.getContext();
-        final User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, context, user, session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
+        if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
+        InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
         iter.setCustomizer(new DocumentCustomizer() {
+
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
-                if (!infoPerm.canReadObjectInFolder()) {
+                if (false == infoPerm.canReadObjectInFolder()) {
                     document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
                 }
-                document.setShareable(infoPerm.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS ||
-                    infoPerm.getWritePermission() >= OCLPermission.WRITE_OWN_OBJECTS && document.getCreatedBy() == user.getId());
+                document.setShareable(infoPerm.canShareObject());
                 return document;
             }
         });
@@ -1892,7 +1879,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                          * adjust parent folder id to match requested identifier
                          */
                         document.setFolderId(getSharedFilesFolderID(session));
-                        document.setShareable(infostorePermission.canWriteObject());
+                        document.setShareable(infostorePermission.canShareObject());
                     }
                 } else {
                     /*
@@ -1902,8 +1889,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
                         document.setFolderId(requestedFolderID.longValue());
                     }
-                    document.setShareable(folderPermission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS ||
-                        folderPermission.getWritePermission() >= OCLPermission.WRITE_OWN_OBJECTS && document.getCreatedBy() == user.getId());
+                    document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
                 }
                 return document;
             }
@@ -2238,13 +2224,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             documents = numberOfVersionsLoader.add(documents, session.getContext(), objectIDs);
         }
         if (addShareable || containsSharedFilesResults) {
+            boolean hasSharedFolderAccess = session.getUserConfiguration().hasFullSharedFolderAccess();
             for (DocumentMetadata document : documents) {
                 int physicalFolderID = (int) document.getFolderId();
                 if (null == permissionsByFolderID) {
                     /*
                      * assume document shareable & readable at physical location
                      */
-                    document.setShareable(true);
+                    document.setShareable(hasSharedFolderAccess);
                     continue;
                 }
                 EffectiveInfostoreFolderPermission folderPermission = permissionsByFolderID.get(I(physicalFolderID));
@@ -2252,7 +2239,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     /*
                      * document is readable at physical location
                      */
-                    document.setShareable(folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == session.getUserId());
+                    document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == session.getUserId());
                 } else {
                     /*
                      * set 'shareable' flag and parent folder based on object permissions
@@ -2262,7 +2249,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         ObjectPermission matchingPermission = EffectiveObjectPermissions.find(session.getUser(), objectPermissions);
                         if (null != matchingPermission && matchingPermission.canRead()) {
                             document.setFolderId(sharedFilesFolderID);
-                            document.setShareable(matchingPermission.canWrite());
+                            document.setShareable(hasSharedFolderAccess && matchingPermission.canWrite());
                         } else {
                             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                         }
@@ -2440,7 +2427,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public void setSessionHolder(final SessionHolder sessionHolder) {
         expiredLocksListener.setSessionHolder(sessionHolder);
-        db.setSessionHolder(sessionHolder);
     }
 
     /**
@@ -2483,4 +2469,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         return tuples;
     }
+
+    /**
+     * Gets an chain of validation checks to use before saving documents.
+     *
+     * @return The validation chain
+     */
+    private ValidationChain getValidationChain() {
+        return new ValidationChain(
+            new InvalidCharactersValidator(),
+            new FilenamesMayNotContainSlashesValidator(),
+            new ObjectPermissionValidator(this)
+        );
+    }
+
 }

@@ -49,23 +49,21 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
-import org.json.JSONArray;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.DefaultRequestContext;
-import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.core.CreatedSharesImpl;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +80,6 @@ public class InviteAction extends AbstractShareAction {
      * Initializes a new {@link InviteAction}.
      *
      * @param services The service lookup
-     * @param translatorFactory
      */
     public InviteAction(ServiceLookup services) {
         super(services);
@@ -91,40 +88,36 @@ public class InviteAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
+            /*
+             * parse targets, recipients & further parameters
+             */
             JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), getTimeZone(requestData, session),
-                services.getService(ModuleSupport.class));
+            ShareRecipient recipient = getParser().parseRecipient(data.getJSONObject("recipient"));
+            checkRecipient(recipient);
+            ShareTarget target = getParser().parseTarget(data.getJSONObject("target"));
             String message = data.optString("message", null);
+            Map<String, Object> meta = getParser().parseMeta(data.optJSONObject("meta"));
             /*
-             * create the shares, notify recipients
+             * create the shares, notify recipients via mail
              */
-            CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
-            CreatedShares createdShares = createPerformer.perform();
+            ShareInfo shareInfo = getShareService().addShare(session, target, recipient, meta).getFirstInfo();
+            CreatedSharesImpl createdShares = new CreatedSharesImpl(Collections.singletonMap(recipient, Collections.singletonList(shareInfo)));
+            List<OXException> warnings = getNotificationService().sendShareCreatedNotifications(
+                Transport.MAIL, createdShares, message, session, requestData.getHostData());
             /*
-             * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
+             * return empty result (including warnings) in case of success
              */
-            ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, DefaultRequestContext.newInstance(requestData));
-            /*
-             * construct & return appropriate json result
-             */
-            AJAXRequestResult result = new AJAXRequestResult();
+            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), shareInfo.getShare().getModified(), "json");
             result.addWarnings(warnings);
-            JSONArray jTokens = new JSONArray(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                if (recipient.isInternal()) {
-                    jTokens.put(JSONObject.NULL);
-                } else {
-                    CreatedShare share = createdShares.getShare(recipient);
-                    jTokens.put(share.getToken());
-                }
-            }
-            result.setResultObject(jTokens, "json");
-            result.setTimestamp(new Date());
             return result;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void checkRecipient(ShareRecipient recipient) throws OXException {
+        if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+            throw ShareExceptionCodes.NO_INVITE_ANONYMOUS.create();
         }
     }
 

@@ -69,13 +69,17 @@ import com.openexchange.exception.OXException;
  */
 public class ServerDirectoryVersion implements DirectoryVersion {
 
-    private final String path;
     private final String normalizedPath;
     private final DirectoryChecksum checksum;
 
+    /**
+     * Initializes a new {@link ServerDirectoryVersion}.
+     *
+     * @param path The path
+     * @param checksum The checksum
+     */
     public ServerDirectoryVersion(String path, DirectoryChecksum checksum) {
         super();
-        this.path = path;
         this.normalizedPath = PathNormalizer.normalize(path);
         this.checksum = checksum;
     }

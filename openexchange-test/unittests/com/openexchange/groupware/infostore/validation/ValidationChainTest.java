@@ -1,10 +1,10 @@
 package com.openexchange.groupware.infostore.validation;
 
-import com.openexchange.exception.OXException;
 import junit.framework.TestCase;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.session.ServerSession;
 
 public class ValidationChainTest extends TestCase{
 
@@ -18,7 +18,7 @@ public class ValidationChainTest extends TestCase{
 		validators.add(new TestValidation3());
 
 		try {
-			validators.validate(null);
+			validators.validate(null, null);
 			fail("No Exception thrown");
 		} catch (final OXException x) {
 			assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String)x.getDisplayArgs()[0]);
@@ -32,7 +32,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation1 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
 			return new DocumentMetadataValidation();
 		}
 
@@ -46,7 +46,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation2 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "sucks");
 			return validation;
@@ -62,7 +62,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation3 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "stinks");
 			validation.setError(Metadata.DESCRIPTION_LITERAL, "stinks");

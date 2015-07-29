@@ -130,9 +130,9 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final ServiceLookup services;
 
-    private final Map<String, Map<String, AttributedProperty>> preferenceItems;
+    private ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems;
 
-    private final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents;
+    private ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents;
 
     private final Map<String, SharedJSlobService> sharedJSlobs;
 
@@ -144,20 +144,25 @@ public final class ConfigJSlobService implements JSlobService {
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
-        this.preferenceItems = initPreferenceItems();
+        initPreferenceItems();
         // Initialize core name mapping
         final ConfigurationService service = services.getService(ConfigurationService.class);
-        final File file = service.getFileByName("paths.perfMap");
-        if (null == file) {
-            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1);
-        } else {
-            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
-            readPerfMap(file, configTreeEquivalents);
-            this.configTreeEquivalents = configTreeEquivalents;
-        }
+        initConfigTree(service);
         // Initialize shared JSlobs
         sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
-        // Initialize service tracker
+    }
+
+    protected void initConfigTree(final ConfigurationService service) throws OXException {
+        this.configTreeEquivalents = null;
+
+        final File file = service.getFileByName("paths.perfMap");
+        if (null == file) {
+            this.configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1);
+        } else {
+            final ConcurrentMap<String, ConfigTreeEquivalent> lConfigTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
+            readPerfMap(file, lConfigTreeEquivalents);
+            this.configTreeEquivalents = lConfigTreeEquivalents;
+        }
     }
 
     /**
@@ -169,7 +174,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services;
     }
 
-    private void readPerfMap(final File file, final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents) throws OXException {
+    private void readPerfMap(final File file, final ConcurrentMap<String, ConfigTreeEquivalent> lConfigTreeEquivalents) throws OXException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
@@ -192,10 +197,10 @@ public final class ConfigJSlobService implements JSlobService {
                             }
                         }
 
-                        ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+                        ConfigTreeEquivalent equiv = lConfigTreeEquivalents.get(jslobName);
                         if (equiv == null) {
                             equiv = new ConfigTreeEquivalent();
-                            configTreeEquivalents.put(jslobName, equiv);
+                            lConfigTreeEquivalents.putIfAbsent(jslobName, equiv);
                         }
 
                         equiv.config2lob.put(configTreePath, jslobPath);
@@ -276,7 +281,9 @@ public final class ConfigJSlobService implements JSlobService {
         }
     }
 
-    private Map<String, Map<String, AttributedProperty>> initPreferenceItems() throws OXException {
+    protected void initPreferenceItems() throws OXException {
+        this.preferenceItems = null;
+
         // Read from config cascade
         final ConfigView view = getConfigViewFactory().getView();
         final Map<String, ComposedConfigProperty<String>> all = view.all();
@@ -284,8 +291,7 @@ public final class ConfigJSlobService implements JSlobService {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
-        final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
-            initialCapacity);
+        final ConcurrentMap<String, Map<String, AttributedProperty>> lPreferenceItems = new ConcurrentHashMap<String, Map<String, AttributedProperty>>(initialCapacity);
         for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             // Check for existence of "preferencePath"
             final ComposedConfigProperty<String> property = entry.getValue();
@@ -296,10 +302,10 @@ public final class ConfigJSlobService implements JSlobService {
                 if (separatorPos != -1) {
                     final String key = preferencePath.substring(0, separatorPos);
                     preferencePath = preferencePath.substring(separatorPos + 2);
-                    Map<String, AttributedProperty> attributes = preferenceItems.get(key);
+                    Map<String, AttributedProperty> attributes = lPreferenceItems.get(key);
                     if (null == attributes) {
                         attributes = new HashMap<String, AttributedProperty>(initialCapacity);
-                        preferenceItems.put(key, attributes);
+                        lPreferenceItems.putIfAbsent(key, attributes);
                     }
                     try {
                         boolean isProtected = Boolean.parseBoolean(property.get("protected"));
@@ -310,7 +316,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
         }
-        return preferenceItems;
+        this.preferenceItems = lPreferenceItems;
     }
 
     /**
@@ -331,7 +337,7 @@ public final class ConfigJSlobService implements JSlobService {
                     JSONObject jsonObject = jsonJSlob.getJsonObject();
                     if (sharedId.equals(id)) {
                         JSONObject sharedJsonObject = sharedJSlob.getJsonObject();
-                        for (Entry<String,Object> sharedEntry : sharedJsonObject.entrySet()) {
+                        for (Entry<String, Object> sharedEntry : sharedJsonObject.entrySet()) {
                             jsonObject.put(sharedEntry.getKey(), sharedEntry.getValue());
                         }
                     } else {
@@ -536,7 +542,6 @@ public final class ConfigJSlobService implements JSlobService {
                     LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
                 }
             }
-
             jsLob.setJsonObject(jObject);
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -1150,7 +1155,7 @@ public final class ConfigJSlobService implements JSlobService {
         try {
             Object value = new JSONTokener(propertyValue).nextValue();
             if (value instanceof String) {
-                if (propertyValue.startsWith("\"")){
+                if (propertyValue.startsWith("\"")) {
                     return value;
                 }
                 return propertyValue;
@@ -1198,7 +1203,7 @@ public final class ConfigJSlobService implements JSlobService {
             this.isProtected = isProtected;
             path = JSONPathElement.parsePath(preferencePath);
         }
-    } // End of class AttributedProperty
+    }// End of class AttributedProperty
 
     private static final class CompletionServiceReference {
 
@@ -1213,5 +1218,4 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
     }
-
 }

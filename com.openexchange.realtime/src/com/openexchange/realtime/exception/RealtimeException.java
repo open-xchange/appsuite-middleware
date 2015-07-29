@@ -70,17 +70,22 @@ public class RealtimeException extends OXException {
     private static final long serialVersionUID = -3650839506266250736L;
 
     private final OXException delegate;
-
-    private Transformer transformer;
+    private final Transformer transformer;
+    private final int hash;
 
     public RealtimeException(OXException origin) {
-        this.delegate = origin;
+        this(origin, null);
     }
 
     public RealtimeException(OXException origin, Transformer transformer) {
         this.delegate = origin;
         this.transformer = transformer;
         super.copyFrom(origin);
+
+        int prime = 31;
+        int result = prime * 1 + ((delegate == null) ? 0 : delegate.hashCode());
+        result = prime * result + ((transformer == null) ? 0 : transformer.hashCode());
+        hash = result;
     }
 
     public RealtimeException toXMPPException() {
@@ -104,28 +109,15 @@ public class RealtimeException extends OXException {
         return delegate.getLocalizedMessage();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((delegate == null) ? 0 : delegate.hashCode());
-        result = prime * result + ((transformer == null) ? 0 : transformer.hashCode());
-        return result;
+        return hash;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof RealtimeException)) {
             return false;

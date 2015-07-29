@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.tests;
 
+import static org.junit.Assert.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
@@ -68,6 +69,8 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
 import org.jdom2.JDOMException;
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -83,28 +86,25 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link FreeBusyTest} - Tests free/busy-lookup via the CalDAV interface 
- * 
+ * {@link FreeBusyTest} - Tests free/busy-lookup via the CalDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyTest extends CalDAVTest {
-	
+
 	private String scheduleOutboxURL;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         this.scheduleOutboxURL = getScheduleOutboxURL();
     }
-	
-	public FreeBusyTest(String name) {
-		super(name);
-	}
-	
+
+	@Test
 	public void testDiscoverScheduleOutbox() throws Exception {
         assertNotNull("got no schedule-outbox URL", this.scheduleOutboxURL);
 	}
-	
+
+	@Test
 	public void testFreeBusy() throws Exception {
 		/*
 		 * create appointments on server for current user
@@ -158,7 +158,8 @@ public class FreeBusyTest extends CalDAVTest {
 			assertNotNull("no matching free/busy slot found for appointment " + appointment, matchingSlot);
 		}
 	}
-	
+
+	@Test
 	public void testFreeBusyTypes() throws Exception {
 		/*
 		 * create appointments on server for current user
@@ -214,7 +215,7 @@ public class FreeBusyTest extends CalDAVTest {
 			assertNotNull("no matching free/busy slot found for appointment " + appointment, matchingSlot);
 		}
 	}
-	
+
 	private Map<String, List<FreeBusySlot>> extractFreeBusy(ICalResource iCalResource) throws ParseException {
 		Map<String, List<FreeBusySlot>> freeBusy = new HashMap<String, List<FreeBusySlot>>();
         assertNotNull("No VFREEBUSY in iCal found", iCalResource.getVFreeBusys());
@@ -235,25 +236,25 @@ public class FreeBusyTest extends CalDAVTest {
 				mail = mail.substring(7);
 			}
 			freeBusy.put(mail, freeBusySlots);
-		}				
+		}
 		return freeBusy;
 	}
-	
+
 	private static final class FreeBusyResponse {
-		
+
 		public String recipient, requestStatus, responseDescription, calendarData;
 
 		public static List<FreeBusyResponse> create(Document document) throws JDOMException {
 			List<FreeBusyResponse> fbResponses = new ArrayList<FreeBusyTest.FreeBusyResponse>();
-			NodeList nodes = document.getElementsByTagNameNS(PropertyNames.RESPONSE_CALDAV.getNamespace().getURI(), 
+			NodeList nodes = document.getElementsByTagNameNS(PropertyNames.RESPONSE_CALDAV.getNamespace().getURI(),
 					PropertyNames.RESPONSE_CALDAV.getName());
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Element element = (Element)nodes.item(i);
-				fbResponses.add(create(element));				
+				fbResponses.add(create(element));
 			}
 			return fbResponses;
 		}
-		
+
 		public static FreeBusyResponse create(Element response) throws JDOMException {
 			FreeBusyResponse fbResponse = new FreeBusyResponse();
 			fbResponse.recipient = extractChildTextContent(PropertyNames.HREF, response);
@@ -262,37 +263,37 @@ public class FreeBusyTest extends CalDAVTest {
 			fbResponse.calendarData = extractChildTextContent(PropertyNames.CALENDAR_DATA, response);
 			return fbResponse;
 		}
-		
+
 	}
-	
+
 	private static final class FreeBusySlot {
-		
+
 		public Date start, end;
 		public String fbType;
-		
+
 		public FreeBusySlot(Date start, Date end, String fbType) {
 			this.start = start;
 			this.end = end;
 			this.fbType = fbType;
 		}
-		
+
 	}
-	
+
 	private static boolean matches(Appointment appointment, FreeBusySlot freeBusySlot) {
 		if (freeBusySlot.start.equals(appointment.getStartDate()) && freeBusySlot.end.equals(appointment.getEndDate())) {
 			if (Appointment.FREE == appointment.getShownAs()) {
-				return "FREE".equals(freeBusySlot.fbType);				
+				return "FREE".equals(freeBusySlot.fbType);
 			} else if (Appointment.ABSENT == appointment.getShownAs()) {
 				return "BUSY-UNAVAILABLE".equals(freeBusySlot.fbType);
 			} else if (Appointment.TEMPORARY == appointment.getShownAs()) {
 				return "BUSY-TENTATIVE".equals(freeBusySlot.fbType);
 			} else {
 				return "BUSY".equals(freeBusySlot.fbType);
-			}			
+			}
 		}
 		return false;
 	}
-	
+
 	private Document postFreeBusy(String freeBusyICal, List<String> recipients) throws Exception {
 		PostMethod post = new PostMethod(super.getWebDAVClient().getBaseURI() + this.scheduleOutboxURL);
 		post.addRequestHeader("Originator", "mailto:" + super.getAJAXClient().getValues().getDefaultAddress());
@@ -308,15 +309,15 @@ public class FreeBusyTest extends CalDAVTest {
         String response = super.getWebDAVClient().doPost(post);
         assertNotNull("got no response", response);
         return DomUtil.parseDocument(new ByteArrayInputStream(response.getBytes()));
-	}	
-	
+	}
+
 	private String getScheduleOutboxURL() throws Exception {
 		/*
 		 * discover principal URL
 		 */
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.PRINCIPAL_URL);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/", 
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
@@ -328,7 +329,7 @@ public class FreeBusyTest extends CalDAVTest {
          */
 		props = new DavPropertyNameSet();
         props.add(PropertyNames.SCHEDULE_OUTBOX_URL);
-        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + principalURL, 
+        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + principalURL,
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
@@ -342,26 +343,26 @@ public class FreeBusyTest extends CalDAVTest {
 		String organizerMail = new UserResolver(getAJAXClient()).getUser(getAJAXClient().getValues().getUserId()).getMail();
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder
-			.append("BEGIN:VCALENDAR").append("\r\n") 
-			.append("CALSCALE:GREGORIAN").append("\r\n") 
-			.append("VERSION:2.0").append("\r\n") 
-			.append("METHOD:REQUEST").append("\r\n") 
-			.append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n") 
-			.append("BEGIN:VFREEBUSY").append("\r\n") 
-			.append("UID:").append(randomUID()).append("\r\n") 
+			.append("BEGIN:VCALENDAR").append("\r\n")
+			.append("CALSCALE:GREGORIAN").append("\r\n")
+			.append("VERSION:2.0").append("\r\n")
+			.append("METHOD:REQUEST").append("\r\n")
+			.append("PRODID:-//Apple Inc.//iCal 5.0.2//EN").append("\r\n")
+			.append("BEGIN:VFREEBUSY").append("\r\n")
+			.append("UID:").append(randomUID()).append("\r\n")
 			.append("DTEND:").append(formatAsUTC(until)).append("\r\n")
 		;
 		for (String attendee : attendees) {
-			stringBuilder.append("ATTENDEE:mailto:").append(attendee).append("\r\n"); 
+			stringBuilder.append("ATTENDEE:mailto:").append(attendee).append("\r\n");
 		}
 		stringBuilder
-			.append("DTSTART:").append(formatAsUTC(from)).append("\r\n") 
-			.append("X-CALENDARSERVER-MASK-UID:").append(randomUID()).append("\r\n") 
-			.append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n") 
-			.append("ORGANIZER:mailto:").append(organizerMail).append("\r\n") 
-			.append("END:VFREEBUSY").append("\r\n") 
+			.append("DTSTART:").append(formatAsUTC(from)).append("\r\n")
+			.append("X-CALENDARSERVER-MASK-UID:").append(randomUID()).append("\r\n")
+			.append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n")
+			.append("ORGANIZER:mailto:").append(organizerMail).append("\r\n")
+			.append("END:VFREEBUSY").append("\r\n")
 			.append("END:VCALENDAR").append("\r\n")
-		;		
+		;
 		return stringBuilder.toString();
 	}
 

@@ -85,10 +85,10 @@ public class GetAction extends AbstractFileStorageAccountAction {
         if(!missingParameters.isEmpty()) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
-        final String messagingServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
+        final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
 
         final String id = request.getParameter(FileStorageAccountConstants.ID);
-        final FileStorageAccount account = registry.getFileStorageService(messagingServiceId).getAccountManager().getAccount(id, session);
+        final FileStorageAccount account = registry.getFileStorageService(fsServiceId).getAccountManager().getAccount(id, session);
         return new AJAXRequestResult(writer.write(account));
     }
 

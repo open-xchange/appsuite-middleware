@@ -51,8 +51,8 @@ package com.openexchange.share.notification.impl;
 
 import java.util.Collection;
 import java.util.Locale;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -75,7 +75,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
 
     protected Locale locale;
 
-    protected RequestContext requestContext;
+    protected HostData hostData;
 
     protected AbstractNotificationBuilder(NotificationType type) {
         super();
@@ -125,10 +125,10 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     /**
      * Sets the request context
      *
-     * @param requestContext
+     * @param hostData
      */
-    public B setRequestContext(RequestContext requestContext) {
-        this.requestContext = requestContext;
+    public B setHostData(HostData hostData) {
+        this.hostData = hostData;
         return (B) this;
     }
 
@@ -143,7 +143,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
         checkNotZero(contextID, "contextID");
         checkNotZero(guestID, "guestID");
         checkNotNull(locale, "locale");
-        checkNotNull(requestContext, "requestContext");
+        checkNotNull(hostData, "hostData");
         return doBuild();
     }
 

@@ -759,7 +759,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getSharedDocumentsByUserQuery(int contextId, int userId, Metadata[] metadata, Metadata sort, int order, int start, int end, DocumentWins wins) {
-        StringBuilder stringBuilder = new StringBuilder(STR_SELECT)
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT ")
             .append(fields(metadata, wins))
             .append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId)
             .append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid")
@@ -767,6 +767,7 @@ public class InfostoreQueryCatalog {
             .append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND")
             .append(" infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id")
             .append(" WHERE object_permission.created_by = ").append(userId)
+            .append(" AND object_permission.permission_id != ").append(userId)
         ;
         if (sort != null) {
             stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
@@ -778,7 +779,6 @@ public class InfostoreQueryCatalog {
             }
             stringBuilder.append(end - start);
         }
-
         return stringBuilder.toString();
     }
 

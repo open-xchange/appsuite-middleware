@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -72,6 +73,7 @@ import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
+import com.openexchange.group.GroupService;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
@@ -86,11 +88,10 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
-import com.openexchange.share.impl.groupware.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
-import com.openexchange.share.impl.groupware.ShareLinksQuotaProvider;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
-import com.openexchange.share.impl.groupware.ShareQuotaProvider;
+import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
+import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -122,7 +123,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class};
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class };
     }
 
     @Override
@@ -189,11 +190,8 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-
-
         ModuleSupport moduleSupport = new ModuleSupportImpl(this);
         registerService(ModuleSupport.class, moduleSupport);
-        registerService(QuotaProvider.class, new ShareQuotaProvider(this));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 

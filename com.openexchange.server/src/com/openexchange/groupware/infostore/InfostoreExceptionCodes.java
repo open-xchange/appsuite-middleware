@@ -202,6 +202,11 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * Unsupported character.
      */
     INVALID_CHARACTER_SIMPLE("Unsupported character", CATEGORY_USER_INPUT, 2103 /* Yes, the same as INVALID_CHARACTER */, InfostoreExceptionMessages.INVALID_CHARACTER_SIMPLE_MSG_DISPLAY),
+    /**
+     * Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+     */
+    VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS("Inapplicable permissions of user \"%1$s\"", CATEGORY_USER_INPUT, 2104, InfostoreExceptionMessages.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY),
+
     ;
 
     private final String message;

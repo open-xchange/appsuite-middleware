@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -71,13 +70,13 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveShare;
 import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.actions.AbstractAction;
@@ -89,7 +88,6 @@ import com.openexchange.drive.impl.actions.ErrorFileAction;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;
-import com.openexchange.drive.impl.checksum.StoredChecksum;
 import com.openexchange.drive.impl.comparison.Change;
 import com.openexchange.drive.impl.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.impl.comparison.FileVersionMapper;
@@ -100,6 +98,7 @@ import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.internal.tracking.SyncTracker;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.DriveStorage;
+import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.drive.impl.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.impl.storage.execute.FileActionExecutor;
 import com.openexchange.drive.impl.sync.DefaultSyncResult;
@@ -109,19 +108,17 @@ import com.openexchange.drive.impl.sync.optimize.OptimizingDirectorySynchronizer
 import com.openexchange.drive.impl.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.Strings;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareService;
+import com.openexchange.java.Reference;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.core.performer.UpdatePerformer;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.notification.Entities;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -535,134 +532,102 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
-        SyncSession syncSession = new SyncSession(session);
-        DriveStorage storage = syncSession.getStorage();
-        Map<String, String> folderIds = new HashMap<String, String>();
-        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
-        for (DriveShareTarget target : targets) {
-            String path = target.getPath();
-            ShareTarget shareTarget = new ShareTarget();
-            shareTarget.setExpiryDate(target.getExpiryDate());
-            shareTarget.setModule(FolderObject.INFOSTORE);
-            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
-                String name = target.getName();
-                File file = storage.getFileByName(path, name);
-                if (file == null) {
-                    throw DriveExceptionCodes.FILE_NOT_FOUND.create(name, path);
-                }
-                if (!ChecksumProvider.matches(syncSession, file, target.getChecksum())) {
-                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(name, target.getChecksum(), path);
-                }
-                shareTarget.setFolder(file.getFolderId());
-                shareTarget.setItem(file.getId());
-            } else {
-                if (!folderIds.containsKey(path)) {
-                    String folderID = storage.getFolderID(path);
-                    folderIds.put(path, folderID);
-                }
-                DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderIds.get(path))).get(0);
-                if (!target.getChecksum().equals(directoryChecksum.getChecksum())) {
-                    throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(path, target.getChecksum());
-                }
-                shareTarget.setFolder(folderIds.get(path));
-            }
-            shareTargets.add(shareTarget);
-
-        }
-
-        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, session.getServerSession(), DriveServiceLookup.get());
-        return cp.perform();
+    public List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).getShares(target);
     }
 
     @Override
-    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
-        updatePerformer.setExpiry(expiry);
-        updatePerformer.setMeta(meta);
-        if (password != null || bits != -1) {
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setPassword(password);
-            recipient.setBits(bits);
-            updatePerformer.setRecipient(recipient);
-        }
-        updatePerformer.perform();
+    public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
+        return new ShareHelper(new SyncSession(session)).addShare(target, recipient, meta);
     }
 
     @Override
-    public void deleteLinks(DriveSession session, List<String> tokens) throws OXException {
-        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
-        shareService.deleteShares(session.getServerSession(), tokens);
+    public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, final File metadata, UpdateParameters parameters) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
+
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original file
+                 */
+                List<Field> fields = new ArrayList<Field>();
+                fields.addAll(DriveConstants.FILE_FIELDS);
+                fields.add(Field.OBJECT_PERMISSIONS);
+                File file = syncSession.getStorage().getFileByName(path, fileVersion.getName(), fields, true);
+                if (null == file || false == ChecksumProvider.matches(syncSession, file, fileVersion.getChecksum())) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                }
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                List<Field> updatedFields = Collections.singletonList(Field.OBJECT_PERMISSIONS);
+                DefaultFile updatedFile = new DefaultFile(file);
+                updatedFile.setObjectPermissions(metadata.getObjectPermissions());
+                String fileID = syncSession.getStorage().getFileAccess().saveFileMetadata(updatedFile, file.getSequenceNumber(), updatedFields);
+                /*
+                 * re-get updated file to determine added permissions as needed
+                 */
+                if (notify) {
+                    File reloadedFile = syncSession.getStorage().getFileAccess().getFileMetadata(fileID, FileStorageFileAccess.CURRENT_VERSION);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFile.getFolderId(), reloadedFile.getId()));
+                    return ShareHelper.getAddedPermissions(file, reloadedFile);
+                }
+                return null;
+            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
+        }
     }
 
     @Override
-    public List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException {
-        SyncSession syncSession = new SyncSession(session);
-        DriveStorage storage = syncSession.getStorage();
-        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
+    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, final FileStorageFolder folder, UpdateParameters parameters) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
 
-        // Get all Shares for infostore
-        List<ShareInfo> allShares = shareService.getAllShares(session.getServerSession(), "infostore");
-        List<DriveShareInfo> retval = new ArrayList<DriveShareInfo>();
-
-        Map<String, File> fileId2File = new HashMap<String, File>();
-        Map<String, String> folderId2Directory = new HashMap<String, String>();
-        for (ShareInfo shareInfo : allShares) {
-            ShareTarget shareTarget = shareInfo.getShare().getTarget();
-            DriveShareTarget driveShareTarget = new DriveShareTarget();
-
-            // Set drive fileName
-            String fileId = null;
-            if (shareTarget.getItem() != null && !Strings.isEmpty(shareTarget.getItem())) {
-                fileId = new FileID(shareTarget.getItem()).getFileId();
-                if (!fileId2File.containsKey(fileId)) {
-                    try {
-                        File file = storage.getFile(fileId);
-                        fileId2File.put(fileId, file);
-                    } catch (OXException e) {
-                        LOG.warn("A Share (" + shareTarget + ") is pointing to a file which seems not to exist.");
-                    }
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original directory version
+                 */
+                FileStorageFolder originalFolder = syncSession.getStorage().getFolder(directoryVersion.getPath());
+                ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, syncSession);
+                String folderID = serverVersion.getDirectoryChecksum().getFolderID().toString();
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                DefaultFileStorageFolder updatedFolder = new DefaultFileStorageFolder();
+                updatedFolder.setPermissions(folder.getPermissions());
+                folderID = syncSession.getStorage().getFolderAccess().updateFolder(folderID, updatedFolder);
+                /*
+                 * re-get updated folder to determine added permissions as needed
+                 */
+                if (notify) {
+                    FileStorageFolder reloadedFolder = syncSession.getStorage().getFolderAccess().getFolder(folderID);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFolder.getId()));
+                    return ShareHelper.getAddedPermissions(originalFolder, reloadedFolder);
                 }
+                return null;
             }
-
-            // Set drive path
-            String folderId = shareTarget.getFolder();
-            if (!folderId2Directory.containsKey(folderId)) {
-                try {
-                    folderId2Directory.put(folderId, storage.getPath(folderId));
-                } catch (OXException e) {
-                    LOG.warn("A Share (" + shareTarget + ") is pointing to a folder which seems not to exist.");
-                }
-            }
-
-            String folderName = folderId2Directory.get(folderId);
-            File file = fileId2File.get(fileId);
-            if (folderName != null) {
-                driveShareTarget.setPath(folderName);
-                driveShareTarget.setChecksum(calculateChecksum(folderId, file, syncSession).getChecksum());
-
-                DriveShareInfo driveShareInfo = new DriveShareInfo(shareInfo);
-                DriveShare driveShare = new DriveShare(shareInfo.getShare());
-                driveShare.setTarget(driveShareTarget);
-                driveShareInfo.setDriveShare(driveShare);
-
-                if (file != null) {
-                    driveShareTarget.setName(file.getFileName());
-                }
-
-                retval.add(driveShareInfo);
-            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
         }
-
-        return retval;
-    }
-
-    private StoredChecksum calculateChecksum(String folderId, File file, SyncSession syncSession) throws OXException {
-        if (file != null) {
-            return ChecksumProvider.getChecksum(syncSession, file);
-        }
-
-        return ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
     }
 
 }

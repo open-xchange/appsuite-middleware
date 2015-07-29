@@ -49,30 +49,30 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link CardDAVBugSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    Bug20665Test.class,
+    Bug21079Test.class,
+    Bug21177Test.class,
+    Bug21235Test.class,
+    Bug21240Test.class,
+    Bug21354Test.class,
+    Bug21374Test.class,
+    Bug23046Test.class,
+    Bug23078Test.class,
+    Bug28672Test.class,
+    Bug30449Test.class,
+    Bug36943Test.class
+})
 public final class CardDAVBugSuite {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.dav.carddav.bugs.CardDAVBugSuite");
-        suite.addTestSuite(Bug20665Test.class);
-        suite.addTestSuite(Bug21079Test.class);
-        suite.addTestSuite(Bug21177Test.class);
-        suite.addTestSuite(Bug21235Test.class);
-        suite.addTestSuite(Bug21240Test.class);
-        suite.addTestSuite(Bug21354Test.class);
-        suite.addTestSuite(Bug21374Test.class);
-        suite.addTestSuite(Bug23046Test.class);
-        suite.addTestSuite(Bug23078Test.class);
-        suite.addTestSuite(Bug28672Test.class);
-        suite.addTestSuite(Bug30449Test.class);
-        suite.addTestSuite(Bug36943Test.class);
-        return suite;
-    }
 }

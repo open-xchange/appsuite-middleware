@@ -71,10 +71,13 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
@@ -105,7 +108,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link BasicDriveDriver}
  *
@@ -131,7 +133,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public boolean isValidFor(ServerSession session) {
+    public boolean isValidFor(final ServerSession session) {
         return session.getUserConfiguration().hasInfostore();
     }
 
@@ -141,23 +143,29 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public SearchResult doSearch(SearchRequest searchRequest, ServerSession session) throws OXException {
-        IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+    public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
 
+        final IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
+        if (null == folderAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
+        }
+
         // Create file access
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        final IDBasedFolderAccess folderAccess = folderAccessFactory.createAccess(session);
 
         // Folder identifier
-        String folderId = searchRequest.getFolderId();
+        final String folderId = searchRequest.getFolderId();
 
         // Fields
-        int start = searchRequest.getStart();
+        final int start = searchRequest.getStart();
         List<Field> fields = DEFAULT_FIELDS;
-        int[] columns = searchRequest.getColumns();
-        if (columns != null) {
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
             fields = Field.get(columns);
         }
 
@@ -171,11 +179,15 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
 
             // Search...
-            List<String> folderIds = null != folderId ? Collections.singletonList(folderId) : null;
+            final List<String> folderIds = new LinkedList<String>();
+            if (folderId != null) {
+                findSubfolders(folderId, folderAccess, folderIds);
+            }
+
             SearchIterator<File> it = null;
             try {
                 it = fileAccess.search(folderIds, term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-                List<Document> results = new LinkedList<Document>();
+                final List<Document> results = new LinkedList<Document>();
                 while (it.hasNext()) {
                     results.add(new FileDocument(it.next()));
                 }
@@ -183,34 +195,84 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             } finally {
                 SearchIterators.close(it);
                 fileAccess.finish();
+                folderAccess.finish();
             }
         }
 
         // Search by simple pattern as fallback
-        List<String> queries = searchRequest.getQueries();
-        String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
+        final List<String> queries = searchRequest.getQueries();
+        final String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
         List<File> files = new LinkedList<File>();
-        SearchIterator<File> it = null;
+        final SearchIterator<File> it = null;
         try {
-            it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-            while (it.hasNext()) {
-                files.add(it.next());
-            }
+            files = iterativeSearch(fileAccess, folderAccess, folderId, pattern, fields, start, start + searchRequest.getSize());
+            //            it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
+            //            while (it.hasNext()) {
+            //                files.add(it.next());
+            //            }
         } finally {
             SearchIterators.close(it);
             fileAccess.finish();
+            folderAccess.finish();
         }
 
         // Filter according to file type facet if defined
-        String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
+        final String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
         if (null != fileType) {
             files = filter(files, fileType);
         }
-        List<Document> results = new ArrayList<Document>(files.size());
-        for (File file : files) {
+        final List<Document> results = new ArrayList<Document>(files.size());
+        for (final File file : files) {
             results.add(new FileDocument(file));
         }
         return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
+    }
+
+    private List<File> iterativeSearch(final IDBasedFileAccess fileAccess, final IDBasedFolderAccess folderAccess, final String startingId, final String pattern, final List<Field> fields, final int start, final int end)
+    {
+        try {
+            //get all Folders
+            final List<String> folders = new ArrayList<String>();
+            findSubfolders(startingId, folderAccess, folders);
+            folders.size();
+            //search in all folders
+            final List<File> files = new ArrayList<File>(30);
+            SearchIterator<File> it = null;
+            for (final String folderId : folders)
+            {
+                it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, end);
+                while (it.hasNext()) {
+                    files.add(it.next());
+                }
+            }
+            Collections.sort(files, SortDirection.DEFAULT.comparatorBy(File.Field.TITLE));
+            return files;
+        } catch (final OXException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Return all folders that are below given folder, including that folder itself.
+     *
+     * @return
+     * @throws OXException
+     */
+    private void findSubfolders(final String folderId, final IDBasedFolderAccess folderAccess, final List<String> result) throws OXException {
+        if (folderId == null) {
+            return;
+        }
+
+        final FileStorageFolder[] fileStorageFolderIds = folderAccess.getSubfolders(folderId, true);
+        if (fileStorageFolderIds == null || fileStorageFolderIds.length == 0) {
+            result.add(folderId);
+        } else {
+            result.add(folderId);
+            for (final FileStorageFolder f : fileStorageFolderIds) {
+                findSubfolders(f.getId(), folderAccess, result);
+            }
+        }
+        return;
     }
 
     /**
@@ -219,9 +281,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param fileyTypeFacts The active facets holding the defined file type
      * @return The file type, or <code>null</code> if there is none
      */
-    private static String extractFileType(List<ActiveFacet> facets) {
+    private static String extractFileType(final List<ActiveFacet> facets) {
         if (null != facets && 0 < facets.size() && null != facets.get(0)) {
-            ActiveFacet facet = facets.get(0);
+            final ActiveFacet facet = facets.get(0);
             if (DriveFacetType.FILE_TYPE.equals(facet.getType()) && null != facet.getFilter() && null != facet.getFilter().getQueries() &&
                 0 < facet.getFilter().getQueries().size() && null != facet.getFilter().getQueries().get(0)) {
                 return facet.getFilter().getQueries().get(0);
@@ -237,7 +299,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param fileType The file type identifier
      * @return The filtered list
      */
-    private static List<File> filter(List<File> files, String fileType) {
+    private static List<File> filter(final List<File> files, final String fileType) {
         if (null != files && 0 < files.size()) {
             /*
              * determine patterns to check the MIME type against
@@ -247,10 +309,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             if (FileType.OTHER.getIdentifier().equals(fileType)) {
                 negate = true;
                 patterns = new ArrayList<String>();
-                String[] typesToNegate = new String[] {
+                final String[] typesToNegate = new String[] {
                     FileType.AUDIO.getIdentifier(), FileType.IMAGES.getIdentifier(), FileType.DOCUMENTS.getIdentifier(), FileType.VIDEO.getIdentifier()
                 };
-                for (String typeToNegate : typesToNegate) {
+                for (final String typeToNegate : typesToNegate) {
                     patterns.addAll(getPatternsForFileType(typeToNegate));
                 }
             } else {
@@ -260,9 +322,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             /*
              * filter files
              */
-            Iterator<File> iterator = files.iterator();
+            final Iterator<File> iterator = files.iterator();
             while (iterator.hasNext()) {
-                File file = iterator.next();
+                final File file = iterator.next();
                 if (matchesAny(file, patterns)) {
                     if (negate) {
                         iterator.remove();
@@ -282,9 +344,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param patterns The patterns to check the file's MIME type against
      * @return <code>true</code> if the file's MIME type matches at least one of the supplied patterns, <code>false</code>, otherwise
      */
-    private static boolean matchesAny(File file, List<String> patterns) {
-        String mimeType = null != file.getFileMIMEType() ? file.getFileMIMEType() : MimeType2ExtMap.getContentType(file.getFileName());
-        for (String regex : patterns) {
+    private static boolean matchesAny(final File file, final List<String> patterns) {
+        final String mimeType = null != file.getFileMIMEType() ? file.getFileMIMEType() : MimeType2ExtMap.getContentType(file.getFileName());
+        for (final String regex : patterns) {
             if (Pattern.matches(regex, mimeType)) {
                 return true;
             }
@@ -298,7 +360,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param fileyType The file type to get the patterns for
      * @return The patterns, or an empty array if there are none
      */
-    private static List<String> getPatternsForFileType(String fileType) {
+    private static List<String> getPatternsForFileType(final String fileType) {
         String[] wildcardPatterns;
         if (FileType.DOCUMENTS.getIdentifier().equals(fileType)) {
             wildcardPatterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
@@ -311,8 +373,8 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         } else {
             wildcardPatterns = new String[0];
         }
-        List<String> patterns = new ArrayList<String>(wildcardPatterns.length);
-        for (String wildcardPattern : wildcardPatterns) {
+        final List<String> patterns = new ArrayList<String>(wildcardPatterns.length);
+        for (final String wildcardPattern : wildcardPatterns) {
             patterns.add(Strings.wildcardToRegex(wildcardPattern));
         }
         return patterns;
@@ -326,7 +388,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // List of supported facets
         final List<Facet> facets = new LinkedList<Facet>();
 
-        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (!Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
@@ -398,12 +460,12 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param findRequest The find request
      * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
      */
-    private static boolean supportsSearchByTerm(ServerSession session, AbstractFindRequest findRequest) throws OXException {
-        IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+    private static boolean supportsSearchByTerm(final ServerSession session, final AbstractFindRequest findRequest) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         try {
             return supportsSearchByTerm(session, fileAccess, findRequest);
         } finally {
@@ -419,32 +481,32 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * @param findRequest The find request
      * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
      */
-    private static boolean supportsSearchByTerm(ServerSession session, IDBasedFileAccess fileAccess, AbstractFindRequest findRequest) throws OXException {
+    private static boolean supportsSearchByTerm(final ServerSession session, final IDBasedFileAccess fileAccess, final AbstractFindRequest findRequest) throws OXException {
         /*
          * check capability of all concrete file storage if folder ID is specified
          */
         if (null != findRequest.getFolderId()) {
-            FolderID folderID = new FolderID(findRequest.getFolderId());
+            final FolderID folderID = new FolderID(findRequest.getFolderId());
             return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
         }
         /*
          * check capability of all available storages, otherwise
          */
-        FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
+        final FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
         if (null == registry) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
         }
-        for (FileStorageService service : registry.getAllServices()) {
+        for (final FileStorageService service : registry.getAllServices()) {
             // Determine accounts
-            List<FileStorageAccount> accounts = AccountAware.class.isInstance(service) ? ((AccountAware) service).getAccounts(session) : service.getAccountManager().getAccounts(session);
+            final List<FileStorageAccount> accounts = AccountAware.class.isInstance(service) ? ((AccountAware) service).getAccounts(session) : service.getAccountManager().getAccounts(session);
 
             // Check for support of needed capability
-            for (FileStorageAccount account : accounts) {
-                FileStorageAccountAccess accountAccess = service.getAccountAccess(account.getId(), session);
+            for (final FileStorageAccount account : accounts) {
+                final FileStorageAccountAccess accountAccess = service.getAccountAccess(account.getId(), session);
 
                 boolean checkByInstance = true;
                 if (accountAccess instanceof CapabilityAware) {
-                    Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_BY_TERM);
+                    final Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_BY_TERM);
                     if (null != supported) {
                         if (false == supported.booleanValue()) {
                             return false;
@@ -456,7 +518,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 if (checkByInstance) {
                     accountAccess.connect();
                     try {
-                        FileStorageFileAccess _fileAccess = accountAccess.getFileAccess();
+                        final FileStorageFileAccess _fileAccess = accountAccess.getFileAccess();
                         if (false == FileStorageCapabilityTools.supports(_fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
                             return false;
                         }

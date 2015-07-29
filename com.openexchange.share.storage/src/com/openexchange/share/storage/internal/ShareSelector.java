@@ -172,7 +172,7 @@ public class ShareSelector {
             stmt = builder.prepareSelect(connection);
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                shares.add(SHARE_MAPPER.fromResultSet(resultSet, shareFields).toShare());
+                shares.add(SHARE_MAPPER.fromResultSet(resultSet, shareFields).getShare());
             }
         } catch (SQLException e) {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());

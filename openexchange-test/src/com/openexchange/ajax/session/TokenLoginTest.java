@@ -51,11 +51,14 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
 import org.apache.http.client.params.ClientPNames;
+import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.session.actions.TokenLoginJSONRequest;
+import com.openexchange.ajax.session.actions.TokenLoginJSONResponse;
 import com.openexchange.ajax.session.actions.TokenLoginRequest;
 import com.openexchange.ajax.session.actions.TokenLoginResponse;
 import com.openexchange.ajax.session.actions.TokensRequest;
@@ -65,6 +68,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * Tests the action tokenLogin of the login servlet.
@@ -142,6 +146,58 @@ public class TokenLoginTest extends AbstractAJAXSession {
             OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN, "a", "b");
             OXException actual = response2.getException();
             assertTrue("Wrong exception", actual.similarTo(expected));
+        } finally {
+            myClient.logout();
+        }
+    }
+
+    public void testTokenLogin_passwordInRequest_returnError() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, false, true));
+
+            assertNotNull(response);
+            assertTrue("Error expected.", response.hasError());
+            assertEquals("Wrong error.", AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.getNumber(), response.getException().getCode());
+            assertTrue("Wrong param", response.getErrorMessage().contains("password"));
+        } finally {
+            myClient.logout();
+        }
+    }
+
+
+    public void testTokenLoginWithJSON_returnJsonResponse() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, true));
+            JSONObject json = response.getResponse().getJSON();
+            assertNotNull(json);
+            assertNotNull(json.get("jsessionid"));
+            assertNull(response.getData());
+            assertNull(response.getErrorMessage());
+            assertNull(response.getConflicts());
+            assertNull(response.getException());
+        } finally {
+            myClient.logout();
+        }
+    }
+
+    public void testTokenLoginWithJSONResponse_passwordInRequest_returnError() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        final AJAXClient myClient = new AJAXClient(session, false);
+        try {
+            TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(login, password, true, true));
+
+            JSONObject json = response.getResponse().getJSON();
+            assertNotNull(json);
+            assertTrue("Error expected.", response.hasError());
+            assertEquals("Wrong error.", AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.getNumber(), response.getException().getCode());
+            assertTrue("Wrong param", response.getErrorMessage().contains("password"));
         } finally {
             myClient.logout();
         }

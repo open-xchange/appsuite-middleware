@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param.FOLDER_ID;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -85,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class AllAction extends AbstractFileAction {
+public class AllAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
@@ -100,9 +101,24 @@ public class AllAction extends AbstractFileAction {
 
         int[] indexes = AJAXRequestDataTools.parseFromToIndexes(request.getRequestData());
 
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
         TimedResult<File> documents;
         if ((null == indexes) || Field.CREATED_BY.equals(sortingField)) {
-            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder);
+            documents = fileAccess.getDocuments(folderId, columns, sortingField, sortingOrder);
 
             if (Field.CREATED_BY.equals(sortingField)) {
                 ServerSession serverSession = request.getSession();
@@ -115,7 +131,7 @@ public class AllAction extends AbstractFileAction {
                 documents = slice(documents, indexes);
             }
         } else {
-            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder, Range.valueOf(indexes));
+            documents = fileAccess.getDocuments(folderId, columns, sortingField, sortingOrder, Range.valueOf(indexes));
         }
 
         return result( documents, request );

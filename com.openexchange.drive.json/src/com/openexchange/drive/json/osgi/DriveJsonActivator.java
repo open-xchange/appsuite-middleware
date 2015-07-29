@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
@@ -65,7 +66,9 @@ import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 
@@ -89,7 +92,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class,
             ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
-            ShareNotificationService.class
+            ShareNotificationService.class, DatabaseService.class, ShareService.class, FileMetadataParserService.class
         };
     }
 
@@ -138,7 +141,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
             LOG.info("Registering blocking long polling listener factory...");
             registerService(LongPollingListenerFactory.class, new BlockingListenerFactory());
         }
-        
+
         registerService(ResultConverter.class, new DriveShareInfoResultConverter());
     }
 

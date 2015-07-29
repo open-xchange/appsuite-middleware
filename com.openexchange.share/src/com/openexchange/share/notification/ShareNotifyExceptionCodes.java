@@ -74,7 +74,16 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
      *  <li>recipients name/email address</li>
      * </ol>
      */
-    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", ShareNotifyExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR_FOR_RECIPIENT("An unexpected error occurred: %1$s", ShareNotifyExceptionMessages.UNEXPECTED_ERROR_FOR_RECIPIENT_MSG, Category.CATEGORY_ERROR, 1),
+
+    /**
+     * An unexpected error occurred: %1$s
+     * Parameters:
+     * <ol>
+     *  <li>root cause (message)</li>
+     * </ol>
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", ShareNotifyExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 2),
 
     /**
      * Missing email address for user %1$s (%2$s) in context %3$s
@@ -85,12 +94,17 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
      *  <li>context id</li>
      * </ol>
      */
-    MISSING_MAIL_ADDRESS("Missing email address for user \"%1$s\" (%2$s) in context \"%3$s\"", MISSING_MAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_MAIL_ADDRESS("Missing email address for user \"%1$s\" (%2$s) in context \"%3$s\"", MISSING_MAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 3),
 
     /**
      * \"%1$s\" is not a valid email address.
      */
-    INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 3),
+    INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 4),
+
+    /**
+     * Unknown notification transport: %1$s.
+     */
+    UNKNOWN_NOTIFICATION_TRANSPORT("Unknown notification transport: %1$s.", null, Category.CATEGORY_ERROR, 5)
 
     ;
 

@@ -344,7 +344,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 LOG.debug("", e);
                 throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
-            if (LoginExceptionCodes.REDIRECT.equals(e)) {
+            if (LoginExceptionCodes.REDIRECT.equals(e) || LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
                 LOG.debug("", e);
             } else {
                 LOG.error("", e);

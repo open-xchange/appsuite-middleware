@@ -102,6 +102,13 @@ public final class PasswordChangeServlet extends SessionServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Tools.checkNonExistence(req, PARAMETER_PASSWORD);
+        } catch (OXException oxException) {
+            handleException(req, resp, oxException);
+            return;
+        }
+
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         /*
          * The magic spell to disable caching
@@ -111,23 +118,19 @@ public final class PasswordChangeServlet extends SessionServlet {
             actionGet(req, resp);
         } catch (final OXException e) {
             LOGGER.error("PasswordChangeServlet.doGet()", e);
-            final ServerSession session = getSessionObject(req);
-            final Response response = new Response(session);
-            response.setException(e);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
-            } catch (final JSONException e1) {
-                final ServletException se = new ServletException(e1);
-                se.initCause(e1);
-                throw se;
-            }
-            writer.flush();
+            handleException(req, resp, e);
         }
     }
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Tools.checkNonExistence(req, PARAMETER_PASSWORD);
+        } catch (OXException oxException) {
+            handleException(req, resp, oxException);
+            return;
+        }
+
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         /*
          * The magic spell to disable caching
@@ -137,17 +140,7 @@ public final class PasswordChangeServlet extends SessionServlet {
             actionPut(req, resp);
         } catch (final OXException e) {
             LOGGER.error("PasswordChangeServlet.doPut()", e);
-            final Response response = new Response();
-            response.setException(e);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
-                final ServletException se = new ServletException(e1);
-                se.initCause(e1);
-                throw se;
-            }
-            writer.flush();
+            handleException(req, resp, e);
         } catch (final JSONException e) {
             LOGGER.error("PasswordChangeServlet.doPut()", e);
             final Response response = new Response();
@@ -162,6 +155,21 @@ public final class PasswordChangeServlet extends SessionServlet {
             }
             writer.flush();
         }
+    }
+
+    private void handleException(final HttpServletRequest req, final HttpServletResponse resp, final OXException e) throws IOException, ServletException {
+        final ServerSession session = getSessionObject(req);
+        final Response response = new Response(session);
+        response.setException(e);
+        final PrintWriter writer = resp.getWriter();
+        try {
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+        } catch (final JSONException e1) {
+            final ServletException se = new ServletException(e1);
+            se.initCause(e1);
+            throw se;
+        }
+        writer.flush();
     }
 
     private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {

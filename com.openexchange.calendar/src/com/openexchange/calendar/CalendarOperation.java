@@ -57,7 +57,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,8 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -459,7 +456,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         cdao.setObjectID(oid);
         cdao.setContext(ctx);
         int check_special_action = action;
-        if (action == UPDATE && inFolder != action_folder) { // We move and this means to create a new object
+        if (action == UPDATE && inFolder != action_folder) {
+            // We move and this means to create a new object
             check_special_action = INSERT;
         }
         try {
@@ -758,7 +756,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     /**
      * Checks, if it is allowed to change the timezone.
-     * 
+     *
      * @param cdao
      * @param edao
      * @return

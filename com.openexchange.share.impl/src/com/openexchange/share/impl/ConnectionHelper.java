@@ -72,6 +72,8 @@ public class ConnectionHelper {
     private final boolean ownsConnection;
     private final Connection connection;
     private final int contextID;
+    private final Session session;
+    private final boolean sessionParameterSet;
 
     private boolean committed;
 
@@ -81,7 +83,6 @@ public class ConnectionHelper {
      * @param contextID The context ID
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
-     * @throws OXException
      */
     public ConnectionHelper(int contextID, ServiceLookup services, boolean needsWritable) throws OXException {
         super();
@@ -90,6 +91,8 @@ public class ConnectionHelper {
         DatabaseService dbService = services.getService(DatabaseService.class);
         connection = needsWritable ? dbService.getWritable(contextID) : dbService.getReadOnly(contextID);
         ownsConnection = true;
+        session = null;
+        sessionParameterSet = false;
     }
 
     /**
@@ -98,20 +101,27 @@ public class ConnectionHelper {
      * @param session The session
      * @param services The service lookup
      * @param needsWritable <code>true</code> if a writable connection is required, <code>false</code>, otherwise
-     * @throws OXException
      */
     public ConnectionHelper(Session session, ServiceLookup services, boolean needsWritable) throws OXException {
         super();
+        this.session = session;
         this.contextID = session.getContextId();
         this.services = services;
         Connection connection = (Connection) session.getParameter(PARAMETER_NAME);
         try {
-            if (null == connection || needsWritable && connection.isReadOnly()) {
+            if (null == connection) {
                 DatabaseService dbService = services.getService(DatabaseService.class);
                 connection = needsWritable ? dbService.getWritable(contextID) : dbService.getReadOnly(contextID);
                 ownsConnection = true;
+                session.setParameter(PARAMETER_NAME, connection);
+                sessionParameterSet = true;
+            } else if (needsWritable && connection.isReadOnly()) {
+                connection = services.getService(DatabaseService.class).getWritable(contextID);
+                ownsConnection = true;
+                sessionParameterSet = false;
             } else {
                 ownsConnection = false;
+                sessionParameterSet = false;
             }
             this.connection = connection;
         } catch (SQLException e) {
@@ -122,7 +132,7 @@ public class ConnectionHelper {
     /**
      * Gets the underlying connection.
      *
-     * @return the connection
+     * @return The connection
      */
     public Connection getConnection() {
         return connection;
@@ -148,8 +158,6 @@ public class ConnectionHelper {
 
     /**
      * Starts the transaction on the underlying connection in case the connection is owned by this instance.
-     *
-     * @throws OXException
      */
     public void start() throws OXException {
         if (ownsConnection) {
@@ -163,8 +171,6 @@ public class ConnectionHelper {
 
     /**
      * Commits the transaction on the underlying connection in case the connection is owned by this instance.
-     *
-     * @throws OXException
      */
     public void commit() throws OXException {
         if (ownsConnection) {
@@ -179,8 +185,6 @@ public class ConnectionHelper {
 
     /**
      * Backs the underlying connection in case the connection is owned by this instance, rolling back automatically if not yet committed.
-     *
-     * @throws OXException
      */
     public void finish() {
         if (ownsConnection && null != connection) {
@@ -197,6 +201,9 @@ public class ConnectionHelper {
             } catch (SQLException e) {
                 org.slf4j.LoggerFactory.getLogger(ConnectionHelper.class).warn("Error backing connection", e);
             }
+        }
+        if (sessionParameterSet && null != session) {
+            session.setParameter(PARAMETER_NAME, null);
         }
     }
 

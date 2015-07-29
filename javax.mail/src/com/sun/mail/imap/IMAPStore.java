@@ -2499,16 +2499,24 @@ public class IMAPStore extends Store
     /**
      * Is this IMAP store currently connected?
      * <p>
-     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command.
+     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command;
+     * unless an exception occurred that forced to close either IMAPFolder or IMAPStore.
      *
      * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
      */
     public boolean isConnectedUnsafe() {
-        return allowUnsafeConnectedCheck ? super.isConnected() : isConnected();
+        boolean superConnected = super.isConnected();
+        if (!superConnected) {
+            // If we haven't been connected at all, return false
+            return false;
+        }
+        return allowUnsafeConnectedCheck ? superConnected : isConnected();
     }
 
     /**
      * Sets the whether an unsafe connectivity check may be performed
+     * <p>
+     * "unsafe" in terms of no {@link IMAPProtocol#noop() NOOP} command is issued to check connection state.
      *
      * @param allowUnsafeConnectedCheck <code>true</code> to allow an unsafe connectivity check; otherwise <code>false</code>
      */

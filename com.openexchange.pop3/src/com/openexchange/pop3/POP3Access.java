@@ -70,7 +70,6 @@ import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -423,7 +422,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Try to authenticate
              */
-            boolean forceSecure = config.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection();
+            boolean forceSecure = config.isRequireTls() || config.getMailProperties().isEnforceSecureConnection();
             pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false, forceSecure).getPop3Store();
             /*
              * Add warning if non-secure

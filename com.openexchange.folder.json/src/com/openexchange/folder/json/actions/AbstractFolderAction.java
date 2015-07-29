@@ -58,8 +58,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,17 +69,32 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.json.FolderField;
+import com.openexchange.folder.json.parser.FolderParser;
+import com.openexchange.folder.json.parser.NotificationData;
+import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SystemContentType;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.Entities;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
+import com.openexchange.share.notification.Entities.PermissionType;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -462,6 +479,21 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         return TRUES.contains(com.openexchange.java.Strings.toLowerCase(string).trim());
     }
 
+    /**
+     * Gets the timezone applicable for a request.
+     *
+     * @param requestData The underlying request data
+     * @param session The associated session
+     * @return The timezone
+     */
+    protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        return TimeZone.getTimeZone(timeZoneID);
+    }
+
     protected Map<String, Object> parametersFor(final Object... objects) {
         if (null == objects) {
             return null;
@@ -478,5 +510,193 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             ret.put(objects[i].toString(), objects[i+1]);
         }
         return ret;
+    }
+
+    /**
+     * Send out share notifications for added permission entities. Those entities are calculated based on
+     * the passed folder objects.
+     *
+     * @param notificationData The notification data
+     * @param original The folder before any permission changes took place; may be <code>null</code> in case of a newly created folder
+     * @param modified The folder after any permission changes took place
+     * @param session The session
+     * @param hostData The host data
+     * @return A list of warnings to be included in the API response
+     */
+    protected List<OXException> sendNotifications(NotificationData notificationData, UserizedFolder original, UserizedFolder modified, ServerSession session, HostData hostData) {
+        if (hostData == null) {
+            return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("HostData was not available"));
+        }
+
+        Permission[] oldPermissions = original == null ? new Permission[0] : original.getPermissions();
+        Permission[] newPermissions = modified.getPermissions();
+        List<Permission> addedPermissions = new ArrayList<>(newPermissions.length);
+        for (Permission permission : newPermissions) {
+            boolean isNew = true;
+            for (Permission existing : oldPermissions) {
+                if (existing.getEntity() == permission.getEntity() && existing.isGroup() == permission.isGroup() && existing.getSystem() == permission.getSystem() && permission.getSystem() == 0) {
+                    isNew = false;
+                    break;
+                }
+            }
+
+            if (isNew) {
+                addedPermissions.add(permission);
+            }
+        }
+
+        if (addedPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ShareNotificationService notificationService = ServiceRegistry.getInstance().getService(ShareNotificationService.class);
+        if (notificationService == null) {
+            return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("ShareNotificationService was absent"));
+        }
+
+        Entities entities = new Entities();
+        for (Permission permission : addedPermissions) {
+            if (permission.isGroup()) {
+                entities.addGroup(permission.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(permission));
+            } else {
+                entities.addUser(permission.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(permission));
+            }
+        }
+
+        return notificationService.sendShareCreatedNotifications(
+            notificationData.getTransport(),
+            entities,
+            notificationData.getMessage(),
+            new ShareTarget(modified.getContentType().getModule(), modified.getID()),
+            session,
+            hostData);
+    }
+
+    /**
+     * Parses the request body of create and update requests which encapsulates the affected folder and possible other
+     * data.
+     *
+     * @param treeId The folder tree ID
+     * @param folderId The requested folder ID
+     * @param request The AJAX request data
+     * @param session The session
+     * @return The data
+     * @throws OXException If the request body is invalid
+     */
+    protected UpdateData parseRequestBody(String treeId, String folderId, AJAXRequestData request, ServerSession session) throws OXException {
+        JSONObject folderObject;
+        JSONObject data = (JSONObject) request.requireData();
+        UpdateData updateData = new UpdateData();
+        if (data.hasAndNotNull("folder")) {
+            try {
+                folderObject = data.getJSONObject("folder");
+                JSONObject jNotification = data.optJSONObject("notification");
+                if (jNotification != null) {
+                    NotificationData notificationData = new NotificationData();
+                    Transport transport = Transport.MAIL;
+                    if (jNotification.hasAndNotNull("transport")) {
+                        transport = Transport.forID(jNotification.getString("transport"));
+                        if (transport == null) {
+                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                        }
+                    }
+                    notificationData.setTransport(transport);
+                    String message = jNotification.optString("message", null);
+                    if (Strings.isNotEmpty(message)) {
+                        notificationData.setMessage(message);
+                    }
+
+                    updateData.setNotificationData(notificationData);
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            }
+        } else {
+            folderObject = data;
+        }
+
+        final ParsedFolder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
+        if (folderId != null) {
+            folder.setID(folderId);
+            try {
+                final String fieldName = FolderField.SUBSCRIBED.getName();
+                if (folderObject.hasAndNotNull(fieldName) && 0 == folderObject.getInt(fieldName)) {
+                    /*
+                     * TODO: Remove this ugly hack to fix broken UI behavior which send "subscribed":0 for db folders
+                     */
+                    try {
+                        Integer.parseInt(folderId);
+                        folder.setSubscribed(true);
+                    } catch (final NumberFormatException e) {
+                        // Ignore
+                    }
+                }
+            } catch (final JSONException e) {
+                // Ignore
+            }
+        }
+        folder.setTreeID(treeId);
+
+        updateData.setFolder(folder);
+        return updateData;
+    }
+
+    /**
+     * Encapsulates the parsed request body data of create and update requests
+     */
+    protected static final class UpdateData {
+
+        private ParsedFolder folder;
+
+        private NotificationData notificationData;
+
+        private UpdateData() {
+            super();
+        }
+
+        /**
+         * Sets the folder
+         *
+         * @param folder The folder to set
+         */
+        public void setFolder(ParsedFolder folder) {
+            this.folder = folder;
+        }
+
+        /**
+         * Gets the folder
+         *
+         * @return The folder
+         */
+        public ParsedFolder getFolder() {
+            return folder;
+        }
+
+        /**
+         * Gets whether permission entities shall be notified about
+         * changes (i.e. if they have been added to a folder)
+         */
+        public boolean notifyPermissionEntities() {
+            return notificationData != null;
+        }
+
+        /**
+         * Gets the notification data
+         *
+         * @return The notification data or <code>null</code>
+         */
+        public NotificationData getNotificationData() {
+            return notificationData;
+        }
+
+        /**
+         * Sets the notification data
+         *
+         * @param notificationData The notification data to set
+         */
+        public void setNotificationData(NotificationData notificationData) {
+            this.notificationData = notificationData;
+        }
+
     }
 }

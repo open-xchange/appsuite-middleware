@@ -49,49 +49,49 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link CalDAVBugSuite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    Bug21794Test.class,
+    Bug22094Test.class,
+    Bug22352Test.class,
+    Bug22338Test.class,
+    Bug22395Test.class,
+    Bug22451Test.class,
+    Bug22723Test.class,
+    Bug23067Test.class,
+    Bug23167Test.class,
+    Bug23181Test.class,
+    Bug32897Test.class,
+    Bug23610Test.class,
+    Bug23612Test.class,
+    Bug24682Test.class,
+    Bug25783Test.class,
+    Bug25672Test.class,
+    Bug26957Test.class,
+    Bug27224Test.class,
+    Bug27309Test.class,
+    Bug28490Test.class,
+    Bug28734Test.class,
+    Bug29554Test.class,
+    Bug29728Test.class,
+    Bug25160Test.class,
+    Bug30359Test.class,
+    Bug31453Test.class,
+    Bug31490Test.class,
+    Bug36943Test.class,
+    Bug37112Test.class,
+    Bug37887Test.class,
+    Bug39098Test.class,
+})
 public final class CalDAVBugSuite {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.dav.caldav.bugs.CalDAVBugSuite");
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug32897Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug26957Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        suite.addTestSuite(Bug28734Test.class);
-        suite.addTestSuite(Bug29554Test.class);
-        suite.addTestSuite(Bug29728Test.class);
-        suite.addTestSuite(Bug25160Test.class);
-        suite.addTestSuite(Bug30359Test.class);
-        suite.addTestSuite(Bug31453Test.class);
-        suite.addTestSuite(Bug31490Test.class);
-        suite.addTestSuite(Bug36943Test.class);
-        suite.addTestSuite(Bug37112Test.class);
-        suite.addTestSuite(Bug37887Test.class);
-        suite.addTestSuite(Bug39098Test.class);
-        return suite;
-    }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.util;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +70,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -338,11 +340,13 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                         return null;
                     } else if (response.isBAD()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
                             ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         protocol.handleResult(response);
                     }
                     return null;

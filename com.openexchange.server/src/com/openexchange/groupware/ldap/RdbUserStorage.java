@@ -506,7 +506,7 @@ public class RdbUserStorage extends UserStorage {
             }
         }
         loadLoginInfo(ctx, con, regularUsers);
-        loadContact(ctx, con, regularUsers);
+        loadContact(ctx, con, users);
         loadAttributes(ctx.getContextId(), con, users, false);
         loadGroups(ctx, con, users);
         final User[] retval = new User[users.size()];
@@ -816,7 +816,7 @@ public class RdbUserStorage extends UserStorage {
         final String password = user.getUserPassword();
         final String mech = user.getPasswordMech();
         final int shadowLastChanged = user.getShadowLastChange();
-        if (null != password && null != mech) {
+        if (null != password && null != mech || user.isGuest()) {
             PreparedStatement stmt = null;
             try {
                 String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);

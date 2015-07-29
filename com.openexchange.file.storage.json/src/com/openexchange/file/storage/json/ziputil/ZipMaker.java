@@ -269,7 +269,7 @@ public class ZipMaker {
         if (threshold > 0) {
             long total = 0L;
             for (IdVersionPair idVersionPair : idVersionPairs) {
-                total += examineResources4Archive(idVersionPair, total, threshold);
+                total = examineResources4Archive(idVersionPair, total, threshold);
             }
         }
     }
@@ -298,7 +298,7 @@ public class ZipMaker {
 
                 if (recursive) {
                     for (FileStorageFolder f : folderAccess.getSubfolders(folderId, false)) {
-                        total += examineResources4Archive(new IdVersionPair(null, null, f.getId()), total, threshold);
+                        total = examineResources4Archive(new IdVersionPair(null, null, f.getId()), total, threshold);
                     }
                 }
 

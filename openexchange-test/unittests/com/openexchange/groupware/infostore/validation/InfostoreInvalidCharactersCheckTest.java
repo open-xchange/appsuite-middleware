@@ -2,9 +2,7 @@ package com.openexchange.groupware.infostore.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
@@ -36,7 +34,7 @@ public class InfostoreInvalidCharactersCheckTest extends TestCase {
 		metadata.setURL("url");
 		metadata.setVersionComment("comment");
 
-		final DocumentMetadataValidation validation = new TestValidator().validate(metadata);
+		final DocumentMetadataValidation validation = new TestValidator().validate(null, metadata);
 
 		assertFalse(validation.isValid());
 

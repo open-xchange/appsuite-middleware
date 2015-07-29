@@ -51,6 +51,7 @@ package com.openexchange.imap.threader.references;
 
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,6 +68,7 @@ import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -80,7 +82,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.IMAPResponse;
 
 
 /**
@@ -106,7 +107,7 @@ public final class Conversations {
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add("References");
         fp.add("Message-Id");
-        fp.add("In-Reply-To");
+        //fp.add("In-Reply-To");
         FETCH_PROFILE_CONVERSATION_BY_HEADERS = fp;
         fp = new FetchProfile();
         fp.add("References");
@@ -129,6 +130,29 @@ public final class Conversations {
         if (null != fields) {
             for (MailField field : fields) {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
+                    MimeStorageUtility.addFetchItem(fp, field);
+                }
+            }
+        }
+        return fp;
+    }
+
+    /**
+     * Gets the <i>"by headers"</i> fetch profile including specified fields.
+     *
+     * @param fields The fields to add
+     * @return The <i>"by headers"</i> fetch profile
+     */
+    public static FetchProfile getFetchProfileConversationByHeaders(MailField... fields) {
+        FetchProfile fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        fp.add("References");
+        fp.add("Message-Id");
+        if (null != fields) {
+            for (MailField field : fields) {
+                if (MailField.RECEIVED_DATE.equals(field)) {
+                    fp.add(MailMessageFetchIMAPCommand.INTERNALDATE);
+                } else {
                     MimeStorageUtility.addFetchItem(fp, field);
                 }
             }
@@ -190,6 +214,8 @@ public final class Conversations {
             }
         } else {
             // Add 'In-Reply-To' to FetchProfile if absent
+            /*-
+             *
             {
                 boolean found = false;
                 final Item envelope = FetchProfile.Item.ENVELOPE;
@@ -214,6 +240,7 @@ public final class Conversations {
                     }
                 }
             }
+             */
             // Add 'Message-Id' to FetchProfile if absent
             {
                 boolean found = false;
@@ -328,11 +355,10 @@ public final class Conversations {
                         final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
-                        final String sFetch = "FETCH";
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
-                            if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
+                            if (r[j] instanceof FetchResponse) {
                                 final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
@@ -357,16 +383,13 @@ public final class Conversations {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return Collections.<Conversation> emptyList();
                     }
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
                 }
                 return Collections.<MailMessage> emptyList();

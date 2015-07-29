@@ -60,9 +60,9 @@ import com.openexchange.ajax.infostore.actions.AllInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.ParsedShareTarget;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
+import com.openexchange.ajax.share.actions.FileShare;
+import com.openexchange.ajax.share.actions.FileSharesRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.File.Field;
@@ -135,32 +135,28 @@ public class FileStorageTransactionTest extends ShareTest {
             }
         }
 
-        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
-        List<ParsedShare> fileShares = new ArrayList<ParsedShare>(sharedFiles.size());
+        List<FileShare> fileShares = new ArrayList<FileShare>(sharedFiles.size());
+        List<FileShare> allShares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
         for (DefaultFile file : sharedFiles) {
-            for (ParsedShare share : allShares) {
-                ParsedShareTarget target = share.getTarget();
-                if (target.getItem() == null) {
-                    continue;
-                }
-
-                if (target.getModule() == FolderObject.INFOSTORE && target.getFolder().equals(Integer.toString(testFolder.getObjectID())) && file.getId().equals(target.getItem())) {
+            for (FileShare share : allShares) {
+                if (share.getId().equals(file.getId())) {
                     fileShares.add(share);
                     break;
                 }
             }
         }
-
         assertEquals("Wrong number of shares", sharedFiles.size(), fileShares.size());
 
         for (int i = 0; i < fileShares.size(); i++) {
-            ParsedShare share = fileShares.get(i);
-            DefaultFile file = sharedFiles.get(i);
+            FileShare share = fileShares.get(i);
             /*
              * check access to share
              */
-            checkShare(permission, file, share);
-            GuestClient guestClient =  resolveShare(share, permission.getRecipient());
+            assertNotNull(share.getExtendedPermissions());
+            assertEquals(1, share.getExtendedPermissions().size());
+            ExtendedPermissionEntity guest = share.getExtendedPermissions().get(0);
+            checkGuestPermission(permission, guest);
+            GuestClient guestClient =  resolveShare(guest, permission.getRecipient());
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(permission);
             /*

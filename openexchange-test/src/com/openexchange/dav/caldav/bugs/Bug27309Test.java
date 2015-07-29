@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -64,10 +66,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug27309Test extends CalDAVTest {
 
-	public Bug27309Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testChangeToDaily() throws Exception {
 		/*
 		 * create appointment series on server

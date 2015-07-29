@@ -159,6 +159,6 @@ public class LoginActivator extends HousekeepingActivator {
         final String logoutFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.logout");
         LoginPerformer.setLoginFormatter(new CompositeLoginFormatter(loginFormat, logoutFormat));
 
-
+        com.openexchange.tools.servlet.http.Tools.setConfigurationService(configurationService);
     }
 }

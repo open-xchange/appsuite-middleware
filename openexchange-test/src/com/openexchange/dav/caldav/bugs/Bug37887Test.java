@@ -49,12 +49,14 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.dav.PropertyNames;
@@ -65,21 +67,13 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * {@link Bug37887Test}
  *
- * CalDAV account creation in Mac OS Calendar sometimes fails 
+ * CalDAV account creation in Mac OS Calendar sometimes fails
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug37887Test extends CalDAVTest {
 
-    /**
-     * Initializes a new {@link Bug37887Test}.
-     *
-     * @param name The test name
-     */
-    public Bug37887Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testCalendarColor() throws Exception {
         /*
          * set a calendar color for personal calendar if not yet set
@@ -104,7 +98,7 @@ public class Bug37887Test extends CalDAVTest {
         }
         /*
          * discover calendar colors via PROPFIND
-         */        
+         */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CALENDAR_COLOR);
         PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
@@ -119,7 +113,7 @@ public class Bug37887Test extends CalDAVTest {
         for (MultiStatusResponse response : responses) {
             if ("/caldav/".equals(response.getHref())) {
                 continue;
-            }            
+            }
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.CALENDAR_COLOR)) {
                 if (null == found) {
                     found = Boolean.TRUE;
@@ -131,9 +125,9 @@ public class Bug37887Test extends CalDAVTest {
                     found = Boolean.FALSE;
                 } else {
                     assertFalse("calendar-color with both status 200 and 404", found.booleanValue());
-                }                
+                }
             }
         }
     }
-    
+
 }

@@ -97,6 +97,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -105,8 +106,8 @@ import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
 import com.openexchange.admin.schemacache.SchemaCacheProvider;
-import com.openexchange.admin.schemacache.SchemaCacheRollback;
-import com.openexchange.admin.schemacache.SchemaResult;
+import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -1085,28 +1086,54 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             }
+
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
-            SchemaCacheRollback cacheRollback = null;
+            int contextId = ctx.getId().intValue();
+            SchemaCacheFinalize cacheFinalize = null;
+            boolean contextCreated = false;
             boolean rollback = false;
+            boolean automaticStrategyUsed = true;
             try {
                 // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
                 rollback = true;
 
                 // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
-                cacheRollback = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                SchemaResult schemaResult = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                cacheFinalize = schemaResult.getCacheFinalize();
+                automaticStrategyUsed = Strategy.AUTOMATIC == schemaResult.getStrategy();
 
-                // Continue with context creation
+                // Write other configdb data
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
-                Context retval = writeContext(ctx, adminUser, access);
 
-                // Commit transaction and unmark to perform a roll-back
-                configCon.commit();
-                rollback = false;
+                /*-
+                 * Continue with context creation depending on utilized schema-select strategy:
+                 *
+                 *
+                 * If AUTOMATIC was used, then write context data _before_ committing the configdb connection
+                 *
+                 * Otherwise commit the configdb connection and write context data _afterwards_
+                 */
+                Context retval;
+                if (automaticStrategyUsed) {
+                    // Write context data before COMMIT
+                    retval = writeContext(ctx, adminUser, access);
 
-                // Null'ify SchemaCacheRollback instance due to successful commit
-                cacheRollback = null;
+                    // Commit transaction and unmark to perform a roll-back
+                    configCon.commit();
+                    rollback = false;
+                } else {
+                    // Commit transaction
+                    configCon.commit();
+
+                    // Write context data after COMMIT and unmark to perform a roll-back
+                    retval = writeContext(ctx, adminUser, access);
+                    rollback = false;
+                }
+
+                // Apparently, no error occurred
+                contextCreated = true;
 
                 LOG.info("Context {} created!", retval.getId());
                 return retval;
@@ -1117,13 +1144,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (StorageException e) {
                 throw e;
             } finally {
-                if (null != cacheRollback) {
-                    try { cacheRollback.rollback(); } catch (Exception x) { /*Ignore*/ }
+                if (null != cacheFinalize) {
+                    try { cacheFinalize.finalize(contextCreated); } catch (Exception x) { /*Ignore*/ }
                 }
 
-                if (rollback) {
-                    rollback(configCon);
-                    OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+                if (automaticStrategyUsed) {
+                    if (rollback) {
+                        // A commit on configDb connection is guaranteed that is has not been performed
+                        rollback(configCon);
+                        OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+                    }
+                } else {
+                    if (rollback) {
+                        // Either commit on configDb connection or writeContext() invocation failed
+                        // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
+                        rollback(configCon);
+
+                        // Manually drop possibly already created data from configDb
+                        new OXContextMySQLStorageCommon().handleCreateContextRollback(configCon, contextId);
+                    }
                 }
 
                 autocommit(configCon);
@@ -1135,15 +1174,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private Context writeContext(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        Connection oxCon;
+        Connection oxCon = null;
+        boolean rollback = false;
         try {
             oxCon = cache.getConnectionForContext(contextId);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        try {
             oxCon.setAutoCommit(false);
+            rollback = true;
 
             contextCommon.initSequenceTables(contextId, oxCon);
             contextCommon.initReplicationMonitor(oxCon, contextId);
@@ -1194,39 +1230,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
 
             oxCon.commit();
+            rollback = false;
+
             ctx.setEnabled(Boolean.TRUE);
             adminUser.setId(I(adminId));
             return ctx;
         } catch (final DataTruncation e) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
-            rollback(oxCon);
             throw AdminCache.parseDataTruncation(e);
         } catch (final OXException e) {
             LOG.error("Error", e);
-            rollback(oxCon);
             throw new StorageException(e.toString());
         } catch (final StorageException e) {
             LOG.error("Storage Error", e);
-            rollback(oxCon);
             throw e;
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
         } catch (final InvalidDataException e) {
             LOG.error("InvalidData Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
-        } catch (final Exception e) {
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final EnforceableDataObjectException e) {
+            LOG.error("Enforceable DataObject Error", e);
+            throw new StorageException(e);
+        } catch (final RuntimeException e) {
             LOG.error("Internal Error", e);
-            rollback(oxCon);
-            throw new StorageException("Internal server error occured");
+            throw new StorageException("Internal server error occured", e);
         } finally {
+            if (rollback) {
+                rollback(oxCon);
+            }
             autocommit(oxCon);
-            try {
-                cache.pushConnectionForContext(contextId, oxCon);
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing ox write connection to pool!", ecp);
+            if (null != oxCon) {
+                try {
+                    cache.pushConnectionForContext(contextId, oxCon);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing ox write connection to pool!", ecp);
+                }
             }
         }
     }
@@ -1334,9 +1377,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param configCon a write connection to the configuration database that is already in a transaction.
      * @param db The database
      * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
-     * @return The possible cache roll-back instance to call if further processing fails
+     * @return The possible schema result from cache that is needed for further processing
      */
-    private SchemaCacheRollback findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
+    private SchemaResult findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         if (CONTEXTS_PER_SCHEMA == 1) {
             // Ignore strategy as there shall be only one schema per context
             int schemaUnique;
@@ -1348,41 +1391,49 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(db);
-            return null;
+            return SchemaResult.AUTOMATIC;
         }
 
         // The effective strategy
         SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
 
         // Determine the schema name according to effective strategy
-        SchemaCacheRollback cacheRollback = null;
         switch (effectiveStrategy.getStrategy()) {
             case SCHEMA:
                 // Pre-defined schema name
-                db.setScheme(effectiveStrategy.getSchema());
-                break;
+                applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
+                return SchemaResult.SCHEMA_NAME;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
-                cacheRollback = inMemoryLookupSchema(configCon, db);
-                break;
+                SchemaCacheFinalize cacheFinalize = inMemoryLookupSchema(configCon, db);
+                return SchemaResult.inMemoryWith(cacheFinalize);
             default:
                 automaticLookupSchema(configCon, db);
-                break;
+                return SchemaResult.AUTOMATIC;
         }
-        return cacheRollback;
     }
 
-    private SchemaCacheRollback inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+    private void applyPredefinedSchemaName(String schemaName, Database db) throws StorageException {
+        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+        if (null != optCache) {
+            optCache.clearFor(db.getId().intValue());
+        }
+
+        // Pre-defined schema name
+        db.setScheme(schemaName);
+    }
+
+    private SchemaCacheFinalize inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
         // Get cache instance
         SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
         ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
 
         // Get next known suitable schema
         int poolId = db.getId().intValue();
-        SchemaResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
+        SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
         if (null != schemaResult) {
             db.setScheme(schemaResult.getSchemaName());
-            return schemaResult.getRollback();
+            return schemaResult.getFinalize();
         }
 
         // No suitable schema known to cache. Therefore clear cache state & perform regular schema look-up/creation

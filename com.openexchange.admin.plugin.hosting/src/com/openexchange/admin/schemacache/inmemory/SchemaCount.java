@@ -50,7 +50,7 @@
 package com.openexchange.admin.schemacache.inmemory;
 
 /**
- * A schema count.
+ * Manages the number of contexts for a certain database schema.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

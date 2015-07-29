@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,6 +105,20 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public String getTitle() {
         return folder.getFolderName();
+    }
+
+    @Override
+    public List<TargetPermission> getPermissions() {
+        List<OCLPermission> permissions = folder.getPermissions();
+        if (null == permissions) {
+            return Collections.emptyList();
+        }
+        OCLPermissionConverter converter = new OCLPermissionConverter(folder);
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(permissions.size());
+        for (OCLPermission permission : permissions) {
+            targetPermissions.add(converter.convert(permission));
+        }
+        return targetPermissions;
     }
 
     @Override
@@ -210,6 +225,12 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             oclPermission.setAllPermission(bits[0], bits[1], bits[2], bits[3]);
             return oclPermission;
         }
+
+        @Override
+        public TargetPermission convert(OCLPermission permission) {
+            return new TargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission));
+        }
+
     };
 
 }

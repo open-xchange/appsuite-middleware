@@ -59,7 +59,7 @@ import javax.servlet.http.HttpSessionContext;
  * {@link SimHttpSession}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.x.x
+ * @since v7.8.0
  */
 public class SimHttpSession implements HttpSession {
 
@@ -71,8 +71,7 @@ public class SimHttpSession implements HttpSession {
 
     @Override
     public String getId() {
-        // TODO Auto-generated method stub
-        return null;
+        return "0987654321234567890.OX1";
     }
 
     @Override

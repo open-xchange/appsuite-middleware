@@ -49,8 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -71,27 +74,13 @@ public class Bug37112Test extends CalDAVTest {
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
 
-    /**
-     * Initializes a new {@link Bug37112Test}.
-     *
-     * @param name The test name
-     */
-    public Bug37112Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         publicFolder = createPublicFolder();
         publicFolderID = String.valueOf(publicFolder.getObjectID());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
 	public void testCreateExceptionInClient() throws Exception {
 	    /*
 	     * create recurring appointment on client

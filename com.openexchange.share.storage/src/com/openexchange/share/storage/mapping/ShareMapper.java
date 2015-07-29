@@ -141,220 +141,221 @@ public class ShareMapper extends DefaultDbMapper<RdbShare, ShareField> {
 
             @Override
             public void set(RdbShare share, Integer value) {
-                share.setGuest(value.intValue());
+                share.getShare().setGuest(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return 0 < share.getGuest();
+                return 0 < share.getShare().getGuest();
             }
 
             @Override
             public Integer get(RdbShare share) {
-                return Integer.valueOf(share.getGuest());
+                return Integer.valueOf(share.getShare().getGuest());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setGuest(0);
+                share.getShare().setGuest(0);
             }
         });
         mappings.put(ShareField.MODULE, new IntegerMapping<RdbShare>("module", "Module ID") {
 
             @Override
             public void set(RdbShare share, Integer value) {
-                share.setModule(value.intValue());
+                share.getShare().getTarget().setModule(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return 0 < share.getModule();
+                return 0 < share.getShare().getTarget().getModule();
             }
 
             @Override
             public Integer get(RdbShare share) {
-                return Integer.valueOf(share.getModule());
+                return Integer.valueOf(share.getShare().getTarget().getModule());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setModule(0);
+                share.getShare().getTarget().setModule(0);
             }
         });
         mappings.put(ShareField.FOLDER, new EmptyVarCharMapping<RdbShare>("folder", "Folder ID") {
 
             @Override
             public void set(RdbShare share, String value) {
-                share.setFolder(value);
+                share.getShare().getTarget().setFolder(value);
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getFolder();
+                return null != share.getShare().getTarget().getFolder();
             }
 
             @Override
             public String get(RdbShare share) {
-                return share.getFolder();
+                return share.getShare().getTarget().getFolder();
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setFolder(null);
+                share.getShare().getTarget().setFolder(null);
             }
         });
         mappings.put(ShareField.ITEM, new EmptyVarCharMapping<RdbShare>("item", "Item") {
 
             @Override
             public void set(RdbShare share, String value) {
-                share.setItem(value);
+                share.getShare().getTarget().setItem(value);
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getItem();
+                return null != share.getShare().getTarget().getItem();
             }
 
             @Override
             public String get(RdbShare share) {
-                return share.getItem();
+                return share.getShare().getTarget().getItem();
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setItem(null);
+                share.getShare().getTarget().setItem(null);
             }
         });
         mappings.put(ShareField.OWNER, new IntegerMapping<RdbShare>("owner", "Owned by") {
 
             @Override
             public void set(RdbShare share, Integer value) {
-                share.setOwner(value.intValue());
+                share.getShare().getTarget().setOwnedBy(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return 0 < share.getOwner();
+                return 0 < share.getShare().getTarget().getOwnedBy();
             }
 
             @Override
             public Integer get(RdbShare share) {
-                return Integer.valueOf(share.getOwner());
+                return Integer.valueOf(share.getShare().getTarget().getOwnedBy());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setOwner(0);
+                share.getShare().getTarget().setOwnedBy(0);
             }
         });
         mappings.put(ShareField.EXPIRES, new BigIntMapping<RdbShare>("expires", "Expiry date") {
 
             @Override
             public void set(RdbShare share, Long value) {
-                share.setExpires(new Date(value));
+                share.getShare().setExpiryDate(new Date(value));
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getExpires();
+                return share.getShare().containsExpiryDate();
             }
 
             @Override
             public Long get(RdbShare share) {
-                return share.getExpires().getTime();
+                Date expiryDate = share.getShare().getExpiryDate();
+                return null == expiryDate ? null : Long.valueOf(expiryDate.getTime());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setExpires(null);
+                share.getShare().setExpiryDate(null);
             }
         });
         mappings.put(ShareField.CREATED, new BigIntMapping<RdbShare>("created", "Creation date") {
 
             @Override
             public void set(RdbShare share, Long value) {
-                share.setCreated(new Date(value));
+                share.getShare().setCreated(new Date(value));
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getCreated();
+                return null != share.getShare().getCreated();
             }
 
             @Override
             public Long get(RdbShare share) {
-                return share.getCreated().getTime();
+                return Long.valueOf(share.getShare().getCreated().getTime());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setCreated(null);
+                share.getShare().setCreated(null);
             }
         });
         mappings.put(ShareField.CREATED_BY, new IntegerMapping<RdbShare>("created_by", "Created by") {
 
             @Override
             public void set(RdbShare share, Integer value) {
-                share.setCreatedBy(value.intValue());
+                share.getShare().setCreatedBy(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return 0 < share.getCreatedBy();
+                return 0 < share.getShare().getCreatedBy();
             }
 
             @Override
             public Integer get(RdbShare share) {
-                return Integer.valueOf(share.getCreatedBy());
+                return Integer.valueOf(share.getShare().getCreatedBy());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setCreatedBy(0);
+                share.getShare().setCreatedBy(0);
             }
         });
         mappings.put(ShareField.MODIFIED, new BigIntMapping<RdbShare>("modified", "Last modification date") {
 
             @Override
             public void set(RdbShare share, Long value) {
-                share.setModified(new Date(value));
+                share.getShare().setModified(new Date(value));
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getModified();
+                return null != share.getShare().getModified();
             }
 
             @Override
             public Long get(RdbShare share) {
-                return share.getModified().getTime();
+                return Long.valueOf(share.getShare().getModified().getTime());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setModified(null);
+                share.getShare().setModified(null);
             }
         });
         mappings.put(ShareField.MODIFIED_BY, new IntegerMapping<RdbShare>("modified_by", "Modified by") {
 
             @Override
             public void set(RdbShare share, Integer value) {
-                share.setModifiedBy(value.intValue());
+                share.getShare().setModifiedBy(value.intValue());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return 0 < share.getModifiedBy();
+                return 0 < share.getShare().getModifiedBy();
             }
 
             @Override
             public Integer get(RdbShare share) {
-                return Integer.valueOf(share.getModifiedBy());
+                return Integer.valueOf(share.getShare().getModifiedBy());
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setModifiedBy(0);
+                share.getShare().setModifiedBy(0);
             }
         });
         mappings.put(ShareField.META, new DefaultDbMapping<Map<String, Object>, RdbShare>("meta", "Meta", java.sql.Types.BLOB) {
@@ -380,7 +381,7 @@ public class ShareMapper extends DefaultDbMapper<RdbShare, ShareField> {
                 if (isSet(share)) {
                     Object coerced;
                     try {
-                        coerced = JSONCoercion.coerceToJSON(share.getMeta());
+                        coerced = JSONCoercion.coerceToJSON(share.getShare().getMeta());
                     } catch (JSONException e) {
                         throw new SQLException(e);
                     }
@@ -396,22 +397,22 @@ public class ShareMapper extends DefaultDbMapper<RdbShare, ShareField> {
 
             @Override
             public boolean isSet(RdbShare share) {
-                return null != share.getMeta() && 0 < share.getMeta().size();
+                return share.getShare().containsMeta();
             }
 
             @Override
             public void set(RdbShare share, Map<String, Object> value) throws OXException {
-                share.setMeta(value);
+                share.getShare().setMeta(value);
             }
 
             @Override
             public Map<String, Object> get(RdbShare share) {
-                return share.getMeta();
+                return share.getShare().getMeta();
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.setMeta(null);
+                share.getShare().setMeta(null);
             }
         });
 

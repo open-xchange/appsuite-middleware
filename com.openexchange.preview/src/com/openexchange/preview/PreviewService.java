@@ -78,7 +78,7 @@ public interface PreviewService {
      * @param arg The argument either denotes an URL or a file
      * @param output The output format
      * @param session The session
-     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
+     * @param pages The number of pages to be generated, if possible. If not set, this argument is ignored. -1 for "all pages"
      * @return The preview document with its content set according to given output format
      * @throws OXException If preview document cannot be generated
      */
@@ -90,7 +90,7 @@ public interface PreviewService {
      * @param documentData The data
      * @param output The output format
      * @param session The session
-     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
+     * @param pages The number of pages to be generated, if possible. If not set, this argument is ignored. -1 for "all pages"
      * @return The preview document with its content set according to given output format
      * @throws OXException If preview document cannot be generated
      */

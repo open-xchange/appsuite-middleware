@@ -105,7 +105,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                         try {
                             IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
                         } catch (Exception e) {
-                            LOG.info("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            LOG.debug("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                         }
                     }
                 }
@@ -121,7 +121,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 try {
                     IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
                 } catch (Exception e) {
-                    LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 }
             }
         }

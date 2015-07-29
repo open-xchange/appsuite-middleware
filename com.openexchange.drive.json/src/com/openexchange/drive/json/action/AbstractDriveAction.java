@@ -49,9 +49,11 @@
 
 package com.openexchange.drive.json.action;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -61,17 +63,23 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveClientVersion;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.json.DriveShareJSONParser;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.session.ServerSession;
@@ -83,8 +91,62 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractDriveAction implements AJAXActionService {
 
+    private final DriveShareJSONParser parser;
+
+    /**
+     * Initializes a new {@link AbstractDriveShareAction}.
+     */
+    protected AbstractDriveAction() {
+        super();
+        this.parser = new DriveShareJSONParser();
+    }
+
+    /**
+     * Gets the drive share parser.
+     *
+     * @return The parser
+     */
+    protected DriveShareJSONParser getShareParser() {
+        return parser;
+    }
+
+    /**
+     * Gets the drive service.
+     *
+     * @return The drive service
+     * @throws OXException if the service is unavailable
+     */
     protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
+        return requireService(DriveService.class, Services.get());
+    }
+
+    /**
+     * Gets the default share service.
+     *
+     * @return The share service
+     * @throws OXException if the service is unavailable
+     */
+    protected ShareService getShareService() throws OXException {
+        return requireService(ShareService.class, Services.get());
+    }
+
+    /**
+     * Gets an existing link, i.e. an anonymous share, for a specific share target.
+     *
+     * @param session The session
+     * @param target The target to get the link for
+     * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
+     */
+    protected DriveShareInfo discoverLink(DriveSession session, DriveShareTarget target) throws OXException {
+        List<DriveShareInfo> shares = getDriveService().getShares(session, target);
+        if (null != shares && 0 < shares.size()) {
+            for (DriveShareInfo share : shares) {
+                if (RecipientType.ANONYMOUS.equals(share.getGuest().getRecipientType())) {
+                    return share;
+                }
+            }
+        }
+        return null;
     }
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
@@ -202,9 +264,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @return The extracted host data
      */
     private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
-        // TODO: "always-on" osgi service to reliably getting host data?
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (requestContext != null) {
+            return requestContext.getHostData();
+        }
+
         /*
-         * try session parameter first
+         * try session parameter as alternative
          */
         HostData hostData = (HostData)session.getParameter(HostnameService.PARAM_HOST_DATA);
         if (null == hostData) {

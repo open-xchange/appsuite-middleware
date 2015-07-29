@@ -101,13 +101,13 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
 
     @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession session) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        DocumentMetadata dm = load(id, version, session.getContext());
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, dm);
+        if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-        DocumentMetadata dm = load(id, version, session.getContext());
-        com.openexchange.filestore.FileStorage fs = getFileStorage(security.getFolderOwner(dm, session.getContext()), session.getContextId());
 
+        com.openexchange.filestore.FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
         InputStream document;
         if (dm.getFilestoreLocation() == null) {
             document = Streams.newByteArrayInputStream(new byte[0]);

@@ -49,24 +49,23 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    NewTest.class,
+    FreeBusyTest.class,
+    MkCalendarTest.class,
+    CookieTest.class,
+    ConfirmationTest.class,
+})
 public final class CalDAVTestSuite {
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.dav.caldav.tests.CalDAVTestSuite");
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(FreeBusyTest.class);
-        suite.addTestSuite(MkCalendarTest.class);
-        suite.addTestSuite(CookieTest.class);
-        suite.addTestSuite(ConfirmationTest.class);
-        return suite;
-    }
 
 }

@@ -56,8 +56,9 @@ import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.share.CreatedShares;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -190,47 +191,51 @@ public interface DriveService {
     DriveUtility getUtility();
 
     /**
-     * Creates shares of the given targets for the given recipients.
+     * Gets all shares for a specific target.
      *
      * @param session The session
-     * @param recipients The recipients
-     * @param targets The targets
-     * @return The created shares
-     * @throws OXException
+     * @param target The target to get the shares for
+     * @return The shares, or an empty list if there are none
      */
-    CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException;
+    List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException;
 
     /**
-     * Updates a single share.
+     * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest user on the share target are updated implicitly via corresponding target proxies
+     * automatically</li>
+     * <li>Permissions checks are performed implicitly during the update of the referenced target</li>
+     * </ul>
      *
      * @param session The session
-     * @param clientTimestamp The client timnestamp
-     * @param token The share token to be updated
-     * @param expiry The expiration date of the share
-     * @param meta Optional meta data
-     * @param password The password
-     * @param bits Th permission bits for the share
-     * @throws OXException
+     * @param target The share target to add
+     * @param recipient The recipient for the share
+     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
+     * @return The created share
      */
-    void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException;
+    DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
 
     /**
-     * Removes share links
+     * Updates metadata of a file. This currently only includes adjusting the file's object permissions.
      *
      * @param session The session
-     * @param links The links to be removed
-     * @throws OXException
+     * @param path The path to the file's parent folder, relative to the root folder
+     * @param fileVersion The file version of the file to update
+     * @param metadata The updated metadata
+     * @param parameters Additional parameters for the update
      */
-    void deleteLinks(DriveSession session, List<String> links) throws OXException;
+    void updateFile(DriveSession session, String path, FileVersion fileVersion, File metadata, UpdateParameters parameters) throws OXException;
 
     /**
-     * Gets all currently active shares of the user
+     * Updates metadata of a directory. This currently only includes adjusting the directory's permissions.
      *
      * @param session The session
-     * @return A list of all shares
-     * @throws OXException
+     * @param directoryVersion The directory version of the directory to update
+     * @param metadata The updated metadata
+     * @param parameters Additional parameters for the update
      */
-    List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException;
+    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, FileStorageFolder metadata, UpdateParameters parameters) throws OXException;
 
 }
-

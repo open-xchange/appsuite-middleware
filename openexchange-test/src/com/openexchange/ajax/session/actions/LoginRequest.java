@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.java.Strings;
 
 /**
  *
@@ -62,8 +63,6 @@ import com.openexchange.ajax.fields.LoginFields;
 public class LoginRequest extends AbstractRequest<LoginResponse> {
 
     private static final String PARAM_PASSWORD = "password";
-
-    private static final String PARAM_SKIP = "skipButton";
 
     private static final String PARAM_NAME = "name";
 
@@ -78,7 +77,6 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     public static final class GuestCredentials {
         private final String login;
         private final String password;
-        private final boolean skipPassword;
 
         /**
          * Use the given guest login but omit the password and skip setting one
@@ -88,7 +86,6 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             super();
             this.login = login;
             password = null;
-            skipPassword = true;
         }
 
         /**
@@ -100,7 +97,6 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             super();
             this.login = login;
             this.password = password;
-            skipPassword = false;
         }
     }
 
@@ -125,8 +121,8 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             parameters.add(new URLParameter(LoginFields.CLIENT_PARAM, client));
         }
         parameters.add(new FieldParameter(PARAM_NAME, credentials.login));
-        if (credentials.skipPassword) {
-            parameters.add(new FieldParameter(PARAM_SKIP, "true"));
+        if (Strings.isEmpty(credentials.password)) {
+            parameters.add(new FieldParameter(PARAM_PASSWORD, ""));
         } else {
             parameters.add(new FieldParameter(PARAM_PASSWORD, credentials.password));
         }
@@ -185,6 +181,18 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             new URLParameter(LoginFields.AUTHID_PARAM, authId),
             new URLParameter(LoginFields.CLIENT_PARAM, client),
             new URLParameter(LoginFields.VERSION_PARAM, version),
+            new FieldParameter(PARAM_NAME, login),
+            new FieldParameter(PARAM_PASSWORD, password)
+        }, failOnError);
+    }
+
+    public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError, boolean passwordInURL) {
+        this(new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
+            new URLParameter(LoginFields.AUTHID_PARAM, authId),
+            new URLParameter(LoginFields.CLIENT_PARAM, client),
+            new URLParameter(LoginFields.VERSION_PARAM, version),
+            new URLParameter(LoginFields.PASSWORD_PARAM, password),
             new FieldParameter(PARAM_NAME, login),
             new FieldParameter(PARAM_PASSWORD, password)
         }, failOnError);

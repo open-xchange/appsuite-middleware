@@ -1,192 +1,164 @@
-/*
- *
- *    OPEN-XCHANGE legal information
- *
- *    All intellectual property rights in the Software are protected by
- *    international copyright laws.
- *
- *
- *    In some countries OX, OX Open-Xchange, open xchange and OXtender
- *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GNU General Public License.
- *    Instead, you are allowed to use these Logos according to the terms and
- *    conditions of the Creative Commons License, Version 2.5, Attribution,
- *    Non-commercial, ShareAlike, and the interpretation of the term
- *    Non-commercial applicable to the aforementioned license is published
- *    on the web site http://www.open-xchange.com/EN/legal/index.html.
- *
- *    Please make sure that third-party modules and libraries are used
- *    according to their respective licenses.
- *
- *    Any modifications to this package must retain all copyright notices
- *    of the original copyright holder(s) for the original code used.
- *
- *    After any such modifications, the original and derivative code shall remain
- *    under the copyright of the copyright holder(s) and/or original author(s)per
- *    the Attribution and Assignment Agreement that can be located at
- *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
- *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
- *     Mail: info@open-xchange.com
- *
- *
- *     This program is free software; you can redistribute it and/or modify it
- *     under the terms of the GNU General Public License, Version 2 as published
- *     by the Free Software Foundation.
- *
- *     This program is distributed in the hope that it will be useful, but
- *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- *     for more details.
- *
- *     You should have received a copy of the GNU General Public License along
- *     with this program; if not, write to the Free Software Foundation, Inc., 59
- *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
-package com.openexchange.ajax.drive.test;
-
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.ajax.drive.action.InviteRequest;
-import com.openexchange.ajax.drive.action.ParsedDriveShareInfo;
-import com.openexchange.ajax.drive.action.SharesRequest;
-import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
-import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
-import com.openexchange.drive.impl.DriveConstants;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
-
-/**
- * {@link InviteTest}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
- */
-public class InviteTest extends AbstractDriveShareTest {
-
-    private InfostoreTestManager itm;
-    private FolderObject rootFolder;
-    private FolderObject folder;
-    private DefaultFile file;
-    private AJAXClient client2;
-    private FolderTestManager ftm2;
-    private FolderObject folder2;
-
-    private static final int FOLDER_READ_PERMISSION = Permissions.createPermissionBits(
-        Permission.READ_FOLDER,
-        Permission.READ_ALL_OBJECTS,
-        Permission.NO_PERMISSIONS,
-        Permission.NO_PERMISSIONS,
-        false);
-
-    private static String PASSWORD = "password123";
-
-    public InviteTest(String name) {
-        super(name);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        client2 = new AJAXClient(User.User2);
-        itm = new InfostoreTestManager(client);
-        ftm2 = new FolderTestManager(client2);
-
-        UserValues values = client.getValues();
-        rootFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
-        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
-        folder2 = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
-
-        long now = System.currentTimeMillis();
-        file = new DefaultFile();
-        file.setFolderId(String.valueOf(folder2.getObjectID()));
-        file.setTitle("GetLinkTest_" + now);
-        file.setFileName(file.getTitle());
-        file.setDescription(file.getTitle());
-        file.setFileMD5Sum(getChecksum(new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"))));
-        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
-    }
-
-    public void testInviteFileInternal() throws Exception {
-        DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder2.getFolderName());
-        target.setName(file.getFileName());
-        target.setChecksum(file.getFileMD5Sum());
-        InternalRecipient recipient = new InternalRecipient();
-        recipient.setEntity(client2.getValues().getUserId());
-        recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
-        client.execute(inviteRequest);
-
-        checkFilePermission(client2.getValues().getUserId(), ObjectPermission.READ, itm.getAction(file.getId()));
-    }
-
-    public void testInviteFolderInternal() throws Exception {
-        DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
-        target.setChecksum(DriveConstants.EMPTY_MD5);
-        InternalRecipient recipient = new InternalRecipient();
-        recipient.setEntity(client2.getValues().getUserId());
-        recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
-        client.execute(inviteRequest);
-
-        checkFolderPermission(client2.getValues().getUserId(), FOLDER_READ_PERMISSION, ftm2.getFolderFromServer(folder.getObjectID()));
-    }
-
-    public void testInviteFileExternal() throws Exception {
-        DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder2.getFolderName());
-        target.setName(file.getFileName());
-        target.setChecksum(file.getFileMD5Sum());
-        AnonymousRecipient recipient = new AnonymousRecipient();
-        recipient.setBits(FOLDER_READ_PERMISSION);
-        recipient.setPassword(PASSWORD);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
-        client.execute(inviteRequest);
-
-        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
-        DriveShareInfo share = null;
-        for (DriveShareInfo parsedShare : allShares) {
-            if (parsedShare.getDriveShare().getTarget().equals(target)) {
-                share = parsedShare;
-                break;
-            }
-        }
-        assertNotNull("Missing share.", share);
-
-        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
-        InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
-        checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
-    }
-
-//    // Debug local stuff.
-//    public void testInviFileExternal2() throws Exception {
+///*
+// *
+// *    OPEN-XCHANGE legal information
+// *
+// *    All intellectual property rights in the Software are protected by
+// *    international copyright laws.
+// *
+// *
+// *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+// *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+// *    trademarks of the Open-Xchange, Inc. group of companies.
+// *    The use of the Logos is not covered by the GNU General Public License.
+// *    Instead, you are allowed to use these Logos according to the terms and
+// *    conditions of the Creative Commons License, Version 2.5, Attribution,
+// *    Non-commercial, ShareAlike, and the interpretation of the term
+// *    Non-commercial applicable to the aforementioned license is published
+// *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+// *
+// *    Please make sure that third-party modules and libraries are used
+// *    according to their respective licenses.
+// *
+// *    Any modifications to this package must retain all copyright notices
+// *    of the original copyright holder(s) for the original code used.
+// *
+// *    After any such modifications, the original and derivative code shall remain
+// *    under the copyright of the copyright holder(s) and/or original author(s)per
+// *    the Attribution and Assignment Agreement that can be located at
+// *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+// *    given Attribution for the derivative code and a license granting use.
+// *
+// *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+// *     Mail: info@open-xchange.com
+// *
+// *
+// *     This program is free software; you can redistribute it and/or modify it
+// *     under the terms of the GNU General Public License, Version 2 as published
+// *     by the Free Software Foundation.
+// *
+// *     This program is distributed in the hope that it will be useful, but
+// *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+// *     for more details.
+// *
+// *     You should have received a copy of the GNU General Public License along
+// *     with this program; if not, write to the Free Software Foundation, Inc., 59
+// *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+// *
+// */
+//
+//package com.openexchange.ajax.drive.test;
+//
+//import java.util.Collections;
+//import java.util.List;
+//import com.openexchange.ajax.drive.action.InviteRequest;
+//import com.openexchange.ajax.drive.action.ParsedDriveShareInfo;
+//import com.openexchange.ajax.drive.action.SharesRequest;
+//import com.openexchange.ajax.folder.actions.EnumAPI;
+//import com.openexchange.ajax.framework.AJAXClient;
+//import com.openexchange.ajax.framework.AJAXClient.User;
+//import com.openexchange.ajax.framework.UserValues;
+//import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+//import com.openexchange.ajax.share.GuestClient;
+//import com.openexchange.drive.impl.DriveConstants;
+//import com.openexchange.drive.share.DriveShareInfo;
+//import com.openexchange.drive.share.DriveShareTarget;
+//import com.openexchange.file.storage.DefaultFile;
+//import com.openexchange.folderstorage.Permission;
+//import com.openexchange.folderstorage.Permissions;
+//import com.openexchange.groupware.container.FolderObject;
+//import com.openexchange.groupware.container.ObjectPermission;
+//import com.openexchange.groupware.modules.Module;
+//import com.openexchange.share.recipient.AnonymousRecipient;
+//import com.openexchange.share.recipient.InternalRecipient;
+//import com.openexchange.share.recipient.ShareRecipient;
+//import com.openexchange.test.FolderTestManager;
+//import com.openexchange.test.TestInit;
+//
+///**
+// * {@link InviteTest}
+// *
+// * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+// * @since v7.8.0
+// */
+//public class InviteTest extends AbstractDriveShareTest {
+//
+//    private InfostoreTestManager itm;
+//    private FolderObject rootFolder;
+//    private FolderObject folder;
+//    private DefaultFile file;
+//    private AJAXClient client2;
+//    private FolderTestManager ftm2;
+//    private FolderObject folder2;
+//
+//    private static final int FOLDER_READ_PERMISSION = Permissions.createPermissionBits(
+//        Permission.READ_FOLDER,
+//        Permission.READ_ALL_OBJECTS,
+//        Permission.NO_PERMISSIONS,
+//        Permission.NO_PERMISSIONS,
+//        false);
+//
+//    private static String PASSWORD = "password123";
+//
+//    public InviteTest(String name) {
+//        super(name);
+//    }
+//
+//    @Override
+//    public void setUp() throws Exception {
+//        super.setUp();
+//        client2 = new AJAXClient(User.User2);
+//        itm = new InfostoreTestManager(client);
+//        ftm2 = new FolderTestManager(client2);
+//
+//        UserValues values = client.getValues();
+//        rootFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
+//        folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
+//        folder2 = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
+//
+//        long now = System.currentTimeMillis();
+//        file = new DefaultFile();
+//        file.setFolderId(String.valueOf(folder2.getObjectID()));
+//        file.setTitle("GetLinkTest_" + now);
+//        file.setFileName(file.getTitle());
+//        file.setDescription(file.getTitle());
+//        file.setFileMD5Sum(getChecksum(new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"))));
+//        itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
+//    }
+//
+//    public void testInviteFileInternal() throws Exception {
 //        DriveShareTarget target = new DriveShareTarget();
-//        target.setPath("/" + folder2.getFolderName());
+//        target.setDrivePath("/" + folder2.getFolderName());
 //        target.setName(file.getFileName());
 //        target.setChecksum(file.getFileMD5Sum());
-//        GuestRecipient recipient = new GuestRecipient();
-//        recipient.setEmailAddress("martin.herfurth@context4712.devel.open-xchange.com");
+//        InternalRecipient recipient = new InternalRecipient();
+//        recipient.setEntity(client2.getValues().getUserId());
+//        recipient.setBits(FOLDER_READ_PERMISSION);
+//        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+//        client.execute(inviteRequest);
+//
+//        checkFilePermission(client2.getValues().getUserId(), ObjectPermission.READ, itm.getAction(file.getId()));
+//    }
+//
+//    public void testInviteFolderInternal() throws Exception {
+//        DriveShareTarget target = new DriveShareTarget();
+//        target.setDrivePath("/" + folder.getFolderName());
+//        target.setChecksum(DriveConstants.EMPTY_MD5);
+//        InternalRecipient recipient = new InternalRecipient();
+//        recipient.setEntity(client2.getValues().getUserId());
+//        recipient.setBits(FOLDER_READ_PERMISSION);
+//        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+//        client.execute(inviteRequest);
+//
+//        checkFolderPermission(client2.getValues().getUserId(), FOLDER_READ_PERMISSION, ftm2.getFolderFromServer(folder.getObjectID()));
+//    }
+//
+//    public void testInviteFileExternal() throws Exception {
+//        DriveShareTarget target = new DriveShareTarget();
+//        target.setDrivePath("/" + folder2.getFolderName());
+//        target.setName(file.getFileName());
+//        target.setChecksum(file.getFileMD5Sum());
+//        AnonymousRecipient recipient = new AnonymousRecipient();
 //        recipient.setBits(FOLDER_READ_PERMISSION);
 //        recipient.setPassword(PASSWORD);
 //        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
@@ -202,41 +174,69 @@ public class InviteTest extends AbstractDriveShareTest {
 //        }
 //        assertNotNull("Missing share.", share);
 //
-//        GuestClient guestClient = new GuestClient(share.getShareURL(null, null), null, recipient.getPassword());
+//        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
 //        InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
 //        checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
 //    }
-
-    public void testInviteFolderExternal() throws Exception {
-        DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
-        target.setChecksum(DriveConstants.EMPTY_MD5);
-        AnonymousRecipient recipient = new AnonymousRecipient();
-        recipient.setBits(FOLDER_READ_PERMISSION);
-        recipient.setPassword(PASSWORD);
-        recipient.setBits(FOLDER_READ_PERMISSION);
-        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
-        client.execute(inviteRequest);
-
-        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
-        DriveShareInfo share = null;
-        for (DriveShareInfo parsedShare : allShares) {
-            DriveShareTarget parsedShareTarget = parsedShare.getDriveShare().getTarget();
-            if (parsedShareTarget.equals(target)) {
-                share = parsedShare;
-                break;
-            }
-        }
-        assertNotNull("Missing share.", share);
-
-        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
-        FolderTestManager ftmGuest = new FolderTestManager(guestClient);
-        checkFolderPermission(guestClient.getValues().getUserId(), FOLDER_READ_PERMISSION, ftmGuest.getFolderFromServer(folder.getObjectID()));
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        itm.cleanUp();
-        super.tearDown();
-    }
-}
+//
+////    // Debug local stuff.
+////    public void testInviFileExternal2() throws Exception {
+////        DriveShareTarget target = new DriveShareTarget();
+////        target.setPath("/" + folder2.getFolderName());
+////        target.setName(file.getFileName());
+////        target.setChecksum(file.getFileMD5Sum());
+////        GuestRecipient recipient = new GuestRecipient();
+////        recipient.setEmailAddress("martin.herfurth@context4712.devel.open-xchange.com");
+////        recipient.setBits(FOLDER_READ_PERMISSION);
+////        recipient.setPassword(PASSWORD);
+////        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+////        client.execute(inviteRequest);
+////
+////        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
+////        DriveShareInfo share = null;
+////        for (DriveShareInfo parsedShare : allShares) {
+////            if (parsedShare.getDriveShare().getTarget().equals(target)) {
+////                share = parsedShare;
+////                break;
+////            }
+////        }
+////        assertNotNull("Missing share.", share);
+////
+////        GuestClient guestClient = new GuestClient(share.getShareURL(null, null), null, recipient.getPassword());
+////        InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
+////        checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
+////    }
+//
+//    public void testInviteFolderExternal() throws Exception {
+//        DriveShareTarget target = new DriveShareTarget();
+//        target.setDrivePath("/" + folder.getFolderName());
+//        target.setChecksum(DriveConstants.EMPTY_MD5);
+//        AnonymousRecipient recipient = new AnonymousRecipient();
+//        recipient.setBits(FOLDER_READ_PERMISSION);
+//        recipient.setPassword(PASSWORD);
+//        recipient.setBits(FOLDER_READ_PERMISSION);
+//        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+//        client.execute(inviteRequest);
+//
+//        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
+//        DriveShareInfo share = null;
+//        for (DriveShareInfo parsedShare : allShares) {
+//            DriveShareTarget parsedShareTarget = parsedShare.getDriveShare().getTarget();
+//            if (parsedShareTarget.equals(target)) {
+//                share = parsedShare;
+//                break;
+//            }
+//        }
+//        assertNotNull("Missing share.", share);
+//
+//        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
+//        FolderTestManager ftmGuest = new FolderTestManager(guestClient);
+//        checkFolderPermission(guestClient.getValues().getUserId(), FOLDER_READ_PERMISSION, ftmGuest.getFolderFromServer(folder.getObjectID()));
+//    }
+//
+//    @Override
+//    public void tearDown() throws Exception {
+//        itm.cleanUp();
+//        super.tearDown();
+//    }
+//}

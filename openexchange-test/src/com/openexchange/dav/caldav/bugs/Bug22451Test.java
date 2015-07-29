@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -66,20 +68,17 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link Bug22451Test} - Wrong until date after exporting and importing recurring appointment
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22451Test extends CalDAVTest {
 
-	public Bug22451Test(String name) {
-		super(name);
-	}	
-	
+	@Test
 	public void testUntilDate() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create appointment series on server
 		 */
@@ -122,7 +121,7 @@ public class Bug22451Test extends CalDAVTest {
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
             int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
-            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : 
+            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) :
                 rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());
@@ -136,7 +135,7 @@ public class Bug22451Test extends CalDAVTest {
             assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         }
         /*
-         * verify appointments on server        
+         * verify appointments on server
          */
         List<Appointment> updates = super.getManager().updates(parse(getDefaultFolderID()), clientLastModified, false);
         assertNotNull("no updates found on server", updates);
@@ -167,7 +166,7 @@ public class Bug22451Test extends CalDAVTest {
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
             int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
-            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : 
+            String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) :
                 rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());

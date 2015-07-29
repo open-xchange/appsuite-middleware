@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +60,7 @@ import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -80,15 +82,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug36943Test extends CalDAVTest {
 
-    /**
-     * Initializes a new {@link Bug36943Test}.
-     *
-     * @param name The test name
-     */
-    public Bug36943Test(String name) {
-        super(name);
-    }
-
+    @Test
     public void testVEventWithAstralSymbols() throws Exception {
         /*
          * create appointment
@@ -117,6 +111,7 @@ public class Bug36943Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", expectedTitle, iCalResource.getVEvent().getSummary());
     }
 
+    @Test
     public void testVTodoWithAstralSymbols() throws Exception {
         /*
          * create VTODO
@@ -145,6 +140,7 @@ public class Bug36943Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", expectedTitle, iCalResource.getVTodo().getSummary());
     }
 
+    @Test
     public void testCreateCollectionWithAstralSymbols() throws Exception {
         /*
          * perform mkcalendar request
@@ -188,6 +184,7 @@ public class Bug36943Test extends CalDAVTest {
         assertNotNull("no response for new folder", folderResponse);
     }
 
+    @Test
     public void testRenameCollectionWithAstralSymbols() throws Exception {
         /*
          * create calendar folder on server

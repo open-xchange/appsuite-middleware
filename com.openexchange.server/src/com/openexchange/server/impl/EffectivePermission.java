@@ -398,6 +398,58 @@ public class EffectivePermission extends OCLPermission {
         return (getDeletePermission() >= DELETE_ALL_OBJECTS);
     }
 
+    /**
+     * Gets a value indicating whether the user's permissions allow public folder access, i.e. the bit
+     * {@link UserPermissionBits#EDIT_PUBLIC_FOLDERS} is set or not.
+     *
+     * @return <code>true</code> if public folder access is available, <code>false</code>, otherwise
+     */
+    public boolean hasFullPublicFolderAccess() {
+        return permissionBits.hasFullPublicFolderAccess();
+    }
+
+    /**
+     * Gets a value indicating whether the user's permissions allow shared folder access, i.e. the bit
+     * {@link UserPermissionBits#READ_CREATE_SHARED_FOLDERS} is set or not.
+     *
+     * @return <code>true</code> if shared folder access is available, <code>false</code>, otherwise
+     */
+    public boolean hasFullSharedFolderAccess() {
+        return permissionBits.hasFullSharedFolderAccess();
+    }
+
+    /**
+     * Gets the underlying folder's type.
+     *
+     * @return The folder type
+     */
+    public int getFolderType() {
+        if (0 >= folderType) {
+            try {
+                folderType = new OXFolderAccess(permissionBits.getContext()).getFolderType(getFuid(), permissionBits.getUserId());
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return folderType;
+    }
+
+    /**
+     * Gets the underlying folder's module.
+     *
+     * @return The folder module
+     */
+    public int getFolderModule() {
+        if (0 >= folderModule) {
+            try {
+                folderModule = new OXFolderAccess(permissionBits.getContext()).getFolderModule(getFuid());
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return folderModule;
+    }
+
     public OCLPermission getUnderlyingPermission() {
         if (underlyingPerm == null) {
             underlyingPerm = new OCLPermission();

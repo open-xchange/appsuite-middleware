@@ -83,6 +83,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
+
     private static enum RampUpKey {
 
         SERVER_CONFIG("serverConfig"),
@@ -134,7 +137,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             public Object call() throws Exception {
                 try {
                     JSONObject folderlist = new JSONObject(2);
-                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(), null, session).getResultObject());
+                    folderlist.put("1", ox.perform(request().module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,3010,3020,3030").format("json").build(loginRequest), null, session).getResultObject());
                     return folderlist;
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -149,12 +152,12 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             public Object call() throws Exception {
                 JSONObject folder = new JSONObject(3);
                 try {
-                    folder.put("1", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+                    folder.put("1", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
                 try {
-                    folder.put("default0/INBOX", ox.perform(request().module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+                    folder.put("default0/INBOX", ox.perform(request().module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
@@ -168,12 +171,13 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             public Object call() throws Exception {
                 try {
                     JSONObject jslobs = new JSONObject();
-                    JSONArray lobs = (JSONArray) ox.perform(request()
+                    AJAXRequestData build = request()
                         .module("jslob")
                         .action("list")
                         .data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")
                             ), "json"
-                        ).format("json").build(), null, session).getResultObject();
+                        ).format("json").build(loginRequest);
+                    JSONArray lobs = (JSONArray) ox.perform(build, null, session).getResultObject();
                     for(int i = 0, size = lobs.length(); i < size; i++) {
                         JSONObject lob = lobs.getJSONObject(i);
                         jslobs.put(lob.getString("id"), lob);
@@ -181,6 +185,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return jslobs;
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
+                    LOG.error("Error during {} ramp-up", RampUpKey.JSLOBS.key, x);
                 }
                 return null;
             }
@@ -190,7 +195,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
-                AJAXRequestData manifestRequest = request().module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build();
+                AJAXRequestData manifestRequest = request().module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build(loginRequest);
                 try {
                     return ox.perform(manifestRequest, null, session).getResultObject();
                 } catch (OXException x) {
@@ -207,18 +212,18 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 JSONObject oauth = new JSONObject(3);
 
                 try {
-                    oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(), null, session).getResultObject());
+                    oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
                 try {
-                    oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(), null, session).getResultObject());
+                    oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
 
                 try {
-                    oauth.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
+                    oauth.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
@@ -231,7 +236,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Object call() throws Exception {
                 try {
-                    return ox.perform(request().module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(), null, session).getResultObject();
+                    return ox.perform(request().module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(loginRequest), null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
@@ -244,7 +249,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Object call() throws Exception {
                 try {
-                    return ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043").build(), null, session).getResultObject();
+                    return ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043").build(loginRequest), null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }

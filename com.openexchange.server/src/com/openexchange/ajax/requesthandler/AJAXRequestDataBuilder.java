@@ -148,9 +148,15 @@ public class AJAXRequestDataBuilder {
         return this;
     }
 
-    public AJAXRequestData build() {
+    public AJAXRequestData build(AJAXRequestData original) {
         if (!formatSpecified) {
             format("native");
+        }
+        if (null != original) {
+            data.setHostname(original.getHostname());
+            data.setPrefix(original.getPrefix());
+            data.setRoute(original.getRoute());
+            data.setServerPort(original.getServerPort());
         }
         return data;
     }

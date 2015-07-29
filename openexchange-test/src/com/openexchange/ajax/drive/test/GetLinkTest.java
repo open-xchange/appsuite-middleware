@@ -51,9 +51,7 @@ package com.openexchange.ajax.drive.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
@@ -72,7 +70,6 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.TestInit;
 
 /**
@@ -90,7 +87,7 @@ public class GetLinkTest extends AbstractDriveShareTest {
 
     /**
      * Initializes a new {@link GetLinkTest}.
-     * 
+     *
      * @param name
      */
     public GetLinkTest(String name) {
@@ -119,60 +116,53 @@ public class GetLinkTest extends AbstractDriveShareTest {
 
     public void testGetFileLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder2.getFolderName());
+        target.setDrivePath("/" + folder2.getFolderName());
         target.setName(file.getFileName());
         target.setChecksum(file.getFileMD5Sum());
         performTest(target);
     }
-    
+
     public void testGetFolderLink() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
+        target.setDrivePath("/" + folder.getFolderName());
         target.setChecksum(DriveConstants.EMPTY_MD5);
         performTest(target);
     }
-    
+
     public void testBadFileChecksum() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder2.getFolderName());
+        target.setDrivePath("/" + folder2.getFolderName());
         target.setName(file.getFileName());
         target.setChecksum("bad");
 
-        int bits = createAnonymousGuestPermission().getPermissionBits();
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, false);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target, false);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
         assertTrue("Expected error.", getLinkResponse.hasError());
         assertTrue("Wrong exception", DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
     }
-    
+
     public void testBadDirectoryChecksum() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
+        target.setDrivePath("/" + folder.getFolderName());
         target.setChecksum("bad");
 
-        int bits = createAnonymousGuestPermission().getPermissionBits();
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, false);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target, false);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
         assertTrue("Expected error.", getLinkResponse.hasError());
         assertTrue("Wrong exception", DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.equals(getLinkResponse.getException()));
     }
 
     private void performTest(DriveShareTarget target) throws OXException, IOException, JSONException, Exception {
-        int bits = createAnonymousGuestPermission().getPermissionBits();
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
-        String token = getLinkResponse.getToken();
         String url = getLinkResponse.getUrl();
 
-        GuestClient guestClient = resolveShare(url, null, password);
+        GuestClient guestClient = resolveShare(url, null, null);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkShareAccessible(expectedPermission);
 
-        client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), token));
+        client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), target));
         assertNull("Share was not deleted", discoverShare(guestClient.getValues().getUserId(), rootFolder.getObjectID(), file.getId()));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertNull("Permission was not deleted", objectPermissions);

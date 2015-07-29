@@ -49,10 +49,12 @@
 
 package com.openexchange.dav.caldav.tests;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -61,16 +63,13 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link NewTest} - Tests appointment creation via the CalDAV interface 
- * 
+ * {@link NewTest} - Tests appointment creation via the CalDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class NewTest extends CalDAVTest {
 
-	public NewTest(String name) {
-		super(name);
-	}	
-	
+	@Test
 	public void testCreateSimpleOnClient() throws Exception {
 		/*
 		 * create appointment on client
@@ -87,7 +86,7 @@ public class NewTest extends CalDAVTest {
          */
         Appointment appointment = super.getAppointment(uid);
         super.rememberForCleanUp(appointment);
-        assertEquals(appointment, start, end, uid, summary, location);
+        assertAppointmentEquals(appointment, start, end, uid, summary, location);
         /*
          * verify appointment on client
          */
@@ -97,12 +96,13 @@ public class NewTest extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
-	
+
+	@Test
 	public void testCreateSimpleOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create appointment on server
 		 */
@@ -124,7 +124,8 @@ public class NewTest extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
-	
+
+	@Test
 	public void testCreateAllDayOnClient() throws Exception {
 		/*
 		 * create appointment on client
@@ -133,7 +134,7 @@ public class NewTest extends CalDAVTest {
     	String summary = "test all day";
     	Date start = TimeTools.D("midnight");
     	Date end = TimeTools.D("tomorrow at midnight");
-    	String iCal = 
+    	String iCal =
     			"BEGIN:VCALENDAR" + "\r\n" +
     			"VERSION:2.0" + "\r\n" +
     			"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
@@ -171,12 +172,13 @@ public class NewTest extends CalDAVTest {
         assertEquals("START wrong", start, iCalResource.getVEvent().getDTStart());
         assertEquals("END wrong", end, iCalResource.getVEvent().getDTEnd());
 	}
-	
+
+	@Test
 	public void testAllDayOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create appointment on server
 		 */
@@ -186,7 +188,7 @@ public class NewTest extends CalDAVTest {
     	Date start = TimeTools.D("next monday at midnight");
     	Calendar calendar = Calendar.getInstance();
     	calendar.setTime(start);
-    	calendar.add(Calendar.DAY_OF_YEAR, 1);    	
+    	calendar.add(Calendar.DAY_OF_YEAR, 1);
     	Date end = calendar.getTime();
 		Appointment appointment = generateAppointment(start, end, uid, summary, location);
 		appointment.setFullTime(true);
@@ -204,7 +206,8 @@ public class NewTest extends CalDAVTest {
         assertEquals("START wrong", start, iCalResource.getVEvent().getDTStart());
         assertEquals("END wrong", end, iCalResource.getVEvent().getDTEnd());
 	}
-	
+
+	@Test
 	public void testCreateWithDifferentName() throws Exception {
 		/*
 		 * create appointment on client
@@ -222,7 +225,7 @@ public class NewTest extends CalDAVTest {
          */
         Appointment appointment = super.getAppointment(uid);
         super.rememberForCleanUp(appointment);
-        assertEquals(appointment, start, end, uid, summary, location);
+        assertAppointmentEquals(appointment, start, end, uid, summary, location);
         /*
          * verify appointment on client
          */
@@ -232,5 +235,5 @@ public class NewTest extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
 	}
-	
+
 }

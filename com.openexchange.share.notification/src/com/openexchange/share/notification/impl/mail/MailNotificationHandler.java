@@ -61,6 +61,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.impl.LinkCreatedNotification;
 import com.openexchange.share.notification.impl.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.impl.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.ShareNotification;
@@ -100,6 +101,10 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
                     sendShareCreated(notification);
                     break;
 
+                case LINK_CREATED:
+                    sendLinkCreated(notification);
+                    break;
+
                 case CONFIRM_PASSWORD_RESET:
                     sendPasswordResetConfirm(notification);
                     break;
@@ -118,6 +123,17 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         TransportProvider transportProvider = getTransportProvider();
         ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ShareCreatedMail.init(casted, transportProvider, services).compose();
+        if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
+        } else {
+            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+        }
+    }
+
+    private void sendLinkCreated(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        TransportProvider transportProvider = getTransportProvider();
+        LinkCreatedNotification<InternetAddress> casted = (LinkCreatedNotification<InternetAddress>) notification;
+        ComposedMailMessage mail = LinkCreatedMail.init(casted, transportProvider, services).compose();
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {

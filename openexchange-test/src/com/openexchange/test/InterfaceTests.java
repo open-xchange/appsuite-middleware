@@ -101,10 +101,10 @@ public final class InterfaceTests {
         // TODO: enable when MSLiveOAuthClient is implemented
         // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
 
-        tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
-        tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
-        tests.addTest(com.openexchange.dav.carddav.tests.CardDAVTestSuite.suite());
-        tests.addTest(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.tests.CalDAVTestSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.tests.CardDAVTestSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class));
 
         tests.addTest(com.openexchange.grizzly.GrizzlyTestSuite.suite());
 

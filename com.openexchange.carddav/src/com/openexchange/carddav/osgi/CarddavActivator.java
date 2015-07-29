@@ -50,6 +50,8 @@
 package com.openexchange.carddav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -57,6 +59,10 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
@@ -93,6 +99,12 @@ public class CarddavActivator extends HousekeepingActivator {
             CardDAV servlet = new CardDAV(this, performer);
             getService(HttpService.class).registerServlet("/servlet/dav/carddav", servlet, null, null);
             registerService(PathRegistration.class, new PathRegistration("carddav"));
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CARDDAV.getCapabilityName());
+                }
+            });
             /*
              * track vCard storage service
              */
@@ -123,6 +135,15 @@ public class CarddavActivator extends HousekeepingActivator {
             httpService.unregister("/servlet/dav/carddav");
         }
         super.stopBundle();
+    }
+
+    private static final class OAuthStrings implements LocalizableStrings {
+
+        // Application 'xyz' requires following permissions:
+        //  - Synchronize your address books and contacts.
+        //  - ...
+        public static final String SYNC_CONTACTS = "Synchronize your address books and contacts.";
+
     }
 
 }

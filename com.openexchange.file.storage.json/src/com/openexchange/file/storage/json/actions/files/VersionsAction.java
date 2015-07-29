@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. The timestamp is the timestamp relating to the requested infostore item.")
-public class VersionsAction extends AbstractFileAction {
+public class VersionsAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
@@ -85,10 +85,28 @@ public class VersionsAction extends AbstractFileAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        List<Field> columns = new ArrayList<File.Field>(request.getFieldsToLoad());
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
         if(!columns.contains(File.Field.VERSION)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
             columns.add(File.Field.VERSION);
         }
+
         final Field sortingField = request.getSortingField();
         final SortDirection sortingOrder = request.getSortingOrder();
         TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, sortingField, sortingOrder);

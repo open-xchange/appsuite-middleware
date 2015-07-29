@@ -64,8 +64,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -76,6 +74,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -88,7 +87,6 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -98,16 +96,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
-import com.openexchange.share.RequestContext;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -121,6 +114,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
+
+    protected static final String RECURSION_MARKER = AbstractUserizedFolderPerformer.class.getName() + ".RECURSION_MARKER";
 
     private static final String DUMMY_ID = "dummyId";
     private static final Pattern IS_NUMBERED_PARENTHESIS = Pattern.compile("\\(\\d+\\)$");
@@ -611,65 +606,35 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param ownedBy The identifier of the user considered as the owner of the folder
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
-     * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
-     *            upon share creation
+     * @param comparedPermissions The compared permissions
      * @param connection The database connection to use or <code>null</code>
      */
-    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
-        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-        ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
+    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, ComparedFolderPermissions comparedPermissions, Connection connection) throws OXException {
+        if (comparedPermissions.hasNewGuests()) {
+            Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, comparedPermissions.getNewGuestPermissions());
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
 
-        CreatedShares shares = null;
-        try {
-            session.setParameter(Connection.class.getName(), connection);
-            for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
-                List<GuestPermission> permissions = entry.getValue();
-                List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
-                for (GuestPermission permission : permissions) {
-                    recipients.add(permission.getRecipient());
-                }
-                shares = shareService.addTarget(session, entry.getKey(), recipients);
-                if (null == shares || shares.size() != permissions.size()) {
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
-                }
-                for (GuestPermission permission : permissions) {
-                    CreatedShare share = shares.getShare(permission.getRecipient());
-                    permission.setEntity(share.getGuestInfo().getGuestID());
-                }
-            }
-        } finally {
-            session.setParameter(Connection.class.getName(), null);
-        }
-
-        RequestContext requestContext = Tools.getRequestContext(session, decorator);
-        if (requestContext == null) {
-            StringBuilder addresses = new StringBuilder();
-            boolean first = true;
-            for (ShareRecipient recipient : shares.getRecipients()) {
-                if (recipient instanceof GuestRecipient) {
-                    String address = ((GuestRecipient)recipient).getEmailAddress();
-                    if (first){
-                        addresses.append(address);
-                        first = false;
-                    } else {
-                        addresses.append(", ").append(address);
+            CreatedShares shares = null;
+            try {
+                session.setParameter(Connection.class.getName(), connection);
+                for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
+                    List<GuestPermission> permissions = entry.getValue();
+                    List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
+                    for (GuestPermission permission : permissions) {
+                        recipients.add(permission.getRecipient());
+                    }
+                    shares = shareService.addTarget(session, entry.getKey(), recipients);
+                    if (null == shares || shares.size() != permissions.size()) {
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+                    }
+                    for (GuestPermission permission : permissions) {
+                        CreatedShare share = shares.getShare(permission.getRecipient());
+                        permission.setEntity(share.getGuestInfo().getGuestID());
+                        comparedPermissions.rememberGuestInfo(share.getGuestInfo());
                     }
                 }
-            }
-
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.", addresses.toString());
-            Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
-            logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
-            if (storageParameters != null) {
-                storageParameters.addWarning(e);
-            }
-        } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, shares, null, session, requestContext);
-            if (storageParameters != null) {
-                for (OXException warning : warnings) {
-                    storageParameters.addWarning(warning);
-                }
+            } finally {
+                session.setParameter(Connection.class.getName(), null);
             }
         }
     }
@@ -691,7 +656,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
         for (GuestPermission permission : permissions) {
             ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
-            target.setExpiryDate(permission.getExpiryDate());
             target.setOwnedBy(ownedBy);
             List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
             if (null == exitingPermissions) {
@@ -704,25 +668,32 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Verifies that all added or modified permissions for guest users are read-only if they are anonymous.
+     * Verifies that a permission change is valid in terms of anonymous guest users. I.e.:
+     * <ul>
+     *  <li>every folder can carry at most one anonymous guest permission</li>
+     *  <li>anonymous guest permissions must be read-only</li>
+     *  <li>existing anonymous guests must not be added as permission entities (only new ones are allowed)</li>
+     * </ul>
      *
      * @param comparedPermissions The compared permissions
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkAnonymousPermissions(ComparedPermissions comparedPermissions) throws OXException {
+    protected void checkAnonymousPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
         if (comparedPermissions.hasAddedGuests()) {
-            List<User> addedGuests = comparedPermissions.getAddedGuests();
-            for (User addedGuest : addedGuests) {
-                if (isAnonymous(addedGuest)) {
-                    checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
+            List<Integer> addedGuests = comparedPermissions.getAddedGuests();
+            for (Integer addedGuest : addedGuests) {
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(addedGuest);
+                if (isAnonymous(guestInfo) && isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
+                    Permission permission = comparedPermissions.getAddedGuestPermission(addedGuest);
+                    throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
                 }
             }
         }
 
         if (comparedPermissions.hasModifiedGuests()) {
-            for (User guest : comparedPermissions.getModifiedGuests()) {
-                if (isAnonymous(guest)) {
-                    checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
+            for (Integer guest : comparedPermissions.getModifiedGuests()) {
+                if (isAnonymous(comparedPermissions.getGuestInfo(guest))) {
+                    checkReadOnly(folder, comparedPermissions.getModifiedGuestPermission(guest));
                 }
             }
         }
@@ -730,23 +701,27 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasNewGuests()) {
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
-                    checkReadOnly(guestPermission);
+                    checkReadOnly(folder, guestPermission);
                 }
             }
         }
     }
 
-    private static void checkReadOnly(Permission p) throws OXException {
+    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
+        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
+    }
+
+    private static void checkReadOnly(Folder folder, Permission p) throws OXException {
         boolean writeFolder = p.getFolderPermission() > Permission.READ_FOLDER;
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
         boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
         if (writeFolder || writeItems || deleteItems) {
-            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create();
+            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(p), p.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
         }
     }
 
-    private static boolean isAnonymous(User guest) {
-        return Strings.isEmpty(guest.getMail());
+    private static boolean isAnonymous(GuestInfo guestInfo) {
+        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

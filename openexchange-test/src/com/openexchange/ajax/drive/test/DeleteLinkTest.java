@@ -50,9 +50,7 @@
 package com.openexchange.ajax.drive.test;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import com.openexchange.ajax.drive.action.DeleteLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkRequest;
 import com.openexchange.ajax.drive.action.GetLinkResponse;
@@ -67,7 +65,6 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.TestInit;
 
 /**
@@ -108,22 +105,19 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
 
     public void testDelete() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
-        target.setPath("/" + folder.getFolderName());
+        target.setDrivePath("/" + folder.getFolderName());
         target.setName(file.getFileName());
         target.setChecksum(file.getFileMD5Sum());
-        int bits = createAnonymousGuestPermission().getPermissionBits();
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
-        String token = getLinkResponse.getToken();
         String url = getLinkResponse.getUrl();
 
-        GuestClient guestClient = resolveShare(url, null, password);
+        GuestClient guestClient = resolveShare(url, null, null);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkShareAccessible(expectedPermission);
 
-        client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), token));
+        client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), target));
         assertNull("Share was not deleted", discoverShare(guestClient.getValues().getUserId(), rootFolder.getObjectID(), file.getId()));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertNull("Permission was not deleted", objectPermissions);

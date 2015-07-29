@@ -54,10 +54,9 @@ import java.util.Iterator;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -74,7 +73,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
 
     private FileStorageGuestObjectPermission perm;
     private File file;
-    private ParsedShare share;
+    private ExtendedPermissionEntity guest;
 
     public ShowSharedFilesFolderTest(String name) {
         super(name);
@@ -85,19 +84,19 @@ public class ShowSharedFilesFolderTest extends ShareTest {
         super.setUp();
         perm = randomGuestObjectPermission();
         file = insertSharedFile(client.getValues().getPrivateInfostoreFolder(), perm);
-        FileStorageObjectPermission matchingFolderPermission = null;
+        FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingFolderPermission = permission;
+                matchingPermission = permission;
                 break;
             }
         }
 
-        assertNotNull("No matching permission for created file found.", matchingFolderPermission);
-        checkPermissions(perm, matchingFolderPermission);
+        assertNotNull("No matching permission for created file found.", matchingPermission);
+        checkPermissions(perm, matchingPermission);
 
-        share = discoverShare(matchingFolderPermission.getEntity(), client.getValues().getPrivateInfostoreFolder(), file.getId());
-        checkShare(perm, file, share);
+        guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(perm, guest);
     }
 
     @Override
@@ -107,11 +106,7 @@ public class ShowSharedFilesFolderTest extends ShareTest {
     }
 
     public void testShowSharedFilesFolder() throws Exception {
-        GuestClient guestClient = resolveShare(share, perm.getRecipient());
-        LoginResponse response = guestClient.getLoginResponse();
-        assertNotNull(response);
-        assertFalse(response.hasError());
-        assertNotNull(response.getSessionId());
+        GuestClient guestClient = resolveShare(guest, perm.getRecipient());
 
         ListRequest req = new ListRequest(EnumAPI.OX_NEW, 9);
         ListResponse res = guestClient.execute(req);

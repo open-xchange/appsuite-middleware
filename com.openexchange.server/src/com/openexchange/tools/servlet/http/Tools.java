@@ -54,18 +54,22 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
@@ -77,13 +81,22 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * Convenience methods for servlets.
@@ -91,6 +104,10 @@ import com.openexchange.tools.encoding.Helper;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    public static final String COM_OPENEXCHANGE_CHECK_URL_PARAMS = "com.openexchange.check.url.params";
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * DateFormat for HTTP header.
@@ -139,6 +156,8 @@ public final class Tools {
      * Pragma HTTP header value.
      */
     private static final String PRAGMA_VALUE = "no-cache";
+
+    private static final AtomicReference<ConfigurationService> CONFIG_SERVICE_REF = new AtomicReference<ConfigurationService>();
 
     static {
         /*
@@ -225,7 +244,7 @@ public final class Tools {
     public static void setETag(final String eTag, final long expiry, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         if (null != eTag) {
-            resp.setHeader(NAME_ETAG, eTag); // ETag
+            resp.setHeader(NAME_ETAG, eTag);// ETag
         }
         if (expiry <= 0) {
             synchronized (HEADER_DATEFORMAT) {
@@ -289,7 +308,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_HOUR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600"); // 1 hour
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600");// 1 hour
     }
 
     /**
@@ -301,7 +320,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018");// 1 year
     }
 
     /**
@@ -652,6 +671,21 @@ public final class Tools {
     }
 
     /**
+     * Creates a new {@link HostData} instance based on the given servlet request and an optional
+     * user information.
+     *
+     * @param servletRequest The servlet request
+     * @param contextId The context id or <code>-1</code> if none is available
+     * @param userId The user id or <code>-1</code> if none is available
+     * @return The host data
+     */
+    public static HostData createHostData(HttpServletRequest request, int contextId, int userId) {
+        String hostname = determineHostname(request, contextId, userId);
+        String servletPrefix = determineServletPrefix();
+        return new HostDataImpl(considerSecure(request), hostname, request.getServerPort(), request.getSession(true).getId(), servletPrefix);
+    }
+
+    /**
      * Sends an error response having a JSON body using given HTTP response
      *
      * @param httpResponse The HTTP response to use
@@ -661,7 +695,7 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
-        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap(), body);
     }
 
     /**
@@ -697,7 +731,7 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
-        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap());
     }
 
     /**
@@ -721,6 +755,7 @@ public final class Tools {
 
     /**
      * Sends an HTML error page to HTTP response.
+     *
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @param desc The error description
@@ -808,4 +843,103 @@ public final class Tools {
         return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
     }
 
+    private static String determineServletPrefix() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(Tools.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+
+                @Override
+                public String call(DispatcherPrefixService service) throws Exception {
+                    return service.getPrefix();
+                }
+            }, DispatcherPrefixService.DEFAULT_PREFIX);
+        } catch (ServiceException e) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+    }
+
+    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId) {
+        String hostname = null;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(Tools.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getHostname(userId, contextId);
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+
+        if (hostname == null) {
+            hostname = servletRequest.getServerName();
+        }
+
+        return hostname;
+    }
+
+    /**
+     * Checks the existence of the given parameters within the request URL and throws an exception if at least one param hurts this rule. If the {@link ConfigurationService} is <code>null</code> no check is performed
+     *
+     * @param req - the request to look for URL
+     * @param parameters - the URL parameter that should not occur
+     * @throws OXException - if the parameters was sent by the client
+     */
+    public static void checkNonExistence(final HttpServletRequest req, String... parameters) throws OXException {
+        ConfigurationService configService = CONFIG_SERVICE_REF.get();
+        if ((configService == null) || (req == null) || (parameters == null)) {
+            LOG.debug("One of the provided parameters is null. Return without checking parameters.");
+            return;
+        }
+        if (!configService.getBoolProperty(COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)) {
+            LOG.debug(COM_OPENEXCHANGE_CHECK_URL_PARAMS + " configured to false. return without checking parameters.");
+            return;
+        }
+
+        String queryString = req.getQueryString();
+        if ((queryString == null) || (queryString.isEmpty())) {
+            return;
+        }
+
+        Map<String, List<String>> parameterMap = null;
+        try {
+            parameterMap = splitQuery(queryString);
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("Unable to analyze query string. Will not check for undesired URI params.", e);
+            return;
+        }
+        if (parameterMap == null) {
+            return;
+        }
+
+        List<String> notAllowed = new ArrayList<>();
+        for (String parameter : parameters) {
+            if (parameterMap.containsKey(parameter)) {
+                notAllowed.add(parameter);
+            }
+        }
+
+        if (!notAllowed.isEmpty()) {
+            throw AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.create(Strings.concat(", ", notAllowed));
+        }
+    }
+
+    private static Map<String, List<String>> splitQuery(String queryString) throws UnsupportedEncodingException {
+        final Map<String, List<String>> queryPairs = new LinkedHashMap<String, List<String>>();
+        final String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            final int idx = pair.indexOf("=");
+            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), Charsets.UTF_8_NAME) : pair;
+            if (!queryPairs.containsKey(key)) {
+                queryPairs.put(key, new LinkedList<String>());
+            }
+            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), Charsets.UTF_8_NAME) : null;
+            queryPairs.get(key).add(value);
+        }
+        return queryPairs;
+    }
+
+    public static void setConfigurationService(final ConfigurationService configurationService) {
+        CONFIG_SERVICE_REF.set(configurationService);
+    }
 }

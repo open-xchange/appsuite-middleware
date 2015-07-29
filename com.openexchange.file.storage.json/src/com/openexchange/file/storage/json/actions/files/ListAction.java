@@ -74,7 +74,7 @@ import com.openexchange.groupware.results.TimedResult;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for infoitems are defined in Common object data and Detailed infoitem data.")
 }, requestBody = "An array with object IDs of requested infoitems. ",
 responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class ListAction extends AbstractFileAction {
+public class ListAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
@@ -89,7 +89,6 @@ public class ListAction extends AbstractFileAction {
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-
         if(!columns.contains(File.Field.ID)) {
             if(!copy) {
                 columns = new ArrayList<File.Field>(columns);

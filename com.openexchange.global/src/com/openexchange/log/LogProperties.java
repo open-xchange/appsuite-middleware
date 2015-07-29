@@ -246,6 +246,10 @@ public final class LogProperties {
          */
         MAIL_LOGIN("com.openexchange.mail.login"),
         /**
+         * com.openexchange.mail.command
+         */
+        MAIL_COMMAND("com.openexchange.mail.command"),
+        /**
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),

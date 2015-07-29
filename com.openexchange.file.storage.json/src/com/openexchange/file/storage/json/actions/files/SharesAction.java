@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -71,14 +73,30 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "sort", optional = true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
 }, responseDescription = "Response: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class SharesAction extends AbstractFileAction {
+public class SharesAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         IDBasedFileAccess fileAccess = request.getFileAccess();
         Field sortingField = request.getSortingField();
         SortDirection sortDirection = request.getSortingOrder();
-        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(request.getFieldsToLoad(), sortingField, sortDirection);
+
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
+        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(columns, sortingField, sortDirection);
         if (Field.CREATED_BY.equals(sortingField)) {
             searchIterator = CreatedByComparator.resort(request.getSession(), searchIterator, sortDirection);
         }

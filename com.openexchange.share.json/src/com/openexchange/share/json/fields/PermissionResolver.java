@@ -53,12 +53,14 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static org.slf4j.LoggerFactory.getLogger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -179,8 +181,10 @@ public class PermissionResolver {
         GuestInfo guest = knownGuests.get(key);
         if (null == guest) {
             try {
-                guest = services.getService(ShareService.class).getGuest(session.getContextId(), guestID);
-                knownGuests.put(key, guest);
+                guest = services.getService(ShareService.class).getGuestInfo(session.getContextId(), guestID);
+                if (guest != null) {
+                    knownGuests.put(key, guest);
+                }
             } catch (OXException e) {
                 getLogger(PermissionResolver.class).error("Error getting guest {}", key, e);
             }
@@ -338,26 +342,45 @@ public class PermissionResolver {
          * fetch users & user contacts
          */
         if (0 < userIDs.size()) {
-            int[] ids = I2i(userIDs);
+            List<Integer> guestUserIDs = new ArrayList<Integer>();
+            List<Integer> regularUserIDs = new ArrayList<Integer>();
             try {
-                for (User user : services.getService(UserService.class).getUser(session.getContext(), ids)) {
-                    knownUsers.put(I(user.getId()), user);
+                for (User user : services.getService(UserService.class).getUser(session.getContext(), I2i(userIDs))) {
+                    Integer id = I(user.getId());
+                    knownUsers.put(id, user);
+                    if (user.isGuest()) {
+                        guestUserIDs.add(id);
+                    } else {
+                        regularUserIDs.add(id);
+                    }
                 }
             } catch (OXException e) {
                 getLogger(PermissionResolver.class).error("Error getting users for permission entities", e);
             }
-            SearchIterator<Contact> searchIterator = null;
-            try {
-                searchIterator = services.getService(ContactService.class).getUsers(session, ids, CONTACT_FIELDS);
-                while (searchIterator.hasNext()) {
-                    Contact userContact = searchIterator.next();
-                    knownUserContacts.put(I(userContact.getInternalUserId()), userContact);
+            if (0 < regularUserIDs.size()) {
+                SearchIterator<Contact> searchIterator = null;
+                try {
+                    searchIterator = services.getService(ContactService.class).getUsers(session, I2i(regularUserIDs), CONTACT_FIELDS);
+                    while (searchIterator.hasNext()) {
+                        Contact userContact = searchIterator.next();
+                        knownUserContacts.put(I(userContact.getInternalUserId()), userContact);
+                    }
+                } catch (OXException e) {
+                    getLogger(PermissionResolver.class).error("Error getting user contacts for permission entities", e);
+                } finally {
+                    SearchIterators.close(searchIterator);
                 }
-            } catch (OXException e) {
-                getLogger(PermissionResolver.class).error("Error getting user contacts for permission entities", e);
-                e.printStackTrace();
-            } finally {
-                SearchIterators.close(searchIterator);
+            }
+            if (0 < guestUserIDs.size()) {
+                ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+                for (Integer guestID : guestUserIDs) {
+                    try {
+                        Contact guestContact = contactUserStorage.getGuestContact(session.getContextId(), i(guestID), CONTACT_FIELDS);
+                        knownUserContacts.put(guestID, guestContact);
+                    } catch (OXException e) {
+                        getLogger(PermissionResolver.class).error("Error getting user contact for guest permission entity", e);
+                    }
+                }
             }
         }
         /*

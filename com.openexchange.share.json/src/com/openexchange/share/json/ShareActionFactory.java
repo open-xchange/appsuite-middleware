@@ -62,9 +62,8 @@ import com.openexchange.share.json.actions.DeleteLinkAction;
 import com.openexchange.share.json.actions.GetAction;
 import com.openexchange.share.json.actions.GetLinkAction;
 import com.openexchange.share.json.actions.InviteAction;
-import com.openexchange.share.json.actions.NotifyAction;
+import com.openexchange.share.json.actions.SendLinkAction;
 import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
 
 
 /**
@@ -85,15 +84,14 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
     public ShareActionFactory(ServiceLookup services) {
         super();
         actions.put("all", new AllAction(services));
-        actions.put("notify", new NotifyAction(services));
         actions.put("delete", new DeleteAction(services));
         actions.put("get", new GetAction(services));
         actions.put("update", new UpdateLinkAction(services));
         actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
         actions.put("getLink", new GetLinkAction(services));
         actions.put("updateLink", new UpdateLinkAction(services));
         actions.put("deleteLink", new DeleteLinkAction(services));
+        actions.put("sendLink", new SendLinkAction(services));
     }
 
     @Override

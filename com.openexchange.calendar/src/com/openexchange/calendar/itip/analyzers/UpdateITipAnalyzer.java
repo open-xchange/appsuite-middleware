@@ -326,18 +326,18 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         Calendar originalLastTouched = null;
-        if (original.containsLastModified()) {
+        if (original.containsLastModified() && original.getLastModified() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             originalLastTouched.setTime(original.getLastModified());
-        } else if (original.containsCreationDate()) {
+        } else if (original.containsCreationDate() && original.getCreationDate() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             originalLastTouched.setTime(original.getCreationDate());
         }
         Calendar updateLastTouched = null;
-        if (update.containsLastModified()) {
+        if (update.containsLastModified() && update.getLastModified() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getLastModified());
-        } else if (update.containsCreationDate()) {
+        } else if (update.containsCreationDate() && update.getCreationDate() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getCreationDate());
         }

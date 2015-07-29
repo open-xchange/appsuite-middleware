@@ -49,10 +49,12 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.Test;
 import org.w3c.dom.Node;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
@@ -66,10 +68,7 @@ import com.openexchange.java.Strings;
  */
 public class Bug32897Test extends CalDAVTest {
 
-	public Bug32897Test(final String name) {
-		super(name);
-	}
-
+	@Test
 	public void testDefaultAlarms() throws Exception {
 	    /*
          * discover default alarms

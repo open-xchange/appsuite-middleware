@@ -49,15 +49,16 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link DeleteLinkAction}
@@ -69,6 +70,7 @@ public class DeleteLinkAction extends AbstractShareAction {
 
     /**
      * Initializes a new {@link DeleteLinkAction}.
+     *
      * @param services
      */
     public DeleteLinkAction(ServiceLookup services) {
@@ -78,16 +80,23 @@ public class DeleteLinkAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
-         * delete share by token
+         * parse parameters & target
          */
-        String token = requestData.requireParameter("token");
-        getShareService().deleteShares(session, Collections.singletonList(token));
+        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
+        JSONObject json = (JSONObject) requestData.requireData();
+        ShareTarget target = getParser().parseTarget(json);
         /*
-         * return empty result in case of success
+         * lookup share
          */
-        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-        result.setTimestamp(new Date());
-        return result;
+        ShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+        }
+        /*
+         * perform the deletion, return empty result in case of success
+         */
+        getShareService().deleteShare(session, shareInfo.getShare(), clientTimestamp);
+        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 
 }

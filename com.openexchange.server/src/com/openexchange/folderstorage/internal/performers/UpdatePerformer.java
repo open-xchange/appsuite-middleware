@@ -79,7 +79,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
@@ -135,8 +134,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(storageParameters, folderStorageDiscoverer);
     }
-
-    private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
 
     /**
      * Performs the <code>UPDATE</code> request.
@@ -231,13 +228,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final ComparedPermissions comparedPermissions = new ComparedPermissions(
-                getContext(),
-                folder,
-                storageFolder,
-                FolderStorageServices.requireService(UserService.class),
-                transactionManager.getConnection());
 
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
@@ -247,107 +240,111 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
             final boolean cascadePermissions = decorator.getBoolProperty("cascadePermissions");
 
-            /*
-             * Do move?
-             */
-            if (move) {
+            boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
+            if (!isRecursion) {
+                decorator.put(RECURSION_MARKER, true);
+            }
+            try {
                 /*
-                 * Move folder dependent on folder is virtual or not
+                 * Do move?
                  */
-                final String newParentId = folder.getParentID();
-                FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
-                if (null == newRealParentStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
-                }
-                FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, oldParentId);
-                if (null == realParentStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, oldParentId);
-                }
-                FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-                }
-                /*
-                 * ensure FileStorageFolderStorage is used for move operations to/from a file storage
-                 */
-                if (FileStorageContentType.getInstance().equals(realParentStorage.getDefaultContentType())) {
-                    newRealParentStorage = realParentStorage;
-                    realStorage = realParentStorage;
-                } else if (FileStorageContentType.getInstance().equals(newRealParentStorage.getDefaultContentType())) {
-                    realParentStorage = newRealParentStorage;
-                    realStorage = newRealParentStorage;
-                }
-                /*
-                 * Check for a folder with the same name below parent
-                 */
-                if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(newRealParentStorage, newParentId), treeId);
-                }
-                /*
-                 * Check for forbidden public mail folder
-                 */
-                if (CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
-                    boolean started = newRealParentStorage.startTransaction(storageParameters, true);
-                    boolean rollback = true;
-                    try {
-                        Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
-                        if (isPublicPimFolder(newParent)) {
-                            throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
-                        }
-                        if (started) {
-                            newRealParentStorage.commitTransaction(storageParameters);
-                            rollback = false;
-                        }
-                    } catch (RuntimeException e) {
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    } finally {
-                        if (started && rollback) {
-                            newRealParentStorage.rollback(storageParameters);
+                if (move) {
+                    /*
+                     * Move folder dependent on folder is virtual or not
+                     */
+                    final String newParentId = folder.getParentID();
+                    FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
+                    if (null == newRealParentStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
+                    }
+                    FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, oldParentId);
+                    if (null == realParentStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, oldParentId);
+                    }
+                    FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                    }
+                    /*
+                     * ensure FileStorageFolderStorage is used for move operations to/from a file storage
+                     */
+                    if (FileStorageContentType.getInstance().equals(realParentStorage.getDefaultContentType())) {
+                        newRealParentStorage = realParentStorage;
+                        realStorage = realParentStorage;
+                    } else if (FileStorageContentType.getInstance().equals(newRealParentStorage.getDefaultContentType())) {
+                        realParentStorage = newRealParentStorage;
+                        realStorage = newRealParentStorage;
+                    }
+                    /*
+                     * Check for a folder with the same name below parent
+                     */
+                    if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
+                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(newRealParentStorage, newParentId), treeId);
+                    }
+                    /*
+                     * Check for forbidden public mail folder
+                     */
+                    if (CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
+                        boolean started = newRealParentStorage.startTransaction(storageParameters, true);
+                        boolean rollback = true;
+                        try {
+                            Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
+                            if (isPublicPimFolder(newParent)) {
+                                throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
+                            }
+                            if (started) {
+                                newRealParentStorage.commitTransaction(storageParameters);
+                                rollback = false;
+                            }
+                        } catch (RuntimeException e) {
+                            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        } finally {
+                            if (started && rollback) {
+                                newRealParentStorage.rollback(storageParameters);
+                            }
                         }
                     }
-                }
-                /*
-                 * Perform move either in real or in virtual storage
-                 */
-                MovePerformer movePerformer = newMovePerformer();
-                movePerformer.setStorageParameters(storageParameters);
-                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
-                } else {
-                    movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
-                }
-            } else if (rename) {
-                folder.setParentID(oldParentId);
-                if (equallyNamedSibling(folder.getName(), treeId, oldParentId, openedStorages)) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), oldParentId, treeId);
-                }
+                    /*
+                     * Perform move either in real or in virtual storage
+                     */
+                    MovePerformer movePerformer = newMovePerformer();
+                    movePerformer.setStorageParameters(storageParameters);
+                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                    } else {
+                        movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
+                    }
+                } else if (rename) {
+                    folder.setParentID(oldParentId);
+                    if (equallyNamedSibling(folder.getName(), treeId, oldParentId, openedStorages)) {
+                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), oldParentId, treeId);
+                    }
 
-                /*
-                 * Perform rename either in real or in virtual storage
-                 */
-                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    doRenameReal(folder, storage);
-                } else {
-                    doRenameVirtual(folder, storage, openedStorages);
-                }
-            } else if (comparedPermissions.hasChanges() || cascadePermissions) {
-                /*
-                 * Check permissions of anonymous guest users
-                 */
-                checkAnonymousPermissions(comparedPermissions);
-
-                boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
-                if (!isRecursion) {
-                    decorator.put(RECURSION_MARKER, true);
-                }
-
-                try {
+                    /*
+                     * Perform rename either in real or in virtual storage
+                     */
+                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                        doRenameReal(folder, storage);
+                    } else {
+                        doRenameVirtual(folder, storage, openedStorages);
+                    }
+                } else if (comparedPermissions.hasChanges() || cascadePermissions) {
+                    /*
+                     * Check permissions of anonymous guest users
+                     */
+                    checkAnonymousPermissions(storageFolder, comparedPermissions);
                     /*
                      * prepare new shares for added guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
                         processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
+                            comparedPermissions, transactionManager.getConnection());
+                    }
+                    if (cascadePermissions) {
+                        /*
+                         * Switch back to false before update due to the recursive nature of FolderStorage.updateFolder in some implementations
+                         */
+                        decorator.put("cascadePermissions", false);
                     }
                     /*
                      * Change permissions either in real or in virtual storage
@@ -359,22 +356,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (null == realStorage) {
                             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                         }
-                        /*
-                         * Cascade folder permissions
-                         */
-                        if (cascadePermissions) {
-                            // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
-                            boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
 
-                            decorator.put("cascadePermissions", false);
-                            checkOpenedStorage(realStorage, openedStorages);
-                            List<String> ids = new ArrayList<String>();
-                            gatherSubfolders(folder, realStorage, treeId, ids, ignoreWarnings);
-
-                            if (ignoreWarnings) {
-                                cascadeFolderPermissions(folder, realStorage, treeId, ids);
-                            }
-                        }
                         if (storage.equals(realStorage)) {
                             storage.updateFolder(folder, storageParameters);
                         } else {
@@ -384,57 +366,76 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         }
                     }
                     /*
+                     * Cascade folder permissions
+                     */
+                    if (cascadePermissions) {
+                        boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+                        checkOpenedStorage(storage, openedStorages);
+                        List<String> ids = new ArrayList<String>();
+                        try {
+                            gatherSubfolders(folder, storage, treeId, ids, ignoreWarnings);
+                            cascadeFolderPermissions(folder, storage, treeId, ids);
+                        } catch (OXException e) {
+                            if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
+                                addWarning(e);
+                                transactionManager.rollback();
+                                return;
+                            }
+                            throw e;
+                        }
+                    }
+                    /*
                      * delete existing shares for removed guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
                         processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
                     }
-                } finally {
-                    if (!isRecursion) {
-                        decorator.remove(RECURSION_MARKER);
+                } else if (changeSubscription) {
+                    /*
+                     * Change subscription either in real or in virtual storage
+                     */
+                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                        storage.updateFolder(folder, storageParameters);
+                    } else {
+                        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                        if (null == realStorage) {
+                            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                        }
+                        if (storage.equals(realStorage)) {
+                            storage.updateFolder(folder, storageParameters);
+                        } else {
+                            checkOpenedStorage(realStorage, openedStorages);
+                            realStorage.updateFolder(folder, storageParameters);
+                            storage.updateFolder(folder, storageParameters);
+                        }
                     }
+                } else if (changedMetaInfo) {
+                    /*
+                     * Change meta either in real or in virtual storage
+                     */
+                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                        storage.updateFolder(folder, storageParameters);
+                    } else {
+                        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                        if (null == realStorage) {
+                            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                        }
+                        if (storage.equals(realStorage)) {
+                            storage.updateFolder(folder, storageParameters);
+                        } else {
+                            checkOpenedStorage(realStorage, openedStorages);
+                            realStorage.updateFolder(folder, storageParameters);
+                            storage.updateFolder(folder, storageParameters);
+                        }
+                    }
+                }
+            } finally {
+                if (!isRecursion) {
+                    decorator.remove(RECURSION_MARKER);
+                }
 
-                    if (addedDecorator) {
-                        storageParameters.setDecorator(null);
-                    }
-                }
-            } else if (changeSubscription) {
-                /*
-                 * Change subscription either in real or in virtual storage
-                 */
-                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    storage.updateFolder(folder, storageParameters);
-                } else {
-                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                    if (null == realStorage) {
-                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-                    }
-                    if (storage.equals(realStorage)) {
-                        storage.updateFolder(folder, storageParameters);
-                    } else {
-                        checkOpenedStorage(realStorage, openedStorages);
-                        realStorage.updateFolder(folder, storageParameters);
-                        storage.updateFolder(folder, storageParameters);
-                    }
-                }
-            } else if (changedMetaInfo) {
-                /*
-                 * Change meta either in real or in virtual storage
-                 */
-                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    storage.updateFolder(folder, storageParameters);
-                } else {
-                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                    if (null == realStorage) {
-                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-                    }
-                    if (storage.equals(realStorage)) {
-                        storage.updateFolder(folder, storageParameters);
-                    } else {
-                        checkOpenedStorage(realStorage, openedStorages);
-                        realStorage.updateFolder(folder, storageParameters);
-                        storage.updateFolder(folder, storageParameters);
-                    }
+                if (addedDecorator) {
+                    storageParameters.setDecorator(null);
                 }
             }
             /*
@@ -475,9 +476,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
                 if (!ignoreWarnings) {
-                    OXException noAdminAccess = OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
-                    storageParameters.addWarning(noAdminAccess);
-                    throw noAdminAccess;
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
                 }
             } else {
                 ids.add(f.getID());
@@ -496,9 +495,11 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     private void cascadeFolderPermissions(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
         for (String id : ids) {
-            Folder f = storage.getFolder(treeId, id, storageParameters);
-            f.setPermissions(folder.getPermissions());
-            storage.updateFolder(f, storageParameters);
+            UpdateFolder toUpdate = new UpdateFolder();
+            toUpdate.setTreeID(treeId);
+            toUpdate.setID(id);
+            toUpdate.setPermissions(folder.getPermissions());
+            storage.updateFolder(toUpdate, storageParameters);
         }
     }
 

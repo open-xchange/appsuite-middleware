@@ -22,8 +22,16 @@
   
   <#-- view item_type button -->
   <p id="view_items" style="padding:10px 0;margin:20px 0;">
-    <@styledButton link=view_items_link>${view_items_lable}</@styledButton>
+    <@styledButton link=view_items_link>${view_items_label}</@styledButton>
   </p>
+  
+  <#-- if the sharing user specified a password -->
+  <#if use_password?has_content>
+    <p id="use_password">
+      ${use_password}<br>
+      ${password}
+    </p>
+  </#if>
   
   <#-- if the sharing user specified an expiration date -->
   <#if will_expire?has_content>

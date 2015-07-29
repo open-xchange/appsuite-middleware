@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -66,25 +68,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug39098Test extends CalDAVTest {
 
-    /**
-     * Initializes a new {@link Bug39098Test}.
-     *
-     * @param name The test name
-     */
-    public Bug39098Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
 	public void testCreateInAsiaShanghai() throws Exception {
 	    /*
 	     * create appointment on client

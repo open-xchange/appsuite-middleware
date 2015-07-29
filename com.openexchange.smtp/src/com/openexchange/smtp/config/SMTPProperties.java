@@ -259,6 +259,16 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
+    public boolean isEnforceSecureConnection() {
+        return transportProperties.isEnforceSecureConnection();
+    }
+
+    @Override
+    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
+        transportProperties.setEnforceSecureConnection(enforceSecureConnection);
+    }
+
+    @Override
     public String getSSLProtocols() {
         return sslProtocols;
     }

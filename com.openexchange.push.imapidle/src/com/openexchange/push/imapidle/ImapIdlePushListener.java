@@ -81,6 +81,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -619,6 +620,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         if ("DBP".equals(e.getPrefix())) {
             throw e;
+        }
+        if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+            Throwable cause = null == e.getCause() ? e : e.getCause();
+            throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
         }
     }
 

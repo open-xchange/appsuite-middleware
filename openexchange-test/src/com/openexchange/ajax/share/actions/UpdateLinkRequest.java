@@ -50,7 +50,9 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -60,6 +62,8 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -70,43 +74,58 @@ import com.openexchange.ajax.tools.JSONCoercion;
  */
 public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
-    private final String token;
-
+    private final ShareTarget target;
     private final long timestamp;
+    private final TimeZone timeZone;
 
-    private boolean failOnError = true;
-
-    private int bits = -1;
-
+    private final boolean failOnError = true;
     private String password = null;
-
-    private long expiry;
-
+    private boolean containsPassword;
+    private Date expiryDate;
+    private boolean containsExpiryDate;
     private Map<String, Object> meta;
+    private boolean containsMeta;
+
+    /**
+     * Initializes a new {@link UpdateLinkRequest} with UTC as time zone
+     *
+     * @param target The share target
+     * @param timestamp The client timestamp
+     */
+    public UpdateLinkRequest(ShareTarget target, long timestamp) {
+        super();
+        this.target = target;
+        this.timestamp = timestamp;
+        this.timeZone = TimeZones.UTC;
+    }
 
     /**
      * Initializes a new {@link UpdateLinkRequest}.
+     *
+     * @param target The share target
+     * @param timeZone The client timezone
+     * @param timestamp The client timestamp
      */
-    public UpdateLinkRequest(String token, long timestamp) {
+    public UpdateLinkRequest(ShareTarget target, TimeZone timeZone, long timestamp) {
         super();
-        this.token = token;
+        this.target = target;
         this.timestamp = timestamp;
-    }
-
-    public void setBits(int bits) {
-        this.bits = bits;
+        this.timeZone = timeZone;
     }
 
     public void setPassword(String password) {
         this.password  = password;
+        containsPassword = true;
     }
 
-    public void setExpiry(long expiry) {
-        this.expiry = expiry;
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+        containsExpiryDate = true;
     }
 
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+        containsMeta = true;
     }
 
     @Override
@@ -134,18 +153,22 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("token", token);
-        if (expiry >= 0) {
-            json.put("expiry_date", expiry);
+        JSONObject json = ShareWriter.writeTarget(target);
+        if (containsExpiryDate) {
+            if (null == expiryDate) {
+                json.put("expiry_date", JSONObject.NULL);
+            } else {
+                long date = expiryDate.getTime();
+                if (null != timeZone) {
+                    date += timeZone.getOffset(date);
+                }
+                json.put("expiry_date", date);
+            }
         }
-        if (bits >= 0) {
-            json.put("bits", bits);
+        if (containsPassword) {
+            json.put("password", null == password ? JSONObject.NULL : password);
         }
-        if (password != null) {
-            json.put("password", password);
-        }
-        if (meta != null) {
+        if (containsMeta) {
             json.put("meta", JSONCoercion.coerceToJSON(meta));
         }
         return json;
@@ -160,6 +183,7 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
         /**
          * Initializes a new {@link Parser}.
+         *
          * @param failOnError
          */
         protected Parser(boolean failOnError) {

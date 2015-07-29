@@ -89,7 +89,7 @@ public final class HostDataImpl implements HostData {
 
     @Override
     public int getPort() {
-        return port;
+        return port < 0 ? (secure ? 443 : 80) : port;
     }
 
     @Override

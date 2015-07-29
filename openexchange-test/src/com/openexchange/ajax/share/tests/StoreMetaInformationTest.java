@@ -49,27 +49,21 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.AllResponse;
 import com.openexchange.ajax.share.actions.DeleteRequest;
 import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-
 
 /**
  * {@link StoreMetaInformationTest}
@@ -79,18 +73,10 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class StoreMetaInformationTest extends ShareTest {
 
-    private static final int FOLDER_READ_PERMISSION = Permissions.createPermissionBits(
-        Permission.READ_FOLDER,
-        Permission.READ_ALL_OBJECTS,
-        Permission.NO_PERMISSIONS,
-        Permission.NO_PERMISSIONS,
-        false);
-
     private Map<String, Object> meta;
     private FolderObject folder;
     private Random rnd;
     private ShareTarget target;
-    private AJAXClient client2;
     private ParsedShare toDelete;
 
     /**
@@ -111,13 +97,10 @@ public class StoreMetaInformationTest extends ShareTest {
             meta.put("element" + i, rnd.nextInt());
         }
         folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
-        remember(folder);
-        client2 = new AJAXClient(User.User2);
-        AnonymousRecipient recipient = new AnonymousRecipient();
-        recipient.setBits(FOLDER_READ_PERMISSION);
+        ShareRecipient recipient = randomGuestPermission(RecipientType.GUEST).getRecipient();
         target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(folder.getObjectID()));
-        target.setMeta(meta);
-        InviteRequest request = new InviteRequest(Collections.singletonList(target), Collections.<ShareRecipient>singletonList(recipient), true);
+        InviteRequest request = new InviteRequest(target, recipient, true);
+        request.setMeta(meta);
         client.execute(request);
     }
 
@@ -134,7 +117,7 @@ public class StoreMetaInformationTest extends ShareTest {
         for (ParsedShare ps : response.getParsedShares()) {
             if (ps.getTarget().equals(target)) {
                 toDelete = ps;
-                assertEquals("Meta information was not stored for target", meta, ps.getTarget().getMeta());
+                assertEquals("Meta information was not stored for target", meta, ps.getMeta());
                 return;
             }
         }

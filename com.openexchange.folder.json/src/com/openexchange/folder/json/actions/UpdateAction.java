@@ -49,10 +49,9 @@
 
 package com.openexchange.folder.json.actions;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -61,12 +60,9 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.json.FolderField;
-import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
@@ -146,43 +142,42 @@ public final class UpdateAction extends AbstractFolderAction {
             }
         }
         /*
-         * Parse folder object
+         * Parse request body
          */
-        final JSONObject folderObject = (JSONObject) request.requireData();
-        final ParsedFolder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
-        folder.setID(id);
-        try {
-            final String fieldName = FolderField.SUBSCRIBED.getName();
-            if (folderObject.hasAndNotNull(fieldName) && 0 == folderObject.getInt(fieldName)) {
-                /*
-                 * TODO: Remove this ugly hack to fix broken UI behavior which send "subscribed":0 for db folders
-                 */
-                try {
-                    Integer.parseInt(id);
-                    folder.setSubscribed(true);
-                } catch (final NumberFormatException e) {
-                    // Ignore
-                }
-            }
-        } catch (final JSONException e) {
-            // Ignore
-        }
-        folder.setTreeID(treeId);
+        UpdateData updateData = parseRequestBody(treeId, id, request, session);
+        ParsedFolder folder = updateData.getFolder();
         /*
          * Update
          */
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
-            .put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("cascadePermissions", cascadePermissions).put("ignoreWarnings", Boolean.valueOf(ignoreWarnings)).put(id, folderService).put("ajaxRequestData", request));
+        FolderServiceDecorator decorator = new FolderServiceDecorator()
+            .put("permissions", request.getParameter("permissions"))
+            .put("altNames", request.getParameter("altNames"))
+            .put("autorename", request.getParameter("autorename"))
+            .put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
+            .put("cascadePermissions", cascadePermissions)
+            .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
+            .put(id, folderService);
+
+        boolean notify = updateData.notifyPermissionEntities() && folder.getPermissions() != null && folder.getPermissions().length > 0;
+        UserizedFolder original = null;
+        if (notify) {
+            original = folderService.getFolder(treeId, id, session, decorator);
+        }
+
+        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, decorator);
+        List<OXException> warnings = new ArrayList<>(response.getWarnings());
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */
         final String newId = folder.getID();
+        if (notify) {
+            warnings.addAll(sendNotifications(updateData.getNotificationData(), original, folderService.getFolder(treeId, newId, session, decorator), session, request.getHostData()));
+        }
+
         Date lastModified = null != newId ? folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC() : null;
         AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
-        Collection<OXException> warnings = response.getWarnings();
         result.addWarnings(warnings);
         if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
             result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(

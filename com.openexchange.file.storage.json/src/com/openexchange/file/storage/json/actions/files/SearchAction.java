@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -73,18 +75,33 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
     @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") }, requestBody = "An Object as described in Search contacts.", responseDescription = "")
-public class SearchAction extends AbstractFileAction {
+public class SearchAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.require(Param.COLUMNS);
+
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
 
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
         IDBasedFileAccess fileAccess = request.getFileAccess();
         SearchIterator<File> results = fileAccess.search(
             request.getSearchQuery(),
-            request.getFieldsToLoad(),
+            columns,
             request.getSearchFolderId(),
             sortingField,
             sortingOrder,

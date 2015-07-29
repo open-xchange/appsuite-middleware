@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -64,10 +66,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug28734Test extends CalDAVTest {
 
-	public Bug28734Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testTimeZoneHongKong() throws Exception {
 		/*
 		 * create appointment in timezone on server

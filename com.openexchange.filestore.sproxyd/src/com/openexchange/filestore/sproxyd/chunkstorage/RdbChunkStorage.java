@@ -114,7 +114,7 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT document_id FROM scality_filestore WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("SELECT DISTINCT document_id FROM scality_filestore WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();

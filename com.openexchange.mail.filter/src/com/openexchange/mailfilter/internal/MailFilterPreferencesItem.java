@@ -86,14 +86,15 @@ public class MailFilterPreferencesItem implements PreferencesItemService {
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.TRUE);
             }
 
             @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
             }
         };
     }

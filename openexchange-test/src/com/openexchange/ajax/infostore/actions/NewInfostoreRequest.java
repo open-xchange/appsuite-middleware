@@ -60,6 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -68,6 +69,8 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     private com.openexchange.file.storage.File metadata;
     private final InputStream input;
+    private Transport notificationTransport;
+    private String notificationMessage;
 
     /**
      * Initializes a new {@link NewInfostoreRequest}.
@@ -110,12 +113,46 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         this.metadata = metadata;
     }
 
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     */
+    public void setNotifyPermissionEntities(Transport transport) {
+        setNotifyPermissionEntities(transport, null);
+    }
+
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     * @param message The user-defined message
+     */
+    public void setNotifyPermissionEntities(Transport transport, String message) {
+        notificationTransport = transport;
+        notificationMessage = message;
+    }
+
     public com.openexchange.file.storage.File getMetadata() {
         return metadata;
     }
 
     @Override
     public String getBody() throws JSONException {
+        JSONObject jFile = prepareJFile();
+        if (notificationTransport != null) {
+            JSONObject data = new JSONObject();
+            data.put("file", jFile);
+            JSONObject jNotification = new JSONObject();
+            jNotification.put("transport", notificationTransport.getID());
+            jNotification.put("message", notificationMessage);
+            data.put("notification", jNotification);
+            return data.toString();
+        }
+        return jFile.toString();
+    }
+
+    private JSONObject prepareJFile() throws JSONException {
         final JSONObject originalObject = new JSONObject(writeJSON(getMetadata()));
         final JSONObject retVal = new JSONObject();
         final Set<String> set = originalObject.keySet();
@@ -133,7 +170,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
             }
         }
 
-        return retVal.toString();
+        return retVal;
     }
 
     @Override

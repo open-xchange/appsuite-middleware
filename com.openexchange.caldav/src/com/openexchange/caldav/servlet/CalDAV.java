@@ -53,11 +53,14 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.caldav.CalDAVServiceLookup;
+import com.openexchange.caldav.Tools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -164,7 +167,7 @@ public class CalDAV extends OXServlet {
         ServerSession session = null;
         try {
             session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(session)) {
+            if (!checkPermission(req, session)) {
                 resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -175,13 +178,23 @@ public class CalDAV extends OXServlet {
         CaldavPerformer.getInstance().doIt(req, resp, action, session);
     }
 
-    private boolean checkPermission(final ServerSession session) {
+    private boolean checkPermission(HttpServletRequest req, ServerSession session) {
         try {
             final ComposedConfigProperty<Boolean> property = CalDAVServiceLookup.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            return property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar();
+            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
+                OAuthGrant oAuthGrant = (OAuthGrant) req.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
+                if (oAuthGrant == null) {
+                    // basic auth took place
+                    return true;
+                } else {
+                    return oAuthGrant.getScope().has(Tools.OAUTH_SCOPE);
+                }
+            }
         } catch (final OXException e) {
-            return false;
+            //
         }
+
+        return false;
     }
 
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
@@ -194,6 +207,11 @@ public class CalDAV extends OXServlet {
     @Override
     protected boolean useCookies() {
         return false;
+    }
+
+    @Override
+    protected boolean allowOAuthAccess() {
+        return true;
     }
 
 }

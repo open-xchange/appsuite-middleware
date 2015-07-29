@@ -128,30 +128,30 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    public boolean isValidFor(ServerSession session) throws OXException {
+    public boolean isValidFor(final ServerSession session) throws OXException {
         if (!session.getUserConfiguration().hasInfostore()) {
             return false;
         }
-        FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
+        final FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
         if (null == registry) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
         }
         /*
          * only available, if "com.openexchange.infostore" is the only account for the user
          */
-        List<FileStorageAccount> allAccounts = new ArrayList<FileStorageAccount>();
-        for (FileStorageService service : registry.getAllServices()) {
+        final List<FileStorageAccount> allAccounts = new ArrayList<FileStorageAccount>();
+        for (final FileStorageService service : registry.getAllServices()) {
             allAccounts.addAll(service.getAccountManager().getAccounts(session));
         }
         return 1 == allAccounts.size() && "com.openexchange.infostore".equals(allAccounts.get(0).getFileStorageService().getId());
     }
 
     @Override
-    public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
+    public boolean isValidFor(final ServerSession session, final AbstractFindRequest findRequest) throws OXException {
         if (false == session.getUserConfiguration().hasInfostore()) {
             return false;
         }
-        String folderId = findRequest.getFolderId();
+        final String folderId = findRequest.getFolderId();
         if (null == folderId) {
             return isValidFor(session);
         } else {
@@ -166,25 +166,25 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
     @Override
     public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
-        long beforeDetermineFolders = System.currentTimeMillis();
-        List<Integer> folderIDs = determineFolderIDs(searchRequest, session);
+        final long beforeDetermineFolders = System.currentTimeMillis();
+        final List<Integer> folderIDs = determineFolderIDs(searchRequest, session);
         LOG.debug("Determined folders in {}ms.", System.currentTimeMillis() - beforeDetermineFolders);
 
-        Metadata[] fields = getFields(searchRequest);
+        final Metadata[] fields = getFields(searchRequest);
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
             term = new TitleTerm("*", true, true);
         }
 
-        List<Document> results = new InfostoreSearcher(searchRequest, session, term, folderIDs, fields).search();
+        final List<Document> results = new InfostoreSearcher(searchRequest, session, term, folderIDs, fields).search();
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
     @Override
-    protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+    protected AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
         final String prefix = autocompleteRequest.getPrefix();
         final List<Facet> facets = new LinkedList<Facet>();
-        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
@@ -279,29 +279,60 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return new AutocompleteResult(facets);
     }
 
-    private static List<Integer> determineAllFolderIDs(ServerSession session) throws OXException {
+    private static List<Integer> determineAllFolderIDs(final ServerSession session) throws OXException {
         return Collections.emptyList();
     }
+
+
+
+    /*
+     * Returns all folders that are below the given folder, including that
+     * folder itself, where the user has the necessary permissions.
+     */
+    private static List<Integer> determineSubFolderIDs(final ServerSession session, final int folderId) throws OXException {
+        final Context context = session.getContext();
+        final int userId = session.getUserId();
+        final UserConfiguration userConfig = session.getUserConfiguration();
+        final OXFolderAccess folderAccess = new OXFolderAccess(context);
+        final FolderObject infostoreFolder = folderAccess.getFolderObject(folderId);
+        final FolderFilter filter = new FolderFilter() {
+
+            @Override
+            public boolean accept(final FolderObject folder) throws OXException {
+                final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+                return perm.isFolderVisible() && perm.canReadOwnObjects();
+            }
+        };
+
+        final List<Integer> folderIDs = new LinkedList<Integer>();
+        if (filter.accept(infostoreFolder)) {
+            folderIDs.add(infostoreFolder.getObjectID());
+        }
+
+        addSubfolderIDs(folderIDs, infostoreFolder, folderAccess, context, filter);
+        return folderIDs;
+    }
+
 
     /*
      * Returns all folders that are below the users default folder (i.e. "My Files"), including that
      * folder itself, where the user has the necessary permissions.
      */
-    private static List<Integer> determinePrivateFolderIDs(ServerSession session) throws OXException {
+    private static List<Integer> determinePrivateFolderIDs(final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
         final UserConfiguration userConfig = session.getUserConfiguration();
         final OXFolderAccess folderAccess = new OXFolderAccess(context);
-        FolderObject infostoreFolder = folderAccess.getDefaultFolder(userId, FolderObject.INFOSTORE);
-        FolderFilter filter = new FolderFilter() {
+        final FolderObject infostoreFolder = folderAccess.getDefaultFolder(userId, FolderObject.INFOSTORE);
+        final FolderFilter filter = new FolderFilter() {
             @Override
-            public boolean accept(FolderObject folder) throws OXException {
-                EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+            public boolean accept(final FolderObject folder) throws OXException {
+                final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
                 return perm.isFolderVisible() && perm.canReadOwnObjects();
             }
         };
 
-        List<Integer> folderIDs = new LinkedList<Integer>();
+        final List<Integer> folderIDs = new LinkedList<Integer>();
         if (filter.accept(infostoreFolder)) {
             folderIDs.add(infostoreFolder.getObjectID());
         }
@@ -314,21 +345,21 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
      * Returns the system-wide public infostore folder and all folders below it, where the user
      * has the necessary permissions.
      */
-    private static List<Integer> determinePublicFolderIDs(ServerSession session) throws OXException {
+    private static List<Integer> determinePublicFolderIDs(final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
         final UserConfiguration userConfig = session.getUserConfiguration();
         final OXFolderAccess folderAccess = new OXFolderAccess(context);
-        FolderObject infostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-        FolderFilter filter = new FolderFilter() {
+        final FolderObject infostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        final FolderFilter filter = new FolderFilter() {
             @Override
-            public boolean accept(FolderObject folder) throws OXException {
-                EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+            public boolean accept(final FolderObject folder) throws OXException {
+                final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
                 return perm.isFolderVisible() && perm.canReadOwnObjects();
             }
         };
 
-        List<Integer> folderIDs = new LinkedList<Integer>();
+        final List<Integer> folderIDs = new LinkedList<Integer>();
         if (filter.accept(infostoreFolder)) {
             folderIDs.add(infostoreFolder.getObjectID());
         }
@@ -343,26 +374,26 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
      * The users own default folder is excluded. Also all folders are excluded that have been created
      * by the user itself, as they are shared to others but are private in terms of the user.
      */
-    private static List<Integer> determineSharedFolderIDs(ServerSession session) throws OXException {
+    private static List<Integer> determineSharedFolderIDs(final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final int userId = session.getUserId();
         final UserConfiguration userConfig = session.getUserConfiguration();
         final OXFolderAccess folderAccess = new OXFolderAccess(context);
         final FolderObject userInfostoreFolder = folderAccess.getDefaultFolder(userId, FolderObject.INFOSTORE);
-        FolderObject systemInfostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-        FolderFilter filter = new FolderFilter() {
+        final FolderObject systemInfostoreFolder = folderAccess.getFolderObject(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        final FolderFilter filter = new FolderFilter() {
             @Override
-            public boolean accept(FolderObject folder) throws OXException {
+            public boolean accept(final FolderObject folder) throws OXException {
                 if (folder.getNonSystemPermissionsAsArray().length < 2 || folder.getObjectID() == userInfostoreFolder.getObjectID() || folder.getCreatedBy() == userId) {
                     return false;
                 }
 
-                EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+                final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
                 return perm.isFolderVisible() && perm.canReadOwnObjects();
             }
         };
 
-        List<Integer> folderIDs = new LinkedList<Integer>();
+        final List<Integer> folderIDs = new LinkedList<Integer>();
         if (filter.accept(systemInfostoreFolder)) {
             folderIDs.add(systemInfostoreFolder.getObjectID());
         }
@@ -371,16 +402,16 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
-    private static void addSubfolderIDs(List<Integer> folderIDs, FolderObject parent, OXFolderAccess folderAccess, Context context, FolderFilter filter) throws OXException {
+    private static void addSubfolderIDs(final List<Integer> folderIDs, final FolderObject parent, final OXFolderAccess folderAccess, final Context context, final FolderFilter filter) throws OXException {
         try {
-            for (int id : parent.getSubfolderIds(true, context)) {
-                FolderObject folder = folderAccess.getFolderObject(id);
+            for (final int id : parent.getSubfolderIds(true, context)) {
+                final FolderObject folder = folderAccess.getFolderObject(id);
                 addSubfolderIDs(folderIDs, folder, folderAccess, context, filter);
                 if (filter.accept(folder)) {
                     folderIDs.add(id);
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new OXException(e);
         }
     }
@@ -394,10 +425,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
      * given type. In edge cases folders can be missing or folders can be contained that don't match the type.
      * See the comments within the single 'determine'-methods for details.
      */
-    private static List<Integer> determineFolderIDs(SearchRequest searchRequest, ServerSession session) throws OXException {
+    private static List<Integer> determineFolderIDs(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         List<Integer> folderIDs;
-        FolderType folderType = searchRequest.getFolderType();
-        String requestFolderId = searchRequest.getFolderId();
+        final FolderType folderType = searchRequest.getFolderType();
+        final String requestFolderId = searchRequest.getFolderId();
         if (requestFolderId == null) {
             if (folderType == null) {
                 folderIDs = determineAllFolderIDs(session);
@@ -420,8 +451,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             }
         } else {
             try {
-                folderIDs = Collections.singletonList(Integer.valueOf(requestFolderId));
-            } catch (NumberFormatException e) {
+                folderIDs = determineSubFolderIDs(session, Integer.valueOf(requestFolderId));
+            } catch (final NumberFormatException e) {
                 throw FindExceptionCode.INVALID_FOLDER_ID.create(requestFolderId, Module.DRIVE.getIdentifier());
             }
         }
@@ -429,10 +460,10 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
-    private static Metadata[] getFields(SearchRequest searchRequest) {
+    private static Metadata[] getFields(final SearchRequest searchRequest) {
         Metadata[] fields = DEFAULT_FIELDS;
-        int[] columns = searchRequest.getColumns();
-        if (columns != null) {
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
             List<Metadata> tmp = new ArrayList<Metadata>(columns.length);
             for (int c : columns) {
                 Metadata field = Metadata.get(c);

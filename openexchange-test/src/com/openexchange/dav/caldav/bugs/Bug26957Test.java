@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
@@ -61,10 +63,7 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug26957Test extends CalDAVTest {
 
-	public Bug26957Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testPutICalWithoutVEvent() throws Exception {
 	    /*
          * try to create appointment

@@ -57,8 +57,11 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Services}
@@ -131,4 +134,20 @@ public class Services {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(FolderService.class);
     }
+
+    public static ShareNotificationService getShareNotificationService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ShareNotificationService.class);
+    }
+
+    public static ThreadPoolService getThreadPoolService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ThreadPoolService.class);
+    }
+
+    public static PreviewService getPreviewService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(PreviewService.class);
+    }
+
 }

@@ -50,10 +50,12 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotaExceededException;
 import com.sun.mail.iap.BadCommandException;
@@ -153,6 +155,7 @@ public abstract class AbstractIMAPCommand<T> {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return abstractIMAPCommand.getDefaultValue();
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
@@ -171,11 +174,13 @@ public abstract class AbstractIMAPCommand<T> {
                          */
                         return abstractIMAPCommand.getDefaultValue();
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(imapCmd));
                     protocol.handleResult(response);
                 }
             }

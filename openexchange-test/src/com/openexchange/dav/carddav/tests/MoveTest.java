@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -64,10 +66,11 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class MoveTest extends CardDAVTest {
 
-	public MoveTest(String name) {
-		super(name);
+	public MoveTest() {
+		super();
 	}
 
+	@Test
 	public void testMoveContactToSubfolderOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -115,6 +118,7 @@ public class MoveTest extends CardDAVTest {
         assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
     }
 
+	@Test
 	public void testMoveContactToDefaultFolderOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization

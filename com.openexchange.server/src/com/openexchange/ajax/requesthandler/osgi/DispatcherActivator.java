@@ -92,7 +92,6 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
-import com.openexchange.ajax.requesthandler.oauth.DefaultSessionProvider;
 import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -108,6 +107,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -238,8 +238,9 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
 
         final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionProvider(this), prefix);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix);
         trackService(OAuthResourceService.class);
+        trackService(OAuthSessionProvider.class);
         trackService(ContextService.class);
         trackService(UserService.class);
         trackService(SessiondService.class);

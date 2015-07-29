@@ -61,35 +61,26 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class GetLinkResponse extends AbstractAJAXResponse {
 
-    private final String url;
-    private final String token;
+    private final ShareLink shareLink;
 
     /**
      * Initializes a new {@link GetLinkResponse}.
-     * @param response
+     *
+     * @param response The underlying response
+     * @param shareLink The share links
      */
-    protected GetLinkResponse(Response response, String url, String token) {
+    protected GetLinkResponse(Response response, ShareLink shareLink) {
         super(response);
-        this.url = url;
-        this.token = token;
+        this.shareLink = shareLink;
     }
 
     /**
-     * Gets the url
+     * Gets the share link
      *
-     * @return The url
+     * @return The share link
      */
-    public String getUrl() {
-        return url;
-    }
-
-    /**
-     * Gets the token
-     *
-     * @return The token
-     */
-    public String getToken() {
-        return token;
+    public ShareLink getShareLink() {
+        return shareLink;
     }
 
 }

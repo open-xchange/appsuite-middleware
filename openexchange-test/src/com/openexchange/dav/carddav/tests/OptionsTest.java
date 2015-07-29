@@ -49,16 +49,17 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import org.apache.jackrabbit.webdav.client.methods.OptionsMethod;
-
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 
 /**
  * {@link OptionsTest}
- * 
- * Tests the "OPTIONS" method for the discovery of support for CardDAV 
- * 
+ *
+ * Tests the "OPTIONS" method for the discovery of support for CardDAV
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class OptionsTest extends CardDAVTest {
@@ -66,19 +67,20 @@ public class OptionsTest extends CardDAVTest {
 	private static final String[] EXPECTED_ALLOW_HEADERS = {
 		"PROPFIND", "OPTIONS", "REPORT", "PUT", "DELETE", "ACL"
 	};
-	
+
 	private static final String[] EXPECTED_DAV_HEADERS = {
-		"1", "2", "3", "addressbook", "access-control", "extended-mkcol"				
+		"1", "2", "3", "addressbook", "access-control", "extended-mkcol"
 	};
-	
-	public OptionsTest(String name) {
-		super(name);
+
+	public OptionsTest() {
+		super();
 	}
 
 	/**
-	 * Tests if the necessary 'Allow' header elements are present in the OPTIONS response. 
+	 * Tests if the necessary 'Allow' header elements are present in the OPTIONS response.
 	 * @throws Exception
 	 */
+	@Test
 	public void testAllowHeaders() throws Exception {
 		OptionsMethod options = null;
 		try {
@@ -89,11 +91,12 @@ public class OptionsTest extends CardDAVTest {
 			release(options);
 		}
 	}
-	
+
 	/**
-	 * Tests if the necessary 'DAV' header elements are present in the OPTIONS response. 
+	 * Tests if the necessary 'DAV' header elements are present in the OPTIONS response.
 	 * @throws Exception
 	 */
+	@Test
 	public void testDAVHeaders() throws Exception {
 		OptionsMethod options = null;
 		try {

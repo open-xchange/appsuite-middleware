@@ -51,6 +51,7 @@ package com.openexchange.realtime.hazelcast.directory;
 
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.MapEvent;
 import com.hazelcast.query.Predicate;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
@@ -59,7 +60,7 @@ import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 /**
  * {@link ResourceMappingEntryAdapter} - An abstract adapter class for receiving ResourceMappingEntry events. The methods in this class are
  * empty. This class exists as convenience for creating listener objects.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -83,6 +84,16 @@ public abstract class ResourceMappingEntryAdapter implements ResourceMappingEntr
     @Override
     public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
      // Do nothing
+    }
+
+    @Override
+    public void mapEvicted(MapEvent event) {
+        // Do nothing
+    }
+
+    @Override
+    public void mapCleared(MapEvent event) {
+        // Do nothing
     }
 
     @Override

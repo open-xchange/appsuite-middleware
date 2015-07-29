@@ -114,6 +114,25 @@ public class EffectiveInfostorePermission {
         return canWriteObjectInFolder() || (objectPermission != null && objectPermission.canWrite());
     }
 
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share the item or not.
+     *
+     * @return <code>true</code> if the item can be shared, <code>false</code>, otherwise
+     */
+    public boolean canShareObject() {
+        return canShareObjectInFolder() || null != objectPermission && objectPermission.canShare();
+    }
+
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share the item or not, solely based on the user's permission
+     * in the parent folder.
+     *
+     * @return <code>true</code> if the item can be shared based on the folder permissions, <code>false</code>, otherwise
+     */
+    public boolean canShareObjectInFolder() {
+        return permission.hasFullSharedFolderAccess() && canWriteObjectInFolder();
+    }
+
     public boolean canWriteObjectInFolder() {
         return permission.canWriteAllObjects() || (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
     }

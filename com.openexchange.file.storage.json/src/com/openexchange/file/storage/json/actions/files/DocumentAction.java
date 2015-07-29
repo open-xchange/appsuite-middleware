@@ -105,6 +105,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
+        final ServerSession session = request.getSession();
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
         final String id = request.getId();
@@ -112,14 +113,21 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
         final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
         if (document != null) {
-            FileHolder fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
+            IFileHolder.RandomAccessClosure rac = null;
+            IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
                 @Override
                 public InputStream newStream() throws OXException, IOException {
-                    return document.getData();
+                    InputStream inputStream = document.getData();
+                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                        return inputStream;
+                    }
+                    return new BufferedInputStream(inputStream, 65536);
                 }
-
-            }, document.getSize(), document.getMimeType(), document.getName());
+            };
+            rac = new IDBasedFileAccessRandomAccessClosure(id, version, document.getSize(), session);
+            FileHolder fileHolder = new FileHolder(isClosure, document.getSize(), document.getMimeType(), document.getName());
+            fileHolder.setRandomAccessClosure(rac);
 
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             String etag = document.getEtag();
@@ -138,7 +146,6 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         IFileHolder.RandomAccessClosure rac = null;
         IFileHolder.InputStreamClosure isClosure;
         {
-            final ServerSession session = request.getSession();
             if (seemsLikeThumbnailRequest(request.getRequestData())) {
                 isClosure = new IFileHolder.InputStreamClosure() {
 
@@ -325,7 +332,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
                 partialIn = newFileAccess.getDocument(id, version, pos, length);
                 int read = partialIn.read(b, off, length);
-                pos += length;
+                pos += read;
                 return read;
             } catch (OXException e) {
                 Throwable cause = e.getCause();

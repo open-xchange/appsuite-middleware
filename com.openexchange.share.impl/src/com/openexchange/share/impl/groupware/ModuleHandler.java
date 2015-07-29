@@ -126,6 +126,16 @@ public interface ModuleHandler {
     boolean isVisible(ShareTarget target, Session session) throws OXException;
 
     /**
+     * Gets a value indicating whether a share target may be adjusted by the session's user or not, i.e. if the user has sufficient
+     * permissions to read & update the folder or item represented by the share target.
+     *
+     * @param target The share target to check
+     * @param session The session of the user trying to adjust the share target
+     * @return <code>true</code> if the share target is adjustable, <code>false</code>, otherwise
+     */
+    boolean mayAdjust(ShareTarget target, Session session) throws OXException;
+
+    /**
      * Gets a value indicating whether a share target (still) exists.
      *
      * @param target The share target to check

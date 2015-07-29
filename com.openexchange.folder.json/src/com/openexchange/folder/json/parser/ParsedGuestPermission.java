@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.json.parser;
 
-import java.util.Date;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -64,7 +63,6 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
     private static final long serialVersionUID = 7203618073266628866L;
 
     private ShareRecipient recipient;
-    private Date expiryDate;
 
     /**
      * Initializes an empty {@link ParsedGuestPermission}.
@@ -78,17 +76,8 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
         return recipient;
     }
 
-    @Override
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
     public void setRecipient(ShareRecipient recipient) {
         this.recipient = recipient;
-    }
-
-    public void setExpiryDate(Date date) {
-        this.expiryDate = date;
     }
 
 }

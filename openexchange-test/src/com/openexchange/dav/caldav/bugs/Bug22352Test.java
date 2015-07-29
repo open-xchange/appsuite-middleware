@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -57,16 +59,13 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug22352Test} - problems interpreting URL 
- * 
+ * {@link Bug22352Test} - problems interpreting URL
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22352Test extends CalDAVTest {
 
-	public Bug22352Test(String name) {
-		super(name);
-	}
-
+	@Test
     public void testLongNumericResourceName() throws Exception {
         /*
          * create appointment on client
@@ -83,7 +82,7 @@ public class Bug22352Test extends CalDAVTest {
          */
         Appointment appointment = super.getAppointment(uid);
         super.rememberForCleanUp(appointment);
-        assertEquals(appointment, start, end, uid, summary, location);
+        assertAppointmentEquals(appointment, start, end, uid, summary, location);
         /*
          * verify appointment on client
          */
@@ -93,5 +92,5 @@ public class Bug22352Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
     }
-	
+
 }

@@ -91,6 +91,10 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this(api, i2s(folderIds), lastModified);
     }
 
+    public DeleteRequest(final API api, final int[] folderIds, final Date lastModified, boolean failOnError) {
+        this(api, i2s(folderIds), lastModified, failOnError);
+    }
+
     public DeleteRequest(final API api, final int folderId, final Date lastModified) {
         this(api, new int[] { folderId }, lastModified);
     }

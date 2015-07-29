@@ -108,6 +108,19 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
+    public List<TargetPermission> getPermissions() {
+        Permission[] permissions = folder.getPermissions();
+        if (null == permissions) {
+            return Collections.emptyList();
+        }
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(permissions.length);
+        for (Permission permission : permissions) {
+            targetPermissions.add(CONVERTER.convert(permission));
+        }
+        return targetPermissions;
+    }
+
+    @Override
     public void applyPermissions(List<TargetPermission> permissions) {
         Permission[] origPermissionArray = folder.getPermissions();
         if (origPermissionArray == null) {
@@ -158,6 +171,11 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         @Override
         public Permission convert(TargetPermission permission) {
             return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+        }
+
+        @Override
+        public TargetPermission convert(Permission permission) {
+            return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
         }
     };
 

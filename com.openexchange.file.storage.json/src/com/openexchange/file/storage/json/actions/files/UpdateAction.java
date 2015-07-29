@@ -49,8 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -59,6 +60,7 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -101,13 +103,25 @@ public class UpdateAction extends AbstractWriteAction {
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
 
         String newId;
+        List<Field> columns = request.getSentColumns();
+        boolean notify = request.notifyPermissionEntities() && columns.contains(File.Field.OBJECT_PERMISSIONS) && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0;
+        File original = null;
+        if (notify) {
+            original = fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION);
+        }
         if (request.hasUploads()) {
             // Save file metadata with binary payload
-            boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION); 
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), ignoreVersion, ignoreWarnings);
+            boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings);
         } else {
             // Save file metadata without binary payload
-            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
+            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings);
+        }
+
+        List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
+        if (notify) {
+            File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), original, modified, request.getSession(), request.getRequestData().getHostData()));
         }
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
@@ -116,7 +130,7 @@ public class UpdateAction extends AbstractWriteAction {
         } else {
             result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
         }
-        Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+
         result.addWarnings(warnings);
         if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
             result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));

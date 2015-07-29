@@ -51,9 +51,9 @@ package com.openexchange.folder.json.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,11 +66,8 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.java.Enums;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link FolderParser} - Parses a folder from JSON data.
@@ -93,10 +90,11 @@ public final class FolderParser {
      * Parses a folder from given JSON object.
      *
      * @param folderJsonObject The JSON object containing folder data
+     * @param timeZone The timezone to use
      * @return The parsed folder
      * @throws OXException If parsing folder fails
      */
-    public ParsedFolder parseFolder(final JSONObject folderJsonObject) throws OXException {
+    public ParsedFolder parseFolder(final JSONObject folderJsonObject, TimeZone timeZone) throws OXException {
         try {
             final ParsedFolder folder = new ParsedFolder();
 
@@ -157,7 +155,7 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.PERMISSIONS_BITS.getName())) {
                 final JSONArray jsonArr = folderJsonObject.getJSONArray(FolderField.PERMISSIONS_BITS.getName());
-                folder.setPermissions(parsePermission(jsonArr).toArray(new Permission[0]));
+                folder.setPermissions(parsePermission(jsonArr, timeZone).toArray(new Permission[0]));
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
@@ -184,15 +182,16 @@ public final class FolderParser {
      * Parses permissions from given JSON array.
      *
      * @param permissionsAsJSON The JSON array containing permissions data
+     * @param timeZone The timezone to use
      * @return The parsed permissions
      * @throws OXException If parsing permissions fails
      */
-    public static List<Permission> parsePermission(final JSONArray permissionsAsJSON) throws OXException {
+    public static List<Permission> parsePermission(final JSONArray permissionsAsJSON, TimeZone timeZone) throws OXException {
         try {
             final int numberOfPermissions = permissionsAsJSON.length();
             final List<Permission> perms = new ArrayList<Permission>(numberOfPermissions);
             for (int i = 0; i < numberOfPermissions; i++) {
-                perms.add(parsePermission(permissionsAsJSON.getJSONObject(i)));
+                perms.add(parsePermission(permissionsAsJSON.getJSONObject(i), timeZone));
             }
             return perms;
         } catch (final JSONException e) {
@@ -204,9 +203,10 @@ public final class FolderParser {
      * Parses a single permission from JSON.
      *
      * @param jsonObject The JSON object to parse
+     * @param timeZone The timezone to use
      * @return The parsed permission
      */
-    private static Permission parsePermission(JSONObject jsonObject) throws OXException, JSONException {
+    private static Permission parsePermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
         Permission permission;
         /*
          * check for external guest permissions
@@ -217,10 +217,7 @@ public final class FolderParser {
              * parse as guest permission entity
              */
             ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
-            parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
-            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-                parsedGuestPermission.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
-            }
+            parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
             permission = parsedGuestPermission;
         } else {
             /*
@@ -240,7 +237,6 @@ public final class FolderParser {
         /*
          * apply common properties
          */
-
         if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
         }
@@ -251,44 +247,6 @@ public final class FolderParser {
         permission.setDeletePermission(permissionBits[3]);
         permission.setAdmin(permissionBits[4] > 0 ? true : false);
         return permission;
-    }
-
-    /**
-     * Parses a share recipient from JSON.
-     *
-     * @param type The recipient type to parse
-     * @param jsonObject The JSON object to parse
-     * @return The parsed share recipient
-     */
-    private static ShareRecipient parseRecipient(RecipientType type, JSONObject jsonObject) throws OXException, JSONException {
-        ShareRecipient recipient;
-        switch (type) {
-        case ANONYMOUS:
-            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-            anonymousRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
-            recipient = anonymousRecipient;
-            break;
-        case GUEST:
-            GuestRecipient guestRecipient = new GuestRecipient();
-            guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
-            if (false == jsonObject.hasAndNotNull(FolderField.EMAIL_ADDRESS.getName())) {
-                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.EMAIL_ADDRESS.getName());
-            }
-            guestRecipient.setEmailAddress(jsonObject.getString(FolderField.EMAIL_ADDRESS.getName()));
-            guestRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
-            guestRecipient.setDisplayName(jsonObject.optString(FolderField.DISPLAY_NAME.getName(), null));
-            guestRecipient.setContactID(jsonObject.optString(FolderField.CONTACT_ID.getName(), null));
-            guestRecipient.setContactFolder(jsonObject.optString(FolderField.CONTACT_FOLDER_ID.getName(), null));
-            recipient = guestRecipient;
-            break;
-        default:
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
-        }
-        if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
-        }
-        recipient.setBits(jsonObject.getInt(FolderField.BITS.getName()));
-        return recipient;
     }
 
 }

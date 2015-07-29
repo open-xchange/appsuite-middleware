@@ -1,3 +1,61 @@
+* 2015-07-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 39571: Avoid double booking of resources.
+
+* 2015-07-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39989: Fixed wrong calculation of total size used to check against possible download quota constraints
+
+* 2015-07-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39545: Dropped Ramp-Up class
+
+* 2015-07-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 39862: Null guard
+
+* 2015-07-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38780: Null guard.
+
+* 2015-07-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39906: Added appropriate null guard to periodic file cleaner task
+
+* 2015-07-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39730: Introduced capability "unified-mailbox" to reflect availability of Unified Mail functionality
+
+* 2015-07-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39462: Introduced new error code to indicate denial of creation for a new component handle.
+                      Thus a GroupDispatcher is able to signal that for instance the current load reaches a non-acceptable threshold
+ - Fix for bug 39838: Fixed possible null dereference on runtime shut-down
+
+* 2015-07-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39801: Don't try to put something into an empty map constant
+
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39767: Introduced an update task along side the create table service task for the 'snippetAttachmentBinary' table
+
+* 2015-07-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39769: Introduced remote look-up of local sessions to verify a session does exist
+
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39712: Distinguish between wildcard and literal search in contacts
+
+* 2015-07-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 37472: Do not update message flags when saving message as draft
+
+* 2015-07-09 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
+
 * 2015-07-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 39451: Orderly invalidate & removed cached IMAPStore instances which lost connectivity

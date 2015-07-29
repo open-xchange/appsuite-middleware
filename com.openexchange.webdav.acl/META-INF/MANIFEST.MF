@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.webdav.acl
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.authentication,
+Import-Package: com.openexchange.ajax.requesthandler.oauth,
+ com.openexchange.authentication,
  com.openexchange.contact,
  com.openexchange.exception,
  com.openexchange.folderstorage,
@@ -19,6 +20,8 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
+ com.openexchange.oauth.provider.grant,
+ com.openexchange.oauth.provider.scope,
  com.openexchange.osgi,
  com.openexchange.search,
  com.openexchange.search.internal.operands,

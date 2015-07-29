@@ -55,11 +55,13 @@ import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AllTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
+import com.openexchange.ajax.share.tests.AnonymousGuestTest;
 import com.openexchange.ajax.share.tests.ConvertToInternalPermissionTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
+import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
@@ -68,9 +70,9 @@ import com.openexchange.ajax.share.tests.GetALinkTest;
 import com.openexchange.ajax.share.tests.GetTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
-import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
+import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
@@ -78,7 +80,7 @@ import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
 import com.openexchange.ajax.share.tests.StoreMetaInformationTest;
-import com.openexchange.ajax.share.tests.SystemMessagesTest;
+import com.openexchange.ajax.share.tests.LoginScreenTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -119,9 +121,11 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(GuestAutologinTest.class);
         tests.addTestSuite(ConvertToInternalPermissionTest.class);
         tests.addTestSuite(EmptyGuestPasswordTest.class);
-        tests.addTestSuite(SystemMessagesTest.class);
+        tests.addTestSuite(LoginScreenTest.class);
         tests.addTestSuite(FolderItemCountTest.class);
         tests.addTestSuite(ShowSharedFilesFolderTest.class);
+        tests.addTestSuite(AnonymousGuestTest.class);
+        tests.addTestSuite(LinkUpdateTest.class);
         return tests;
     }
 

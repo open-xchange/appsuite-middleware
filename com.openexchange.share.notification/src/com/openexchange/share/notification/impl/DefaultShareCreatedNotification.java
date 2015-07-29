@@ -64,15 +64,9 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> implements ShareCreatedNotification<T> {
 
     private Session session;
-
     private List<ShareTarget> targets;
-
     private String message;
-
     private int targetUserID;
-
-    private boolean isInitialShare;
-
     private String shareUrl;
 
     /**
@@ -111,11 +105,6 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     }
 
     @Override
-    public boolean isInitialShare() {
-        return isInitialShare;
-    }
-
-    @Override
     public String getShareUrl() {
         return shareUrl;
     }
@@ -134,10 +123,6 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     public void setTargetUserID(int targetUserID) {
         this.targetUserID = targetUserID;
-    }
-
-    public void setInitialShare(boolean isInitialShare) {
-        this.isInitialShare = isInitialShare;
     }
 
     public void setShareUrl(String shareUrl) {

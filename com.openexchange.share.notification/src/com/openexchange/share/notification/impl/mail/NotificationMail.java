@@ -51,6 +51,7 @@ package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.activation.DataHandler;
@@ -60,8 +61,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -69,9 +72,14 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -158,7 +166,7 @@ abstract class NotificationMail {
                 mimeMessage.saveChanges();
                 mail = new ContentAwareComposedMailMessage(mimeMessage, data.context.getContextId());
             } catch (MessagingException e) {
-                throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), data.recipient.getAddress());
+                throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR_FOR_RECIPIENT.create(e, e.getMessage(), data.recipient.getAddress());
             }
         }
 
@@ -171,6 +179,37 @@ abstract class NotificationMail {
         StringWriter writer = new StringWriter();
         template.process(vars, writer);
         return requireService(HtmlService.class, services).getConformHTML(writer.toString(), "UTF-8");
+    }
+
+    protected static InternetAddress getSenderAddress(ConfigurationService configService, Session session, User user) throws OXException {
+        String fromSource = configService.getProperty("com.openexchange.notification.fromSource", "primaryMail");
+        String from = null;
+        if ("defaultSenderAddress".equals(fromSource)) {
+            UserSettingMail mailSettings = UserSettingMailStorage.getInstance().getUserSettingMail(session);
+            if (mailSettings != null) {
+                from = mailSettings.getSendAddr();
+            }
+        }
+
+        if (from == null) {
+            from = user.getMail();
+        }
+
+        InternetAddress[] parsed = MimeMessageUtility.parseAddressList(from, true);
+        if (parsed == null || parsed.length == 0) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("User " + user.getId() + " in context " + session.getContextId() + " seems to have no valid mail address.");
+        }
+
+        InternetAddress senderAddress = parsed[0];
+        if (senderAddress.getPersonal() == null) {
+            try {
+                senderAddress.setPersonal(user.getDisplayName());
+            } catch (UnsupportedEncodingException e) {
+                // try to send nevertheless
+            }
+        }
+
+        return senderAddress;
     }
 
 }

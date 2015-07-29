@@ -49,10 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -61,15 +57,12 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.DefaultRequestContext;
-import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.json.ShareLink;
+import com.openexchange.share.json.ShareResultConverter;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link GetLinkAction}
@@ -79,8 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetLinkAction extends AbstractShareAction {
 
-    /** The default permission bits to use if not supplied by the client */
-    private static final int DEFAULT_PERMISSION_BITS = Permissions.createPermissionBits(
+    /** The default permission bits to use for anonymous link shares */
+    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
         Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 
     /**
@@ -94,35 +87,25 @@ public class GetLinkAction extends AbstractShareAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        try {
-            JSONObject json = (JSONObject) requestData.requireData();
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session),
-                services.getService(ModuleSupport.class));
-            int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
-            String password = json.hasAndNotNull("password") ? json.getString("password") : null;
-            /*
-             * prepare anonymous recipient
-             */
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setBits(permissionBits);
-            recipient.setPassword(password);
-            /*
-             * create share
-             */
-            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
-            CreatedShare share = createPerformer.perform().getShare(recipient);
-            /*
-             * wrap share token & url into JSON result & return
-             */
-            JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
-            jResult.put("token", share.getToken());
-            return new AJAXRequestResult(jResult, new Date(), "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        } catch (ClassCastException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        /*
+         * parse target
+         */
+        ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
+        /*
+         * reuse existing or create a new anonymous share as needed
+         */
+        boolean isNew = false;
+        ShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
+            CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
+            shareInfo = createdShare.getFirstInfo();
+            isNew = true;
         }
+        /*
+         * wrap into share link & return appropriate result
+         */
+        return new AJAXRequestResult(new ShareLink(shareInfo, isNew), shareInfo.getShare().getModified(), ShareResultConverter.INPUT_FORMAT);
     }
 
 }

@@ -49,6 +49,11 @@
 
 package com.openexchange.preview;
 
+import java.io.InputStream;
+import com.openexchange.conversion.Data;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 /**
  * {@link RemoteInternalPreviewService} - An interface for preview services that schedule a remote job.
  * <p>
@@ -71,4 +76,31 @@ public interface RemoteInternalPreviewService extends InternalPreviewService {
      */
     long getTimeToWaitMillis();
 
+    /**
+     * Asynchonously triggers the creation of a preview document for the specified arguments and output format.
+     * The implementation has to trigger the creation for the given parameters and should immediately
+     * return. Future calls to {@link PreviewService#getPreviewFor(String, PreviewOutput, Session, int)}
+     * should then return an already cached result, if possible.
+     *
+     * @param arg The argument either denotes an URL or a file
+     * @param output The output format
+     * @param session The session
+     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
+     * @throws OXException If preview document cannot be generated
+     */
+    void triggerGetPreviewFor(String arg, PreviewOutput output, Session session, int pages) throws OXException;
+
+    /**
+     * Asynchonously triggers the creation of a preview document for the specified arguments and output format.
+     * The implementation has to trigger the creation for the given parameters and should immediately
+     * return. Future calls to {@link PreviewService#getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session, int pages)}
+     * should then return an already cached result, if possible.
+     *
+     * @param documentData The data
+     * @param output The output format
+     * @param session The session
+     * @param pages The number of pages to be generated, if possible. If not, this argument is ignored. -1 for "all pages"
+     * @throws OXException If preview document cannot be generated
+     */
+    void triggerGetPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session, int pages) throws OXException;
 }

@@ -249,6 +249,20 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
                     }
                 } catch (OXException e) {
+                    if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e)) {
+                        try {
+                            CredentialStorage credentialStorage = optCredentialStorage();
+                            if (null != credentialStorage) {
+                                try {
+                                    credentialStorage.deleteCredentials(pushUser.getUserId(), pushUser.getContextId());
+                                } catch (OXException x) {
+                                    LOG.warn("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), e);
+                                }
+                            }
+                        } catch (OXException ex) {
+                            // IGnore
+                        }
+                    }
                     LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
                 } catch (RuntimeException e) {
                     LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
@@ -269,7 +283,25 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     private boolean stopPermanentListenerFor(PushUser pushUser, PushManagerExtendedService extendedService, boolean tryToReconnect) throws OXException {
         // Always called when holding synchronized lock
-        return extendedService.stopPermanentListener(pushUser, tryToReconnect);
+        try {
+            return extendedService.stopPermanentListener(pushUser, tryToReconnect);
+        } catch (OXException e) {
+            if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e)) {
+                try {
+                    CredentialStorage credentialStorage = optCredentialStorage();
+                    if (null != credentialStorage) {
+                        try {
+                            credentialStorage.deleteCredentials(pushUser.getUserId(), pushUser.getContextId());
+                        } catch (OXException x) {
+                            LOG.warn("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), e);
+                        }
+                    }
+                } catch (OXException ex) {
+                    // IGnore
+                }
+            }
+            throw e;
+        }
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -325,9 +357,9 @@ public final class PushManagerRegistry implements PushListenerService {
                                 LOG.debug("Rescheduling permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
                             }
                         } catch (OXException e) {
-                            LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
+                            LOG.error("Error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                         } catch (RuntimeException e) {
-                            LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
+                            LOG.error("Runtime error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                         }
                     }
                 }

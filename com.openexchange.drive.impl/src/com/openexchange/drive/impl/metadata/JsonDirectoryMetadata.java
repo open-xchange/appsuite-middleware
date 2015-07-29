@@ -168,6 +168,9 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
                 if (isShared(folder)) {
                     jsonObject.put("shared", true);
                 }
+                if (folder.getOwnPermission().isAdmin()) {
+                    jsonObject.put("shareable", true);
+                }
             }
             if (includeFiles) {
                 jsonObject.putOpt("files", getJSONFiles());
@@ -186,6 +189,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         if (session.getStorage().supports(folderID, FileStorageCapability.OBJECT_PERMISSIONS)) {
             specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
             fields.add(Field.OBJECT_PERMISSIONS);
+            fields.add(Field.SHAREABLE);
         }
         if (session.getStorage().supports(folderID, FileStorageCapability.LOCKS)) {
             specialCapabilites.add(FileStorageCapability.LOCKS);

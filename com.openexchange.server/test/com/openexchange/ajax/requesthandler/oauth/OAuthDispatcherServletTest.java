@@ -80,9 +80,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
@@ -97,8 +99,10 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Rea
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.SimOAuthResourceService;
 import com.openexchange.server.SimpleServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -254,6 +258,14 @@ public class OAuthDispatcherServletTest {
         DispatcherServlet.setDispatcher(dispatcher);
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
         ServerConfig.getInstance().initialize(new SimConfigurationService());
+        DispatcherPrefixService dispatcherPrefixService = new DispatcherPrefixService() {
+            @Override
+            public String getPrefix() {
+                return "/ajax/";
+            }
+        };
+        ServerServiceRegistry.getInstance().addService(DispatcherPrefixService.class, dispatcherPrefixService);
+        Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
     }
 
     @Before
@@ -277,14 +289,15 @@ public class OAuthDispatcherServletTest {
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(OAuthResourceService.class, resourceService);
-        servlet = new OAuthDispatcherServlet(serviceLookup, new OAuthSessionProvider() {
+        serviceLookup.add(OAuthSessionProvider.class, new OAuthSessionProvider() {
             @Override
             public ServerSession getSession(OAuthGrant token, HttpServletRequest httpRequest) throws OXException {
                 SimServerSession simServerSession = new SimServerSession(token.getContextId(), token.getUserId());
                 simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
                 return simServerSession;
             }
-        }, "/ajax/");
+        });
+        servlet = new OAuthDispatcherServlet(serviceLookup, "/ajax/");
         request = new SimHttpServletRequest();
         request.setMethod("GET");
 

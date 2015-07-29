@@ -473,6 +473,18 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
+    public final void handleCreateContextRollback(Connection configCon, int contextId) throws StorageException {
+        // remove all entries from configuration database because everything to configuration database has been committed.
+        try {
+            if (configCon != null) {
+                deleteContextFromConfigDB(configCon, contextId);
+                configCon.commit();
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error removing/rollback entries from configdb for context {}", contextId, e);
+        }
+    }
+
     public final void handleContextDeleteRollback(final Connection write_ox_con, final Connection con_write) {
         try {
             if (con_write != null && !con_write.getAutoCommit()) {

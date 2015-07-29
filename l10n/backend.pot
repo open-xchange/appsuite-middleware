@@ -3,6 +3,8 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:221
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:114
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
@@ -70,6 +72,58 @@ msgstr ""
 #. Written to the log file if the session does not contain a Kerberos subject for the delegation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:81
 msgid "No Kerberos delegation ticket found in session."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:103
+msgid "/servlet/dav/caldav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
+msgid "/servlet/dav/dev/null"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
+msgid "caldav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
+msgid "modules"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
+msgid "module"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:181
+msgid "modules/caldav/active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:186
+msgid "io.ox/caldav//active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:191
+msgid "modules/caldav/active > io.ox/caldav//active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:198
+msgid "modules/caldav/url"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:203
+msgid "io.ox/caldav//url"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:208
+msgid "modules/caldav/url > io.ox/caldav//url"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your calendars and appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:247
+msgid "Synchronize your calendars and appointments."
 msgstr ""
 
 #. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
@@ -849,6 +903,30 @@ msgstr ""
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:88
+msgid "starting bundle: \"com.openexchange.carddav\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:135
+msgid "/servlet/dav/carddav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:101
+msgid "carddav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:121
+msgid "stopping bundle: \"com.openexchange.carddav\""
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your address books and contacts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:145
+msgid "Synchronize your address books and contacts."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
@@ -2567,7 +2645,6 @@ msgstr ""
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mobilepush/src/com/openexchange/mobilepush/MobilePushExceptionMessages.java:70
 msgid ""
 "An error occurred inside the server which prevented it from fulfilling the "
 "request."
@@ -2606,9 +2683,7 @@ msgid "Missing field: %s"
 msgstr ""
 
 #. The general message if an error occurred while reading or writing to the database
-#. SQL error message
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mobilepush/src/com/openexchange/mobilepush/MobilePushExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "Error while reading/writing data from/to the database."
 msgstr ""
@@ -3156,6 +3231,10 @@ msgstr ""
 msgid ""
 "Please review your mail filter rules as they seem to be invalid. Response "
 "from server: \"%1$s\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
+msgid "Managing mail filter rules is not available for your account."
 msgstr ""
 
 #. Maximum number of messages already stored for client %1$s
@@ -6061,6 +6140,13 @@ msgstr ""
 msgid "Unsupported character. Please correct your input."
 msgstr ""
 
+#. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
+msgid ""
+"Due to limited capabilities of user \"%1$s\", it is not possible to apply "
+"the permission changes."
+msgstr ""
+
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
@@ -7680,6 +7766,10 @@ msgstr ""
 msgid "Invalid JSON data received from client"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
+msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
+msgstr ""
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -7907,10 +7997,15 @@ msgstr ""
 msgid "View items"
 msgstr ""
 
-#. expires
-#. * The link will expire on $preformatted_date
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:173
+#. * The link will expire on 01/01/16 *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
 msgid "The link will expire on %1$s"
+msgstr ""
+
+#. * The link is password protected. To see it you must use the following password: kac7Nede *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+msgid ""
+"This link is password protected. You need the following password to open it:"
 msgstr ""
 
 #.
@@ -7919,40 +8014,40 @@ msgstr ""
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:182
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
 msgid "%1$s - Forgot your password?"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
 msgid "Hello,"
 msgstr ""
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr ""
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
 msgid "Set password"
 msgstr ""
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
 msgstr ""
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
 msgid "This is an automated message, please do not reply."
 msgstr ""
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
 msgid "unknown"
 msgstr ""
 
@@ -8059,6 +8154,14 @@ msgstr ""
 msgid "You don't have sufficient permissions to invite guests."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:92
+msgid "You can't create links for multiple targets."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:94
+msgid "You cannot create more than one link per folder or item."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
 msgstr ""
@@ -8071,6 +8174,10 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:66
 msgid "An error occurred, we were unable to send an email to \"%2$s\"."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:68
+msgid "An error occurred, we were unable to send out the notification mails."
 msgstr ""
 
 #. *

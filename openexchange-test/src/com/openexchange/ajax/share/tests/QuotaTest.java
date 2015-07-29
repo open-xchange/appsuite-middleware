@@ -49,30 +49,21 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.io.IOException;
 import java.rmi.Naming;
-import java.util.Collections;
-import junitx.framework.Assert;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.GetLinkForQuotaLimitRequest;
-import com.openexchange.ajax.share.actions.GetLinkForQuotaLimitResponse;
+import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.share.ShareTarget;
 
@@ -84,99 +75,94 @@ import com.openexchange.share.ShareTarget;
  */
 public class QuotaTest extends ShareTest {
 
+    /**
+     * Initializes a new {@link QuotaTest}.
+     *
+     * @param name The test name
+     */
     public QuotaTest(String name) {
         super(name);
-    }
-
-    private static final String COM_OPENEXCHANGE_QUOTA_SHARE = "com.openexchange.quota.share";
-
-    private InfostoreTestManager itm;
-
-    private FolderObject infostore;
-
-    private DefaultFile file;
-
-    public void changeUserConfig() throws Exception {
-        AJAXClient client4 = new AJAXClient(AJAXClient.User.User4);
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client4.getValues().getUserId());
-        user.setUserAttribute("config", COM_OPENEXCHANGE_QUOTA_SHARE, "1");
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client4.getValues().getContextId()), user, credentials);
-        client4.logout();
-    }
-
-    public void revertUserConfig() throws Exception {
-        AJAXClient client4 = new AJAXClient(AJAXClient.User.User4);
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client4.getValues().getUserId());
-        user.setUserAttribute("config", COM_OPENEXCHANGE_QUOTA_SHARE, null);
-        Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client4.getValues().getContextId()), user, credentials);
-        client4.logout();
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(User.User4);
-
-        changeUserConfig();
-
-        itm = new InfostoreTestManager(client);
-
-        UserValues values = client.getValues();
-        infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
-
-        long now = System.currentTimeMillis();
-        FolderObject parent = infostore;
-        DefaultFile firstShare = new DefaultFile();
-        firstShare.setFolderId(String.valueOf(parent.getObjectID()));
-        firstShare.setTitle("QuotaTest_" + now);
-        firstShare.setDescription(firstShare.getTitle());
-        itm.newAction(firstShare);
-
-        // Create First share to reach limit
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), firstShare.getId());
-        GetLinkForQuotaLimitRequest getLinkRequest = new GetLinkForQuotaLimitRequest(Collections.singletonList(target));
-        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-        client.execute(getLinkRequest);
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client.getValues().getUserId());
+        user.setUserAttribute("config", "com.openexchange.quota.share_links", "1");
+        user.setUserAttribute("config", "com.openexchange.quota.invite_guests", "1");
+        Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        iface.change(new Context(client.getValues().getContextId()), user, credentials);
     }
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
-
-        if (client != null) {
-            client.logout();
-        }
-        revertUserConfig();
-    }
-
-    public void testCreateShareButQuotaLimitReached() throws OXException, IOException, SAXException, JSONException {
-        long now = System.currentTimeMillis();
-        FolderObject parent = infostore;
-        file = new DefaultFile();
-        file.setFolderId(String.valueOf(parent.getObjectID()));
-        file.setTitle("QuotaTest_" + now);
-        file.setDescription(file.getTitle());
-        itm.newAction(file);
-
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
-        GetLinkForQuotaLimitRequest getLinkRequest = new GetLinkForQuotaLimitRequest(Collections.singletonList(target));
-        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-
-        GetLinkForQuotaLimitResponse getLinkResponse = null;
         try {
-            getLinkResponse = client.execute(getLinkRequest);
-            JSONObject serverException = getLinkResponse.getServerException();
-            String code = (String) serverException.get("code");
-            String exceptionCode = QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.getPrefix() + "-000" + QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.getNumber();
-            Assert.assertEquals(exceptionCode, code);
-            String category = (String) serverException.get("error_desc");
-            Assert.assertEquals("Quota exceeded for shares. Quota used: 1. Quota limit: 1.", category);
-        } catch (Exception e) {
-            fail();
+            com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client.getValues().getUserId());
+            user.setUserAttribute("config", "com.openexchange.quota.share_links", null);
+            user.setUserAttribute("config", "com.openexchange.quota.invite_guests", null);
+            Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
+            OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+            iface.change(new Context(client.getValues().getContextId()), user, credentials);
+        } finally {
+            super.tearDown();
         }
     }
+
+    public void testShareLinkButQuotaLimitReached() throws Exception {
+        /*
+         * try and create more links than allowed
+         */
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+        GetLinkRequest getLinkRequest = new GetLinkRequest(new ShareTarget(FolderObject.INFOSTORE, String.valueOf(folder.getObjectID())));
+        getLinkRequest.setFailOnError(false);
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        if (getLinkResponse.hasError()) {
+            /*
+             * one or more share links existed before, expect appropriate exception
+             */
+            OXException e = getLinkResponse.getException();
+            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
+        } else {
+            /*
+             * no errors in first getLink request - a second link will exceed the quota for sure
+             */
+            folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+            getLinkRequest = new GetLinkRequest(new ShareTarget(FolderObject.INFOSTORE, String.valueOf(folder.getObjectID())));
+            getLinkRequest.setFailOnError(false);
+            getLinkResponse = client.execute(getLinkRequest);
+            OXException e = getLinkResponse.getException();
+            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
+        }
+    }
+
+    public void testInviteGuestButQuotaLimitReached() throws Exception {
+        /*
+         * try and invite more guests than allowed
+         */
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+        folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
+        UpdateRequest request = new UpdateRequest(EnumAPI.OX_NEW, folder);
+        request.setFailOnError(false);
+        InsertResponse updateResponse = client.execute(request);
+        if (updateResponse.hasError()) {
+            /*
+             * one or more guest invitations existed before, expect appropriate exception
+             */
+            OXException e = updateResponse.getException();
+            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
+        } else {
+            /*
+             * no errors during first invitation - a second guest will exceed the quota for sure
+             */
+            folder = getFolder(EnumAPI.OX_NEW, folder.getObjectID());
+            folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
+            request = new UpdateRequest(EnumAPI.OX_NEW, folder);
+            request.setFailOnError(false);
+            updateResponse = client.execute(request);
+            OXException e = updateResponse.getException();
+            assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
+        }
+    }
+
 }

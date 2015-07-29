@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -63,6 +64,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -366,6 +368,7 @@ public final class AllFetch {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return new MailMessage[0];
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
@@ -381,11 +384,13 @@ public final class AllFetch {
                     } catch (final MessagingException e) {
                         LOG.warn("STATUS command failed. Throwing original exception: {}", response, e);
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
                 }
                 Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);

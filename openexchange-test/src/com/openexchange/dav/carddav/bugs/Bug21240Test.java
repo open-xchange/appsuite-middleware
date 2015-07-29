@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.Map;
-
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.UserAgents;
@@ -59,23 +61,23 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21240Test}
- * 
+ *
  * Contact can't be deleted with Addressbook client on Mac OS 10.6.8
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21240Test extends CardDAVTest {
 
-	public Bug21240Test(String name) {
-		super(name);
+	public Bug21240Test() {
+		super();
 	}
-	
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+
+    @Before
+    public void setUserAgent() throws Exception {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
     }
-    
+
+    @Test
 	public void testDeleteContact() throws Exception {
 		/*
 		 * create contact
@@ -84,7 +86,7 @@ public class Bug21240Test extends CardDAVTest {
     	final String pathUid = randomUID() + "-ABSPlugin";
     	final String firstName = "test";
     	final String lastName = "hannes";
-    	final String vCard = 
+    	final String vCard =
     			"BEGIN:VCARD" + "\r\n" +
 				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +

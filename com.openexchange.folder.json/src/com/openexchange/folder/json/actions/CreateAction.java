@@ -49,6 +49,8 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -65,6 +67,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
@@ -116,10 +119,10 @@ public final class CreateAction extends AbstractFolderAction {
         	}
         }
         /*
-         * Parse folder object
+         * Parse request body
          */
-        final JSONObject folderObject = (JSONObject) request.requireData();
-        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        UpdateData updateData = parseRequestBody(treeId, null, request, session);
+        final Folder folder = updateData.getFolder();
         folder.setParentID(parentId);
         folder.setTreeID(treeId);
         /*
@@ -130,17 +133,21 @@ public final class CreateAction extends AbstractFolderAction {
          * Parse parameters
          */
         FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .put("autorename", request.getParameter("autorename"))
-            .put("ajaxRequestData", request);
+            .put("autorename", request.getParameter("autorename"));
         final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, decorator);
         final String newId = newIdResponse.getResponse();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
+        Collection<OXException> warnings = new ArrayList<>(newIdResponse.getWarnings());
+        if (updateData.notifyPermissionEntities()) {
+            UserizedFolder createdFolder = folderService.getFolder(treeId, newId, session, decorator);
+            warnings.addAll(sendNotifications(updateData.getNotificationData(), null, createdFolder, session, request.getHostData()));
+        }
+        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(warnings);
     }
 
     @OAuthScopeCheck
     public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
         JSONObject folderObject = (JSONObject) request.requireData();
-        Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
         ContentType contentType = folder.getContentType();
         return mayWriteViaOAuthRequest(contentType, grant);
     }

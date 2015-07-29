@@ -55,9 +55,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
@@ -69,6 +71,8 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     private Field[] fields;
     private final String id;
     private final Date lastModified;
+    private Transport notificationTransport;
+    private String notificationMessage;
 
     public UpdateInfostoreRequest(String id, Date lastModified, java.io.File upload) {
         this.id = id;
@@ -95,13 +99,43 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         this.metadata = metadata;
     }
 
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     */
+    public void setNotifyPermissionEntities(Transport transport) {
+        setNotifyPermissionEntities(transport, null);
+    }
+
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     * @param message The user-defined message
+     */
+    public void setNotifyPermissionEntities(Transport transport, String message) {
+        notificationTransport = transport;
+        notificationMessage = message;
+    }
+
     public File getMetadata() {
         return metadata;
     }
 
     @Override
     public String getBody() throws JSONException {
-        return writeJSON(getMetadata(), fields);
+        JSONObject jFile = writeJSON(getMetadata(), fields);
+        if (notificationTransport != null) {
+            JSONObject data = new JSONObject();
+            data.put("file", jFile);
+            JSONObject jNotification = new JSONObject();
+            jNotification.put("transport", notificationTransport.getID());
+            jNotification.put("message", notificationMessage);
+            data.put("notification", jNotification);
+            return data.toString();
+        }
+        return jFile.toString();
     }
 
     @Override

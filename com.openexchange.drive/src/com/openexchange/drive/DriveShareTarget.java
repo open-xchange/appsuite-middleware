@@ -49,7 +49,8 @@
 
 package com.openexchange.drive;
 
-import java.util.Date;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link DriveShareTarget}
@@ -57,15 +58,68 @@ import java.util.Date;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveShareTarget {
+public class DriveShareTarget extends ShareTarget {
+
+    private static final long serialVersionUID = -8685321482126335866L;
+    private static final int MODULE_ID = FolderObject.INFOSTORE;
 
     private String name;
-
     private String path;
-
     private String checksum;
 
-    private Date expiryDate;
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     */
+    public DriveShareTarget() {
+        super();
+        setModule(MODULE_ID);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     */
+    public DriveShareTarget(ShareTarget shareTarget) {
+        super(shareTarget);
+        setModule(MODULE_ID);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     * @param path The drive path
+     * @param checksum The checksum
+     */
+    public DriveShareTarget(ShareTarget shareTarget, String path, String checksum) {
+        this(shareTarget, path, null, checksum);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     * @param path The drive path
+     * @param name The filename, or <code>null</code> if this is a folder target
+     * @param checksum The checksum
+     */
+    public DriveShareTarget(ShareTarget shareTarget, String path, String name, String checksum) {
+        this(shareTarget);
+        this.path = path;
+        this.name = name;
+        this.checksum = checksum;
+    }
+
+    /**
+     * Gets a value indicating whether this share target points to a folder, i.e. there is no item defined, or not.
+     *
+     * @return <code>true</code> if this target points to a folder, <code>false</code>, otherwise
+     */
+    @Override
+    public boolean isFolder() {
+        return null == name;
+    }
 
     public String getChecksum() {
         return checksum;
@@ -83,20 +137,12 @@ public class DriveShareTarget {
         this.name = name;
     }
 
-    public String getPath() {
+    public String getDrivePath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setDrivePath(String path) {
         this.path = path;
-    }
-
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
     }
 
     @Override
@@ -104,7 +150,6 @@ public class DriveShareTarget {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((checksum == null) ? 0 : checksum.hashCode());
-        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         return result;
@@ -123,11 +168,6 @@ public class DriveShareTarget {
             if (other.checksum != null)
                 return false;
         } else if (!checksum.equals(other.checksum))
-            return false;
-        if (expiryDate == null) {
-            if (other.expiryDate != null)
-                return false;
-        } else if (!expiryDate.equals(other.expiryDate))
             return false;
         if (name == null) {
             if (other.name != null)

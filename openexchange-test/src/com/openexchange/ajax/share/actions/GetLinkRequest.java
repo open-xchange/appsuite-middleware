@@ -50,7 +50,7 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
 
@@ -71,28 +71,31 @@ import com.openexchange.share.ShareTarget;
  */
 public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
-    private final List<ShareTarget> targets;
-
+    private final ShareTarget target;
+    private final TimeZone timeZone;
     private boolean failOnError = true;
 
-    private int bits = -1;
-
-    private String password = null;
+    /**
+     * Initializes a new {@link GetLinkRequest} with UTC as time zone
+     *
+     * @param target The share target
+     */
+    public GetLinkRequest(ShareTarget target) {
+        super();
+        this.target = target;
+        this.timeZone = TimeZones.UTC;
+    }
 
     /**
      * Initializes a new {@link GetLinkRequest}.
+     *
+     * @param target The share target
+     * @param timeZone The client timezone
      */
-    public GetLinkRequest(List<ShareTarget> targets) {
+    public GetLinkRequest(ShareTarget target, TimeZone timeZone) {
         super();
-        this.targets = targets;
-    }
-
-    public void setBits(int bits) {
-        this.bits = bits;
-    }
-
-    public void setPassword(String password) {
-        this.password  = password;
+        this.target = target;
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -114,20 +117,12 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     @Override
     public AbstractAJAXParser<GetLinkResponse> getParser() {
-        return new Parser(failOnError);
+        return new Parser(failOnError, timeZone);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        if (bits >= 0) {
-            json.put("bits", bits);
-        }
-        if (password != null) {
-            json.put("password", password);
-        }
-        return json;
+        return ShareWriter.writeTarget(target);
     }
 
     @Override
@@ -135,20 +130,33 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
         return NO_HEADER;
     }
 
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
     private static final class Parser extends AbstractAJAXParser<GetLinkResponse> {
+
+        private final TimeZone timeZone;
 
         /**
          * Initializes a new {@link Parser}.
+         *
          * @param failOnError
          */
-        protected Parser(boolean failOnError) {
+        protected Parser(boolean failOnError, TimeZone timeZone) {
             super(failOnError);
+            this.timeZone = timeZone;
         }
 
         @Override
         protected GetLinkResponse createResponse(Response response) throws JSONException {
-            JSONObject json = ResponseWriter.getJSON(response).getJSONObject("data");
-            return new GetLinkResponse(response, json.getString("url"), json.getString("token"));
+            if (!response.hasError()) {
+                JSONObject data = (JSONObject) response.getData();
+                ShareLink shareLink = new ShareLink(data, timeZone);
+                return new GetLinkResponse(response, shareLink);
+            }
+
+            return new GetLinkResponse(response, null);
         }
 
     }

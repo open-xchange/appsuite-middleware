@@ -67,14 +67,12 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
     private final Map<String, AJAXActionService> actions;
 
     public AccountActionFactory(final FileStorageServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>();
-
+        actions = new HashMap<String, AJAXActionService>(8, 0.9F);
         actions.put("all", new AllAction(registry));
         actions.put("delete", new DeleteAction(registry));
         actions.put("get", new GetAction(registry));
         actions.put("new", new NewAction(registry));
         actions.put("update", new UpdateAction(registry));
-
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -208,6 +209,24 @@ public class EffectiveInfostoreFolderPermission {
 
     public boolean canDeleteAllObjects() {
         return permission.canDeleteAllObjects();
+    }
+
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share "own" items in the folder or not.
+     *
+     * @return <code>true</code> if "own" items can be shared, <code>false</code>, otherwise
+     */
+    public boolean canShareOwnObjects() {
+        return permission.canWriteOwnObjects() && permission.hasFullSharedFolderAccess() && FolderObject.TRASH != permission.getFolderType();
+    }
+
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share all items in the folder or not.
+     *
+     * @return <code>true</code> if all items can be shared, <code>false</code>, otherwise
+     */
+    public boolean canShareAllObjects() {
+        return permission.canWriteAllObjects() && permission.hasFullSharedFolderAccess() && FolderObject.TRASH != permission.getFolderType();
     }
 
     public OCLPermission getUnderlyingPermission() {

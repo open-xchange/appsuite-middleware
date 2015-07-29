@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -60,6 +59,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -70,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.request.AttachmentRequest;
@@ -81,7 +82,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.ajax.requesthandler.MultipleAdapter;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.mail.MailFolderType;
@@ -104,6 +105,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
@@ -430,7 +432,7 @@ public class Multiple extends SessionServlet {
                 }
             }
             if (handles) {
-                final AJAXRequestData request = MultipleAdapter.parse(moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
+                final AJAXRequestData request = parse(req, moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
                 final AJAXRequestResult result;
                 try {
@@ -613,6 +615,57 @@ public class Multiple extends SessionServlet {
             LOG.error("", e);
         }
         return state;
+    }
+
+    /**
+     * The pattern to split by commas.
+     */
+    private static final Pattern SPLIT_CSV = Pattern.compile("\\s*,\\s*");
+
+    private static AJAXRequestData parse(HttpServletRequest servletRequest, String module, String path, String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
+        final AJAXRequestData request = new AJAXRequestData();
+        request.setSecure(secure);
+
+        /*
+         * Check for decorators
+         */
+        if (jsonObject.hasAndNotNull("decorators")) {
+            final String parameter = jsonObject.getString("decorators");
+            if (null != parameter) {
+                for (final String id : SPLIT_CSV.split(parameter, 0)) {
+                    request.addDecoratorId(id.trim());
+                }
+            }
+        }
+
+        request.setHttpServletRequest(servletRequest);
+        request.setHostname(jsonObject.getString(HOSTNAME));
+        request.setRoute(jsonObject.getString(ROUTE));
+        request.setRemoteAddress(jsonObject.getString(REMOTE_ADDRESS));
+        request.setPrefix(Dispatchers.getPrefix());
+
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
+            final String name = entry.getKey();
+            if (RequestConstants.DATA.equals(name)) {
+                request.setData(entry.getValue());
+            } else {
+                final Object value = entry.getValue();
+                if (value != null && value != JSONObject.NULL) {
+                    request.putParameter(name, entry.getValue().toString());
+                }
+            }
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        request.setModule(module);
+        request.setFormat("json");
+        request.setAction(action);
+        request.setServletRequestURI(path);
+        request.setPathInfo(path);
+        request.setSession(session);
+
+        return request;
     }
 
     private static MultipleHandler lookUpMultipleHandler(final String module) {

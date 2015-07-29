@@ -72,7 +72,7 @@ import com.openexchange.share.Share;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.impl.DefaultGuestInfo;
-import com.openexchange.share.impl.ShareTool;
+import com.openexchange.share.impl.ShareUtils;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.threadpool.AbstractTask;
@@ -168,7 +168,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
         /*
          * check to which modules the user has access to (if any)
          */
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         Set<Integer> modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
         if (0 == modules.size()) {
@@ -218,9 +218,9 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             /*
              * guest user still has shares, adjust permissions as needed
              */
-            int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
-            UserPermissionBits updatedPermissionBits = ShareTool.setPermissionBits(
-                services, connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);
+            ShareUtils utils = new ShareUtils(services);
+            int requiredPermissionBits = utils.getRequiredPermissionBits(guestUser, modules);
+            UserPermissionBits updatedPermissionBits = utils.setPermissionBits(connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);
             if (updatedPermissionBits.getPermissionBits() != requiredPermissionBits) {
                 LOG.debug("Shares in modules {} still available for {}, permission bits adjusted to {}.",
                     modules, guestInfo, updatedPermissionBits);

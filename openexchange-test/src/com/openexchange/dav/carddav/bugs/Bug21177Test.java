@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -66,10 +68,11 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21177Test extends CardDAVTest {
 
-	public Bug21177Test(String name) {
-		super(name);
+	public Bug21177Test() {
+		super();
 	}
 
+	@Test
 	public void testAddSpecialCharacters() throws Exception {
 		/*
 		 * fetch sync token for later synchronization

@@ -123,23 +123,29 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 return;
             }
             /*
-             * perform auto-login
+             * try guest auto-login first
              */
-            String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
-            LoginResult loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
+            LoginResult loginResult = AutoLoginTools.tryGuestAutologin(conf, req, resp);
             if (null == loginResult) {
                 /*
-                 * auto-login failed
+                 * try auto-login for regular user
                  */
-                SessionUtility.removeOXCookies(hash, req, resp);
-                SessionUtility.removeJSESSIONID(req, resp);
-                if (doAutoLogin(req, resp)) {
-                    if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
-                        return;
+                String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
+                loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
+                if (null == loginResult) {
+                    /*
+                     * auto-login failed
+                     */
+                    SessionUtility.removeOXCookies(hash, req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
+                            return;
+                        }
+                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
-                    throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                    return;
                 }
-                return;
             }
             /*
              * auto-login successful, prepare result

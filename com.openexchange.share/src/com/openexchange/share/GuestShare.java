@@ -49,7 +49,9 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * {@link GuestShare}
@@ -115,5 +117,20 @@ public interface GuestShare {
      * @return The single share target in case there is exactly one contained target in this guest share, <code>null</code>, otherwise
      */
     ShareTarget getSingleTarget();
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible. This is only available for "single"
+     * share targets.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    Date getExpiryDate();
+
+    /**
+     * If defined, gets arbitrary metadata for the share in a map. This is only available for "single" share targets.
+     *
+     * @return The metadata, or <code>null</code> if not defined
+     */
+    Map<String, Object> getMeta();
 
 }

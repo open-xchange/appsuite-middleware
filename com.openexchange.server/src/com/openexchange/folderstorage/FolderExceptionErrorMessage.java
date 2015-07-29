@@ -224,7 +224,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      */
     FOLDER_UPDATE_ABORTED(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED_MSG, Category.CATEGORY_CONFLICT, 1038, FolderExceptionMessages.FOLDER_UPDATE_ABORTED_MSG_DISPLAY),
     /**
-     * The set folder permissions are invalid.
+     * The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
      */
     INVALID_PERMISSIONS(FolderExceptionErrorMessage.INVALID_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1039),
     ;
@@ -346,8 +346,8 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     // Folder update aborted: %1$s
     private static final String FOLDER_UPDATE_ABORTED_MSG = "Folder update aborted: %2$s";
 
-    // The set folder permissions are invalid.
-    private static final String INVALID_PERMISSIONS_MSG = "The set folder permissions are invalid.";
+    // The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
+    private static final String INVALID_PERMISSIONS_MSG = "The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.";
 
     /**
      * The prefix for this error codes.

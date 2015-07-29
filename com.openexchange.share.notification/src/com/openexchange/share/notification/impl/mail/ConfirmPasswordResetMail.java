@@ -101,7 +101,7 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         User guestUser = userService.getUser(guestId, context);
         Translator translator = translatorFactory.translatorFor(guestUser.getLocale());
         ServerConfig serverConfig = serverConfigService.getServerConfig(
-            notification.getRequestContext().getHostname(),
+            notification.getHostData().getHost(),
             guestId,
             context.getContextId());
 

@@ -162,20 +162,4 @@ public class HttpTools {
         return params;
     }
 
-//    /**
-//     * Releases an HTTP client connection if the response is a <code>301/302</code> redirect.
-//     *
-//     * @param response The response
-//     */
-//    public static void releaseConnectionOnRedirect(HttpResponse response) {
-//        /*
-//         * A custom grizzly extension always produces HTML output on redirects.
-//         * We need to consume this entity or the connection cannot be re-used.
-//         */
-//        int statusCode = response.getStatusLine().getStatusCode();
-//        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-//            EntityUtils.consumeQuietly(response.getEntity());
-//        }
-//    }
-
 }

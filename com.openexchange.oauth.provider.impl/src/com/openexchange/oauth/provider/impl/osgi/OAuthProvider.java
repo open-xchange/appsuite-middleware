@@ -67,6 +67,8 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.impl.DefaultSessionProvider;
 import com.openexchange.oauth.provider.impl.OAuthProviderServiceImpl;
 import com.openexchange.oauth.provider.impl.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.impl.authcode.AbstractAuthorizationCodeProvider;
@@ -130,6 +132,7 @@ public class OAuthProvider {
                 registeredServices.add(context.registerService(OAuthProviderService.class, oAuthProvider, null));
                 registeredServices.add(context.registerService(OAuthResourceService.class, resourceService, null));
                 registeredServices.add(context.registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory(), null));
+                registeredServices.add(context.registerService(OAuthSessionProvider.class, new DefaultSessionProvider(resourceService, activator), null));
 
                 registerServlets(oAuthProvider);
                 started = true;

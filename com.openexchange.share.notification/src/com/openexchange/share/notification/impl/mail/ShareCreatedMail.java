@@ -50,15 +50,10 @@
 package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
-import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -68,10 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.BasicNotificationTemplate;
 import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.notification.FullNameBuilder;
@@ -79,15 +71,12 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
-import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.notification.impl.ShareCreatedNotification;
+import com.openexchange.share.notification.impl.TextSnippets;
 import com.openexchange.user.UserService;
 
 /**
@@ -98,12 +87,11 @@ import com.openexchange.user.UserService;
  */
 public class ShareCreatedMail extends NotificationMail {
 
-    private static final String HAS_SHARED_ITEMS = "has_shared_items";
-    private static final String PLEASE_CLICK = "please_click";
-    private static final String USER_MESSAGE = "user_message";
-    private static final String VIEW_ITEMS_LINK = "view_items_link";
-    private static final String VIEW_ITEMS_LABLE = "view_items_lable";
-    private static final String WILL_EXPIRE = "will_expire";
+    static final String HAS_SHARED_ITEMS = "has_shared_items";
+    static final String PLEASE_CLICK = "please_click";
+    static final String USER_MESSAGE = "user_message";
+    static final String VIEW_ITEMS_LINK = "view_items_link";
+    static final String VIEW_ITEMS_LABEL = "view_items_label";
 
     protected ShareCreatedMail(MailData data) {
         super(data);
@@ -112,11 +100,9 @@ public class ShareCreatedMail extends NotificationMail {
     private static class CollectVarsData {
         ShareCreatedNotification<InternetAddress> notification;
         User sharingUser;
-        User targetUser;
 
-        Translator translator;
+        TextSnippets textSnippets;
         String shareOwnerName;
-        Set<TargetProxyType> targetProxyTypes;
         HashMap<ShareTarget, TargetProxy> targetProxies;
     }
 
@@ -132,6 +118,7 @@ public class ShareCreatedMail extends NotificationMail {
         User sharingUser = userService.getUser(notification.getSession().getUserId(), context);
         User targetUser = userService.getUser(notification.getTargetUserID(), context);
         Translator translator = translatorFactory.translatorFor(targetUser.getLocale());
+        TextSnippets textSnippets = new TextSnippets(translator);
 
         List<ShareTarget> shareTargets = notification.getShareTargets();
         HashMap<ShareTarget, TargetProxy> targetProxies = new HashMap<>(shareTargets.size());
@@ -146,14 +133,12 @@ public class ShareCreatedMail extends NotificationMail {
         CollectVarsData data = new CollectVarsData();
         data.notification = notification;
         data.sharingUser = sharingUser;
-        data.targetUser = targetUser;
-        data.translator = translator;
         data.shareOwnerName = FullNameBuilder.buildFullName(sharingUser, translator);
         data.targetProxies = targetProxies;
-        data.targetProxyTypes = targetProxyTypes;
+        data.textSnippets = textSnippets;
 
         ServerConfig serverConfig = serverConfigService.getServerConfig(
-            notification.getRequestContext().getHostname(),
+            notification.getHostData().getHost(),
             targetUser.getId(),
             context.getContextId());
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
@@ -166,7 +151,7 @@ public class ShareCreatedMail extends NotificationMail {
         MailData mailData = new MailData();
         mailData.sender = getSenderAddress(configService, notification.getSession(), sharingUser);
         mailData.recipient = notification.getTransportInfo();
-        mailData.subject = determineSubject(data);
+        mailData.subject = textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values());
         mailData.htmlContent = htmlContent;
         mailData.footerImage = footerImage;
         mailData.context = context;
@@ -190,217 +175,21 @@ public class ShareCreatedMail extends NotificationMail {
      */
     private static Map<String, Object> prepareShareCreatedVars(CollectVarsData data) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
-        boolean hasMessage = !Strings.isEmpty(data.notification.getMessage());
+        boolean hasMessage = Strings.isNotEmpty(data.notification.getMessage());
         String shareUrl = data.notification.getShareUrl();
         String email = data.sharingUser.getMail();
-        List<ShareTarget> shareTargets = data.notification.getShareTargets();
         String fullName = data.shareOwnerName;
 
-        if (shareTargets.size() > 1) {
-            int count = shareTargets.size();
-            if (data.targetProxyTypes.size() > 1) {//multiple shares of different types
-                if (hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(data.translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(data.translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count));
-                    vars.put(PLEASE_CLICK, data.translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }
-                addViewItemsToVars(vars, null, data.translator, true, shareUrl);
-            } else {//multiple shares of single type
-                TargetProxyType targetProxyType = data.targetProxyTypes.iterator().next();
-                addSharedItemsToVars(vars, targetProxyType, hasMessage, data.translator, fullName, email, count);
-                addViewItemsToVars(vars, targetProxyType, data.translator, true, shareUrl);
-            }
-        } else {
-            ShareTarget shareTarget = shareTargets.get(0);
-            TargetProxy targetProxy = data.targetProxies.get(shareTarget);
-            TargetProxyType targetProxyType = targetProxy.getProxyType();
-            String proxyTitle = targetProxy.getTitle();
-            addSharedItemToVars(vars, targetProxyType, hasMessage, data.translator, fullName, email, proxyTitle);
-            addViewItemsToVars(vars, targetProxyType, data.translator, false, shareUrl);
-        }
-
+        vars.put(HAS_SHARED_ITEMS, data.textSnippets.shareStatementLong(fullName, email, data.targetProxies.values(), hasMessage));
         if (hasMessage) {
             vars.put(USER_MESSAGE, data.notification.getMessage());
+        } else {
+            vars.put(PLEASE_CLICK, data.textSnippets.linkIntro(data.targetProxies.values()));
         }
 
-        Date expiryDate = data.notification.getShareTargets().iterator().next().getExpiryDate();
-        if (data.targetUser.isGuest() && expiryDate != null) { // no expiry for internal users yet
-            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, data.targetUser.getLocale());
-            Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(data.targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
-            vars.put(WILL_EXPIRE, String.format(data.translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
-        }
-
+        vars.put(VIEW_ITEMS_LINK, shareUrl);
+        vars.put(VIEW_ITEMS_LABEL, data.textSnippets.linkLabel(data.targetProxies.values()));
         return vars;
-    }
-
-    private static void addSharedItemToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, String filename) {
-        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE), fullName, email, filename));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
-            }
-        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE), fullName, email, filename));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
-            }
-        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER), fullName, email, filename));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
-            }
-        } else {
-            //fall back to item for other types
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM), fullName, email, filename));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
-            }
-        }
-    }
-
-    private static Map<String, Object> addSharedItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, int count) {
-        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, count));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES), fullName, email, count));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-            }
-
-        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, count));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName, email, count));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-            }
-        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, count));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName, email, count));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-            }
-        } else {
-            //fall back to item for other types
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count));
-                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-            }
-        }
-        return vars;
-    }
-
-    private static void addViewItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, Translator translator, boolean multipleShares, String shareLink) {
-        vars.put(VIEW_ITEMS_LINK, shareLink);
-        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-            if (multipleShares) {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_IMAGES));
-            } else {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_IMAGE));
-            }
-        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-            if (multipleShares) {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_FILES));
-            } else {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_FILE));
-            }
-        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-            if (multipleShares) {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_FOLDERS));
-            } else {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_FOLDER));
-            }
-        } else {
-            //fall back to item for other types
-            if (multipleShares) {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_ITEMS));
-            } else {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_ITEM));
-            }
-        }
-    }
-
-    private static InternetAddress getSenderAddress(ConfigurationService configService, Session session, User user) throws OXException {
-        String fromSource = configService.getProperty("com.openexchange.notification.fromSource", "primaryMail");
-        String from = null;
-        if ("defaultSenderAddress".equals(fromSource)) {
-            UserSettingMail mailSettings = UserSettingMailStorage.getInstance().getUserSettingMail(session);
-            if (mailSettings != null) {
-                from = mailSettings.getSendAddr();
-            }
-        }
-
-        if (from == null) {
-            from = user.getMail();
-        }
-
-        InternetAddress[] parsed = MimeMessageUtility.parseAddressList(from, true);
-        if (parsed == null || parsed.length == 0) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("User " + user.getId() + " in context " + session.getContextId() + " seems to have no valid mail address.");
-        }
-
-        InternetAddress senderAddress = parsed[0];
-        if (senderAddress.getPersonal() == null) {
-            try {
-                senderAddress.setPersonal(user.getDisplayName());
-            } catch (UnsupportedEncodingException e) {
-                // try to send nevertheless
-            }
-        }
-
-        return senderAddress;
-    }
-
-    private static String determineSubject(CollectVarsData data) {
-        String fullName = data.shareOwnerName;
-        int count = data.notification.getShareTargets().size();
-        if (count > 1 && data.targetProxyTypes.size() > 1) {
-            return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName, count);
-        } else {
-            ShareTarget shareTarget = data.notification.getShareTargets().get(0);
-            TargetProxy targetProxy = data.targetProxies.get(shareTarget);
-            TargetProxyType targetProxyType = targetProxy.getProxyType();
-            String itemName = targetProxy.getTitle();
-            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-                if (count == 1) {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), fullName, itemName);
-                } else {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), fullName, count);
-                }
-            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-                if (count == 1) {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILE), fullName, itemName);
-                } else {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), fullName, count);
-                }
-            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-                if (count == 1) {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER), fullName, itemName);
-                } else {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS), fullName, count);
-                }
-            } else {
-                //fall back to item for other types
-                if (count == 1) {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEM), fullName, itemName);
-                } else {
-                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName);
-                }
-            }
-        }
     }
 
 }

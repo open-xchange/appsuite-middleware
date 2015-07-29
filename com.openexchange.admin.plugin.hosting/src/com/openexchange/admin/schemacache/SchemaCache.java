@@ -70,7 +70,7 @@ public interface SchemaCache {
      * @return The schema name according to cache's state or <code>null</code> if no suitable schema is known to the cache
      * @throws StorageException If next schema cannot be returned
      */
-    SchemaResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
+    SchemaCacheResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
 
     /**
      * Clears the cache for given write pool to force (re-)initialization on next {@link #getNextSchemaFor(int, int, ContextCountPerSchemaClosure)} invocation.

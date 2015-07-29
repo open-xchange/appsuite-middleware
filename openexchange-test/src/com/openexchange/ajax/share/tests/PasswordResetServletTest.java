@@ -51,16 +51,25 @@ package com.openexchange.ajax.share.tests;
 
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
-import org.junit.Assert;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.PasswordResetConfirmServletRequest;
-import com.openexchange.ajax.share.actions.PasswordResetConfirmServletResponse;
-import com.openexchange.ajax.share.actions.PasswordResetServletRequest;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -79,9 +88,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 public final class PasswordResetServletTest extends ShareTest {
 
     private OCLGuestPermission guestPermission;
-
-    private ParsedShare share;
-
+    private ExtendedPermissionEntity guest;
     private FolderObject folder;
 
     /**
@@ -102,6 +109,7 @@ public final class PasswordResetServletTest extends ShareTest {
          * \u00b0 create folder shared to guest user
          */
         int module = randomModule();
+        EnumAPI api = randomFolderAPI();
         folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
         /*
          * check permissions
@@ -118,14 +126,14 @@ public final class PasswordResetServletTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare lShare = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(lGuestPermission, folder, lShare);
+        ExtendedPermissionEntity lGuest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(lGuestPermission, lGuest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(lShare, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
+        GuestClient guestClient = resolveShare(lGuest, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
         guestClient.checkShareModuleAvailable();
-        this.share = lShare;
+        this.guest = lGuest;
         this.guestPermission = lGuestPermission;
 
         /*
@@ -147,46 +155,97 @@ public final class PasswordResetServletTest extends ShareTest {
         super.tearDown();
     }
 
-    public void testResetPassword_confirmPasswordReset() throws Exception {
-        String confirm = getConfirmationToken();
-        PasswordResetConfirmServletResponse response = Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
-        String location = response.getLocation();
-
-        Assert.assertNotNull("Redirect URL cannot be null", location);
-        Assert.assertEquals("Unexpected location", share.getShareURL(), location);
-    }
-
     public void testResetPassword_passwordReset() throws Exception {
-        String confirm = getConfirmationToken();
-        Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
+        // http://localhost/ajax/share/1100ba1e0f0652b8849d7f3f066049e390589313a77026ef
+        URI shareUrl = new URI(guest.getShareURL());
+        String[] pathSegments = shareUrl.getPath().split("/");
+        String token = null;
+        for (String segment : pathSegments) {
+            Matcher matcher = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE).matcher(segment);
+            if (matcher.matches()) {
+                token = matcher.group();
+                break;
+            }
+        }
+        if (token == null) {
+            fail("got no token from share link");
+        }
+        DefaultHttpClient httpClient = getSession().getHttpClient();
+        // http://localhost/ajax/share/reset/password?share=1100ba1e0f0652b8849d7f3f066049e390589313a77026ef&confirm=FIMvTtnmQ7Dv_N97CRENJy6rTYw
+        HttpGet getConfirmationMail = new HttpGet(new URIBuilder()
+            .setScheme(client.getProtocol())
+            .setHost(client.getHostname())
+            .setPath("/ajax/share/reset/password")
+            .setParameter("share", token)
+            .build());
+        HttpResponse getConfirmationMailResponse = httpClient.execute(getConfirmationMail);
+        EntityUtils.consume(getConfirmationMailResponse.getEntity());
+
+        PWResetData resetData = getConfirmationToken();
+        HttpPost confirmPWReset = new HttpPost(new URIBuilder()
+            .setScheme(client.getProtocol())
+            .setHost(client.getHostname())
+            .setPath("/ajax/share/reset/password")
+            .build());
         String newPW = UUIDs.getUnformattedStringFromRandom();
-        // Set the new password
-        GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
-        guestClient.logout();
+        List<BasicNameValuePair> params = new ArrayList<>(3);
+        params.add(new BasicNameValuePair("share", resetData.shareToken));
+        params.add(new BasicNameValuePair("confirm", resetData.confirmationToken));
+        params.add(new BasicNameValuePair("password", newPW));
+        confirmPWReset.setEntity(new UrlEncodedFormEntity(params));
+        HttpResponse confirmResponse = httpClient.execute(confirmPWReset);
+        EntityUtils.consume(confirmResponse.getEntity());
+        assertEquals("Response was no redirect", 302, confirmResponse.getStatusLine().getStatusCode());
+        Header locationHeader = confirmResponse.getFirstHeader(HttpHeaders.LOCATION);
+        assertNotNull("Missing location header", locationHeader);
+        URI location = new URI(locationHeader.getValue());
+        String[] kvPairs = location.getRawFragment().split("&");
+        String sessionId = null;
+        for (String pair : kvPairs) {
+            String[] splitted = pair.split("=");
+            if (splitted.length == 2) {
+                if ("session".equals(splitted[0])) {
+                    sessionId = URLDecoder.decode(splitted[1], "UTF-8");
+                }
+            }
+        }
+
+        assertNotNull("Missing session ID in redirect location", sessionId);
+
         // Login again to verify
-        guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        GuestClient guestClient = resolveShare(guest, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        guestClient.checkShareAccessible(guestPermission);
         guestClient.logout();
     }
 
-    private String getConfirmationToken() throws Exception {
-        PasswordResetServletRequest request = new PasswordResetServletRequest(share.getToken());
-        Executor.execute(getSession(), request);
-
+    private PWResetData getConfirmationToken() throws Exception {
         List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         Message message = messages.get(0);
         String url = message.getHeaders().get("X-Open-Xchange-Share-Reset-PW-URL");
+        assertNotNull("Missing X-Open-Xchange-Share-Reset-PW-URL in confirmation mail", url);
         String query = new URI(url).getRawQuery();
         String[] kvPairs = query.split("&");
+        PWResetData pwResetData = new PWResetData();
         for (String kvPair : kvPairs) {
             String[] kv = kvPair.split("=");
-            if (kv.length == 2 && "confirm".equals(kv[0])) {
-                return URLDecoder.decode(kv[1], "UTF-8");
+            if (kv.length == 2) {
+                if ("confirm".equals(kv[0])) {
+                    pwResetData.confirmationToken = URLDecoder.decode(kv[1], "UTF-8");
+                } else if ("share".equals(kv[0])) {
+                    pwResetData.shareToken = URLDecoder.decode(kv[1], "UTF-8");
+                }
             }
         }
 
-        fail("Confirmation token was not set in URL: " + url);
-        return null;
+        assertNotNull("Cannot extract share token from URL: " + url, pwResetData.shareToken);
+        assertNotNull("Cannot extract confirmation token from URL: " + url, pwResetData.confirmationToken);
+        return pwResetData;
+    }
+
+    private static final class PWResetData {
+        private String shareToken;
+        private String confirmationToken;
     }
 
 }

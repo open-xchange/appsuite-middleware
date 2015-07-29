@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.Date;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -62,7 +61,6 @@ public class OCLGuestPermission extends OCLPermission {
     private static final long serialVersionUID = -3277662647906767821L;
 
     private ShareRecipient recipient;
-    private Date expiryDate;
 
     /**
      * Initializes an empty {@link OCLGuestPermission}.
@@ -85,16 +83,8 @@ public class OCLGuestPermission extends OCLPermission {
         return recipient;
     }
 
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
     public void setRecipient(ShareRecipient recipient) {
         this.recipient = recipient;
-    }
-
-    public void setExpiryDate(Date date) {
-        this.expiryDate = date;
     }
 
     public int getPermissionBits() {

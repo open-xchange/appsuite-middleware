@@ -49,7 +49,9 @@
 
 package com.openexchange.imap.storecache;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
@@ -148,7 +150,7 @@ public final class IMAPStoreCache {
      * -------------------------------------- Runnable stuff --------------------------------------
      */
 
-    private final class ContainerCloseElapsedRunnable implements Runnable {
+    private static final class ContainerCloseElapsedRunnable implements Runnable {
 
         private final IMAPStoreContainer container;
         private final long stamp;
@@ -166,16 +168,19 @@ public final class IMAPStoreCache {
         }
     }
 
-    private final class CloseElapsedRunnable implements Runnable {
+    private static final class CloseElapsedRunnable implements Runnable {
 
-        protected CloseElapsedRunnable() {
+        private final IMAPStoreCache storeCache;
+
+        protected CloseElapsedRunnable(IMAPStoreCache storeCache) {
             super();
+            this.storeCache = storeCache;
         }
 
         @Override
         public void run() {
             try {
-                closeElapsed();
+                storeCache.closeElapsed();
             } catch (final Exception e) {
                 LOG.error("", e);
             }
@@ -220,16 +225,25 @@ public final class IMAPStoreCache {
 
     private void init() {
         final TimerService timer = Services.getService(TimerService.class);
-        final Runnable task = new CloseElapsedRunnable();
+        final Runnable task = new CloseElapsedRunnable(this);
         final int shrinkerMillis = SHRINKER_MILLIS;
         timerTask = timer.scheduleWithFixedDelay(task, shrinkerMillis, shrinkerMillis);
     }
 
     private void shutDown() {
+        List<IMAPStoreContainer> containers = new ArrayList<IMAPStoreContainer>(this.map.values());
+        this.map.clear();
+
         final ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
             timerTask.cancel();
             this.timerTask = null;
+        }
+
+        if (!containers.isEmpty()) {
+            for (IMAPStoreContainer container : containers) {
+                container.clear();
+            }
         }
     }
 
@@ -270,15 +284,17 @@ public final class IMAPStoreCache {
     protected void closeElapsed() {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (containers.hasNext()) {
-            final boolean debug = LOG.isDebugEnabled();
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
-            do {
-                final IMAPStoreContainer container = containers.next();
-                if (null != container && container.hasElapsed(stamp)) {
-                    threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
-                }
-            } while (containers.hasNext());
+            boolean debug = LOG.isDebugEnabled();
+            ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null != threadPool) {
+                long stamp = System.currentTimeMillis() - IDLE_MILLIS;
+                do {
+                    IMAPStoreContainer container = containers.next();
+                    if (null != container && container.hasElapsed(stamp)) {
+                        threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
+                    }
+                } while (containers.hasNext());
+            }
         }
     }
 

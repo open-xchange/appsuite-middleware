@@ -53,7 +53,10 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.login.Interface;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -70,8 +73,6 @@ import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
 public class WebdavPrincipalServlet extends OXServlet {
 
     private static final long serialVersionUID = 4646903712578496388L;
-
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalServlet.class);
 
     @Override
     protected Interface getInterface() {
@@ -156,6 +157,10 @@ public class WebdavPrincipalServlet extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
+        if (!checkPermission(req, session)) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
     }
 
@@ -169,6 +174,22 @@ public class WebdavPrincipalServlet extends OXServlet {
     @Override
     protected boolean useCookies() {
         return false;
+    }
+
+    @Override
+    protected boolean allowOAuthAccess() {
+        return true;
+    }
+
+    private boolean checkPermission(HttpServletRequest req, ServerSession session) {
+        OAuthGrant oAuthGrant = (OAuthGrant) req.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
+        if (oAuthGrant == null) {
+            // basic auth took place
+            return true;
+        } else {
+            Scope scope = oAuthGrant.getScope();
+            return scope.has("caldav") || scope.has("carddav");
+        }
     }
 
 }

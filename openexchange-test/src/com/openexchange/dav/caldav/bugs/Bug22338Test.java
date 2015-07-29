@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
+import org.junit.Test;
 import com.openexchange.contact.internal.Tools;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -59,16 +61,13 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug22338Test} - moving an appointment in iCal will not move the appointment accordingly in the OX GUI 
- * 
+ * {@link Bug22338Test} - moving an appointment in iCal will not move the appointment accordingly in the OX GUI
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22338Test extends CalDAVTest {
 
-	public Bug22338Test(String name) {
-		super(name);
-	}
-
+	@Test
     public void testLastModified() throws Exception {
         /*
          * create appointment on client
@@ -85,7 +84,7 @@ public class Bug22338Test extends CalDAVTest {
          */
         Appointment appointment = super.getAppointment(uid);
         super.rememberForCleanUp(appointment);
-        assertEquals(appointment, start, end, uid, summary, location);
+        assertAppointmentEquals(appointment, start, end, uid, summary, location);
         Date clientLastModified = super.getManager().getLastModification();
         /*
          * verify appointment on client
@@ -119,8 +118,8 @@ public class Bug22338Test extends CalDAVTest {
             }
         }
         assertNotNull("appointment not listed in updates", updatedAppointment);
-        assertEquals(updatedAppointment, updatedStart, updatedEnd, uid, summary, location);
+        assertAppointmentEquals(updatedAppointment, updatedStart, updatedEnd, uid, summary, location);
         assertTrue("last modified not changed", clientLastModified.before(super.getManager().getLastModification()));
     }
-	
+
 }

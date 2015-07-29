@@ -54,9 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 
@@ -80,29 +77,6 @@ public abstract class AbstractTargetProxy implements TargetProxy {
         modified = true;
     }
 
-    /**
-     * Takes a folder permission bit mask and deduces the according object permissions.
-     *
-     * @param folderPermissionBits The folder permission bit mask
-     * @return The object permission bits
-     */
-    protected static int getObjectPermissionBits(int folderPermissionBits) {
-        int objectBits = ObjectPermission.NONE;
-        int[] permissionBits = Permissions.parsePermissionBits(folderPermissionBits);
-        int rp = permissionBits[1];
-        int wp = permissionBits[2];
-        int dp = permissionBits[3];
-        if (dp >= Permission.DELETE_ALL_OBJECTS) {
-            objectBits = ObjectPermission.DELETE;
-        } else if (wp >= Permission.WRITE_ALL_OBJECTS) {
-            objectBits = ObjectPermission.WRITE;
-        } else if (rp >= Permission.READ_ALL_OBJECTS) {
-            objectBits = ObjectPermission.READ;
-        }
-
-        return objectBits;
-    }
-
     protected static interface PermissionConverter<T> {
 
         int getEntity(T permission);
@@ -112,6 +86,8 @@ public abstract class AbstractTargetProxy implements TargetProxy {
         int getBits(T permission);
 
         T convert(TargetPermission permission);
+
+        TargetPermission convert(T permission);
 
     }
 

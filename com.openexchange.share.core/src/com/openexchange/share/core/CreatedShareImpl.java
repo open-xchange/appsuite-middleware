@@ -52,9 +52,9 @@ package com.openexchange.share.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -198,17 +198,17 @@ public class CreatedShareImpl implements CreatedShare {
      * whether this share has multiple targets or not. The latter behavior is subject to change in
      * the future.
      *
-     * @param requestContext
+     * @param hostData The host data
      * @return The URL
      */
     @Override
-    public String getUrl(RequestContext requestContext) {
+    public String getUrl(HostData hostData) {
         if (recipient.isInternal()) {
             // TODO: no handling for multi-target shares yet
-            return ShareLinks.generateInternal(requestContext, getFirstTarget());
+            return ShareLinks.generateInternal(hostData, getFirstTarget());
         }
 
-        return ShareLinks.generateExternal(requestContext, getToken());
+        return ShareLinks.generateExternal(hostData, getToken());
     }
 
     /**

@@ -67,6 +67,7 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
+import com.openexchange.ajax.oauth.provider.protocol.Grant;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
@@ -80,133 +81,156 @@ import com.openexchange.exception.OXException;
  */
 public class WebDAVClient {
 
-	private final HttpClient httpClient;
-	private String baseURI = null;
+    private final HttpClient httpClient;
+    private final boolean useOAuth;
+    private Grant oauthGrant;
 
-	public WebDAVClient(String userAgent) throws OXException {
-		super();
+    private String baseURI = null;
+
+    public WebDAVClient(String userAgent) throws OXException {
+        this(userAgent, null);
+    }
+
+    public WebDAVClient(String userAgent, Grant oAuthGrant) throws OXException {
+        super();
+        this.useOAuth = oAuthGrant != null;
         /*
-         * setup log
+         * init web client
          */
-//		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
-//		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
-//		System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire", "debug");
-//		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "debug");
-		/*
-		 * init web client
-		 */
-        this.httpClient = new HttpClient();
-        this.httpClient.getParams().setAuthenticationPreemptive(true); // authentication should be attempted preemptively in tests
-        this.httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        this.httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-        this.setCredentials(Config.getLogin(), Config.getPassword());
+        if (useOAuth) {
+            httpClient = newOAuthHTTPClient();
+            this.oauthGrant = oAuthGrant;
+        } else {
+            httpClient = newDefaultHTTPClient();
+            this.setCredentials(Config.getLogin(), Config.getPassword());
+        }
         this.setBaseURI(Config.getBaseUri());
         this.setUserAgent(userAgent);
-	}
+    }
 
-	/**
-	 * @return the baseUrl
-	 */
-	public String getBaseURI() {
-		return this.baseURI;
-	}
+    private static HttpClient newOAuthHTTPClient() {
+        HttpClient httpClient = new HttpClient();
+        httpClient.getParams().setAuthenticationPreemptive(false);
+        httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        httpClient.getParams().setParameter("http.protocol.max-redirects", 0);
+        httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+        return httpClient;
+    }
 
-	/**
-	 * @param baseUrl the baseUrl to set
-	 */
-	public void setBaseURI(final String baseURI) {
-		this.baseURI = baseURI;
-	}
+    private static HttpClient newDefaultHTTPClient() {
+        HttpClient httpClient = new HttpClient();
+        httpClient.getParams().setAuthenticationPreemptive(true);
+        httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+        return httpClient;
+    }
 
-	public void setUserAgent(final String userAgent) {
+    /**
+     * @return the baseUrl
+     */
+    public String getBaseURI() {
+        return this.baseURI;
+    }
+
+    /**
+     * @param baseUrl the baseUrl to set
+     */
+    public void setBaseURI(final String baseURI) {
+        this.baseURI = baseURI;
+    }
+
+    public void setUserAgent(final String userAgent) {
         this.httpClient.getParams().setParameter(HttpMethodParams.USER_AGENT, userAgent);
-	}
+    }
 
-	public void setCredentials(final Credentials credentials) {
+    public void setCredentials(final Credentials credentials) {
         this.httpClient.getState().setCredentials(AuthScope.ANY, credentials);
-	}
+    }
 
-	public void setCredentials(final String login, final String password) {
-		this.setCredentials(new UsernamePasswordCredentials(login, password));
-	}
+    public void setCredentials(final String login, final String password) {
+        this.setCredentials(new UsernamePasswordCredentials(login, password));
+    }
 
-	public HttpClient getHttpClient() {
-	    return this.httpClient;
-	}
+    public HttpClient getHttpClient() {
+        return this.httpClient;
+    }
 
-	public int executeMethod(final HttpMethod method) throws HttpException, IOException {
-		return this.httpClient.executeMethod(method);
-	}
+    public int executeMethod(final HttpMethod method) throws HttpException, IOException {
+        if (useOAuth) {
+            method.addRequestHeader("Authorization", "Bearer " + oauthGrant.getAccessToken());
+        }
+        return this.httpClient.executeMethod(method);
+    }
 
-	public void doPut(final PutMethod put, final int expectedStatus) throws HttpException, IOException {
-		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(put));
-		} finally {
-			release(put);
-		}
-	}
+    public void doPut(final PutMethod put, final int expectedStatus) throws HttpException, IOException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(put));
+        } finally {
+            release(put);
+        }
+    }
 
-	public void doPut(final PutMethod put) throws HttpException, IOException {
-		this.doPut(put, StatusCodes.SC_CREATED);
-	}
+    public void doPut(final PutMethod put) throws HttpException, IOException {
+        this.doPut(put, StatusCodes.SC_CREATED);
+    }
 
-	public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException, DavException {
-		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(report));
-	    	return report.getResponseBodyAsMultiStatus().getResponses();
-		} catch (final DavException e) {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
-			return null;
-		} finally {
-			release(report);
-		}
-	}
+    public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException, DavException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
+            return report.getResponseBodyAsMultiStatus().getResponses();
+        } catch (final DavException e) {
+            Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
+            return null;
+        } finally {
+            release(report);
+        }
+    }
 
-	public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException, DavException {
-		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(report));
-	    	return report.getResponseBodyAsSyncCollection();
-		} catch (final DavException e) {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
-			return null;
-		} finally {
-			release(report);
-		}
-	}
+    public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException, DavException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
+            return report.getResponseBodyAsSyncCollection();
+        } catch (final DavException e) {
+            Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
+            return null;
+        } finally {
+            release(report);
+        }
+    }
 
-	public MultiStatusResponse[] doReport(final ReportMethod report) throws HttpException, IOException, DavException {
-		return this.doReport(report, StatusCodes.SC_MULTISTATUS);
-	}
+    public MultiStatusResponse[] doReport(final ReportMethod report) throws HttpException, IOException, DavException {
+        return this.doReport(report, StatusCodes.SC_MULTISTATUS);
+    }
 
-	public MultiStatusResponse[] doReport(final ReportInfo reportInfo, final String uri) throws ConfigurationException, IOException, DavException {
-    	ReportMethod report = null;
-    	MultiStatusResponse[] responses = null;
-    	try {
+    public MultiStatusResponse[] doReport(final ReportInfo reportInfo, final String uri) throws ConfigurationException, IOException, DavException {
+        ReportMethod report = null;
+        MultiStatusResponse[] responses = null;
+        try {
             report = new ReportMethod(uri, reportInfo);
-	        responses = this.doReport(report, StatusCodes.SC_MULTISTATUS);
-    	} finally {
-    		release(report);
-    	}
+            responses = this.doReport(report, StatusCodes.SC_MULTISTATUS);
+        } finally {
+            release(report);
+        }
         Assert.assertNotNull("got no response", responses);
-		return responses;
-	}
+        return responses;
+    }
 
-	public SyncCollectionResponse doReport(SyncCollectionReportInfo reportInfo, String uri) throws ConfigurationException, IOException, DavException {
-		SyncCollectionReportMethod report = null;
-		SyncCollectionResponse response = null;
-    	try {
+    public SyncCollectionResponse doReport(SyncCollectionReportInfo reportInfo, String uri) throws ConfigurationException, IOException, DavException {
+        SyncCollectionReportMethod report = null;
+        SyncCollectionResponse response = null;
+        try {
             report = new SyncCollectionReportMethod(uri, reportInfo);
-	        response = this.doReport(report, StatusCodes.SC_MULTISTATUS);
-    	} finally {
-    		release(report);
-    	}
+            response = this.doReport(report, StatusCodes.SC_MULTISTATUS);
+        } finally {
+            release(report);
+        }
         Assert.assertNotNull("got no response", response);
-		return response;
-	}
+        return response;
+    }
 
     public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
         try {
-            int executeMethod = this.httpClient.executeMethod(propFind);
+            int executeMethod = executeMethod(propFind);
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod);
             return propFind.getResponseBodyAsMultiStatus().getResponses();
         } catch (final DavException e) {
@@ -219,7 +243,7 @@ public class WebDAVClient {
 
     public MultiStatusResponse[] doPropPatch(PropPatchMethod propPatch, int expectedStatus) throws HttpException, IOException, DavException {
         try {
-            Assert.assertEquals("unexpected http status", expectedStatus, httpClient.executeMethod(propPatch));
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(propPatch));
             return propPatch.getResponseBodyAsMultiStatus().getResponses();
         } catch (DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
@@ -229,26 +253,26 @@ public class WebDAVClient {
         }
     }
 
-	public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
-		return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
-	}
+    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
+        return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
+    }
 
-	public String doPost(PostMethod post) throws HttpException, IOException {
-		return this.doPost(post, StatusCodes.SC_OK);
-	}
+    public String doPost(PostMethod post) throws HttpException, IOException {
+        return this.doPost(post, StatusCodes.SC_OK);
+    }
 
-	public String doPost(PostMethod post, int expectedStatus) throws HttpException, IOException {
-		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(post));
-	    	return post.getResponseBodyAsString();
-		} finally {
-			release(post);
-		}
-	}
+    public String doPost(PostMethod post, int expectedStatus) throws HttpException, IOException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(post));
+            return post.getResponseBodyAsString();
+        } finally {
+            release(post);
+        }
+    }
 
-	private static void release(final HttpMethod method) {
-		if (null != method) {
-			method.releaseConnection();
-		}
-	}
+    private static void release(final HttpMethod method) {
+        if (null != method) {
+            method.releaseConnection();
+        }
+    }
 }
