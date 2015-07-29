@@ -2749,7 +2749,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         CalendarDataObject clone = null;
 
-        final boolean changeMasterTime = checkRecurrenceMasterTimeUpdate(cdao, edao);
+        final boolean changeMasterTime = Tools.checkRecurrenceMasterTimeUpdate(cdao, edao);
 
         // Reset all exceptions (change and delete)
         if (changeMasterTime) {
@@ -3165,48 +3165,6 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         }
         return null;
-    }
-
-    /**
-     * Checks, if the start or end date of the whole sequence has been changed.
-     *
-     * @param newObject new CalendarDataObject
-     * @param currencObject old CalendarDataObject
-     * @return
-     */
-    private boolean checkRecurrenceMasterTimeUpdate(final CalendarDataObject newObject, final CalendarDataObject currentObject) {
-        // Is sequence?
-        if (!currentObject.containsRecurrenceType() || currentObject.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
-            return false;
-        }
-
-        // Is Exception
-        if (newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
-            return false;
-        }
-        if (newObject.containsRecurrenceDatePosition()) {
-            return false;
-        }
-
-        final Date newStart = newObject.getStartDate();
-        final Date newEnd = newObject.getEndDate();
-
-        // No new dates
-        if (newStart == null && newEnd == null) {
-            return false;
-        }
-
-        // New start date
-        if (newStart != null && !newStart.equals(currentObject.getStartDate())) {
-            return true;
-        }
-
-        // New end date
-        if (newEnd != null && !newEnd.equals(currentObject.getEndDate())) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
