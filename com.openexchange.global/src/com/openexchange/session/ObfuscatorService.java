@@ -47,46 +47,30 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
+package com.openexchange.session;
 
 /**
- * {@link SessiondServiceTracker}
+ * {@link ObfuscatorService} - The obfuscator service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService, SessiondService> {
+public interface ObfuscatorService {
 
-    private final BundleContext context;
+    /**
+     * Obfuscates given string
+     *
+     * @param string The string to obfuscate
+     * @return The obfuscated string
+     */
+    String obfuscate(String string);
 
-    SessiondServiceTracker(BundleContext context) {
-        this.context = context;
-    }
-
-    @Override
-    public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
-        PortableSessionRemoteLookUp.setSessiondServiceReference(null);
-        PortableSessionExistenceCheck.setSessiondServiceReference(null);
-        context.ungetService(reference);
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<SessiondService> reference, SessiondService service) {
-        // Ignore
-    }
-
-    @Override
-    public SessiondService addingService(ServiceReference<SessiondService> reference) {
-        SessiondService service = context.getService(reference);
-        PortableSessionExistenceCheck.setSessiondServiceReference(service);
-        PortableSessionRemoteLookUp.setSessiondServiceReference(service);
-        return service;
-    }
+    /**
+     * Un-Obfuscates given string
+     *
+     * @param string The string to un-obfuscate
+     * @return The un-obfuscated string
+     */
+    String unobfuscate(String string);
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,26 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
+package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link SessiondServiceTracker}
+ * {@link PortableSessionRemoteLookupFactory} - The portable factory for {@link PortableSessionExistenceCheck} type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService, SessiondService> {
+public class PortableSessionRemoteLookupFactory extends AbstractCustomPortableFactory {
 
-    private final BundleContext context;
-
-    SessiondServiceTracker(BundleContext context) {
-        this.context = context;
+    @Override
+    public CustomPortable create() {
+        return new PortableSessionRemoteLookUp();
     }
 
     @Override
-    public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
-        PortableSessionRemoteLookUp.setSessiondServiceReference(null);
-        PortableSessionExistenceCheck.setSessiondServiceReference(null);
-        context.ungetService(reference);
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<SessiondService> reference, SessiondService service) {
-        // Ignore
-    }
-
-    @Override
-    public SessiondService addingService(ServiceReference<SessiondService> reference) {
-        SessiondService service = context.getService(reference);
-        PortableSessionExistenceCheck.setSessiondServiceReference(service);
-        PortableSessionRemoteLookUp.setSessiondServiceReference(service);
-        return service;
+    public int getClassId() {
+        return PortableSessionRemoteLookUp.CLASS_ID;
     }
 
 }

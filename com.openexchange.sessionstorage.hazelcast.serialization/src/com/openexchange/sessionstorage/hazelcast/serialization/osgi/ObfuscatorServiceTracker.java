@@ -52,40 +52,37 @@ package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
 
 /**
- * {@link SessiondServiceTracker}
+ * {@link ObfuscatorServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService, SessiondService> {
+class ObfuscatorServiceTracker implements ServiceTrackerCustomizer<ObfuscatorService, ObfuscatorService> {
 
     private final BundleContext context;
 
-    SessiondServiceTracker(BundleContext context) {
+    ObfuscatorServiceTracker(BundleContext context) {
         this.context = context;
     }
 
     @Override
-    public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
-        PortableSessionRemoteLookUp.setSessiondServiceReference(null);
-        PortableSessionExistenceCheck.setSessiondServiceReference(null);
+    public void removedService(ServiceReference<ObfuscatorService> reference, ObfuscatorService service) {
+        PortableSessionRemoteLookUp.setObfuscatorServiceReference(null);
         context.ungetService(reference);
     }
 
     @Override
-    public void modifiedService(ServiceReference<SessiondService> reference, SessiondService service) {
+    public void modifiedService(ServiceReference<ObfuscatorService> reference, ObfuscatorService service) {
         // Ignore
     }
 
     @Override
-    public SessiondService addingService(ServiceReference<SessiondService> reference) {
-        SessiondService service = context.getService(reference);
-        PortableSessionExistenceCheck.setSessiondServiceReference(service);
-        PortableSessionRemoteLookUp.setSessiondServiceReference(service);
+    public ObfuscatorService addingService(ServiceReference<ObfuscatorService> reference) {
+        ObfuscatorService service = context.getService(reference);
+        PortableSessionRemoteLookUp.setObfuscatorServiceReference(service);
         return service;
     }
 

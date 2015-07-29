@@ -76,6 +76,7 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
@@ -299,6 +300,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
+
+            registerService(ObfuscatorService.class, SessionHandler.getObfuscator());
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());

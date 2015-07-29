@@ -155,6 +155,7 @@ public interface CustomPortable extends Portable {
      * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
      *
      * <li><code>  400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
+     * <li><code>  401</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp</li>>
      * </ul>
      *
      * @return The class ID
