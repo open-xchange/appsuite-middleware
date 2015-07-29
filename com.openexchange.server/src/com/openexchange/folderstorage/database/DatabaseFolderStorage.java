@@ -2086,7 +2086,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
      */
     private static List<FolderObject> getUserSharedFolders(SearchIterator<FolderObject> searchIterator, Connection connection, StorageParameters storageParameters) throws OXException {
         List<FolderObject> folders = new ArrayList<FolderObject>();
-        Set<Integer> knownPublicFolders = new HashSet<Integer>();
+        Set<Integer> knownPrivateFolders = new HashSet<Integer>();
         while (searchIterator.hasNext()) {
             /*
              * only include shared, non-public folders created by the user
@@ -2094,7 +2094,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             FolderObject folder = searchIterator.next();
             if (folder.getCreatedBy() == storageParameters.getUserId()) {
                 OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
-                if (null != permissions && 1 < permissions.length && false == considerPublic(folder, knownPublicFolders, connection, storageParameters)) {
+                if (null != permissions && 1 < permissions.length && considerPrivate(folder, knownPrivateFolders, connection, storageParameters)) {
                     folders.add(folder);
                 }
             }
@@ -2103,48 +2103,50 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     }
 
     /**
-     * Gets a value indicating whether the supplied folder can be considered as a "public" one, i.e. he is marked directly as such, or is
-     * an infostore folder somewhere in the "public" subtree below {@link FolderObject#SYSTEM_PUBLIC_FOLDER_ID} /
-     * {@link FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID}.
+     * Gets a value indicating whether the supplied folder can be considered as a "private" one, i.e. it is marked directly as such, or is
+     * an infostore folder somewhere in the "private" subtree below the user's personal default infostore folder.
      *
      * @param folder The folder to check
-     * @param knownPublicFolders A set of already known public folders (from previous checks)
+     * @param knownPrivateFolders A set of already known private folders (from previous checks)
      * @param connection An opened database connection to use
      * @param storageParameters The storage parameters as passed from the client
      * @return <code>true</code> if the folder can be considered as "public", <code>false</code>, otherwise
      */
-    private static boolean considerPublic(FolderObject folder, Set<Integer> knownPublicFolders, Connection connection, StorageParameters storageParameters) throws OXException {
+    private static boolean considerPrivate(FolderObject folder, Set<Integer> knownPrivateFolders, Connection connection, StorageParameters storageParameters) throws OXException {
         if (FolderObject.INFOSTORE == folder.getModule()) {
             /*
-             * infostore folders are always of "public" type, so check if they're somewhere in the "public" subtree
+             * infostore folders are always of "public" type, so check if they're somewhere below the personal subtree
              */
-            knownPublicFolders.add(I(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-            knownPublicFolders.add(I(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-            if (knownPublicFolders.contains(I(folder.getObjectID()))) {
-                return true;
-            } else if (knownPublicFolders.contains(I(folder.getParentFolderID()))) {
-                knownPublicFolders.add(I(folder.getObjectID()));
-                return true;
-            } else {
-                int parentFolderID = folder.getParentFolderID();
-                while (FolderObject.MIN_FOLDER_ID < parentFolderID) {
-                    FolderObject parentFolder = getFolderObject(parentFolderID, storageParameters.getContext(), connection, storageParameters);
-                    if (knownPublicFolders.contains(I(parentFolder.getObjectID()))) {
-                        return true;
-                    } else if (knownPublicFolders.contains(I(parentFolder.getParentFolderID()))) {
-                        knownPublicFolders.add(I(folder.getObjectID()));
-                        return true;
+            List<Integer> seenFolders = new ArrayList<Integer>();
+            FolderObject currentFolder = folder;
+            do {
+                Integer id = I(currentFolder.getObjectID());
+                seenFolders.add(id);
+                if (knownPrivateFolders.contains(id) || knownPrivateFolders.contains(I(currentFolder.getParentFolderID())) ||
+                    currentFolder.isDefaultFolder() && FolderObject.PUBLIC == currentFolder.getType()) {
+                    /*
+                     * folder or its parent is a previously recognized "private" folder, or the user's personal infostore folder is reached
+                     */
+                    knownPrivateFolders.addAll(seenFolders);
+                    return true;
+                } else {
+                    /*
+                     * check parent folder if there are more parent folders available
+                     */
+                    if (FolderObject.MIN_FOLDER_ID < currentFolder.getParentFolderID()) {
+                        currentFolder = getFolderObject(currentFolder.getParentFolderID(), storageParameters.getContext(), connection, storageParameters);
                     } else {
-                        parentFolderID = parentFolder.getParentFolderID();
+                        currentFolder = null;
+                        return false;
                     }
                 }
-            }
+            } while (null != currentFolder);
             return false;
         } else {
             /*
-             * always consider non-infostore "public" folders as public
+             * always consider non-infostore "private" folders as private
              */
-            return FolderObject.PUBLIC == folder.getType(storageParameters.getUserId());
+            return FolderObject.PRIVATE == folder.getType(storageParameters.getUserId());
         }
     }
 
