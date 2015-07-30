@@ -47,39 +47,58 @@
  *
  */
 
-package com.openexchange.guard;
+package com.openexchange.guard.internal;
 
-import java.util.Map;
-import org.json.JSONValue;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@link GuardApi} - Provides HTTP-based access to the configured OX Guard end-point.
+ * {@link AbstractGuardAccess} - Access to OX Guard API.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public interface GuardApi {
+public abstract class AbstractGuardAccess {
+
+    private static final AtomicReference<GuardApiImpl> API_REF = new AtomicReference<GuardApiImpl>();
 
     /**
-     * Performs a GET request to the Guard end-point using given parameters.
+     * Sets the {@link GuardApiImpl} reference
      *
-     * @param parameters The parameters
-     * @param clazz The return type
-     * @throws OXException If GET fails
-     * @see GuardApiUtils#mapFor(String...)
+     * @param guardApi The instance to set
      */
-    <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz) throws OXException;
+    public static void setGuardApi(GuardApiImpl guardApi) {
+        API_REF.set(guardApi);
+    }
 
     /**
-     * Performs a PUT request to the Guard end-point using given parameters and body.
+     * Sets the {@link GuardApiImpl} reference
      *
-     * @param parameters The parameters
-     * @param jsonBody The JSON body to pass
-     * @param clazz The return type
-     * @throws OXException If PUT fails
-     * @see GuardApiUtils#mapFor(String...)
+     * @param guardApi The instance to set
      */
-    <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz) throws OXException;
+    public static GuardApiImpl unsetGuardApi() {
+        GuardApiImpl guardApi;
+        do {
+            guardApi = API_REF.get();
+            if (null == guardApi) {
+                return null;
+            }
+        } while (!API_REF.compareAndSet(guardApi, null));
+        return guardApi;
+    }
+
+    /**
+     * Initializes a new {@link AbstractGuardAccess}.
+     */
+    protected AbstractGuardAccess() {
+        super();
+    }
+
+    /**
+     * Gets the Guard API access.
+     *
+     * @return The Guard API access
+     */
+    protected static GuardApiImpl getGuardApi() {
+        return API_REF.get();
+    }
 
 }

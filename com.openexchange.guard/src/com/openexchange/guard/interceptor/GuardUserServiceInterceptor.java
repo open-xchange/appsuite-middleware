@@ -49,6 +49,7 @@
 
 package com.openexchange.guard.interceptor;
 
+import static com.openexchange.guard.GuardApiUtils.mapFor;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,9 +58,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.guard.AbstractGuardAccess;
-import com.openexchange.guard.GuardApi;
 import com.openexchange.guard.GuardApiExceptionCodes;
+import com.openexchange.guard.internal.AbstractGuardAccess;
+import com.openexchange.guard.internal.GuardApiImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserServiceInterceptor;
 
@@ -110,7 +111,7 @@ public class GuardUserServiceInterceptor extends AbstractGuardAccess implements 
     @Override
     public void beforeDelete(final Context context, final User user, final Contact contactData) throws OXException {
         try {
-            GuardApi guardApi = getGuardApi();
+            GuardApiImpl guardApi = getGuardApi();
             if (null == guardApi) {
                 // Guard end point not available
                 return;

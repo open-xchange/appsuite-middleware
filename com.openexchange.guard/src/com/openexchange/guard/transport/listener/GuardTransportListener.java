@@ -49,10 +49,11 @@
 
 package com.openexchange.guard.transport.listener;
 
+import static com.openexchange.guard.GuardApiUtils.mapFor;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.guard.AbstractGuardAccess;
-import com.openexchange.guard.GuardApi;
+import com.openexchange.guard.internal.AbstractGuardAccess;
+import com.openexchange.guard.internal.GuardApiImpl;
 import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
@@ -82,7 +83,7 @@ public class GuardTransportListener extends AbstractGuardAccess implements MailT
             return new GuardResult(message, Reply.NEUTRAL);
         }
 
-        GuardApi guardApi = getGuardApi();
+        GuardApiImpl guardApi = getGuardApi();
         if (null == guardApi) {
             // Guard end point not available
             return new GuardResult(message, Reply.NEUTRAL);

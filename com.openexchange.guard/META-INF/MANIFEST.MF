@@ -129,3 +129,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.guard.osgi.GuardActivator
+Export-Package: com.openexchange.guard

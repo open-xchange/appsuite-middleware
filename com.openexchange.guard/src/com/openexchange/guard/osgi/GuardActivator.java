@@ -55,10 +55,10 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.guard.AbstractGuardAccess;
-import com.openexchange.guard.GuardApi;
 import com.openexchange.guard.interceptor.GuardProvisioningContextPlugin;
 import com.openexchange.guard.interceptor.GuardUserServiceInterceptor;
+import com.openexchange.guard.internal.AbstractGuardAccess;
+import com.openexchange.guard.internal.GuardApiImpl;
 import com.openexchange.guard.transport.listener.GuardTransportListener;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.listener.MailTransportListener;
@@ -106,7 +106,8 @@ public class GuardActivator extends HousekeepingActivator {
                     endPoint = new StringBuilder(endPoint).append('/').toString();
                 }
                 logger.info("Starting bundle {} using end point \"{}\"", context.getBundle().getSymbolicName(), endPoint);
-                AbstractGuardAccess.setGuardApi(new GuardApi(endPoint, service));
+                GuardApiImpl guardApi = new GuardApiImpl(endPoint, service);
+                AbstractGuardAccess.setGuardApi(guardApi);
             }
             Services.setServiceLookup(this);
             // Register plugin interfaces
@@ -131,7 +132,7 @@ public class GuardActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        GuardApi guardApi = AbstractGuardAccess.unsetGuardApi();
+        GuardApiImpl guardApi = AbstractGuardAccess.unsetGuardApi();
         if (null != guardApi) {
             guardApi.shutDown();
         }

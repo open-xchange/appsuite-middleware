@@ -49,6 +49,7 @@
 
 package com.openexchange.guard.interceptor;
 
+import static com.openexchange.guard.GuardApiUtils.mapFor;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONException;
@@ -61,8 +62,8 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.exception.OXException;
-import com.openexchange.guard.AbstractGuardAccess;
-import com.openexchange.guard.GuardApi;
+import com.openexchange.guard.internal.AbstractGuardAccess;
+import com.openexchange.guard.internal.GuardApiImpl;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -109,7 +110,7 @@ public final class GuardProvisioningContextPlugin extends AbstractGuardAccess im
     @Override
     public void delete(final Context ctx, final Credentials auth) throws PluginException {
         try {
-            GuardApi guardApi = getGuardApi();
+            GuardApiImpl guardApi = getGuardApi();
             if (null == guardApi) {
                 // Guard end point not available
                 return;

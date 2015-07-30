@@ -51,56 +51,20 @@ package com.openexchange.guard;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * {@link AbstractGuardAccess} - Access to OX Guard API.
+ * {@link GuardApiUtils}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public abstract class AbstractGuardAccess {
-
-    private static final AtomicReference<GuardApi> API_REF = new AtomicReference<GuardApi>();
+public class GuardApiUtils {
 
     /**
-     * Sets the {@link GuardApi} reference
-     *
-     * @param guardApi The instance to set
+     * Initializes a new {@link GuardApiUtils}.
      */
-    public static void setGuardApi(GuardApi guardApi) {
-        API_REF.set(guardApi);
-    }
-
-    /**
-     * Sets the {@link GuardApi} reference
-     *
-     * @param guardApi The instance to set
-     */
-    public static GuardApi unsetGuardApi() {
-        GuardApi guardApi;
-        do {
-            guardApi = API_REF.get();
-            if (null == guardApi) {
-                return null;
-            }
-        } while (!API_REF.compareAndSet(guardApi, null));
-        return guardApi;
-    }
-
-    /**
-     * Initializes a new {@link AbstractGuardAccess}.
-     */
-    protected AbstractGuardAccess() {
+    private GuardApiUtils() {
         super();
-    }
-
-    /**
-     * Gets the Guard API access.
-     *
-     * @return The Guard API access
-     */
-    protected static GuardApi getGuardApi() {
-        return API_REF.get();
     }
 
     /**
@@ -109,7 +73,7 @@ public abstract class AbstractGuardAccess {
      * @param args The arguments
      * @return The resulting map
      */
-    protected static Map<String, String> mapFor(String... args) {
+    public static Map<String, String> mapFor(String... args) {
         if (null == args) {
             return null;
         }
