@@ -1195,8 +1195,8 @@ fi
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
-# SoftwareChange_Request-2456
-ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
