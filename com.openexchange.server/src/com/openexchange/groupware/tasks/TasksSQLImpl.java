@@ -218,7 +218,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
      */
     private void collectAddresses(Task task) {
         if ((task == null) || (task.getParticipants() == null)) {
-            LOG.info("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
+            LOG.debug("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
             return;
         }
 
