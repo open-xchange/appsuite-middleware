@@ -781,6 +781,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return The user permission bits
      */
     public UserPermissionBits getUserPermissionBits() {
-        return new UserPermissionBits(getPermissionBits(), userId, ctx.getContextId()).setGroups(groups);
+        return new UserPermissionBits(getPermissionBits(), userId, groups, ctx);
     }
 }

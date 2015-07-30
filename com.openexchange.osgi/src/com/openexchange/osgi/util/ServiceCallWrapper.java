@@ -248,6 +248,18 @@ public class ServiceCallWrapper {
             return new OXException(cause);
         }
 
+        /**
+         * Throws a runtime exception that either denotes the unavailability of the requested service or
+         * encapsulates the root cause of this exception.
+         */
+        public RuntimeException toRuntimeException() {
+            if (isServiceUnavailable) {
+                return new RuntimeException("The required service " + serviceClass.getName() + " is temporary not available. Please try again later.");
+            }
+
+            return new RuntimeException(getCause());
+        }
+
     }
 
     static class BundleContextProvider {

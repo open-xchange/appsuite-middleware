@@ -344,7 +344,7 @@ public class ShareUtils {
             /*
              * save permission bits
              */
-            userPermissionBits = new UserPermissionBits(permissionBits, userID, context.getContextId());
+            userPermissionBits = new UserPermissionBits(permissionBits, userID, context);
             userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
         } else if (userPermissionBits.getPermissionBits() != permissionBits) {
             /*

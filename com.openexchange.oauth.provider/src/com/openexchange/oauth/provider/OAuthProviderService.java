@@ -59,6 +59,7 @@ import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * The management service to be used by the OAuth provider implementation.
@@ -101,12 +102,11 @@ public interface OAuthProviderService {
      * @param clientId The client identifier
      * @param redirectURI The redirect URI
      * @param scope The scope, must have been validated before
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @return A new authorization code
      * @throws OXException If operation fails
      */
-    String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException;
+    String generateAuthorizationCodeFor(String id, String redirectURI, Scope scope, Session session) throws OXException;
 
     /**
      * Redeems the passed authorization code for an access token.

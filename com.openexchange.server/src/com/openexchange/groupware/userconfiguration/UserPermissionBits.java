@@ -51,16 +51,20 @@ package com.openexchange.groupware.userconfiguration;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -234,7 +238,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     // ---------------------------------------------------------------------------------------------------------- //
 
     private final int userId;
-    private final int contextId;
+    private final Context context;
     private int permissionBits;
     private int[] groups;
 
@@ -243,10 +247,12 @@ public class UserPermissionBits implements Serializable, Cloneable {
      *
      * @param permissions The permissions
      * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param contextId The context ID
+     * @deprecated Use {@link #UserPermissionBits(int, int, Context)}
      */
+    @Deprecated
     public UserPermissionBits(final int permissions, final int userId, final int contextId) {
-        this(permissions, userId, null, contextId);
+        this(permissions, userId, null, loadContext(contextId));
     }
 
     /**
@@ -255,13 +261,38 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * @param permissions The permissions
      * @param userId The user identifier
      * @param groups The user's groups
-     * @param contextId The context identifier
+     * @param contextId The context ID
+     * @deprecated Use {@link #UserPermissionBits(int, int, int[], Context)}
      */
+    @Deprecated
     public UserPermissionBits(final int permissions, final int userId, final int[] groups, final int contextId) {
+        this(permissions, userId, groups, loadContext(contextId));
+    }
+
+    /**
+     * Initializes a new {@link UserPermissionBits}.
+     *
+     * @param permissions The permissions
+     * @param userId The user identifier
+     * @param context The context
+     */
+    public UserPermissionBits(final int permissions, final int userId, final Context context) {
+        this(permissions, userId, null, context);
+    }
+
+    /**
+     * Initializes a new {@link UserPermissionBits}.
+     *
+     * @param permissions The permissions
+     * @param userId The user identifier
+     * @param groups The user's groups
+     * @param context The context
+     */
+    public UserPermissionBits(final int permissions, final int userId, final int[] groups, final Context context) {
         super();
         this.userId = userId;
         this.groups = groups;
-        this.contextId = contextId;
+        this.context = context;
         this.permissionBits = permissions;
     }
 
@@ -885,12 +916,26 @@ public class UserPermissionBits implements Serializable, Cloneable {
      *
      * @param serverSession The session
      * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated Use {@link #isGlobalAddressBookEnabled()} instead
      */
+    @Deprecated
     public boolean isGlobalAddressBookEnabled(final ServerSession serverSession) {
-        final Context context = serverSession.getContext();
-        if (null == context) {
+        try {
+            return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
+        } catch (final OXException e) {
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserPermissionBits.class);
+            logger.warn("Cannot check availability of Global Address Book.", e);
             return false;
         }
+    }
+
+    /**
+     * Checks if global address book is enabled.
+     *
+     * @param context The session
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public boolean isGlobalAddressBookEnabled() {
         try {
             return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
         } catch (final OXException e) {
@@ -918,7 +963,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
         int[] thisGroups = groups;
         if (null == thisGroups) {
             try {
-                thisGroups = groups = UserStorage.getInstance().getUser(userId, contextId).getGroups();
+                thisGroups = groups = UserStorage.getInstance().getUser(userId, context.getContextId()).getGroups();
             } catch (OXException e) {
                 thisGroups = groups = new int[0];
             }
@@ -943,7 +988,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * @return The context identifier
      */
     public int getContextId() {
-        return contextId;
+        return context.getContextId();
     }
 
     /**
@@ -967,16 +1012,28 @@ public class UserPermissionBits implements Serializable, Cloneable {
 
     /**
      * Gets the context associated with this user permission bits.
-     * <p>
-     * Helper method that invokes {@link ContextStorage#getStorageContext(int)}.
      *
      * @return The context
      */
     public Context getContext() {
+        return context;
+    }
+
+    /**
+     * @deprecated remove when deprected constructors are removed
+     */
+    @Deprecated
+    private static Context loadContext(final int contextId) {
         try {
-            return ContextStorage.getStorageContext(contextId);
-        } catch (OXException e) {
-            return null;
+            return doServiceCall(ServerSessionAdapter.class, ContextService.class,
+                new ServiceUser<ContextService, Context>() {
+                    @Override
+                    public Context call(ContextService service) throws OXException {
+                        return service.getContext(contextId);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toRuntimeException();
         }
     }
 

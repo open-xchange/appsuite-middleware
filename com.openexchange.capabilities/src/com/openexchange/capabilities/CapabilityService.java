@@ -69,26 +69,30 @@ public interface CapabilityService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param computeCapabilityFilters <code>true</code> to indicate if filters should be computed. Use <code>false</code> (default) to retrieve all available capabilities
+     * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
+     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *                         set, but no PasswordChangeService is available).
      * @param allowCache <code>true</code> (default) to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters, boolean allowCache) throws OXException;
+    CapabilitySet getCapabilities(int userId, int contextId, boolean alignPermissions, boolean allowCache) throws OXException;
 
     /**
-     * Gets the capabilities associated with given session.
+     * Gets the capabilities associated with given session. Cached capability sets are always preferred.
      *
      * @param session The session
-     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
-     *            capabilities
+     * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
+     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *                         set, but no PasswordChangeService is available).
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    CapabilitySet getCapabilities(Session session, boolean computeCapabilityFilters) throws OXException;
+    CapabilitySet getCapabilities(Session session, boolean alignPermissions) throws OXException;
 
     /**
-     * Gets the capabilities associated with given user.
+     * Gets the capabilities associated with given user. Behaves the same as {@link #getCapabilities(int, int, boolean, boolean)}
+     * called with <code>alignPermissions = false</code> and <code>allowCache = true</code>.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -98,7 +102,8 @@ public interface CapabilityService {
     CapabilitySet getCapabilities(int userId, int contextId) throws OXException;
 
     /**
-     * Gets the capabilities associated with given session.
+     * Gets the capabilities associated with given session. Cached capability sets are always preferred. Permission capabilities
+     * will not be aligned.
      *
      * @param session The session
      * @return The capabilities

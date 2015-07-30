@@ -1220,7 +1220,7 @@ public class DefaultShareService implements ShareService {
         /*
          * store permission bits
          */
-        services.getService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context.getContextId()));
+        services.getService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context));
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {

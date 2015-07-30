@@ -386,7 +386,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             }
 
             // Everything OK, send notification mail and do the redirect with authorization code & state
-            String code = oAuthProvider.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), user.getId(), context.getContextId());
+            String code = oAuthProvider.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), session);
             String redirectLocation = URLHelper.getRedirectLocation(
                 authRequest.getRedirectURI(),
                 OAuthProviderConstants.PARAM_CODE,
