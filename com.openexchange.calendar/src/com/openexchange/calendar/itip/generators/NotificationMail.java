@@ -344,38 +344,6 @@ public class NotificationMail {
             return "NPE";
         }
     }
-    
-    private String diffs() {
-        try {
-            return getDiff().getDifferingFieldNames().toString();
-        } catch (Exception e) {
-            return "NPE";
-        }
-    }
-    
-    private String changes() {
-        try {
-            return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
-        } catch (Exception e) {
-            return "NPE";
-        }
-    }
-    
-    private String stateChanges() {
-        try {
-            return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
-        } catch (Exception e) {
-            return "NPE";
-        }
-    }
-
-    private String id() {
-        try {
-            return getRecipient().getUser().getId() + "";
-        } catch (Exception e) {
-            return "NPE";
-        }
-    }
 
     private String getUserDiff() {
         try {
