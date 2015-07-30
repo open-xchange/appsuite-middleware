@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -216,6 +217,33 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected boolean hasRegisteredServices() {
         return !serviceRegistrations.isEmpty();
+    }
+
+    /**
+     * Gets the {@link ServiceRegistration} instance for specified service.
+     *
+     * @param clazz The service's class
+     * @return The {@link ServiceRegistration} instance or <code>null</code> if no such service has been registered
+     */
+    @SuppressWarnings("unchecked")
+    protected <S> ServiceRegistration<S> getServiceRegistrationFor(Class<S> clazz) {
+        for (Map.Entry<Object, ServiceRegistration<?>> entry : serviceRegistrations.entries()) {
+            if (clazz.isInstance(entry.getKey())) {
+                return (ServiceRegistration<S>) entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the {@link ServiceRegistration} instance for specified service.
+     *
+     * @param service The previously registered service
+     * @return The {@link ServiceRegistration} instance or <code>null</code> if no such service has been registered
+     */
+    @SuppressWarnings("unchecked")
+    protected <S> ServiceRegistration<S> getServiceRegistrationFor(S service) {
+        return (ServiceRegistration<S>) serviceRegistrations.get(service);
     }
 
     /**
