@@ -2688,6 +2688,11 @@ msgstr ""
 msgid "Error while reading/writing data from/to the database."
 msgstr ""
 
+#. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+msgid "Data cannot be stored into the database because it is too big"
+msgstr ""
+
 #. *
 #. * File not found: %1$s
 #.
