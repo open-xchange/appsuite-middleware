@@ -51,7 +51,6 @@ package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -67,19 +66,17 @@ import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
  */
 public class SubscribeActivator extends AJAXModuleActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class,
-		    SubscriptionSourceDiscoveryService.class, ConfigurationService.class };
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-//		registerService(SecretService.class, new WhiteboardSecretService(context));
-		this.addService(SecretService.class, new WhiteboardSecretService(context));
+    @Override
+    protected void startBundle() throws Exception {
+        this.addService(SecretService.class, new WhiteboardSecretService(context));
 
-		registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
-		registerModule(new SubscriptionActionFactory(this), "subscriptions");
-	}
+        registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
+        registerModule(new SubscriptionActionFactory(this), "subscriptions");
+    }
 
 }

@@ -170,9 +170,8 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
                 protected String getDisplayName(final Subscription subscription) {
                     if(form.getDisplayNameField() == null) {
                         return external.getDisplayName();
-                    } else {
-                        return subscription.getConfiguration().get(form.getDisplayNameField().getName()).toString();
                     }
+                    return subscription.getConfiguration().get(form.getDisplayNameField().getName()).toString();
                 }
             };
             subscribeService.setOXMFParserFactory(parserFactory);

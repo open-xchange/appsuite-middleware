@@ -72,10 +72,6 @@ public enum SubscriptionJSONErrorMessages implements DisplayableOXExceptionCode 
 
     THROWABLE(103, "An unexpected error occurred: %s", CATEGORY_ERROR),
     UNKNOWN_COLUMN(201, "Unknown column: %s", CATEGORY_USER_INPUT),
-    /**
-     * The operation is forbidden according to configuration.
-     */
-    FORBIDDEN_CREATE_MODIFY(104, "The operation is forbidden according to configuration.", CATEGORY_USER_INPUT, SubscriptionJSONExceptionMessage.FORBIDDEN_CREATE_MODIFY_MESSAGE),
     ;
 
     private final Category category;
