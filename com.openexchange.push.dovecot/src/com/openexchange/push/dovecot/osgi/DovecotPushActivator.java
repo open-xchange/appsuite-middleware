@@ -49,31 +49,18 @@
 
 package com.openexchange.push.dovecot.osgi;
 
-import java.util.Map;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
-import com.openexchange.push.PushManagerService;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
 import com.openexchange.push.dovecot.DovecotPushDeleteListener;
 import com.openexchange.push.dovecot.DovecotPushManagerService;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
-import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
 import com.openexchange.push.dovecot.rest.DovecotPushRESTService;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
@@ -89,128 +76,6 @@ import com.openexchange.user.UserService;
  * @since 7.6.2
  */
 public class DovecotPushActivator extends HousekeepingActivator {
-
-    private static final class HzConfigTracker implements ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> {
-
-        final BundleContext context;
-        final DovecotPushActivator activator;
-        final DovecotPushConfiguration configuration;
-        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
-
-        HzConfigTracker(BundleContext context, DovecotPushConfiguration configuration, DovecotPushActivator activator) {
-            super();
-            this.context = context;
-            this.activator = activator;
-            this.configuration = configuration;
-        }
-
-        @Override
-        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
-            HazelcastConfigurationService hzConfigService = context.getService(reference);
-
-            final Logger logger = org.slf4j.LoggerFactory.getLogger(DovecotPushActivator.class);
-            try {
-                boolean hzEnabled = hzConfigService.isEnabled();
-                if (false == hzEnabled) {
-                    String msg = "IMAP-IDLE is configured to use Hazelcast-based locking, but Hazelcast is disabled as per configuration! Start of IMAP-IDLE aborted!";
-                    logger.error(msg, new Exception(msg));
-                    context.ungetService(reference);
-                    return null;
-                }
-
-                final BundleContext context = this.context;
-                ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> stc = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-                    private volatile ServiceRegistration<PushManagerService> reg;
-
-                    @Override
-                    public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                        HazelcastInstance hzInstance = context.getService(reference);
-                        try {
-                            String mapName = discoverMapName(hzInstance.getConfig(), logger);
-                            ((HzDovecotPushClusterLock) configuration.getClusterLock()).setMapName(mapName);
-                            activator.addService(HazelcastInstance.class, hzInstance);
-
-                            reg = context.registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getEndPoint(), configuration.getClusterLock(), activator), null);
-
-                            return hzInstance;
-                        } catch (Exception e) {
-                            logger.warn("Failed start-up for {}", context.getBundle().getSymbolicName(), e);
-                        }
-                        context.ungetService(reference);
-                        return null;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                        // Nothing
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                        ServiceRegistration<PushManagerService> reg = this.reg;
-                        if (null != reg) {
-                            reg.unregister();
-                            // stopPushManagerSafe();
-                            this.reg = null;
-                        }
-
-                        activator.removeService(HazelcastInstance.class);
-                        context.ungetService(reference);
-                    }
-                };
-                ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, stc);
-                this.hzInstanceTracker = hzInstanceTracker;
-                hzInstanceTracker.open();
-
-                return hzConfigService;
-            } catch (Exception e) {
-                logger.warn("Failed to start IMAP-IDLE!", e);
-            }
-
-            context.ungetService(reference);
-            return null;
-        }
-
-        @Override
-        public void modifiedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
-            // Ignore
-        }
-
-        @Override
-        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
-            ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
-            if (null != hzInstanceTracker) {
-                hzInstanceTracker.close();
-                this.hzInstanceTracker = null;
-            }
-
-            context.ungetService(reference);
-        }
-
-        /**
-         * Discovers the map name from the supplied Hazelcast configuration.
-         *
-         * @param config The config object
-         * @return The sessions map name
-         * @throws IllegalStateException
-         */
-        String discoverMapName(Config config, Logger logger) throws IllegalStateException {
-            Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-            if (null != mapConfigs && 0 < mapConfigs.size()) {
-                for (String mapName : mapConfigs.keySet()) {
-                    if (mapName.startsWith("dovecotnotify-")) {
-                        logger.info("Using distributed Dovecot Push map '{}'.", mapName);
-                        return mapName;
-                    }
-                }
-            }
-            String msg = "No distributed Dovecot Push map found in Hazelcast configuration";
-            throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link DovecotPushActivator}.
@@ -233,11 +98,13 @@ public class DovecotPushActivator extends HousekeepingActivator {
         // Check Hazelcast-based locking is enabled
         if (DovecotPushClusterLock.Type.HAZELCAST.equals(configuration.getClusterLock().getType())) {
             // Start tracking for Hazelcast
-            track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
+            DovecotRegisteringTracker registeringTracker = new DovecotRegisteringTracker(true, configuration, this, context);
+            track(registeringTracker.getFilter(), registeringTracker);
         } else {
             // Register PushManagerService instance
+            DovecotRegisteringTracker registeringTracker = new DovecotRegisteringTracker(false, configuration, this, context);
+            track(registeringTracker.getFilter(), registeringTracker);
             trackService(HazelcastInstance.class);
-            registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getEndPoint(), configuration.getClusterLock(), this));
         }
         openTrackers();
 
