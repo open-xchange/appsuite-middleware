@@ -1,3 +1,7 @@
+* 2015-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40040: Render a better error message in case a setting cannot be stored into database due to data truncation
+
 * 2015-07-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 39571: Avoid double booking of resources.

@@ -86,6 +86,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // The general message if an error occurred while reading or writing to the database
     public static final String SQL_ERROR_MSG = "Error while reading/writing data from/to the database.";
 
+    // General message if a setting cannot be put into database because it exceeds a column's capacity constraints
+    public static final String DATA_TRUNCATION_ERROR_MSG = "Data cannot be stored into the database because it is too big";
+
     /**
      * Initializes a new {@link OXExceptionStrings}.
      */

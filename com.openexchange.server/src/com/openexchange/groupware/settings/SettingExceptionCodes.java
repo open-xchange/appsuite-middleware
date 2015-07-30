@@ -63,8 +63,8 @@ public enum SettingExceptionCodes implements DisplayableOXExceptionCode {
     /** Cannot get connection to database. */
     NO_CONNECTION("Cannot get connection to database.", Category.CATEGORY_SERVICE_DOWN, 1),
 
-    /** An SQL problem occures while reading information from the config database. */
-    SQL_ERROR("An SQL problem occures while reading information from the config database.", OXExceptionStrings.SQL_ERROR_MSG,
+    /** An SQL problem occured while reading information from the config database. */
+    SQL_ERROR("An SQL problem occured while reading information from the config database.", OXExceptionStrings.SQL_ERROR_MSG,
         Category.CATEGORY_ERROR, 2),
 
     /** Writing the setting %1$s is not permitted. */
@@ -98,8 +98,12 @@ public enum SettingExceptionCodes implements DisplayableOXExceptionCode {
     NOT_ALLOWED("Not allowed operation.", Category.CATEGORY_ERROR, 14),
 
     /** Reached maximum retries writing setting %s. */
-    MAX_RETRY("Reached maximum retries for writing the setting %s.", OXExceptionStrings.MESSAGE_RETRY, Category.CATEGORY_TRY_AGAIN, 15);
+    MAX_RETRY("Reached maximum retries for writing the setting %s.", OXExceptionStrings.MESSAGE_RETRY, Category.CATEGORY_TRY_AGAIN, 15),
 
+    /** Setting "%1$s" cannot be stored into the database because is too big */
+    DATA_TRUNCATION("Setting \"%1$s\" cannot be stored into the database because is too big", OXExceptionStrings.DATA_TRUNCATION_ERROR_MSG, Category.CATEGORY_ERROR, 16),
+
+    ;
 
     private String message;
     private String displayMessage;
