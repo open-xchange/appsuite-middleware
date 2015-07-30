@@ -197,7 +197,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 action.call(data);
             }
         } catch (FileResponseRendererActionException ex) {
-            //Response with an error
+            //Respond with an error
             return;
         } catch (final OXException e) {
             String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
@@ -217,7 +217,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
-            close(data.documentData, data.getFile());
+            close(data.getDocumentData(), data.getFile());
             close(closeables);
         }
     }
@@ -261,22 +261,22 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private class DataWrapper implements IDataWrapper {
 
-        String delivery = null;
-        String contentType = null;
-        String contentDisposition = null;
-        Boolean contentTypeByParameter = false;
-        Readable documentData = null;
-        long length = -1;
-        IFileHolder file;
-        HttpServletRequest request;
-        String fileContentType;
-        String fileName;
-        AJAXRequestData requestData;
-        HttpServletResponse response;
-        String userAgent;
-        List<Closeable> closeables;
-        AJAXRequestResult result;
-        AtomicReference<File> tmpDirReference;
+        private String delivery = null;
+        private String contentType = null;
+        private String contentDisposition = null;
+        private String userAgent;
+        private String fileContentType;
+        private String fileName;
+        private long length = -1;
+        private Boolean contentTypeByParameter = false;
+        private Readable documentData = null;
+        private IFileHolder file;
+        private HttpServletRequest request;
+        private HttpServletResponse response;
+        private AJAXRequestData requestData;
+        private AJAXRequestResult result;
+        private List<Closeable> closeables;
+        private AtomicReference<File> tmpDirReference;
 
         public DataWrapper(String delivery, String contentType, String contentDisposition, Boolean contentTypeByParameter, Readable documentData, long length, IFileHolder file, HttpServletRequest req, String fileContentType, String fileName, AJAXRequestData requestData, HttpServletResponse response, String userAgent, List<Closeable> closeables, AJAXRequestResult result, AtomicReference<File> tmpDirReference) {
             this.delivery = delivery;

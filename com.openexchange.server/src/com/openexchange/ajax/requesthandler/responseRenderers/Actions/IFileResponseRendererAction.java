@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
 
-import com.openexchange.exception.OXException;
-
 /**
  * {@link IFileResponseRendererAction}
  *
