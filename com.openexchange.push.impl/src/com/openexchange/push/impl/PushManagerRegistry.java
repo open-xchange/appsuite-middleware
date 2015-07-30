@@ -249,7 +249,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
                     }
                 } catch (OXException e) {
-                    if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e)) {
+                    if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e) || PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
                         try {
                             CredentialStorage credentialStorage = optCredentialStorage();
                             if (null != credentialStorage) {
