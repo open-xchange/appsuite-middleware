@@ -629,6 +629,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share URL, or <code>null</code> if not found
      */
     protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
+        return discoverShareURL(client, guestEntity);
+    }
+
+    /**
+     * Discovers the share URL based on the supplied guest permission entity by either reading the share URL property directly in case
+     * the guest entity points to an anonymous share, or by fetching and parsing the notification message for the recipient in case he is
+     * an invited guest.
+     *
+     * @param client The ajax client to use
+     * @param guestEntity The guest entity
+     * @return The share URL, or <code>null</code> if not found
+     */
+    protected String discoverShareURL(AJAXClient client, ExtendedPermissionEntity guestEntity) throws Exception {
         switch (guestEntity.getType()) {
             case ANONYMOUS:
                 return guestEntity.getShareURL();
@@ -636,7 +649,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
                 assertNotNull("No contact in guest entity", guestEntity.getContact());
                 String email = guestEntity.getContact().getEmail1();
                 assertNotNull("No mail address in guest entity", email);
-                return discoverInvitationLink(email);
+                return discoverInvitationLink(client, email);
             default:
                 fail("unexpected recipient type: " + guestEntity.getType());
                 break;
@@ -647,9 +660,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
     /**
      * Fetches the currently stored e-mail messages on the server and discovers an inviation message sent to a specifc recipient.
      *
+     * @param client The ajax client to use
+     * @param emailAddress The guest's e-mail address to search for
      * @return The message, or <code>null</code> if not found
      */
-    protected Message discoverInvitationMessage(String emailAddress) throws Exception {
+    protected Message discoverInvitationMessage(AJAXClient client, String emailAddress) throws Exception {
         List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         for (Message message : messages) {
             Map<String, String> headers = message.getHeaders();
@@ -677,10 +692,12 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * Fetches the currently stored e-mail messages on the server and discovers an invitation message sent to a specific recipient. If
      * found, the share URL link is extracted and returned.
      *
+     * @param client The ajax client to use
+     * @param emailAddress The guest's e-mail address to search for
      * @return The share URL, or <code>null</code> if not found
      */
-    protected String discoverInvitationLink(String emailAddress) throws Exception {
-        Message message = discoverInvitationMessage(emailAddress);
+    protected String discoverInvitationLink(AJAXClient client, String emailAddress) throws Exception {
+        Message message = discoverInvitationMessage(client, emailAddress);
         if (null != message) {
             return message.getHeaders().get("X-Open-Xchange-Share-URL");
         }

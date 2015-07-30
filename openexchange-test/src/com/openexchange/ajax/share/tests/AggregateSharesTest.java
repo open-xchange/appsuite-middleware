@@ -70,6 +70,7 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link AggregateSharesTest}
@@ -164,7 +165,9 @@ public class AggregateSharesTest extends ShareTest {
          */
         FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client1.getValues().getUserId(), guestPermission);
         folderA.setParentFolderID(getDefaultFolder(client1, module1));
-        InsertResponse insertResponse1 = client1.execute(new InsertRequest(api, folderA));
+        InsertRequest insertRequest1 = new InsertRequest(api, folderA);
+        insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
+        InsertResponse insertResponse1 = client1.execute(insertRequest1);
         insertResponse1.fillObject(folderA);
         clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
         GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
@@ -187,13 +190,15 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
-        String shareURLA = discoverShareURL(guestA);
+        String shareURLA = discoverShareURL(client1, guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
         FolderObject folderB = Create.createPrivateFolder(randomUID(), module2, client2.getValues().getUserId(), guestPermission);
         folderB.setParentFolderID(getDefaultFolder(client2, module2));
-        InsertResponse insertResponse2 = client2.execute(new InsertRequest(api, folderB));
+        InsertRequest insertRequest2 = new InsertRequest(api, folderB);
+        insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
+        InsertResponse insertResponse2 = client2.execute(insertRequest2);
         insertResponse2.fillObject(folderB);
         clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
         GetResponse getResponse = client2.execute(new GetRequest(api, folderB.getObjectID()));
@@ -216,7 +221,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
-        String shareURLB = discoverShareURL(guestB);
+        String shareURLB = discoverShareURL(client2, guestB);
         /*
          * check permission entities
          */
@@ -250,7 +255,9 @@ public class AggregateSharesTest extends ShareTest {
          */
         FolderObject folderA = Create.createPrivateFolder(randomUID(), module1, client1.getValues().getUserId(), guestPermission);
         folderA.setParentFolderID(getDefaultFolder(client1, module1));
-        InsertResponse insertResponse1 = client1.execute(new InsertRequest(api, folderA));
+        InsertRequest insertRequest1 = new InsertRequest(api, folderA);
+        insertRequest1.setNotifyPermissionEntities(Transport.MAIL);
+        InsertResponse insertResponse1 = client1.execute(insertRequest1);
         insertResponse1.fillObject(folderA);
         clientsAndFolders.get(client1).add(Integer.valueOf(folderA.getObjectID()));
         GetResponse getResponse1 = client1.execute(new GetRequest(api, folderA.getObjectID()));
@@ -279,7 +286,9 @@ public class AggregateSharesTest extends ShareTest {
          */
         FolderObject folderB = Create.createPrivateFolder(randomUID(), module2, client2.getValues().getUserId(), guestPermission);
         folderB.setParentFolderID(getDefaultFolder(client2, module2));
-        InsertResponse insertResponse2 = client2.execute(new InsertRequest(api, folderB));
+        InsertRequest insertRequest2 = new InsertRequest(api, folderB);
+        insertRequest2.setNotifyPermissionEntities(Transport.MAIL);
+        InsertResponse insertResponse2 = client2.execute(insertRequest2);
         insertResponse2.fillObject(folderB);
         clientsAndFolders.get(client2).add(Integer.valueOf(folderB.getObjectID()));
         GetResponse getResponse2 = client2.execute(new GetRequest(api, folderB.getObjectID()));
