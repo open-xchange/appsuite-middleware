@@ -322,10 +322,8 @@ public final class OXFolderUtility {
         boolean creatorIsAdmin = false;
         for (int i = 0; i < permissionsSize; i++) {
             final OCLPermission oclPerm = iter.next();
-            if (oclPerm.getEntity() < 0) {
-                throw OXFolderExceptionCode.INVALID_ENTITY.create(Integer.valueOf(oclPerm.getEntity()),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+            if (oclPerm.getEntity() < 0 || oclPerm.isGroupPermission() && GroupStorage.GUEST_GROUP_IDENTIFIER == oclPerm.getEntity()) {
+                throw OXFolderExceptionCode.INVALID_ENTITY.create(I(oclPerm.getEntity()), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
             }
             if (oclPerm.isFolderAdmin()) {
                 adminEntities.add(oclPerm.getEntity());
