@@ -304,7 +304,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(guestA, guestPermission.getRecipient());
+        String shareURLA = discoverShareURL(guestA);
+        GuestClient guestClientA = resolveShare(shareURLA, guestPermission.getRecipient());
         guestClientA.checkModuleAvailable(module1);
         guestClientA.checkModuleAvailable(module2);
         guestClientA.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
@@ -312,7 +313,8 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(guestB, guestPermission.getRecipient());
+        String shareURLB = discoverShareURL(guestB);
+        GuestClient guestClientB = resolveShare(shareURLB, guestPermission.getRecipient());
         guestClientB.checkModuleAvailable(module1);
         guestClientB.checkModuleAvailable(module2);
         guestClientB.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
@@ -351,12 +353,12 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check if share link to folder A still accessible
          */
-        ResolveShareResponse shareResolveResponse = new GuestClient(guestA.getShareURL(), guestPermission.getRecipient(), false).getShareResolveResponse();
+        ResolveShareResponse shareResolveResponse = new GuestClient(shareURLA, guestPermission.getRecipient(), false).getShareResolveResponse();
         assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         /*
          * check if share link to folder A still accessible
          */
-        shareResolveResponse = new GuestClient(guestB.getShareURL(), guestPermission.getRecipient()).getShareResolveResponse();
+        shareResolveResponse = new GuestClient(shareURLB, guestPermission.getRecipient()).getShareResolveResponse();
         assertEquals("Status code wrong", HttpServletResponse.SC_MOVED_TEMPORARILY, shareResolveResponse.getStatusCode());
     }
 

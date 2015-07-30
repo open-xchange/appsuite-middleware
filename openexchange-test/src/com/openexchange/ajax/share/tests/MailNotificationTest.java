@@ -74,8 +74,6 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.InviteRequest;
-import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -135,7 +133,6 @@ public class MailNotificationTest extends ShareTest {
         image2 = createFile(testFolder1, IMAGENAME2, IMAGETYPE2);
         file1 = createFile(testFolder1, FILENAME1, FILETYPE1);
         file2 = createFile(testFolder1, FILENAME2, FILETYPE2);
-        client.execute(new StartSMTPRequest());
         initUserConfig();
         shareExpireDate = new SimpleDateFormat("yyyy-MM-dd", userValues.getLocale()).parse("2048-12-02");
         dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, userValues.getLocale());
@@ -151,7 +148,6 @@ public class MailNotificationTest extends ShareTest {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new StopSMTPRequest());
         super.tearDown();
     }
 

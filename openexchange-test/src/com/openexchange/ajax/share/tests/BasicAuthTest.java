@@ -226,7 +226,8 @@ public class BasicAuthTest extends ShareTest {
         }
 
         // Check access to share (via guest client)
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient =  resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
 
@@ -249,7 +250,7 @@ public class BasicAuthTest extends ShareTest {
             httpClient.setCredentialsProvider(credentialsProvider);
         }
 
-        HttpGet httpGet = new HttpGet(guest.getShareURL());
+        HttpGet httpGet = new HttpGet(shareURL);
         httpGet.setHeader("Accept", "text/calendar");
         httpGet.setHeader("User-Agent", "Microsoft Outlook");
 

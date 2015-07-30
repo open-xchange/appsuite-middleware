@@ -125,7 +125,8 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -135,7 +136,7 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check if share link still accessible
          */
-        GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient(), false);
+        GuestClient revokedGuestClient = new GuestClient(shareURL, guestPermission.getRecipient(), false);
         ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
         assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         /*

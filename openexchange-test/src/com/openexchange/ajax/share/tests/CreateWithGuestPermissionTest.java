@@ -80,7 +80,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         testCreateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
     }
 
-    public void noTestCreateSharedFolderExtensively() throws Exception {
+    public void notTestCreateSharedFolderExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
@@ -129,7 +129,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -167,7 +167,7 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission, contents);
     }

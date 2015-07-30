@@ -119,7 +119,6 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
-
     private void testUpdateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
         testUpdateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
     }

@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.junit.Assert;
@@ -94,6 +96,10 @@ import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ShareLink;
+import com.openexchange.ajax.share.actions.StartSMTPRequest;
+import com.openexchange.ajax.share.actions.StopSMTPRequest;
+import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
+import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
@@ -105,11 +111,13 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -166,6 +174,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
+        client.execute(new StartSMTPRequest());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (null != client) {
+            client.execute(new StopSMTPRequest());
+            deleteFoldersSilently(client, foldersToDelete);
+            deleteFilesSilently(client, filesToDelete.values());
+        }
+        super.tearDown();
     }
 
     /**
@@ -368,14 +387,14 @@ public abstract class ShareTest extends AbstractAJAXSession {
      *
      * @param folderID The parent folder identifier
      * @param filename The filename to use
-     * @param guestPermission The guest permission to assign
+     * @param permission The permission to assign
      * @return The inserted file
      * @throws Exception
      */
-    protected File insertSharedFile(int folderID, String filename, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    protected File insertSharedFile(int folderID, String filename, FileStorageObjectPermission permission) throws Exception {
         byte[] contents = new byte[64 + random.nextInt(256)];
         random.nextBytes(contents);
-        return insertSharedFile(folderID, filename, guestPermission, contents);
+        return insertSharedFile(folderID, filename, permission, contents);
     }
 
     /**
@@ -383,19 +402,20 @@ public abstract class ShareTest extends AbstractAJAXSession {
      *
      * @param folderID The parent folder identifier
      * @param filename The filename to use
-     * @param guestPermission The guest permission to assign
+     * @param permission The permission to assign
      * @param data The file contents
      * @return The inserted file
      * @throws Exception
      */
-    protected File insertSharedFile(int folderID, String filename, FileStorageGuestObjectPermission guestPermission, byte[] data) throws Exception {
+    protected File insertSharedFile(int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
-        if (null != guestPermission) {
-            metadata.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(guestPermission));
+        if (null != permission) {
+            metadata.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
         }
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
+        newRequest.setNotifyPermissionEntities(Transport.MAIL);
         NewInfostoreResponse newResponse = getClient().execute(newRequest);
         String id = newResponse.getID();
         metadata.setId(id);
@@ -453,6 +473,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
         UpdateRequest request = new UpdateRequest(api, folder);
+        request.setNotifyPermissionEntities(Transport.MAIL);
         if (customizer != null) {
             customizer.customize(request);
         }
@@ -488,6 +509,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected File updateFile(File file, Field[] modifiedColumns, RequestCustomizer<UpdateInfostoreRequest> customizer) throws Exception {
         UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, file.getLastModified());
+        updateInfostoreRequest.setNotifyPermissionEntities(Transport.MAIL);
         updateInfostoreRequest.setFailOnError(true);
         if (customizer != null) {
             customizer.customize(updateInfostoreRequest);
@@ -542,7 +564,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
-        InsertResponse insertResponse = client.execute(new InsertRequest(api, folder, client.getValues().getTimeZone()));
+        InsertRequest insertRequest = new InsertRequest(api, folder, client.getValues().getTimeZone());
+        insertRequest.setNotifyPermissionEntities(Transport.MAIL);
+        InsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(folder);
         remember(folder);
         FolderObject createdFolder = getFolder(api, folder.getObjectID());
@@ -594,6 +618,73 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static List<FolderShare> getFolderShares(AJAXClient client, EnumAPI api, int module) throws OXException, IOException, JSONException {
         return client.execute(new FolderSharesRequest(api, Module.getModuleString(module, -1))).getShares(client.getValues().getTimeZone());
+    }
+
+    /**
+     * Discovers the share URL based on the supplied guest permission entity by either reading the share URL property directly in case
+     * the guest entity points to an anonymous share, or by fetching and parsing the notification message for the recipient in case he is
+     * an invited guest.
+     *
+     * @param guestEntity The guest entity
+     * @return The share URL, or <code>null</code> if not found
+     */
+    protected String discoverShareURL(ExtendedPermissionEntity guestEntity) throws Exception {
+        switch (guestEntity.getType()) {
+            case ANONYMOUS:
+                return guestEntity.getShareURL();
+            case GUEST:
+                assertNotNull("No contact in guest entity", guestEntity.getContact());
+                String email = guestEntity.getContact().getEmail1();
+                assertNotNull("No mail address in guest entity", email);
+                return discoverInvitationLink(email);
+            default:
+                fail("unexpected recipient type: " + guestEntity.getType());
+                break;
+        }
+        return null;
+    }
+
+    /**
+     * Fetches the currently stored e-mail messages on the server and discovers an inviation message sent to a specifc recipient.
+     *
+     * @return The message, or <code>null</code> if not found
+     */
+    protected Message discoverInvitationMessage(String emailAddress) throws Exception {
+        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        for (Message message : messages) {
+            Map<String, String> headers = message.getHeaders();
+            String toHeader = headers.get("To");
+            if (false == Strings.isEmpty(toHeader)) {
+                InternetAddress[] addresses = null;
+                try {
+                    addresses = InternetAddress.parseHeader(toHeader, false);
+                } catch (AddressException e) {
+                    fail(e.getMessage());
+                }
+                if (null != addresses && 0 < addresses.length) {
+                    for (InternetAddress address : addresses) {
+                        if (emailAddress.equals(address.getAddress())) {
+                            return message;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Fetches the currently stored e-mail messages on the server and discovers an invitation message sent to a specific recipient. If
+     * found, the share URL link is extracted and returned.
+     *
+     * @return The share URL, or <code>null</code> if not found
+     */
+    protected String discoverInvitationLink(String emailAddress) throws Exception {
+        Message message = discoverInvitationMessage(emailAddress);
+        if (null != message) {
+            return message.getHeaders().get("X-Open-Xchange-Share-URL");
+        }
+        return null;
     }
 
     /**
@@ -762,15 +853,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return discoverShare(client, folderID, item, guest);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        if (null != client) {
-            deleteFoldersSilently(client, foldersToDelete);
-            deleteFilesSilently(client, filesToDelete.values());
-        }
-        super.tearDown();
-    }
-
     protected static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
         deleteFoldersSilently(client, foldersToDelete.keySet());
     }
@@ -807,7 +889,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return An authenticated guest client being able to access the share
      */
     protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient) throws Exception {
-        return new GuestClient(guestPermission.getShareURL(), recipient);
+        return new GuestClient(discoverShareURL(guestPermission), recipient);
     }
 
     /**
@@ -906,12 +988,12 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Checks the supplied object permissions against the expected guest permissions.
+     * Checks the supplied object permissions against the expected permissions.
      *
      * @param expected The expected permissions
      * @param actual The actual permissions
      */
-    protected static void checkPermissions(FileStorageGuestObjectPermission expected, FileStorageObjectPermission actual) {
+    protected static void checkPermissions(FileStorageObjectPermission expected, FileStorageObjectPermission actual) {
         assertEquals("Permission wrong", expected.canDelete(), actual.canDelete());
         assertEquals("Permission wrong", expected.canWrite(), actual.canWrite());
         assertEquals("Permission wrong", expected.canRead(), actual.canRead());
@@ -951,15 +1033,20 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Checks the supplied extended guest permission against the expected guest permissions.
+     * Checks the supplied extended permission entity against the expected object permissions.
      *
      * @param expectedPermission The expected permissions
      * @param actual The actual extended permission
      */
-    protected static void checkGuestPermission(FileStorageGuestObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
+    protected static void checkGuestPermission(FileStorageObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
         assertNotNull("No guest permission entitiy", actual);
         checkPermissions(expectedPermission, actual.toObjectPermission());
-        checkRecipient(expectedPermission.getRecipient(), actual);
+        if (FileStorageGuestObjectPermission.class.isInstance(expectedPermission)) {
+            checkRecipient(((FileStorageGuestObjectPermission) expectedPermission).getRecipient(), actual);
+        } else {
+            assertEquals("Entity ID wrong", actual.getEntity(), expectedPermission.getEntity());
+            assertEquals("Recipient type wrong", actual.getType(), expectedPermission.isGroup() ? RecipientType.GROUP : RecipientType.USER);
+        }
     }
 
     /**
@@ -1159,6 +1246,14 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static FileStorageGuestObjectPermission randomGuestObjectPermission() {
         return TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
+    }
+
+    protected static FileStorageGuestObjectPermission randomGuestObjectPermission(RecipientType type) {
+        FileStorageGuestObjectPermission permission;
+        do {
+            permission = TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
+        } while (false == type.equals(permission.getRecipient().getType()));
+        return permission;
     }
 
     /**

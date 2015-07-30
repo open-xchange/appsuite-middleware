@@ -128,7 +128,8 @@ public class DownloadHandlerTest extends ShareTest {
         /*
          * check access to share (via guest client)
          */
-        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -148,7 +149,7 @@ public class DownloadHandlerTest extends ShareTest {
          * check direct download
          */
         for (String queryParameter : new String[] { "delivery=download", "dl=1", "dl=true" }) {
-            HttpGet httpGet = new HttpGet(guest.getShareURL() + '?' + queryParameter);
+            HttpGet httpGet = new HttpGet(shareURL + '?' + queryParameter);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");
@@ -163,7 +164,7 @@ public class DownloadHandlerTest extends ShareTest {
          * check inline delivery
          */
         for (String queryParameter : new String[] { "delivery=view", "raw=1", "raw=true" }) {
-            HttpGet httpGet = new HttpGet(guest.getShareURL() + '?' + queryParameter);
+            HttpGet httpGet = new HttpGet(shareURL + '?' + queryParameter);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");

@@ -103,7 +103,8 @@ public class GuestPasswordTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * update password
@@ -115,13 +116,13 @@ public class GuestPasswordTest extends ShareTest {
         /*
          * check if share link still accessible with old password
          */
-        GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient(), false);
+        GuestClient revokedGuestClient = new GuestClient(shareURL, guestPermission.getRecipient(), false);
         assertTrue("No errors during login with old password", revokedGuestClient.getLoginResponse().hasError());
         assertNull("Got session ID from login with old password", revokedGuestClient.getLoginResponse().getSessionId());
         /*
          * check access to share with new password
          */
-        guestClient = resolveShare(guest, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPassword);
+        guestClient = resolveShare(shareURL, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPassword);
         guestClient.checkShareModuleAvailable();
     }
 

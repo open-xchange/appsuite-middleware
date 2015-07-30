@@ -110,7 +110,8 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * check access to share - a login request must not have been performed
          */
-        GuestClient guestClient = resolveShare(guest.getShareURL());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(shareURL);
         assertNull(guestClient.getLoginResponse());
         /*
          * Set password for guest user
@@ -124,7 +125,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * Re-login with PW
          */
-        guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()), newPW);
+        guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
         LoginResponse response = guestClient.getLoginResponse();
         assertNotNull(response);
         assertFalse(response.hasError());
@@ -132,7 +133,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * Empty password should now fail with LoginExceptionCodes.INVALID_CREDENTIALS
          */
-        guestClient = resolveShare(guest.getShareURL());
+        guestClient = resolveShare(shareURL);
         response = guestClient.getLoginResponse();
         assertNotNull(response);
         assertTrue(response.hasError());

@@ -118,7 +118,7 @@ public class GuestContactTest extends ShareTest {
 
     public void testCreateGuestContact() throws Exception {
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = new GuestClient(guest.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
+        GuestClient guestClient = new GuestClient(discoverInvitationLink(GUEST_MAIL), GUEST_MAIL, GUEST_PASSWORD);
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
@@ -134,7 +134,7 @@ public class GuestContactTest extends ShareTest {
 
     public void testUpdateGuestContact() throws Exception {
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = new GuestClient(guest.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
+        GuestClient guestClient = new GuestClient(discoverInvitationLink(GUEST_MAIL), GUEST_MAIL, GUEST_PASSWORD);
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();

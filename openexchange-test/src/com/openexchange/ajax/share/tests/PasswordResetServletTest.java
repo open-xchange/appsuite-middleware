@@ -70,8 +70,6 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.ajax.share.actions.StartSMTPRequest;
-import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.groupware.container.FolderObject;
@@ -90,6 +88,7 @@ public final class PasswordResetServletTest extends ShareTest {
     private OCLGuestPermission guestPermission;
     private ExtendedPermissionEntity guest;
     private FolderObject folder;
+    private String shareURL;
 
     /**
      * Initializes a new {@link PasswordResetServletTest}
@@ -131,33 +130,21 @@ public final class PasswordResetServletTest extends ShareTest {
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(lGuest, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
+        shareURL = discoverShareURL(lGuest);
+        GuestClient guestClient = resolveShare(shareURL, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
         guestClient.checkShareModuleAvailable();
         this.guest = lGuest;
         this.guestPermission = lGuestPermission;
-
-        /*
-         * start dummy smtp to catch password-reset mail
-         */
-        try {
-            StartSMTPRequest startSMTPReqeuest = new StartSMTPRequest(true);
-            startSMTPReqeuest.setUpdateNoReplyForContext(client.getValues().getContextId());
-            client.execute(startSMTPReqeuest);
-        } catch (Exception e) {
-            tearDown();
-            throw e;
-        }
     }
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new StopSMTPRequest());
         super.tearDown();
     }
 
     public void testResetPassword_passwordReset() throws Exception {
         // http://localhost/ajax/share/1100ba1e0f0652b8849d7f3f066049e390589313a77026ef
-        URI shareUrl = new URI(guest.getShareURL());
+        URI shareUrl = new URI(shareURL);
         String[] pathSegments = shareUrl.getPath().split("/");
         String token = null;
         for (String segment : pathSegments) {
