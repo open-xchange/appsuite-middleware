@@ -76,6 +76,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 
@@ -205,12 +206,12 @@ public class Tools {
         }
         return idsToFolders;
     }
-    
+
     /**
      * Collects all infostore folders visible to a user and puts their folder IDs into the supplied lists, depending on the user being
      * allowed to read all contained items or only own ones.
      *
-     * @param security A reference to the infostore security service 
+     * @param security A reference to the infostore security service
      * @param connection A readable connection to the database
      * @param context The context
      * @param user The user
@@ -224,7 +225,7 @@ public class Tools {
         Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
         if (null != requestedFolderIDs) {
             /*
-             * check permissions of supplied folders 
+             * check permissions of supplied folders
              */
             for (int folderID : requestedFolderIDs) {
                 EffectiveInfostoreFolderPermission infostorePermission = security.getFolderPermission(folderID, context, user, userPermissions, connection);
@@ -253,7 +254,7 @@ public class Tools {
                         all.add(I(folder.getObjectID()));
                     } else if (infostorePermission.canReadOwnObjects()) {
                         own.add(I(folder.getObjectID()));
-                    } 
+                    }
                     permissionsByFolderID.put(I(folder.getObjectID()), infostorePermission);
                 }
             } finally {
@@ -275,11 +276,68 @@ public class Tools {
     }
 
     /**
+     * Iterates through a search iterator of documents and collects those documents that are located in or below the users personal
+     * infostore folder, i.e. removing all documents from "non-private" folders.
+     *
+     * @param searchIterator The search iterator to filter the documents for
+     * @param session The session
+     * @param dbProvider The database provider to use
+     * @return The documents, or an empty list if no "private" documents where found at all
+     */
+    public static List<DocumentMetadata> removeNonPrivate(SearchIterator<DocumentMetadata> searchIterator, ServerSession session, DBProvider dbProvider) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(session.getContext());
+            return removeNonPrivate(searchIterator, session, connection);
+        } finally {
+            if (null != connection) {
+                dbProvider.releaseReadConnection(session.getContext(), connection);
+            }
+        }
+    }
+
+    /**
+     * Iterates through a search iterator of documents and collects those documents that are located in or below the users personal
+     * infostore folder, i.e. removing all documents from "non-private" folders.
+     *
+     * @param searchIterator The search iterator to filter the documents for
+     * @param session The session
+     * @param connection A readable connection to the database
+     * @return The documents, or an empty list if no "private" documents where found at all
+     */
+    public static List<DocumentMetadata> removeNonPrivate(SearchIterator<DocumentMetadata> searchIterator, ServerSession session, Connection connection) throws OXException {
+        List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
+        Map<Integer, Boolean> knownFolders = new HashMap<Integer, Boolean>();
+        OXFolderAccess folderAccess = new OXFolderAccess(connection, session.getContext());
+        int defaultFolderID = folderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE);
+        knownFolders.put(I(defaultFolderID), Boolean.TRUE);
+        while (searchIterator.hasNext()) {
+            DocumentMetadata document = searchIterator.next();
+            Integer folderID = I((int) document.getFolderId());
+            List<Integer> seenFolders = new ArrayList<Integer>();
+            while (false == knownFolders.containsKey(folderID) && FolderObject.MIN_FOLDER_ID < folderID.intValue()) {
+                seenFolders.add(folderID);
+                folderID = I(folderAccess.getParentFolderID(folderID.intValue()));
+            }
+            Boolean isPrivate = knownFolders.get(folderID);
+            if (null == isPrivate) {
+                isPrivate = Boolean.FALSE;
+            } else if (isPrivate.booleanValue()) {
+                documents.add(document);
+            }
+            for (Integer seenFolder : seenFolders) {
+                knownFolders.put(seenFolder, isPrivate);
+            }
+        }
+        return documents;
+    }
+
+    /**
      * Collects all infostore folders visible to a user and puts their folder IDs into the supplied lists, depending on the user being
      * allowed to read all contained items or only own ones.
      *
      * @param session The session
-     * @param security A reference to the infostore security service 
+     * @param security A reference to the infostore security service
      * @param dbProvider The database provider to use
      * @param requestedFolderIDs The folder identifiers requested from the client, or <code>null</code> to use all visible ones
      * @param all A collection to add the IDs of folders the user is able to read "all" items from
@@ -299,11 +357,11 @@ public class Tools {
     }
 
     /**
-     * Prepares an array of metadata fields to include in the read documents based on a client-supplied list and additional fields 
-     * required for additional result processing. 
-     * 
+     * Prepares an array of metadata fields to include in the read documents based on a client-supplied list and additional fields
+     * required for additional result processing.
+     *
      * @param requestedFields The fields as requested from the client, or <code>null</code> to use all fields
-     * @param requiredFields Additional fields to always include in the returned array, or <code>null</code> if not needed 
+     * @param requiredFields Additional fields to always include in the returned array, or <code>null</code> if not needed
      * @return The metadata fields to query
      */
     public static Metadata[] getFieldsToQuery(Metadata[] requestedFields, Metadata...requiredFields) {
