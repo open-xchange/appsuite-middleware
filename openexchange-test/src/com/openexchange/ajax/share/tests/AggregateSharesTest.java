@@ -102,7 +102,9 @@ public class AggregateSharesTest extends ShareTest {
         if (null != clientsAndFolders) {
             for (Map.Entry<AJAXClient, List<Integer>> entry : clientsAndFolders.entrySet()) {
                 deleteFoldersSilently(entry.getKey(), entry.getValue());
-                entry.getKey().logout();
+                if (null != client && false == client.equals(entry.getKey())) {
+                    entry.getKey().logout();
+                }
             }
         }
         super.tearDown();
@@ -185,6 +187,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
+        String shareURLA = discoverShareURL(guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -213,6 +216,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
+        String shareURLB = discoverShareURL(guestB);
         /*
          * check permission entities
          */
@@ -220,7 +224,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        GuestClient guestClientA = resolveShare(guestA, guestPermission.getRecipient());
+        GuestClient guestClientA = resolveShare(shareURLA, guestPermission.getRecipient());
         guestClientA.checkModuleAvailable(module1);
         guestClientA.checkModuleAvailable(module2);
         guestClientA.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
@@ -228,7 +232,7 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        GuestClient guestClientB = resolveShare(guestB, guestPermission.getRecipient());
+        GuestClient guestClientB = resolveShare(shareURLB, guestPermission.getRecipient());
         guestClientB.checkModuleAvailable(module1);
         guestClientB.checkModuleAvailable(module2);
         guestClientB.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
@@ -269,6 +273,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestA = discoverGuestEntity(client1, api, module1, folderA.getObjectID(), matchingPermissionA.getEntity());
         checkGuestPermission(guestPermission, guestA);
+        String shareURLA = discoverShareURL(guestA);
         /*
          * as user 2 with client 2, create folder B shared to guest user
          */
@@ -297,6 +302,7 @@ public class AggregateSharesTest extends ShareTest {
          */
         ExtendedPermissionEntity guestB = discoverGuestEntity(client2, api, module2, folderB.getObjectID(), matchingPermissionB.getEntity());
         checkGuestPermission(guestPermission, guestB);
+        String shareURLB = discoverShareURL(guestB);
         /*
          * check permission entities
          */
@@ -304,7 +310,6 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder A
          */
-        String shareURLA = discoverShareURL(guestA);
         GuestClient guestClientA = resolveShare(shareURLA, guestPermission.getRecipient());
         guestClientA.checkModuleAvailable(module1);
         guestClientA.checkModuleAvailable(module2);
@@ -313,7 +318,6 @@ public class AggregateSharesTest extends ShareTest {
         /*
          * check access to shares via link to folder B
          */
-        String shareURLB = discoverShareURL(guestB);
         GuestClient guestClientB = resolveShare(shareURLB, guestPermission.getRecipient());
         guestClientB.checkModuleAvailable(module1);
         guestClientB.checkModuleAvailable(module2);
