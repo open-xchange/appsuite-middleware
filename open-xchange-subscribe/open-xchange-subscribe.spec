@@ -165,6 +165,10 @@ if [ ${1:-0} -eq 2 ]; then
             ox_remove_property $prop $pfile
         fi
     done
+    
+    # SoftwareChange_Request-2470
+    ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
+    
 fi
 
 %clean
