@@ -174,7 +174,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
-        client.execute(new StartSMTPRequest());
+        StartSMTPRequest startSMTPRequest = new StartSMTPRequest();
+        startSMTPRequest.setUpdateNoReplyForContext(client.getValues().getContextId());
+        client.execute(startSMTPRequest);
     }
 
     @Override
@@ -258,12 +260,12 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param api The folder tree to use
      * @param module The module identifier
      * @param parent The ID of the parent folder
-     * @param guestPermission The guest permission to add
+     * @param permission The permission to add
      * @return The inserted folder
      * @throws Exception
      */
-    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
-        return insertSharedFolder(api, module, parent, randomUID(), guestPermission);
+    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, OCLPermission permission) throws Exception {
+        return insertSharedFolder(api, module, parent, randomUID(), permission);
     }
 
     /**
@@ -273,12 +275,12 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param module The module identifier
      * @param parent The ID of the parent folder
      * @param name The folders name
-     * @param guestPermission The guest permission to add
+     * @param permission The permission to add
      * @return The inserted folder
      * @throws Exception
      */
-    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLGuestPermission guestPermission) throws Exception {
-        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), guestPermission);
+    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLPermission permission) throws Exception {
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), permission);
         sharedFolder.setParentFolderID(parent);
         return insertFolder(api, sharedFolder);
     }
@@ -992,12 +994,12 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Checks the supplied OCL permissions against the expected guest permissions.
+     * Checks the supplied OCL permissions against the expected permissions.
      *
      * @param expected The expected permissions
      * @param actual The actual permissions
      */
-    protected static void checkPermissions(OCLGuestPermission expected, OCLPermission actual) {
+    protected static void checkPermissions(OCLPermission expected, OCLPermission actual) {
         assertEquals("Permission wrong", expected.getDeletePermission(), actual.getDeletePermission());
         assertEquals("Permission wrong", expected.getFolderPermission(), actual.getFolderPermission());
         assertEquals("Permission wrong", expected.getReadPermission(), actual.getReadPermission());
@@ -1072,10 +1074,15 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param expectedPermission The expected permissions
      * @param actual The actual extended permission
      */
-    protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
+    protected static void checkGuestPermission(OCLPermission expectedPermission, ExtendedPermissionEntity actual) {
         assertNotNull("No guest permission entitiy for entity " + expectedPermission.getEntity(), actual);
         checkPermissions(expectedPermission, actual.toFolderPermission(expectedPermission.getFuid()));
-        checkRecipient(expectedPermission.getRecipient(), actual);
+        if (OCLGuestPermission.class.isInstance(expectedPermission)) {
+            checkRecipient(((OCLGuestPermission) expectedPermission).getRecipient(), actual);
+        } else {
+            assertEquals("Entity ID wrong", actual.getEntity(), expectedPermission.getEntity());
+            assertEquals("Recipient type wrong", actual.getType(), expectedPermission.isGroupPermission() ? RecipientType.GROUP : RecipientType.USER);
+        }
     }
 
     private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {

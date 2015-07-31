@@ -200,7 +200,7 @@ public final class PasswordResetServletTest extends ShareTest {
         assertNotNull("Missing session ID in redirect location", sessionId);
 
         // Login again to verify
-        GuestClient guestClient = resolveShare(guest, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        GuestClient guestClient = resolveShare(shareURL, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
         guestClient.checkShareAccessible(guestPermission);
         guestClient.logout();
     }

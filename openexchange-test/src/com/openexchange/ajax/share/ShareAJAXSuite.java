@@ -74,6 +74,7 @@ import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
 import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.ListFileSharesTest;
+import com.openexchange.ajax.share.tests.ListFolderSharesTest;
 import com.openexchange.ajax.share.tests.LoginScreenTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
@@ -128,6 +129,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(AnonymousGuestTest.class);
         tests.addTestSuite(LinkUpdateTest.class);
         tests.addTestSuite(ListFileSharesTest.class);
+        tests.addTestSuite(ListFolderSharesTest.class);
         return tests;
     }
 
