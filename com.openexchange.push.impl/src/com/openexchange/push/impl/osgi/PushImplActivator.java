@@ -133,6 +133,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
+            trackService(HazelcastInstance.class);
 
             // Track management service & register MBean
             {

@@ -243,33 +243,44 @@ public final class PushManagerRegistry implements PushListenerService {
         // Always called when holding synchronized lock
         if (allowPermanentPush && extendedService.supportsPermanentListeners()) {
             for (PushUser pushUser : pushUsers) {
-                try {
-                    PushListener pl = extendedService.startPermanentListener(pushUser);
-                    if (null != pl) {
-                        LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
-                    }
-                } catch (OXException e) {
-                    if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e) || PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
-                        try {
-                            CredentialStorage credentialStorage = optCredentialStorage();
-                            if (null != credentialStorage) {
-                                try {
-                                    credentialStorage.deleteCredentials(pushUser.getUserId(), pushUser.getContextId());
-                                } catch (OXException x) {
-                                    LOG.warn("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), e);
-                                }
-                            }
-                        } catch (OXException ex) {
-                            // IGnore
+                int retry = 2;
+                while (retry-- > 0) {
+                    try {
+                        PushListener pl = extendedService.startPermanentListener(pushUser);
+                        retry = 0;
+                        if (null != pl) {
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
                         }
+                    } catch (OXException e) {
+                        if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e) || PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
+                            try {
+                                CredentialStorage credentialStorage = optCredentialStorage();
+                                if (null != credentialStorage) {
+                                    try {
+                                        Session session = new SessionLookUpUtility(this, services).lookUpSessionFor(pushUser, false, true);
+                                        if (null == session) {
+                                            credentialStorage.deleteCredentials(pushUser.getUserId(), pushUser.getContextId());
+                                        } else {
+                                            credentialStorage.storeCredentials(new DefaultCredentials(session));
+                                        }
+                                    } catch (OXException x) {
+                                        LOG.warn("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), e);
+                                    }
+                                }
+                            } catch (OXException ex) {
+                                // IGnore
+                            }
+                        } else {
+                            retry = 0;
+                            LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
+                        }
+                    } catch (RuntimeException e) {
+                        retry = 0;
+                        LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
                     }
-                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
-                } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService, e);
                 }
             }
         }
-
     }
 
     /**
