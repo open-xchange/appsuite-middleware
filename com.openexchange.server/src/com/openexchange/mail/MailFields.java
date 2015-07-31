@@ -277,11 +277,18 @@ public final class MailFields {
      * Removes specified {@link MailField} constant.
      *
      * @param mailField The mail field to remove
+     * @return <code>true</code> if specified {@link MailField} constant was contained; otherwise <code>false</code>
      */
-    public void removeMailField(MailField mailField) {
-        if (mailField != null) {
-            arr[mailField.ordinal()] = false;
+    public boolean removeMailField(MailField mailField) {
+        if (mailField == null) {
+            return false;
         }
+        int ordinal = mailField.ordinal();
+        if (arr[ordinal]) {
+            arr[ordinal] = false;
+            return true;
+        }
+        return false;
     }
 
     /**

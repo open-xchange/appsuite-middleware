@@ -2186,6 +2186,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final MailFields FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
+
     private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, final MailField[] mailFields) throws MessagingException, OXException {
         final MailFields usedFields = new MailFields(mailFields);
         usedFields.add(MailField.THREAD_LEVEL);
@@ -2199,27 +2201,32 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
         // Check cache
         final ConversationCache conversationCache = ConversationCache.getInstance();
-        if (conversationCache.containsCachedConversations(fullName, accountId, session)) {
-            int total = imapFolder.getMessageCount();
-            long uidNext = imapFolder.getUIDNext();
-            int sentTotal = 0;
-            long sentUidNext = 0L;
-            if (mergeWithSent) {
-                // Switch folder
-                openReadOnly(sentFullName);
+        if (false == body) {
+            if (conversationCache.containsCachedConversations(fullName, accountId, session)) {
+                int total = imapFolder.getMessageCount();
+                long uidNext = imapFolder.getUIDNext();
+                int sentTotal = 0;
+                long sentUidNext = 0L;
+                if (mergeWithSent) {
+                    // Switch folder
+                    openReadOnly(sentFullName);
 
-                sentTotal = imapFolder.getMessageCount();
-                sentUidNext = imapFolder.getUIDNext();
+                    sentTotal = imapFolder.getMessageCount();
+                    sentUidNext = imapFolder.getUIDNext();
 
-                // Switch back folder
-                openReadOnly(fullName);
-            }
+                    // Switch back folder
+                    openReadOnly(fullName);
+                }
 
-            String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, total, uidNext, sentTotal, sentUidNext);
-            List<List<MailMessage>> list = conversationCache.getCachedConversations(fullName, accountId, argsHash, session);
-            if (null != list) {
-                // Slice & fill
-                return sliceMessages(list, indexRange);
+                String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, total, uidNext, sentTotal, sentUidNext);
+                List<List<MailMessage>> list = conversationCache.getCachedConversations(fullName, accountId, argsHash, session);
+                if (null != list) {
+                    // Slice & fill with recent flags
+                    if (usedFields.containsAny(FIELDS_FLAGS)) {
+                        return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, body, isRev1);
+                    }
+                    return sliceMessages(list, indexRange);
+                }
             }
         }
 
@@ -2314,7 +2321,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
         // Check for requested slice
         if (null == indexRange) {
-            // Fill
+            // Fill (except flags)
             fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, body, isRev1);
             // Put into cache
             conversationCache.putCachedConversations(list, fullName, accountId, argsHash, session);
