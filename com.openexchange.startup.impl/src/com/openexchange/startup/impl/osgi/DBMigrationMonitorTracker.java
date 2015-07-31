@@ -78,13 +78,14 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
 
     /**
      * Initializes a new {@link DBMigrationMonitorTracker}.
+     * @param signalStartedRegistrationRef
      *
      * @param context The bundle context
      */
-    public DBMigrationMonitorTracker(BundleContext context) {
+    public DBMigrationMonitorTracker(AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef, BundleContext context) {
         super();
         this.context = context;
-        signalStartedRegistrationRef = new AtomicReference<ServiceRegistration<SignalStartedService>>();
+        this.signalStartedRegistrationRef = signalStartedRegistrationRef;
     }
 
     @Override
@@ -131,10 +132,6 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
 
     @Override
     public void removedService(final ServiceReference<DBMigrationMonitorService> reference, final DBMigrationMonitorService service) {
-        ServiceRegistration<SignalStartedService> signalStartedRegistration = signalStartedRegistrationRef.getAndSet(null);
-        if (signalStartedRegistration != null) {
-            signalStartedRegistration.unregister();
-        }
         context.ungetService(reference);
     }
 
