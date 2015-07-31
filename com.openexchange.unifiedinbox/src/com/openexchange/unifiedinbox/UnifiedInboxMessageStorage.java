@@ -695,9 +695,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
                     @Override
                     public List<List<MailMessage>> call() {
-                        long st = System.currentTimeMillis();
-
-
                         int accountId = mailAccount.getId();
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                         String fn = null;
@@ -832,9 +829,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             return Collections.emptyList();
                         } finally {
                             closeSafe(mailAccess);
-
-                            long dur = System.currentTimeMillis() - st;
-                            System.err.println("UnifiedInboxMessageStorage.getThreadSortedMessages.call() took " + dur + "msec");
                         }
                     }
                 });
