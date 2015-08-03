@@ -96,7 +96,7 @@ public class NotifyAction extends AbstractWriteAction {
             throw ServiceExceptionCode.absentService(ShareNotificationService.class);
         }
         ShareTarget target = new ShareTarget(8, metadata.getFolderId(), metadata.getId());
-        List<OXException> warnings = notificationService.sendShareCreatedNotifications(
+        List<OXException> warnings = notificationService.sendShareNotifications(
             transport, entities, message, target, request.getSession(), request.getRequestData().getHostData());
         /*
          * return empty response in case of success, including any warnings that occurred during notification transport

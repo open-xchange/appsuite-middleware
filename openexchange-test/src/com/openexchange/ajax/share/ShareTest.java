@@ -314,6 +314,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Gets the public root folder based on the folder module, i.e. either {@link FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID} for the
+     * infostore module, or {@link FolderObject#SYSTEM_PUBLIC_FOLDER_ID} for other folder.
+     *
+     * @param module The module to get the public root folder identifier for
+     * @return The public root folder identifier
+     */
+    protected int getPublicRoot(int module) {
+        return FolderObject.INFOSTORE == module ? FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID : FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
+    }
+
+    /**
      * Inserts a public folder below folder 2 or folder 15 if its a drive folder.
      *
      * @param api The folder tree to use
@@ -336,13 +347,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        if (module == FolderObject.INFOSTORE) {
-            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-        } else {
-            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        }
+        folder.setParentFolderID(getPublicRoot(module));
 
         InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
+        request.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;

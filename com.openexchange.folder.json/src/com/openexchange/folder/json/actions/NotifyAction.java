@@ -155,7 +155,7 @@ public final class NotifyAction extends AbstractFolderAction {
         if (null == notificationService) {
             throw ServiceExceptionCode.absentService(ShareNotificationService.class);
         }
-        List<OXException> warnings = notificationService.sendShareCreatedNotifications(
+        List<OXException> warnings = notificationService.sendShareNotifications(
             notificationData.getTransport(), entities, notificationData.getMessage(), target, session, request.getHostData());
         /*
          * return empty response in case of success, including any warnings that occurred during notification transport
