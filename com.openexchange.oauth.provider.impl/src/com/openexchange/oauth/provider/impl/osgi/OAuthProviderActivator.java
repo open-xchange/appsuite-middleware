@@ -95,6 +95,8 @@ import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -273,7 +275,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         registerService(CapabilityChecker.class, new CapabilityChecker() {
             @Override
             public boolean isEnabled(String capability, Session session) throws OXException {
-                if ("oauth-grants".equals(capability) && session != null) {
+                if ("oauth-grants".equals(capability)) {
+                    ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                    if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                        return false;
+                    }
                     ConfigView configView = requireService(ConfigViewFactory.class, serviceLookup).getView(session.getUserId(), session.getContextId());
                     return configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue();
                 }

@@ -96,7 +96,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("xing".equals(capability)) {
                         final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
+                        if (session.isAnonymous() || session.getUser().isGuest()) {
                             return false;
                         }
 
