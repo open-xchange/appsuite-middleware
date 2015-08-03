@@ -1,9 +1,3 @@
-open-xchange-dataretrieval (7.6.2-27) stable; urgency=medium
-
-  * Build for patch 2015-08-03 (2650)
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Jul 2015 09:10:53 +0200
-
 open-xchange-dataretrieval (7.6.2-26) stable; urgency=medium
 
   * Build for patch 2015-07-27 (2626)
