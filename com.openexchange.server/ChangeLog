@@ -1,3 +1,7 @@
+* 2015-08-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 40111: Forget service registration once the service was unregistered.
+
 * 2015-07-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 40045: Update flags information
