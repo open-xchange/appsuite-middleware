@@ -68,12 +68,10 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -221,94 +219,25 @@ public class ShareJSONParser {
     }
 
     /**
-     * Parses a list of share recipients from the supplied JSON array.
+     * Adds the timezone offset to the supplied timestamp.
      *
-     * @param jsonRecipients The JSON array holding the share recipients
-     * @return The share recipients
+     * @param date The timestamp to add the timezone offset to
+     * @param timeZone The timezone
+     * @return The timestamp with added timezone offset
      */
-    public List<ShareRecipient> parseRecipients(JSONArray jsonRecipients) throws OXException {
-        try {
-            if (null == jsonRecipients || 0 == jsonRecipients.length()) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("recipients");
-            }
-            List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
-            for (int i = 0; i < jsonRecipients.length(); i++) {
-                recipients.add(parseRecipient(jsonRecipients.getJSONObject(i)));
-            }
-            return recipients;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
+    public long addTimeZoneOffset(long date, TimeZone timeZone) {
+        return null == timeZone ? date : date + timeZone.getOffset(date);
     }
 
     /**
      * Parses a share recipient from the supplied JSON object.
      *
-     * @param jsonTargets The JSON object holding the share recipient
+     * @param jsonRecipient The JSON object holding the share recipient
+     * @param timeZone The timezone to use, or <code>null</code> to not apply timezone offsets to parsed timestamps
      * @return The share recipient
      */
-    public ShareRecipient parseRecipient(JSONObject jsonRecipient) throws OXException, JSONException {
-        /*
-         * determine type
-         */
-        if (false == jsonRecipient.hasAndNotNull("type")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
-        }
-        RecipientType type;
-        try {
-            type = Enums.parse(RecipientType.class, jsonRecipient.getString("type"));
-        } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "type", jsonRecipient.getString("type"));
-        }
-        /*
-         * parse recipient type specific properties
-         */
-        ShareRecipient recipient;
-        switch (type) {
-        case USER:
-        case GROUP:
-            InternalRecipient internalRecipient = new InternalRecipient();
-            internalRecipient.setGroup(RecipientType.GROUP == type);
-            if (false == jsonRecipient.hasAndNotNull("entity")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entity");
-            }
-            internalRecipient.setEntity(jsonRecipient.getInt("entity"));
-            recipient = internalRecipient;
-            break;
-        case GUEST:
-            GuestRecipient guestRecipient = new GuestRecipient();
-            if (false == jsonRecipient.hasAndNotNull("email_address")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("email_address");
-            }
-            guestRecipient.setEmailAddress(jsonRecipient.getString("email_address"));
-            if (jsonRecipient.hasAndNotNull("override_password")) {
-                guestRecipient.setPassword(jsonRecipient.getString("override_password"));
-            }
-            if (jsonRecipient.hasAndNotNull("display_name")) {
-                guestRecipient.setDisplayName(jsonRecipient.getString("display_name"));
-            }
-            if (jsonRecipient.hasAndNotNull("contact_id")) {
-                guestRecipient.setContactID(jsonRecipient.getString("contact_id"));
-                if (false == jsonRecipient.hasAndNotNull("contact_folder")) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("contact_folder");
-                }
-                guestRecipient.setContactFolder(jsonRecipient.getString("contact_folder"));
-            }
-            recipient = guestRecipient;
-            break;
-        default:
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", jsonRecipient.getString("type"));
-        }
-        /*
-         * parse common properties
-         */
-        if (false == jsonRecipient.hasAndNotNull("bits")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("bits");
-        }
-        int bits = jsonRecipient.getInt("bits");
-        recipient.setBits(bits);
-
-        return recipient;
+    public ShareRecipient parseRecipient(JSONObject jsonRecipient, TimeZone timeZone) throws OXException, JSONException {
+        return ShareTool.parseRecipient(jsonRecipient, timeZone);
     }
 
     private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
