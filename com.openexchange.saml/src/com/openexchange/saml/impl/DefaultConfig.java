@@ -50,6 +50,7 @@
 package com.openexchange.saml.impl;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
+import static com.openexchange.saml.SAMLProperties.ENABLE_AUTO_LOGIN;
 import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
 import static com.openexchange.saml.SAMLProperties.ENABLE_SINGLE_LOGOUT;
 import static com.openexchange.saml.SAMLProperties.ENTITY_ID;
@@ -96,6 +97,8 @@ public class DefaultConfig implements SAMLConfig {
 
     private String logoutResponseTemplate;
 
+    private boolean autoLoginEnabled;
+
 
     private DefaultConfig() {
         super();
@@ -121,6 +124,7 @@ public class DefaultConfig implements SAMLConfig {
         }
 
         config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
+        config.setAutoLoginEnabled(configService.getBoolProperty(ENABLE_AUTO_LOGIN, false));
         return config;
     }
 
@@ -199,6 +203,11 @@ public class DefaultConfig implements SAMLConfig {
         return logoutResponseTemplate;
     }
 
+    @Override
+    public boolean isAutoLoginEnabled() {
+        return autoLoginEnabled;
+    }
+
     private void setProviderName(String providerName) {
         this.providerName = providerName;
     }
@@ -241,6 +250,10 @@ public class DefaultConfig implements SAMLConfig {
 
     private void setLogoutResponseTemplate(String logoutResponseTemplate) {
         this.logoutResponseTemplate = logoutResponseTemplate;
+    }
+
+    private void setAutoLoginEnabled(boolean autoLoginEnabled) {
+        this.autoLoginEnabled = autoLoginEnabled;;
     }
 
 }

@@ -5,13 +5,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -74,20 +79,29 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.configuration.ClientWhitelist;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.http.InitService;
+import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
 import com.openexchange.saml.spi.CredentialProvider;
 import com.openexchange.saml.spi.DefaultExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.state.SimStateManagement;
+import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.saml.tools.SignatureHelper;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
@@ -96,6 +110,9 @@ import com.openexchange.session.reservation.SimSessionReservationService;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SimSessiondService;
+import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.user.SimUserService;
+import com.openexchange.user.UserService;
 
 /*
  *
@@ -162,6 +179,8 @@ public class SAMLWebSSOProviderTest {
     private static SimStateManagement stateManagement;
     private static SimSessionReservationService sessionReservationService;
     private static SimSessiondService sessiondService;
+    private static SimpleServiceLookup services;
+    private static SimUserService userService;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -175,7 +194,7 @@ public class SAMLWebSSOProviderTest {
         config = new TestConfig();
         openSAML = new OpenSAML();
 
-        SimpleServiceLookup services = new SimpleServiceLookup();
+        services = new SimpleServiceLookup();
         sessionReservationService = new SimSessionReservationService();
         services.add(SessionReservationService.class, sessionReservationService);
         services.add(DispatcherPrefixService.class, new DispatcherPrefixService() {
@@ -187,6 +206,9 @@ public class SAMLWebSSOProviderTest {
         services.add(SAMLBackend.class, new TestSAMLBackend(credentialProvider));
         sessiondService = new SimSessiondService();
         services.add(SessiondService.class, sessiondService);
+        userService = new SimUserService();
+        services.add(UserService.class, userService);
+        userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services);
     }
@@ -245,12 +267,55 @@ public class SAMLWebSSOProviderTest {
         URI locationURI = new URIBuilder(location).build();
         Assert.assertEquals(requestHost, locationURI.getHost());
         Map<String, String> redirectParams = parseURIQuery(locationURI);
-        Assert.assertEquals(requestedLoginPath, redirectParams.get("uiWebPath"));
+        Assert.assertEquals(requestedLoginPath, redirectParams.get(SAMLLoginTools.PARAM_LOGIN_PATH));
         Assert.assertEquals("test-client", redirectParams.get(LoginFields.CLIENT_PARAM));
-        Assert.assertEquals("redeemReservation", redirectParams.get("action"));
-        String reservationToken = redirectParams.get("token");
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
         Assert.assertNotNull(reservationToken);
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+
+    @Test
+    public void testAutoLogin() throws Exception {
+        /*
+         * Fake SAML cookie and try auto login
+         */
+        TestLoginConfigurationLookup loginConfigurationLookup = new TestLoginConfigurationLookup();
+        InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), loginConfigurationLookup, services);
+        final String samlCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
+        Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+            @Override
+            public void enhanceSession(Session session) {
+                session.setParameter(SAMLSessionParameters.SESSION_INDEX, UUIDs.getUnformattedString(UUID.randomUUID()));
+                session.setParameter(SAMLSessionParameters.SUBJECT_ID, UUIDs.getUnformattedString(UUID.randomUUID()));
+                session.setParameter(SAMLSessionParameters.SESSION_COOKIE, samlCookieValue);
+            }
+        }));
+
+        SimHttpServletRequest autoLoginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost("webmail.example.com")
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "login")
+            .setParameter("client", "test-client")
+            .setParameter("redirect", "true")
+            .build());
+        String cookieHash = HashCalculator.getInstance().getHash(
+            autoLoginHTTPRequest,
+            LoginTools.parseUserAgent(autoLoginHTTPRequest),
+            LoginTools.parseClient(autoLoginHTTPRequest, false, loginConfigurationLookup.getLoginConfiguration().getDefaultClient()));
+        List<Cookie> cookies = new ArrayList<Cookie>();
+        cookies.add(new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + cookieHash, samlCookieValue));
+        cookies.add(new Cookie(LoginServlet.SECRET_PREFIX + cookieHash, session.getSecret()));
+        autoLoginHTTPRequest.setCookies(cookies);
+        SimHttpServletResponse initLoginResponse = new SimHttpServletResponse();
+        initService.service(autoLoginHTTPRequest, initLoginResponse);
+        Assert.assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, initLoginResponse.getStatus());
+        String redirectLocation = initLoginResponse.getHeader("location");
+        Assert.assertNotNull(redirectLocation);
+        Matcher sessionMatcher = Pattern.compile("session=([a-z0-9]+)").matcher(redirectLocation);
+        Assert.assertTrue(sessionMatcher.find());
+        Assert.assertEquals(session.getSessionID(), sessionMatcher.group(1));
     }
 
     @Test
@@ -395,7 +460,7 @@ public class SAMLWebSSOProviderTest {
 
     @Test
     public void testCachingHeadersOnInit() throws Exception {
-        InitService initService = new InitService(provider, new DefaultExceptionHandler(), sessiondService);
+        InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
         /*
          * login
          */
@@ -588,7 +653,7 @@ public class SAMLWebSSOProviderTest {
 
             @Override
             public String getClientIP() {
-                return "217.64.23.137";
+                return "127.0.0.1";
             }
 
             @Override
@@ -646,6 +711,8 @@ public class SAMLWebSSOProviderTest {
         request.setSecure("https".equals(location.getScheme()));
         request.setServerName(location.getHost());
         request.setQueryString(location.getRawQuery());
+        request.setCookies(Collections.<Cookie>emptyList());
+        request.setRemoteAddr("127.0.0.1");
         Map<String, String> params = parseURIQuery(location);
         for (String name : params.keySet()) {
             request.setParameter(name, params.get(name));
@@ -800,6 +867,39 @@ public class SAMLWebSSOProviderTest {
 
         public void reset() {
             responseStream.reset();
+        }
+
+    }
+
+    private static final class TestLoginConfigurationLookup implements LoginConfigurationLookup {
+
+        private final LoginConfiguration conf;
+
+        private TestLoginConfigurationLookup() {
+            super();
+            conf = new LoginConfiguration(
+                "/appsuite/",
+                false,
+                CookieHashSource.CALCULATE,
+                "false",
+                "open-xchange-appsuite",
+                "1.0",
+                "<b>ERROR_MESSAGE</b>",
+                60000,
+                false,
+                false,
+                false,
+                new ClientWhitelist(),
+                false,
+                Collections.<IPRange>emptyList(),
+                true,
+                true,
+                false);
+        }
+
+        @Override
+        public LoginConfiguration getLoginConfiguration() {
+            return conf;
         }
 
     }

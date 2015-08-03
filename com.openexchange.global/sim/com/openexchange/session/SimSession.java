@@ -67,6 +67,7 @@ public class SimSession implements Session {
     private int contextId;
     private int userId;
     private String password;
+    private String secret;
 
     public SimSession() {
 
@@ -140,7 +141,7 @@ public class SimSession implements Session {
 
     @Override
     public String getSecret() {
-        return null;
+        return secret;
     }
 
     @Override
@@ -231,4 +232,9 @@ public class SimSession implements Session {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
 }

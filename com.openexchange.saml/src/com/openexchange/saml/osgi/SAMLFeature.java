@@ -70,6 +70,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
@@ -82,7 +83,9 @@ import com.openexchange.saml.http.InitService;
 import com.openexchange.saml.http.MetadataService;
 import com.openexchange.saml.http.SingleLogoutService;
 import com.openexchange.saml.impl.DefaultConfig;
-import com.openexchange.saml.impl.SAMLLoginEnhancer;
+import com.openexchange.saml.impl.DefaultLoginConfigurationLookup;
+import com.openexchange.saml.impl.LoginConfigurationLookup;
+import com.openexchange.saml.impl.SAMLLoginRequestHandler;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.saml.impl.SAMLSessionInspector;
 import com.openexchange.saml.impl.WebSSOProviderImpl;
@@ -91,12 +94,13 @@ import com.openexchange.saml.impl.hz.PortableAuthnRequestInfoFactory;
 import com.openexchange.saml.impl.hz.PortableLogoutRequestInfoFactory;
 import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.inspector.SessionInspectorService;
-import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.UserService;
 
 /**
  * Tracks service dependencies, initializes the SAML core and registers all SAML-specific
@@ -118,7 +122,9 @@ public class SAMLFeature extends DependentServiceStarter {
         HazelcastInstance.class,
         SessiondService.class,
         CapabilityService.class,
-        TemplateService.class
+        TemplateService.class,
+        ContextService.class,
+        UserService.class
     };
 
     private final static Class<?>[] OPTIONAL_SERVICES = new Class[] {
@@ -148,11 +154,11 @@ public class SAMLFeature extends DependentServiceStarter {
             serviceRegistrations.push(context.registerService(SessionInspectorService.class, new SAMLSessionInspector(sessiondService), null));
 
             SAMLBackend samlBackend = services.getService(SAMLBackend.class);
-            serviceRegistrations.push(context.registerService(Enhancer.class, new SAMLLoginEnhancer(samlBackend), null));
 
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableAuthnRequestInfoFactory(), null));
             serviceRegistrations.push(context.registerService(CustomPortableFactory.class, new PortableLogoutRequestInfoFactory(), null));
 
+            LoginConfigurationLookup loginConfigurationLookup = new DefaultLoginConfigurationLookup();
             ExceptionHandler exceptionHandler = samlBackend.getExceptionHandler();
             HttpService httpService = services.getService(HttpService.class);
             String prefix = services.getService(DispatcherPrefixService.class).getPrefix() + "saml/";
@@ -161,14 +167,19 @@ public class SAMLFeature extends DependentServiceStarter {
             httpService.registerServlet(acsServletAlias, new AssertionConsumerService(serviceProvider, exceptionHandler), null, null);
             servlets.push(acsServletAlias);
 
+            Dictionary<String, Object> loginRHProperties = new Hashtable<String, Object>();
+            loginRHProperties.put(AJAXServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN);
+            SAMLLoginRequestHandler loginRH = new SAMLLoginRequestHandler(config, samlBackend, loginConfigurationLookup, services);
+            serviceRegistrations.push(context.registerService(LoginRequestHandler.class, loginRH, loginRHProperties));
+
             String initAuthServletAlias = prefix + "init";
-            httpService.registerServlet(initAuthServletAlias, new InitService(serviceProvider, exceptionHandler, sessiondService), null, null);
+            httpService.registerServlet(initAuthServletAlias, new InitService(config, serviceProvider, exceptionHandler, loginConfigurationLookup, services), null, null);
             servlets.push(initAuthServletAlias);
 
             if (config.singleLogoutEnabled()) {
-                Dictionary<String, Object> lrhProperties = new Hashtable<String, Object>();
-                lrhProperties.put(AJAXServlet.PARAMETER_ACTION, "samlLogout");
-                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend), lrhProperties));
+                Dictionary<String, Object> logoutRHProperties = new Hashtable<String, Object>();
+                logoutRHProperties.put(AJAXServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGOUT);
+                serviceRegistrations.push(context.registerService(LoginRequestHandler.class, new SAMLLogoutRequestHandler(samlBackend, loginConfigurationLookup), logoutRHProperties));
                 String slsServletAlias = prefix + "sls";
                 httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(slsServletAlias);

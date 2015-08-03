@@ -51,18 +51,34 @@ package com.openexchange.saml.http;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Map;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
+import com.openexchange.saml.impl.LoginConfigurationLookup;
 import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.saml.tools.SAMLLoginTools;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -77,18 +93,27 @@ public class InitService extends SAMLServlet {
 
     private static final long serialVersionUID = -4022982444417155759L;
 
-    private final SessiondService sessiondService;
+    private final SAMLConfig config;
+
+    private final LoginConfigurationLookup loginConfigurationLookup;
+
+    private final ServiceLookup services;
 
 
     /**
      * Initializes a new {@link InitService}.
+     * @param config
      * @param provider
      * @param exceptionHandler
-     * @param sessiondService
+     * @param loginConfigurationLookup
+     * @param services
      */
-    public InitService(SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler, SessiondService sessiondService) {
+    public InitService(SAMLConfig config, SAMLWebSSOProvider provider, ExceptionHandler exceptionHandler, LoginConfigurationLookup loginConfigurationLookup,
+        ServiceLookup services) {
         super(provider, exceptionHandler);
-        this.sessiondService = sessiondService;
+        this.config = config;
+        this.loginConfigurationLookup = loginConfigurationLookup;
+        this.services = services;
     }
 
     @Override
@@ -105,7 +130,10 @@ public class InitService extends SAMLServlet {
         try {
             String redirectURI;
             if (flow.equals("login") || flow.equals("relogin")) {
-                redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
+                redirectURI = tryAutoLogin(httpRequest, httpResponse);
+                if (redirectURI == null) {
+                    redirectURI = provider.buildAuthnRequest(httpRequest, httpResponse);
+                }
             } else if (flow.equals("logout")) {
                 String sessionId = httpRequest.getParameter("session");
                 if (sessionId == null) {
@@ -114,6 +142,7 @@ public class InitService extends SAMLServlet {
                     return;
                 }
 
+                SessiondService sessiondService = services.getService(SessiondService.class);
                 Session session = sessiondService.getSession(sessionId);
                 if (session == null) {
                     LOG.debug("Received SAML init request with invalid session parameter '{}'", sessionId);
@@ -144,6 +173,50 @@ public class InitService extends SAMLServlet {
             LOG.error("Could not init SAML flow {}", flow, e);
             httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String tryAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        Cookie samlCookie = null;
+        if (config.isAutoLoginEnabled()) {
+            LoginConfiguration loginConfiguration = loginConfigurationLookup.getLoginConfiguration();
+            String hash = HashCalculator.getInstance().getHash(httpRequest, LoginTools.parseUserAgent(httpRequest), LoginTools.parseClient(httpRequest, false, loginConfiguration.getDefaultClient()));
+            Map<String, Cookie> cookies = Cookies.cookieMapFor(httpRequest);
+            samlCookie = cookies.get(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash);
+            if (samlCookie != null) {
+                SessiondService sessiondService = services.getService(SessiondService.class);
+                Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + SAMLSessionParameters.SESSION_COOKIE + "=" + samlCookie.getValue() + ")"));
+                if (sessions.size() > 0) {
+                    Session session = sessiondService.getSession(sessions.iterator().next());
+                    if (session == null) {
+                        LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                    } else {
+                        try {
+                            LOG.debug("Found session '{}' for SAML auto-login cookie '{}' with value '{}'", session.getSessionID(), samlCookie.getName(), samlCookie.getValue());
+                            SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfiguration);
+                            String uiWebPath = httpRequest.getParameter(SAMLLoginTools.PARAM_LOGIN_PATH);
+                            if (Strings.isEmpty(uiWebPath)) {
+                                uiWebPath = loginConfiguration.getUiWebPath();
+                            }
+                            String language = services.getService(UserService.class).getUser(session.getUserId(), session.getContextId()).getPreferredLanguage();
+                            return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, language, uiWebPath, services.getOptionalService(HostnameService.class));
+                        } catch (OXException e) {
+                            LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
+                        }
+                    }
+                } else {
+                    LOG.debug("Found no session for SAML auto-login cookie '{}' with value '{}'", samlCookie.getName(), samlCookie.getValue());
+                }
+            }
+        }
+
+        if (samlCookie != null) {
+            // cookie exists but no according session was found => remove it
+            Cookie toRemove = (Cookie) samlCookie.clone();
+            toRemove.setMaxAge(0);
+            httpResponse.addCookie(toRemove);
+        }
+
+        return null;
     }
 
 }

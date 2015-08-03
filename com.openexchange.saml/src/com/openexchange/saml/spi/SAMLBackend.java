@@ -66,7 +66,6 @@ import com.openexchange.saml.validation.ResponseValidator;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
-import com.openexchange.session.reservation.Enhancer;
 
 /**
  * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable
@@ -166,11 +165,10 @@ public interface SAMLBackend {
      * response. Use {@link EnhancedAuthenticated} to wrap the given {@link Authenticated} instance and add your
      * customizations.
      *
-     * @param authenticated The authenticated prepared by the 'redeemReservation' login action
+     * @param authenticated The authenticated prepared by the 'samlLogin' login action
      * @param properties The properties that were returned as part of {@link AuthenticationInfo} from {@link #resolveAuthnResponse(Response, Assertion)}
      * @return The enhanced {@link Authenticated}. If you don't need to adjust anything, simply return <code>null</code> here
      * @see EnhancedAuthenticated
-     * @see Enhancer
      */
     Authenticated enhanceAuthenticated(Authenticated authenticated, Map<String, String> properties);
 

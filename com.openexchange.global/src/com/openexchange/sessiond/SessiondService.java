@@ -210,6 +210,16 @@ public interface SessiondService {
 
     /**
      * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * <b>local</b> containers.
+     *
+     * @param filter The filter
+     * @return The IDs of the found sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while filtering
+     */
+    Collection<String> findSessions(SessionFilter filter) throws OXException;
+
+    /**
+     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
      * (hazelcast-)cluster.
      *
      * @param filter The filter

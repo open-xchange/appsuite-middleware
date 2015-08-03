@@ -94,7 +94,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
     private String localAddr;
     private int localPort;
     private String authType;
-    private List<String> cookies;
+    private List<Cookie> cookies;
     private long dateHeader;
     private String pathInfo;
     private String method;
@@ -487,7 +487,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
      *
      * @param cookies The cookies to set
      */
-    public void setCookies(List<String> cookies) {
+    public void setCookies(List<Cookie> cookies) {
         this.cookies = cookies;
     }
 
