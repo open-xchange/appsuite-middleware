@@ -112,6 +112,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -136,6 +137,7 @@ import com.openexchange.saml.state.DefaultLogoutRequestInfo;
 import com.openexchange.saml.state.LogoutRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.tools.CryptoHelper;
+import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.saml.validation.AuthnResponseValidationResult;
 import com.openexchange.saml.validation.ValidationException;
 import com.openexchange.saml.validation.ValidationStrategy;
@@ -271,12 +273,12 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
-                .setParameter("action", "redeemReservation")
-                .setParameter("token", sessionToken);
+                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN)
+                .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken);
 
             String loginPath = requestInfo.getLoginPath();
             if (loginPath != null) {
-                redirectLocation.setParameter(LoginFields.UI_WEB_PATH_PARAM, loginPath);
+                redirectLocation.setParameter(SAMLLoginTools.PARAM_LOGIN_PATH, loginPath);
             }
 
             String clientID = requestInfo.getClientID();
@@ -337,8 +339,8 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
-                .setParameter("action", "samlLogout")
-                .setParameter("session", requestInfo.getSessionId())
+                .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGOUT)
+                .setParameter(LoginServlet.PARAMETER_SESSION, requestInfo.getSessionId())
                 .build();
 
             Tools.disableCaching(httpResponse);
@@ -474,6 +476,10 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
+    }
+
+    private String getDomainName(HttpServletRequest httpRequest) {
+        return SAMLLoginTools.getHostName(services.getOptionalService(HostnameService.class), httpRequest);
     }
 
     private String compileLogoutRequestRedirectURI(String logoutRequestXML, String relayState) throws OXException {
@@ -766,20 +772,6 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 throw SAMLExceptionCode.ENCODING_ERROR.create(e, "Could not compute URI signature for location " + rawQuery);
             }
         }
-    }
-
-    private String getDomainName(HttpServletRequest httpRequest) {
-        HostnameService hostnameService = services.getOptionalService(HostnameService.class);
-        if (hostnameService == null) {
-            return httpRequest.getServerName();
-        }
-
-        String hostname = hostnameService.getHostname(-1, -1);
-        if (hostname == null) {
-            return httpRequest.getServerName();
-        }
-
-        return hostname;
     }
 
     private AuthnRequest customizeAuthnRequest(AuthnRequest authnRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
