@@ -64,6 +64,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 public class ShareLink {
 
     private final String shareURL;
+    private final int entity;
     private final String password;
     private final Date expiry;
     private final boolean isNew;
@@ -78,6 +79,7 @@ public class ShareLink {
     public ShareLink(JSONObject json, TimeZone timeZone) throws JSONException {
         super();
         shareURL = json.optString("url", null);
+        entity = json.getInt("entity");
         password = json.optString("password", null);
         isNew = json.optBoolean("is_new", false);
         if (json.hasAndNotNull("expiry_date")) {
@@ -102,6 +104,10 @@ public class ShareLink {
 
     public String getShareURL() {
         return shareURL;
+    }
+
+    public int getEntity() {
+        return entity;
     }
 
     public String getPassword() {
