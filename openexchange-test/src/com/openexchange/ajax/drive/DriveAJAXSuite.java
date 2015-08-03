@@ -65,13 +65,9 @@ public class DriveAJAXSuite extends TestSuite {
 
     public static Test suite() {
         TestSuite tests = new TestSuite(DriveAJAXSuite.class.getName());
-
         tests.addTestSuite(GetLinkTest.class);
         tests.addTestSuite(UpdateLinkTest.class);
-//        tests.addTestSuite(InviteTest.class);
         tests.addTestSuite(DeleteLinkTest.class);
-//        tests.addTestSuite(SharesTest.class);
-
         return tests;
     }
 

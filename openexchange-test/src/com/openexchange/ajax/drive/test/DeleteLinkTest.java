@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -116,9 +117,18 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkShareAccessible(expectedPermission);
+        String folder = guestClient.getFolder();
+        String item = guestClient.getItem();
+        int guestID = guestClient.getValues().getUserId();
 
         client.execute(new DeleteLinkRequest(rootFolder.getObjectID(), target));
-        assertNull("Share was not deleted", discoverShare(guestClient.getValues().getUserId(), rootFolder.getObjectID(), file.getId()));
+        ExtendedPermissionEntity guestEntity;
+        if (target.isFolder()) {
+            guestEntity = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, Integer.parseInt(folder), guestID);
+        } else {
+            guestEntity = discoverGuestEntity(folder, item, guestID);
+        }
+        assertNull("Share was not deleted", guestEntity);
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertNull("Permission was not deleted", objectPermissions);
     }

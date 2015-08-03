@@ -86,7 +86,6 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient.ClientConfig;
-import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FileSharesRequest;
@@ -606,7 +605,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param module The module identifier
      * @return The folder shares
      */
-    protected List<FolderShare> getFolderShares(EnumAPI api, int module) throws OXException, IOException, JSONException {
+    protected List<FolderShare> getFolderShares(EnumAPI api, int module) throws Exception {
         return getFolderShares(client, api, module);
     }
 
@@ -618,8 +617,31 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param module The module identifier
      * @return The folder shares
      */
-    protected static List<FolderShare> getFolderShares(AJAXClient client, EnumAPI api, int module) throws OXException, IOException, JSONException {
+    protected static List<FolderShare> getFolderShares(AJAXClient client, EnumAPI api, int module) throws Exception {
         return client.execute(new FolderSharesRequest(api, Module.getModuleString(module, -1))).getShares(client.getValues().getTimeZone());
+    }
+
+    /**
+     * Gets all folder shares of a specific module.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The folder shares
+     */
+    protected List<FileShare> getFileShares() throws Exception {
+        return getFileShares(client);
+    }
+
+    /**
+     * Gets all folder shares of a specific module.
+     *
+     * @param client The ajax client to use
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The folder shares
+     */
+    protected static List<FileShare> getFileShares(AJAXClient client) throws Exception {
+        return client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
     }
 
     /**
@@ -715,7 +737,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The guest permission entity, or <code>null</code> if not found
      */
-    protected ExtendedPermissionEntity discoverGuestEntity(EnumAPI api, int module, int folderID, int guest) throws OXException, IOException, JSONException {
+    protected ExtendedPermissionEntity discoverGuestEntity(EnumAPI api, int module, int folderID, int guest) throws Exception {
         return discoverGuestEntity(client, api, module, folderID, guest);
     }
 
@@ -727,7 +749,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, EnumAPI api, int module, int folderID, int guest) throws OXException, IOException, JSONException {
+    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, EnumAPI api, int module, int folderID, int guest) throws Exception {
         List<FolderShare> shares = getFolderShares(client, api, module);
         for (FolderShare share : shares) {
             if (share.getObjectID() == folderID) {
@@ -745,7 +767,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The guest permission entity, or <code>null</code> if not found
      */
-    protected ExtendedPermissionEntity discoverGuestEntity(String folder, String item, int guest) throws OXException, IOException, JSONException {
+    protected ExtendedPermissionEntity discoverGuestEntity(String folder, String item, int guest) throws Exception {
         return discoverGuestEntity(client, folder, item, guest);
     }
 
@@ -758,8 +780,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param guest The ID of the guest associated to the share
      * @return The share, or <code>null</code> if not found
      */
-    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String folder, String item, int guest) throws OXException, IOException, JSONException {
-        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
+    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String folder, String item, int guest) throws Exception {
+        List<FileShare> shares = getFileShares(client);
         for (FileShare share : shares) {
             if (share.getId().equals(item)) {
                 return discoverGuestEntity(share.getExtendedPermissions(), guest);
@@ -785,91 +807,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
             }
         }
         return null;
-    }
-
-    /**
-     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
-     *
-     * @param client The ajax client to use
-     * @param folderID The folder ID to discover the share for
-     * @param guest The ID of the guest associated to the share
-     * @return The share, or <code>null</code> if not found
-     */
-    protected static ParsedShare discoverShare(AJAXClient client, int folderID, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, null, guest);
-    }
-
-    /**
-     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
-     *
-     * @param client The ajax client to use
-     * @param folderID The folder ID to discover the share for
-     * @param item The item ID to discover the share for
-     * @param guest The ID of the guest associated to the share
-     * @return The share, or <code>null</code> if not found
-     */
-    protected static ParsedShare discoverShare(AJAXClient client, int folderID, String item, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(client.execute(new AllRequest()).getParsedShares(), folderID, item, guest);
-    }
-
-    /**
-     * Discovers a specific share amongst the supplied shares, based on the folder- and guest identifiers.
-     *
-     * @param shares The shares to search
-     * @param folderID The folder ID to discover the share for
-     * @param guest The ID of the guest associated to the share
-     * @return The share, or <code>null</code> if not found
-     */
-    protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, int guest) throws OXException, IOException, JSONException {
-        return discoverShare(shares, folderID, null, guest);
-    }
-
-    /**
-     * Discovers a specific share amongst the supplied shares, based on the folder- and guest identifiers.
-     *
-     * @param shares The shares to search
-     * @param folderID The folder ID to discover the share for
-     * @param item The item ID to discover the share for
-     * @param guest The ID of the guest associated to the share
-     * @return The share, or <code>null</code> if not found
-     */
-    protected static ParsedShare discoverShare(List<ParsedShare> shares, int folderID, String item, int guest) throws OXException, IOException, JSONException {
-        String folder = String.valueOf(folderID);
-        for (ParsedShare share : shares) {
-            if (folder.equals(share.getTarget().getFolder()) && guest == share.getGuest()) {
-                if (item == null) {
-                    if (share.getTarget().getItem() == null) {
-                        return share;
-                    }
-                } else if (item.equals(share.getTarget().getItem())) {
-                    return share;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
-     *
-     * @param guest The ID of the guest associated to the share
-     * @param folderID The folder ID to discover the share for
-     * @return The share, or <code>null</code> if not found
-     */
-    protected ParsedShare discoverShare(int guest, int folderID) throws OXException, IOException, JSONException {
-        return discoverShare(client, folderID, null, guest);
-    }
-
-    /**
-     * Discovers a specific share amongst all available shares of the current user, based on the guest identifier.
-     *
-     * @param guest The ID of the guest associated to the share
-     * @param folderID The folder ID to discover the share for
-     * @param item The item ID to discover the share for
-     * @return The share, or <code>null</code> if not found
-     */
-    protected ParsedShare discoverShare(int guest, int folderID, String item) throws OXException, IOException, JSONException {
-        return discoverShare(client, folderID, item, guest);
     }
 
     protected static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
@@ -944,17 +881,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected GuestClient resolveShare(String url, String username, String password) throws Exception {
         return new GuestClient(url, username, password);
-    }
-
-    /**
-     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
-     *
-     * @param share The share
-     * @param recipient The recipient
-     * @return An authenticated guest client being able to access the share
-     */
-    protected GuestClient resolveShare(ParsedShare share, ShareRecipient recipient) throws Exception {
-        return new GuestClient(share.getShareURL(), recipient);
     }
 
     /**

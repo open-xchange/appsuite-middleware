@@ -53,13 +53,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
-import com.openexchange.ajax.share.tests.AllTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestTest;
 import com.openexchange.ajax.share.tests.ConvertToInternalPermissionTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
-import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
 import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
@@ -67,7 +65,6 @@ import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
 import com.openexchange.ajax.share.tests.GetALinkTest;
-import com.openexchange.ajax.share.tests.GetTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
@@ -82,7 +79,6 @@ import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
-import com.openexchange.ajax.share.tests.StoreMetaInformationTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -103,8 +99,6 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(RemoveGuestPermissionTest.class);
         tests.addTestSuite(ExpiredSharesTest.class);
         tests.addTestSuite(CreateSubfolderTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(DeleteTest.class);
         tests.addTestSuite(FolderTransactionTest.class);
         tests.addTestSuite(AggregateSharesTest.class);
         tests.addTestSuite(InviteTest.class);
@@ -118,8 +112,6 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(DownloadHandlerTest.class);
         tests.addTestSuite(PasswordResetServletTest.class);
         tests.addTestSuite(MailNotificationTest.class);
-        tests.addTestSuite(StoreMetaInformationTest.class);
-        tests.addTestSuite(GetTest.class);
         tests.addTestSuite(GuestAutologinTest.class);
         tests.addTestSuite(ConvertToInternalPermissionTest.class);
         tests.addTestSuite(EmptyGuestPasswordTest.class);
