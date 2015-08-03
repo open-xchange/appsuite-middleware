@@ -106,8 +106,8 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     IMAGE_DOWNSCALE_FAILED("Unable to scale image down.", ContactExceptionMessages.IMAGE_DOWNSCALE_FAILED_DISPLAY,
         Category.CATEGORY_ERROR, 108),
 
-    /** Invalid SQL Query. */
-    SQL_PROBLEM("Invalid SQL query.", ContactExceptionMessages.SQL_ERROR_DISPLAY,Category.CATEGORY_ERROR, 109),
+    /** Unexpected database error: \"%1$s\" */
+    SQL_PROBLEM("Unexpected database error: \"%1$s\"", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 109),
 
     /** Invalid SQL Query: %s */
     AGGREGATING_CONTACTS_NOT_ENABLED("This feature has not been enabled", ContactExceptionMessages.AGGREGATING_CONTACTS_DISABLED_DISPLAY,

@@ -68,8 +68,6 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String IMAGE_DOWNSCALE_FAILED_DISPLAY = "Unable to scale image down.";
 
-    public final static String SQL_ERROR_DISPLAY = "Error while reading/writing data from/to the database.";
-
     public final static String AGGREGATING_CONTACTS_DISABLED_DISPLAY = "This feature has not been enabled";
 
     public final static String NO_CREATE_DISPLAY = "You do not have the appropriate permission to create objects in the folder \"%1$s\".";

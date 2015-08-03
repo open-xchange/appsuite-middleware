@@ -67,9 +67,9 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      */
     TOO_LONG_VALUES("Some field values are too long.", CATEGORY_TRUNCATED, 100),
     /**
-     * Invalid SQL Query: %s
+     * Unexpected database error: \"%1$s\"
      */
-    SQL_PROBLEM("Invalid SQL Query: %1$s", CATEGORY_ERROR, 200, OXExceptionStrings.SQL_ERROR_MSG),
+    SQL_PROBLEM("Unexpected database error: \"%1$s\"", CATEGORY_ERROR, 200, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Cannot pre-fetch results.
      */
