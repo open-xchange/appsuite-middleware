@@ -177,8 +177,8 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             return false;
         }
 
+        stanza.getSequencePrincipal().lock("gate");
         try {
-            stanza.getSequencePrincipal().lock("gate");
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
             /* We haven't recorded a threshold (upper bound of last known sequence number) for this principal, yet so we'll add one */
             if (threshold == null) {
