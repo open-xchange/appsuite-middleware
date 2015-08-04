@@ -59,6 +59,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.user.UserService;
 
 /**
@@ -82,7 +83,7 @@ public abstract class AbstractJsonMetadata  {
     }
 
     /**
-     * Puts a user- or group entity into the supplied JSON object.
+     * Puts a user-, guest- or group entity into the supplied JSON object.
      *
      * @param jsonObject The JSON object to put the entity into
      * @param entity The entity identifier
@@ -90,20 +91,23 @@ public abstract class AbstractJsonMetadata  {
      * @return The JSON object
      */
     protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
-        jsonObject.put("group", group);
         jsonObject.put("entity", entity);
         Context context = session.getServerSession().getContext();
         if (group) {
             Group resolvedGroup = DriveServiceLookup.getService(GroupService.class).getGroup(context, entity);
             jsonObject.put("display_name", resolvedGroup.getDisplayName());
-            jsonObject.put("guest", false);
+            jsonObject.put("type", "group");
         } else {
             User user = DriveServiceLookup.getService(UserService.class).getUser(entity, context);
             jsonObject.put("display_name", user.getDisplayName());
             if (false == Strings.isEmpty(user.getMail())) {
                 jsonObject.put("email_address", user.getMail());
             }
-            jsonObject.put("guest", user.isGuest());
+            if (user.isGuest()) {
+                jsonObject.put("type", ShareTool.isAnonymousGuest(user) ? "anonymous" : "guest");
+            } else {
+                jsonObject.put("type", "user");
+            }
         }
         return jsonObject;
     }
