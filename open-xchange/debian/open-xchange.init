@@ -18,6 +18,7 @@ DESC="Open-Xchange"
 DEFAULTS=/etc/default/open-xchange
 OXFUNCTIONS=/opt/open-xchange/lib/oxfunctions.sh
 OXCONFIG=/opt/open-xchange/etc/ox-scriptconf.sh
+TRIGGER_UPDATE_THEMES=/opt/open-xchange/sbin/triggerupdatethemes
 
 # Defaults - don't touch, edit /etc/default/open-xchange
 ENABLED=0
@@ -29,6 +30,10 @@ if [ ! -f $OXFUNCTIONS ]; then
 fi
 if [ ! -f $OXCONFIG ]; then
     echo "$DESC: $OXCONFIG missing, exiting"
+    exit 0
+fi
+if [ ! -x $TRIGGER_UPDATE_THEMES ]; then
+    echo "$DESC: $TRIGGER_UPDATE_THEMES missing or not executable, exiting."
     exit 0
 fi
 
@@ -62,6 +67,7 @@ fi
 
 case "$1" in
   start)
+    $TRIGGER_UPDATE_THEMES -u || exit 1
     echo -n "Starting $DESC: "
     ox_start_daemon $STARTSCRIPT $NAME open-xchange open-xchange
     echo "$NAME."
