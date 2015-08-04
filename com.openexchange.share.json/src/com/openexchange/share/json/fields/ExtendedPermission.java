@@ -61,6 +61,7 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.tools.PermissionResolver;
 
 /**
  * {@link ExtendedPermission}

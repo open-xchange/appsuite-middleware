@@ -88,6 +88,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("sendLink", new SendLinkAction());
         actions.put("updateFile", new UpdateFileAction());
         actions.put("updateFolder", new UpdateFolderAction());
+        actions.put("shares", new SharesAction());
     }
 
     @Override

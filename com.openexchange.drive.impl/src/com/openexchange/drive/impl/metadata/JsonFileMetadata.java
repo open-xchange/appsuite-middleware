@@ -64,8 +64,11 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 
@@ -117,7 +120,8 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                 }
                 break;
             case OBJECT_PERMISSIONS:
-                jsonObject.putOpt("object_permissions", getJSONObjectPermissions(file.getObjectPermissions()));
+                jsonObject.putOpt("object_permissions", getJSONObjectPermissions(file.getObjectPermissions(), false));
+                jsonObject.putOpt("extended_object_permissions", getJSONObjectPermissions(file.getObjectPermissions(), true));
                 if (isShared(file)) {
                     jsonObject.put("shared", true);
                 }
@@ -230,13 +234,13 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         return jumpActions;
     }
 
-    private JSONArray getJSONObjectPermissions(List<FileStorageObjectPermission> permissions) throws JSONException, OXException {
+    private JSONArray getJSONObjectPermissions(List<FileStorageObjectPermission> permissions, boolean extended) throws JSONException, OXException {
         if (null == permissions) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(permissions.size());
         for (FileStorageObjectPermission permission : permissions) {
-            jsonArray.put(getJSONObjectPermission(permission));
+            jsonArray.put(extended ? getExtendedJSONObjectPermission(permission) : getJSONObjectPermission(permission));
         }
         return jsonArray;
     }
@@ -245,6 +249,34 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("bits", permission.getPermissions());
         putEntity(jsonObject, permission.getEntity(), permission.isGroup());
+        return jsonObject;
+    }
+
+    private JSONObject getExtendedJSONObjectPermission(FileStorageObjectPermission permission) throws JSONException, OXException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("bits", permission.getPermissions());
+        if (permission.isGroup()) {
+            jsonObject.put("type", "group");
+            addGroupInfo(jsonObject, session.getPermissionResolver().getGroup(permission.getEntity()));
+        } else {
+            User user = session.getPermissionResolver().getUser(permission.getEntity());
+            if (null == user) {
+                org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class).warn(
+                    "Can't resolve uon entity {} for file {}", permission.getEntity(), file);
+            } else if (user.isGuest()) {
+                GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
+                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                    addShareInfo(jsonObject, session.getPermissionResolver().getShare(file, permission.getEntity()));
+                } else {
+                    addUserInfo(jsonObject, user);
+                }
+            } else {
+                jsonObject.put("type", "user");
+                addUserInfo(jsonObject, user);
+            }
+        }
         return jsonObject;
     }
 
