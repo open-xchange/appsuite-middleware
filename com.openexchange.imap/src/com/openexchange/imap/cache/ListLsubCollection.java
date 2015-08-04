@@ -1722,13 +1722,14 @@ final class ListLsubCollection implements Serializable {
     private static final TObjectIntHashMap<String> POS_MAP;
 
     static {
-        POS_MAP = new TObjectIntHashMap<String>(6);
-        POS_MAP.put("\\marked", 1);
-        POS_MAP.put("\\unmarked", 2);
-        POS_MAP.put("\\noselect", 3);
-        POS_MAP.put("\\noinferiors", 4);
-        POS_MAP.put("\\haschildren", 5);
-        POS_MAP.put("\\hasnochildren", 6);
+        TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(6);
+        map.put("\\marked", 1);
+        map.put("\\unmarked", 2);
+        map.put("\\noselect", 3);
+        map.put("\\noinferiors", 4);
+        map.put("\\haschildren", 5);
+        map.put("\\hasnochildren", 6);
+        POS_MAP = map;
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
@@ -1736,65 +1737,65 @@ final class ListLsubCollection implements Serializable {
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes) {
-        /*
+        /*-
+         * Parses responses like:
+         *
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          */
-        final String[] s = listResponse.readSimpleList();
-        /*
-         * Check attributes
-         */
-        final Set<String> attributes;
+
+        // Parse & check attributes
+        Set<String> attributes;
         ListLsubEntry.ChangeState changeState = ListLsubEntry.ChangeState.UNDEFINED;
         boolean canOpen = true;
         boolean hasInferiors = true;
         Boolean hasChildren = null;
-        if (s != null) {
-            /*
-             * Non-empty attribute list
-             */
-            if ((s.length <= 0) && (null != requiredAttributes)) {
-                // Cannot contain any required attribute
-                return null;
-            }
-
-            attributes = new HashSet<String>(s.length);
-            for (int i = s.length; i-- > 0;) {
-                String attr = Strings.asciiLowerCase(s[i]);
-                switch (POS_MAP.get(attr)) {
-                case 1:
-                    changeState = ListLsubEntry.ChangeState.CHANGED;
-                    break;
-                case 2:
-                    changeState = ListLsubEntry.ChangeState.UNCHANGED;
-                    break;
-                case 3:
-                    canOpen = false;
-                    break;
-                case 4:
-                    hasInferiors = false;
-                    break;
-                case 5:
-                    hasChildren = Boolean.TRUE;
-                    break;
-                case 6:
-                    hasChildren = Boolean.FALSE;
-                    break;
-                default:
-                    // Nothing
-                    break;
+        {
+            String[] s = listResponse.readSimpleList();
+            if (s == null) {
+                attributes = Collections.emptySet();
+                if (null != requiredAttributes) {
+                    // Cannot contain any required attribute
+                    return null;
                 }
-                attributes.add(attr);
-            }
-        } else {
-            attributes = Collections.emptySet();
-            if (null != requiredAttributes) {
-                // Cannot contain any required attribute
-                return null;
+            } else {
+                // Non-empty attribute list
+                if ((s.length <= 0) && (null != requiredAttributes)) {
+                    // Cannot contain any required attribute
+                    return null;
+                }
+
+                attributes = new HashSet<String>(s.length);
+                for (int i = s.length; i-- > 0;) {
+                    String attr = Strings.asciiLowerCase(s[i]);
+                    switch (POS_MAP.get(attr)) {
+                        case 1:
+                            changeState = ListLsubEntry.ChangeState.CHANGED;
+                            break;
+                        case 2:
+                            changeState = ListLsubEntry.ChangeState.UNCHANGED;
+                            break;
+                        case 3:
+                            canOpen = false;
+                            break;
+                        case 4:
+                            hasInferiors = false;
+                            break;
+                        case 5:
+                            hasChildren = Boolean.TRUE;
+                            break;
+                        case 6:
+                            hasChildren = Boolean.FALSE;
+                            break;
+                        default:
+                            // Nothing
+                            break;
+                    }
+                    attributes.add(attr);
+                }
             }
         }
-        /*
-         * Check against required attributes
-         */
+
+        // Check against required attributes
         if (null != requiredAttributes) {
             boolean containsAny = false;
             for (String requiredAttribute : requiredAttributes) {
@@ -1807,30 +1808,25 @@ final class ListLsubCollection implements Serializable {
                 return null;
             }
         }
-        /*
-         * Read separator character
-         */
+
+        // Read separator character
         char separator = '/';
         listResponse.skipSpaces();
         if (listResponse.readByte() == '"') {
             if ((separator = (char) listResponse.readByte()) == '\\') {
-                /*
-                 * Escaped separator character
-                 */
+                // Escaped separator character
                 separator = (char) listResponse.readByte();
             }
             listResponse.skip(1);
         } else {
             listResponse.skip(2);
         }
-        /*
-         * Read full name; decode the name (using RFC2060's modified UTF7)
-         */
+
+        // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
-        final String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
-        /*
-         * Return
-         */
+        String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
+
+        // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
     }
 
