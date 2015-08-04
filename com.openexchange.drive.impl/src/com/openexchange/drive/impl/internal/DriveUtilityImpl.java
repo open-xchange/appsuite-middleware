@@ -56,13 +56,22 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
+import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
+import com.openexchange.drive.impl.metadata.JsonFileMetadata;
+import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
@@ -134,14 +143,14 @@ public class DriveUtilityImpl implements DriveUtility {
         }
         return metadata;
     }
-    
+
     private static final class FolderComparator implements Comparator<FileStorageFolder> {
 
         private final Collator collator;
 
         /**
          * Initializes a new {@link FolderComparator}.
-         * 
+         *
          * @param locale The locale to use, or <code>null</code> to fall back to the default locale
          */
         public FolderComparator(Locale locale) {
@@ -153,6 +162,58 @@ public class DriveUtilityImpl implements DriveUtility {
         public int compare(FileStorageFolder folder1, FileStorageFolder folder2) {
             return collator.compare(folder1.getName(), folder2.getName());
         }
+    }
+
+    @Override
+    public JSONObject getSharesMetadata(DriveSession session) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        return syncSession.getStorage().wrapInTransaction(new StorageOperation<JSONObject>() {
+
+            @Override
+            public JSONObject call() throws OXException {
+                JSONObject jsonObject = new JSONObject(2);
+                try {
+                    jsonObject.put("directories", getDirectorySharesMetadata(syncSession));
+                    jsonObject.put("files", getFileSharesMetadata(syncSession));
+                } catch (JSONException e) {
+                    throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+                return jsonObject;
+            }
+        });
+    }
+
+    private JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
+        List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
+        List<Field> fields = new ArrayList<File.Field>();
+        fields.addAll(DriveConstants.FILE_FIELDS);
+        fields.add(Field.CREATED_BY);
+        fields.add(Field.MODIFIED_BY);
+        if (session.getStorage().supports(session.getStorage().getRootFolderID(), FileStorageCapability.OBJECT_PERMISSIONS)) {
+            specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
+            fields.add(Field.OBJECT_PERMISSIONS);
+            fields.add(Field.SHAREABLE);
+        }
+        FileStorageCapability[] fileStorageCapabilities = specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()]);
+        List<File> files = session.getStorage().getSharedFiles(fields);
+        JSONArray jsonArray = new JSONArray(files.size());
+        for (File file : files) {
+            JSONObject jsonObject = new JsonFileMetadata(session, file).build(fileStorageCapabilities);
+            jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
+            jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+            jsonArray.put(jsonObject);
+        }
+        return jsonArray;
+    }
+
+    private JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
+        List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
+        JSONArray jsonArray = new JSONArray(folders.size());
+        for (FileStorageFolder folder : folders) {
+            JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
+            jsonArray.put(jsonObject);
+        }
+        return jsonArray;
     }
 
 }

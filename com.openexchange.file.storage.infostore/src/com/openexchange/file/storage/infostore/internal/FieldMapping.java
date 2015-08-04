@@ -109,10 +109,7 @@ public class FieldMapping {
     }
 
     public static int getSortDirection(SortDirection order) {
-        switch(order) {
-        case DESC: return InfostoreFacade.DESC;
-        default: return InfostoreFacade.ASC;
-        }
+        return SortDirection.DESC.equals(order) ? InfostoreFacade.DESC : InfostoreFacade.ASC;
     }
 
 }
