@@ -140,7 +140,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
     private boolean bindOnly, useFullLoginInfo;
 
     private boolean adsbind;
-    
+
     private int searchScope = SearchControls.SUBTREE_SCOPE;
 
     /**
@@ -308,10 +308,10 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             }
             return null;
         } catch (InvalidNameException e) {
-            LOG.error("Login failed for dn {}:", dn,e);
+            LOG.debug("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (AuthenticationException e) {
-            LOG.error("Login failed for dn {}:", dn,e);
+            LOG.debug("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
             LOG.error("", e);
