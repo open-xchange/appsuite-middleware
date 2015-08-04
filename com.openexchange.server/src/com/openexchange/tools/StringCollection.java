@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
@@ -109,7 +110,7 @@ public final class StringCollection {
      * escaped since this is automatically done by <code>java.sql.PreparedStatement.setString()</code> method.
      * <ul>
      * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>
-	 * '_'</code>) are escaped.</li>
+     * '_'</code>) are escaped.</li>
      * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
      * <code>'%'</code> and <code>'_'</code>.</li>
      * </ul>
@@ -129,7 +130,7 @@ public final class StringCollection {
      * Prepares specified string for being used in a statement's WHERE clause as a search pattern.
      * <ul>
      * <li>Any contained SQL wildcard characters (<code>'%'</code> and <code>
-	 * '_'</code>) are escaped.</li>
+     * '_'</code>) are escaped.</li>
      * <li>Wildcard characters <code>'*'</code> and <code>'?'</code> are replaced with corresponding SQL wildcard characters
      * <code>'%'</code> and <code>'_'</code>.</li>
      * </ul>
@@ -603,4 +604,20 @@ public final class StringCollection {
         return sw.toString();
     }
 
+    /**
+     * Pattern to check whether a string contains escaped REGEX wildcards or not
+     */
+    private static final Pattern ESCAPED_REGEX_WILDCARD_PATTERN = Pattern.compile("(([\\\\]+)(\\*|\\?))");
+    
+    private static final Pattern REGEX_WILDCARD_PATTERN = Pattern.compile("((\\*|\\?))");
+
+    /**
+     * Determines whether the specified string contains any REGEX wildcard characters '*' or '?' that are not escaped
+     * 
+     * @param s The string to check
+     * @return true if the specified string contains REGEX wildcards '*' or '?' that are not escaped; false otherwise
+     */
+    public static boolean containsWildcards(final String s) {
+        return REGEX_WILDCARD_PATTERN.matcher(s).find() && !ESCAPED_REGEX_WILDCARD_PATTERN.matcher(s).find();
+    }
 }

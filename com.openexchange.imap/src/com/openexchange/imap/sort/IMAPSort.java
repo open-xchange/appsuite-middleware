@@ -83,6 +83,7 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;

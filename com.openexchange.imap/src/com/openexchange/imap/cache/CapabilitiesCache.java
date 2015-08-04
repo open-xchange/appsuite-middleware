@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import static com.openexchange.imap.IMAPMessageStorage.allowSORTDISPLAY;
 import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -194,7 +195,8 @@ public final class CapabilitiesCache {
             imapCaps.setThreadReferences(map.containsKey(IMAPCapabilities.CAP_THREAD_REFERENCES));
             imapCaps.setThreadOrderedSubject(map.containsKey(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
             imapCaps.setQuota(map.containsKey(IMAPCapabilities.CAP_QUOTA));
-            imapCaps.setSort(map.containsKey(IMAPCapabilities.CAP_SORT));
+            boolean hasSort = map.containsKey(IMAPCapabilities.CAP_SORT);
+            imapCaps.setSort(hasSort);
             imapCaps.setIMAP4(map.containsKey(IMAPCapabilities.CAP_IMAP4));
             imapCaps.setIMAP4rev1(map.containsKey(IMAPCapabilities.CAP_IMAP4_REV1));
             imapCaps.setUIDPlus(map.containsKey(IMAPCapabilities.CAP_UIDPLUS));
@@ -202,6 +204,13 @@ public final class CapabilitiesCache {
             imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
+            if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
+                // IMAP sort supported & enabled
+                imapCaps.setSortDisplay(allowSORTDISPLAY() && map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY));
+            } else {
+                // The in-memory sorting does sort with primary respect to display name, the actual address
+                imapCaps.setSortDisplay(true);
+            }
             /*
              * ACL extension
              */
