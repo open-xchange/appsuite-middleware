@@ -135,6 +135,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jul 23 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-07-27 (2626)
 * Wed Jul 15 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-07-20 (2614)
 * Fri Jul 03 2015 Marc Arens <marc.arens@open-xchange.com>
