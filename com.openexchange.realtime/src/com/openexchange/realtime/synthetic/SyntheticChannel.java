@@ -57,7 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
 import org.osgi.framework.Constants;
 import com.google.common.base.Optional;
 import com.openexchange.exception.OXException;
@@ -175,28 +174,28 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
         if (shuttingDown.get()) {
             return false;
         }
-        ComponentHandle componentHandle = handles.get(id);
-        if (componentHandle != null) {
+
+        id.lock(CONJURELOCK);
+        try {
+            ComponentHandle componentHandle = handles.get(id);
+            if (componentHandle != null) {
+                return true;
+            }
+            Component component = components.get(id.getComponent());
+            if (component == null) {
+                return false;
+            }
+            ComponentHandle handle = component.create(id);
+            if (handle == null) {
+                return false;
+            }
+            handles.put(id, handle);
+            runLoopManager.getRunLoopForID(id, true);
+            setUpEviction(component.getEvictionPolicy(), handle, id);
             return true;
+        } finally {
+            id.unlock(CONJURELOCK);
         }
-
-        Component component = components.get(id.getComponent());
-        if (component == null) {
-            return false;
-        }
-        ComponentHandle handle = component.create(id);
-
-        if (handle == null) {
-            return false;
-        }
-
-        handles.put(id, handle);
-
-        runLoopManager.getRunLoopForID(id, true);
-
-        setUpEviction(component.getEvictionPolicy(), handle, id);
-
-        return true;
     }
 
     protected void setUpEviction(EvictionPolicy evictionPolicy, ComponentHandle handle, ID id) {
@@ -302,7 +301,11 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
 
     @Override
     public void cleanupForId(ID id) {
-        Lock conjureLock = null;
+        try {
+            id.lock(CONJURELOCK);
+        } catch (RealtimeException e) {
+            LOG.error("Failed to acquire conjure lock during cleanup for ID: {}", id, e);
+        }
         try {
             if(handles.containsKey(id)) {
                 /*
@@ -310,7 +313,6 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
                  *  - wait for this lock and do nothin after it got the lock
                  *  - do nothing as the handle for that id was already removed
                  */
-                id.getLock(CONJURELOCK);
                 LOG.debug("Cleanup for ID: {}. Removing  ComponentHandle and RunLoop mappings.", id);
                 Optional<SyntheticChannelRunLoop> runLoop = runLoopManager.removeIDFromRunLoop(id);
                 handles.remove(id);
@@ -326,8 +328,10 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
         } catch (Exception e) {
             LOG.error("Error during cleanup for ID: {}", id, e);
         } finally {
-            if(conjureLock != null) {
-                conjureLock.unlock();
+            try {
+                id.unlock(CONJURELOCK);
+            } catch (RealtimeException e) {
+                LOG.error("Failed to release conjure lock during cleanup for ID: {}", id, e);
             }
         }
     }
