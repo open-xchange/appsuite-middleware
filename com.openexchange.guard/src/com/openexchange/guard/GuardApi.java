@@ -52,6 +52,7 @@ package com.openexchange.guard;
 import java.util.Map;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link GuardApi} - Provides HTTP-based access to the configured OX Guard end-point.
@@ -81,5 +82,30 @@ public interface GuardApi {
      * @see GuardApiUtils#mapFor(String...)
      */
     <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz) throws OXException;
+
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Performs a GET request to the Guard end-point using given parameters.
+     *
+     * @param parameters The parameters
+     * @param clazz The return type
+     * @param session The session associated with the request
+     * @throws OXException If GET fails
+     * @see GuardApiUtils#mapFor(String...)
+     */
+    <R> R doCallSessionSensitiveGet(Map<String, String> parameters, Class<? extends R> clazz, Session session) throws OXException;
+
+    /**
+     * Performs a PUT request to the Guard end-point using given parameters and body.
+     *
+     * @param parameters The parameters
+     * @param jsonBody The JSON body to pass
+     * @param clazz The return type
+     * @param session The session associated with the request
+     * @throws OXException If PUT fails
+     * @see GuardApiUtils#mapFor(String...)
+     */
+    <R> R doCallSessionSensitivePut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session) throws OXException;
 
 }

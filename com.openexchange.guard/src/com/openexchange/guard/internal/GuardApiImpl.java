@@ -76,6 +76,7 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
@@ -91,6 +92,7 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
@@ -101,6 +103,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -116,6 +120,7 @@ import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 
 /**
@@ -191,9 +196,9 @@ public class GuardApiImpl implements GuardApi {
     private final String authLogin;
     private final String authPassword;
     private final URI uri;
+    private final HttpHost targetHost;
+    private final BasicHttpContext localcontext;
     private volatile DefaultHttpClient httpClient;
-    private volatile BasicHttpContext localcontext;
-    private volatile HttpHost targetHost;
 
     /**
      * Initializes a new {@link GuardApiImpl}.
@@ -215,9 +220,17 @@ public class GuardApiImpl implements GuardApi {
         String sUrl = endPoint;
         try {
             uri = new URI(sUrl);
+            HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+            this.targetHost = targetHost;
         } catch (URISyntaxException e) {
-            throw GuardApiExceptionCodes.INVALID_GUARD_URL.create(null == sUrl ? "<empty>" : sUrl);
+            throw GuardApiExceptionCodes.INVALID_GUARD_URL.create(e, null == sUrl ? "<empty>" : sUrl);
         }
+
+        // Generate BASIC scheme object and stick it to the local execution context
+        BasicHttpContext context = new BasicHttpContext();
+        BasicScheme basicAuth = new BasicScheme();
+        context.setAttribute("preemptive-auth", basicAuth);
+        this.localcontext = context;
     }
 
     private DefaultHttpClient getHttpClient() {
@@ -226,27 +239,22 @@ public class GuardApiImpl implements GuardApi {
             synchronized (this) {
                 tmp = httpClient;
                 if (null == tmp) {
-                    tmp = HttpClients.getHttpClient("OX Guard Http Client v" + Version.getInstance().getVersionString());
-
-                    Credentials credentials = new UsernamePasswordCredentials(authLogin, authPassword);
-                    tmp.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
-
-                    // Generate BASIC scheme object and stick it to the local execution context
-                    BasicHttpContext context = new BasicHttpContext();
-                    BasicScheme basicAuth = new BasicScheme();
-                    context.setAttribute("preemptive-auth", basicAuth);
-                    this.localcontext = context;
-
-                    // Add as the first request interceptor
-                    tmp.addRequestInterceptor(new PreemptiveAuth(), 0);
-
-                    HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
-                    this.targetHost = targetHost;
-
+                    tmp = newHttpClient();
                     httpClient = tmp;
                 }
             }
         }
+        return tmp;
+    }
+
+    private DefaultHttpClient newHttpClient() {
+        DefaultHttpClient tmp = HttpClients.getHttpClient("OX Guard Http Client v" + Version.getInstance().getVersionString());
+
+        Credentials credentials = new UsernamePasswordCredentials(authLogin, authPassword);
+        tmp.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
+
+        // Add "preemptive-auth" as the first request interceptor
+        tmp.addRequestInterceptor(new PreemptiveAuth(), 0);
         return tmp;
     }
 
@@ -328,9 +336,6 @@ public class GuardApiImpl implements GuardApi {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.guard.internal.GuardApi#doCallGet(java.util.Map, java.lang.Class)
-     */
     @Override
     public <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz) throws OXException {
         HttpGet request = null;
@@ -352,9 +357,6 @@ public class GuardApiImpl implements GuardApi {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.guard.internal.GuardApi#doCallPut(java.util.Map, org.json.JSONValue, java.lang.Class)
-     */
     @Override
     public <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz) throws OXException {
         HttpPut request = null;
@@ -376,6 +378,85 @@ public class GuardApiImpl implements GuardApi {
             throw GuardApiExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             reset(request);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------- //
+
+    @Override
+    public <R> R doCallSessionSensitiveGet(Map<String, String> parameters, Class<? extends R> clazz, Session session) throws OXException {
+        if (null == session) {
+            return doCallGet(parameters, clazz);
+        }
+
+        DefaultHttpClient httpClient = null;
+        HttpGet request = null;
+        try {
+            List<NameValuePair> queryString = toQueryString(parameters);
+            queryString.add(new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getSessionID()));
+            request = new HttpGet(buildUri(queryString));
+
+            // Create a new HttpClient instance
+            httpClient = newHttpClient();
+
+            // Enrich with session data
+            CookieStore cookieStore = httpClient.getCookieStore();
+            cookieStore.addCookie(new BasicClientCookie(new StringBuilder(LoginServlet.SECRET_PREFIX).append(session.getHash()).toString(), session.getSecret()));
+
+            return handleHttpResponse(execute(request, httpClient), clazz);
+        } catch (HttpResponseException e) {
+            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                // Authentication failed -- recreate token
+                throw GuardApiExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+            }
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw handleIOError(e);
+        } catch (RuntimeException e) {
+            throw GuardApiExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            reset(request);
+            HttpClients.shutDown(httpClient);
+        }
+    }
+
+    @Override
+    public <R> R doCallSessionSensitivePut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session) throws OXException {
+        if (null == session) {
+            return doCallPut(parameters, jsonBody, clazz);
+        }
+
+        DefaultHttpClient httpClient = null;
+        HttpPut request = null;
+        try {
+            List<NameValuePair> queryString = toQueryString(parameters);
+            queryString.add(new BasicNameValuePair(AJAXServlet.PARAMETER_SESSION, session.getSessionID()));
+            request = new HttpPut(buildUri(queryString));
+            request.setEntity(asHttpEntity(jsonBody));
+
+            // Create a new HttpClient instance
+            httpClient = newHttpClient();
+
+            // Enrich with session data
+            CookieStore cookieStore = httpClient.getCookieStore();
+            cookieStore.addCookie(new BasicClientCookie(new StringBuilder(LoginServlet.SECRET_PREFIX).append(session.getHash()).toString(), session.getSecret()));
+
+            return handleHttpResponse(execute(request, getHttpClient()), clazz);
+        } catch (HttpResponseException e) {
+            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                // Authentication failed -- recreate token
+                throw GuardApiExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+            }
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw handleIOError(e);
+        } catch (JSONException e) {
+            throw GuardApiExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw GuardApiExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            reset(request);
+            HttpClients.shutDown(httpClient);
         }
     }
 
