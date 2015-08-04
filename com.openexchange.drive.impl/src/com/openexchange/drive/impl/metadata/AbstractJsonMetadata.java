@@ -49,17 +49,21 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
+import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
-import com.openexchange.user.UserService;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.tools.ShareTool;
 
 /**
  * {@link AbstractJsonMetadata}
@@ -82,7 +86,7 @@ public abstract class AbstractJsonMetadata  {
     }
 
     /**
-     * Puts a user- or group entity into the supplied JSON object.
+     * Puts a user-, guest- or group entity into the supplied JSON object.
      *
      * @param jsonObject The JSON object to put the entity into
      * @param entity The entity identifier
@@ -90,22 +94,84 @@ public abstract class AbstractJsonMetadata  {
      * @return The JSON object
      */
     protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
-        jsonObject.put("group", group);
         jsonObject.put("entity", entity);
-        Context context = session.getServerSession().getContext();
         if (group) {
-            Group resolvedGroup = DriveServiceLookup.getService(GroupService.class).getGroup(context, entity);
+            Group resolvedGroup = session.getPermissionResolver().getGroup(entity);
             jsonObject.put("display_name", resolvedGroup.getDisplayName());
-            jsonObject.put("guest", false);
+            jsonObject.put("type", "group");
         } else {
-            User user = DriveServiceLookup.getService(UserService.class).getUser(entity, context);
+            User user = session.getPermissionResolver().getUser(entity);
             jsonObject.put("display_name", user.getDisplayName());
             if (false == Strings.isEmpty(user.getMail())) {
                 jsonObject.put("email_address", user.getMail());
             }
-            jsonObject.put("guest", user.isGuest());
+            if (user.isGuest()) {
+                jsonObject.put("type", ShareTool.isAnonymousGuest(user) ? "anonymous" : "guest");
+            } else {
+                jsonObject.put("type", "user");
+            }
         }
         return jsonObject;
+    }
+
+    protected void addGroupInfo(JSONObject jsonObject, Group group) throws JSONException {
+        if (null != group) {
+            jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());
+        }
+    }
+
+    protected void addUserInfo(JSONObject jsonObject, User user) throws JSONException {
+        if (null != user) {
+            Contact userContact = session.getPermissionResolver().getUserContact(user.getId());
+            if (null != userContact) {
+                addContactInfo(jsonObject, userContact);
+            } else {
+                addContactInfo(jsonObject, user);
+            }
+        }
+    }
+
+    protected void addContactInfo(JSONObject jsonObject, Contact userContact) throws JSONException {
+        if (null != userContact) {
+            jsonObject.putOpt(ContactFields.DISPLAY_NAME, userContact.getDisplayName());
+            JSONObject jsonContact = new JSONObject();
+            jsonContact.putOpt(ContactFields.EMAIL1, userContact.getEmail1());
+            jsonContact.putOpt(ContactFields.TITLE, userContact.getTitle());
+            jsonContact.putOpt(ContactFields.LAST_NAME, userContact.getSurName());
+            jsonContact.putOpt(ContactFields.FIRST_NAME, userContact.getGivenName());
+            jsonContact.putOpt(ContactFields.IMAGE1_URL, session.getPermissionResolver().getImageURL(userContact.getInternalUserId()));
+            jsonObject.put("contact", jsonContact);
+        }
+    }
+
+    protected void addContactInfo(JSONObject jsonObject, User user) throws JSONException {
+        if (null != user) {
+            jsonObject.putOpt(ContactFields.DISPLAY_NAME, user.getDisplayName());
+            JSONObject jsonContact = new JSONObject();
+            jsonContact.putOpt(ContactFields.EMAIL1, user.getMail());
+            jsonContact.putOpt(ContactFields.LAST_NAME, user.getSurname());
+            jsonContact.putOpt(ContactFields.FIRST_NAME, user.getGivenName());
+            jsonContact.putOpt(ContactFields.IMAGE1_URL, session.getPermissionResolver().getImageURL(user.getId()));
+            jsonObject.put("contact", jsonContact);
+        }
+    }
+
+    protected void addShareInfo(JSONObject jsonObject, ShareInfo share) throws JSONException {
+        if (null != share) {
+            HostData hostData = session.getDriveSession().getHostData();
+            if (null != hostData) {
+                jsonObject.putOpt("share_url", share.getShareURL(hostData));
+            }
+            Date expiryDate = share.getShare().getExpiryDate();
+            if (null != expiryDate) {
+                jsonObject.put("expiry_date", expiryDate.getTime());
+            }
+            Map<String, Object> meta = share.getShare().getMeta();
+            if (null != meta) {
+                jsonObject.put("meta", JSONCoercion.coerceToJSON(meta));
+            }
+            jsonObject.putOpt("password", share.getGuest().getPassword());
+        }
     }
 
 }

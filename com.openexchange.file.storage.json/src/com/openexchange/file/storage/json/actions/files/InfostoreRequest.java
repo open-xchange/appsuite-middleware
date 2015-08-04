@@ -347,4 +347,12 @@ public interface InfostoreRequest {
      */
     String getNotifiactionMessage() throws OXException;
 
+    /**
+     * Gets a list of entity identifiers as supplied by the client in the <code>entities</code> request body field, as used for
+     * notification purposes.
+     *
+     * @return The entity identifiers
+     */
+    List<Integer> getEntities() throws OXException;
+
 }

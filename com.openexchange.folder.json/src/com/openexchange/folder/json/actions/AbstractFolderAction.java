@@ -91,10 +91,10 @@ import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeExceptio
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.Entities.PermissionType;
+import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -573,6 +573,32 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     /**
+     * Parses notification data from the supplied JSON object.
+     *
+     * @param jsonObject The JSON object to parse the notification data from
+     * @return The parsed notification data, or <code>null</code> if passed JSON object was <code>null</code>
+     */
+    protected NotificationData parseNotificationData(JSONObject jsonObject) throws JSONException, OXException {
+        if (null == jsonObject) {
+            return null;
+        }
+        NotificationData notificationData = new NotificationData();
+        Transport transport = Transport.MAIL;
+        if (jsonObject.hasAndNotNull("transport")) {
+            transport = Transport.forID(jsonObject.getString("transport"));
+            if (transport == null) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
+        }
+        notificationData.setTransport(transport);
+        String message = jsonObject.optString("message", null);
+        if (Strings.isNotEmpty(message)) {
+            notificationData.setMessage(message);
+        }
+        return notificationData;
+    }
+
+    /**
      * Parses the request body of create and update requests which encapsulates the affected folder and possible other
      * data.
      *
@@ -590,24 +616,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (data.hasAndNotNull("folder")) {
             try {
                 folderObject = data.getJSONObject("folder");
-                JSONObject jNotification = data.optJSONObject("notification");
-                if (jNotification != null) {
-                    NotificationData notificationData = new NotificationData();
-                    Transport transport = Transport.MAIL;
-                    if (jNotification.hasAndNotNull("transport")) {
-                        transport = Transport.forID(jNotification.getString("transport"));
-                        if (transport == null) {
-                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                        }
-                    }
-                    notificationData.setTransport(transport);
-                    String message = jNotification.optString("message", null);
-                    if (Strings.isNotEmpty(message)) {
-                        notificationData.setMessage(message);
-                    }
-
-                    updateData.setNotificationData(notificationData);
-                }
+                updateData.setNotificationData(parseNotificationData(data.optJSONObject("notification")));
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }

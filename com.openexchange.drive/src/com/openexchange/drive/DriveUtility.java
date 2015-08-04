@@ -117,4 +117,14 @@ public interface DriveUtility {
      */
     List<JSONObject> getSubfolderMetadata(DriveSession session) throws OXException;
 
+    /**
+     * Gets metadata for all files and directories that are considered as shared by the user. The JSON format of the metadata is the same
+     * as used inside the <code>.drive-meta</code> files.
+     *
+     * @param session The drive session
+     * @return The metadata of the shared items as a JSON object holding two JSON arrays <code>files</code> and <code>directories</code>
+     *         containing the metadata
+     */
+    JSONObject getSharesMetadata(DriveSession session) throws OXException;
+
 }

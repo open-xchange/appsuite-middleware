@@ -110,6 +110,17 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                 return validation;
             }
             /*
+             * check applied permission bits
+             */
+            for (ObjectPermission permission : objectPermissions) {
+                int bits = permission.getPermissions();
+                if (ObjectPermission.WRITE != bits && ObjectPermission.DELETE != bits && ObjectPermission.READ != bits) {
+                    validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "Invalid permission bits: " + bits);
+                    validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(permission.getEntity())));
+                    return validation;
+                }
+            }
+            /*
              * check existence of each group permission entity
              */
             int[] groupIDs = getGroupEntities(objectPermissions);

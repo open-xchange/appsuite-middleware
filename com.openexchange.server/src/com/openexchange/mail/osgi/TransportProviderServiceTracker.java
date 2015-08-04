@@ -129,7 +129,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     public boolean isEnabled(String capability, Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
                             final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous()) {
+                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
                                 return false;
                             }
 

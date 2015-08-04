@@ -750,7 +750,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (Strings.isNotEmpty(value)) {
                 List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
                 for (String cap : staticCapabilities) {
-                    capabilities.add(new Capability(cap));
+                    capabilities.add(getCapability(cap));
                 }
             }
         }
