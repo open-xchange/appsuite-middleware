@@ -136,10 +136,13 @@ public class FileMetadataFieldParser {
                         throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("entity");
                     }
                     parsedPermission.setEntity(jsonObject.getInt("entity"));
-                    if (false == jsonObject.has("group")) {
+                    if (jsonObject.has("group")) {
+                        parsedPermission.setGroup(jsonObject.getBoolean("group"));
+                    } else if (null != type) {
+                        parsedPermission.setGroup(RecipientType.GROUP == type);
+                    } else {
                         throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("group");
                     }
-                    parsedPermission.setGroup(jsonObject.getBoolean("group"));
                     parsedPermission.setPermissions(bits);
                     permission = parsedPermission;
                 }

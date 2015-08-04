@@ -228,10 +228,13 @@ public final class FolderParser {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }
             parsedPermission.setEntity(jsonObject.getInt(FolderField.ENTITY.getName()));
-            if (false == jsonObject.has(FolderField.GROUP.getName())) {
+            if (jsonObject.has(FolderField.GROUP.getName())) {
+                parsedPermission.setGroup(jsonObject.getBoolean(FolderField.GROUP.getName()));
+            } else if (null != type) {
+                parsedPermission.setGroup(RecipientType.GROUP == type);
+            } else {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
             }
-            parsedPermission.setGroup(jsonObject.getBoolean(FolderField.GROUP.getName()));
             permission = parsedPermission;
         }
         /*
