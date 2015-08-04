@@ -73,6 +73,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
+* Thu Jul 23 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-07-27 (2626)
 * Wed Jul 15 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-07-20 (2614)
 * Tue Jul 14 2015 Steffen Templin <steffen.templin@open-xchange.com>
