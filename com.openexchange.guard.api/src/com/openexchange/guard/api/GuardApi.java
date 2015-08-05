@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
  * {@link GuardApi} - Provides access to the OX Guard end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v2.0.0
+ * @since v7.8.0
  */
 @SingletonService
 public interface GuardApi {
