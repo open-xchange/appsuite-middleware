@@ -518,7 +518,7 @@ public class DriveStorage {
             return Collections.emptyMap();
         }
         Map<String, Long> storedSequenceNumbers = getFileAccess().getSequenceNumbers(folderIDs);
-        if (3 <= session.getDriveSession().getApiVersion()) {
+        if (session.getDriveSession().useDriveMeta()) {
             for (String folderID : folderIDs) {
                 Long storedSequenceNumber = storedSequenceNumbers.get(folderID);
                 String path = getPath(folderID);
@@ -535,7 +535,7 @@ public class DriveStorage {
     }
 
     public InputStream getDocument(File file) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveMetadata.class.isInstance(file)) {
+        if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(file)) {
             return ((DriveMetadata) file).getDocument();
         } else {
             return getFileAccess().getDocument(file.getId(), file.getVersion());
@@ -593,7 +593,7 @@ public class DriveStorage {
                 session.getServerSession().getUserId(), session.getServerSession().getContextId());
         }
         List<File> files = new ArrayList<File>();
-        if (3 <= session.getDriveSession().getApiVersion()) {
+        if (session.getDriveSession().useDriveMeta()) {
             files.add(new DriveMetadata(session, folder));
         }
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
@@ -655,7 +655,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(name)) {
+        if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(name)) {
             return new DriveMetadata(session, getFolder(path, false));
         }
         String folderID = getFolderID(path);
