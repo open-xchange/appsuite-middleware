@@ -101,24 +101,28 @@ public interface GuardApi {
      *
      * @param parameters
      * @param clazz The return type
+     * @param session The associated session
      * @param cookies The needed cookies for user authentication; typically the secret and public cookie
+     * @param headers The needed headers to set; typically <code>"User-Agent"</code> header
      * @throws OXException If GET fails
      * @see GuardApis#mapFor(String...)
      * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
      */
-    <R> R doCallSessionSensitiveGet(Map<String, String> parameters, Class<? extends R> clazz, Session session, List<Cookie> cookies) throws OXException;
+    <R> R doCallSessionSensitiveGet(Map<String, String> parameters, Class<? extends R> clazz, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
 
     /**
      * Performs the PUT using given parameters.
      *
      * @param parameters
      * @param clazz The return type
+     * @param session The associated session
      * @param cookies The needed cookies for user authentication; typically the secret and public cookie
+     * @param headers The needed headers to set; typically <code>"User-Agent"</code> header
      * @throws OXException If PUT fails
      * @see GuardApis#mapFor(String...)
      * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
      */
-    <R> R doCallSessionSensitivePut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session, List<Cookie> cookies) throws OXException;
+    <R> R doCallSessionSensitivePut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
 
     /**
      * Requests a resource from Guard end-point.
@@ -126,11 +130,12 @@ public interface GuardApi {
      * @param parameters The request parameters
      * @param session The associated session
      * @param cookies The needed cookies for user authentication; typically the secret and public cookie
+     * @param headers The needed headers to set; typically <code>"User-Agent"</code> header
      * @return The resource data
      * @throws OXException If resource data cannot be returned
      * @see GuardApis#mapFor(String...)
      * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
      */
-    InputStream requestSessionSensitiveResource(Map<String, String> parameters, Session session, List<Cookie> cookies) throws OXException;
+    InputStream requestSessionSensitiveResource(Map<String, String> parameters, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
 
 }
