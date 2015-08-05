@@ -281,49 +281,61 @@ public final class UserServiceImpl implements UserService {
     }
 
     private void beforeCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeCreate(context, user, null);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeCreate(context, user, null);
+            }
         }
     }
 
     private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterCreate(context, user, null);
-            } catch(OXException e) {
-                LOG.error("Error while calling interceptor.", e);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterCreate(context, user, null);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
             }
         }
     }
 
     private void beforeUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(context, user, null, properties);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeUpdate(context, user, null, properties);
+            }
         }
     }
 
     private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterUpdate(context, user, null, properties);
-            } catch(OXException e) {
-                LOG.error("Error while calling interceptor.", e);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterUpdate(context, user, null, properties);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
             }
         }
     }
 
     private void beforeDelete(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeDelete(context, user, null);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeDelete(context, user, null);
+            }
         }
     }
 
     private void afterDelete(Context context, User user, List<UserServiceInterceptor> interceptors) {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterDelete(context, user, null);
-            } catch (OXException e) {
-                LOG.error("Error while calling interceptor.", e);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterDelete(context, user, null);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
             }
         }
     }

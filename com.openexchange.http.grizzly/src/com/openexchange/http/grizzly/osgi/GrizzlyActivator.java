@@ -186,19 +186,21 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly.start();
             log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
 
-            /*
-             * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
-             * getService() will get its own instance of HttpServiceImpl
-             */
-            registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
-            log.info("Registered OSGi HttpService for Grizzly server.");
+            if (grizzlyConfig.isShutdownFast()) {
+                /*-
+                 * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
+                 * getService() will get its own instance of HttpServiceImpl
+                 */
+                registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
+                log.info("Registered OSGi HttpService for Grizzly server.");
+            }
 
             registerService(Reloadable.class, grizzlyConfig);
 
             // Finally start listeners if server start-up is completed
             track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
     }

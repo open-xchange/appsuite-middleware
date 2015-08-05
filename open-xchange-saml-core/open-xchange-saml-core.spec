@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -73,13 +73,17 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
+* Mon Aug 03 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-08-03 (2650)
 * Thu Jul 23 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-07-27 (2626)
 * Wed Jul 15 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-07-20 (2614)
 * Tue Jul 14 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Prepare for 7.6.2 hotfix
-* Wed Jun 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
-Build for patch 2015-06-26 (2573)
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
 initial packaging for SAML core package
+* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release

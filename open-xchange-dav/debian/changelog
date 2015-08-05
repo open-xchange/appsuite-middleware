@@ -1,8 +1,20 @@
+open-xchange-dav (7.8.0-1) stable; urgency=medium
+
+  * First release candidate for 7.8.0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 05 Aug 2015 09:17:00 +0200
+
 open-xchange-dav (7.8.0-0) unstable; urgency=medium
 
   * prepare for 7.8.0 release
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:40:48 +0100
+
+open-xchange-dav (7.6.2-27) stable; urgency=medium
+
+  * Build for patch 2015-08-03 (2650)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 03 Aug 2015 14:52:45 +0200
 
 open-xchange-dav (7.6.2-26) stable; urgency=medium
 

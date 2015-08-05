@@ -1,8 +1,20 @@
+open-xchange-linkedin (7.8.0-1) stable; urgency=medium
+
+  * First release candidate for 7.8.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Aug 2015 09:17:19 +0200
+
 open-xchange-linkedin (7.8.0-0) unstable; urgency=medium
 
   * prepare for 7.8.0 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Feb 2015 16:33:09 +0100
+
+open-xchange-linkedin (7.6.2-20) stable; urgency=medium
+
+  * Build for patch 2015-08-03 (2650)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Aug 2015 14:53:02 +0200
 
 open-xchange-linkedin (7.6.2-19) stable; urgency=medium
 

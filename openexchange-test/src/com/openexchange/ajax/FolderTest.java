@@ -593,7 +593,7 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public void testGetRootFolders() throws OXException, IOException, SAXException, JSONException, OXException {
-        final int[] assumedIds = { 1, 2, 3, 4, 7, 9 };
+        final int[] assumedIds = { 1, 2, 3, 9 };
         final List<FolderObject> l = getRootFolders(getWebConversation(), getHostName(), getSessionId(), true);
         assertFalse(l == null || l.size() == 0);
         int i = 0;

@@ -112,6 +112,12 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
 
+    /** Do we want a fast or a clean shut-down */
+    private boolean shutdownFast = false;
+
+    /** The number of seconds to await the shut-down */
+    private int awaitShutDownSeconds = 90;
+
     /** The maximum header size for an HTTP request in bytes. */
     private int maxHttpHeaderSize = 8192;
 
@@ -226,6 +232,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
         final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
         this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
+        this.shutdownFast = configService.getBoolProperty("com.openexchange.connector.shutdownFast", false);
+        this.awaitShutDownSeconds = configService.getIntProperty("com.openexchange.connector.awaitShutDownSeconds", 90);
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -456,6 +464,24 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public boolean isAbsoluteRedirect() {
         return isAbsoluteRedirect;
+    }
+
+    /**
+     * Gets the shutdown-fast flag
+     *
+     * @return The shutdown-fast flag
+     */
+    public boolean isShutdownFast() {
+        return shutdownFast;
+    }
+
+    /**
+     * Gets the awaitShutDownSeconds
+     *
+     * @return The awaitShutDownSeconds
+     */
+    public int getAwaitShutDownSeconds() {
+        return awaitShutDownSeconds;
     }
 
     /**
