@@ -59,7 +59,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.session.Session;
 
 /**
- * {@link GuardApis} - Utility class-
+ * {@link GuardApis} - Utility class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v2.0.0

@@ -59,6 +59,27 @@ import com.openexchange.session.Session;
 
 /**
  * {@link GuardApi} - Provides access to the OX Guard end-point.
+ * <p>
+ * Code sample:
+ * <pre style="background-color:#FFDDDD;">
+ * HttpServletRequest request = ...;
+ * Session session = ...;
+ * GuardApi guardApi = ...;
+ *
+ * // Initialize cookies
+ * List&lt;Cookie&gt; userAuthCookies = GuardApis.extractCookiesFrom(request, session);
+ *
+ * // Initialize headers
+ * String userAgent = request.getHeader("User-Agent");
+ * List&lt;Header&gt; headers = null == userAgent ? Collections.&lt;Header&gt; emptyList() : Collections.singletonList(new Header("User-Agent", userAgent));
+ *
+ * // Initialize parameters
+ * Map&lt;String, String&gt; parameters = GuardApis.mapFor("arg01", "val01", "arg02", "val02");
+ *
+ * // Request the decrypted resource
+ * InputStream requestedResource = guardApi.requestSessionSensitiveResource(parameters, session, userAuthCookies, headers);
+ * ...
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
