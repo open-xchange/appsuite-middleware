@@ -1,3 +1,9 @@
+open-xchange-realtime-json (7.8.0-1) stable; urgency=medium
+
+  * First release candidate for 7.8.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 05 Aug 2015 09:17:34 +0200
+
 open-xchange-realtime-json (7.8.0-0) unstable; urgency=medium
 
   * prepare for 7.8.0 release
