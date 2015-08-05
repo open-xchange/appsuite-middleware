@@ -79,6 +79,7 @@ public class DefaultDriveSession implements DriveSession {
     private List<DriveFileField> fields;
     private List<FilePattern> fileExclusions;
     private List<DirectoryPattern> directoryExclusions;
+    private Boolean useDriveMeta;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -143,6 +144,16 @@ public class DefaultDriveSession implements DriveSession {
      */
     public void setDirectoryExclusions(List<DirectoryPattern> directoryExclusions) {
         this.directoryExclusions = directoryExclusions;
+    }
+
+    /**
+     * Overrides if drive metadata synchronization should be enabled or not, independently of the used API version.
+     *
+     * @param useDriveMeta <code>true</code> to force drive meta synchronization, <code>false</code> to forcibly disable it, or
+     *        <code>null</code> to decide based on the API version
+     */
+    public void setUseDriveMeta(Boolean useDriveMeta) {
+        this.useDriveMeta = useDriveMeta;
     }
 
     @Override
@@ -217,7 +228,7 @@ public class DefaultDriveSession implements DriveSession {
 
     @Override
     public boolean useDriveMeta() {
-        return 3 <= apiVersion;
+        return null != useDriveMeta ? useDriveMeta.booleanValue() : 3 <= apiVersion;
     }
 
     @Override
