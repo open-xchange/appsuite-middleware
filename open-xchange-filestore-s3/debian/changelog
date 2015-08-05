@@ -10,6 +10,12 @@ open-xchange-filestore-s3 (7.8.0-0) unstable; urgency=medium
 
  -- Markus Wagner <markus.wagner@open-xchange.com>  Wed, 05 Nov 2014 09:40:52 +0100
 
+open-xchange-filestore-s3 (7.6.2-27) stable; urgency=medium
+
+  * Build for patch 2015-08-03 (2650)
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Mon, 03 Aug 2015 14:52:51 +0200
+
 open-xchange-filestore-s3 (7.6.2-26) stable; urgency=medium
 
   * Build for patch 2015-07-27 (2626)
