@@ -1,3 +1,9 @@
+* 2015-08-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39927: Added an orderly shut-down to the Open-Xchange Server, that is to await for each running request to terminate prior
+                      to performing any shut-down operations. That behavior can be disabled (com.openexchange.connector.shutdownFast=true)
+                      or influenced how long to await the orderly shutdown (com.openexchange.connector.awaitShutDownSeconds)
+
 * 2015-08-05 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 39924: Do not use UserServiceInterceptors when creating/updating/deleting a guest user

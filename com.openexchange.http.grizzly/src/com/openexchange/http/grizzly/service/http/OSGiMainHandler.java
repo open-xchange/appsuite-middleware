@@ -101,6 +101,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -140,21 +141,39 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiMainHandler.class);
 
+    private static final AtomicBoolean SHUTDOWN_REQUESTED = new AtomicBoolean(false);
+
+    /**
+     * Sets the "shut-down requested" marker.
+     */
+    public static void markShutdownRequested() {
+        SHUTDOWN_REQUESTED.set(true);
+    }
+
+    /**
+     * Unsets the "shut-down requested" marker.
+     */
+    public static void unmarkShutdownRequested() {
+        SHUTDOWN_REQUESTED.set(false);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     private final Bundle bundle;
-
     private final OSGiCleanMapper mapper;
+    private final HttpStatus shutDownStatus;
 
     /**
      * Constructor.
      *
-     * @param logger Logger utility.
      * @param bundle Bundle that we create if for, for local data reference.
      */
     public OSGiMainHandler(Bundle bundle) {
+        super();
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
+        this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
         ServletFilterRegistration.getInstance().setOSGiMainHandler(this);
     }
 
@@ -178,13 +197,18 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 if (cutOff) {
                     // not found
                     break;
-                } else {
-                    // switching to reducing mapping mode (removing after last '/' and searching)
-                    LOG.debug("Switching to reducing mapping mode.");
-                    cutOff = true;
-                    alias = originalAlias;
                 }
+                // switching to reducing mapping mode (removing after last '/' and searching)
+                LOG.debug("Switching to reducing mapping mode.");
+                cutOff = true;
+                alias = originalAlias;
             } else {
+                if (SHUTDOWN_REQUESTED.get()) {
+                    // 500 - Internal Server Error
+                    response.setStatus(shutDownStatus);
+                    return;
+                }
+
                 HttpHandler httpHandler = OSGiCleanMapper.getHttpHandler(alias);
 
                 ReadLock processingLock = ((OSGiHandler) httpHandler).getProcessingLock();

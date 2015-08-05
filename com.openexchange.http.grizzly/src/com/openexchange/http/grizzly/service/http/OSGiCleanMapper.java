@@ -92,6 +92,7 @@
 package com.openexchange.http.grizzly.service.http;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,6 +102,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import javax.servlet.Servlet;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.osgi.service.http.HttpContext;
@@ -112,7 +114,7 @@ import org.osgi.service.http.HttpContext;
  * @author Hubert Iwaniuk
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-class OSGiCleanMapper {
+public class OSGiCleanMapper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiCleanMapper.class);
     private static final ReentrantLock lock = new ReentrantLock();
@@ -209,6 +211,15 @@ class OSGiCleanMapper {
     }
 
     /**
+     * Gets all available {@link HttpHandler}s.
+     *
+     * @return The unmodifiable {@link HttpHandler}s.
+     */
+    public static Collection<HttpHandler> getAllHttpHandlers() {
+        return Collections.unmodifiableCollection(registrations.values());
+    }
+
+    /**
      * Looks up {@link HttpHandler}s.
      *
      * @return The unmodifiable {@link HttpHandler}s.
@@ -275,15 +286,18 @@ class OSGiCleanMapper {
         if (containsAlias(alias)) {
             HttpHandler httpHandler = getHttpHandler(alias);
             if (httpHandler instanceof OSGiServletHandler) {
-                ((OSGiHandler) httpHandler).getRemovalLock().lock();
+                OSGiServletHandler servletHandler = (OSGiServletHandler) httpHandler;
+
+                WriteLock removalLock = servletHandler.getRemovalLock();
+                removalLock.lock();
                 try {
-                    Servlet servlet = ((OSGiServletHandler) httpHandler).getServletInstance();
+                    Servlet servlet = servletHandler.getServletInstance();
                     registeredServlets.remove(servlet);
                     if (callDestroyOnServlet) {
                         servlet.destroy();
                     }
                 } finally {
-                    ((OSGiHandler) httpHandler).getRemovalLock().unlock();
+                    removalLock.unlock();
                 }
             }
         }
