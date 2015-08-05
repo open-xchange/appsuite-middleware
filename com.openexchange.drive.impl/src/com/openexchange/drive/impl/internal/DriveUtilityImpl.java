@@ -65,6 +65,7 @@ import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.drive.impl.metadata.JsonFileMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
@@ -208,9 +209,15 @@ public class DriveUtilityImpl implements DriveUtility {
 
     private JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
-        JSONArray jsonArray = new JSONArray(folders.size());
+        List<String> folderIDs = new ArrayList<String>(folders.size());
         for (FileStorageFolder folder : folders) {
-            JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
+            folderIDs.add(folder.getId());
+        }
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
+        JSONArray jsonArray = new JSONArray(folders.size());
+        for (int i = 0; i < folderIDs.size(); i++) {
+            JSONObject jsonObject = new JsonDirectoryMetadata(session, folders.get(i)).build(false);
+            jsonObject.put("checksum", checksums.get(i).getChecksum());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
