@@ -233,8 +233,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
         };
 
         FutureTask<Void> shutDownTask = new FutureTask<Void>(r, null);
-        Thread shutDownThread = new Thread(shutDownTask, "Grizzly Shut-Down Performer");
-        shutDownThread.start();
+        new Thread(shutDownTask, "Grizzly Shut-Down Performer").start();
         return shutDownTask;
     }
 
