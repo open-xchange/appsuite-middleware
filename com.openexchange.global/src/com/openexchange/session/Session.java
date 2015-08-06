@@ -198,6 +198,13 @@ public interface Session {
     public static final String PARAM_GUEST = "__session.guest".intern();
 
     /**
+     * The parameter for the cookie refresh time stamp.
+     *
+     * @type <code>java.lang.Long</code>
+     */
+    public static final String PARAM_COOKIE_REFRESH_TIMESTAMP = "__session.cookierefresh".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();

@@ -2,6 +2,9 @@
 
  - Fix for bug 39909: Force immediate shut-down if Hazelcast fails to stop gracefully
  - Fix for bug 40048: Fixed possible deadlock when managing shared locks with a mutually exclusive map
+ - Fix for bug 36971: Introduced a two-step cookie-refreshing mechanism:
+                      A time stamp based refresh detection for secret/public cookie + one-time flag based detection for session cookie to
+                      avoid setting both cookies in one HTTP request.
 
 * 2015-08-06 - tobias.friedrich@open-xchange.com
 
