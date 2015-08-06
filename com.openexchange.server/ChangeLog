@@ -1,3 +1,7 @@
+* 2015-08-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39909: Force immediate shut-down if Hazelcast fails to stop gracefully
+
 * 2015-08-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40081: Don't enable oauth services for guest users
