@@ -42,11 +42,11 @@ __Administrator Notes:__
 
 Shares are accessed with a hyperlink that contains the so-called share "token". This 24-byte token uniquely identifies the associated guest account on the system, and carries enough randomness that it can't be guessed. Explicitly invited guest users receive this hyperlink in the invitation mail to a share, while in case of an "anonymous" share where just the link itself was generated, it's up to the sharing user to distribute the link on his own. Besides the token, a share link may contain an additional path that points to the concrete folder and item, which just aids to jump to the shared item in the web interface directly. The following shows an example of a share link:
 
- https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38
+`https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38`
 
 If a guest user has been invited to more than one share in a context (based on his e-mail address), his individual share token remains equal, so that he will have access to all shared contents in the web interface after following any of the share links he received. However, the additional "path" still points to the concrete item. When inviting more than one guest user to the same share, each recipient will get his own individual share link.
 
-Once the share URL is requested from the server, the associated guest account is looked up and, depending of the guest type, the request is redirected to a specific login screen or directly into the App Suite web interface. More details regarding the different login modes are described at [Guest Login & Session Handling].
+Once the share URL is requested from the server, the associated guest account is looked up and, depending of the guest type, the request is redirected to a specific login screen or directly into the App Suite web interface. More details regarding the different login modes are described at [Guest Login & Session Handling](#Guest_Login_&_Session_Handling).
 
 After a share has been revoked (either explicitly, by removing the permission, or if the share is expired), share links can't be accessed any longer, and, after the last share for the guest user was removed, the guest account is removed from the system automatically. 
 
@@ -78,23 +78,26 @@ __Administrator Notes:__
 
 ### Capabilities
 
+Capabilities for guest user account may be configured in different modes.
+
 tbd.
 
 ### Anonymous Guest Users
 
 If a "share link" is created, this results in an implicit creation of an anonymous guest user account on the server. The "secret" to access the shared contents is the share token itself that is encoded in the generated share link, so that everybody that knows the share link is able to access the shared contents. Optionally, such an anonymous share link may be secured with an additional PIN code. Guest users will be prompted to enter this PIN code when attempting to access the share. 
 
-To have a strict separation between different shared contents, each time a folder or item is shared using the "Get a link" method, a designated anonymous guest account for this share is used. Consequently, each time such an anonymous share is revoked, this guest account is terminated again with no further delay. 
+To have a strict separation between different shared contents, each time a folder or item is shared using the "Get a link" method, a designated anonymous guest account for this share is used. Consequently, each time such an anonymous share is revoked, this guest account is terminated again with no further delay. Additionally, such an anonymous guest entity can only be applied to the permission set of the folder or item the original link was created for, i.e. it's not possible to add more shared contents to an anonymous guest - in contrast to an invited, named guest user. 
 
 Besides the common restrictions for guest accounts outlined above, the following applies for anonymous guest user accounts:
 
 * No e-mail address or display name
 * No password, if no PIN was assigned by the sharing user
-* A password that may only be changed by the sharing user, if a PIN code was set
+* A password that may only be changed by editing the link, if a PIN code was set
+* Anonymous guest users may only receive "read-only" access permissions to the shared item
 
 __Administrator Notes:__
 
-* The PIN code for anonymous guest users is stored using symmetrical encryption in the database, therefore, an encryption key needs to be specific via the property `com.openexchange.share.cryptKey` in `share.properties`
+* The PIN code for anonymous guest users is stored using symmetrical encryption in the database, therefore, an encryption key needs to be specified via the property `com.openexchange.share.cryptKey` in `share.properties`
 
 ### Named Guest Users
 
@@ -153,9 +156,13 @@ We have basically three different authentication options for guest users accessi
 
 ### Cookies
 
-Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the open-xchange-secret-<hash> and open-xchange-public-session-<hash> cookies. The cookie hashes are calculated in a way that also the guest user context- and user identifiers are taken into account. Doing so, this allows to use the regular user session as well as one or more guest sessions from within the same client - e.g. if the sharing user wants to check how the contents appear for the guest user after generating a share link.
+Guest sessions basically make use of the same cookies as regular user sessions do. This includes the JSESSONID cookie for the JVM route, as well as the `open-xchange-secret-<hash>` and `open-xchange-public-session-<hash>` cookies. The cookie hashes are calculated in a way that also the guest user context- and user identifiers are taken into account. Doing so, this results in different cookie names for regular and guest users within the same client, which allows to use the regular user session as well as one or more guest sessions in parallel - e.g. if the sharing user quickly wants to check how the contents appear for the guest user after generating a share link.
 
 Additionally, if configured, the client may also issue a `store` request to persist the open-xchange-session-<hash> cookie. This cookie may then be used to auto-login the guest client into the previously used session if it is still valid. 
+
+Besides the common cookies, another special cookie is set: `open-xchange-share-<hash>`. The value contains the unique share token bound to the guest user accessing the share. here, the cookie hash is calculated as it's done for ordinary sessions, so that there can only be one `open-xchange-share-<hash>` cookie in a client at the same time. Whenever an auto-login request is issued by the client, the server checks for the existence of this "share" cookie, and, once recognized and checked for validity, it will try to perform the auto-login for an existing guest session first, i.e. using the session cookie based on the special guest hash calculation outlined above. Otherwise, the common auto-login process takes place. The "share" cookie is removed once the guest session terminates, i.e. the guest user logs out.
+
+Reason for this handling is that if users reload the web application in the browser and the client attempts to perform an auto-login request, this should never lead to a situation where the session of a regular user is loaded in a browser tab page that previously hosted the guest session. However, the other way around, this also means that reloading the web application during the time a valid guest session is active will result in the data of the share being loaded.   
 
 __Administrator Notes:__
 
@@ -168,15 +175,15 @@ When accessing a share link, one of the following login modes is triggered to ac
 
 #### Redirect to Target
 
-In case a share is accessible without providing credentials, the client is redirected to the share target directly, i.e. without prompting for a username or password. By default, the client is redirected to the target in the app suite webinterface by responding the `GET` request to the share link with `HTTP 302`, and a location header like the following:
+In case a share is accessible without providing credentials, the client is redirected to the share target directly, i.e. without prompting for a username or password. By default, the client is redirected to the target in the App Suite web interface by responding the `GET` request to the share link with `HTTP 302`, and a location header like the following:
 
- Location: /appsuite#session=2a78efe78613421db58c500e17f20ce3&store=true&user=&user_id=4590&context_id=424242669&language=en_US&m=contacts&f=253818
+`Location: /appsuite/ui#!&session=80c711019d6f48b5bec9cd82758e3308&store=true&user=&user_id=642&context_id=1&m=files&f=41042`
 
-The session for the guest user is created implicitly in the backend after checking the share link's validity, and the client is instructed to store appropriate cookies in the redirect response:
+The session for the guest user is created implicitly in the backend after checking the share link's validity, and the client is instructed to store appropriate cookies in the redirect response, including the "share" cookie:
 
- Set-Cookie: JSESSIONID=6086750515033495572.OX0; Expires=Wed, 22-Oct-2014 06:58:31 GMT; Path=/; HttpOnly
- Set-Cookie: open-xchange-secret-fsl8TeHMCm5BJ5RrUiS2eg=df21f69fbb4049a6a34899d35617fc4a; Expires=Wed, 15-Oct-2014 06:58:40 GMT; Path=/; HttpOnly
- Set-Cookie: open-xchange-public-session-2374ecf1cde9a4345fc66df66223cd94=59646e53ae66479a871a25900b155497; Expires=Wed, 15-Oct-2014 06:58:40 GMT; Path=/; HttpOnly
+`Set-Cookie: open-xchange-secret-aNobP2G9wLHJ6sMr7vtTA=38ee770d6e4f42ab8366d91db3279931; Expires=Thu, 13-Aug-2015 06:16:26 GMT; Path=/; Secure; HttpOnly`
+`Set-Cookie: open-xchange-public-session-d0759656127fb7cee6e0fe8bb5fe19f9=cae6a3e712ac429e9da9194abd389cb3; Expires=Thu, 13-Aug-2015 06:16:26 GMT; Path=/; Secure; HttpOnly`
+`Set-Cookie: open-xchange-share-b7gDSqJpnh9gS3Fs52I65Q=0ad50ac00418fbcdad50ac1418f94fb181d51b8fa7b2bde3; Expires=Thu, 13-Aug-2015 06:16:26 GMT; Path=/; Secure; HttpOnly`
 
 #### Redirect to Login Screen
 
@@ -184,24 +191,21 @@ If additional credentials, i.e. an additional PIN code or username/password comb
 
 If the share ought to be accessed anonymously, but protected by a PIN code, a location like the following is added to the response header:
 
- Location: /appsuite/ui#share=1ee2930d068d22647abfee068d37469f9c56ac7514b14bf5&target=9b36b8c7&login_type=anonymous&message=New%20Share&message_type=INFO&status=login
+`Location: /appsuite/ui#!&share=08b4b6110151f1bd7d4b610151f0405d9fc8bb89a887f04e&login_type=anonymous&message_type=INFO&message=Tony%20Parker%20has%20shared%20the%20folder%20%22Pictures%22%20with%20you.%20Please%20log%20in%20to%20view%20it.%20&target=151ebb38`
 
 For shares to dedicated guest users identified by their e-mail address, the redirect location looks like follows:
 
- Location: /appsuite/ui#share=1d5fc7760eb0c75e416aa9beb0d241a0bf764735e902000a&target=9b36a9c3&login_type=guest&login_name=otto%40example.com&message=New%20Share&message_type=INFO&status=login
+`Location: /appsuite/ui#!&share=4ac9eb590f9ca4d2ac9eb58f9ca611ec9b4f4638d288c8c0&login_type=guest&message_type=INFO&message=Tony%20Parker%20has%20shared%20the%20file%20%22Agenda.pdf%22%20with%20you.%20Please%20log%20in%20to%20view%20it.%20&login_name=ray%40example.com&target=4444cbc7`
 
-The redirect response already contains the set-cookie header for the jvm route:
+The redirect response already contains the `Set-Cookie` header for the JVM route. On the redirect target, the client should request the PIN code or password from the user, and then issue a special login request, supplying the share token and optional target from the URL parameters, and the password as URL encoded form data in the request body, similar to the usual login request via POST. After successful authentication, the login response includes, along with the common login response properties like the session identifier, information about the share target being accessed:
 
- Set-Cookie: JSESSIONID=781409709894243648.OX0; Expires=Wed, 22-Oct-2014 06:59:57 GMT; Path=/; HttpOnly
-
-On the redirect target, the client should request the PIN code or password from the user, and then issue a special login request, supplying the share token and optional target from the URL parameters, and the password as URL encoded form data in the request body, similar to the usual login request via POST. After successful authentication, the login response includes, along the common login response properties like the session identifier, information about the share target being accessed:
-
- {"session":"86d73776ffbc47c1a554d5279c97e251","user_id":4587,"context_id":424242669,"locale":"en_US","folder":"253815","module":"infostore"}
+`{"session":"b89af2c2ce494ce4b4573c0632b48e89","user":"ray@example.com","user_id":660,"context_id":1,"locale":"en_US","module":"files","folder":"10","item":"10/456398", ... }`
 
 Additionally, the client is instructed to store the secret cookies:
 
- Set-Cookie: open-xchange-secret-AgR4uA90o94qGA71WetcA=20a61700b1f44444aaa281e006096783; Path=/; HttpOnly
- Set-Cookie: open-xchange-public-session-2374ecf1cde9a4345fc66df66223cd94=f845a15caa53414ea40685b170f340cf; Path=/; HttpOnly
+`Set-Cookie: open-xchange-share-b7gDSqJpnh9gS3Fs52I65Q=0ac9eb590f9ca4d5ac9eb58f9ca641ec9b4f4638d288c8a0; Expires=Thu, 13-Aug-2015 06:31:21 GMT; Path=/; Secure; HttpOnly`
+`Set-Cookie: open-xchange-secret-MBIRg9bJBLduCcosqQBCw=70187de16f844be6880c18be373b953d; Expires=Thu, 13-Aug-2015 06:31:21 GMT; Path=/; Secure; HttpOnly`
+`Set-Cookie: open-xchange-public-session-d0759656127fb7cee6e0fe8bb5fe19f9=4e797a59758a4dd7b763912472ccf26d; Expires=Thu, 13-Aug-2015 06:31:21 GMT; Path=/; Secure; HttpOnly`
 
 Afterwards, the client is able to use the session to access the share target as usual.
 
@@ -220,11 +224,11 @@ Guest sessions are terminated once a logout request is issued by the client, i.e
 
 Since guest users are not able to use the default login page for regular users, a custom logout location for guest users should be specified where guest users are taken to after clicking logout explicitly, or if their session expired. 
 
-If a share is consumed "directly", e.g. by downloading the binary contents of a file share directly (see [[#Consuming Shares|Consuming Shares]] for details), the guest sessions is terminated instantly after serving the request. 
+If a share is consumed "directly", e.g. by downloading the binary contents of a file share directly (see [Consuming Shares](#Consuming_Shares) for details), the guest sessions is terminated instantly after serving the request. 
 
 __Administrator Notes:__
 
-* The logout location for guest accounts can be specified at (tbd.)
+* The logout location for guest accounts can be customized via `guestLogoutLocation` in the file `as-config.yml` (see file `as-config-default.yml` for an example)  
 
 ## Share Notifications
 
@@ -241,16 +245,16 @@ To create or manage shares and guest users, the HTTP API has been extended at va
 
 As preparation for individual object permissions where a file can be accessed from different folder "views", the object IDs for documents in the default "infostore" file storage account will get enhanced with the prefixing folder ID. 
 
-The identifiers will now be of format "<some numbers>/<more numbers>". Object identifiers are already of type "String", so this change should usually be transparent to clients. However, there may be some clever clients out there that for example tried to interpret the string of numerical characters as number, so client developers should double-check their implementation for compatibility. They most likely would run into trouble when coping with non-infostore file storages anyway. 
+The identifiers will now be of format `<some numbers>/<more numbers>`. Object identifiers are already of type `String`, so this change should usually be transparent to clients. However, there may be some clever clients out there that for example tried to interpret the string of numerical characters as number, so client developers should double-check their implementation for compatibility. They most likely would run into trouble when coping with non-infostore file storages anyway. 
 
 ### Object permissions for files
 
-In order to define permissions on object-level, a new property “object_permissions” for objects of type “infoitem” is introduced. Each time the underlying folder permissions are not sufficient to access an item, those object permissions are taken into account. Object permissions are stored as an array of Object Permission objects as defined below within the detailed infoitem data, the column ID is 108. 
+In order to define permissions on object-level, a new property `object_permissions` for objects of type `infoitem` is introduced. Each time the underlying folder permissions are not sufficient to access an item, those object permissions are taken into account. Object permissions are stored as an array of Object Permission objects as defined below within the detailed infoitem data, the column ID is `108`. 
 
 Details about the JSON structure are available at: 
-* [[HTTP_API#DetailedInfoitemData|HTTP API: Detailed Infoitem Data]]
-* [[HTTP_API#ObjectPermissionObject|HTTP API: Object Permission Object]]
-* [[HTTP_API#ObjectPermissionFlags|HTTP API: Object Permission Flags]]
+* [HTTP API: Detailed Infoitem Data](http://oxpedia.org/index.php?title=HTTP_API#DetailedInfoitemData)
+* [HTTP API: Object Permission Object](http://oxpedia.org/index.php?title=HTTP_API#ObjectPermissionObject)
+* [HTTP API: Object Permission Flags](http://oxpedia.org/index.php?title=HTTP_API#ObjectPermissionFlags)
 
 ### New field for "user" data: "guest_created_by"
 
@@ -263,47 +267,71 @@ A new property has been introduced for users that needs to be exposed in our HTT
 The property is read-only and can't be removed or set by clients. 
 
 See also:
-* [[HTTP_API#DetailedUserData|HTTP API: Detailed User Data]]
+* [HTTP API: Detailed User Data](http://oxpedia.org/index.php?title=HTTP_API#DetailedUserData)
 
 ### Extend folder- and object permissions for addressing external guests
 
 For sharing files- or folders to external guests, the folder- and object permission objects are extended with additional properties. Those extended properties can be set during creation or update of the parent folder or file. The underlying shares and guest user entities for the referenced recipients are created automatically along with folder/file creation/update. Afterwards, the external recipients appear as regular "user" entities in the permission arrays in subsequent "get" requests.
 
 Details about the extended JSON structure are available at: 
-* [[HTTP_API#PermissionObject|HTTP API: Permission Object]]
-* [[HTTP_API#ObjectPermissionObject|HTTP API: Object Permission Object]]
+* [HTTP API: Permission Object](http://oxpedia.org/index.php?title=HTTP_API#PermissionObject)
+* [HTTP API: Object Permission Object](http://oxpedia.org/index.php?title=HTTP_API#ObjectPermissionObject)
 
 ### New Ajax module: share/management
 
 To work with shares, a new Ajax module is introduced. 
 
 The available actions in the module are described at: 
-* [[HTTP_API#Module_.22share.2Fmanagement.22_.28preliminary.2C_available_with_v7.8.0.29|HTTP API: Module share management]]
+* [HTTP API: Module share management](http://oxpedia.org/index.php?title=HTTP_API#Module_.22share.2Fmanagement.22_.28preliminary.2C_available_with_v7.8.0.29)
 
 ### New column "shareable" in detailed infoitem data
 
-Clients want to know quickly if an infostore item is shareable or not. A new (read-only) property named "shareable" of type Boolean with column identifier 109 is introduced for "detailed infoitem data". If "true", the can be considered as shareable, i.e. the item's object permissions may be adjusted by the user. 
+Clients want to know quickly if an infostore item is shareable or not. A new (read-only) property named `shareable` of type Boolean with column identifier `109` is introduced for "detailed infoitem data". If "true", the can be considered as shareable, i.e. the item's object permissions may be adjusted by the user. 
 
 Further details are available at:
-* [[HTTP_API#DetailedInfoitemData|HTTP API: Detailed Infoitem Data ]].
+* [HTTP API: Detailed Infoitem Data](http://oxpedia.org/index.php?title=HTTP_API#DetailedInfoitemData)
 
+### New action "shares" in module folder
+
+To provide an overview of all folders of a certain modules that are shared to others, a new `shares` action is added to the Ajax module `folders`. It returns all personal folders of a certain module that are shared to other entities. 
+
+Further details are available at: 
+* [HTTP API: Get shared folders](http://oxpedia.org/index.php?title=HTTP_API#Get_shared_folders_.28Since_7.8.0.2C_Preliminary.29)
+
+### New action "shares" in module infostore
+
+To provide an overview of all files that are shared to others, a new `shares` action is added to the Ajax module `infostore`. It returns all personal files that are shared to other entities. 
+
+Further details are available at: 
+* [HTTP API: Get shared infoitems](http://oxpedia.org/index.php?title=HTTP_API#Get_shared_infoitems_.28Since_7.8.0.2C_Preliminary.29)
+
+### New fields to retrieve extended permissions of files and folders
+
+Clients would like to have more details about permission entities folders directly. A new read-only property named `com.openexchange.share.extendedPermissions` is introduced for "Detailed folder data", with column identifier `3060`. It basically contains the same as the regular `permissions` array, yet enhanced by resolved information about the user, group or guest entities as well as additional, sharing-related properties. 
+
+Similarly, a new read-only property named `com.openexchange.share.extendedObjectPermissions` is introduced for "Detailed infoitem data", with column identifier `7010`. It basically contains the same as the regular `object_permissions` array, yet enhanced by resolved information about the user, group or guest entities as well as additional, sharing-related properties. 
+
+Further information about the JSON structure is available at:
+* [HTTP API: Extended Permission Object](http://oxpedia.org/index.php?title=HTTP_API#ExtendedPermissionObject)
+* [HTTP API: Extended Object Permission Object](http://oxpedia.org/index.php?title=HTTP_API#ExtendedObjectPermissionObject)
+ 
 ## Consuming Shares
 
 Depending on the shared contents and the requesting user agent, shares may be consumed in a couple of different ways. The concrete response to a request to the share URL is evaluated by the share servlet in the backend.
 
 ### App Suite
 
-The default handling for all shares is forwarding them to the App Suite web interface, where the shared contents are made available through the existing client. Based on the underlying guest account, the client is either forwarded to the login prompt, or taken directly to the share target if no credentials need to be provided. This process is described in more detail at [[#Guest Login & Session Handling|Guest Login & Session Handling]].
+The default handling for all shares is forwarding them to the App Suite web interface, where the shared contents are made available through the existing client. Based on the underlying guest account, the client is either forwarded to the login prompt, or taken directly to the share target if no credentials need to be provided. This process is described in more detail at [Guest Login & Session Handling](#Guest_Login_&_Session_Handling).
 
 ### Direct Download
 
 Shares to a single file may also be downloaded directly by clients, without opening them in the web interface first. This is indicated by an additional parameter appended to the plain share link, and can be specified in the following ways:
 
 * Append `dl` parameter: 
- https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38__&dl=true__
+ `https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38&dl=true`
 
 * Specify `delivery` parameter:
- https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38__&delivery=download__
+ `https://ox.example.com/ajax/share/48b2b6190151f1bd8b4b610151f0405d9fc8cb89a087f14e/151eab38&delivery=download`
 
 If accessing the item requires authentication, an unauthenticated request is responded with `HTTP 401 Unauthorized`. The client then has to provide the correct credentials to access the share via basic authentication. If there's no dedicated username for the underlying guest account - i.e. an "anonymous" share link protected with a PIN code is accessed - only the password is checked, i.e. the client may then supply an arbitrary username in the basic authentication header like "Guest".
 
@@ -343,9 +371,10 @@ Because of the above points and the whole different concept, we do not migrate e
 * Yet it's still possible to delete existing publications and subscriptions
 * Therefore, the menu section "Publications and Subscriptions" will still be available (if there's at least one publication or subscription)
 
+Exceptions to these rules cover special internal subscriptions to 3rd party services like addressbooks from LinkedIn or Xing, as well as the auto-publish feature of mail attachments exceeding a specific size. 
+
 __Administrator Notes:__
 
 * The possibility to create/update publications via HTTP-API may be configured via `com.openexchange.publish.createModifyEnabled` in file `publications.properties`
 * The possibility to create/update subscriptions via HTTP-API may be configured via `com.openexchange.publish.createModifyEnabled` in file `subscribe.properties`
-
 
