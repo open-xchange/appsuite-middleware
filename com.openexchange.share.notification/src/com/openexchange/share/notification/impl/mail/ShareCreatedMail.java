@@ -88,7 +88,6 @@ import com.openexchange.user.UserService;
 public class ShareCreatedMail extends NotificationMail {
 
     static final String HAS_SHARED_ITEMS = "has_shared_items";
-    static final String PLEASE_CLICK = "please_click";
     static final String USER_MESSAGE = "user_message";
     static final String VIEW_ITEMS_LINK = "view_items_link";
     static final String VIEW_ITEMS_LABEL = "view_items_label";
@@ -183,8 +182,6 @@ public class ShareCreatedMail extends NotificationMail {
         vars.put(HAS_SHARED_ITEMS, data.textSnippets.shareStatementLong(fullName, email, data.targetProxies.values(), hasMessage));
         if (hasMessage) {
             vars.put(USER_MESSAGE, data.notification.getMessage());
-        } else {
-            vars.put(PLEASE_CLICK, data.textSnippets.linkIntro(data.targetProxies.values()));
         }
 
         vars.put(VIEW_ITEMS_LINK, shareUrl);

@@ -284,7 +284,7 @@ public class MailNotificationTest extends ShareTest {
             testFolder1,
             image1,
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
-            String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_IMAGE, clientFullName, clientEmail, image1.getFileName()), NotificationStrings.PLEASE_CLICK_IT),
+            String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
             NotificationStrings.VIEW_IMAGE,
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             null,
@@ -293,27 +293,67 @@ public class MailNotificationTest extends ShareTest {
     }
 
     public void testUserGotAnImageAndMessage() throws Exception {
-        testUserGotA(testFolder1, image1, String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()), String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()), NotificationStrings.VIEW_IMAGE, String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()), clientShareMessage, shareExpireDate);
+        testUserGotA(
+        		testFolder1,
+        		image1,
+        		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
+        		String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
+        		NotificationStrings.VIEW_IMAGE,
+        		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
+        		clientShareMessage,
+        		shareExpireDate);
     }
 
     //---FILES------------------------------------------------------------------------------------------------------------------------------
 
     public void testUserGotAFile() throws Exception {
-        testUserGotA(testFolder1, file1, String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FILE, clientFullName, clientEmail, file1.getFileName()), NotificationStrings.PLEASE_CLICK_IT), NotificationStrings.VIEW_FILE, String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), null, shareExpireDate);
+        testUserGotA(
+        		testFolder1,
+        		file1,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+        		String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
+        		NotificationStrings.VIEW_FILE,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+        		null,
+        		shareExpireDate);
     }
 
     public void testUserGotAFileAndMessage() throws Exception {
-        testUserGotA(testFolder1, file1, String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()), NotificationStrings.VIEW_FILE, String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()), clientShareMessage, shareExpireDate);
+        testUserGotA(
+        		testFolder1,
+        		file1,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+        		String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
+        		NotificationStrings.VIEW_FILE,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
+        		clientShareMessage,
+        		shareExpireDate);
     }
 
     //---FOLDER-----------------------------------------------------------------------------------------------------------------------------
 
     public void testUserGotAFolder() throws Exception {
-        testUserGotA(testFolder1, null, String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FOLDER, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.PLEASE_CLICK_IT), NotificationStrings.VIEW_FOLDER, String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), null, shareExpireDate);
+        testUserGotA(
+        		testFolder1,
+        		null,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+        		String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+        		NotificationStrings.VIEW_FOLDER,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+        		null,
+        		shareExpireDate);
     }
 
     public void testUserGotAFolderAndMessage() throws Exception {
-        testUserGotA(testFolder1, null, String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.VIEW_FOLDER, String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()), clientShareMessage, shareExpireDate);
+        testUserGotA(
+        		testFolder1,
+        		null,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+        		String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+        		NotificationStrings.VIEW_FOLDER,
+        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+        		clientShareMessage,
+        		shareExpireDate);
     }
 
     public void testDontNotifyInternalsOnPublicFolderShare() throws Exception {
