@@ -191,27 +191,27 @@ public class AppointmentDiff {
         return false;
     }
 
-	public boolean anyFieldChangedOf(Collection<String> fields) {
+    public boolean anyFieldChangedOf(Collection<String> fields) {
         for (String field : fields) {
             if (differingFieldNames.contains(field)) {
                 return true;
             }
         }
         return false;
-	}
+    }
 
 
 
-	public boolean anyFieldChangedOf(final int...fields) {
-		for (final int field : fields) {
-			for (final FieldUpdate upd : updates) {
-				if (upd.getFieldNumber() == field) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean anyFieldChangedOf(final int...fields) {
+        for (final int field : fields) {
+            for (final FieldUpdate upd : updates) {
+                if (upd.getFieldNumber() == field) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
     public boolean onlyTheseChanged(final String...fields) {
@@ -321,6 +321,22 @@ public class AppointmentDiff {
         differing.removeAll(Arrays.asList(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS));
         if (!differing.isEmpty()) {
             return false;
+        }
+
+        return isAboutStateChanges();
+    }
+
+    /**
+     * Checks if the appointment diff contains <b>only</b> state changes beside relevant fields.
+     *
+     * @return <code>true</code> for <b>only</b> state changes; otherwise <code>false</code>
+     */
+    public boolean isAboutStateChangesOnly(Set<String> relevant) {
+        // First, let's see if any fields besides the state tracking fields have changed
+        HashSet<String> differing = new HashSet<String>(differingFieldNames);
+        differing.removeAll(Arrays.asList(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS));
+        if (differing.removeAll(relevant)) {
+            return false; // There is at least one relevant change left.
         }
 
         return isAboutStateChanges();

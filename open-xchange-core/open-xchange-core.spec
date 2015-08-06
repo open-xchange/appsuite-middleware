@@ -1200,6 +1200,9 @@ fi
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1240,6 +1243,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-03 (2650)
 * Thu Jul 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-07-27 (2626)
 * Wed Jul 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
