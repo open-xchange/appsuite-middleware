@@ -1,6 +1,7 @@
 * 2015-08-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40081: Don't enable oauth services for guest users
+ - Fix for bug 40067: Don't do randomly access files if not supported by storage
 
 * 2015-08-05 - thorben.betten@open-xchange.com
 
