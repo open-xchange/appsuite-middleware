@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-07-28 11:28+0100\n"
+"PO-Revision-Date: 2015-08-06 14:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -66,76 +66,24 @@ msgstr "Kein Ticket im Principal %1$s gefunden, das erneuert werden muss. "
 msgid "No Kerberos delegation ticket found in session."
 msgstr "Kein Kerberos-Weiterleitungsticket in der Sitzung gefunden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:103
-msgid "/servlet/dav/caldav"
-msgstr "/servlet/dav/caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
-msgid "/servlet/dav/dev/null"
-msgstr "/servlet/dav/dev/null"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:145
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "caldav"
-msgstr "CalDAV"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "modules"
-msgstr "Module"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "module"
-msgstr "Modul"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:181
-msgid "modules/caldav/active"
-msgstr "modules/caldav/active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:186
-msgid "io.ox/caldav//active"
-msgstr "io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:191
-msgid "modules/caldav/active > io.ox/caldav//active"
-msgstr "modules/caldav/active > io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:198
-msgid "modules/caldav/url"
-msgstr "modules/caldav/url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:203
-msgid "io.ox/caldav//url"
-msgstr "io.ox/caldav//url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:208
-msgid "modules/caldav/url > io.ox/caldav//url"
-msgstr "modules/caldav/url > io.ox/caldav//url"
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your calendars and appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/OAuthStrings.java:61
 msgid "Synchronize your calendars and appointments."
 msgstr "Synchronisieren Sie Ihre Kalender und Termine."
-
-#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-#. registerService(TargetService.class, new ModifyThroughDependant(), props);
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
-msgid "calendar"
-msgstr "Kalender"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
 msgid "Read all your appointments."
 msgstr "Alle Ihre Termine lesen."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
 msgid "Create, modify and delete appointments."
 msgstr "Termine anlegen, ändern und löschen."
 
@@ -944,30 +892,10 @@ msgstr ""
 "Sie erhalten diese E-Mail, da der Termin die Ressource %1$s enthält, die Sie "
 "verwalten."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:88
-#, fuzzy
-msgid "starting bundle: \"com.openexchange.carddav\""
-msgstr "Bundle starten: \"com.openexchange.carddav\""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:135
-msgid "/servlet/dav/carddav"
-msgstr "/servlet/dav/carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:101
-#, fuzzy
-msgid "carddav"
-msgstr "CardDAV"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:121
-#, fuzzy
-msgid "stopping bundle: \"com.openexchange.carddav\""
-msgstr "Bundle anhalten: \"com.openexchange.carddav\""
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Synchronisieren Sie Ihre Adressbücher und Kontakte."
 
@@ -1446,38 +1374,17 @@ msgstr ""
 msgid "Unable to access the file store."
 msgstr "Zugriff auf Dateispeicher fehlgeschlagen"
 
-#.
-#. * register ajax module
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:88
-msgid "contacts"
-msgstr "Kontakte"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-#, fuzzy
-msgid "identifier"
-msgstr "ID"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-msgid "com.openexchange.contact.json"
-msgstr "com.openexchange.contact.json"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "com.openexchange.contact"
-msgstr "com.openexchange.contact"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
 msgstr "Alle Ihre Kontakte lesen."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete contacts."
 msgstr "Kontakte anlegen, ändern und löschen."
 
@@ -1858,7 +1765,7 @@ msgstr ""
 #. In order to accomplish the search, %1$d or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid ""
@@ -2798,7 +2705,6 @@ msgstr "[Nicht verfügbar]"
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mobilepush/src/com/openexchange/mobilepush/MobilePushExceptionMessages.java:70
 msgid ""
 "An error occurred inside the server which prevented it from fulfilling the "
 "request."
@@ -2841,12 +2747,16 @@ msgid "Missing field: %s"
 msgstr "Fehlendes Feld: %s"
 
 #. The general message if an error occurred while reading or writing to the database
-#. SQL error message
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mobilepush/src/com/openexchange/mobilepush/MobilePushExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "Error while reading/writing data from/to the database."
 msgstr "Fehler beim Lesen oder Schreiben aus bzw. in die Datenbank."
+
+#. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+msgid "Data cannot be stored into the database because it is too big"
+msgstr ""
+"Die Daten können nicht in der Datenbank gespeichert werden, da sie zu "
+"umfangreich sind"
 
 #. *
 #. * File not found: %1$s
@@ -2924,12 +2834,12 @@ msgstr ""
 "Das Kerberos-Ticket für die Sitzung fehlt. Bitte versuchen Sie es erneut."
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
 msgid "A Guard error occurred: %1$s"
 msgstr "Es trat ein Guard-Fehler auf: %1$s"
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid ""
 "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
@@ -2937,27 +2847,27 @@ msgstr ""
 "Fehlermeldung: %2$s"
 
 #. Invalid Guard URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
 msgid "The provided Guard URL: %1$s is invalid"
 msgstr "Die angegebene Guard-URL: %1$s ist ungültig."
 
 #. The Guard resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Die angegebene Guard-Ressource ist nicht vorhanden: %1$s"
 
 #. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
 msgid "An I/O error occurred: %1$s"
 msgstr "Es trat ein E/A-Fehler auf: %1$s"
 
 #. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "Authentication failed: %1$s"
 msgstr "Authentifizierung fehlgeschlagen: %1$s"
 
 #. The Guard resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
 msgstr "Die Guard-Ressource ist nicht vorhanden"
 
@@ -4338,7 +4248,6 @@ msgstr "Daten konnten nicht via Proxy geladen werden."
 
 #. The operation is forbidden
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONErrorDisplayMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
 msgid "The operation is forbidden"
 msgstr "Die Aktion ist nicht zulässig."
 
@@ -4610,7 +4519,7 @@ msgstr "Die Anfrage ergab kein Ergebnis."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
 #, fuzzy
 msgid "The GroupDispatcher %1$s was already disposed."
-msgstr "Der GroupDispatcher %1$s wurde bereits entfernt (dispose)."
+msgstr "Der GroupDispatcher %1$s wurde bereits entfernt."
 
 #. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
@@ -4702,15 +4611,10 @@ msgstr "Benutzer ist deaktiviert"
 msgid "Password expired"
 msgstr "Passwort ist abgelaufen"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:84
-#, fuzzy
-msgid "config"
-msgstr "Konfiguration"
-
 #. Application 'xyz' requires following permissions:
 #. - Read and change your settings.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/OAuthScopeDescription.java:9
 msgid "Read and change your settings."
 msgstr "Ihre Einstellungen lesen und ändern."
 
@@ -5273,11 +5177,11 @@ msgstr ""
 msgid "Unable to scale image down."
 msgstr "Bild kann nicht herunterskaliert werden"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "This feature has not been enabled"
 msgstr "Dieses Feature wurde nicht aktiviert."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:73
 msgid ""
 "You do not have the appropriate permission to create objects in the folder "
 "\"%1$s\"."
@@ -5285,13 +5189,13 @@ msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen von Objekten "
 "im Ordner \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:75
 msgid "Unable to synchronize the old contact with the new changes."
 msgstr ""
 "Der vorherige Kontakt kann nicht mit den neuen Änderungen synchronisiert "
 "werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
 msgid "You are not allowed to mark this contact as private contact."
 msgstr ""
 "Sie haben keine Berechtigung, diesen Kontakt als privaten Kontakt zu "
@@ -5299,25 +5203,25 @@ msgstr ""
 
 #. Somebody else modified the same object just before the actual change should be saved. Actual change is denied and user should refresh
 #. his object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:81
 msgid "An edit conflict occurred. To edit the contact please reload it."
 msgstr ""
 "Es trat ein Bearbeitungskonflikt auf. Zum Bearbeiten des Kontakts müssen Sie "
 "diesen neu laden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
 msgid "No changes found. No update required."
 msgstr "Keine Änderungen gefunden. Kein Update erforderlich. "
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:85
 msgid "Contact \"%1$s\" not found."
 msgstr "Der Kontakt  \"%1$s\" konnte nicht gefunden werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
 msgid "The image appears to be broken."
 msgstr "Das Bild scheint beschädigt zu sein."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$s, current: %3$s) and try again."
@@ -5326,7 +5230,7 @@ msgstr ""
 "den Eintrag für \"%1$s\" (Limit: %2$s, aktuell: %3$s) und versuchen Sie es "
 "erneut."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:91
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -5334,20 +5238,20 @@ msgstr ""
 "Das anzuhängende Bild ist ungültig. Es ist entweder beschädigt oder keine "
 "gültige Datei."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:93
 msgid "Required  value \"first name\" was not supplied."
 msgstr "Erforderlicher Wert \"Vorname\" wurde nicht angegeben."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:95
 msgid "Required  value \"display name\" was not supplied."
 msgstr "Erforderlicher Wert \"Anzeigename\" wurde nicht angegeben."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid "Unable to move this contact because it is marked as private."
 msgstr ""
 "Dieser Kontakt kann nicht verschoben werden, da er als privat markiert ist."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid ""
 "The name you entered is already assigned to another user. Please choose "
 "another display name."
@@ -5355,11 +5259,11 @@ msgstr ""
 "Der von Ihnen eingegebene Name ist bereits an einen anderen Benutzer "
 "vergeben. Bitte wählen Sie einen anderen Anzeigenamen"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:101
 msgid "Bad character in field \"%2$s\"."
 msgstr "Ungültiges Zeichen im Feld \"%2$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:103
 msgid ""
 "You do not have the appropriate permission to delete objects from the folder "
 "\"%1$s\"."
@@ -5367,37 +5271,37 @@ msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Löschen von Objekten "
 "aus dem Ordner \"%1$s\"."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
 msgid "Mime type is not defined."
 msgstr "Mime-Typ ist nicht definiert."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:107
 msgid "Storing a contact with private flag in a shared folder is not allowed."
 msgstr ""
 "Ein Kontakt mit Privatmarkierung (private flag) darf nicht in einem "
 "freigegebenen Ordner gespeichert werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:109
 msgid "Image size too large. Image size: %1$s. Max. size: %2$s."
 msgstr "Bild ist zu groß. Bildgröße: %1$s. Max. erlaubte Größe: %2$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid "Primary E-Mail address in system contact must not be edited."
 msgstr "Primäre E-Mail-Adresse in Systemkontakt darf nicht bearbeitet werden. "
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
 msgid "The contact %1$d is not located in folder %2$s (%3$d)."
 msgstr "Die Kontakt %1$d befindet sich nicht im Ordner %2$s (%3$d)."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid "Required  value \"last name\" was not supplied."
 msgstr "Erforderlicher Wert \"Nachname\" wurde nicht angegeben."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
 msgid "You are not allowed to modify that contact"
 msgstr "Sie haben keine Berechtigung, diesen Kontakt zu ändern."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address."
@@ -5405,7 +5309,7 @@ msgstr ""
 "Für externe Mitglieder einer Verteilerliste muss eine E-Mail-Adresse "
 "angegeben werden. Bitte fügen Sie eine gültige E-Mail-Adresse hinzu. "
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:123
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
 "The object identifier is mandatory for distribution list members referencing "
 "existing contacts."
@@ -5413,11 +5317,11 @@ msgstr ""
 "Die Objekt-ID ist eine Pflichtangabe für Mitglieder von Verteilerlisten, die "
 "auf vorhandene Kontakte verweisen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:123
 msgid "User contacts can not be deleted."
 msgstr "Benutzerkontakte können nicht gelöscht werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:125
 msgid ""
 "Number of documents attached to this contact is below zero. You can not "
 "remove any more attachments."
@@ -5425,28 +5329,28 @@ msgstr ""
 "Anzahl der an diesen Kontakt angehängten Dokumente ist weniger Null. Sie "
 "können keine weiteren Anlagen entfernen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:129
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:127
 msgid "Setting %s requires at least a contact and a value."
 msgstr ""
 "Zum Festlegen von %s wird mindestens ein Kontakt und ein Wert benötigt."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:131
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:129
 msgid "Given string %1$s could not be converted to a date."
 msgstr ""
 "Die angegebene Zeichenkette %1$s konnte nicht in ein Datum konvertiert "
 "werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:131
 msgid "Could not convert given object %s to a date when setting %s."
 msgstr ""
 "Mit der Einstellung %s konnte das angegebene Objekt %s nicht in ein Datum "
 "konvertiert werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:133
 msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "Die Abfrage des Werts %s erfordert mindestens ein ContactObject"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
 msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
@@ -5455,13 +5359,13 @@ msgstr ""
 "Das Zeichen \"%1$s\" im Feld \"%2$s\" kann nicht gespeichert werden.  Bitte "
 "entfernen Sie das Zeichen und versuchen Sie es erneut."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
 #, fuzzy
 msgid ""
 "The query \"%1$s\" contains too many patterns. Please shorten the query and "
 "try again."
 msgstr ""
-"Die Anfrage \"%1$s\" enthält zuviele Muster. Bitte kürzen Sie die Anfrage "
+"Die Anfrage \"%1$s\" enthält zu viele Muster. Bitte kürzen Sie die Anfrage "
 "und versuchen Sie es erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
@@ -7085,7 +6989,6 @@ msgstr "Nicht unterstütztes Zeichen. Bitte korrigieren Sie Ihre Eingabe."
 
 #. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
-#, fuzzy
 msgid ""
 "Due to limited capabilities of user \"%1$s\", it is not possible to apply "
 "the permission changes."
@@ -7401,21 +7304,17 @@ msgstr "Kein Zieldienst eingetragen für das Modul %1$d."
 msgid "Required  value \"identifier\" was not supplied."
 msgstr "Erforderlicher Wert \"Identifier\" wurde nicht angegeben."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
-msgid "reminder"
-msgstr "Erinnerung"
-
 #. Application 'xyz' requires following permissions:
 #. - Read reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:9
 msgid "Read reminders for appointments and tasks."
 msgstr "Termin- und Aufgabenerinnerungen lesen."
 
 #. Application 'xyz' requires following permissions:
 #. - Set or change reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:14
 msgid "Set or change reminders for appointments and tasks."
 msgstr "Termin- und Aufgabenerinnerungen festlegen oder ändern."
 
@@ -7468,7 +7367,7 @@ msgstr "Geschätzte Dauer"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:99
 #, fuzzy
 msgid "Trip meter"
-msgstr "Kilometerzähler"
+msgstr "Entfernung"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:65
 msgid "Error while inserting task."
@@ -9087,45 +8986,77 @@ msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s hat %2$d Ordner für Sie freigegeben."
 
 #. detailed body
-#. * $username ($user_email) has shared file "$filename" with you.
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
-msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
-msgstr "%1$s (%2$s) hat die Datei \"%3$s\" für Sie freigegeben."
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) hat die Datei \"%3$s\" für Sie freigegeben. Bitte klicken Sie "
+"auf die Schaltfäche unten, um die Datei anzuzeigen."
 
-#. * $username ($user_email) has shared $number_of_files files with you.
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
-msgid "%1$s (%2$s) has shared %3$s files with you."
-msgstr "%1$s (%2$s) hat %3$s Dateien mit Ihnen geteilt."
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) hat %3$s Dateien für Sie freigegeben. Bitte klicken Sie auf die "
+"Schaltfäche unten, um sie anzuzeigen."
 
-#. * $username ($user_email) has shared image "$filename" with you.
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
-msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
-msgstr "%1$s (%2$s) hat das Bild \"%3$s\" für Sie freigegeben."
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) hat das Bild \"%3$s\" für Sie freigegeben. Bitte klicken Sie auf "
+"die Schaltfäche unten, um es anzuzeigen."
 
-#. * $username ($user_email) has shared $number_of_images iamges with you.
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
-msgid "%1$s (%2$s) has shared %3$s images with you."
-msgstr "%1$s (%2$s) hat %3$s Bilder mit Ihnen geteilt."
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) hat %3$s Bilder für Sie freigegeben. Bitte klicken Sie auf die "
+"Schaltfäche unten, um sie anzuzeigen."
 
-#. * $username ($user_email) has shared item "$filename" with you.
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
-msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
-msgstr "%1$s (%2$s) hat das Objekt \"%3$s\" für Sie freigegeben."
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) hat das Objekt \"%3$s\" für Sie freigegeben. Bitte klicken Sie "
+"auf die Schaltfäche unten, um es anzuzeigen."
 
-#. * $username ($user_email) has shared $number items with you.
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
-msgid "%1$s (%2$s) has shared %3$s items with you."
-msgstr "%1$s (%2$s) hat %3$s Objekte mit Ihnen geteilt."
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) hat %3$s Objekte für Sie freigegeben. Bitte klicken Sie auf die "
+"Schaltfäche unten, um sie anzuzeigen."
 
-#. * $username ($user_email) has shared folder $folder with you.
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
-msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
-msgstr "%1$s (%2$s) hat den Ordner \"%3$s\" für Sie freigegeben."
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) hat den Ordner \"%3$s\" für Sie freigegeben. Bitte klicken Sie "
+"auf die Schaltfäche unten, um ihn anzuzeigen."
 
-#. * $username ($user_email) has shared folder $number folders with you.
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
-msgid "%1$s (%2$s) has shared %3$ folders with you."
-msgstr "%1$s (%2$s) hat %3$s Ordner mit Ihnen geteilt."
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) hat %3$ Ordner für Sie freigegeben. Bitte klicken Sie auf die "
+"Schaltfäche unten, um sie anzuzeigen."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -9187,68 +9118,54 @@ msgstr ""
 "%1$s (%2$s) hat %3$s Ordner mit Ihnen geteilt und Ihnen eine Nachricht "
 "hinterlassen:"
 
-#. please click
-#. * Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
-#, fuzzy
-msgid "Please click the button below to view it."
-msgstr "Zur Ansicht klicken Sie bitte auf die Schaltfläche unten."
-
-#. * Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
-#, fuzzy
-msgid "Please click the button below to view them."
-msgstr "Zur Ansicht klicken Sie bitte auf die Schaltfläche unten."
-
 #. button with label
-#. * View photo
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
 msgid "View image"
 msgstr "Bild anzeigen"
 
-#. * View photos
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
 msgid "View images"
 msgstr "Bilder anzeigen"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
 msgid "View file"
 msgstr "Datei anzeigen"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
 msgid "View files"
 msgstr "Dateien anzeigen"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
 msgid "View folder"
 msgstr "Ordner anzeigen"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
 msgid "View folders"
 msgstr "Ordner anzeigen"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
 msgid "View item"
 msgstr "Objekt anzeigen"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
 msgid "View items"
 msgstr "Objekte anzeigen"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
-#, fuzzy
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
 msgid "The link will expire on %1$s"
 msgstr "Der Link läuft ab am %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr ""
@@ -9261,16 +9178,16 @@ msgstr ""
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Passwort vergessen?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid "Hello,"
 msgstr "Hallo,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -9279,12 +9196,12 @@ msgstr ""
 "ein neues Passwort festlegen:"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "Set password"
 msgstr "Passwort festlegen"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -9294,12 +9211,12 @@ msgstr ""
 "neues einrichten."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
 msgid "This is an automated message, please do not reply."
 msgstr "Dies ist eine automatisierte Nachricht. Bitte nicht antworten."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
 msgid "unknown"
 msgstr "unbekannt"
 
@@ -9318,11 +9235,10 @@ msgid "folder"
 msgstr "Ordner"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
-#, fuzzy
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 msgstr ""
-"%1$s hat %2$s \"%3$s\" für Sie freigegeben. Bitte melden Sie sich zum Sehen "
-"des Objekts an."
+"%1$s hat %2$s \"%3$s\" für Sie freigegeben. Bitte melden Sie sich zum "
+"Anzeigen des Objekts an."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:70
 msgid "Files have been shared with you. Please log in to view them. "
@@ -9509,6 +9425,11 @@ msgstr ""
 msgid "You provided an invalid URL."
 msgstr "Sie haben eine ungültige URL eingegeben."
 
+#. The operation is forbidden
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
+msgid "The operation is forbidden."
+msgstr "Die Aktion ist nicht zulässig."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
 msgid "The OAuth Account to use"
@@ -9586,21 +9507,17 @@ msgstr ""
 msgid "You already have such a subscription."
 msgstr "Sie haben bereits ein solches Abonnement."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
-msgid "tasks"
-msgstr "Aufgaben"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your tasks."
 msgstr "Alle Ihre Aufgaben lesen."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete tasks."
 msgstr "Aufgaben anlegen, ändern und löschen."
 
@@ -11960,6 +11877,108 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "/servlet/dav/caldav"
+#~ msgstr "/servlet/dav/caldav"
+
+#~ msgid "/servlet/dav/dev/null"
+#~ msgstr "/servlet/dav/dev/null"
+
+#~ msgid "caldav"
+#~ msgstr "CalDAV"
+
+#~ msgid "modules"
+#~ msgstr "Module"
+
+#~ msgid "module"
+#~ msgstr "Modul"
+
+#~ msgid "modules/caldav/active"
+#~ msgstr "modules/caldav/active"
+
+#~ msgid "io.ox/caldav//active"
+#~ msgstr "io.ox/caldav//active"
+
+#~ msgid "modules/caldav/active > io.ox/caldav//active"
+#~ msgstr "modules/caldav/active > io.ox/caldav//active"
+
+#~ msgid "modules/caldav/url"
+#~ msgstr "modules/caldav/url"
+
+#~ msgid "io.ox/caldav//url"
+#~ msgstr "io.ox/caldav//url"
+
+#~ msgid "modules/caldav/url > io.ox/caldav//url"
+#~ msgstr "modules/caldav/url > io.ox/caldav//url"
+
+#~ msgid "calendar"
+#~ msgstr "Kalender"
+
+#, fuzzy
+#~ msgid "starting bundle: \"com.openexchange.carddav\""
+#~ msgstr "Bundle starten: \"com.openexchange.carddav\""
+
+#~ msgid "/servlet/dav/carddav"
+#~ msgstr "/servlet/dav/carddav"
+
+#~ msgid "carddav"
+#~ msgstr "CardDAV"
+
+#, fuzzy
+#~ msgid "stopping bundle: \"com.openexchange.carddav\""
+#~ msgstr "Bundle anhalten: \"com.openexchange.carddav\""
+
+#~ msgid "contacts"
+#~ msgstr "Kontakte"
+
+#~ msgid "identifier"
+#~ msgstr "ID"
+
+#~ msgid "com.openexchange.contact.json"
+#~ msgstr "com.openexchange.contact.json"
+
+#~ msgid "com.openexchange.contact"
+#~ msgstr "com.openexchange.contact"
+
+#, fuzzy
+#~ msgid "config"
+#~ msgstr "Konfiguration"
+
+#~ msgid "reminder"
+#~ msgstr "Erinnerung"
+
+#~ msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) hat die Datei \"%3$s\" für Sie freigegeben."
+
+#~ msgid "%1$s (%2$s) has shared %3$s files with you."
+#~ msgstr "%1$s (%2$s) hat %3$s Dateien mit Ihnen geteilt."
+
+#~ msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) hat das Bild \"%3$s\" für Sie freigegeben."
+
+#~ msgid "%1$s (%2$s) has shared %3$s images with you."
+#~ msgstr "%1$s (%2$s) hat %3$s Bilder mit Ihnen geteilt."
+
+#~ msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) hat das Objekt \"%3$s\" für Sie freigegeben."
+
+#~ msgid "%1$s (%2$s) has shared %3$s items with you."
+#~ msgstr "%1$s (%2$s) hat %3$s Objekte mit Ihnen geteilt."
+
+#~ msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) hat den Ordner \"%3$s\" für Sie freigegeben."
+
+#~ msgid "%1$s (%2$s) has shared %3$ folders with you."
+#~ msgstr "%1$s (%2$s) hat %3$s Ordner mit Ihnen geteilt."
+
+#~ msgid "Please click the button below to view it."
+#~ msgstr "Zur Ansicht klicken Sie bitte auf die Schaltfläche unten."
+
+#~ msgid "Please click the button below to view them."
+#~ msgstr "Zur Ansicht klicken Sie bitte auf die Schaltfläche unten."
+
+#~ msgid "tasks"
+#~ msgstr "Aufgaben"
 
 #~ msgid "Error while logging in to Facebook."
 #~ msgstr "Fehler beim Anmelden bei Facebook."
