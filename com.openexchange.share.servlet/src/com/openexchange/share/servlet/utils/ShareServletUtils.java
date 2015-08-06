@@ -151,7 +151,7 @@ public final class ShareServletUtils {
             /*
              * construct & send redirect
              */
-            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, loginConfig);
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, target, loginConfig);
             LOG.debug("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
             response.sendRedirect(url);
             return true;
