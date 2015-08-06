@@ -175,9 +175,9 @@ public class QueryAction extends RTAction {
         final Map<String, Object> queryActionResults = new HashMap<String, Object>();
 
         final Lock sendLock = new ReentrantLock();
+        LOG.debug("{}: Trying to lock", Thread.currentThread());
+        sendLock.lock();
         try {
-            LOG.debug("{}: Trying to lock", Thread.currentThread());
-            sendLock.lock();
             LOG.debug("{}: Got lock", Thread.currentThread());
             final Condition handled = sendLock.newCondition();
             
@@ -197,8 +197,8 @@ public class QueryAction extends RTAction {
                         customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(t));
                     }
                     customActionResults.put(CARESULT_DONE, Boolean.TRUE);
+                    sendLock.lock();
                     try {
-                        sendLock.lock();
                         handled.signal();
                     } finally {
                         sendLock.unlock();
