@@ -47,7 +47,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-file-storage-googledrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-file-storage-onedrive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-freebusy"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-guard-backend"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,open-xchange-hazelcast-upgrade324"/>
