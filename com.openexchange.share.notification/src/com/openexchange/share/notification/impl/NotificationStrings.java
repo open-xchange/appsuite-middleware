@@ -86,29 +86,29 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$d folders with you.";
 
     // detailed body
-    /** $username ($user_email) has shared file "$filename" with you. */
-    public static final String HAS_SHARED_FILE = "%1$s (%2$s) has shared the file \"%3$s\" with you.";
+    /** $username ($user_email) has shared file "$filename" with you. Please click the button below to view it. */
+    public static final String HAS_SHARED_FILE_NO_MESSAGE = "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button below to view it.";
 
-    /** $username ($user_email) has shared $number_of_files files with you. */
-    public static final String HAS_SHARED_FILES = "%1$s (%2$s) has shared %3$s files with you.";
+    /** $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them. */
+    public static final String HAS_SHARED_FILES_NO_MESSAGE = "%1$s (%2$s) has shared %3$s files with you. Please click the button below to view them.";
 
-    /** $username ($user_email) has shared image "$filename" with you. */
-    public static final String HAS_SHARED_IMAGE = "%1$s (%2$s) has shared the image \"%3$s\" with you.";
+    /** $username ($user_email) has shared image "$filename" with you. Please click the button below to view it. */
+    public static final String HAS_SHARED_IMAGE_NO_MESSAGE = "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button below to view it.";
 
-    /** $username ($user_email) has shared $number_of_images iamges with you. */
-    public static final String HAS_SHARED_IMAGES = "%1$s (%2$s) has shared %3$s images with you.";
+    /** $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them. */
+    public static final String HAS_SHARED_IMAGES_NO_IMAGES = "%1$s (%2$s) has shared %3$s images with you. Please click the button below to view them.";
 
-    /** $username ($user_email) has shared item "$filename" with you. */
-    public static final String HAS_SHARED_ITEM = "%1$s (%2$s) has shared the item \"%3$s\" with you.";
+    /** $username ($user_email) has shared item "$filename" with you. Please click the button below to view it. */
+    public static final String HAS_SHARED_ITEM_NO_MESSAGE = "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button below to view it.";
 
-    /** $username ($user_email) has shared $number items with you. */
-    public static final String HAS_SHARED_ITEMS = "%1$s (%2$s) has shared %3$s items with you.";
+    /** $username ($user_email) has shared $number items with you. Please click the button below to view them. */
+    public static final String HAS_SHARED_ITEMS_NO_MESSAGE = "%1$s (%2$s) has shared %3$s items with you. Please click the button below to view them.";
 
-    /** $username ($user_email) has shared folder $folder with you. */
-    public static final String HAS_SHARED_FOLDER = "%1$s (%2$s) has shared the folder \"%3$s\" with you.";
+    /** $username ($user_email) has shared folder $folder with you. Please click the button below to view it. */
+    public static final String HAS_SHARED_FOLDER_NO_MESSAGE = "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button below to view it.";
 
-    /** $username ($user_email) has shared folder $number folders with you. */
-    public static final String HAS_SHARED_FOLDERS = "%1$s (%2$s) has shared %3$ folders with you.";
+    /** $username ($user_email) has shared folder $number folders with you. Please click the button below to view them. */
+    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE = "%1$s (%2$s) has shared %3$ folders with you. Please click the button below to view them.";
 
 
     /** $username ($user_email) has shared file "$filename" with you and left you a message: */
@@ -134,19 +134,12 @@ public class NotificationStrings implements LocalizableStrings {
 
     /** $username ($user_email) has shared $number_of_folder items with you. */
     public static final String HAS_SHARED_FOLDERS_AND_MESSAGE = "%1$s (%2$s) has shared %3$d folders with you and left you a message:";
-
-    //please click
-    /** Please click the button below to view it. */
-    public static final String PLEASE_CLICK_IT = "Please click the button below to view it.";
-
-    /** Please click the button below to view them. */
-    public static final String PLEASE_CLICK_THEM = "Please click the button below to view them.";
-
+    
     // button with label
-    /** View photo */
+    /** View image */
     public static final String VIEW_IMAGE = "View image";
 
-    /** View photos */
+    /** View images */
     public static final String VIEW_IMAGES = "View images";
 
     /** View file */
