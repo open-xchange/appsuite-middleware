@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 
@@ -84,17 +85,34 @@ public class ShareRedirectUtils {
      * @param session The session
      * @param user The user
      * @param share The share
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    public static String getWebSessionRedirectURL(Session session, User user, GuestShare share, LoginConfiguration loginConfig) {
+    public static String getWebSessionRedirectURL(Session session, User user, GuestShare share, ShareTarget target, LoginConfiguration loginConfig) {
         /*
-         * prepare url
+         * evaluate link destination based on share or target
+         */
+        int module;
+        String folder;
+        String item;
+        if (null != target) {
+            module = target.getModule();
+            folder = target.getFolder();
+            item = target.getItem();
+        } else if (share.isMultiTarget()) {
+            module = share.getCommonModule();
+            folder = share.getCommonFolder();
+            item = null;
+        } else {
+            module = share.getSingleTarget().getModule();
+            folder = share.getSingleTarget().getFolder();
+            item = share.getSingleTarget().getItem();
+        }
+        /*
+         * prepare url, appending placeholders for link destination parameters
          */
         StringBuilder stringBuilder = new StringBuilder("[uiwebpath]#!&session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
-        int module = share.getCommonModule();
-        String folder = share.getCommonFolder();
-        String item = null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
         if (0 != module) {
             stringBuilder.append("&m=[module]");
         }
@@ -104,10 +122,10 @@ public class ShareRedirectUtils {
         if (null != item) {
             stringBuilder.append("&i=[item]");
         }
-        String redirectLink = stringBuilder.toString();
         /*
-         * replace templates
+         * replace templates & return redirect link
          */
+        String redirectLink = stringBuilder.toString();
         redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(getLoginLink()));
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));

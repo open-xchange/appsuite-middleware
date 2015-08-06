@@ -150,4 +150,12 @@ public interface DriveSession {
      */
     List<FilePattern> getFileExclusions();
 
+    /**
+     * Gets a value indicating whether this drive session makes use of inline metadata synchronization via <code>.drive-meta</code> files
+     * or not, based on the requested API version.
+     *
+     * @return <code>true</code> if drive metadata is synchronized, <code>false</code>, otherwise
+     */
+    boolean useDriveMeta();
+
 }

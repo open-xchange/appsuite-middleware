@@ -482,20 +482,7 @@ public class RecurringCalculation {
 
         final boolean boundaries = hasBoundaries();
 
-        // TODO: Remove on failure
-        // ///////////////////
-//        // MARKER-START
-//        if (range_start != 0) {
-//            final long dayOffset = recurrence_calculator * Constants.MILLI_DAY + Constants.MILLI_DAY;
-//            while ((calc.getTimeInMillis() + dayOffset) < range_start) {
-//                start_of_series += recurring_interval*Constants.MILLI_DAY;
-//                normalized_start_of_series += recurring_interval*Constants.MILLI_DAY;
-//                calc.add(Calendar.DAY_OF_MONTH, recurring_interval);
-//            }
-//        }
-        // MARKER-END
-        // ///////////////////
-
+        int hoursJumped = 0; // This is to detect jumps in the time. Happens during timezone offset transitions.
         while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
@@ -514,7 +501,14 @@ public class RecurringCalculation {
             }
             start_of_series += recurring_interval*Constants.MILLI_DAY;
             normalized_start_of_series += recurring_interval*Constants.MILLI_DAY;
+            int tmp = calc.get(Calendar.HOUR_OF_DAY);
             calc.add(Calendar.DAY_OF_MONTH, recurring_interval);
+            if (hoursJumped != 0) {
+                calc.add(Calendar.HOUR_OF_DAY, -hoursJumped);
+                hoursJumped = 0;
+            } else {
+                hoursJumped = calc.get(Calendar.HOUR_OF_DAY) - tmp;
+            }
         }
         return rs;
     }
@@ -595,24 +589,6 @@ public class RecurringCalculation {
         }
 
         final boolean boundaries = hasBoundaries();
-
-        // TODO: Remove on failure
-        // ///////////////////
-        // MARKER-START
-//        if (range_start != 0) {
-//            boolean changed = false;
-//            while (calc_weekly.getTimeInMillis() + Constants.MILLI_WEEK < range_start) {
-//                calc_weekly.add(Calendar.WEEK_OF_YEAR, recurring_interval);
-//                changed = true;
-//            }
-//            if (changed) {
-//                start_of_series = calc_weekly.getTimeInMillis();
-//                normalized_start_of_series = start_of_series;
-//                calc.setTimeInMillis(start_of_series);
-//            }
-//        }
-        // MARKER-END
-        // ///////////////////
 
         loop: while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();

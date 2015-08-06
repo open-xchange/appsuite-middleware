@@ -23,7 +23,7 @@ default:
     # loginLocation: 'http://my.login-page.tld'
 
     # Defines basic styling for notification mails. If you
-    # override these you must all mandatory elements!
+    # override these you must specify all mandatory elements!
     notificationMails:
         # Call to actions are often shown as buttons. Their
         # appearance can be configured in terms of font color,

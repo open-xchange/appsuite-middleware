@@ -98,20 +98,23 @@ public class IDManager extends AbstractRealtimeJanitor {
             locksPerId = (meantime != null) ? meantime : locksPerId;
         }
 
+        OwnerAwareReentrantLock lock = null;
         synchronized (locksPerId) {
             if (locksPerId.isValid()) {
-                OwnerAwareReentrantLock lock = locksPerId.get(scope);
+                lock = locksPerId.get(scope);
                 if (lock == null) {
                     lock = new OwnerAwareReentrantLock();
-                    OwnerAwareReentrantLock l = locksPerId.putIfAbsent(scope, lock);
-                    lock = (l != null) ? l : lock;
+                    locksPerId.put(scope, lock);
                 }
-                return lock;
             }
         }
 
+        if (lock != null) {
+            return lock;
+        }
+
         // Retry w/o holding monitor...
-        return lock(id, scope);
+        return getLock(id, scope);
     }
 
     /**
@@ -121,7 +124,7 @@ public class IDManager extends AbstractRealtimeJanitor {
      * @param scope The scope to be used for the {@link Lock}
      * @return The acquired "scope"-wide lock for a given {@link ID}.
      */
-    public OwnerAwareReentrantLock lock(ID id, String scope) {
+    public void lock(ID id, String scope) {
         LockMap locksPerId = LOCKS.get(id);
         if (locksPerId == null) {
             locksPerId = new LockMap();
@@ -129,21 +132,25 @@ public class IDManager extends AbstractRealtimeJanitor {
             locksPerId = (meantime != null) ? meantime : locksPerId;
         }
 
+        OwnerAwareReentrantLock lock = null;
         synchronized (locksPerId) {
             if (locksPerId.isValid()) {
-                OwnerAwareReentrantLock lock = locksPerId.get(scope);
+                lock = locksPerId.get(scope);
                 if (lock == null) {
                     lock = new OwnerAwareReentrantLock();
-                    OwnerAwareReentrantLock l = locksPerId.putIfAbsent(scope, lock);
-                    lock = (l != null) ? l : lock;
+                    locksPerId.put(scope, lock);
                 }
-                lock.lock();
-                return lock;
             }
         }
 
+        // Acquire lock w/o holding monitor
+        if (null != lock) {
+            lock.lock();
+            return;
+        }
+
         // Retry w/o holding monitor...
-        return lock(id, scope);
+        lock(id, scope);
     }
 
     /**
@@ -159,18 +166,21 @@ public class IDManager extends AbstractRealtimeJanitor {
             return;
         }
 
+        OwnerAwareReentrantLock lock = null;
         synchronized (locksPerId) {
-            OwnerAwareReentrantLock lock = locksPerId.get(scope);
-            if (lock != null) {
-                if (lock.isHeldByCurrentThread()) {
-                    lock.unlock();
-                } else {
-                    Thread owner = lock.getOwner();
-                    if (null != owner) {
-                        Throwable t = new FastThrowable();
-                        t.setStackTrace(owner.getStackTrace());
-                        LOG.error("Tried to unlock, but is no owner. Current owner is {}.", owner.getName(), t);
-                    }
+            lock = locksPerId.get(scope);
+        }
+
+        // Unlock w/o holding monitor
+        if (lock != null) {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            } else {
+                Thread owner = lock.getOwner();
+                if (null != owner) {
+                    Throwable t = new FastThrowable();
+                    t.setStackTrace(owner.getStackTrace());
+                    LOG.error("Tried to unlock, but is no owner. Current owner is {}.", owner.getName(), t);
                 }
             }
         }

@@ -1202,7 +1202,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * create copy in target storage
          */
-        File fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
+        DefaultFile fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
         if (update != null) {
             fileMetadata.copyFrom(update, fields.toArray(new File.Field[fields.size()]));
         }
@@ -1213,6 +1213,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
+        fileMetadata.setVersion(null);
 
         if (newData == null) {
             saveFileMetadata(fileMetadata, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);

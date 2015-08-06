@@ -76,7 +76,8 @@ public class Bug22094Test extends CalDAVTest {
 		/*
 		 * create target folder for move on server
 		 */
-		FolderObject subfolder = super.createFolder("move test");
+		FolderObject subfolder = super.createFolder("move test" + System.currentTimeMillis());
+		super.rememberForCleanUp(subfolder);
 		String subfolderID = Integer.toString(subfolder.getObjectID());
 		/*
 		 * create appointment in default folder on client

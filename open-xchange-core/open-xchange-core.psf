@@ -71,6 +71,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.search"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.groupware.settings.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.groupware.tools"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.guard.api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.hazelcast.configuration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.hazelcast.serialization"/>

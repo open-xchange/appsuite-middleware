@@ -77,7 +77,6 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
@@ -237,15 +236,6 @@ public class CaldavActivator extends HousekeepingActivator {
         }
         CalDAVServiceLookup.set(null);
         super.stopBundle();
-    }
-
-    private static final class OAuthStrings implements LocalizableStrings {
-
-        // Application 'xyz' requires following permissions:
-        //  - Synchronize your calendars and appointments.
-        //  - ...
-        public static final String SYNC_CALENDAR = "Synchronize your calendars and appointments.";
-
     }
 
 }

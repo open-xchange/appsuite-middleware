@@ -56,6 +56,8 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -105,7 +107,9 @@ public class DriveActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
             IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class,
-            UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class };
+            UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class,
+            ContactService.class, ContactUserStorage.class
+        };
     }
 
     @Override
