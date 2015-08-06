@@ -90,17 +90,13 @@ public class LockMap {
     }
 
     /**
-     * Performs a put-if-absent operation.
+     * Performs a put operation.
      *
      * @param scope The scope
      * @param newLock The new lock to insert (if absent)
-     * @return The previous lock associated with the specified scope, or <code>null</code> if there was no lock for the scope
      */
-    public OwnerAwareReentrantLock putIfAbsent(String scope, OwnerAwareReentrantLock newLock) {
-        if (locks.containsKey(scope)) {
-            return locks.get(scope);
-        }
-        return locks.put(scope, newLock);
+    public void put(String scope, OwnerAwareReentrantLock newLock) {
+        locks.put(scope, newLock);
     }
 
     /**
