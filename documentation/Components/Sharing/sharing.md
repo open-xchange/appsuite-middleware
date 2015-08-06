@@ -78,9 +78,35 @@ __Administrator Notes:__
 
 ### Capabilities
 
-Capabilities for guest user account may be configured in different modes.
+Guest users always have the `guest` capability set. Besides they are generally configured with a limited permission set, that allows them just to work with their shared items. That permission set includes:
 
-tbd.
+| Permission | Capability | Details |
+|------------|------------|---------|
+|` deniedportal` | | No `portal` capability |
+| `editpublicfolders` | `edit_public_folders` ||
+| `readcreatesharedfolders` | `read_create_shared_folders` ||
+| `editpassword` | `edit_password` | Only for invited guests, not links |
+
+
+Additionally for every module the guest is having shared items in, the according module permission is granted, e.g. a shared drive folder results in permission `infostore` and the according capability. Guest users are never allowed to share folders or items on their own, i.e. the capabilities `share_links` and `invite_guests` can never be set.
+
+__Administrator Notes:__
+
+This limited capability set can be extended by configuration. Currently three modes are supported:
+
+| Mode | Description |
+|------|-------------|
+| deny_all | No further capabilities are applied to guest users, except ones that have been explicitly set for the guest user via `changeuser --capabilities-to-add`. |
+| static | A static list of capabilities is applied to guest users via the `com.openexchange.share.staticGuestCapabilities` property. Additionally capabilities that have been explicitly set for the guest user via `changeuser --capabilities-to-add` are applied. |
+| inherit | All capabilities of the user who "created" the guest, i.e. created the link or initially invited somebody, are applied to the guest user. Additionally capabilities that have been explicitly set for the guest user via `changeuser --capabilities-to-add` are applied. |
+
+The mode can be configured via the `com.openexchange.share.guestCapabilityMode` property in `share.properties`. This property is config-cascade capable, so it can for example be overridden for certain sets of contexts. The same applies to the `com.openexchange.share.staticGuestCapabilities` property.
+
+Due to this configuration mechanism it is possible to increase the user experience for guests and even allow some real collaboration. As an example one could apply the following configuration to allow guests to see preview images of files and edit shared documents with OX Text and OX Spreadsheet:
+
+    com.openexchange.share.guestCapabilityMode = static
+    com.openexchange.share.staticGuestCapabilities = document_preview, text, spreadsheet
+
 
 ### Anonymous Guest Users
 
@@ -232,8 +258,13 @@ __Administrator Notes:__
 
 ## Share Notifications
 
-tbd. 
+Along with sharing as a whole, a new notification feature is introduced, that notifies guest users and optionally also internal users about newly created shares or links via email. For some of those notifications it is necessary to configure a special mail transport account that is used to deliver system messages or is used if the user who triggers a message has no configured webmail account.
 
+__Administrator Notes:__
+
+* The special transport account is configured in `noreply.properties`. All properties therein are config-cascade capable, so their values can be sensitive to the current user or context.
+* It is possible to disable the notification of internal users about shared folders or items at all by setting `com.openexchange.share.notifyInternal` in `share.properties` to `false`.
+* The layout of notifications mails can be changed via `as-config.yml`. All available properties are defined and explained in `as-config-defaults.yml`.
 
 ## API Access
 
