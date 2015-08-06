@@ -60,7 +60,6 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -135,15 +134,6 @@ public class CarddavActivator extends HousekeepingActivator {
             httpService.unregister("/servlet/dav/carddav");
         }
         super.stopBundle();
-    }
-
-    private static final class OAuthStrings implements LocalizableStrings {
-
-        // Application 'xyz' requires following permissions:
-        //  - Synchronize your address books and contacts.
-        //  - ...
-        public static final String SYNC_CONTACTS = "Synchronize your address books and contacts.";
-
     }
 
 }

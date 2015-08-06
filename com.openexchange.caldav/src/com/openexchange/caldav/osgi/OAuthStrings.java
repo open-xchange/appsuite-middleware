@@ -47,17 +47,13 @@
  *
  */
 
+
 package com.openexchange.caldav.osgi;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-/**
- * i18n strings.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
- */
-public final class OAuthStrings implements LocalizableStrings {
+
+final class OAuthStrings implements LocalizableStrings {
 
     // Application 'xyz' requires following permissions:
     //  - Synchronize your calendars and appointments.
