@@ -76,7 +76,8 @@ public class DistListTest extends AbstractManagedContactTest {
     	 * create empty distribution list
     	 */
         Contact distributionList = super.generateContact("List");
-    	distributionList.setDistributionList(new DistributionListEntryObject[0]);
+    	distributionList.setDistributionList(new DistributionListEntryObject[]{new DistributionListEntryObject("dn", "mail@example.invalid", DistributionListEntryObject.INDEPENDENT)});
+    	manager.setFailOnError(true);
     	distributionList = manager.newAction(distributionList);
     	/*
     	 * verify distribution list
