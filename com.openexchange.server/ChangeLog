@@ -1,3 +1,7 @@
+* 2015-08-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39841/39451: Properly check connectivity status prior to passing IMAPStore instance back into pool
+
 * 2015-07-27 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 39862: Null guard
