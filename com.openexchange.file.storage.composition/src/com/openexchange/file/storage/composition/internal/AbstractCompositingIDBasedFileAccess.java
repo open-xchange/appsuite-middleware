@@ -1629,13 +1629,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (1 < sourceFile.getNumberOfVersions()) {
-            FileStorageFileAccess targetFileAccess = getFileAccess(targetFolderID);
-            if (false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.FILE_VERSIONS)) {
-                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
-                FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
-                warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
-                    getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
-            }
+            FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+            FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
+            warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
+                getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (null != sourceFile.getObjectPermissions() && 0 < sourceFile.getObjectPermissions().size()) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());

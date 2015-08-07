@@ -260,7 +260,7 @@ public class StorageTransfer {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_CATEGORIES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
-        if (1 < sourceFile.getNumberOfVersions() && false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.FILE_VERSIONS)) {
+        if (1 < sourceFile.getNumberOfVersions()) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
