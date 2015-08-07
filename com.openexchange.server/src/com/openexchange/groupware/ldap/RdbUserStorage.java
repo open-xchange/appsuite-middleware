@@ -274,34 +274,42 @@ public class RdbUserStorage extends UserStorage {
     public void deleteUser(Connection con, Context context, int userId) throws OXException {
         try {
             /*
-             * fire delete event beforehand
-             */
-            DeleteEvent deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
-            DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
-            /*
-             * fetch data to copy into del_user table
+             * fetch required data of deleted user
              */
             int contactId;
             int uidNumber;
             int gidNumber;
             int guestCreatedBy;
+            String mail;
             ResultSet result = null;
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("SELECT contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
+                stmt = con.prepareStatement("SELECT mail,contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
                     throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(context.getContextId()));
                 }
-                contactId = result.getInt(1);
-                uidNumber = result.getInt(2);
-                gidNumber = result.getInt(3);
-                guestCreatedBy = result.getInt(4);
+                mail = result.getString(1);
+                contactId = result.getInt(2);
+                uidNumber = result.getInt(3);
+                gidNumber = result.getInt(4);
+                guestCreatedBy = result.getInt(5);
             } finally {
                 closeSQLStuff(result, stmt);
             }
+            /*
+             * prpeare & fire delete event
+             */
+            DeleteEvent deleteEvent;
+            if (0 < guestCreatedBy) {
+                int subType = Strings.isEmpty(mail) ? DeleteEvent.SUBTYPE_ANONYMOUS_GUEST : DeleteEvent.SUBTYPE_INVITED_GUEST;
+                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context);
+            } else {
+                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
+            }
+            DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
             /*
              * insert tombstone record into del_user table
              */
