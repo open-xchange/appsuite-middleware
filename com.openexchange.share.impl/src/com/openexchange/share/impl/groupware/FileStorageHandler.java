@@ -63,10 +63,7 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.infostore.PermissionHelper;
-import com.openexchange.groupware.container.EffectiveObjectPermissions;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -200,18 +197,7 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean canShare(TargetProxy proxy, HandlerParameters parameters) {
-        File file = ((FileTargetProxy) proxy).getFile();
-        List<ObjectPermission> objectPermissions = PermissionHelper.getObjectPermissions(file.getObjectPermissions());
-        if (objectPermissions == null || objectPermissions.isEmpty()) {
-            return false;
-        }
-
-        ObjectPermission objectPermission = EffectiveObjectPermissions.find(parameters.getUser(), objectPermissions);
-        if (objectPermission == null) {
-            return false;
-        }
-
-        return objectPermission.canWrite();
+        return ((FileTargetProxy) proxy).getFile().isShareable();
     }
 
     @Override

@@ -1,3 +1,7 @@
+* 2015-08-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40267: Evaluate 'shareable' flag of file target proxy during permission checks
+
 * 2015-08-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 39909: Force immediate shut-down if Hazelcast fails to stop gracefully
