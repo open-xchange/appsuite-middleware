@@ -47,39 +47,47 @@
  *
  */
 
-package com.openexchange.guard;
-
-import java.util.Map;
-import org.json.JSONValue;
-import com.openexchange.exception.OXException;
+package com.openexchange.guard.api;
 
 /**
- * {@link GuardApi} - Provides HTTP-based access to the configured OX Guard end-point.
+ * {@link Header} - A header to set for the request to OX Guard end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v2.0.0
  */
-public interface GuardApi {
+public class Header {
+
+    private final String name;
+    private final String value;
 
     /**
-     * Performs a GET request to the Guard end-point using given parameters.
+     * Initializes a new {@link Header}.
      *
-     * @param parameters The parameters
-     * @param clazz The return type
-     * @throws OXException If GET fails
-     * @see GuardApiUtils#mapFor(String...)
+     * @param name The name
+     * @param value The value
      */
-    <R> R doCallGet(Map<String, String> parameters, Class<? extends R> clazz) throws OXException;
+    public Header(String name, String value) {
+        super();
+        this.name = name;
+        this.value = value;
+    }
 
     /**
-     * Performs a PUT request to the Guard end-point using given parameters and body.
+     * Gets the name
      *
-     * @param parameters The parameters
-     * @param jsonBody The JSON body to pass
-     * @param clazz The return type
-     * @throws OXException If PUT fails
-     * @see GuardApiUtils#mapFor(String...)
+     * @return The name
      */
-    <R> R doCallPut(Map<String, String> parameters, JSONValue jsonBody, Class<? extends R> clazz) throws OXException;
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
+    public String getValue() {
+        return value;
+    }
 
 }

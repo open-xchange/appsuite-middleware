@@ -76,6 +76,8 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -357,7 +359,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
 
         final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
@@ -379,8 +380,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);
 
         verifyAccount();
@@ -831,7 +830,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         if (files != null) {
             return files;
         }
-        return files = fileAccess.getSim(FileStorageFileAccess.class);
+        return files = fileAccess.getSim(FileStorageFileAccess.class, FileStorageVersionedFileAccess.class, FileStorageLockedFileAccess.class);
     }
 
     /*

@@ -47,58 +47,47 @@
  *
  */
 
-package com.openexchange.guard.internal;
-
-import java.util.concurrent.atomic.AtomicReference;
+package com.openexchange.guard.api;
 
 /**
- * {@link AbstractGuardAccess} - Access to OX Guard API.
+ * {@link Cookie} - A cookie to set for the request to OX Guard end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v2.0.0
  */
-public abstract class AbstractGuardAccess {
+public class Cookie {
 
-    private static final AtomicReference<GuardApiImpl> API_REF = new AtomicReference<GuardApiImpl>();
+    private final String name;
+    private final String value;
 
     /**
-     * Sets the {@link GuardApiImpl} reference
+     * Initializes a new {@link Cookie}.
      *
-     * @param guardApi The instance to set
+     * @param name The name
+     * @param value The value
      */
-    public static void setGuardApi(GuardApiImpl guardApi) {
-        API_REF.set(guardApi);
-    }
-
-    /**
-     * Sets the {@link GuardApiImpl} reference
-     *
-     * @param guardApi The instance to set
-     */
-    public static GuardApiImpl unsetGuardApi() {
-        GuardApiImpl guardApi;
-        do {
-            guardApi = API_REF.get();
-            if (null == guardApi) {
-                return null;
-            }
-        } while (!API_REF.compareAndSet(guardApi, null));
-        return guardApi;
-    }
-
-    /**
-     * Initializes a new {@link AbstractGuardAccess}.
-     */
-    protected AbstractGuardAccess() {
+    public Cookie(String name, String value) {
         super();
+        this.name = name;
+        this.value = value;
     }
 
     /**
-     * Gets the Guard API access.
+     * Gets the name
      *
-     * @return The Guard API access
+     * @return The name
      */
-    protected static GuardApiImpl getGuardApi() {
-        return API_REF.get();
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
+    public String getValue() {
+        return value;
     }
 
 }

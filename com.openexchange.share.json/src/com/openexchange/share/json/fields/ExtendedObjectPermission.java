@@ -56,6 +56,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
 
 /**

@@ -47,45 +47,99 @@
  *
  */
 
-package com.openexchange.guard;
+package com.openexchange.realtime.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * {@link GuardApiUtils}
+ * {@link LockMap} - A map for {@link OwnerAwareReentrantLock} instances.
+ * <p>
+ * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+ * <b>NOTE</b>:<br>
+ * This map is <b>not</b> thread-safe!.
+ * </div>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class GuardApiUtils {
+@NotThreadSafe
+public class LockMap {
+
+    private final Map<String, OwnerAwareReentrantLock> locks;
+    private boolean deprecated;
 
     /**
-     * Initializes a new {@link GuardApiUtils}.
+     * Initializes a new {@link LockMap}.
      */
-    private GuardApiUtils() {
+    public LockMap() {
         super();
+        locks = new HashMap<String, OwnerAwareReentrantLock>(16, 0.9F);
+        deprecated = false;
     }
 
     /**
-     * Gets a map for specified arguments.
+     * Gets the lock for given scope.
      *
-     * @param args The arguments
-     * @return The resulting map
+     * @param scope The scope
+     * @return The associated lock or <code>null</code>
      */
-    public static Map<String, String> mapFor(String... args) {
-        if (null == args) {
-            return null;
+    public OwnerAwareReentrantLock get(String scope) {
+        return locks.get(scope);
+    }
+
+    /**
+     * Performs a put-if-absent operation.
+     *
+     * @param scope The scope
+     * @param newLock The new lock to insert (if absent)
+     * @return The previous lock associated with the specified scope, or <code>null</code> if there was no lock for the scope
+     */
+    public OwnerAwareReentrantLock putIfAbsent(String scope, OwnerAwareReentrantLock newLock) {
+        if (locks.containsKey(scope)) {
+            return locks.get(scope);
         }
-        int length = args.length;
-        if (0 == length || (length % 2) != 0) {
-            return null;
+        return locks.put(scope, newLock);
+    }
+
+    /**
+     * Checks if a contained lock has still an owner assigned.
+     *
+     * @return <code>true</code> if a contained lock has still an owner assigned; otherwise <code>false</code>
+     */
+    public boolean hasOwners() {
+        for (OwnerAwareReentrantLock lock : locks.values()) {
+            if (lock.getOwner() != null) {
+                return true;
+            }
         }
-        Map<String, String> map = new HashMap<String, String>(length >> 1);
-        for (int i = 0; i < length; i+=2) {
-            map.put(args[i], args[i+1]);
-        }
-        return map;
+        return false;
+    }
+
+    /**
+     * Checks if this map is valid (not marked as deprecated before)
+     *
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    public boolean isValid() {
+        return !deprecated;
+    }
+
+    /**
+     * Marks this map as deprecated
+     */
+    public void markDeprecated() {
+        this.deprecated = true;
+    }
+
+    /**
+     * Gets the size
+     *
+     * @return The size
+     */
+    public int size() {
+        return locks.size();
     }
 
 }

@@ -98,6 +98,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link DriveStorage}
@@ -161,6 +162,10 @@ public class DriveStorage {
             getFileAccess().finish();
             getFolderAccess().finish();
         }
+    }
+
+    public FolderID getRootFolderID() {
+        return rootFolderID;
     }
 
     /**
@@ -513,7 +518,7 @@ public class DriveStorage {
             return Collections.emptyMap();
         }
         Map<String, Long> storedSequenceNumbers = getFileAccess().getSequenceNumbers(folderIDs);
-        if (3 <= session.getDriveSession().getApiVersion()) {
+        if (session.getDriveSession().useDriveMeta()) {
             for (String folderID : folderIDs) {
                 Long storedSequenceNumber = storedSequenceNumbers.get(folderID);
                 String path = getPath(folderID);
@@ -530,7 +535,7 @@ public class DriveStorage {
     }
 
     public InputStream getDocument(File file) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveMetadata.class.isInstance(file)) {
+        if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(file)) {
             return ((DriveMetadata) file).getDocument();
         } else {
             return getFileAccess().getDocument(file.getId(), file.getVersion());
@@ -588,7 +593,7 @@ public class DriveStorage {
                 session.getServerSession().getUserId(), session.getServerSession().getContextId());
         }
         List<File> files = new ArrayList<File>();
-        if (3 <= session.getDriveSession().getApiVersion()) {
+        if (session.getDriveSession().useDriveMeta()) {
             files.add(new DriveMetadata(session, folder));
         }
         if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
@@ -650,7 +655,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(name)) {
+        if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(name)) {
             return new DriveMetadata(session, getFolder(path, false));
         }
         String folderID = getFolderID(path);
@@ -662,6 +667,62 @@ public class DriveStorage {
             files = FileNameFilter.byName(name, normalizeFileNames).findAll(getFilesInFolder(session.getStorage().getFolderID(path)));
         }
         return selectFile(files, name);
+    }
+
+    /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity, and are located below the root folder.
+     *
+     * @param fields The metadata to fetch
+     * @return The shared files, or an empty list if there are none
+     */
+    public List<File> getSharedFiles(List<Field> fields) throws OXException {
+        if (false == supports(rootFolderID, FileStorageCapability.OBJECT_PERMISSIONS)) {
+            return Collections.emptyList();
+        }
+        List<File> files = new ArrayList<File>();
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = getFileAccess().getUserSharedDocuments(fields, Field.FILENAME, SortDirection.DEFAULT);
+            while (searchIterator.hasNext()) {
+                File file = searchIterator.next();
+                /*
+                 * only include synchronized files, i.e. files below the root path
+                 */
+                if (null != getPath(file.getFolderId())) {
+                    files.add(file);
+                }
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return files;
+    }
+
+    /**
+     * Gets all folders that are considered as "shared" by the user, i.e. those folders of the user that have been shared to at least
+     * one other entity, and are located below the root folder.
+     *
+     * @return The shared folders, or an empty list if there are none
+     */
+    public List<FileStorageFolder> getSharedFolders() throws OXException {
+        Set<String> capabilities = getRootFolder().getCapabilities();
+        if (null == capabilities || false == capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS)) {
+            return Collections.emptyList();
+        }
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>();
+        FileStorageFolder[] sharedFolders = getFolderAccess().getUserSharedFolders();
+        if (null != sharedFolders && 0 < sharedFolders.length) {
+            for (FileStorageFolder folder : sharedFolders) {
+                /*
+                 * only include synchronized folders, i.e. folders below the root path
+                 */
+                if (null != getPath(folder.getId())) {
+                    folders.add(folder);
+                }
+            }
+        }
+        return folders;
     }
 
     /**

@@ -118,7 +118,7 @@ public class DownloadHelper {
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveMetadata.class.isInstance(file)) {
+        if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(file)) {
             /*
              * get .drive-meta data
              */

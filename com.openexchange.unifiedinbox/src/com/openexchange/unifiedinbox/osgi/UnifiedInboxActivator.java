@@ -72,6 +72,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.unifiedinbox.Enabled;
 import com.openexchange.unifiedinbox.UnifiedInboxMessageStorage;
 import com.openexchange.unifiedinbox.UnifiedInboxProvider;
@@ -148,7 +150,8 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
                     @Override
                     public boolean isEnabled(String capability, Session session) throws OXException {
                         if (sCapability.equals(capability)) {
-                            if (session.getUserId() <= 0) {
+                            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                            if (serverSession.isAnonymous() || !serverSession.getUserPermissionBits().hasWebMail()) {
                                 return false;
                             }
 

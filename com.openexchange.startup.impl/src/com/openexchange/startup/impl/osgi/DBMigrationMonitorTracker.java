@@ -71,7 +71,7 @@ import com.openexchange.startup.impl.SignalStartedServiceImpl;
 public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMigrationMonitorService, DBMigrationMonitorService> {
 
     /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationMonitorTracker.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("StartUp-Logger");
 
     private final BundleContext context;
     private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;

@@ -47,87 +47,80 @@
  *
  */
 
-package com.openexchange.guard.transport.listener;
+package com.openexchange.guard.api;
 
-import static com.openexchange.guard.GuardApiUtils.mapFor;
-import javax.mail.internet.MimeMessage;
-import com.openexchange.exception.OXException;
-import com.openexchange.guard.internal.AbstractGuardAccess;
-import com.openexchange.guard.internal.GuardApiImpl;
-import com.openexchange.mail.transport.listener.MailTransportListener;
-import com.openexchange.mail.transport.listener.Reply;
-import com.openexchange.mail.transport.listener.Result;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link GuardTransportListener}
+ * {@link GuardApis} - Utility class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v2.0.0
  */
-public class GuardTransportListener extends AbstractGuardAccess implements MailTransportListener {
-
-    private static final String HEADER_GUARD = "X-OX-Guard-Marker";
+public class GuardApis {
 
     /**
-     * Initializes a new {@link GuardTransportListener}.
+     * Initializes a new {@link GuardApis}.
      */
-    public GuardTransportListener() {
+    private GuardApis() {
         super();
     }
 
-    @Override
-    public Result onBeforeMessageTransport(MimeMessage message, Session session) throws OXException {
-        if (!"true".equalsIgnoreCase(getHeaderSafe(message))) {
-            return new GuardResult(message, Reply.NEUTRAL);
-        }
-
-        GuardApiImpl guardApi = getGuardApi();
-        if (null == guardApi) {
-            // Guard end point not available
-            return new GuardResult(message, Reply.NEUTRAL);
-        }
-
-        MimeMessage processedMessage = guardApi.processMimeMessage(message, mapFor("action", "process_message", "user", Integer.toString(session.getUserId()), "context", Integer.toString(session.getContextId())));
-        return new GuardResult(processedMessage, Reply.ACCEPT);
-    }
-
-    private String getHeaderSafe(MimeMessage message) {
-        try {
-            return message.getHeader(HEADER_GUARD, null);
-        } catch (Exception e) {
+    /**
+     * Gets a map for specified arguments.
+     *
+     * @param args The arguments
+     * @return The resulting map
+     */
+    public static Map<String, String> mapFor(String... args) {
+        if (null == args) {
             return null;
         }
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+        Map<String, String> map = new HashMap<String, String>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
+        }
+        return map;
     }
 
-    @Override
-    public void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException {
-        // Nothing to do
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
-    private static class GuardResult implements Result {
-
-        private final MimeMessage mimeMessage;
-        private final Reply reply;
-
-        GuardResult(MimeMessage mimeMessage, Reply reply) {
-            super();
-            this.mimeMessage = mimeMessage;
-            this.reply = reply;
+    /**
+     * Extracts the user-authenticating cookies from given HTTP request using associated session
+     *
+     * @param request The HTTP request
+     * @param session The associated session
+     * @return The extracted cookies or an empty list
+     */
+    public static List<Cookie> extractCookiesFrom(HttpServletRequest request, Session session) {
+        javax.servlet.http.Cookie[] cookies = request.getCookies();
+        if (null == cookies) {
+            return Collections.emptyList();
         }
 
-        @Override
-        public Reply getReply() {
-            return reply;
+        List<Cookie> extractedCookies = new LinkedList<Cookie>();
+        for (javax.servlet.http.Cookie cookie : cookies) {
+            String name = cookie.getName();
+            if (name.startsWith(LoginServlet.SECRET_PREFIX)) {
+                if (cookie.getValue().equals(session.getSecret())) {
+                    extractedCookies.add(new Cookie(name, cookie.getValue()));
+                }
+            } else if (name.startsWith(LoginServlet.PUBLIC_SESSION_PREFIX)) {
+                if (cookie.getValue().equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                    extractedCookies.add(new Cookie(name, cookie.getValue()));
+                }
+            }
         }
-
-        @Override
-        public MimeMessage getMimeMessage() {
-            return mimeMessage;
-        }
+        return extractedCookies;
     }
 
 }

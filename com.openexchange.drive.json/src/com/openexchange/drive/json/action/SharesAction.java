@@ -47,45 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.drive.json.action;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ParsedShareTarget}
+ * {@link SharesAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ParsedShareTarget extends ShareTarget {
+public class SharesAction extends AbstractDriveAction {
 
-    private static final long serialVersionUID = -7321092542211626595L;
-
-    /**
-     * Initializes a new {@link ParsedShareTarget}.
-     */
-    public ParsedShareTarget() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link ParsedShareTarget}.
-     *
-     * @param json The JSON object to parse
-     */
-    public ParsedShareTarget(JSONObject json) throws JSONException {
-        super();
-        if (json.hasAndNotNull("module")) {
-            setModule(Module.getModuleInteger(json.getString("module")));
-        }
-        if (json.hasAndNotNull("folder")) {
-            setFolder(json.getString("folder"));
-        }
-        if (json.hasAndNotNull("item")) {
-            setItem(json.getString("item"));
-        }
+    @Override
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * get & return metadata for shared files & folders as JSON
+         */
+        JSONObject metadata = getDriveService().getUtility().getSharesMetadata(session);
+        return new AJAXRequestResult(metadata, "json");
     }
 
 }

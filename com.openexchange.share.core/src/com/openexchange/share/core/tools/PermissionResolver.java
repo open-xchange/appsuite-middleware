@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.fields;
+package com.openexchange.share.core.tools;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -63,7 +63,9 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -107,6 +109,17 @@ public class PermissionResolver {
 
     /**
      * Initializes a new {@link PermissionResolver}.
+     * <p/>
+     * <b>Note: </b> The service lookup reference should provide access to the following services:
+     * <ul>
+     * <li>{@link ModuleSupport}</li>
+     * <li>{@link ShareService}</li>
+     * <li>{@link ContactUserStorage}</li>
+     * <li>{@link GroupService}</li>
+     * <li>{@link UserService}</li>
+     * <li>{@link GroupService}</li>
+     * <li>{@link ContactService}</li>
+     * </ul>
      *
      * @param services The service lookup reference
      * @param session The server session
@@ -130,6 +143,17 @@ public class PermissionResolver {
      */
     public ShareInfo getShare(FolderObject folder, int guestID) {
         return getShare(folder.getModule(), String.valueOf(folder.getObjectID()), null, guestID);
+    }
+
+    /**
+     * Gets information about the share behind a guest permission entity of a specific folder.
+     *
+     * @param folder The folder to get the share for
+     * @param guestID The guest entity to get the share for
+     * @return The share, or <code>null</code> if not found
+     */
+    public ShareInfo getShare(FileStorageFolder folder, int guestID) {
+        return getShare(FolderObject.INFOSTORE, folder.getId(), null, guestID);
     }
 
     /**
@@ -275,6 +299,33 @@ public class PermissionResolver {
             }
         }
         return userContact;
+    }
+
+    /**
+     * Caches the permission entities found in the supplied list of folders.
+     *
+     * @param folders The folders to cache the permission entities for
+     */
+    public void cacheFileStorageFolderPermissionEntities(List<FileStorageFolder> folders) {
+        /*
+         * collect user- and group identifiers
+         */
+        Set<Integer> userIDs = new HashSet<Integer>();
+        Set<Integer> groupIDs = new HashSet<Integer>();
+        for (FileStorageFolder folder : folders) {
+            List<FileStoragePermission> permissions = folder.getPermissions();
+            if (null == permissions ) {
+                continue;
+            }
+            for (FileStoragePermission permission : permissions) {
+                if (permission.isGroup()) {
+                    groupIDs.add(I(permission.getEntity()));
+                } else {
+                    userIDs.add(I(permission.getEntity()));
+                }
+            }
+        }
+        cachePermissionEntities(userIDs, groupIDs);
     }
 
     /**

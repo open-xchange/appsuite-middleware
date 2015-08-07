@@ -57,7 +57,16 @@ for f in $OXFUNCTIONS $OXCONFIG; do
 	fi
 	. $f
 done
-
+TRIGGER_UPDATE_THEMES=/opt/open-xchange/sbin/triggerupdatethemes
+if [ ! -x $TRIGGER_UPDATE_THEMES ]; then
+    echo "$DESC: $TRIGGER_UPDATE_THEMES missing or not executable, exiting."
+		if [ "$1" = "stop" ]; then
+		    exit 0
+		else
+		    exit 5
+		fi
+    exit 1
+fi
 
 
 # Check for missing binaries (stale symlinks should not happen)
@@ -215,6 +224,7 @@ fi
 
 case "$1" in
     start)
+	$TRIGGER_UPDATE_THEMES -u || exit 1
 	echo -n "Starting open-xchange "
 	## Start daemon with startproc(8). If this fails
 	## the return value is set appropriately by startproc.

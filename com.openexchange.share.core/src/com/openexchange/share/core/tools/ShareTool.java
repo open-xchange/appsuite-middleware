@@ -370,10 +370,15 @@ public class ShareTool {
                 throw OXException.mandatoryField("entity");
             }
             internalRecipient.setEntity(jsonObject.getInt("entity"));
-            if (false == jsonObject.has("group")) {
+            boolean group;
+            if (jsonObject.has("group")) {
+                group = jsonObject.getBoolean("group");
+            } else if (null != type) {
+                group = RecipientType.GROUP == type;
+            } else {
                 throw OXException.mandatoryField("group");
             }
-            internalRecipient.setGroup(jsonObject.getBoolean("group"));
+            internalRecipient.setGroup(group);
             recipient = internalRecipient;
         }
         if (false == jsonObject.hasAndNotNull("bits")) {

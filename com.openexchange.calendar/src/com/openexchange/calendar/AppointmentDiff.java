@@ -191,27 +191,27 @@ public class AppointmentDiff {
         return false;
     }
 
-	public boolean anyFieldChangedOf(Collection<String> fields) {
+    public boolean anyFieldChangedOf(Collection<String> fields) {
         for (String field : fields) {
             if (differingFieldNames.contains(field)) {
                 return true;
             }
         }
         return false;
-	}
+    }
 
 
 
-	public boolean anyFieldChangedOf(final int...fields) {
-		for (final int field : fields) {
-			for (final FieldUpdate upd : updates) {
-				if (upd.getFieldNumber() == field) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean anyFieldChangedOf(final int...fields) {
+        for (final int field : fields) {
+            for (final FieldUpdate upd : updates) {
+                if (upd.getFieldNumber() == field) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
     public boolean onlyTheseChanged(final String...fields) {

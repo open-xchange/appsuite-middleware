@@ -74,7 +74,7 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ComparedObjectPermissions extends ComparedPermissions<FileStorageObjectPermission, FileStorageGuestObjectPermission> {
 
-    private final ShareService shareService;
+    private ShareService shareService;
 
     private final int contextId;
 
@@ -89,7 +89,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
      * @throws OXException
      */
     public ComparedObjectPermissions(int contextId, File oldMetadata, File newMetadata) throws OXException {
-        this(contextId, null == oldMetadata ? null: oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
+        this(contextId, null == oldMetadata ? null : oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
     }
 
     /**
@@ -103,10 +103,6 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
     public ComparedObjectPermissions(int contextId, List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) throws OXException {
         super(newPermissions, oldPermissions);
         this.contextId = contextId;
-        shareService = Services.getService(ShareService.class);
-        if (shareService == null) {
-            throw ServiceExceptionCode.absentService(ShareService.class);
-        }
         guestInfos = new HashMap<>();
         calc();
     }
@@ -156,8 +152,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
     /**
      * Remembers a guest info. A guest info must be set for every new guest permission,
      * after the according guest entity has been created. Other guest infos (i.e. for added
-     * but not new guests) don't need to be set, they will be loaded on-demand when calling
-     * {@link #getGuestInfo(int)}.
+     * but not new guests) don't need to be set, they will be loaded on-demand when calling {@link #getGuestInfo(int)}.
      *
      * @param guestInfo The guest info
      */
@@ -175,7 +170,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
     public GuestInfo getGuestInfo(int guestId) throws OXException {
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
-            guestInfo = shareService.getGuestInfo(contextId, guestId);
+            guestInfo = getShareService().getGuestInfo(contextId, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }
@@ -187,6 +182,17 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
         }
 
         return guestInfo;
+    }
+
+    private ShareService getShareService() throws OXException {
+        if (this.shareService != null) {
+            return shareService;
+        }
+        ShareService service = Services.getService(ShareService.class);
+        if (service == null) {
+            throw ServiceExceptionCode.absentService(ShareService.class);
+        }
+        return shareService = service;
     }
 
     private static final GuestInfo NO_GUEST = new GuestInfo() {

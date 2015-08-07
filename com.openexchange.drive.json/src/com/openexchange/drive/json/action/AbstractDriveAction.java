@@ -192,6 +192,12 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             driveSession.setDeviceName(device);
         }
         /*
+         * extract meta override parameter if present
+         */
+        if (requestData.containsParameter("driveMeta")) {
+            driveSession.setUseDriveMeta(requestData.getParameter("driveMeta", Boolean.class));
+        }
+        /*
          * extract push token if present
          */
         String pushToken = requestData.getParameter("pushToken");

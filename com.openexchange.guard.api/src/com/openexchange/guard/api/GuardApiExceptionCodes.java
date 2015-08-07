@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.guard;
+package com.openexchange.guard.api;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

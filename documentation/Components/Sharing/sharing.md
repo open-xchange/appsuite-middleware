@@ -6,26 +6,32 @@ Starting with v7.8.0, the Open-Xchange server comes with a whole new concept to 
 
 The main idea behind the new sharing concept is that guest users, i.e. external users without a regular account on the server, should be able to access the shared contents using the existing interfaces, especially the App Suite web interface. On the one hand, this includes consuming the shared data using the App Suite's advanced media viewing capabilities. On the other hand, this enables guests to edit existing as well as to create or upload new content in the groupware. Even real collaboration between internal users and guests in OX Documents is possible. 
 
-The following chapters cover different topics regarding sharing and guest users and tries to describe some technical background and impact where hosters, administrators or integrators might be interested in.
+The following chapters cover different topics regarding sharing and guest users and try to describe some technical background and impact where hosters, administrators or integrators might be interested in.
 
 ## Creating Shares
 
-Basically, creating a share means adding an additional permission entity to the shared folder or item. Previously, this was only possible for "internal" entities, i.e. regular users or user groups. Now, to share something to a guest user, it's also possible to just add the e-mail address of the invitee as new permission entity. The middleware then takes care to provision a new or reuse an existing account for the guest user, and equips him with the required permissions for accessing the contents.
+Basically, creating a share means adding an additional permission entity to the shared folder or item. Previously, this was only possible for "internal" entities, i.e. regular users or user groups. Now, the underlying permission system has been extended to support external entities, which can be either invited guest users, or special "anonymous" guest users who access a shared folder or item via a secret link. Anonymous and invited guest users are explained in more detail below. 
 
-As an alternative, it's also possible to just get a secret link for a folder or item. This will result in an additional "anonymous" guest entity in the permissions of the shared object, and will grant any user with the corresponding share link access the shared contents. Anonymous and invited guest users are explained in more detail below. 
+### Invite Guests
 
-To simplify the creation of share links and guest invitations, the clients will offer an additional "wizard" to quickly share selected items to one or more recipients.
+To share something to a guest user, it's possible to just add the e-mail address of the invitee as new permission entity for files and folders. The middleware then takes care to provision a new or reuse an existing account for the guest user, and equips him with the required permissions for accessing the contents. So, from a client's point of view, sharing something to a guest user is mostly the same process as sharing something to an internal user or group.
+
+### Share Links 
+
+Besides explicitly inviting a guest user to a share, it's also possible to just get a secret link for a folder or item. This will result in an additional "anonymous" guest entity in the permissions of the shared object, and will grant any user with the corresponding share link access the shared contents. To simplify the creation of share links, the clients will offer an additional "wizard" to quickly get a share link for a folder or item. Unlike invited guests which behave much like internal users, anonymous guest entities are strictly bound to the underlying folder or item, i.e. there is at most one anonymous permission entity per file or folder, as well as an anonymous permission entity can only be used for only once.
 
 __Administrator Notes:__
 
 * Existing shares of a user or context may be listed using the commandline utility `listshares`
-* The ability to create shares may be controlled via `com.openexchange.capability.sharing`, either globally in the configuration file permissions.properties, or on a more fine-granular level through the [[ConfigCascade| config cascade]]
-* The number of allowed shares per user may be specified via `com.openexchange.quota.share`, either globally in the configuration file share.properties, or on a more fine-granular level through the [[ConfigCascade| config cascade]]
+* The ability to create share links may be controlled via `com.openexchange.capability.share_links`, either globally in the configuration file `permissions.properties`, or on a more fine-granular level through the [Config Cascade](https://oxpedia.org/wiki/index.php?title=ConfigCascade)
+* The ability to invite guest users may be controlled via `com.openexchange.capability.invite_guests`, either globally in the configuration file `permissions.properties`, or on a more fine-granular level through the [Config Cascade](https://oxpedia.org/wiki/index.php?title=ConfigCascade)
+* The number of allowed share links per user may be specified via `com.openexchange.quota.share_links`, either globally in the configuration file `share.properties`, or on a more fine-granular level through the [Config Cascade](https://oxpedia.org/wiki/index.php?title=ConfigCascade)
+* The number of allowed guest invitations per user may be specified via `com.openexchange.quota.invite_guests`, either globally in the configuration file `share.properties`, or on a more fine-granular level through the [Config Cascade](https://oxpedia.org/wiki/index.php?title=ConfigCascade)
 * Specific share data is stored in the new database table `share`
 
 ## Removing Shares
 
-The lifetime of shares is implicitly bound to the lifetime of the associated permission of the guest user entity. So, once a permission entity pointing to a guest user account is removed from the parent folder or item, this also leads to the removal of the associated share itself. Afterwards, the contents are no longer accessible for the guest user. For shares that were created with a specific expiry date, it is ensured that they can no longer be accessed via their share link after expiring. Additionally, expired shares are cleaned up periodically within a background task.
+The lifetime of shares is implicitly bound to the lifetime of the associated permission of the guest user entity. So, once a permission entity pointing to a (named or anonymous) guest user account is removed from the parent folder or item, this also leads to the removal of the associated share itself. Afterwards, the contents are no longer accessible for the guest user. For shares that were created with a specific expiry date, it is ensured that they can no longer be accessed via their share link after expiring. Additionally, expired shares are cleaned up periodically within a background task.
 
 __Administrator Notes:__
 
@@ -40,7 +46,7 @@ Shares are accessed with a hyperlink that contains the so-called share "token". 
 
 If a guest user has been invited to more than one share in a context (based on his e-mail address), his individual share token remains equal, so that he will have access to all shared contents in the web interface after following any of the share links he received. However, the additional "path" still points to the concrete item. When inviting more than one guest user to the same share, each recipient will get his own individual share link.
 
-Once the share URL is requested from the server, the associated guest account is looked up and, depending of the guest type, the request is redirected to a specific login screen or directly into the App Suite web interface. More details regarding the different login modes are described at [[#Guest Login & Session handling|Guest Login & Session handling]].
+Once the share URL is requested from the server, the associated guest account is looked up and, depending of the guest type, the request is redirected to a specific login screen or directly into the App Suite web interface. More details regarding the different login modes are described at [Guest Login & Session Handling].
 
 After a share has been revoked (either explicitly, by removing the permission, or if the share is expired), share links can't be accessed any longer, and, after the last share for the guest user was removed, the guest account is removed from the system automatically. 
 
@@ -54,6 +60,7 @@ __Administrator Notes:__
 As outlined above, guest users are created on demand once something is being shared. We basically distinguish between two types of guest users: Those that were invited explicitly by the sharing user, or "anonymous" guest users that are able to access by visiting the share link. Access for the latter one may optionally be secured with a fixed PIN code. 
 
 For both kinds of guest users, a corresponding user account is provisioned dynamically on the system once a new share is created. Such a guest account is handled much similar as an account for a regular user, with the following main exceptions:
+
 * No access to the "Mail" module
 * No personal folders
 * No access to the "Portal"
@@ -69,6 +76,10 @@ __Administrator Notes:__
 * All service calls and APIs that list or search users have been adjusted to be "guest-aware", i.e. by default, guests users are not included in the output, yet may be included explicitly with additional parameters (namely `includeGuests` and `excludeUsers`)
 * Service calls and APIs that request data explicitly based on an entity's identifier are also working with guest users, i.e. if a specific idnetifier points to a guest, then the referenced guest data is returned
 
+### Capabilities
+
+tbd.
+
 ### Anonymous Guest Users
 
 If a "share link" is created, this results in an implicit creation of an anonymous guest user account on the server. The "secret" to access the shared contents is the share token itself that is encoded in the generated share link, so that everybody that knows the share link is able to access the shared contents. Optionally, such an anonymous share link may be secured with an additional PIN code. Guest users will be prompted to enter this PIN code when attempting to access the share. 
@@ -76,6 +87,7 @@ If a "share link" is created, this results in an implicit creation of an anonymo
 To have a strict separation between different shared contents, each time a folder or item is shared using the "Get a link" method, a designated anonymous guest account for this share is used. Consequently, each time such an anonymous share is revoked, this guest account is terminated again with no further delay. 
 
 Besides the common restrictions for guest accounts outlined above, the following applies for anonymous guest user accounts:
+
 * No e-mail address or display name
 * No password, if no PIN was assigned by the sharing user
 * A password that may only be changed by the sharing user, if a PIN code was set
@@ -92,7 +104,7 @@ If data is shared for the first time to the recipient in the context, a new gues
 
 If the recipient has already been invited from the same or another internal user in the context to another share before, the new share is added to the guest user in a way that the underlying folder- and object permissions are taken over, and the user capabilities getting expanded as needed to cover all modules the shares are located in. Similarly, if a share to a named guest user is revoked and the underlying folder- and object-permissions are removed, the guest user capabilities are updated implicitly to reflect the modules of the remaining shares. 
 
-After the last share to a named guest user has been revoked, the user has no longer access to any data. The account itself gets removed from the context automatically after a configurable expiry time. Additinally, any data that is stored for the guest user in the cross-context database is removed once the guest user has been deleted from all contexts in the system.
+After the last share to a named guest user has been revoked, the user has no longer access to any data. The account itself gets removed from the context automatically after a configurable expiry time. Additionally, any data that is stored for the guest user in the cross-context database is removed once the guest user has been deleted from all contexts in the system.
 
 In contrast to an "anonymous" guest user, a named guest user has access to all shared items from a context after logging in, since the permissions get added to an existing guest user account automatically. For entering the web interface, he may use any of the share links that were sent to him in the different notification messages. Those links usually point to an individual share target like a folder or file, but the guest user may navigate to the other shared contents using the folder tree of the web interface in the same way as regular groupware users do. Similarly, if the guest user has access to shares from different modules, the modules can be switched in the web interface as usual.
 

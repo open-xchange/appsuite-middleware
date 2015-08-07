@@ -52,6 +52,7 @@
         <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
         <chmod perm="755" file="${sbinInstallDir}/lastlogintimestamp"/>
         <chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
+        <chmod perm="755" file="${sbinInstallDir}/triggerupdatethemes"/>
     </target>
 
     <target name="patchScripts">
@@ -65,6 +66,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
+        <copy file="${sbinDir}/triggerupdatethemes" todir="${patchSbinDir}" overwrite="true" />
         <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency clearpreviewcache heapdump sanitizefilemimetypes closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>

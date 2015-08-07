@@ -159,7 +159,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     public boolean isEnabled(final String capability, final Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
                             final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous()) {
+                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
                                 return false;
                             }
                             return TransportProperties.getInstance().isPublishOnExceededQuota();

@@ -60,6 +60,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
 
 /**

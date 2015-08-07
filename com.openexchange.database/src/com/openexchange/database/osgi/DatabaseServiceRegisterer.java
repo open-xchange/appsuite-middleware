@@ -127,6 +127,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
         if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
             serviceRegistration.unregister();
+            serviceRegistration = null;
             Initialization.getInstance().stop();
             Initialization.setConfigurationService(null);
         }

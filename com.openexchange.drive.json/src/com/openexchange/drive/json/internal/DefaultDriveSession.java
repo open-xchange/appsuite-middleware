@@ -54,9 +54,9 @@ import java.util.Locale;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
-import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.FilePattern;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
@@ -79,6 +79,7 @@ public class DefaultDriveSession implements DriveSession {
     private List<DriveFileField> fields;
     private List<FilePattern> fileExclusions;
     private List<DirectoryPattern> directoryExclusions;
+    private Boolean useDriveMeta;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -143,6 +144,16 @@ public class DefaultDriveSession implements DriveSession {
      */
     public void setDirectoryExclusions(List<DirectoryPattern> directoryExclusions) {
         this.directoryExclusions = directoryExclusions;
+    }
+
+    /**
+     * Overrides if drive metadata synchronization should be enabled or not, independently of the used API version.
+     *
+     * @param useDriveMeta <code>true</code> to force drive meta synchronization, <code>false</code> to forcibly disable it, or
+     *        <code>null</code> to decide based on the API version
+     */
+    public void setUseDriveMeta(Boolean useDriveMeta) {
+        this.useDriveMeta = useDriveMeta;
     }
 
     @Override
@@ -216,9 +227,15 @@ public class DefaultDriveSession implements DriveSession {
     }
 
     @Override
+    public boolean useDriveMeta() {
+        return null != useDriveMeta ? useDriveMeta.booleanValue() : 3 <= apiVersion;
+    }
+
+    @Override
     public String toString() {
         return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
             session.getContextId() + ", clientVersion=" + clientVersion + ", deviceName=" + deviceName + ", apiVersion=" +
             apiVersion + ", diagnostics=" + diagnostics + "]";
     }
+
 }

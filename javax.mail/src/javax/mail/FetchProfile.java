@@ -40,18 +40,18 @@
 
 package javax.mail;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
- * Clients use a FetchProfile to list the Message attributes that 
+ * Clients use a FetchProfile to list the Message attributes that
  * it wishes to prefetch from the server for a range of messages.<p>
  *
- * Messages obtained from a Folder are light-weight objects that 
+ * Messages obtained from a Folder are light-weight objects that
  * typically start off as empty references to the actual messages.
- * Such a Message object is filled in "on-demand" when the appropriate 
+ * Such a Message object is filled in "on-demand" when the appropriate
  * get*() methods are invoked on that particular Message. Certain
  * server-based message access protocols (Ex: IMAP) allow batch
  * fetching of message attributes for a range of messages in a single
@@ -62,7 +62,7 @@ import java.util.LinkedHashSet;
  * to the server. <p>
  *
  * Note that implementations are not obligated to support
- * FetchProfiles, since there might be cases where the backend service 
+ * FetchProfiles, since there might be cases where the backend service
  * does not allow easy, efficient fetching of such profiles. <p>
  *
  * Sample code that illustrates the use of a FetchProfile is given
@@ -90,7 +90,7 @@ public class FetchProfile {
      * This inner class is the base class of all items that
      * can be requested in a FetchProfile. The items currently
      * defined here are <code>ENVELOPE</code>, <code>CONTENT_INFO</code>
-     * and <code>FLAGS</code>. The <code>UIDFolder</code> interface 
+     * and <code>FLAGS</code>. The <code>UIDFolder</code> interface
      * defines the <code>UID</code> Item as well. <p>
      *
      * Note that this class only has a protected constructor, therby
@@ -101,57 +101,57 @@ public class FetchProfile {
      */
     public static class Item {
 
-	    /**
-	     * This is the Envelope item. <p>
-	     *
-	     * The Envelope is an aggregration of the common attributes
-	     * of a Message. Implementations should include the following
-	     * attributes: From, To, Cc, Bcc, ReplyTo, Subject and Date.
-	     * More items may be included as well. <p>
-	     *
-	     * For implementations of the IMAP4 protocol (RFC 2060), the
-	     * Envelope should include the ENVELOPE data item. More items
-	     * may be included too.
-	     */
-	    public static final Item ENVELOPE = new Item("ENVELOPE");
+        /**
+         * This is the Envelope item. <p>
+         *
+         * The Envelope is an aggregration of the common attributes
+         * of a Message. Implementations should include the following
+         * attributes: From, To, Cc, Bcc, ReplyTo, Subject and Date.
+         * More items may be included as well. <p>
+         *
+         * For implementations of the IMAP4 protocol (RFC 2060), the
+         * Envelope should include the ENVELOPE data item. More items
+         * may be included too.
+         */
+        public static final Item ENVELOPE = new Item("ENVELOPE");
 
-	    /**
-	     * This item is for fetching information about the
-	     * content of the message. <p>
-	     *
-	     * This includes all the attributes that describe the content
-	     * of the message. Implementations should include the following
-	     * attributes: ContentType, ContentDisposition,
-	     * ContentDescription, Size and LineCount. Other items may be
-	     * included as well.
-	     */
-	    public static final Item CONTENT_INFO = new Item("CONTENT_INFO");
+        /**
+         * This item is for fetching information about the
+         * content of the message. <p>
+         *
+         * This includes all the attributes that describe the content
+         * of the message. Implementations should include the following
+         * attributes: ContentType, ContentDisposition,
+         * ContentDescription, Size and LineCount. Other items may be
+         * included as well.
+         */
+        public static final Item CONTENT_INFO = new Item("CONTENT_INFO");
 
-	    /**
-	     * SIZE is a fetch profile item that can be included in a
-	     * <code>FetchProfile</code> during a fetch request to a Folder.
-	     * This item indicates that the sizes of the messages in the specified
-	     * range should be prefetched. <p>
-	     *
-	     * @since	JavaMail 1.5
-	     */
-	    public static final Item SIZE = new Item("SIZE");
+        /**
+         * SIZE is a fetch profile item that can be included in a
+         * <code>FetchProfile</code> during a fetch request to a Folder.
+         * This item indicates that the sizes of the messages in the specified
+         * range should be prefetched. <p>
+         *
+         * @since   JavaMail 1.5
+         */
+        public static final Item SIZE = new Item("SIZE");
 
-	    /**
-	     * This is the Flags item.
-	     */
-	    public static final Item FLAGS = new Item("FLAGS");
+        /**
+         * This is the Flags item.
+         */
+        public static final Item FLAGS = new Item("FLAGS");
 
-	    private final String name;
+        private final String name;
 
-	    /**
-	     * Constructor for an item.  The name is used only for debugging.
-	     *
-	     * @param	name	the item name
-	     */
-	    protected Item(String name) {
-	        this.name = name;
-	    }
+        /**
+         * Constructor for an item.  The name is used only for debugging.
+         *
+         * @param   name    the item name
+         */
+        protected Item(String name) {
+            this.name = name;
+        }
 
         /**
          * Gets the item's name
@@ -162,84 +162,84 @@ public class FetchProfile {
             return name;
         }
 
-	    /**
-	     * Include the name in the toString return value for debugging.
-	     */
-	    public String toString() {
-	        return getClass().getName() + "[" + name + "]";
-	    }
+        /**
+         * Include the name in the toString return value for debugging.
+         */
+        public String toString() {
+            return getClass().getName() + "[" + name + "]";
+        }
     } // End of class Item
-    
+
     // -----------------------------------------------------------------------------------
-    
+
     private final List<Item> specials; // specials
     private final Set<String> headers; // set of header names
 
     /**
      * Create an empty FetchProfile.
      */
-    public FetchProfile() { 
-	    specials = new LinkedList<Item>();
-	    headers = new LinkedHashSet<String>();
+    public FetchProfile() {
+        specials = new LinkedList<Item>();
+        headers = new LinkedHashSet<String>();
     }
-    
+
     /**
      * Add the given special item as one of the attributes to
      * be prefetched.
      *
-     * @param	item		the special item to be fetched
-     * @see	FetchProfile.Item#ENVELOPE
-     * @see	FetchProfile.Item#CONTENT_INFO
-     * @see	FetchProfile.Item#FLAGS
+     * @param   item        the special item to be fetched
+     * @see FetchProfile.Item#ENVELOPE
+     * @see FetchProfile.Item#CONTENT_INFO
+     * @see FetchProfile.Item#FLAGS
      */
     public void add(Item item) {
         if (!specials.contains(item))
-	        specials.add(item);
+            specials.add(item);
     }
 
     /**
      * Add the specified header-field to the list of attributes
      * to be prefetched.
      *
-     * @param	headerName	header to be prefetched
+     * @param   headerName  header to be prefetched
      */
     public void add(String headerName) {
-	    headers.add(headerName);
+        headers.add(headerName);
     }
 
     /**
      * Returns true if the fetch profile contains the given special item.
      *
-     * @param	item	the Item to test
+     * @param   item    the Item to test
      * @return true if the fetch profile contains the given special item
      */
-    public boolean contains(Item item) { 
-   	    return specials.contains(item);
+    public boolean contains(Item item) {
+        return specials.contains(item);
     }
 
     /**
      * Returns true if the fetch profile contains the given header name.
      *
-     * @param	headerName	the header to test
-     * @return	true if the fetch profile contains the given header name
+     * @param   headerName  the header to test
+     * @return  true if the fetch profile contains the given header name
      */
-    public boolean contains(String headerName) { 
-   	    return headers.contains(headerName);
+    public boolean contains(String headerName) {
+        return headers.contains(headerName);
     }
 
     /**
-     * Get the items set in this profile. 
+     * Get the items set in this profile.
      *
-     * @return		items set in this profile
+     * @return      items set in this profile
      */
     public Item[] getItems() {
         return specials.isEmpty() ? new Item[0] : specials.toArray(new Item[specials.size()]);
     }
 
     /**
-     * Get the names of the header-fields set in this profile. 
+     * Get the names of the header-fields set in this profile.
      *
-     * @return		headers set in this profile
+     * @return      headers set in this profile
      */
     public String[] getHeaderNames() {
         return headers.isEmpty() ? new String[0] : headers.toArray(new String[headers.size()]);

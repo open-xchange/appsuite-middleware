@@ -100,7 +100,7 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
             public boolean isEnabled(String capability, Session session) throws OXException {
                 if (PLUS_CAPABILITY.equals(capability)) {
                     final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                    if (serverSession.isAnonymous()) {
+                    if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
                         return false;
                     }
                     return plusChecker.hasPlusFeatures(new ServerSessionAdapter(serverSession));

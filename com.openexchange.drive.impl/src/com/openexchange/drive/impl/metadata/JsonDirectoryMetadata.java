@@ -75,6 +75,9 @@ import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link JsonDirectoryMetadata}
@@ -119,7 +122,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", folder.getId());
             jsonObject.put("name", folder.getName());
-            jsonObject.putOpt("localizedName", folder.getLocalizedName(session.getDriveSession().getLocale()));
+            jsonObject.putOpt("localized_name", folder.getLocalizedName(session.getDriveSession().getLocale()));
             jsonObject.put("path", session.getStorage().getPath(folderID));
             if (null != folder.getCreationDate()) {
                 jsonObject.put("created", folder.getCreationDate().getTime());
@@ -163,7 +166,8 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             Set<String> capabilities = folder.getCapabilities();
             if (null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS)) {
                 jsonObject.put("own_rights", createPermissionBits(folder.getOwnPermission()));
-                jsonObject.putOpt("permissions", getJSONPermissions(folder.getPermissions()));
+                jsonObject.putOpt("permissions", getJSONPermissions(folder.getPermissions(), false));
+                jsonObject.putOpt("extended_permissions", getJSONPermissions(folder.getPermissions(), true));
                 jsonObject.put("jump", new JSONArray(Collections.singleton("permissions")));
                 if (isShared(folder)) {
                     jsonObject.put("shared", true);
@@ -218,13 +222,13 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         return jsonArray;
     }
 
-    private JSONArray getJSONPermissions(List<FileStoragePermission> permissions) throws JSONException, OXException {
+    private JSONArray getJSONPermissions(List<FileStoragePermission> permissions, boolean extended) throws JSONException, OXException {
         if (null == permissions) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(permissions.size());
         for (FileStoragePermission permission : permissions) {
-            jsonArray.put(getJSONPermission(permission));
+            jsonArray.put(extended ? getExtendedJSONPermission(permission) : getJSONPermission(permission));
         }
         return jsonArray;
     }
@@ -233,6 +237,35 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("bits", createPermissionBits(permission));
         putEntity(jsonObject, permission.getEntity(), permission.isGroup());
+        return jsonObject;
+    }
+
+    private JSONObject getExtendedJSONPermission(FileStoragePermission permission) throws JSONException, OXException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("bits", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
+            permission.getWritePermission(), permission.getDeletePermission(), permission.isAdmin()));
+        if (permission.isGroup()) {
+            jsonObject.put("type", "group");
+            addGroupInfo(jsonObject, session.getPermissionResolver().getGroup(permission.getEntity()));
+        } else {
+            User user = session.getPermissionResolver().getUser(permission.getEntity());
+            if (null == user) {
+                org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class).warn(
+                    "Can't resolve user entity {} for folder {}", permission.getEntity(), folder);
+            } else if (user.isGuest()) {
+                GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
+                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                    addShareInfo(jsonObject, session.getPermissionResolver().getShare(folder, permission.getEntity()));
+                } else {
+                    addUserInfo(jsonObject, user);
+                }
+            } else {
+                jsonObject.put("type", "user");
+                addUserInfo(jsonObject, user);
+            }
+        }
         return jsonObject;
     }
 

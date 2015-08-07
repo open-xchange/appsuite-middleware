@@ -77,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -93,6 +94,7 @@ public class SyncSession {
     private DirectLinkGenerator linkGenerator;
     private CapabilitySet capabilities;
     private DriveTemp temp;
+    private PermissionResolver permissionResolver;
 
     /**
      * Initializes a new {@link SyncSession}.
@@ -139,6 +141,18 @@ public class SyncSession {
             storage = new DriveStorage(this);
         }
         return storage;
+    }
+
+    /**
+     * Gets the permission resolver.
+     *
+     * @return The permission resolver
+     */
+    public PermissionResolver getPermissionResolver() {
+        if (null == permissionResolver) {
+            permissionResolver = new PermissionResolver(DriveServiceLookup.get(), getServerSession());
+        }
+        return permissionResolver;
     }
 
     /**
@@ -310,7 +324,7 @@ public class SyncSession {
         if (0 == folderIDs.size()) {
             trace("All server directories skipped.");
             return Collections.emptyList();
-        }        
+        }
         StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
         List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
         List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());

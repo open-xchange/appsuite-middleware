@@ -93,7 +93,6 @@ import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.FolderSharesRequest;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
@@ -114,7 +113,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -314,6 +312,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Gets the public root folder based on the folder module, i.e. either {@link FolderObject#SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID} for the
+     * infostore module, or {@link FolderObject#SYSTEM_PUBLIC_FOLDER_ID} for other folder.
+     *
+     * @param module The module to get the public root folder identifier for
+     * @return The public root folder identifier
+     */
+    protected int getPublicRoot(int module) {
+        return FolderObject.INFOSTORE == module ? FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID : FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
+    }
+
+    /**
      * Inserts a public folder below folder 2 or folder 15 if its a drive folder.
      *
      * @param api The folder tree to use
@@ -336,13 +345,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
         folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
-        if (module == FolderObject.INFOSTORE) {
-            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-        } else {
-            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        }
+        folder.setParentFolderID(getPublicRoot(module));
 
         InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
+        request.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;
@@ -945,39 +951,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Checks the supplied share against the expected guest permissions.
-     *
-     * @param expectedPermission The expected permissions
-     * @param expectedFile The expected file
-     * @param actual The actual share
-     */
-    protected static void checkShare(FileStorageGuestObjectPermission expectedPermission, File expectedFile, ParsedShare actual) {
-        assertNotNull("No share", actual);
-        checkAuthentication(expectedPermission.getRecipient(), actual);
-        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
-        assertNotNull("No share target", actual.getTarget());
-        assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
-        assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
-        assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
-    }
-
-    /**
-     * Checks the supplied share against the expected guest permissions.
-     *
-     * @param expectedPermission The expected permissions
-     * @param expectedFolder The expected folder
-     * @param actual The actual share
-     */
-    protected static void checkShare(OCLGuestPermission expectedPermission, FolderObject expectedFolder, ParsedShare actual) {
-        assertNotNull("No share", actual);
-        checkAuthentication(expectedPermission.getRecipient(), actual);
-        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
-        assertNotNull("No share target", actual.getTarget());
-        assertEquals("Target module wrong", expectedFolder.getModule(), actual.getTarget().getModule());
-        assertEquals("Target folder wrong", String.valueOf(expectedFolder.getObjectID()), actual.getTarget().getFolder());
-    }
-
-    /**
      * Checks the supplied extended permission entity against the expected object permissions.
      *
      * @param expectedPermission The expected permissions
@@ -1011,18 +984,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
         }
     }
 
-    private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {
-        assertNotNull("No recipient", actual);
-        assertEquals("Wrong recipient type", expected.getType(), actual.getType());
-        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
-            assertEquals("Wrong password", ((AnonymousRecipient) expected).getPassword(), ((AnonymousRecipient) actual).getPassword());
-        } else if (RecipientType.GUEST.equals(expected.getType())) {
-            GuestRecipient expectedRecipient = (GuestRecipient) expected;;
-            GuestRecipient actualRecipient = (GuestRecipient) actual;
-            assertEquals("Wrong e-mail address", expectedRecipient.getEmailAddress(), actualRecipient.getEmailAddress());
-        }
-    }
-
     private static void checkRecipient(ShareRecipient expected, ExtendedPermissionEntity actual) {
         assertEquals("Wrong recipient type", expected.getType(), actual.getType());
         if (RecipientType.ANONYMOUS.equals(expected.getType())) {
@@ -1034,22 +995,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
             assertEquals("Wrong display name", guestRecipient.getDisplayName(), actual.getDisplayName());
             assertNotNull("No contact", actual.getContact());
             assertEquals("Wrong e-mail address", guestRecipient.getEmailAddress(), actual.getContact().getEmail1());
-        }
-    }
-
-    private static void checkAuthentication(ShareRecipient expected, ParsedShare actual) {
-        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
-            if (null == ((AnonymousRecipient) expected).getPassword()) {
-                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS, actual.getAuthentication());
-            } else {
-                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
-            }
-        } else if (RecipientType.GUEST.equals(expected.getType())) {
-            if (null == ((GuestRecipient) expected).getPassword()) {
-                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
-            } else {
-                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
-            }
         }
     }
 

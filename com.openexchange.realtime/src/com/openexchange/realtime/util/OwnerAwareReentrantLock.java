@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,40 @@
  *
  */
 
-package com.openexchange.guard.osgi;
+package com.openexchange.realtime.util;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link OwnerAwareReentrantLock} - Makes the {@link #getOwner()} method publicly accessible.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class Services {
+public class OwnerAwareReentrantLock extends ReentrantLock {
+
+    private static final long serialVersionUID = 6942612557093175975L;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link OwnerAwareReentrantLock}.
      */
-    private Services() {
+    public OwnerAwareReentrantLock() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
     /**
-     * Sets the service lookup.
+     * Initializes a new {@link OwnerAwareReentrantLock}.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param fair <code>true</code> if this lock should use a fair ordering policy
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    public OwnerAwareReentrantLock(boolean fair) {
+        super(fair);
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.guard\" not started?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+    @Override
+    public Thread getOwner() {
+        return super.getOwner();
     }
 
 }

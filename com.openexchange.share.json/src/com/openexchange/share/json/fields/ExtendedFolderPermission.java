@@ -57,6 +57,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
