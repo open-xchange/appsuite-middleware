@@ -525,6 +525,36 @@ public final class ListLsubCache {
     }
 
     /**
+     * Gets the pretty-printed cache content
+     *
+     * @param accountId The account identifier
+     * @param session The associated session
+     * @return The pretty-printed content or <code>null</code>
+     */
+    public static String prettyPrintCache(int accountId, Session session) {
+        try {
+            KeyedCache cache = getCache(session);
+
+            // Get the associated map
+            ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
+            if (null == map) {
+                return null;
+            }
+
+            // Submit task
+            Future<ListLsubCollection> f = map.get(Integer.valueOf(accountId));
+            if (null == f) {
+                return null;
+            }
+
+            ListLsubCollection collection = getFrom(f);
+            return collection.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Gets cached LIST entry for specified full name.
      *
      * @param fullName The full name
