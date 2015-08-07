@@ -341,6 +341,21 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
 
         });
+        
+        track(AJAXActionCustomizerFactory.class, new SimpleRegistryListener<AJAXActionCustomizerFactory>() {
+
+			@Override
+			public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+				dispatcher.addCustomizer(service);
+			}
+
+			@Override
+			public void removed(ServiceReference<AJAXActionCustomizerFactory> ref,
+					AJAXActionCustomizerFactory service) {
+				dispatcher.removeCustomizer(service);
+				
+			}
+		});
 
         openTrackers();
 
