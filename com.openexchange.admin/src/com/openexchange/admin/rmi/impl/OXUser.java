@@ -706,8 +706,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final int user_id = user.getId().intValue();
             final OXUserStorageInterface oxuser = this.oxu;
             final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
-
-            Context storageContext = oxctx.getData(ctx, ClientAdminThread.cache.getMasterCredentials());
+            
+            Context storageContext = oxctx.getOwnData(ctx, auth);
             User storageUser = oxuser.getData(ctx, new User[] { user })[0];
 
             if (null != storageUser.getFilestoreId() && storageUser.getFilestoreId().intValue() > 0) {
@@ -814,7 +814,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final OXUserStorageInterface oxuser = this.oxu;
             final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
 
-            Context storageContext = oxctx.getData(ctx, ClientAdminThread.cache.getMasterCredentials());
+            Context storageContext = oxctx.getOwnData(ctx, auth);
             User storageUser = oxuser.getData(ctx, new User[] { user })[0];
 
             if (null == storageUser.getFilestoreId() || storageUser.getFilestoreId().intValue() <= 0) {
