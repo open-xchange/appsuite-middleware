@@ -119,7 +119,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         + "END:VCARD\n";
     
     public Map<String, String> VCARD_ELEMENTS = new HashMap<String, String>(){{
-        put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
+        //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Prinz\\, Tobias");
         put("N", "Prinz;Tobias;;;");
         put("BDAY", "1981-05-01");
@@ -130,7 +130,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
     }};
     
     public Map<String, String> VCARD_ELEMENTS_2 = new HashMap<String, String>(){{
-        put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
+        //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Mustermann\\, Max");
         put("N", "Mustermann;Max;;;");
         put("BDAY", "1966-07-30");
