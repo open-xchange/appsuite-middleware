@@ -138,93 +138,108 @@ public class DefaultDispatcher implements Dispatcher {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
         addLogProperties(requestData, false);
+        final List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
         try {
-            final List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
-            final AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
+            try {
+                final AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
-            /*
-             * Set request context
-             */
-            RequestContextHolder.set(buildRequestContext(modifiedRequestData));
+                /*
+                 * Set request context
+                 */
+                RequestContextHolder.set(buildRequestContext(modifiedRequestData));
 
-            final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
-            if (factory == null) {
-                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
-            }
-
-            final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
-            if (action == null) {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
-            }
-
-            /*
-             * Validate request headers for caching
-             */
-            final AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
-            if (etagResult != null) {
-                return etagResult;
-            }
-
-            /*
-             * Validate request headers for resume
-             */
-            final AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
-            if (failedResult != null) {
-                return failedResult;
-            }
-
-            /*
-             * Check for action annotations
-             */
-            for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
-                if (annotationProcessor.handles(action)) {
-                    annotationProcessor.process(action, modifiedRequestData, session);
+                final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
+                if (factory == null) {
+                    throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
                 }
-            }
 
-            /*
-             * State already initialized for module?
-             */
-            if (factory instanceof AJAXStateHandler) {
-                final AJAXStateHandler handler = (AJAXStateHandler) factory;
-                if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
-                    handler.initialize(state);
+                final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
+                if (action == null) {
+                    throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
                 }
-            }
-            modifiedRequestData.setState(state);
 
-            /*
-             * Ensure requested format
-             */
-            if (requestData.getFormat() == null) {
-                requestData.setFormat("apiResponse");
-            }
-
-            /*
-             * Perform request
-             */
-            final AJAXRequestResult result = callAction(action, modifiedRequestData, session);
-            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
-                // No further processing
-                return result;
-            }
-
-            return customizeResult(modifiedRequestData, result, customizers, session);
-        } catch (final RuntimeException e) {
-            if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
-                // Handle special Rhino wrapper error
-                final Throwable wrapped = e.getCause();
-                if (wrapped instanceof OXException) {
-                    throw (OXException) wrapped;
+                /*
+                 * Validate request headers for caching
+                 */
+                final AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
+                if (etagResult != null) {
+                    return etagResult;
                 }
-            }
 
-            // Wrap unchecked exception
-            addLogProperties(requestData, true);
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            RequestContextHolder.reset();
+                /*
+                 * Validate request headers for resume
+                 */
+                final AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
+                if (failedResult != null) {
+                    return failedResult;
+                }
+
+                /*
+                 * Check for action annotations
+                 */
+                for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
+                    if (annotationProcessor.handles(action)) {
+                        annotationProcessor.process(action, modifiedRequestData, session);
+                    }
+                }
+
+                /*
+                 * State already initialized for module?
+                 */
+                if (factory instanceof AJAXStateHandler) {
+                    final AJAXStateHandler handler = (AJAXStateHandler) factory;
+                    if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
+                        handler.initialize(state);
+                    }
+                }
+                modifiedRequestData.setState(state);
+
+                /*
+                 * Ensure requested format
+                 */
+                if (requestData.getFormat() == null) {
+                    requestData.setFormat("apiResponse");
+                }
+
+                /*
+                 * Perform request
+                 */
+                final AJAXRequestResult result = callAction(action, modifiedRequestData, session);
+                if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                    // No further processing
+                    return result;
+                }
+
+                return customizeResult(modifiedRequestData, result, customizers, session);
+            } catch (final RuntimeException e) {
+                if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
+                    // Handle special Rhino wrapper error
+                    final Throwable wrapped = e.getCause();
+                    if (wrapped instanceof OXException) {
+                        throw (OXException) wrapped;
+                    }
+                }
+
+                // Wrap unchecked exception
+                addLogProperties(requestData, true);
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                RequestContextHolder.reset();
+            }
+        } catch (OXException x) {
+        	for (AJAXActionCustomizer customizer : customizers) {
+				if (customizer instanceof AJAXExceptionHandler) {
+					try {
+						AJAXExceptionHandler exceptionHandler = (AJAXExceptionHandler) customizer;
+						exceptionHandler.exceptionOccurred(requestData, x, session);
+					} catch (Throwable t) {
+						// Discard. Not our problem, we need to get on with this!
+					}
+				}
+			}
+        	throw x;
         }
+
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
@@ -597,6 +612,13 @@ public class DefaultDispatcher implements Dispatcher {
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
+    /**
+     * Removes the specified customizer factory
+     */
+	public void removeCustomizer(AJAXActionCustomizerFactory factory) {
+		this.customizerFactories.remove(factory);
+	}
+
 
     /**
      * Releases specified factory from given module.
@@ -756,5 +778,6 @@ public class DefaultDispatcher implements Dispatcher {
         }
 
 	} // End of class Strings
+
 
 }
