@@ -163,4 +163,40 @@ public final class Bug27722Test extends AbstractInfostoreTest {
             assertFalse("Object not deleted", objectIDs.contains(objectID));
         }
     }
+
+    @Test
+    public void testHardDeleteManyFiles() throws Exception {
+        /*
+         * pick DELETED_ITEMS randomly
+         */
+        List<String> objectIDs = new ArrayList<String>(DELETED_ITEMS);
+        List<String> folderIDs = new ArrayList<String>(DELETED_ITEMS);
+        Random random = new Random();
+        while (objectIDs.size() < DELETED_ITEMS) {
+            File randomDocument = items.get(random.nextInt(TOTAL_ITEMS));
+            String objectID = randomDocument.getId();
+            if (false == objectIDs.contains(objectID)) {
+                objectIDs.add(objectID);
+                folderIDs.add(randomDocument.getFolderId());
+            }
+        }
+        /*
+         * execute hard delete request
+         */
+        infoMgr.deleteAction(objectIDs, folderIDs, infoMgr.getLastResponse().getTimestamp(), Boolean.TRUE);
+        long duration = infoMgr.getLastResponse().getRequestDuration();
+        assertTrue("hard deletion took " + duration + "ms, which is too long", 50 * DELETED_ITEMS > duration); // allow 50ms per hard-deleted item
+        /*
+         * verify deletion
+         */
+        int[] columns = { CommonObject.OBJECT_ID };
+        AllInfostoreRequest allRequest = new AllInfostoreRequest(testFolder.getObjectID(), columns, -1, null);
+        AbstractColumnsResponse allResponse = getClient().execute(allRequest);
+        assertEquals("Unexpected object count", TOTAL_ITEMS - DELETED_ITEMS, allResponse.getArray().length);
+        for (Object[] object : allResponse) {
+            String objectID = object[0].toString();
+            assertFalse("Object not deleted", objectIDs.contains(objectID));
+        }
+    }
+
 }

@@ -268,6 +268,10 @@ public class InfostoreQueryCatalog {
     private static final String INSERT_DEL_INFOSTORE = buildInsert(Table.DEL_INFOSTORE, STR_CID);
 
     public List<String> getDelete(final Table t, final List<DocumentMetadata> documents) {
+        return getDelete(t, documents, true);
+    }
+
+    public List<String> getDelete(final Table t, final List<DocumentMetadata> documents, boolean includeVersions) {
         switch (t) {
         default:
             break;
@@ -278,7 +282,7 @@ public class InfostoreQueryCatalog {
         final int size = documents.size();
         final List<String> l = new ArrayList<String>(2);
         // Versions
-        {
+        if (includeVersions) {
             final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
             final StringBuilder delete = new StringBuilder("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
                 Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append(" IN (");

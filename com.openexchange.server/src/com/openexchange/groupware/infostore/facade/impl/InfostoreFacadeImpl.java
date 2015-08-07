@@ -1084,14 +1084,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
         perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
-        /*
-         * delete object permissions
-         */
+        perform(new DeleteVersionAction(this, QUERIES, context, delVers, session), true);
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
     }
 
@@ -1474,14 +1471,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
         perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
-        /*
-         * delete object permissions
-         */
+        perform(new DeleteVersionAction(this, QUERIES, context, allVersions, null), true);
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
