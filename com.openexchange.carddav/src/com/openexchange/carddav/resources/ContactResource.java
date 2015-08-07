@@ -51,6 +51,7 @@ package com.openexchange.carddav.resources;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.GroupwareCarddavFactory;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -315,7 +317,14 @@ public class ContactResource extends CardDAVResource {
                 }
                 contact = vCardImport.getContact();
                 contact.setContextId(factory.getSession().getContextId());
-                contact.setParentFolderID(Tools.parse(parentFolderID));
+                /*
+                 * set initial parent folder to the default contacts folder in case of an iOS client
+                 */
+                if (isIOSClient()) {
+                    contact.setParentFolderID(Tools.parse(factory.getState().getDefaultFolder().getID()));
+                } else {
+                    contact.setParentFolderID(Tools.parse(parentFolderID));
+                }
             } else {
                 /*
                  * import vCard and merge with existing contact, ensuring that some important properties don't change
@@ -491,6 +500,17 @@ public class ContactResource extends CardDAVResource {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether the request's user agent is assumed to represent an iOS client or not.
+     *
+     * @return <code>true</code> if the request originates in an iOS client, <code>false</code>, otherwise
+     */
+    private boolean isIOSClient() {
+        String userAgent = (String) factory.getSession().getParameter("user-agent");
+        return false == Strings.isEmpty(userAgent) &&
+            Pattern.matches(".*iOS.*dataaccessd.*", userAgent) && false == userAgent.contains("Android");
     }
 
 }
