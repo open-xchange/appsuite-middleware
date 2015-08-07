@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -105,7 +106,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
@@ -450,6 +450,13 @@ public class Multiple extends SessionServlet {
                     }
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
+                    if (null != result.getException()) {
+                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
+                        ResponseWriter.writeException(result.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
+                    }
+                    if (null != result.getWarnings() && 0 < result.getWarnings().size()) {
+                        ResponseWriter.writeWarnings(new ArrayList<OXException>(result.getWarnings()), jsonWriter, localeFrom(session));
+                    }
                 } catch (final OXException e) {
                     logError(e.getMessage(), session, e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
