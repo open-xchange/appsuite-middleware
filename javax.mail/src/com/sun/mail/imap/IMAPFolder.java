@@ -453,12 +453,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		throw new IllegalStateException(
 		    "This operation is not allowed on a closed folder"
 	    	);
-	    else { // Folder was closed "implicitly"
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
+	    else // Folder was closed "implicitly"
 		throw new FolderClosedException(this,
 		    "Lost folder connection to server"
 		);
-        }
 	}
     }
 
@@ -483,7 +481,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(false);
 	    } catch (ConnectionException cex) {
 		// Oops, lost connection
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -838,7 +835,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		try {
 		    keepConnectionAlive(true);
 		} catch (ConnectionException cex) {
-            ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
@@ -884,7 +880,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // Probably doesn't support STATUS, tough luck.
 	    return false;
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new StoreClosedException(store, cex.getMessage());
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -1290,7 +1285,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    try {
 		r = getProtocol().fetch(msgsets, command.toString());
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (CommandFailedException cfx) {
 		// Ignore these, as per RFC 2180
@@ -1421,7 +1415,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 					"Messages have been removed");
 		p.storeFlags(ms, flag, value);
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1659,7 +1652,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
             } catch (ConnectionException cex) {
-                ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
                 throw new StoreClosedException(store, cex.getMessage());
             } catch (ProtocolException pex) {
                 throw new MessagingException(pex.getMessage(), pex);
@@ -1700,7 +1692,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
 	    } catch (ConnectionException cex) {
-                ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
                 throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1714,7 +1705,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(true);
 		return total;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1752,7 +1742,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1766,7 +1755,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		keepConnectionAlive(true);
 		return recent;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1793,7 +1781,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		// return the count .. bah, not worth it.
 		return -1;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1810,7 +1797,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return matches.length; // NOTE: 'matches' is never null
 	    }
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // Shouldn't happen
@@ -1840,7 +1826,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return matches.length; // NOTE: 'matches' is never null
 	    }
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // Shouldn't happen
@@ -2067,7 +2052,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else
 			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
-            ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
@@ -2183,7 +2167,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    else
 			throw new MessagingException(cfx.getMessage(), cfx);
 		} catch (ConnectionException cex) {
-            ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
@@ -2240,7 +2223,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		else
 		    throw new MessagingException(cfx.getMessage(), cfx);
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		// Bad bad server ..
@@ -2327,7 +2309,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		throw sex;
 	    return super.search(term);
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
@@ -2374,7 +2355,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // too complex for IMAP
 	    return super.search(term, msgs);
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
@@ -2440,7 +2420,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // too complex for IMAP
 	    throw new MessagingException(sex.getMessage(), sex);
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    // bug in our IMAP layer ?
@@ -2577,7 +2556,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		}
 	    }
 	} catch(ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2619,7 +2597,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		}
 	    }
 	} catch(ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2679,7 +2656,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return msgs;
 	    }
 	} catch(ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2722,7 +2698,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    uidTable.put(Long.valueOf(uid), m);
 		}
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -2823,7 +2798,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    msgs[i] = getMessageBySeqNumber(nums[i]);
 	    }
 	} catch(ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -3302,7 +3276,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		// return the count .. bah, not worth it.
 		return -1;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -3565,7 +3538,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// time we get here and our protocol object will have been
 	// released, so if we no longer have a protocol object we base
 	// this decision on whether we *think* the folder is open.
-    ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	if ((protocol != null && cex.getProtocol() == protocol) ||
 		(protocol == null && !reallyClosed))
             throw new FolderClosedException(this, cex.getMessage(), cex);
