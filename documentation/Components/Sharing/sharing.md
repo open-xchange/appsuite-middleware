@@ -258,12 +258,14 @@ __Administrator Notes:__
 
 ## Share Notifications
 
-Along with sharing as a whole, a new notification feature is introduced, that notifies guest users and optionally also internal users about newly created shares or links via email. For some of those notifications it is necessary to configure a special mail transport account that is used to deliver system messages or is used if the user who triggers a message has no configured webmail account.
+With the new sharing concept, notification mails can be sent out to the permission entities (i.e. internal or guest users) of folders or items. Mechanisms exist to send out such mails implicitly or explicitly. Notifications are sent out implicitly, if externals are invited as guests and can also be sent out for internal invitations, if configured so. The client (e.g. App Suite UI) decides on its own whether implicit notifications shall be sent when updating a folders or items permissions. Besides there are separate API calls for sending out notification messages explicitly. Its on the client to provide this functionality to its users. This makes it possible to re-send a link to a folder or item to an existing permission entity.
+
+Sending out links to shared folders and items is not the only case for notification messages, it can also be necessary to send out system notifications to guest users. Currently this is the case when a guest user secured his account with a password and needs to reset that password, because he cannot remember.
 
 __Administrator Notes:__
 
-* The special transport account is configured in `noreply.properties`. All properties therein are config-cascade capable, so their values can be sensitive to the current user or context.
-* It is possible to disable the notification of internal users about shared folders or items at all by setting `com.openexchange.share.notifyInternal` in `share.properties` to `false`.
+* A special transport must be configured for system notifications and cases where the sharing user has no configured webmail account. This transport is configured in `noreply.properties`. All properties therein are config-cascade capable, so their values can be sensitive to the current user or context.
+* It is possible to disable the implicit notification of internal users about shared folders or items at all by setting `com.openexchange.share.notifyInternal` in `share.properties` to `false`.
 * The layout of notifications mails can be changed via `as-config.yml`. All available properties are defined and explained in `as-config-defaults.yml`.
 
 ## API Access
