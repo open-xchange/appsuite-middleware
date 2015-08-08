@@ -75,6 +75,8 @@ import com.openexchange.session.inspector.SessionInspectorChain;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.inspector.internal.ServiceSet;
 import com.openexchange.session.inspector.internal.SessionInspectorChainImpl;
+import com.openexchange.startup.ThreadControlService;
+import com.openexchange.startup.impl.ThreadControl;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -93,6 +95,7 @@ public final class GlobalActivator implements BundleActivator {
     private volatile ServiceRegistration<StringParser> parserRegistration;
     private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
     private volatile ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
+    private volatile ServiceRegistration<ThreadControlService> threadControlRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
 
 
@@ -136,6 +139,8 @@ public final class GlobalActivator implements BundleActivator {
             }
 
             metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
+
+            threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
 
             logger.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -234,23 +239,30 @@ public final class GlobalActivator implements BundleActivator {
                 this.trackers = null;
             }
             ServiceHolderInit.getInstance().stop();
-            final Initialization initialization = this.initialization;
+
+            Initialization initialization = this.initialization;
             if (null != initialization) {
-                initialization.stop();
                 this.initialization = null;
+                initialization.stop();
             }
             shutdownStringParsers();
 
+            ServiceRegistration<ThreadControlService> threadControlRegistration = this.threadControlRegistration;
+            if (null != threadControlRegistration) {
+                this.threadControlRegistration = null;
+                threadControlRegistration.unregister();
+            }
+
             ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
             if (null != metaContributorsRegistration) {
-                metaContributorsRegistration.unregister();
                 this.metaContributorsRegistration = null;
+                metaContributorsRegistration.unregister();
             }
 
             ServiceRegistration<SessionInspectorChain> inspectorChainRegistration = this.inspectorChainRegistration;
             if (null != inspectorChainRegistration) {
-                inspectorChainRegistration.unregister();
                 this.inspectorChainRegistration = null;
+                inspectorChainRegistration.unregister();
             }
 
             OXExceptionInterceptorRegistration.dropInstance();

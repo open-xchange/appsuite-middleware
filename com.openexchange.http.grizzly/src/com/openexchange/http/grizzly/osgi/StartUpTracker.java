@@ -72,7 +72,9 @@ import com.openexchange.http.grizzly.service.http.OSGiCleanMapper;
 import com.openexchange.http.grizzly.service.http.OSGiHandler;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 import com.openexchange.http.grizzly.service.http.OSGiServletHandler;
+import com.openexchange.http.grizzly.util.ThreadControlReference;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.startup.ThreadControlService;
 
 /**
  * {@link StartUpTracker}
@@ -140,6 +142,11 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
     public void removedService(final ServiceReference<SignalStartedService> reference, final SignalStartedService service) {
         synchronized (grizzlyConfig) {
             OSGiMainHandler.markShutdownRequested();
+
+            ThreadControlService threadControl = ThreadControlReference.getThreadControlService();
+            if (null != threadControl) {
+                threadControl.interruptAll();
+            }
 
             if (!grizzlyConfig.isShutdownFast()) {
                 // Check the number of seconds to await the shut-down

@@ -79,6 +79,7 @@ import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -196,6 +197,9 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             registerService(Reloadable.class, grizzlyConfig);
+
+            // Track the thread control
+            track(ThreadControlService.class, new ThreadControlTracker(context));
 
             // Finally start listeners if server start-up is completed
             track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
