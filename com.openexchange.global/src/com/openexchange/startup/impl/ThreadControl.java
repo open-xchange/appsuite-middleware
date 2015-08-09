@@ -57,7 +57,7 @@ import com.openexchange.startup.ThreadControlService;
 
 
 /**
- * {@link ThreadControl} - The USM-JSON thread control.
+ * {@link ThreadControl} - The singleton thread control.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,7 +85,7 @@ public class ThreadControl implements ThreadControlService {
      */
     private ThreadControl() {
         super();
-        threads = new ConcurrentHashMap<Thread, Object>(256);
+        threads = new ConcurrentHashMap<Thread, Object>(256, 0.9F, 1);
     }
 
     @Override
