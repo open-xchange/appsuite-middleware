@@ -118,6 +118,8 @@ public class GuardApis {
                 if (cookie.getValue().equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     extractedCookies.add(new Cookie(name, cookie.getValue()));
                 }
+            } else if ("JSESSIONID".equals(name)) {
+                extractedCookies.add(new Cookie(name, cookie.getValue()));
             }
         }
         return extractedCookies;
