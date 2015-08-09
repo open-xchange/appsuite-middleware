@@ -217,12 +217,15 @@ public class ShareHelper {
             /*
              * remove all shares targeting the documents
              */
-            Connection connection = ConnectionHolder.CONNECTION.get();
-            try {
-                session.setParameter(Connection.class.getName(), connection);
-                Services.getService(ShareService.class).deleteTargets(session, shareTargets, null);
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
+            ShareService service = Services.getService(ShareService.class);
+            if (null != service) {
+                Connection connection = ConnectionHolder.CONNECTION.get();
+                try {
+                    session.setParameter(Connection.class.getName(), connection);
+                    service.deleteTargets(session, shareTargets, null);
+                } finally {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
         }
     }
@@ -248,12 +251,15 @@ public class ShareHelper {
             /*
              * remove all shares targeting the documents in the folder
              */
-            Connection connection = ConnectionHolder.CONNECTION.get();
-            try {
-                session.setParameter(Connection.class.getName(), connection);
-                Services.getService(ShareService.class).deleteTargets(session, Collections.singletonList(shareTarget), true);
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
+            ShareService service = Services.getService(ShareService.class);
+            if (null != service) {
+                Connection connection = ConnectionHolder.CONNECTION.get();
+                try {
+                    session.setParameter(Connection.class.getName(), connection);
+                    service.deleteTargets(session, Collections.singletonList(shareTarget), true);
+                } finally {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
         }
     }
@@ -300,14 +306,17 @@ public class ShareHelper {
         /*
          * remove shares targeting the document for all affected users
          */
-        Connection connection = ConnectionHolder.CONNECTION.get();
-        try {
-            session.setParameter(Connection.class.getName(), connection);
-            Services.getService(ShareService.class).deleteTargets(session, Collections.singletonList(shareTarget), affectedUserIDs);
-            return true;
-        } finally {
-            session.setParameter(Connection.class.getName(), null);
+        ShareService shareService = Services.getService(ShareService.class);
+        if (null != shareService) {
+            Connection connection = ConnectionHolder.CONNECTION.get();
+            try {
+                session.setParameter(Connection.class.getName(), connection);
+                shareService.deleteTargets(session, Collections.singletonList(shareTarget), affectedUserIDs);
+            } finally {
+                session.setParameter(Connection.class.getName(), null);
+            }
         }
+        return true;
     }
 
     private static List<FileStorageObjectPermission> handleNewGuestPermissions(Session session, FileStorageFileAccess access, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
