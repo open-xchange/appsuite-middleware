@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
@@ -332,6 +333,9 @@ public class ShareHelper {
 
                 List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
                 ShareService shareService = Services.getService(ShareService.class);
+                if (null == shareService) {
+                    throw ServiceExceptionCode.absentService(ShareService.class);
+                }
                 int owner = document.getCreatedBy();
                 if (0 >= owner) {
                     owner = access.getFileMetadata(
