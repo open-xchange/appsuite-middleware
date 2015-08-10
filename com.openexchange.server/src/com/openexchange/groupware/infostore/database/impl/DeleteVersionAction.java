@@ -61,8 +61,6 @@ import com.openexchange.session.Session;
 
 public class DeleteVersionAction extends AbstractDocumentListAction {
 
-    private int batchSize = 1000;
-
     /**
      * Initializes a new {@link DeleteVersionAction}.
      */
@@ -95,23 +93,72 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
     }
 
     @Override
+    protected void undoAction() throws OXException {
+        if (getDocuments().isEmpty()) {
+            return;
+        }
+        final List<DocumentMetadata> documents = getDocuments();
+        final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+        for (final DocumentMetadata doc : getDocuments()) {
+            updates.add(new Update(getQueryCatalog().getVersionInsert()) {
+                @Override
+                public void fillStatement() throws SQLException {
+                    fillStmt(stmt,getQueryCatalog().getWritableVersionFields(),doc,Integer.valueOf(getContext().getContextId()));
+                }
+            });
+        }
+        for (int j = 0; j < slices.length; j++) {
+            updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slices[j])){
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+            });
+        }
+
+        doUpdates(updates);
+    }
+
+    @Override
     public void perform() throws OXException {
+        /*
+         * replaces entries in the del_infostore_document table for each document version to be deleted, then removes the document
+         * versions from the infostore_document table.
+         */
         List<DocumentMetadata> documents = getDocuments();
         if (null == documents || documents.isEmpty()) {
             return;
         }
         /*
-         * collect batches to remove entries from the infostore_document table
+         * prepare update batches for
          */
-        final int contextID = getContext().getContextId();
+        final Integer contextID = Integer.valueOf(getContext().getContextId());
         List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length);
+        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length * 2);
         for (int i = 0; i < slices.length; i++) {
-            updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, slices[i])) {
+            final List<DocumentMetadata> slice = slices[i];
+            /*
+             * add batches to replace any values in the del_infostore_document table
+             */
+            updates.add(new Update(getQueryCatalog().getReplace(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slice.size())) {
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    stmt.setInt(1, contextID);
+                    int parameterIndex = 1;
+                    for (DocumentMetadata document : slice) {
+                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDelVersionFields(), document, contextID);
+                    }
+                }
+            });
+            /*
+             * add batches to remove values from the infostore_document table
+             */
+            updates.add(new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT, slice)) {
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, contextID.intValue());
                 }
             });
         }
@@ -121,28 +168,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
         doUpdates(updates);
     }
 
-    @Override
-    protected void undoAction() throws OXException {
-        List<DocumentMetadata> documents = getDocuments();
-        if (null == documents || documents.isEmpty()) {
-            return;
-        }
-        /*
-         * re-insert versions into the infostore_document table
-         */
-        final Integer contextID = Integer.valueOf(getContext().getContextId());
-        List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
-        for (final DocumentMetadata doc : getDocuments()) {
-            updates.add(new Update(getQueryCatalog().getVersionInsert()) {
-
-                @Override
-                public void fillStatement() throws SQLException {
-                    fillStmt(stmt, getQueryCatalog().getWritableVersionFields(), doc, contextID);
-                }
-            });
-        }
-        doUpdates(updates);
-    }
+    private int batchSize = 1000;
 
     public int getBatchSize() {
         return batchSize;
