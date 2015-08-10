@@ -77,6 +77,7 @@ import com.openexchange.caldav.mixins.Invite;
 import com.openexchange.caldav.mixins.MaxDateTime;
 import com.openexchange.caldav.mixins.MinDateTime;
 import com.openexchange.caldav.mixins.Organizer;
+import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
@@ -124,7 +125,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         super(factory, url, folder);
         this.factory = factory;
         includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this));
+            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this), new ScheduleDefaultCalendarURL(factory));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
