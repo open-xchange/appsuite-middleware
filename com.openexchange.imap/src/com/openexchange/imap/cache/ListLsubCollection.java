@@ -2372,8 +2372,9 @@ final class ListLsubCollection implements Serializable {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
+            sb.append(", subscribed=\"").append(isSubscribed()).append('"');
             sb.append(", parent=");
             if (null == parent) {
                 sb.append("null");
