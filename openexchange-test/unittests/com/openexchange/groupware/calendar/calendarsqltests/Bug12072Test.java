@@ -49,16 +49,16 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import com.openexchange.exception.OXException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 
-
 public class Bug12072Test extends CalendarSqlTest {
+
     /**
      * Test for <a href= "http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=12072">bug #12072</a>
      *
@@ -66,12 +66,12 @@ public class Bug12072Test extends CalendarSqlTest {
      */
     public void testShouldNotIndicateConflictingResources() throws OXException {
         final long today = getTools().normalizeLong(System.currentTimeMillis());
-        final int weekDayOfToday;
-        {
-            final Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-            cal.setTimeInMillis(today);
-            weekDayOfToday = cal.get(Calendar.DAY_OF_WEEK);
-        }
+        final int weekDayOfToday, weekDayOfTomorrow;
+        final Calendar cal = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTimeInMillis(today);
+        weekDayOfToday = cal.get(Calendar.DAY_OF_WEEK);
+        cal.add(Calendar.DAY_OF_WEEK, 1);
+        weekDayOfTomorrow = cal.get(Calendar.DAY_OF_WEEK);
         Date start = new Date(today + (10 * Constants.MILLI_HOUR));
         Date end = new Date(today + (11 * Constants.MILLI_HOUR));
         // Create Weekly recurrence
@@ -101,7 +101,7 @@ public class Bug12072Test extends CalendarSqlTest {
         update.setContext(ctx);
         update.setTimezone("utc");
         update.setRecurrenceType(CalendarDataObject.WEEKLY);
-        update.setDays(convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(weekDayOfToday + 1));
+        update.setDays(convertCalendarDAY_OF_WEEK2CalendarDataObjectDAY_OF_WEEK(weekDayOfTomorrow));
         update.setTitle("Everything can happen on a X1-day");
         update.setInterval(1);
         update.setOccurrence(5);
