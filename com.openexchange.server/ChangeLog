@@ -1,3 +1,7 @@
+* 2015-08-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40298: Supply Lightning client with more properties during account bootstrapping  
+
 * 2015-07-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 40277: NPE in conflict handler.

@@ -85,6 +85,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
@@ -131,10 +132,16 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override
-                public PropertyMixin create(final SessionHolder sessionHolder) {
+                public PropertyMixin create(SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
+            });
+            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
+                @Override
+                public PropertyMixin create(SessionHolder sessionHolder) {
+                    return new CurrentUserPrincipal(sessionHolder);
+                }
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
