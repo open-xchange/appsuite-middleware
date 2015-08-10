@@ -1,6 +1,7 @@
 * 2015-08-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 40055: Ensure valid JSON responses are written on multiple requests
+ - Fix for bug 40207: Only register Dovecot Push if IMAP provider is available
 
 * 2015-08-10 - tobias.friedrich@open-xchange.com
 
