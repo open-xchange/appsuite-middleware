@@ -523,7 +523,7 @@ public final class ListLsubCache {
             throw MimeMailException.handleMessagingException(e);
         }
     }
-
+    
     /**
      * Gets the pretty-printed cache content
      *
@@ -532,8 +532,20 @@ public final class ListLsubCache {
      * @return The pretty-printed content or <code>null</code>
      */
     public static String prettyPrintCache(int accountId, Session session) {
+        return prettyPrintCache(accountId, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the pretty-printed cache content
+     *
+     * @param accountId The account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The pretty-printed content or <code>null</code>
+     */
+    public static String prettyPrintCache(int accountId, int userId, int contextId) {
         try {
-            KeyedCache cache = getCache(session);
+            KeyedCache cache = getCache(userId, contextId);
 
             // Get the associated map
             ConcurrentMap<Integer, Future<ListLsubCollection>> map = cache.get();
