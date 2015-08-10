@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,28 @@
 
 package com.openexchange.html.bugtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.html.AbstractSanitizing;
 
-
 /**
- * {@link Bug21532Test}
- *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * {@link Bug40189Test}
+ * 
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.0
  */
-public class Bug21532Test extends AbstractSanitizing {
+public class Bug40189Test extends AbstractSanitizing {
     @Test
-    public void testConvertConditionalCommentsWihoutWhitespaces() {
-        String content = getHtmlService().getConformHTML("<!--[if !supportLists]-->", "UTF-8");
+    public void testInsecureHref() {
 
-        String expected = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><!-- [if !supportLists]--></body><!-- <![endif] --></html>";
+        String content = "<a href=3D\"http://neon-response.hmmh.de/argon/jsp/DoubleOptNLZG=" +
+            ".jsp?DOINLZGID=3D1SBPO-WgpKBxr3e3AzwHxpL8UI1qj72ypu-bJfhmKYs&SecureAdressKe=" +
+            "y=3Dej7wSI1OsAQcy3wVWJAF%2Bg%3D%3D&amp;SendRedirect=3Dhttp%3A%2F%2Femp-onli=" +
+            "ne.co.uk%2Fnew_registered__%2F%3Fcrm_id%3D%3C%25SecureAdressKey%25%3E\" targ=" +
+            "et=3D\"_blank\"><strong>clicking here</strong></a>";
 
-        assertEquals("Unexpected return value", expected, content);
+        String test = getHtmlService().sanitize(content, null, true, null, null);
+
+        assertTrue("Unexpected return value", test.contains("http://neon-response.hmmh.de/argon/jsp/DoubleOptNLZG=.jsp?DOINLZGID=3D1SBPO-WgpKBxr3e3AzwHxpL8UI1qj72ypu-bJfhmKYs&amp;SecureAdressKe=y=3Dej7wSI1OsAQcy3wVWJAF%2Bg%3D%3D&amp;SendRedirect=3Dhttp%3A%2F%2Femp-onli=ne.co.uk%2Fnew_registered__%2F%3Fcrm_id%3D%3C%25SecureAdressKey%25%3E"));
     }
 }
