@@ -1087,8 +1087,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * Delete documents, all versions and object permissions from database
          */
-        perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
         perform(new DeleteVersionAction(this, QUERIES, context, delVers, session), true);
+        perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
     }
 
@@ -1474,8 +1474,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * Delete documents, all versions and object permissions from database
          */
-        perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
         perform(new DeleteVersionAction(this, QUERIES, context, allVersions, null), true);
+        perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
