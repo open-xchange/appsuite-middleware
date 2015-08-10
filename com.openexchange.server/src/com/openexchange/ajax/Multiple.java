@@ -273,7 +273,19 @@ public class Multiple extends SessionServlet {
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
                     if (null != jsonInOut) {
-                        respArr.put(jsonInOut.getOutputObject());
+                        JSONValue outputObj = jsonInOut.getOutputObject();
+                        if (null == outputObj) {
+                            OXJSONWriter jsonWriter = new OXJSONWriter();
+                            jsonWriter.object();
+                            try {
+                                ResponseWriter.writeException(OXException.general("Failed to handle JSON request: " + jsonInOut.getInputObject().toString()), jsonWriter, localeFrom(session), false);
+                            } finally {
+                                jsonWriter.endObject();
+                            }
+                            respArr.put(jsonWriter.getObject());
+                        } else {
+                            respArr.put(outputObj);
+                        }
                     }
                 }
             } finally {

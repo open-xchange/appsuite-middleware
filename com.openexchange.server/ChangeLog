@@ -1,3 +1,7 @@
+* 2015-08-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40055: Ensure valid JSON responses are written on multiple requests
+
 * 2015-08-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40298: Supply Lightning client with more properties during account bootstrapping  
