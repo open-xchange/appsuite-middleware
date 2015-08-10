@@ -54,10 +54,25 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link ContactHalo} - The singleton contact halo service.
+ */
+@SingletonService
 public interface ContactHalo {
 
+    /**
+     * Investigates specified contact using given provider.
+     *
+     * @param provider The provider identifier
+     * @param contact The contact to investigate
+     * @param req The associated AJAX request
+     * @param session The associated session
+     * @return The investigation result
+     * @throws OXException If operation fails
+     */
     AJAXRequestResult investigate(String provider, Contact contact, AJAXRequestData req, ServerSession session) throws OXException;
 
     /**
@@ -80,6 +95,13 @@ public interface ContactHalo {
      */
     String getPictureETag(Contact contact, ServerSession session) throws OXException;
 
+    /**
+     * Gets the identifiers of all currently known providers
+     *
+     * @param session The associated session
+     * @return A listing of the identifiers of all currently known providers
+     * @throws OXException If listing cannot be returned
+     */
     List<String> getProviders(ServerSession session) throws OXException;
 
 }
