@@ -82,9 +82,6 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		//ICAL
 		tests.addTest( ICalImportTest.suite() );
 
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
-
 		//separate tests for reported bugs
 		tests.addTest( Bug7732Test.suite() );
 //		tests.addTest( Bug7470Test.suite() ); //FIXME
