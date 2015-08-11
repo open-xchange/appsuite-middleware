@@ -52,15 +52,18 @@ package com.openexchange.mail.json.writer;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.TimeZone;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
@@ -73,7 +76,10 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JsonMessageHandler;
@@ -85,6 +91,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.sun.mail.util.QPDecoderStream;
 
 /**
  * {@link MessageWriter} - Writes {@link MailMessage} instances as JSON strings
@@ -241,7 +248,31 @@ public final class MessageWriter {
                 handler.setTimeZone(optTimeZone);
             }
             MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
-            parser.parseMailMessage(mail, handler);
+            {
+                ThresholdFileHolder backup = null;
+                try {
+                    parser.parseMailMessage(mail, handler);
+                } catch (OXException e) {
+                    if (!MailExceptionCode.NO_CONTENT.equals(e)) {
+                        throw e;
+                    }
+                    
+                    try {
+                        backup = new ThresholdFileHolder();
+                        mail.writeTo(backup.asOutputStream());
+                        FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
+                        parser.parseMailMessage(MimeMessageConverter.convertMessage(mimeMessage, true), handler);
+                        backup = null; // Avoid preliminary closing
+                    } catch (Exception x) {
+                        // Surrender...
+                        throw e;
+                    }
+                } finally {
+                    if (null != backup) {
+                        backup.close();
+                    }
+                }
+            }
             if (null != warnings) {
                 List<OXException> list = parser.getWarnings();
                 if (!list.isEmpty()) {

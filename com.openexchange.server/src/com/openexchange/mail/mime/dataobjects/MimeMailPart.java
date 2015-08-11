@@ -68,6 +68,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -76,6 +77,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ManagedMimeMessage;
@@ -84,15 +86,19 @@ import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.QPDecoderStream;
 
 /**
  * {@link MimeMailPart} - Represents a MIME part as per RFC 822.
@@ -337,10 +343,34 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         if (isMulti) {
             return null;
         }
+        
+        ThresholdFileHolder backup = null;
         try {
             final Object obj = part.getContent();
             if (obj instanceof MimeMessage) {
-                return MimeMessageConverter.convertMessage((MimeMessage) obj);
+                MailMessage mContent;
+                
+                MimeMessage nestedMessage = (MimeMessage) obj;
+                String encoding = MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, null, part);
+                if ("quoted-printable".equalsIgnoreCase(encoding)) {
+                    backup = new ThresholdFileHolder();
+                    backup.write(new QPDecoderStream(MimeMessageUtility.getStreamFromPart(nestedMessage)));
+                    FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
+                    nestedMessage = mimeMessage;
+                    mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
+                    backup = null; // Avoid preliminary closing
+                } else if ("base64".equalsIgnoreCase(encoding)) {
+                    backup = new ThresholdFileHolder();
+                    backup.write(new BASE64DecoderStream(MimeMessageUtility.getStreamFromPart(nestedMessage)));
+                    FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
+                    nestedMessage = mimeMessage;
+                    mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
+                    backup = null; // Avoid preliminary closing
+                } else {
+                    mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
+                }
+                
+                return mContent;
             } else if (obj instanceof Part) {
                 return MimeMessageConverter.convertPart((Part) obj, false);
             } else {
@@ -357,9 +387,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
+        } finally {
+            if (null != backup) {
+                backup.close();
+            }
         }
     }
-
+    
     @Override
     public DataHandler getDataHandler() throws OXException {
         final Part part = this.part;
