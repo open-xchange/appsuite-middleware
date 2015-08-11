@@ -75,4 +75,9 @@ public class DefaultMailProviderRegistration implements MailProviderRegistration
         return name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }
