@@ -1,3 +1,7 @@
+* 2015-07-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 39862: Null guard
+
 * 2015-07-15 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 39767: Introduced an update task along side the create table service task for the 'snippetAttachmentBinary' table
@@ -17,6 +21,10 @@
 * 2015-07-09 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
+
+* 2015-07-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39451: Orderly invalidate & removed cached IMAPStore instances which lost connectivity
 
 * 2015-07-08 - martin.herfurth@open-xchange.com
 

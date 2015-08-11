@@ -59,6 +59,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Tue Aug 04 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-08-03 (2650)
 * Thu Jul 23 2015 Carsten Hoeger <choeger@open-xchange.com>
