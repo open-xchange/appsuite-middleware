@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-06 14:30+0100\n"
+"PO-Revision-Date: 2015-08-11 14:32+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -4475,81 +4475,6 @@ msgstr "Unerwarteter Fehler: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Ungültige ID. Ressourcen-ID fehlt."
 
-#. XMPP
-#. * The client has sent a message that is malformed or cannot be processed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
-msgid ""
-"The client has sent a message that is malformed or cannot be processed: %1$s"
-msgstr ""
-"Der Client hat eine Nachricht gesendet, die fehlerhaft ist bzw. nicht "
-"verarbeitet werden kann: %1$s"
-
-#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
-msgid ""
-"The server could not process the stanza because of a misconfiguration or an "
-"otherwise-undefined internal server error: %1$s"
-msgstr ""
-"Stanza konnte vom Server wegen einer fehlerhaften Konfiguration oder einem "
-"internen, nicht näher bestimmtem Server-Fehler nicht verarbeitet werden: %1$s"
-
-#. * The recipient you tried to reach is currently unavailable
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-msgid "The recipient you tried to reach is currently unavailable: %1$s"
-msgstr ""
-"Der von Ihnen angeforderte Teilnehmer ist derzeit nicht verfügbar: %1$s"
-
-#. * Your session is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
-msgid "Your session is invalid."
-msgstr "Ihre Sitzung ist ungültig."
-
-#. * You are no member of the GroupDispatcher: %1$s. Please join first.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:95
-msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
-msgstr ""
-"Sie sind kein Mitglied von GroupDispatcher: %1$s. Bitte treten Sie erst bei."
-
-#. * The request didn't yield any response.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:98
-msgid "The request didn't yield any response."
-msgstr "Die Anfrage ergab kein Ergebnis."
-
-#. * The GroupDispatcher %1$s was already disposed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
-#, fuzzy
-msgid "The GroupDispatcher %1$s was already disposed."
-msgstr "Der GroupDispatcher %1$s wurde bereits entfernt."
-
-#. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
-msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
-msgstr ""
-"Die Verarbeitung eines Stanza von %2$s nach %3$s durch den GroupDispatcher "
-"%1$s ist fehlgeschlagen."
-
-#. * Joining the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
-msgid "Joining the GroupDispatcher %1$s failed."
-msgstr "Beitreten zum GroupDispatcher %1$s ist fehlgeschlagen."
-
-#. * Leaving the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
-msgid "Leaving the GroupDispatcher %1$s failed."
-msgstr "Verlassen des GroupDispatcher %1$s ist fehlgeschlagen."
-
-#. * ResponseChannel timed out while simulating synchronous behaviour.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
-msgid "ResponseChannel timed out while simulating synchronous behaviour."
-msgstr ""
-"ResponseChannel-Zeitüberschreitung während der Simulation synchronen "
-"Verhaltens."
-
-#. * You are already a member of the GroupDispatcher %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
-msgid "You are already a member of the GroupDispatcher %1$s"
-msgstr "Sie sind bereits Mitglied des GroupDispatcher %1$s"
-
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -4895,7 +4820,7 @@ msgstr "Anlagen"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
 #, fuzzy
 msgid "Label"
-msgstr "Bezeichner"
+msgstr "Kennzeichen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:65
 msgid "Note"
@@ -5360,7 +5285,6 @@ msgstr ""
 "entfernen Sie das Zeichen und versuchen Sie es erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
-#, fuzzy
 msgid ""
 "The query \"%1$s\" contains too many patterns. Please shorten the query and "
 "try again."
@@ -7365,7 +7289,6 @@ msgstr "Geschätzte Dauer"
 
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:99
-#, fuzzy
 msgid "Trip meter"
 msgstr "Entfernung"
 
@@ -7763,7 +7686,6 @@ msgstr ""
 "%2$d gefunden werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:63
-#, fuzzy
 msgid ""
 "The provided mail address %1$s is invalid! It cannot be added to guest "
 "administration."
@@ -7772,7 +7694,6 @@ msgstr ""
 "Administration hinzugefügt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:65
-#, fuzzy
 msgid ""
 "The provided mail address is empty! It cannot be added to guest "
 "administration."
@@ -7781,7 +7702,6 @@ msgstr ""
 "Administration hinzugefügt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:67
-#, fuzzy
 msgid "The new password might not be empty! Please provide a password."
 msgstr ""
 "Das neue Passwort darf nicht leer sein. Bitte geben Sie ein Passwort an."
@@ -8889,7 +8809,6 @@ msgid "Invalid JSON data received from client"
 msgstr "Ungültige JSON-Daten vom Client erhalten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
-#, fuzzy
 msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
 msgstr ""
 "Der Client hat den nicht zulässigen Anfrageparameter \"%1$s\" in der URI "
@@ -11877,6 +11796,60 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The client has sent a message that is malformed or cannot be processed: "
+#~ "%1$s"
+#~ msgstr ""
+#~ "Der Client hat eine Nachricht gesendet, die fehlerhaft ist bzw. nicht "
+#~ "verarbeitet werden kann: %1$s"
+
+#~ msgid ""
+#~ "The server could not process the stanza because of a misconfiguration or "
+#~ "an otherwise-undefined internal server error: %1$s"
+#~ msgstr ""
+#~ "Stanza konnte vom Server wegen einer fehlerhaften Konfiguration oder "
+#~ "einem internen, nicht näher bestimmtem Server-Fehler nicht verarbeitet "
+#~ "werden: %1$s"
+
+#~ msgid "The recipient you tried to reach is currently unavailable: %1$s"
+#~ msgstr ""
+#~ "Der von Ihnen angeforderte Teilnehmer ist derzeit nicht verfügbar: %1$s"
+
+#~ msgid "Your session is invalid."
+#~ msgstr "Ihre Sitzung ist ungültig."
+
+#~ msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
+#~ msgstr ""
+#~ "Sie sind kein Mitglied von GroupDispatcher: %1$s. Bitte treten Sie erst "
+#~ "bei."
+
+#~ msgid "The request didn't yield any response."
+#~ msgstr "Die Anfrage ergab kein Ergebnis."
+
+#, fuzzy
+#~ msgid "The GroupDispatcher %1$s was already disposed."
+#~ msgstr "Der GroupDispatcher %1$s wurde bereits entfernt."
+
+#~ msgid ""
+#~ "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
+#~ msgstr ""
+#~ "Die Verarbeitung eines Stanza von %2$s nach %3$s durch den "
+#~ "GroupDispatcher %1$s ist fehlgeschlagen."
+
+#~ msgid "Joining the GroupDispatcher %1$s failed."
+#~ msgstr "Beitreten zum GroupDispatcher %1$s ist fehlgeschlagen."
+
+#~ msgid "Leaving the GroupDispatcher %1$s failed."
+#~ msgstr "Verlassen des GroupDispatcher %1$s ist fehlgeschlagen."
+
+#~ msgid "ResponseChannel timed out while simulating synchronous behaviour."
+#~ msgstr ""
+#~ "ResponseChannel-Zeitüberschreitung während der Simulation synchronen "
+#~ "Verhaltens."
+
+#~ msgid "You are already a member of the GroupDispatcher %1$s"
+#~ msgstr "Sie sind bereits Mitglied des GroupDispatcher %1$s"
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"
