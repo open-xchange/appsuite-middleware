@@ -137,109 +137,106 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
+
         addLogProperties(requestData, false);
-        final List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
+        List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
         try {
-            try {
-                final AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
+            AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
-                /*
-                 * Set request context
-                 */
-                RequestContextHolder.set(buildRequestContext(modifiedRequestData));
+            /*
+             * Set request context
+             */
+            RequestContextHolder.set(buildRequestContext(modifiedRequestData));
 
-                final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
-                if (factory == null) {
-                    throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
-                }
-
-                final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
-                if (action == null) {
-                    throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
-                }
-
-                /*
-                 * Validate request headers for caching
-                 */
-                final AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
-                if (etagResult != null) {
-                    return etagResult;
-                }
-
-                /*
-                 * Validate request headers for resume
-                 */
-                final AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
-                if (failedResult != null) {
-                    return failedResult;
-                }
-
-                /*
-                 * Check for action annotations
-                 */
-                for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
-                    if (annotationProcessor.handles(action)) {
-                        annotationProcessor.process(action, modifiedRequestData, session);
-                    }
-                }
-
-                /*
-                 * State already initialized for module?
-                 */
-                if (factory instanceof AJAXStateHandler) {
-                    final AJAXStateHandler handler = (AJAXStateHandler) factory;
-                    if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
-                        handler.initialize(state);
-                    }
-                }
-                modifiedRequestData.setState(state);
-
-                /*
-                 * Ensure requested format
-                 */
-                if (requestData.getFormat() == null) {
-                    requestData.setFormat("apiResponse");
-                }
-
-                /*
-                 * Perform request
-                 */
-                final AJAXRequestResult result = callAction(action, modifiedRequestData, session);
-                if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
-                    // No further processing
-                    return result;
-                }
-
-                return customizeResult(modifiedRequestData, result, customizers, session);
-            } catch (final RuntimeException e) {
-                if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
-                    // Handle special Rhino wrapper error
-                    final Throwable wrapped = e.getCause();
-                    if (wrapped instanceof OXException) {
-                        throw (OXException) wrapped;
-                    }
-                }
-
-                // Wrap unchecked exception
-                addLogProperties(requestData, true);
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                RequestContextHolder.reset();
+            AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
+            if (factory == null) {
+                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
             }
-        } catch (OXException x) {
-        	for (AJAXActionCustomizer customizer : customizers) {
-				if (customizer instanceof AJAXExceptionHandler) {
-					try {
-						AJAXExceptionHandler exceptionHandler = (AJAXExceptionHandler) customizer;
-						exceptionHandler.exceptionOccurred(requestData, x, session);
-					} catch (Throwable t) {
-						// Discard. Not our problem, we need to get on with this!
-					}
-				}
-			}
-        	throw x;
-        }
 
+            AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
+            if (action == null) {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
+            }
+
+            /*
+             * Validate request headers for caching
+             */
+            AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
+            if (etagResult != null) {
+                return etagResult;
+            }
+
+            /*
+             * Validate request headers for resume
+             */
+            AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
+            if (failedResult != null) {
+                return failedResult;
+            }
+
+            /*
+             * Check for action annotations
+             */
+            for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
+                if (annotationProcessor.handles(action)) {
+                    annotationProcessor.process(action, modifiedRequestData, session);
+                }
+            }
+
+            /*
+             * State already initialized for module?
+             */
+            if (factory instanceof AJAXStateHandler) {
+                final AJAXStateHandler handler = (AJAXStateHandler) factory;
+                if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
+                    handler.initialize(state);
+                }
+            }
+            modifiedRequestData.setState(state);
+
+            /*
+             * Ensure requested format
+             */
+            if (requestData.getFormat() == null) {
+                requestData.setFormat("apiResponse");
+            }
+
+            /*
+             * Perform request
+             */
+            AJAXRequestResult result = callAction(action, modifiedRequestData, session);
+            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                // No further processing
+                return result;
+            }
+
+            return customizeResult(modifiedRequestData, result, customizers, session);
+        } catch (OXException e) {
+            for (AJAXActionCustomizer customizer : customizers) {
+                if (customizer instanceof AJAXExceptionHandler) {
+                    try {
+                        ((AJAXExceptionHandler) customizer).exceptionOccurred(requestData, e, session);
+                    } catch (Exception x) {
+                        // Discard. Not our problem, we need to get on with this!
+                    }
+                }
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
+                // Handle special Rhino wrapper error
+                Throwable wrapped = e.getCause();
+                if (wrapped instanceof OXException) {
+                    throw (OXException) wrapped;
+                }
+            }
+
+            // Wrap unchecked exception
+            addLogProperties(requestData, true);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            RequestContextHolder.reset();
+        }
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
