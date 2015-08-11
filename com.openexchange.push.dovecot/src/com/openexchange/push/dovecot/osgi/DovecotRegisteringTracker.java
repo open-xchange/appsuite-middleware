@@ -65,8 +65,8 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.mail.MailProviderRegistration;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.MailProvider;
 import com.openexchange.osgi.Tools;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
@@ -90,7 +90,7 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
     private final boolean hazelcastRequired;
     private ServiceRegistration<PushManagerService> reg;
     private HazelcastInstance hzInstance;
-    private MailProvider impProvider;
+    private MailProviderRegistration imapRegistration;
     private HazelcastConfigurationService hzConfigService;
 
     /**
@@ -112,14 +112,14 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
      */
     public Filter getFilter() throws InvalidSyntaxException {
         if (hazelcastRequired) {
-            return Tools.generateServiceFilter(context, MailProvider.class, HazelcastInstance.class, HazelcastConfigurationService.class);
+            return Tools.generateServiceFilter(context, MailProviderRegistration.class, HazelcastInstance.class, HazelcastConfigurationService.class);
         }
 
-        return Tools.generateServiceFilter(context, MailProvider.class);
+        return Tools.generateServiceFilter(context, MailProviderRegistration.class);
     }
 
     private boolean allAvailable() {
-        return hazelcastRequired ? (null != impProvider && null != hzInstance && null != hzConfigService) : (null != impProvider);
+        return hazelcastRequired ? (null != imapRegistration && null != hzInstance && null != hzConfigService) : (null != imapRegistration);
     }
 
     @Override
@@ -133,22 +133,19 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
                     return null;
                 }
                 this.hzInstance = (HazelcastInstance) service;
-            } else if (MailProvider.class.isInstance(service)) {
-                Object protocol = reference.getProperty("protocol");
-                if (null == protocol) {
-                    context.ungetService(reference);
-                    return null;
-                }
+            } else if (MailProviderRegistration.class.isInstance(service)) {
+                MailProviderRegistration providerRegistration = (MailProviderRegistration) service;
+                String protocol = providerRegistration.getRegisteredProvider();
                 try {
-                    Protocol p = Protocol.parseProtocol(protocol.toString());
+                    Protocol p = Protocol.parseProtocol(protocol);
                     if (false == p.isSupported("imap")) {
                         context.ungetService(reference);
                         return null;
                     }
 
-                    this.impProvider = (MailProvider) service;
+                    this.imapRegistration = providerRegistration;
                 } catch (OXException e) {
-                    LOG.error("Failed to handle registered MailProvider", e);
+                    LOG.error("Failed to handle registered MailProviderRegistration", e);
                 }
             } else if (HazelcastConfigurationService.class.isInstance(service)) {
                 if (false == hazelcastRequired) {
@@ -186,16 +183,17 @@ public class DovecotRegisteringTracker implements ServiceTrackerCustomizer<Objec
                     this.hzInstance = null;
                     someServiceMissing = true;
                 }
-            } else if (MailProvider.class.isInstance(service)) {
-                if (this.impProvider != null) {
+            } else if (MailProviderRegistration.class.isInstance(service)) {
+                if (this.imapRegistration != null) {
                     try {
-                        Object protocol = reference.getProperty("protocol");
-                        if (null != protocol && Protocol.parseProtocol(protocol.toString()).isSupported("imap")) {
-                            this.impProvider = null;
+                        MailProviderRegistration providerRegistration = (MailProviderRegistration) service;
+                        String protocol = providerRegistration.getRegisteredProvider();
+                        if (null != protocol && Protocol.parseProtocol(protocol).isSupported("imap")) {
+                            this.imapRegistration = null;
                             someServiceMissing = true;
                         }
                     } catch (Exception e) {
-                        LOG.error("Failed to handle unregistered MailProvider", e);
+                        LOG.error("Failed to handle unregistered MailProviderRegistration", e);
                     }
                 }
             } else if (HazelcastConfigurationService.class.isInstance(service)) {
