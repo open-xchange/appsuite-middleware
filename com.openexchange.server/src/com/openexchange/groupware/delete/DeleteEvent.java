@@ -88,6 +88,17 @@ public class DeleteEvent extends EventObject {
      */
     public static final int TYPE_CONTEXT = 5;
 
+    /**
+     * The numerical constant for the anonymous guest users
+     */
+    public static final int SUBTYPE_ANONYMOUS_GUEST = 101;
+
+    /**
+     * The numerical constant for the invited guest users
+     */
+    public static final int SUBTYPE_INVITED_GUEST = 102;
+
+
     private static final long serialVersionUID = 2636570955675454470L;
 
     private transient final Context ctx;
@@ -95,6 +106,8 @@ public class DeleteEvent extends EventObject {
     protected int id;
 
     protected int type;
+
+    protected int subType;
 
     private transient Session session;
 
@@ -109,10 +122,7 @@ public class DeleteEvent extends EventObject {
      * @throws OXException if context object could not be fetched from <code>{@link ContextStorage}</code>
      */
     public DeleteEvent(final Object source, final int id, final int type, final int cid) throws OXException {
-        super(source);
-        this.id = id;
-        this.type = type;
-        ctx = ContextStorage.getInstance().getContext(cid);
+        this(source, id, type, ContextStorage.getInstance().getContext(cid));
     }
 
     /**
@@ -125,9 +135,24 @@ public class DeleteEvent extends EventObject {
      * @param ctx the context
      */
     public DeleteEvent(final Object source, final int id, final int type, final Context ctx) {
+        this(source, id, type, 0, ctx);
+    }
+
+    /**
+     * Initializes a new {@link DeleteEvent}.
+     *
+     * @param source the object on which the Event initially occurred
+     * @param id the object's ID
+     * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
+     *            <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, or <code>{@value #TYPE_CONTEXT}</code>
+     * @param type The object's subtype, or <code>0</code> if not specified
+     * @param ctx the context
+     */
+    public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx) {
         super(source);
         this.id = id;
         this.type = type;
+        this.subType = subType;
         this.ctx = ctx;
     }
 
@@ -158,6 +183,15 @@ public class DeleteEvent extends EventObject {
      */
     public int getType() {
         return type;
+    }
+
+    /**
+     * After checking the type via {@link #getType()}, you may also check against the subtype constants declard in this class.
+     *
+     * @return The subtype, or <code>0</code> if not specified
+     */
+    public int getSubType() {
+        return subType;
     }
 
     /**

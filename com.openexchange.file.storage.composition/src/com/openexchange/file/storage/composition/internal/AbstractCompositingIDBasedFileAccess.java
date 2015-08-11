@@ -1202,7 +1202,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * create copy in target storage
          */
-        File fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
+        DefaultFile fileMetadata = new DefaultFile(getFileMetadata(sourceId, version));
         if (update != null) {
             fileMetadata.copyFrom(update, fields.toArray(new File.Field[fields.size()]));
         }
@@ -1213,6 +1213,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
+        fileMetadata.setVersion(null);
 
         if (newData == null) {
             saveFileMetadata(fileMetadata, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
@@ -1628,13 +1629,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (1 < sourceFile.getNumberOfVersions()) {
-            FileStorageFileAccess targetFileAccess = getFileAccess(targetFolderID);
-            if (false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.FILE_VERSIONS)) {
-                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
-                FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
-                warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
-                    getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
-            }
+            FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+            FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
+            warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
+                getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (null != sourceFile.getObjectPermissions() && 0 < sourceFile.getObjectPermissions().size()) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());

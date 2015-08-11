@@ -104,51 +104,22 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
     }
 
     @Override
-    protected void undoAction() throws OXException {
-        /*
-         * cleans up the del_infostore table again
-         */
-        List<DocumentMetadata> documents = getDocuments();
-        if (null == documents || 0 == documents.size()) {
-            return;
-        }
-        List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
-        for (int i = 0; i < slices.length; i++) {
-            List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, slices[i]);
-            for (String deleteStmt : deleteStmts) {
-                updates.add(new Update(deleteStmt) {
-
-                    @Override
-                    public void fillStatement() throws SQLException {
-                        stmt.setInt(1, getContext().getContextId());
-                    }
-                });
-            }
-        }
-        /*
-         * perform updates
-         */
-        doUpdates(updates);
-    }
-
-    @Override
     public void perform() throws OXException {
         /*
-         * replaces entries in the del_infostore table
+         * replace entries in the del_infostore table only as there's no valuable information in the del_infostore_document table anymore
          */
         List<DocumentMetadata> documents = getDocuments();
         if (null == documents || 0 == documents.size()) {
             return;
         }
-        /*
-         * create update batches
-         */
         final Integer contextID = Integer.valueOf(getContext().getContextId());
         List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
         List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length);
         for (int i = 0; i < slices.length; i++) {
             final List<DocumentMetadata> slice = slices[i];
+            /*
+             * REPLACE INTO del_infostore (...) VALUES (...);
+             */
             updates.add(new Update(getQueryCatalog().getReplace(Table.DEL_INFOSTORE, slice.size())) {
 
                 @Override
@@ -159,6 +130,38 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
                     }
                 }
             });
+        }
+        /*
+         * perform updates
+         */
+        doUpdates(updates);
+    }
+
+    @Override
+    protected void undoAction() throws OXException {
+        /*
+         * clean up the del_infostore table again
+         */
+        List<DocumentMetadata> documents = getDocuments();
+        if (null == documents || 0 == documents.size()) {
+            return;
+        }
+        List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
+        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
+        for (int i = 0; i < slices.length; i++) {
+            /*
+             * DELETE FROM del_infostore WHERE id IN (...) AND cid=...;
+             */
+            List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, slices[i], false);
+            for (String deleteStmt : deleteStmts) {
+                updates.add(new Update(deleteStmt) {
+
+                    @Override
+                    public void fillStatement() throws SQLException {
+                        stmt.setInt(1, getContext().getContextId());
+                    }
+                });
+            }
         }
         /*
          * perform updates

@@ -1084,14 +1084,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
+        perform(new DeleteVersionAction(this, QUERIES, context, delVers, session), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
-        /*
-         * delete object permissions
-         */
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
     }
 
@@ -1474,14 +1471,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
+        perform(new DeleteVersionAction(this, QUERIES, context, allVersions, null), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
-        /*
-         * delete object permissions
-         */
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
@@ -1921,6 +1915,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final User user = session.getUser();
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
 
         InfostoreIterator newIter = null;
         InfostoreIterator modIter = null;
@@ -1988,7 +1983,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
-            final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
             delta = lockedUntilLoader.add(delta, context, locks);
         }
         if (addNumberOfVersions) {

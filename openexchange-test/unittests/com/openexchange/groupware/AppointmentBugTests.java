@@ -58,7 +58,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import junit.framework.TestCase;
+import org.junit.Before;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
@@ -67,6 +67,8 @@ import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -98,7 +100,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-public class AppointmentBugTests extends TestCase {
+public class AppointmentBugTests extends CalendarTest {
 
     int cols[] = new int[] { Appointment.START_DATE, Appointment.END_DATE, Appointment.TITLE, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS, Appointment.FULL_TIME };
     public static final long SUPER_END = 253402210800000L; // 31.12.9999 00:00:00 (GMT)
@@ -108,6 +110,7 @@ public class AppointmentBugTests extends TestCase {
     public static int contextid = 1;
 
     @Override
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
         Init.startServer();
@@ -143,10 +146,6 @@ public class AppointmentBugTests extends TestCase {
         return uStorage.getUserId(u, getContext());
     }
 
-    private static Date decrementDate(final Date d) {
-        return new Date(d.getTime() - 1);
-    }
-
     public static int getUserId() throws Exception {
 
         final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
@@ -173,7 +172,7 @@ public class AppointmentBugTests extends TestCase {
         final SearchIterator<Appointment> si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
         while (si.hasNext()) {
             final Appointment cdao = si.next();
-            CalendarTest.testDelete(cdao);
+            testDelete(cdao);
         }
         si.close();
         DBPool.push(context, readcon);

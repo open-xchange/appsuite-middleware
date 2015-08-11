@@ -89,6 +89,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -345,6 +346,13 @@ public final class MailMessageParser {
                 parseMailContent(mail, handler, prefix, 1);
             }
         } catch (final IOException e) {
+            if ("No content".equals(e.getMessage())) {
+                /*-
+                 * Special JavaMail I/O error to indicate no content available from IMAP server.
+                 * Return the empty string in this case.
+                 */
+                throw MailExceptionCode.NO_CONTENT.create(e, e.getMessage());
+            }
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
             throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
@@ -1053,7 +1061,7 @@ public final class MailMessageParser {
         /*
          * Read content
          */
-        String content = MimeMessageUtility.readContent(mailPart, contentType);
+        String content = MimeMessageUtility.readContent(mailPart, contentType, true);
         if (null == content) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
         }

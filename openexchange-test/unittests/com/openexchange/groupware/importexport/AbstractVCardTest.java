@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import junit.framework.JUnit4TestAdapter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.openexchange.groupware.Init;
@@ -64,12 +63,7 @@ import com.openexchange.tools.session.ServerSessionFactory;
 public class AbstractVCardTest extends AbstractContactTest {
 
 	public final Format format = Format.VCARD;
-	@SuppressWarnings("hiding")
 	public final Importer imp = new VCardImporter(null);
-
-    public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(VCardImportTest.class);
-	}
 
 	@BeforeClass
 	public static void initialize() throws Exception {

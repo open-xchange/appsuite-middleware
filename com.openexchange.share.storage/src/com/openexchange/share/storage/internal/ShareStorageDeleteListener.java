@@ -124,24 +124,49 @@ public class ShareStorageDeleteListener implements DeleteListener {
         }
     }
 
-    private static int reassignShares(Connection connection, int cid, int createdBy, int newCreatedBy) throws SQLException, OXException {
-        //TODO owner and creator, modifiedby?
-        return 0;
-//        StringBuilder stringBuilder = new StringBuilder()
-//            .append("UPDATE share SET ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=? ")
-//            .append("WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
-//            .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
-//        ;
-//        PreparedStatement stmt = null;
-//        try {
-//            stmt = connection.prepareStatement(stringBuilder.toString());
-//            stmt.setInt(1, newCreatedBy);
-//            stmt.setInt(2, cid);
-//            stmt.setInt(3, createdBy);
-//            return logExecuteUpdate(stmt);
-//        } finally {
-//            DBUtils.closeSQLStuff(stmt);
-//        }
+    private static int reassignShares(Connection connection, int cid, int owner, int newOwner) throws SQLException, OXException {
+        int updated = 0;
+        {
+            StringBuilder stringBuilder = new StringBuilder()
+                .append("UPDATE share SET ").append(SQL.SHARE_MAPPER.get(ShareField.OWNER).getColumnLabel()).append("=?,")
+                .append(SQL.SHARE_MAPPER.get(ShareField.MODIFIED).getColumnLabel()).append("=? ")
+                .append("WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+                .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.OWNER).getColumnLabel()).append("=?;")
+            ;
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                stmt.setInt(1, newOwner);
+                stmt.setLong(2, System.currentTimeMillis());
+                stmt.setInt(3, cid);
+                stmt.setInt(4, owner);
+                updated += logExecuteUpdate(stmt);
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+        {
+            StringBuilder stringBuilder = new StringBuilder()
+                .append("UPDATE share SET ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?,")
+                .append(SQL.SHARE_MAPPER.get(ShareField.MODIFIED_BY).getColumnLabel()).append("=?,")
+                .append(SQL.SHARE_MAPPER.get(ShareField.MODIFIED).getColumnLabel()).append("=? ")
+                .append("WHERE ").append(SQL.SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? ")
+                .append("AND ").append(SQL.SHARE_MAPPER.get(ShareField.CREATED_BY).getColumnLabel()).append("=?;")
+            ;
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                stmt.setInt(1, newOwner);
+                stmt.setInt(2, newOwner);
+                stmt.setLong(3, System.currentTimeMillis());
+                stmt.setInt(4, cid);
+                stmt.setInt(5, owner);
+                updated += logExecuteUpdate(stmt);
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+        return updated;
     }
 
 }

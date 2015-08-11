@@ -51,6 +51,7 @@ package com.openexchange.ajax.attach.actions;
 
 import java.io.IOException;
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.json.JSONException;
@@ -92,10 +93,10 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
 
     /*
      * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse, org.apache.http.HttpRequest)
      */
     @Override
-    public String checkResponse(HttpResponse response) throws ParseException, IOException {
+    public String checkResponse(HttpResponse response, HttpRequest request) throws ParseException, IOException {
         Header[] headers = response.getAllHeaders();
         for (Header h : headers) {
             if (h.getName().equals("Content-Length")) {
@@ -103,7 +104,7 @@ public class GetDocumentParser extends AbstractAJAXParser<GetDocumentResponse> {
                 break;
             }
         }
-        return super.checkResponse(response);
+        return super.checkResponse(response, request);
     }
 
     /*

@@ -111,7 +111,7 @@ public class ConflictHandler {
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             return NO_CONFLICTS;
-        } else if (cdao.isSingle() && cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
+        } else if (cdao.isSingle() && cdao.getEndDate() != null && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past single apps should never conflict
         } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict

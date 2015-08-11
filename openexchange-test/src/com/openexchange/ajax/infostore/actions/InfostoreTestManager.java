@@ -118,11 +118,11 @@ public class InfostoreTestManager {
             objectIDs.add(metadata.getId());
             folderIDs.add(metadata.getFolderId());
         }
-        deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE));
+        deleteAction(objectIDs, folderIDs, new Date(Long.MAX_VALUE), Boolean.TRUE);
         createdEntities.clear();
     }
 
-    private void removeFromCreatedEntities(Collection<String> ids) {
+    public void removeFromCreatedEntities(Collection<String> ids) {
         for (String id : ids) {
             for (File data : new HashSet<File>(createdEntities)) {
                 if (data.getId() == id) {
@@ -169,7 +169,12 @@ public class InfostoreTestManager {
     }
 
     public void deleteAction(List<String> ids, List<String> folders, Date timestamp) throws OXException, IOException, SAXException, JSONException {
+        deleteAction(ids, folders, timestamp, null);
+    }
+
+    public void deleteAction(List<String> ids, List<String> folders, Date timestamp, Boolean hardDelete) throws OXException, IOException, SAXException, JSONException {
         DeleteInfostoreRequest deleteRequest = new DeleteInfostoreRequest(ids, folders, timestamp);
+        deleteRequest.setHardDelete(hardDelete);
         deleteRequest.setFailOnError(getFailOnError());
         DeleteInfostoreResponse deleteResponse = getClient().execute(deleteRequest);
         lastResponse = deleteResponse;

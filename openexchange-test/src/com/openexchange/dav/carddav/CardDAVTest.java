@@ -49,6 +49,11 @@
 
 package com.openexchange.dav.carddav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -84,10 +89,10 @@ import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.Headers;
-import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.carddav.reports.AddressbookMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
@@ -95,8 +100,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
-
-import static org.junit.Assert.*;
 
 /**
  * {@link CardDAVTest} - Common base class for CardDAV tests
@@ -210,10 +213,14 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
     }
 
-	protected int putVCard(String uid, String vCard) throws Exception {
+    protected int putVCard(String uid, String vCard) throws Exception {
+        return putVCard(uid, vCard, "Contacts");
+    }
+
+    protected int putVCard(String uid, String vCard, String collection) throws Exception {
         PutMethod put = null;
         try {
-            final String href = "/carddav/Contacts/" + uid + ".vcf";
+            final String href = "/carddav/" + collection + "/" + uid + ".vcf";
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
@@ -221,7 +228,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         } finally {
             release(put);
         }
-	}
+    }
 
 	protected int putVCardUpdate(String uid, String vCard) throws Exception {
 		return this.putVCardUpdate(uid, vCard, null);
@@ -242,9 +249,14 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
 	}
 
-	protected String fetchSyncToken() throws Exception {
-		return super.fetchSyncToken("/carddav/Contacts");
-	}
+    protected String fetchSyncToken() throws Exception {
+        return fetchSyncToken("Contacts");
+    }
+
+    @Override
+    protected String fetchSyncToken(String collection) throws Exception {
+        return super.fetchSyncToken("/carddav/" + collection);
+    }
 
 	/**
 	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the
@@ -256,9 +268,14 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws ConfigurationException
 	 * @throws DavException
 	 */
-	protected Map<String, String> syncCollection(final String syncToken) throws Exception {
-		return super.syncCollection(syncToken, "/carddav/Contacts");
-	}
+    protected Map<String, String> syncCollection(final String syncToken) throws Exception {
+        return syncCollection("Contacts", syncToken);
+    }
+
+    @Override
+    protected Map<String, String> syncCollection(String collection, final String syncToken) throws Exception {
+        return super.syncCollection(syncToken, "/carddav/" + collection);
+    }
 
 	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
 		return super.syncCollection(syncToken, "/carddav/Contacts");

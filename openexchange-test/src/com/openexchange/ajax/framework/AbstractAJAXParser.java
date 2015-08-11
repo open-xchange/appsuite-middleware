@@ -109,10 +109,6 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         return response;
     }
 
-    public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
-        return checkResponse(resp, null);
-    }
-
     public String checkResponse(final HttpResponse resp, final HttpRequest request) throws ParseException, IOException {
         if (HttpStatus.SC_OK != resp.getStatusLine().getStatusCode()) {
             String entity = null;

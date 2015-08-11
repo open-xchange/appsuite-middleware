@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link RedirectServlet}
@@ -75,12 +76,12 @@ public class RedirectServlet extends HttpServlet {
         String location = req.getParameter("location");
 
         if (location == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
             return;
         }
 
         if (!isRelative(location)) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
             return;
         }
 
@@ -92,7 +93,7 @@ public class RedirectServlet extends HttpServlet {
         final String referer = purgeHost(req.getHeader("referer"));
 
         if (referer == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
             return;
         }
 

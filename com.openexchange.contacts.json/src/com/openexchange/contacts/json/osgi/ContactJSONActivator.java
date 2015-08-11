@@ -64,7 +64,6 @@ import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 
@@ -116,18 +115,6 @@ public class ContactJSONActivator extends AJAXModuleActivator {
          */
         track(VCardStorageFactory.class);
         openTrackers();
-    }
-
-    private static final class OAuthScopeDescription implements LocalizableStrings {
-        // Application 'xyz' requires following permissions:
-        //  - Read all your contacts.
-        //  - ...
-        public static final String READ_ONLY = "Read all your contacts.";
-
-        // Application 'xyz' requires following permissions:
-        //  - Create, modify and delete contacts.
-        //  - ...
-        public static final String WRITABLE = "Create, modify and delete contacts.";
     }
 
 }

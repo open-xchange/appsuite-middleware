@@ -116,6 +116,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     /**
      * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
+     * 
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
      * @param userId2 will be the user the folder is shared to. He can only see all objects.
@@ -142,7 +143,31 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
     }
 
     /**
+     * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
+     * 
+     * @param client will be the folder owner and can read all objects.
+     * @param module the module under test
+     * @param permission the permissions
+     * @param ftm TODO
+     */
+    protected static FolderObject createSharedFolder(AJAXClient client, int module, FolderTestManager ftm, OCLPermission... permissions) throws OXException, IOException, JSONException {
+        FolderObject folder = ftm.generateSharedFolder(
+            UUID.randomUUID().toString(),
+            module,
+            getParentFolderForModule(client, module),
+            client.getValues().getUserId());
+        
+        folder.removePermissions();
+
+        for (OCLPermission permission : permissions) {
+            folder.addPermission(permission);
+        }
+        return ftm.insertFolderOnServer(folder);
+    }
+
+    /**
      * Creates a public folder for the given module (see modules section in {@link FolderObject}).
+     * 
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
      * @param userId2 will be the user the folder can be read by. He can only see his own objects.

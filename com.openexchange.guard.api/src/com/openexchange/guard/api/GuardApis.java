@@ -50,7 +50,7 @@
 package com.openexchange.guard.api;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +87,7 @@ public class GuardApis {
         if (0 == length || (length % 2) != 0) {
             return null;
         }
-        Map<String, String> map = new HashMap<String, String>(length >> 1);
+        Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
         for (int i = 0; i < length; i+=2) {
             map.put(args[i], args[i+1]);
         }
@@ -118,6 +118,8 @@ public class GuardApis {
                 if (cookie.getValue().equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     extractedCookies.add(new Cookie(name, cookie.getValue()));
                 }
+            } else if ("JSESSIONID".equals(name)) {
+                extractedCookies.add(new Cookie(name, cookie.getValue()));
             }
         }
         return extractedCookies;

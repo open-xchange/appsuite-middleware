@@ -51,6 +51,8 @@ package com.openexchange.ajax.session;
 
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -69,7 +71,7 @@ public final class MissingKerberosTicketInterceptor implements SessionServletInt
     }
 
     @Override
-    public void intercept(Session session) throws OXException {
+    public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
         if (!session.containsParameter(SESSION_SUBJECT) || !session.containsParameter(SESSION_PRINCIPAL)) {
             throw SessionExceptionCodes.KERBEROS_TICKET_MISSING.create(session.getSessionID());
         }

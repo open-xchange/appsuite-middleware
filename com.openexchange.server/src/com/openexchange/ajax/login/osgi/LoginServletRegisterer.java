@@ -60,12 +60,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.session.CookieRefresher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -92,7 +96,14 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private LoginServlet login;
     private volatile String alias;
+    private volatile ServiceRegistration<SessionServletInterceptor> interceptorRegistration;
 
+    /**
+     * Initializes a new {@link LoginServletRegisterer}.
+     *
+     * @param context The bundle context
+     * @param rampUp The ramp-up service set
+     */
     public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
         this.context = context;
@@ -163,6 +174,11 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 String alias = prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
                 httpService.registerServlet(alias, login, params, null);
                 this.alias = alias;
+
+                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
+                if (conf.isSessiondAutoLogin() || conf.getCookieExpiry() < 0) {
+                    interceptorRegistration = context.registerService(SessionServletInterceptor.class, new CookieRefresher(conf), null);
+                }
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -231,6 +247,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (null != alias) {
                 unregister.unregister(alias);
                 this.alias = null;
+            }
+
+            ServiceRegistration<SessionServletInterceptor> interceptorRegistration = this.interceptorRegistration;
+            if (null != interceptorRegistration) {
+                this.interceptorRegistration = null;
+                interceptorRegistration.unregister();
             }
         }
         context.ungetService(reference);

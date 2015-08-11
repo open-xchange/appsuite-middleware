@@ -133,11 +133,11 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
             try {
                 mailAccess = mailService.getMailAccess(session, mailAccount.getId());
                 mailAccess.connect();
-                List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateSenderSearch(addresses), requestedFields));
+                List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", new IndexRange(0, limit), MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateSenderSearch(addresses), requestedFields));
                 messages.addAll(moreMessages);
 
                 final String sentFullName = mailAccess.getFolderStorage().getSentFolder();
-                moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateRecipientSearch(addresses), requestedFields));
+                moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, new IndexRange(0, limit), MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateRecipientSearch(addresses), requestedFields));
                 messages.addAll(moreMessages);
             } finally {
                 if (mailAccess != null) {

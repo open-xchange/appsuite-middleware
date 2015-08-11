@@ -134,11 +134,6 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
 
         @Override
         public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
-            return checkResponse(resp);
-        }
-
-        @Override
-        public String checkResponse(HttpResponse resp) throws ParseException, IOException {
             statusCode = resp.getStatusLine().getStatusCode();
             reasonPhrase = resp.getStatusLine().getReasonPhrase();
             httpResponse = resp;

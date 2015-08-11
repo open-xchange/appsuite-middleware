@@ -94,8 +94,8 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) {
+        state.lock();
         try {
-            state.lock();
             state.touch();
             if (commit) {
                 sendPong(from, state, transmitter);
@@ -112,8 +112,8 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) {
+        state.lock();
         try {
-            state.lock();
             state.enqueue(stanza);
             emptyBuffer(state, transmitter);
         } finally {
@@ -123,8 +123,8 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws RealtimeException {
+        state.lock();
         try {
-            state.lock();
             state.touch();
             stanza.trace("Received message in RTProtocol with asynchronous acknowledgements");
             boolean enqueued = false;
@@ -156,8 +156,8 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter, List<Long> acknowledgements) throws RealtimeException {
+        state.lock();
         try {
-            state.lock();
             state.touch();
             stanza.trace("Received message in RTProtocol with synchronous acknowledgements");
             if (newState) {
@@ -181,8 +181,8 @@ public class RTProtocolImpl implements RTProtocol {
             LOG.debug("Transmitter was null.");
             return;
         }
+        state.lock();
         try {
-            state.lock();
             state.touch();
 
             List<Stanza> stanzasToSend = state.getStanzasToSend();

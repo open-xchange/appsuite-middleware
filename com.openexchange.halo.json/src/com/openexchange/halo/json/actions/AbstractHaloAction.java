@@ -46,56 +46,73 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.infostore;
 
-import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
-import com.openexchange.tx.UndoableAction;
+package com.openexchange.halo.json.actions;
+
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.halo.ContactHalo;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link AbstractHaloAction} - The abstract Halo action.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class InsertDocumentIntoDelTableActionTest extends AbstractInfostoreActionTest {
+public abstract class AbstractHaloAction implements AJAXActionService {
 
-	CreateDocumentAction create = new CreateDocumentAction(null);
+    /** The OSGi service look.up */
+    protected final ServiceLookup services;
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		create.setProvider(getProvider());
-		create.setContext(getContext());
-		create.setDocuments(getDocuments());
-		create.setQueryCatalog(getQueryCatalog());
-		create.perform();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-		create.undo();
-		super.tearDown();
-	}
+    /**
+     * Initializes a new {@link AbstractHaloAction}.
+     *
+     * @param services The service lookup reference
+     */
+    public AbstractHaloAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
-    protected void verifyPerformed() throws Exception {
-        for(final DocumentMetadata doc : getDocuments()) {
-            assertResult("SELECT 1 FROM del_infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            return doPerform(requestData, session);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    @Override
-    protected void verifyUndone() throws Exception {
-        for(final DocumentMetadata doc : getDocuments()) {
-            assertNoResult("SELECT 1 FROM del_infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
+    /**
+     * Requires the {@link ContactHalo} service.
+     *
+     * @return The service
+     * @throws OXException If service is unavailable
+     */
+    protected ContactHalo requireContactHalo() throws OXException {
+        ContactHalo contactHalo = services.getService(ContactHalo.class);
+        if (null == contactHalo) {
+            throw ServiceExceptionCode.absentService(ContactHalo.class);
         }
+        return contactHalo;
     }
 
-    @Override
-    protected UndoableAction getAction() throws Exception {
-        final InsertDocumentIntoDelTableAction action = new InsertDocumentIntoDelTableAction(null);
-		action.setProvider(getProvider());
-		action.setContext(getContext());
-		action.setDocuments(getDocuments());
-		action.setQueryCatalog(getQueryCatalog());
-		return action;
-    }
+    /**
+     * Performs given request.
+     *
+     * @param requestData The request to perform
+     * @param session The session providing needed user data
+     * @return The result yielded for given request
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException;
+
 }

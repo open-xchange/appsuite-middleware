@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -169,6 +170,54 @@ final class ListLsubCollection implements Serializable {
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
         init(false, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    /**
+     * Generates a string representation
+     *
+     * @param lsub <code>true</code> to include LSUB entries; otherwise LIST
+     * @return The string
+     */
+    public String toString(boolean lsub) {
+        StringBuilder builder = new StringBuilder(1024);
+        String lf = System.getProperty("line.separator");
+        builder.append("ListLsubCollection:");
+
+        SortedMap<String, ListLsubEntry> sm = new TreeMap<String, ListLsubEntry>(lsub ? lsubMap : listMap);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Draft:");
+        sm = new TreeMap<String, ListLsubEntry>(draftsEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Spam:");
+        sm = new TreeMap<String, ListLsubEntry>(junkEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Sent:");
+        sm = new TreeMap<String, ListLsubEntry>(sentEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Trash:");
+        sm = new TreeMap<String, ListLsubEntry>(trashEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        return builder.toString();
     }
 
     private void checkDeprecated() {
@@ -2323,8 +2372,9 @@ final class ListLsubCollection implements Serializable {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
+            sb.append(", subscribed=\"").append(isSubscribed()).append('"');
             sb.append(", parent=");
             if (null == parent) {
                 sb.append("null");

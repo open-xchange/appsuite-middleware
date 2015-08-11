@@ -55,6 +55,7 @@ import java.nio.CharBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import com.openexchange.ajax.framework.AbstractRedirectParser;
@@ -85,8 +86,8 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        return super.checkResponse(resp);
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        return super.checkResponse(resp, request);
     }
 
     @Override

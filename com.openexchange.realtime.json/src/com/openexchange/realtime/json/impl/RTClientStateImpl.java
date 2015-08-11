@@ -91,8 +91,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public void acknowledgementReceived(long sequenceNumber) {
+        lock();
         try {
-            lock();
             resendBuffer.remove(sequenceNumber);
         } finally {
             unlock();
@@ -102,8 +102,8 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void enqueue(Stanza stanza) {
         if (stanza.getSequenceNumber() != -1) {
+            lock();
             try {
-                lock();
                 stanza.setSequenceNumber(sequenceNumber);
                 stanza.trace("RTClientState recasting stanza to sequence number "+ sequenceNumber + " for delivery");
                 sequenceNumber++;
@@ -128,8 +128,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public List<Stanza> getStanzasToSend() {
+        lock();
         try {
-            lock();
             List<Stanza> list = new ArrayList<Stanza>(resendBuffer.size() + nonsequenceStanzas.size());
             for(EnqueuedStanza es: resendBuffer.values()) {
                 list.add(es.stanza);
@@ -153,8 +153,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public void purge() {
+        lock();
         try {
-            lock();
             for (Stanza s : nonsequenceStanzas) {
                 s.trace("Stanza could not be delivered");
             }
@@ -177,8 +177,8 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void reset() {
         LOG.debug("Removing all sequenced and unsequenced Stanzas.");
+        lock();
         try {
-            lock();
             nonsequenceStanzas.clear();
             resendBuffer.clear();
         } finally {

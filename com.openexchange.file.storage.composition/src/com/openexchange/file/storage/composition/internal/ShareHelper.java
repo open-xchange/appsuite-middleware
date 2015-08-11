@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
@@ -217,12 +218,15 @@ public class ShareHelper {
             /*
              * remove all shares targeting the documents
              */
-            Connection connection = ConnectionHolder.CONNECTION.get();
-            try {
-                session.setParameter(Connection.class.getName(), connection);
-                Services.getService(ShareService.class).deleteTargets(session, shareTargets, null);
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
+            ShareService service = Services.getService(ShareService.class);
+            if (null != service) {
+                Connection connection = ConnectionHolder.CONNECTION.get();
+                try {
+                    session.setParameter(Connection.class.getName(), connection);
+                    service.deleteTargets(session, shareTargets, null);
+                } finally {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
         }
     }
@@ -248,12 +252,15 @@ public class ShareHelper {
             /*
              * remove all shares targeting the documents in the folder
              */
-            Connection connection = ConnectionHolder.CONNECTION.get();
-            try {
-                session.setParameter(Connection.class.getName(), connection);
-                Services.getService(ShareService.class).deleteTargets(session, Collections.singletonList(shareTarget), true);
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
+            ShareService service = Services.getService(ShareService.class);
+            if (null != service) {
+                Connection connection = ConnectionHolder.CONNECTION.get();
+                try {
+                    session.setParameter(Connection.class.getName(), connection);
+                    service.deleteTargets(session, Collections.singletonList(shareTarget), true);
+                } finally {
+                    session.setParameter(Connection.class.getName(), null);
+                }
             }
         }
     }
@@ -300,14 +307,17 @@ public class ShareHelper {
         /*
          * remove shares targeting the document for all affected users
          */
-        Connection connection = ConnectionHolder.CONNECTION.get();
-        try {
-            session.setParameter(Connection.class.getName(), connection);
-            Services.getService(ShareService.class).deleteTargets(session, Collections.singletonList(shareTarget), affectedUserIDs);
-            return true;
-        } finally {
-            session.setParameter(Connection.class.getName(), null);
+        ShareService shareService = Services.getService(ShareService.class);
+        if (null != shareService) {
+            Connection connection = ConnectionHolder.CONNECTION.get();
+            try {
+                session.setParameter(Connection.class.getName(), connection);
+                shareService.deleteTargets(session, Collections.singletonList(shareTarget), affectedUserIDs);
+            } finally {
+                session.setParameter(Connection.class.getName(), null);
+            }
         }
+        return true;
     }
 
     private static List<FileStorageObjectPermission> handleNewGuestPermissions(Session session, FileStorageFileAccess access, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
@@ -323,6 +333,9 @@ public class ShareHelper {
 
                 List<FileStorageObjectPermission> allPermissions = new ArrayList<FileStorageObjectPermission>(shareRecipients.size());
                 ShareService shareService = Services.getService(ShareService.class);
+                if (null == shareService) {
+                    throw ServiceExceptionCode.absentService(ShareService.class);
+                }
                 int owner = document.getCreatedBy();
                 if (0 >= owner) {
                     owner = access.getFileMetadata(

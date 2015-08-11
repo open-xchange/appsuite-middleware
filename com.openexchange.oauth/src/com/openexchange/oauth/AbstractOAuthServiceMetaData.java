@@ -57,8 +57,10 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
@@ -138,6 +140,16 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean isEnabled(final int userId, final int contextId) throws OXException {
+        /*
+         * disable for guests
+         */
+        User user = Services.getService(UserService.class).getUser(userId, contextId);
+        if (user.isGuest()) {
+            return false;
+        }
+        /*
+         * check config cascade for specific "enabled" property
+         */
         final ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
         final ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
         if (!property.isDefined()) {

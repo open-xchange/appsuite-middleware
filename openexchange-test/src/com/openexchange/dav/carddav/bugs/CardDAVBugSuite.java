@@ -71,7 +71,9 @@ import org.junit.runners.Suite.SuiteClasses;
     Bug23078Test.class,
     Bug28672Test.class,
     Bug30449Test.class,
-    Bug36943Test.class
+    Bug36943Test.class,
+    Bug38550Test.class
+
 })
 public final class CardDAVBugSuite {
 

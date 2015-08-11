@@ -1,3 +1,46 @@
+* 2015-08-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35186: Convert non-ascii characters to appropriate HTML decimal entity ( &#nnnn; )
+ - Fix for bug 40344: Removed version support from box.com file storage integration
+ - Fix for bug 40276: Orderly render messages that cannot be loaded part-wise from IMAP server
+
+* 2015-08-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40055: Ensure valid JSON responses are written on multiple requests
+ - Fix for bug 40207: Only register Dovecot Push if IMAP provider is available
+
+* 2015-08-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40298: Supply Lightning client with more properties during account bootstrapping
+
+* 2015-07-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 40277: NPE in conflict handler.
+
+* 2015-08-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39841/39451: Properly check connectivity status prior to passing IMAPStore instance back into pool
+ - Fix for bug 40272: Signal HTTP error code along-side with an error page to avoid possible download trigger for Safari Browser
+
+* 2015-08-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40267: Evaluate 'shareable' flag of file target proxy during permission checks
+ - Fix for bug 38550: Stick to the user's default folder when creating contacts using the iOS CardDAV client
+
+* 2015-08-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39909: Force immediate shut-down if Hazelcast fails to stop gracefully
+ - Fix for bug 40048: Fixed possible deadlock when managing shared locks with a mutually exclusive map
+ - Fix for bug 36971: Introduced a two-step cookie-refreshing mechanism:
+                      A time stamp based refresh detection for secret/public cookie + one-time flag based detection for session cookie to
+                      avoid setting both cookies in one HTTP request.
+
+* 2015-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40081: Don't enable oauth services for guest users
+ - Fix for bug 40067: Don't do randomly access files if not supported by storage
+ - Fix for bug 40063: Reset version identifier when copying a file
+
 * 2015-08-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 39927: Added an orderly shut-down to the Open-Xchange Server, that is to await for each running request to terminate prior

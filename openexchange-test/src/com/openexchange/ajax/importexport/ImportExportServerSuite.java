@@ -78,6 +78,7 @@ public final class ImportExportServerSuite {
         tests.addTestSuite(Bug36943Test.class);
 
         // Overall bug tests.
+        tests.addTestSuite(Bug6825Test.class);
         tests.addTestSuite(Bug9209Test.class);
         tests.addTestSuite(DistributionListExportTest.class);
         return tests;

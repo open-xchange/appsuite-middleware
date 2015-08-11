@@ -143,7 +143,7 @@ public class TextSnippets {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, count);
                 }
             } else {//multiple shares of single type
                 TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
@@ -151,27 +151,27 @@ public class TextSnippets {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, count);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES), fullName, email, count);
                     }
 
                 } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, count);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE), fullName, email, count);
                     }
                 } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, count);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE), fullName, email, count);
                     }
                 } else {
                     //fall back to item for other types
                     if (hasMessage) {
                         return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, count);
                     }
                 }
             }
@@ -183,43 +183,29 @@ public class TextSnippets {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE), fullName, email, filename);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE), fullName, email, filename);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE), fullName, email, filename);
                 }
             } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE), fullName, email, filename);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE), fullName, email, filename);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE), fullName, email, filename);
                 }
             } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE), fullName, email, filename);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER), fullName, email, filename);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE), fullName, email, filename);
                 }
             } else {
                 //fall back to item for other types
                 if (hasMessage) {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE), fullName, email, filename);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM), fullName, email, filename);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_NO_MESSAGE), fullName, email, filename);
                 }
             }
         }
-    }
-
-    /**
-     * Gets a string advising the recipient to click the share link. E.g.: Please click the button below to view it.
-     *
-     * @param targetProxies The collection of shared targets as {@link TargetProxy}s
-     * @return The translated and formatted string
-     */
-    public String linkIntro(Collection<TargetProxy> targetProxies) {
-        if (targetProxies.size() == 1) {
-            return translator.translate(NotificationStrings.PLEASE_CLICK_IT);
-        }
-
-        return translator.translate(NotificationStrings.PLEASE_CLICK_THEM);
     }
 
     /**

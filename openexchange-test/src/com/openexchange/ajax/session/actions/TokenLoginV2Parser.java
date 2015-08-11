@@ -51,6 +51,7 @@ package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import com.openexchange.ajax.LoginServlet;
@@ -74,7 +75,7 @@ public class TokenLoginV2Parser extends AbstractRedirectParser<TokenLoginV2Respo
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         this.status = resp.getStatusLine().getStatusCode();
         Header[] headers = resp.getHeaders("Set-Cookie");
         for (Header header : headers) {
@@ -83,7 +84,7 @@ public class TokenLoginV2Parser extends AbstractRedirectParser<TokenLoginV2Respo
                 break;
             }
         }
-        return super.checkResponse(resp);
+        return super.checkResponse(resp, request);
     }
 
     @Override

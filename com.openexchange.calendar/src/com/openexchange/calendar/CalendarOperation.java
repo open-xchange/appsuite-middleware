@@ -1995,7 +1995,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
+            //checkAndRemoveRecurrenceFields(cdao);
             cdao.setRecurrence(edao.getRecurrence());
             /*
              * Return specified recurring action unchanged

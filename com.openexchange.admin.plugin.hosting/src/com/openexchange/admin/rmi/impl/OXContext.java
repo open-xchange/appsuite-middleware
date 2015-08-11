@@ -716,6 +716,30 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         // END OF CACHE
     }
+    
+    @Override
+    public Context getOwnData(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            try {
+                doNullCheck(ctx);
+            } catch (final InvalidDataException e1) {
+                LOGGER.error("One of the given arguments for getData is null", e1);
+                throw e1;
+            }
+            
+            new BasicAuthenticator(context).doAuthentication(auth, ctx);
+            
+            OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.getData(new Context[] { ctx })[0];
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final RuntimeException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
 
     @Override
     public Context[] getData(final Context[] ctxs, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {

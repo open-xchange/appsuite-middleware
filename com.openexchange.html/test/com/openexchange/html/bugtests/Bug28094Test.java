@@ -73,7 +73,6 @@ public class Bug28094Test extends AbstractSanitizing {
 
         String test = getHtmlService().sanitize(content, null, true, null, null);
 
-        Assert.assertTrue("Anchor tag not properly sanitized.", test.indexOf("<a>") >= 0);
-        Assert.assertTrue("Anchor tag not properly sanitized.", test.indexOf("href=\"") < 0);
+        Assert.assertTrue("Unexpected Value.", test.indexOf("href=\"") >= 0);
     }
 }

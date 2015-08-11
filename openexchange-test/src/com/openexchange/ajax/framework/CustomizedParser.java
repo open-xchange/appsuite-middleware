@@ -73,11 +73,6 @@ public abstract class CustomizedParser<T extends AbstractAJAXResponse> extends A
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        return checkResponse(resp, null);
-    }
-
-    @Override
     public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         String checkCustom = checkCustom(resp);
         if (checkCustom == null) {

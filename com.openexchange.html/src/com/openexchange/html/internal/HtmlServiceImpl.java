@@ -51,6 +51,8 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -142,7 +144,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * Member stuff
      */
 
-    private final Map<Character, String> htmlCharMap;
+    private final TIntObjectMap<String> htmlCharMap;
     private final Map<String, Character> htmlEntityMap;
     private final Tika tika;
     private final String lineSeparator;
@@ -158,7 +160,13 @@ public final class HtmlServiceImpl implements HtmlService {
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
         lineSeparator = System.getProperty("line.separator");
-        this.htmlCharMap = htmlCharMap;
+        {
+            TIntObjectMap<String> tmp = new TIntObjectHashMap<String>(htmlCharMap.size());
+            for (Map.Entry<Character, String> entry : htmlCharMap.entrySet()) {
+                tmp.put(entry.getKey().charValue(), entry.getValue());
+            }
+            this.htmlCharMap = tmp;
+        }
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
@@ -964,29 +972,37 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
-        final int length = s.length();
-        final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
+        int length = s.length();
+        TIntObjectMap<String> htmlChar2EntityMap = htmlCharMap;
+
+        int i = 0;
         if (withQuote) {
-            for (int i = 0; i < length; i++) {
-                final char c = s.charAt(i);
-                final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
-                if (entity == null) {
-                    sb.append(c);
-                } else {
+            for (int k = length; k-- > 0; i++) {
+                char c = s.charAt(i);
+                String entity = htmlChar2EntityMap.get(c);
+                if (entity != null) {
                     sb.append('&').append(entity).append(';');
+                } else if (c > 127) {
+                    // Non-ASCII character
+                    sb.append("&#").append((int) c).append(';');
+                } else {
+                    sb.append(c);
                 }
             }
         } else {
-            for (int i = 0; i < length; i++) {
-                final char c = s.charAt(i);
+            for (int k = length; k-- > 0; i++) {
+                char c = s.charAt(i);
                 if ('"' == c) {
                     sb.append(c);
                 } else {
-                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
-                    if (entity == null) {
-                        sb.append(c);
-                    } else {
+                    String entity = htmlChar2EntityMap.get(c);
+                    if (entity != null) {
                         sb.append('&').append(entity).append(';');
+                    } else if (c > 127) {
+                        // Non-ASCII character
+                        sb.append("&#").append((int) c).append(';');
+                    } else {
+                        sb.append(c);
                     }
                 }
             }

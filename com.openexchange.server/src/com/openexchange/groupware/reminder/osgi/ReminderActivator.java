@@ -56,7 +56,6 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -94,18 +93,6 @@ public class ReminderActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.TASKS.getCapabilityName()) || capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
-    }
-
-    private static final class OAuthScopeDescription implements LocalizableStrings {
-        // Application 'xyz' requires following permissions:
-        //  - Read reminders for appointments and tasks.
-        //  - ...
-        public static final String READ_ONLY = "Read reminders for appointments and tasks.";
-
-        // Application 'xyz' requires following permissions:
-        //  - Set or change reminders for appointments and tasks.
-        //  - ...
-        public static final String WRITABLE = "Set or change reminders for appointments and tasks.";
     }
 
 }

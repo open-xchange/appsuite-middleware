@@ -53,8 +53,12 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
+import com.openexchange.webdav.acl.mixins.AddressbookHomeSet;
+import com.openexchange.webdav.acl.mixins.CalendarHomeSet;
+import com.openexchange.webdav.acl.mixins.PrincipalCollectionSet;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalServlet;
+import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 /**
@@ -84,6 +88,9 @@ public class WebdavACLActivator extends HousekeepingActivator {
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
+            registerService(PropertyMixin.class, new PrincipalCollectionSet());
+            registerService(PropertyMixin.class, new CalendarHomeSet());
+            registerService(PropertyMixin.class, new AddressbookHomeSet());
             openTrackers();
         } catch (final Throwable t) {
             LOG.error("", t);

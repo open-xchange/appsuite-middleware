@@ -54,7 +54,6 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigActionFactory;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -88,13 +87,6 @@ public final class ConfigJSONActivator extends AJAXModuleActivator {
                 return true;
             }
         });
-    }
-
-    private static final class OAuthScopeDescription implements LocalizableStrings {
-        // Application 'xyz' requires following permissions:
-        //  - Read and change your settings.
-        //  - ...
-        public static final String WRITABLE = "Read and change your settings.";
     }
 
 }

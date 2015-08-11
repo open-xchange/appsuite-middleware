@@ -193,7 +193,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testUpdatesViaCreateAndDelete() throws Exception {
-        int GROUP0 = 1; // group 0 always has a very high creation date since it is automatically generated, so this will be included most of the time
+        int staticGroupCount = 2; // "all users" & "guests" are always included in new/modified responses
         Group group = new Group();
         group.setSimpleName("simplename_"+new Date().getTime());
         group.setDisplayName("Group Updates Test"+new Date());
@@ -209,8 +209,8 @@ public final class FunctionTest extends AbstractAJAXSession {
         int numberNewAfterCreation = updatesResponseAfterCreate.getNew().size();
         int numberModifiedAfterCreation = updatesResponseAfterCreate.getModified().size();
         int numberDeletedAfterCreation = updatesResponseAfterCreate.getDeleted().size();
-        assertEquals("Amount of modified elements should have increased after creation", 1+GROUP0, numberModifiedAfterCreation);
-        assertEquals("Amount of deleted elements should not change after creation", 0+GROUP0, numberDeletedAfterCreation);
+        assertEquals("Amount of modified elements should have increased after creation", 1 + staticGroupCount, numberModifiedAfterCreation);
+        assertEquals("Amount of deleted elements should not change after creation", 0 + staticGroupCount, numberDeletedAfterCreation);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
 
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
@@ -222,8 +222,8 @@ public final class FunctionTest extends AbstractAJAXSession {
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();
         int numberModifiedAfterDeletion = updatesResponseAfterDeletion.getModified().size();
         int numberDeletedAfterDeletion = updatesResponseAfterDeletion.getDeleted().size();
-        assertEquals("Amount of modified elements should have decreased after deletion", 0+GROUP0, numberModifiedAfterDeletion);
-        assertEquals("Amount of deleted elements should have increased after deletion", 1+GROUP0, numberDeletedAfterDeletion);
+        assertEquals("Amount of modified elements should have decreased after deletion", 0 + staticGroupCount, numberModifiedAfterDeletion);
+        assertEquals("Amount of deleted elements should have increased after deletion", 1 + staticGroupCount, numberDeletedAfterDeletion);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterDeletion, numberModifiedAfterDeletion);
     }
 

@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.tasks.json.TaskActionFactory;
@@ -92,18 +91,6 @@ public class TaskJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.TASKS.getCapabilityName());
             }
         });
-    }
-
-    private static final class OAuthScopeDescription implements LocalizableStrings {
-        // Application 'xyz' requires following permissions:
-        //  - Read all your tasks.
-        //  - ...
-        public static final String READ_ONLY = "Read all your tasks.";
-
-        // Application 'xyz' requires following permissions:
-        //  - Create, modify and delete tasks.
-        //  - ...
-        public static final String WRITABLE = "Create, modify and delete tasks.";
     }
 
 }

@@ -127,7 +127,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
 
         for(int j = 0, size = slices.length; j < size; j++) {
-            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, slices[j]);
+            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, slices[j], false);
             for (final String deleteStmt : deleteStmts) {
                 updates.add(new Update(deleteStmt){
 

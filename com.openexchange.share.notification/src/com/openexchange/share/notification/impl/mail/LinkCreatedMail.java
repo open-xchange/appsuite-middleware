@@ -139,8 +139,6 @@ public class LinkCreatedMail extends NotificationMail {
         vars.put(ShareCreatedMail.HAS_SHARED_ITEMS, textSnippets.shareStatementLong(shareOwnerName, email, targetProxies, hasMessage));
         if (hasMessage) {
             vars.put(ShareCreatedMail.USER_MESSAGE, notification.getMessage());
-        } else {
-            vars.put(ShareCreatedMail.PLEASE_CLICK, textSnippets.linkIntro(targetProxies));
         }
 
         vars.put(ShareCreatedMail.VIEW_ITEMS_LINK, shareUrl);
