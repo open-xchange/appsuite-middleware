@@ -51,6 +51,10 @@ package com.openexchange.imap.sort;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -85,10 +89,6 @@ import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.SearchSequence;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
