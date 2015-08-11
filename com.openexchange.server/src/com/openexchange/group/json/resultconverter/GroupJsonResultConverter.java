@@ -161,13 +161,13 @@ public class GroupJsonResultConverter implements ResultConverter {
 
                         JSONObject jGroup = new JSONObject(6);
                         groupWriter.writeGroup(group, jGroup);
-                        jGroups.put(jGroup);
+                        jDeletedGroups.put(jGroup);
                     }
                 } else {
                     for (Group group : deleted) {
                         JSONObject jGroup = new JSONObject(6);
                         groupWriter.writeGroup(group, jGroup);
-                        jGroups.put(jGroup);
+                        jDeletedGroups.put(jGroup);
                     }
                 }
             }
