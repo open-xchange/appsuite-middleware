@@ -220,6 +220,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                             importResult.setException(oxEx);
                             LOG.debug("cannot import contact object", oxEx);
                         }
+                        importResult.setFolder(String.valueOf(contactObj.getParentFolderID()));
                         importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
                         importResult.setDate(contactObj.getLastModified());
                     }
