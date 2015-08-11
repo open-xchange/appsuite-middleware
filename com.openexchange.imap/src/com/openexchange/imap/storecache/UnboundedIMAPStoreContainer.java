@@ -105,18 +105,18 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        IMAPStore imapStore = null;
+        IMAPStore imapStore;
 
-        final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
-        if (null == imapStoreWrapper) {
-            imapStore = newStore(server, port, login, pw, imapSession, session);
-            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
-        } else {
+        IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
+        if (null != imapStoreWrapper && imapStoreWrapper.imapStore.isConnectedUnsafe()) {
             imapStore = imapStoreWrapper.imapStore;
             // Should we set properties from passed session?
             // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
             // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
             LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+        } else {
+            imapStore = newStore(server, port, login, pw, imapSession, session);
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         }
 
         inUseCount.incrementAndGet();
