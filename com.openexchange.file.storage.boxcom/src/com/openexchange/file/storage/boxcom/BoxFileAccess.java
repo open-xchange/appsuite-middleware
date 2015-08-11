@@ -52,17 +52,14 @@ package com.openexchange.file.storage.boxcom;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.slf4j.Logger;
 import com.box.boxjavalibv2.BoxClient;
 import com.box.boxjavalibv2.dao.BoxCollection;
 import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFileVersion;
 import com.box.boxjavalibv2.dao.BoxFolder;
 import com.box.boxjavalibv2.dao.BoxThumbnail;
 import com.box.boxjavalibv2.dao.BoxTypedObject;
@@ -74,7 +71,6 @@ import com.box.boxjavalibv2.requests.requestobjects.BoxImageRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxItemCopyRequestObject;
 import com.box.boxjavalibv2.requests.requestobjects.BoxPagingRequestObject;
 import com.box.boxjavalibv2.resourcemanagers.IBoxFilesManager;
-import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
@@ -86,14 +82,12 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -104,7 +98,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageVersionedFileAccess, FileStorageLockedFileAccess {
+public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageLockedFileAccess {
 
     private static final String THUMBNAIL_EXTENSION = "png";
 
@@ -195,13 +189,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected File doPerform(BoxAccess boxAccess) throws BoxRestException, BoxServerException, AuthFatalFailureException, OXException {
                 try {
                     BoxClient boxClient = boxAccess.getBoxClient();
-                    final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, customRequestObject(Arrays.asList(BoxFile.FIELD_NAME))).size();
+
+                    // Versions are only tracked for Box users with premium accounts- Hence we do not support it (anymore)
+                    /* final int versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, customRequestObject(Arrays.asList(BoxFile.FIELD_NAME))).size(); */
 
                     BoxFile file = boxClient.getFilesManager().getFile(id, defaultBoxRequest());
                     checkFileValidity(file);
 
                     com.openexchange.file.storage.boxcom.BoxFile boxFile = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId).parseBoxFile(file);
-                    boxFile.setNumberOfVersions(versions);
                     return boxFile;
                 } catch (final BoxServerException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
@@ -719,11 +714,10 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /*-
+     * Deprecated versions-related methods:
      *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
-     */
+
     @Override
     public String[] removeVersion(String folderId, final String id, final String[] versions) throws OXException {
         return perform(new BoxClosure<String[]>() {
@@ -756,11 +750,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
-     */
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         return perform(new BoxClosure<TimedResult<File>>() {
@@ -793,12 +782,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         });
     }
-
-    /*
-     * (non-Javadoc)
      *
-     * @see com.openexchange.file.storage.FileStorageLockedFileAccess#unlock(java.lang.String, java.lang.String)
      */
+
     @Override
     public void unlock(String folderId, final String id) throws OXException {
         perform(new BoxClosure<Void>() {
@@ -812,11 +798,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageLockedFileAccess#lock(java.lang.String, java.lang.String, long)
-     */
     @Override
     public void lock(String folderId, final String id, long diff) throws OXException {
         perform(new BoxClosure<Void>() {

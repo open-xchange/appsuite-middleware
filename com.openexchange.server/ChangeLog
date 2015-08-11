@@ -1,6 +1,7 @@
 * 2015-08-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 35186: Convert bob-ascii characters to appropriate HTML decimal entity ( &#nnnn; )
+ - Fix for bug 40344: Removed version support from box.com file storage integration
 
 * 2015-08-10 - thorben.betten@open-xchange.com
 

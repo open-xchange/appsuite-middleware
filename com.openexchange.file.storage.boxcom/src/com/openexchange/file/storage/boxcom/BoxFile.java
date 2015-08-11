@@ -87,6 +87,7 @@ public final class BoxFile extends DefaultFile {
         setId(id);
         setFileName(id);
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
+        setNumberOfVersions(1);
         setIsCurrentVersion(true);
     }
 
@@ -190,7 +191,7 @@ public final class BoxFile extends DefaultFile {
 
     /**
      * Parses an ISO8601 formatted date into a {@link java.util.Date} object.
-     * 
+     *
      * @param date The ISO8601 formatted date
      * @return The date
      */
