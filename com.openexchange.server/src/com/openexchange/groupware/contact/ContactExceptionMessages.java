@@ -140,6 +140,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String TOO_MANY_PATTERNS_DISPLAY = "The query \"%1$s\" contains too many patterns. Please shorten the query and try again.";
 
+    public final static String IGNORED_PATTERN_DISPLAY = "The pattern \"%1$s\" has been ignored during search.";
+
     private ContactExceptionMessages() {
         super();
     }
