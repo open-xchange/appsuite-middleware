@@ -899,7 +899,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 properties.put("mail.imap.accountId", Integer.toString(accountId));
             }
             boolean checkConnectivityIfPolled = checkConnectivityIfPolled();
-            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), );
+            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), checkConnectivityIfPolled);
             if (null == borrowedIMAPStore) {
                 throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
             }
