@@ -101,13 +101,20 @@ public class ShareHelper {
      * @return The compared object permissions yielding new and removed guest object permissions
      */
     public static ComparedObjectPermissions processGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, List<Field> modifiedColumns) throws OXException {
-        if ((null == modifiedColumns || modifiedColumns.contains(Field.OBJECT_PERMISSIONS)) && supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
+        if ((null == modifiedColumns || modifiedColumns.contains(Field.OBJECT_PERMISSIONS))) {
             ComparedObjectPermissions comparedPermissions;
             if (FileStorageFileAccess.NEW == document.getId()) {
                 comparedPermissions = new ComparedObjectPermissions(session.getContextId(), null, document);
             } else {
                 File oldDocument = fileAccess.getFileMetadata(document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION);
                 comparedPermissions = new ComparedObjectPermissions(session.getContextId(), oldDocument, document);
+            }
+            /*
+             * check for general support if changes should be applied
+             */
+            if (comparedPermissions.hasChanges() && false == supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
+                throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(
+                    fileAccess.getAccountAccess().getService().getDisplayName(), document.getFolderId(), session.getContextId());
             }
             /*
              * Remove new guests from the document and check them in terms of permission bits
