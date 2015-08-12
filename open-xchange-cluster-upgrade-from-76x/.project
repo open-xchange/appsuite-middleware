@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>open-xchange-hazelcast-upgrade324</name>
+	<name>open-xchange-cluster-upgrade-from-76x</name>
 	<comment></comment>
 	<projects>
 		<project>com.openexchange.contact.storage.ldap</project>

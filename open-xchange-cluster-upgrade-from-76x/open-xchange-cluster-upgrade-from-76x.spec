@@ -1,5 +1,5 @@
 
-Name:           open-xchange-hazelcast-upgrade324
+Name:           open-xchange-cluster-upgrade-from-76x
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
@@ -21,12 +21,12 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Server module to invalidate nodes running a hazelcast v3.2.4 cluster during upgrade
+Summary:        Server module to invalidate cluster nodes running v7.6.x of the Open-Xchange server (Hazelcast v3.2.4) during upgrade
 Autoreqprov:    no
 Requires:       open-xchange-core >= @OXVERSION@
 
 %description
-Server module to invalidate nodes running a hazelcast v3.2.4 cluster during upgrade
+Server module to invalidate cluster nodes running v7.6.x of the Open-Xchange server (Hazelcast v3.2.4) during upgrade
 
 Authors:
 --------
