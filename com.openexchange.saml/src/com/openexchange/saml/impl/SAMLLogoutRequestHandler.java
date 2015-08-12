@@ -49,19 +49,20 @@
 
 package com.openexchange.saml.impl;
 
+import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.spi.SAMLBackend;
+import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.session.Session;
 
 
@@ -77,16 +78,19 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
 
     private final SAMLBackend backend;
 
-    public SAMLLogoutRequestHandler(SAMLBackend backend) {
+    private final LoginConfigurationLookup loginConfigurationLookup;
+
+    public SAMLLogoutRequestHandler(SAMLBackend backend, LoginConfigurationLookup loginConfigurationLookup) {
         super();
         this.backend = backend;
+        this.loginConfigurationLookup = loginConfigurationLookup;
     }
 
     @Override
     public void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
             Session session = null;
-            String sessionId = httpRequest.getParameter(AJAXServlet.PARAMETER_SESSION);
+            String sessionId = httpRequest.getParameter(LoginServlet.PARAMETER_SESSION);
             if (sessionId == null) {
                 LOG.info("Missing session id in SAML logout request");
             } else {
@@ -95,22 +99,12 @@ public class SAMLLogoutRequestHandler implements LoginRequestHandler {
             }
 
             if (session != null) {
-                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
-                SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, httpRequest.getRemoteAddr(), conf.getIpCheckWhitelist());
-                final String secret = SessionUtility.extractSecret(
-                    conf.getHashSource(),
-                    httpRequest,
-                    session.getHash(),
-                    session.getClient());
-
-                if (secret != null && session.getSecret().equals(secret)) {
-                    LOG.debug("Performing logout for session {}", sessionId);
-                    LoginPerformer.getInstance().doLogout(sessionId);
-                    SessionUtility.removeOXCookies(session.getHash(), httpRequest, httpResponse);
-                    SessionUtility.removeJSESSIONID(httpRequest, httpResponse);
-                } else {
-                    LOG.info("Missing or non-matching secret for session {}", sessionId);
-                }
+                String hash = session.getHash();
+                SAMLLoginTools.validateSession(httpRequest, session, hash, loginConfigurationLookup.getLoginConfiguration());
+                LOG.debug("Performing logout for session {}", sessionId);
+                LoginPerformer.getInstance().doLogout(sessionId);
+                SessionUtility.removeOXCookies(httpRequest, httpResponse, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, LoginServlet.SECRET_PREFIX + hash, getPublicSessionCookieName(httpRequest), SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + hash));
+                SessionUtility.removeJSESSIONID(httpRequest, httpResponse);
             }
         } catch (OXException e) {
             LOG.error("Logout failed", e);
