@@ -45,6 +45,20 @@ Install this package and its dependencies will install the necessary components 
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    PFILE=/opt/open-xchange/etc/saml.properties
+
+    # SoftwareChange_Request-2673
+    ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -65,6 +79,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
+* Thu Aug 06 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-08-17 (2666)
 * Tue Aug 04 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Steffen Templin <steffen.templin@open-xchange.com>

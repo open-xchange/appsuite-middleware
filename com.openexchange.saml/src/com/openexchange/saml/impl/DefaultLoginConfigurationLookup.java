@@ -47,74 +47,22 @@
  *
  */
 
-package com.openexchange.saml;
+package com.openexchange.saml.impl;
 
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
 
-public class TestConfig implements SAMLConfig {
-
-
-    TestConfig() {
-        super();
-    }
-
-    @Override
-    public String getProviderName() {
-        return "OX App Suite";
-    }
+/**
+ * Default implementation of {@link LoginConfigurationLookup}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.6.1
+ */
+public class DefaultLoginConfigurationLookup implements LoginConfigurationLookup {
 
     @Override
-    public String getEntityID() {
-        return "http://webmail.example.com";
-    }
-
-    @Override
-    public String getAssertionConsumerServiceURL() {
-        return "https://webmail.example.com/appsuite/api/saml/acs";
-    }
-
-    @Override
-    public String getSingleLogoutServiceURL() {
-        return "https://webmail.example.com/appsuite/api/saml/sls";
-    }
-
-    @Override
-    public String getIdentityProviderEntityID() {
-        return "http://idp.example.com";
-    }
-
-    @Override
-    public Binding getLogoutResponseBinding() {
-        return Binding.HTTP_REDIRECT;
-    }
-
-    @Override
-    public String getIdentityProviderAuthnURL() {
-        return "https://idp.example.com/sso/login";
-    }
-
-    @Override
-    public boolean singleLogoutEnabled() {
-        return true;
-    }
-
-    @Override
-    public String getIdentityProviderLogoutURL() {
-        return "https://idp.example.com/sso/logout";
-    }
-
-    @Override
-    public boolean enableMetadataService() {
-        return true;
-    }
-
-    @Override
-    public String getLogoutResponseTemplate() {
-        return null;
-    }
-
-    @Override
-    public boolean isAutoLoginEnabled() {
-        return true;
+    public LoginConfiguration getLoginConfiguration() {
+        return LoginServlet.getLoginConfiguration();
     }
 
 }

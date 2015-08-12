@@ -78,4 +78,9 @@ public class SAMLSessionParameters {
      */
     public static final String SESSION_INDEX = "com.openexchange.saml.SessionIndex";
 
+    /**
+     * com.openexchange.saml.SessionCookie
+     */
+    public static final String SESSION_COOKIE = "com.openexchange.saml.SessionCookie";
+
 }

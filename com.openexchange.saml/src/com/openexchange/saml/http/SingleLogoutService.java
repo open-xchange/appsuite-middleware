@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.ExceptionHandler;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -107,6 +108,7 @@ public class SingleLogoutService extends SAMLServlet {
                 }
                 break;
             default:
+                Tools.disableCaching(httpResponse);
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 break;
         }

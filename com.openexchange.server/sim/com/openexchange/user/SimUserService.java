@@ -51,6 +51,8 @@ package com.openexchange.user;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
@@ -63,6 +65,23 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimUserService implements UserService {
+
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, User>> contexts = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, User>>();
+
+    /**
+     * Adds a user, its ID must be set!
+     */
+    public void addUser(User user, int contextId) {
+        ConcurrentMap<Integer, User> users = contexts.get(contextId);
+        if (users == null) {
+            users = new ConcurrentHashMap<Integer, User>();
+            ConcurrentMap<Integer, User> existing = contexts.putIfAbsent(contextId, users);
+            if (existing != null) {
+                users = existing;
+            }
+        }
+        users.put(user.getId(), user);
+    }
 
     @Override
     public Context getContext(int contextId) throws OXException {
@@ -95,14 +114,17 @@ public class SimUserService implements UserService {
      */
     @Override
     public User getUser(final int uid, final Context context) throws OXException {
-        // Nothing to do
-        return null;
+        return getUser(uid, context.getContextId());
     }
 
     @Override
     public User getUser(int uid, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        ConcurrentMap<Integer, User> users = contexts.get(contextId);
+        if (users == null) {
+            return null;
+        }
+
+        return users.get(uid);
     }
 
     @Override

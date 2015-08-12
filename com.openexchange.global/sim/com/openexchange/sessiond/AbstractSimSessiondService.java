@@ -186,4 +186,9 @@ public class AbstractSimSessiondService implements SessiondService {
         return Collections.emptyList();
     }
 
+    @Override
+    public Collection<String> findSessions(SessionFilter filter) throws OXException {
+        return Collections.emptyList();
+    }
+
 }

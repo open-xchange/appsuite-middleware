@@ -83,6 +83,7 @@ public class SimSessiondService implements SessiondService {
         session.setLoginName(param.getFullLogin());
         session.setPassword(param.getPassword());
         session.setLocalIp(param.getClientIP());
+        session.setSecret(UUIDs.getUnformattedString(UUID.randomUUID()));
         Session existing = null;
         do {
             session.setSessionID(UUIDs.getUnformattedString(UUID.randomUUID()));
@@ -291,5 +292,10 @@ public class SimSessiondService implements SessiondService {
     public boolean storeSession(String sessionId) throws OXException {
         // Nothing to do.
         return true;
+    }
+
+    @Override
+    public Collection<String> findSessions(SessionFilter filter) {
+        return filterSessionIds(filter, false);
     }
 }
