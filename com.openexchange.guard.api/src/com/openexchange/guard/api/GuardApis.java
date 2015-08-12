@@ -111,15 +111,20 @@ public class GuardApis {
         for (javax.servlet.http.Cookie cookie : cookies) {
             String name = cookie.getName();
             if (name.startsWith(LoginServlet.SECRET_PREFIX)) {
-                if (cookie.getValue().equals(session.getSecret())) {
+                String value = cookie.getValue();
+                if (null != value && value.equals(session.getSecret())) {
                     extractedCookies.add(new Cookie(name, cookie.getValue()));
                 }
             } else if (name.startsWith(LoginServlet.PUBLIC_SESSION_PREFIX)) {
-                if (cookie.getValue().equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                String value = cookie.getValue();
+                if (null != value && value.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                     extractedCookies.add(new Cookie(name, cookie.getValue()));
                 }
             } else if ("JSESSIONID".equals(name)) {
-                extractedCookies.add(new Cookie(name, cookie.getValue()));
+                String value = cookie.getValue();
+                if (null != value) {
+                    extractedCookies.add(new Cookie(name, value));
+                }
             }
         }
         return extractedCookies;
