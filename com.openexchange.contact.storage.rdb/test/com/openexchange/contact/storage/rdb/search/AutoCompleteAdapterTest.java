@@ -50,11 +50,10 @@
 package com.openexchange.contact.storage.rdb.search;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.exception.OXException;
+import com.openexchange.java.SimpleTokenizer;
 
 /**
  * {@link AutoCompleteAdapterTest}
@@ -63,19 +62,6 @@ import com.openexchange.exception.OXException;
  * @since 7.8.0
  */
 public class AutoCompleteAdapterTest {
-
-    @Test
-    public void testTooManyPatterns() throws Exception {
-        String query = "eins zwei drei vier fuenf sechs";
-        OXException expected = null;
-        try {
-            new AutocompleteAdapter(query, null, null, 0, null, null, false);
-        } catch (OXException e) {
-            expected = e;
-        }
-        assertNotNull(expected);
-        assertEquals("CON-0263", expected.getErrorCode());
-    }
 
     @Test
     public void testDetectWildcard() throws Exception {
@@ -120,7 +106,7 @@ public class AutoCompleteAdapterTest {
     }
 
     private static void assertPatterns(String query, String...expectedPatterns) throws Exception {
-        List<String> patterns = AutocompleteAdapter.extractPatterns(query, false);
+        List<String> patterns = AutocompleteAdapter.preparePatterns(SimpleTokenizer.tokenize(query));
         if (null == expectedPatterns || 0 == expectedPatterns.length) {
             assertTrue(null == patterns || 0 == patterns.size());
         } else {

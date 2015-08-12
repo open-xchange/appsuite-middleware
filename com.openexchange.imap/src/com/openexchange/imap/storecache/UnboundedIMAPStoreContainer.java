@@ -60,6 +60,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -108,15 +110,18 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStore imapStore;
 
         IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
-        if (null != imapStoreWrapper && imapStoreWrapper.imapStore.isConnectedUnsafe()) {
+        if (null == imapStoreWrapper) {
+            imapStore = newStore(server, port, login, pw, imapSession, session);
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+        } else {
             imapStore = imapStoreWrapper.imapStore;
+            String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+            
             // Should we set properties from passed session?
             // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
             // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
             LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
-        } else {
-            imapStore = newStore(server, port, login, pw, imapSession, session);
-            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         }
 
         inUseCount.incrementAndGet();

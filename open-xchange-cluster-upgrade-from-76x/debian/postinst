@@ -1,5 +1,5 @@
 #!/bin/bash
-# postinst script for open-xchange-hazelcast-upgrade324
+# postinst script for open-xchange-cluster-upgrade-from-76x
 #
 # see: dh_installdeb(1)
 

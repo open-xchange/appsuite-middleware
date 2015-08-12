@@ -54,7 +54,6 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -117,7 +116,6 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
-import com.openexchange.version.Version;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -924,12 +922,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
+            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         }
         /*
          * ... and connect it
@@ -1044,11 +1037,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isConnected() {
-        if (!connected) {
-            return false;
-        }
-        IMAPStore imapStore = this.imapStore;
-        return (connected = ((imapStore != null) && imapStore.isConnectedUnsafe()));
+        /*-
+         *
+         if (!connected) {
+             return false;
+         }
+        return (connected = ((imapStore != null) && imapStore.isConnected()));
+         */
+        return connected;
     }
 
     @Override

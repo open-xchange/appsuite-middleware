@@ -89,6 +89,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
     // General message if a setting cannot be put into database because it exceeds a column's capacity constraints
     public static final String DATA_TRUNCATION_ERROR_MSG = "Data cannot be stored into the database because it is too big";
 
+    // The request sent by the client was syntactically incorrect
+    public static final String BAD_REQUEST = "The request sent by the client was syntactically incorrect";
+
     /**
      * Initializes a new {@link OXExceptionStrings}.
      */

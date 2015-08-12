@@ -88,9 +88,6 @@ public class Bug40298Test extends CalDAVTest {
         String currentUserPrincipal = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertNotNull(currentUserPrincipal);
         assertTrue(currentUserPrincipal.contains(getUsername()));
-        String owner = extractHref(PropertyNames.OWNER, response);
-        assertNotNull(owner);
-        assertTrue(owner.contains(getUsername()));
 	}
 
 }

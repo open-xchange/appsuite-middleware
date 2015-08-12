@@ -1,4 +1,4 @@
-Source: open-xchange-hazelcast-upgrade324
+Source: open-xchange-cluster-upgrade-from-76x
 Section: web
 Priority: optional
 Maintainer: Tobias Friedrich <tobias.friedrich@open-xchange.com>
@@ -6,8 +6,8 @@ Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), ja
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
-Package: open-xchange-hazelcast-upgrade324
+Package: open-xchange-cluster-upgrade-from-76x
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: Server module to invalidate nodes running a hazelcast v3.2.4 cluster during upgrade
+Description: Server module to invalidate cluster nodes running v7.6.x of the Open-Xchange server (Hazelcast v3.2.4) during upgrade
