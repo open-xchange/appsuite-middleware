@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -367,7 +368,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>.
      */
     public boolean hasWebMail() {
-        return hasPermission(WEBMAIL);
+        return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
     }
 
     /**
@@ -376,7 +377,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasCalendar() {
-        return hasPermission(CALENDAR);
+        return capabilities.contains(Permission.CALENDAR.getCapabilityName());
     }
 
     /**
@@ -385,7 +386,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasContact() {
-        return hasPermission(CONTACTS);
+        return capabilities.contains(Permission.CONTACTS.getCapabilityName());
     }
 
     /**
@@ -394,7 +395,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasTask() {
-        return hasPermission(TASKS);
+        return capabilities.contains(Permission.TASKS.getCapabilityName());
     }
 
     /**
@@ -403,7 +404,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
-        return hasPermission(INFOSTORE);
+        return capabilities.contains(Permission.INFOSTORE.getCapabilityName());
     }
 
     /**
@@ -412,7 +413,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAVXML() {
-        return hasPermission(WEBDAV_XML);
+        return capabilities.contains(Permission.WEBDAV_XML.getCapabilityName());
     }
 
     /**
@@ -421,7 +422,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAV() {
-        return hasPermission(WEBDAV);
+        return capabilities.contains(Permission.WEBDAV.getCapabilityName());
     }
 
     /**
@@ -430,7 +431,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasICal() {
-        return hasPermission(ICAL);
+        return capabilities.contains(Permission.ICAL.getCapabilityName());
     }
 
     /**
@@ -439,7 +440,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasVCard() {
-        return hasPermission(VCARD);
+        return capabilities.contains(Permission.VCARD.getCapabilityName());
     }
 
     /**
@@ -448,7 +449,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasSyncML() {
-        return hasPermission(MOBILITY);
+        return capabilities.contains(Permission.MOBILITY.getCapabilityName());
     }
 
     /**
@@ -511,7 +512,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if portal page is allowed; otherwise <code>false</code>
      */
     public boolean hasPortal() {
-        return !hasPermission(DENIED_PORTAL);
+        return capabilities.contains("portal");
     }
 
     /**
@@ -578,7 +579,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> full public folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullPublicFolderAccess() {
-        return hasPermission(EDIT_PUBLIC_FOLDERS);
+        return capabilities.contains(Permission.EDIT_PUBLIC_FOLDERS.getCapabilityName());
     }
 
     /**
@@ -588,7 +589,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> full shared folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullSharedFolderAccess() {
-        return hasPermission(READ_CREATE_SHARED_FOLDERS);
+        return capabilities.contains(Permission.READ_CREATE_SHARED_FOLDERS.getCapabilityName());
     }
 
     /**
@@ -597,7 +598,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if user can delegate tasks; otherwise <code>false</code>
      */
     public boolean canDelegateTasks() {
-        return hasPermission(DELEGATE_TASKS);
+        return capabilities.contains(Permission.DELEGATE_TASKS.getCapabilityName());
     }
 
     /**
@@ -606,7 +607,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>
      */
     public boolean isCollectEmailAddresses() {
-        return hasPermission(COLLECT_EMAIL_ADDRESSES);
+        return capabilities.contains(Permission.COLLECT_EMAIL_ADDRESSES.getCapabilityName());
     }
 
     /**
@@ -615,7 +616,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
-        return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
+        return capabilities.contains(Permission.MULTIPLE_MAIL_ACCOUNTS.getCapabilityName());
     }
 
     /**
@@ -624,7 +625,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
-        return hasPermission(SUBSCRIPTION);
+        return capabilities.contains(Permission.SUBSCRIPTION.getCapabilityName());
     }
 
     /**
@@ -633,28 +634,28 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
-        return hasPermission(PUBLICATION);
+        return capabilities.contains(Permission.PUBLICATION.getCapabilityName());
     }
 
     /**
      * Checks if this user configuration indicates that the user may use Exchange Active Sync
      */
     public boolean hasActiveSync() {
-        return hasPermission(ACTIVE_SYNC);
+        return capabilities.contains(Permission.ACTIVE_SYNC.getCapabilityName());
     }
 
     /**
      * Checks if this user configuration indicates that the user may use USM.
      */
     public boolean hasUSM() {
-        return hasPermission(USM);
+        return capabilities.contains(Permission.USM.getCapabilityName());
     }
 
     /**
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
     public boolean hasOLOX20() {
-        return hasPermission(OLOX20);
+        return capabilities.contains(Permission.OLOX20.getCapabilityName());
     }
 
     /**
@@ -663,7 +664,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditGroup() {
-        return hasPermission(EDIT_GROUP);
+        return capabilities.contains(Permission.EDIT_GROUP.getCapabilityName());
     }
 
     /**
@@ -672,7 +673,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditResource() {
-        return hasPermission(EDIT_RESOURCE);
+        return capabilities.contains(Permission.EDIT_RESOURCE.getCapabilityName());
     }
 
     /**
@@ -682,7 +683,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      *         <code>false</code>
      */
     public boolean isEditPassword() {
-        return hasPermission(EDIT_PASSWORD);
+        return capabilities.contains(Permission.EDIT_PASSWORD.getCapabilityName());
     }
 
     /**
