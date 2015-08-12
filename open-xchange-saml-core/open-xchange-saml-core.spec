@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -53,6 +53,20 @@ Install this package and its dependencies will install the necessary components 
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    PFILE=/opt/open-xchange/etc/saml.properties
+
+    # SoftwareChange_Request-2673
+    ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -73,6 +87,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
+* Thu Aug 06 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.8.0
 * Tue Aug 04 2015 Steffen Templin <steffen.templin@open-xchange.com>
@@ -85,6 +101,8 @@ Build for patch 2015-07-27 (2626)
 Build for patch 2015-07-20 (2614)
 * Tue Jul 14 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Prepare for 7.6.2 hotfix
+* Wed Jun 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-06-26 (2573)
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
 initial packaging for SAML core package
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>

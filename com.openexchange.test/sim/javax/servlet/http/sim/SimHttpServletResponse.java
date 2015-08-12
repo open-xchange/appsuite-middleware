@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -73,7 +74,7 @@ public final class SimHttpServletResponse implements HttpServletResponse {
     private ServletOutputStream outputStream;
     private boolean committed;
     private Locale locale;
-    private List<Cookie> cookies;
+    private final List<Cookie> cookies = new LinkedList<Cookie>();
     private int status;
     private String statusMessage;
 
