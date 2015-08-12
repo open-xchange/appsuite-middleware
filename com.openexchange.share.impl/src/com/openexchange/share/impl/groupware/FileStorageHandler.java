@@ -57,6 +57,8 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -216,9 +218,12 @@ public class FileStorageHandler implements ModuleHandler {
                     fileAccess.startTransaction();
                     for (TargetProxy proxy : modified) {
                         File file = ((FileTargetProxy) proxy).getFile();
+                        FileID fileID = new FileID(file.getId());
+                        if (false == fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.OBJECT_PERMISSIONS)) {
+                            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(fileID.getService(), file.getFolderId(), parameters.getContext().getContextId());
+                        }
                         fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                     }
-
                     fileAccess.commit();
                 } catch (OXException e) {
                     fileAccess.rollback();
