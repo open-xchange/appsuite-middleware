@@ -49,11 +49,8 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,6 +58,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.java.Strings;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 
 /**
  * Enumeration of known permissions.
@@ -159,7 +159,7 @@ public enum Permission {
      * @return The capability name
      */
     public String getCapabilityName() {
-        return toLowerCase(name());
+        return asciiLowerCase(name());
     }
 
     /**
