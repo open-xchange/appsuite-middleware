@@ -2263,9 +2263,7 @@ public final class IMAPCommandsCollection {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
-                        Store store = imapFolder.getStore();
-                        ((IMAPStore) store).setAllowUnsafeConnectedCheck(false);
-                        throw new StoreClosedException(store, protocolException.getMessage());
+                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
                     }
                     final Throwable cause = protocolException.getCause();
                     if (cause instanceof StoreClosedException) {

@@ -880,7 +880,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // Probably doesn't support STATUS, tough luck.
 	    return false;
 	} catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	    throw new StoreClosedException(store, cex.getMessage());
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -1653,7 +1652,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
             } catch (ConnectionException cex) {
-                ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
                 throw new StoreClosedException(store, cex.getMessage());
             } catch (ProtocolException pex) {
                 throw new MessagingException(pex.getMessage(), pex);
@@ -1694,7 +1692,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
 	    } catch (ConnectionException cex) {
-                ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
                 throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1745,7 +1742,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     releaseStoreProtocol(p);
                 }
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1785,7 +1781,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		// return the count .. bah, not worth it.
 		return -1;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -3281,7 +3276,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		// return the count .. bah, not worth it.
 		return -1;
 	    } catch (ConnectionException cex) {
-        ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 		throw new StoreClosedException(store, cex.getMessage());
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -3544,7 +3538,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// time we get here and our protocol object will have been
 	// released, so if we no longer have a protocol object we base
 	// this decision on whether we *think* the folder is open.
-    ((IMAPStore)store).setAllowUnsafeConnectedCheck(false);
 	if ((protocol != null && cex.getProtocol() == protocol) ||
 		(protocol == null && !reallyClosed))
             throw new FolderClosedException(this, cex.getMessage(), cex);
