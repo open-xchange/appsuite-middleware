@@ -110,7 +110,10 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStore imapStore;
 
         IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
-        if (null != imapStoreWrapper && imapStoreWrapper.imapStore.isConnectedUnsafe()) {
+        if (null == imapStoreWrapper) {
+            imapStore = newStore(server, port, login, pw, imapSession, session);
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+        } else {
             imapStore = imapStoreWrapper.imapStore;
             String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
@@ -119,9 +122,6 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
             // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
             LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
-        } else {
-            imapStore = newStore(server, port, login, pw, imapSession, session);
-            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         }
 
         inUseCount.incrementAndGet();
