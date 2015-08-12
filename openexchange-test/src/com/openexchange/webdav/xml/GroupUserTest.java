@@ -15,6 +15,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.resource.Resource;
@@ -67,7 +68,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 
 		int posInArray = -1;
 		for (int a = 0; a < group.length; a++) {
-			if (group[a].getIdentifier() > 0) {
+			if (GroupStorage.GROUP_ZERO_IDENTIFIER != group[a].getIdentifier() && GroupStorage.GUEST_GROUP_IDENTIFIER != group[a].getIdentifier()) {
 			    posInArray = a;
 				break;
 			}
