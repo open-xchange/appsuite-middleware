@@ -131,6 +131,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     public static final String DELETE_DENIED_MSG = "Delete denied for \"%1$s\" resource: %2$s";
 
     // Missing configuration for %1$s account "%2$s".
+    // The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+    // E.g. 'Missing configuration for boxcom account "3".'
     public static final String MISSING_CONFIG_MSG = "Missing configuration for %1$s account \"%2$s\".";
 
     // The provided %1$s resource does not exist: %2$s
