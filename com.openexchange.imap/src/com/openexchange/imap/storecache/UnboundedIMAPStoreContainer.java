@@ -60,6 +60,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -110,6 +112,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
         if (null != imapStoreWrapper && imapStoreWrapper.imapStore.isConnectedUnsafe()) {
             imapStore = imapStoreWrapper.imapStore;
+            String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+            
             // Should we set properties from passed session?
             // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
             // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));

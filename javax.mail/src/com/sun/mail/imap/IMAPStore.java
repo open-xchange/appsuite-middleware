@@ -774,6 +774,21 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Gets the denoted client parameter (advertised via <code>"ID"</code> command).
+     *
+     * @param name The parameter name
+     * @return The value or <code>null</code> if there is no such client parameter set
+     */
+    public String getClientParameter(String name) {
+        if (null == name) {
+            return null;
+        }
+        
+        Map<String, String> clientParameters = this.clientParameters;
+        return null == clientParameters ? null : clientParameters.get(name);
+    }
+
+    /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
      * specified by various properties. <p>
