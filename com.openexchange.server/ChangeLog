@@ -4,6 +4,7 @@
  - Fix for bug 40326: Handle invalid JSON request body on incoming multiple request gracefully by returning a "400 - Bad Request" HTTP error
                       code along-side with a tiny HTML page (to avoid accidental download trigger for Safari Browser)
  - Fix for OXTN#2015080610000286: Fixed conditional check if portal is available
+ - Fix for bug 40236: Deny trailing white-space character in folder name (treat as not present)
 
 * 2015-08-12 - jan.bauerdick@open-xchange.com
 

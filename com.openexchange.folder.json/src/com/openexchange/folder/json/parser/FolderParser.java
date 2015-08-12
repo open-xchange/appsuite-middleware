@@ -107,7 +107,7 @@ public final class FolderParser {
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.FOLDER_NAME.getName())) {
-                folder.setName(folderJsonObject.getString(FolderField.FOLDER_NAME.getName()));
+                folder.setName(folderJsonObject.getString(FolderField.FOLDER_NAME.getName()).trim());
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.MODULE.getName())) {
