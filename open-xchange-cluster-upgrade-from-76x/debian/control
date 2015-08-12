@@ -1,4 +1,4 @@
-Source: open-xchange-hazelcast-upgrade324
+Source: open-xchange-cluster-upgrade-from-76x
 Section: web
 Priority: optional
 Maintainer: Tobias Friedrich <tobias.friedrich@open-xchange.com>
