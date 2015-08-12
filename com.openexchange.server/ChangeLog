@@ -1,3 +1,7 @@
+* 2015-08-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39893: Do not accept an empty address when building a contact's halo
+
 * 2015-08-12 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 39484: Added folder data to response

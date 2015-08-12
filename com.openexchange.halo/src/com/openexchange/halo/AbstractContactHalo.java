@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractContactHalo implements HaloContactDataSource {
@@ -87,20 +88,20 @@ public abstract class AbstractContactHalo implements HaloContactDataSource {
     protected List<String> getEMailAddresses(final Contact contact) {
         final Set<String> addresses = new LinkedHashSet<String>(8);
         if (contact.containsEmail1()) {
-            final String s = contact.getEmail1();
-            if (null != s) {
+            String s = contact.getEmail1();
+            if (false == Strings.isEmpty(s)) {
                 addresses.add(s);
             }
         }
         if (contact.containsEmail2()) {
-            final String s = contact.getEmail2();
-            if (null != s) {
+            String s = contact.getEmail2();
+            if (false == Strings.isEmpty(s)) {
                 addresses.add(s);
             }
         }
         if (contact.containsEmail3()) {
-            final String s = contact.getEmail3();
-            if (null != s) {
+            String s = contact.getEmail3();
+            if (false == Strings.isEmpty(s)) {
                 addresses.add(s);
             }
         }
