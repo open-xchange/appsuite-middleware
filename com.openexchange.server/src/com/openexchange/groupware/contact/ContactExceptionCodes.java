@@ -275,6 +275,12 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
         ContactExceptionMessages.TOO_MANY_PATTERNS_DISPLAY, Category.CATEGORY_USER_INPUT, 263),
 
     /**
+     * The pattern \"%1$s\" has been ignored during search.
+     */
+    IGNORED_PATTERN("The pattern \"%1$s\" has been ignored during search.",
+        ContactExceptionMessages.IGNORED_PATTERN_DISPLAY, Category.CATEGORY_USER_INPUT, 264),
+
+    /**
      * Number of documents attached to this contact is below zero. You can not
      * remove any more attachments.
      */
