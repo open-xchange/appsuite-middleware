@@ -78,17 +78,19 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     protected final int port;
     protected final int maxRetryCount;
     private final AtomicInteger inUseCount;
+    private final boolean checkConnectivityIfPolled;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(String server, int port, boolean propagateClientIp) {
+    public UnboundedIMAPStoreContainer(String server, int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         super(propagateClientIp);
         maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
         this.port = port;
         this.server = server;
         inUseCount = new AtomicInteger();
+        this.checkConnectivityIfPolled = checkConnectivityIfPolled;
     }
 
     /**
@@ -107,24 +109,40 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        IMAPStore imapStore;
+        IMAPStore imapStore = pollOrCreateIMAPStore(imapSession, login, pw, session);
+        inUseCount.incrementAndGet();
+        return imapStore;
+    }
 
+    private IMAPStore pollOrCreateIMAPStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException {
         IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
         if (null == imapStoreWrapper) {
-            imapStore = newStore(server, port, login, pw, imapSession, session);
+            IMAPStore imapStore = newStore(server, port, login, pw, imapSession, session);
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
-        } else {
-            imapStore = imapStoreWrapper.imapStore;
-            String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-            
-            // Should we set properties from passed session?
-            // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
-            // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
-            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+            return imapStore;
         }
-
-        inUseCount.incrementAndGet();
+        
+        // Polled an existing instance
+        IMAPStore imapStore = imapStoreWrapper.imapStore;
+        
+        // Valid?
+        if (checkConnectivityIfPolled) {
+            if (false == imapStore.isConnected()) {
+                // IMAPStore instance is no more connected
+                imapStore = newStore(server, port, login, pw, imapSession, session);
+                LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+                return imapStore;
+            }
+        }
+        
+        // Grab associated IMAP session identifier (as advertised via "ID" command)
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        
+        // Should we set properties from passed session?
+        // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
+        // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
+        LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         return imapStore;
     }
 

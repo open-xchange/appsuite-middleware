@@ -171,6 +171,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The scheduled timer task to clean-up maps.
      */
     private static volatile ScheduledTimerTask cleanUpTimerTask;
+    
+    private static Boolean checkConnectivityIfPolled;
+    private static boolean checkConnectivityIfPolled() {
+        Boolean b = checkConnectivityIfPolled;
+        if (null == b) {
+            synchronized (IMAPAccess.class) {
+                b = checkConnectivityIfPolled;
+                if (null == b) {
+                    boolean defaultValue = true;
+                    ConfigurationService configService = Services.optService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    b = Boolean.valueOf(configService.getBoolProperty("com.openexchange.imap.storecache.checkConnectivityIfPolled", defaultValue));
+                    checkConnectivityIfPolled = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
 
     /*-
      * Member section
@@ -878,7 +898,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 properties.put("mail.imap.authAwait", "true");
                 properties.put("mail.imap.accountId", Integer.toString(accountId));
             }
-            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null));
+            boolean checkConnectivityIfPolled = checkConnectivityIfPolled();
+            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), );
             if (null == borrowedIMAPStore) {
                 throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
             }
@@ -976,8 +997,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
-        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp);
+    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws MessagingException, OXException {
+        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp, checkConnectivityIfPolled);
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
