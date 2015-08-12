@@ -119,7 +119,7 @@ public class UpdateAction extends AbstractWriteAction {
         }
 
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
-        if (notify) {
+        if (notify && null != newId) {
             File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
             warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), original, modified, request.getSession(), request.getRequestData().getHostData()));
         }
