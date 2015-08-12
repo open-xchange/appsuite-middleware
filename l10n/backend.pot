@@ -2583,6 +2583,11 @@ msgstr ""
 msgid "Data cannot be stored into the database because it is too big"
 msgstr ""
 
+#. The request sent by the client was syntactically incorrect
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+msgid "The request sent by the client was syntactically incorrect"
+msgstr ""
+
 #. *
 #. * File not found: %1$s
 #.
