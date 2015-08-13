@@ -618,6 +618,11 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return (RemoteInternalPreviewService) previewService;
         }
 
+        // PreviewService object is no direct RemoteInternalPreviewService instance. Check if it is an instance of Delegating
+        if (!(previewService instanceof Delegating)) {
+            return null;
+        }
+        
         // Try to determine file MIME type
         String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
         if (null == mimeType) {
@@ -625,20 +630,17 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return null;
         }
 
-        if (previewService instanceof Delegating) {
-            // Determine candidate
-            PreviewService bestFit = null;
-            try {
-                bestFit = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
-            } catch (OXException e) {
-                LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
-            }
-
+        // Determine candidate
+        try {
+            PreviewService bestFit = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
             if (bestFit instanceof RemoteInternalPreviewService) {
                 return (RemoteInternalPreviewService) bestFit;
             }
+        } catch (OXException e) {
+            LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
         }
 
+        // No suitable candidate found...
         return null;
     }
 
