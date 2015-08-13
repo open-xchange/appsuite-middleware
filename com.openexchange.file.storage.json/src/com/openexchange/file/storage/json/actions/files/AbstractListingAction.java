@@ -268,7 +268,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                         RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
                         if (null != candidate) {
                             AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                            LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
                             numberOfPregeneratedPreviews--;
+                        } else {
+                            LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
                         }
                     }
                 } catch (Exception e) {
