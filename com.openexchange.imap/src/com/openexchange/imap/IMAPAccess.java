@@ -179,7 +179,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             synchronized (IMAPAccess.class) {
                 b = checkConnectivityIfPolled;
                 if (null == b) {
-                    boolean defaultValue = true;
+                    boolean defaultValue = false;
                     ConfigurationService configService = Services.optService(ConfigurationService.class);
                     if (null == configService) {
                         return defaultValue;
