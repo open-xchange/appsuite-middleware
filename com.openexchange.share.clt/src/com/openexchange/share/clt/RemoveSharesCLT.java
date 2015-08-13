@@ -96,8 +96,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         if (cmd.hasOption("i")) {
             userId = cmd.getOptionValue("i");
         }
-        if (cmd.hasOption("t")) {
-            token = cmd.getOptionValue("t");
+        if (cmd.hasOption("T")) {
+            token = cmd.getOptionValue("T");
         }
         iKnowWhatIamDoing = cmd.hasOption("f");
     }
@@ -138,7 +138,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
         options.addOption("i", "userid", true, "The id of the user who created the shares.");
-        options.addOption("t", "tokens", true, "Token to remove.");
+        options.addOption("T", "token", true, "Token or URL to remove.");
         options.addOption("f", "force", false, "Force removal of token.");
     }
 
