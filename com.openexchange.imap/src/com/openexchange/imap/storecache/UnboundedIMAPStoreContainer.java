@@ -125,14 +125,11 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         // Polled an existing instance
         IMAPStore imapStore = imapStoreWrapper.imapStore;
         
-        // Valid?
-        if (checkConnectivityIfPolled) {
-            if (false == imapStore.isConnected()) {
-                // IMAPStore instance is no more connected
-                imapStore = newStore(server, port, login, pw, imapSession, session);
-                LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
-                return imapStore;
-            }
+        if (checkConnectivityIfPolled && (false == imapStore.isConnected())) {
+            // IMAPStore instance is no more connected
+            imapStore = newStore(server, port, login, pw, imapSession, session);
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+            return imapStore;
         }
         
         // Grab associated IMAP session identifier (as advertised via "ID" command)
