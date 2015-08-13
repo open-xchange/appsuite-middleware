@@ -49,6 +49,8 @@
 
 package com.openexchange.share.clt;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -152,6 +154,9 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
             if (null != token && !token.isEmpty()) {
+                if (isShareURL(token)) {
+                    token = extractTokenFromURL(token);
+                }
                 Pair<String, String> tokenAndPath = parseToken(token);
                 String shareToken = tokenAndPath.getFirst();
                 String targetPath = tokenAndPath.getSecond();
@@ -192,6 +197,21 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         }
 
         return new Pair<String, String>(shareToken, targetPath);
+    }
+
+    private final Pattern PATTERN = Pattern.compile("\\Ahttps?:\\/\\/.*?\\/ajax\\/share\\/(.*?)\\z");
+
+    private boolean isShareURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        return m.matches();
+    }
+
+    private String extractTokenFromURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        if (m.matches()) {
+            return m.group(1);
+        }
+        return url;
     }
 
 }
