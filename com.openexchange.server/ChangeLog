@@ -1,3 +1,7 @@
+* 2015-08-13 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40405: Use -T option for token
+
 * 2015-08-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 37990: Added parameter checks to avoid possible runtime errors
