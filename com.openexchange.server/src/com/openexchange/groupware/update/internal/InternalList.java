@@ -663,9 +663,6 @@ public final class InternalList {
             //Add folder_id to primary key in del_dates_members
             list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
-            //Add primary key to dlist tables
-            list.add(new MakeUUIDPrimaryForDListTablesV2());
-
         }
 
         // Adds "archive" and "archive_fullname" columns to mail/transport account table
@@ -791,6 +788,9 @@ public final class InternalList {
 
         // Remove accounts related to facebook
         list.add(new com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask());
+
+        //Add primary key to dlist tables
+        list.add(new MakeUUIDPrimaryForDListTablesV2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

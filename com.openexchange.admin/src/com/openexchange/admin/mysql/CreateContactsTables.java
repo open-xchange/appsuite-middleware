@@ -76,7 +76,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field02 VARCHAR(128),"
         + "field03 VARCHAR(128),"
         + "field04 VARCHAR(128),"
-        + "cid INT4,"
+        + "cid INT4 NOT NULL,"
         + "uuid binary(16) NOT NULL,"
         + "PRIMARY KEY(uuid, cid, intfield01),"
         + "INDEX (intfield01, cid),"

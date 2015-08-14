@@ -71,11 +71,11 @@ import com.openexchange.tools.update.Tools;
  */
 public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
 
-    private static final String TABLE = "prg_dlist";
+    protected static final String TABLE = "prg_dlist";
 
-    private static final String DEL_TABLE = "del_dlist";
+    protected static final String DEL_TABLE = "del_dlist";
 
-    private static final String COLUMN = "uuid";
+    protected static final String COLUMN = "uuid";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
