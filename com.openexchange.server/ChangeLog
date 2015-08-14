@@ -1,3 +1,7 @@
+* 2015-07-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 40433: Fixed bad UpdateTask/CreateTableTask
+
 * 2015-08-12 - thorben.betten@open-xchange.com
 
  - Fix for OXTN#2015080610000286: Fixed conditional check if portal is available
