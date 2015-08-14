@@ -158,7 +158,7 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
 
             if (!otherMembers.isEmpty()) {
                 IExecutorService executor = hzInstance.getExecutorService("default");
-                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(value), otherMembers);
+                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(value.substring(pos + 1)), otherMembers);
                 for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
                     Future<Boolean> future = entry.getValue();
                     // Check Future's return value
