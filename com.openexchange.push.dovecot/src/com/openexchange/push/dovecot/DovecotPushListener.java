@@ -188,7 +188,7 @@ public class DovecotPushListener implements PushListener, Runnable {
     /**
      * Initializes registration for this listener.
      *
-     * @return A reason string i case registration failed; otherwise <code>null</code> on success
+     * @return A reason string in case registration failed; otherwise <code>null</code> on success
      * @throws OXException If registration failed hard
      */
     public synchronized String initateRegistration() throws OXException {
@@ -224,14 +224,14 @@ public class DovecotPushListener implements PushListener, Runnable {
             if (!imapStore.hasCapability("METADATA")) {
                 // No METADATA support
                 LOGGER.info("No \"METADATA\" capability advertised for {}. Skipping listener registration.", imapStore);
-                return "No \"METADATA\" capability advertised";
+                return "No \"METADATA\" capability supported";
             }
 
             // Proceed & grab INBOX folder
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
+            // Advertise registration at Dovecot IMAP server through SETMETADATA command
             Boolean result = (Boolean) imapFolder.doCommand(new RegistrationCommand(imapFolder, session));
-
             if (false == result.booleanValue()) {
                 return "SETMETADATA command failed";
             }
@@ -244,12 +244,13 @@ public class DovecotPushListener implements PushListener, Runnable {
             refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
             return null;
         } catch (FolderClosedException e) {
-            //scheduleRetry = true;
+            scheduleRetry = true;
             throw MimeMailException.handleMessagingException(e);
         } catch (StoreClosedException e) {
-            //scheduleRetry = true;
+            scheduleRetry = true;
             throw MimeMailException.handleMessagingException(e);
         } catch (MessagingException e) {
+            scheduleRetry = true;
             throw MimeMailException.handleMessagingException(e);
         } catch (OXException e) {
             if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
@@ -263,23 +264,7 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             if (scheduleRetry) {
                 long delay = 5000L;
-                final String inf = logInfo;
-                Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            initateRegistration();
-                        } catch (Exception e) {
-                            if (null == inf) {
-                                LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", session.getUserId(), session.getContextId());
-                            } else {
-                                LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", inf, session.getUserId(), session.getContextId());
-                            }
-                        }
-                    }
-                };
-                retryTask = timerService.schedule(r, delay);
+                retryTask = timerService.schedule(new RetryRunnable(logInfo), delay);
             }
         }
     }
@@ -290,17 +275,22 @@ public class DovecotPushListener implements PushListener, Runnable {
      * @throws OXException If unregistration fails
      */
     public synchronized boolean unregister(boolean tryToReconnect) throws OXException {
-        // Cancel timer tasks
-        ScheduledTimerTask retryTask = this.retryTask;
-        if (null != retryTask) {
-            this.retryTask = null;
-            retryTask.cancel();
-        }
+        // Avoid subsequent initialization attempt
+        initialized = true;
 
-        ScheduledTimerTask refreshLockTask = this.refreshLockTask;
-        if (null != refreshLockTask) {
-            this.refreshLockTask = null;
-            refreshLockTask.cancel();
+        // Cancel timer tasks
+        {
+            ScheduledTimerTask retryTask = this.retryTask;
+            if (null != retryTask) {
+                this.retryTask = null;
+                retryTask.cancel();
+            }
+
+            ScheduledTimerTask refreshLockTask = this.refreshLockTask;
+            if (null != refreshLockTask) {
+                this.refreshLockTask = null;
+                refreshLockTask.cancel();
+            }
         }
 
         boolean reconnected = false;
@@ -346,7 +336,7 @@ public class DovecotPushListener implements PushListener, Runnable {
                 mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
                 mailAccess.connect(false);
 
-                // Get IMAP store
+                // Get IMAP store & execute SETMETADATA for unregistration
                 IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
                 IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
                 imapFolder.doCommand(new UnregistrationCommand(imapFolder));
@@ -387,6 +377,30 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
         }
         return (IMAPFolderStorage) fstore;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private class RetryRunnable implements Runnable {
+
+        private final String logInfo;
+
+        RetryRunnable(String logInfo) {
+            this.logInfo = logInfo;
+        }
+
+        @Override
+        public void run() {
+            try {
+                initateRegistration();
+            } catch (Exception e) {
+                if (null == logInfo) {
+                    LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", session.getUserId(), session.getContextId(), e);
+                } else {
+                    LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, session.getUserId(), session.getContextId(), e);
+                }
+            }
+        }
     }
 
 }
