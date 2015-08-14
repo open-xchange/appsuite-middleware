@@ -175,7 +175,7 @@ public final class Utils {
             if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
                 return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, path);
             }
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, "HTTP", Integer.valueOf(serverException.error),
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(),
                 null == serverException.body.userError ? serverException.body.error : serverException.body.userError);
         }
         if (DropboxException.class.isInstance(e)) {
