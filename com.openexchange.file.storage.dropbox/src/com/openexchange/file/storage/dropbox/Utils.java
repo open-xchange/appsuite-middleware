@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
 
 /**
@@ -174,6 +175,9 @@ public final class Utils {
             DropboxServerException serverException = (DropboxServerException) e;
             if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
                 return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, path);
+            }
+            if (DropboxServerException._403_FORBIDDEN == serverException.error && Strings.asciiLowerCase(e.getMessage()).indexOf("access token") >= 0) {
+                return OAuthExceptionCodes.INVALID_ACCOUNT.create();
             }
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(),
                 null == serverException.body.userError ? serverException.body.error : serverException.body.userError);
