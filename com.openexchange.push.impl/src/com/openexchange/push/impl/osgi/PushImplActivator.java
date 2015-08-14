@@ -193,7 +193,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
                 } else {
-                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
                 }
             }
 

@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -414,7 +415,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                     if (otherMembers.isEmpty()) {
                         // No other cluster members - assign all available permanent listeners to this node
-                        pushManagerRegistry.applyInitialListeners(allPushUsers);
+                        pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
                         LOG.info("Applied all push user to local member (no other members available): {}", localMember);
                         return null;
                     }
@@ -484,7 +485,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     // Check capable members
                     if (!memberAdded) {
                         // No other cluster members - assign all available permanent listeners to this node
-                        pushManagerRegistry.applyInitialListeners(allPushUsers);
+                        pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
                         LOG.info("Applied all push user to local member (no other capable members): {}", localMember);
                         return null;
                     }
@@ -528,7 +529,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     }
 
                     // Apply newly calculated initial permanent listeners
-                    pushManagerRegistry.applyInitialListeners(ps);
+                    pushManagerRegistry.applyInitialListeners(ps, TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
 
                     LOG.info("{} now runs permanent listeners for: {}", localMember, ps);
 

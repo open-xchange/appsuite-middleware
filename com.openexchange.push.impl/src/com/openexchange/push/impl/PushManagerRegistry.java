@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
@@ -323,8 +322,9 @@ public final class PushManagerRegistry implements PushListenerService {
      * Starts the permanent listeners for given push users.
      *
      * @param pushUsers The push users
+     * @param parkNanos The number of nanoseconds to wait prior to starting listeners
      */
-    public void applyInitialListeners(List<PushUser> pushUsers) {
+    public void applyInitialListeners(List<PushUser> pushUsers, long parkNanos) {
         synchronized (this) {
             Collection<PushUser> toStop;
             {
@@ -375,9 +375,11 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.info("Rescheduled permanent push listener for user {} in context {} on another cluster node.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
                     }
                 }
+            }
 
-                // Park a while until stop completed
-                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
+            // Park a while
+            if (parkNanos > 0L) {
+                LockSupport.parkNanos(parkNanos);
             }
 
             // Start permanent candidates
