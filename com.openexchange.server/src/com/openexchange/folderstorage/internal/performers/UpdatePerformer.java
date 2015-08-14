@@ -230,7 +230,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {

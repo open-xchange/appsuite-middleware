@@ -376,18 +376,22 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public GuestInfo getGuestInfo(int contextId, int userId) throws OXException {
+    public GuestInfo getGuestInfo(Session session, int guestID) throws OXException {
+        User user = null;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, false);
         try {
-            User user = services.getService(UserService.class).getUser(userId, contextId);
-            if (user.isGuest()) {
-                return new DefaultGuestInfo(services, contextId, user, getLinkTarget(contextId, user));
-            }
+            user = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, utils.getContext(session));
+            connectionHelper.commit();
         } catch (OXException e) {
-            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+            if (false == UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 throw e;
             }
+        } finally {
+            connectionHelper.finish();
         }
-
+        if (null != user && user.isGuest()) {
+            return new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user));
+        }
         return null;
     }
 

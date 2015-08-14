@@ -109,18 +109,27 @@ public class FileStorageHandler implements ModuleHandler {
                     files.add(new FileTargetProxy(file, isPublic));
                 }
             } else {
-                IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
                 Iterator<ShareTarget> targetIt = targets.iterator();
                 Iterator<Boolean> publicIt = publicFlags.iterator();
-                while (targetIt.hasNext()) {
-                    ShareTarget target = targetIt.next();
-                    boolean isPublic = publicIt.next().booleanValue();
-                    FileID fileID = new FileID(target.getItem());
-                    if (fileID.getFolderId() == null) {
-                        fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+                try {
+                    fileAccess.startTransaction();
+                    while (targetIt.hasNext()) {
+                        ShareTarget target = targetIt.next();
+                        boolean isPublic = publicIt.next().booleanValue();
+                        FileID fileID = new FileID(target.getItem());
+                        if (fileID.getFolderId() == null) {
+                            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                        }
+                        File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                        files.add(new FileTargetProxy(file, isPublic));
                     }
-                    File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                    files.add(new FileTargetProxy(file, isPublic));
+                    fileAccess.commit();
+                } catch (OXException e) {
+                    fileAccess.rollback();
+                    throw e;
+                } finally {
+                    fileAccess.finish();
                 }
             }
         } finally {

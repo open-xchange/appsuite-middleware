@@ -88,6 +88,7 @@ public class ShareHelper {
     /** com.openexchange.groupware.container.FolderObject.INFOSTORE */
     private static final int MODULE_FILE_STORAGE = 8;
 
+
     /**
      * Pre-processes the supplied document to extract added, modified or removed guest object permissions required for sharing support. Guest object
      * permissions that are considered as "new", i.e. guest object permissions from the document metadata that are not yet resolved to a
@@ -104,10 +105,10 @@ public class ShareHelper {
         if ((null == modifiedColumns || modifiedColumns.contains(Field.OBJECT_PERMISSIONS))) {
             ComparedObjectPermissions comparedPermissions;
             if (FileStorageFileAccess.NEW == document.getId()) {
-                comparedPermissions = new ComparedObjectPermissions(session.getContextId(), null, document);
+                comparedPermissions = new ComparedObjectPermissions(session, null, document);
             } else {
                 File oldDocument = fileAccess.getFileMetadata(document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION);
-                comparedPermissions = new ComparedObjectPermissions(session.getContextId(), oldDocument, document);
+                comparedPermissions = new ComparedObjectPermissions(session, oldDocument, document);
             }
             /*
              * check for general support if changes should be applied
@@ -122,10 +123,25 @@ public class ShareHelper {
             if (comparedPermissions.hasNewGuests()) {
                 List<FileStorageGuestObjectPermission> newGuestPermissions = comparedPermissions.getNewGuestPermissions();
                 document.getObjectPermissions().removeAll(newGuestPermissions);
+                FileStorageGuestObjectPermission newAnonymousPermission = null;
                 for (FileStorageGuestObjectPermission p : newGuestPermissions) {
                     if (isInvalidGuestPermission(p)) {
                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                     }
+                    if (RecipientType.ANONYMOUS.equals(p.getRecipient().getType())) {
+                        if (null == newAnonymousPermission) {
+                            newAnonymousPermission = p;
+                        } else {
+                            throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                        }
+                    }
+                }
+                /*
+                 * check for an already existing anonymous permission if a new one should be added
+                 */
+                if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                    throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(
+                        newAnonymousPermission.getPermissions(), newAnonymousPermission.getEntity(), document.getId());
                 }
             }
             /*
@@ -133,12 +149,28 @@ public class ShareHelper {
              * Especially existing anonymous guests must not be added as permission entities.
              */
              if (comparedPermissions.hasAddedGuests()) {
+                 FileStorageObjectPermission addedAnonymousPermission = null;
                  for (Integer guest : comparedPermissions.getAddedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
                      GuestInfo guestInfo = comparedPermissions.getGuestInfo(guest);
-                     if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(document, guestInfo.getLinkTarget()))) {
+                     IDManglingFile file = new IDManglingFile(document, fileAccess.getAccountAccess().getService().getId(), fileAccess.getAccountAccess().getAccountId());
+                     if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(file, guestInfo.getLinkTarget()))) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
+                     if (isAnonymous(guestInfo)) {
+                         if (null == addedAnonymousPermission) {
+                             addedAnonymousPermission = p;
+                         } else {
+                             throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                         }
+                     }
+                 }
+                 /*
+                  * check for an already existing anonymous permission if another one should be added
+                  */
+                 if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                     throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(
+                         addedAnonymousPermission.getPermissions(), addedAnonymousPermission.getEntity(), document.getId());
                  }
              }
              if (comparedPermissions.hasModifiedGuests()) {
@@ -152,7 +184,7 @@ public class ShareHelper {
 
             return comparedPermissions;
         }
-        return new ComparedObjectPermissions(session.getContextId(), (File)null, (File)null);
+        return new ComparedObjectPermissions(session, (File)null, (File)null);
     }
 
     public static List<FileStorageObjectPermission> collectAddedObjectPermissions(ComparedObjectPermissions comparedPermissions, Session session) throws OXException {
@@ -407,6 +439,28 @@ public class ShareHelper {
             return (p.canWrite() || p.canDelete());
         }
 
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the original permissions in the supplied compared permissions instance already contain an
+     * "anonymous" entity one or not.
+     *
+     * @param comparedPermissions The compared permissions to check
+     * @return <code>true</code> if there's an "anonymous" entity in the original permissions, <code>false</code>, otherwise
+     */
+    private static boolean containsOriginalAnonymousPermission(ComparedObjectPermissions comparedPermissions) throws OXException {
+        Collection<FileStorageObjectPermission> originalPermissions = comparedPermissions.getOriginalPermissions();
+        if (null != originalPermissions && 0 < originalPermissions.size()) {
+            for (FileStorageObjectPermission originalPermission : originalPermissions) {
+                if (false == originalPermission.isGroup()) {
+                    GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
+                    if (null != guestInfo && isAnonymous(guestInfo)) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 

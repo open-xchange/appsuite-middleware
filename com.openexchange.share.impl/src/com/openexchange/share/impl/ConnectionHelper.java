@@ -66,8 +66,6 @@ import com.openexchange.share.storage.StorageParameters;
  */
 public class ConnectionHelper {
 
-    private static final String PARAMETER_NAME = Connection.class.getName();
-
     private final ServiceLookup services;
     private final boolean ownsConnection;
     private final Connection connection;
@@ -107,16 +105,18 @@ public class ConnectionHelper {
         this.session = session;
         this.contextID = session.getContextId();
         this.services = services;
-        Connection connection = (Connection) session.getParameter(PARAMETER_NAME);
+        Connection connection = (Connection) session.getParameter(Connection.class.getName() + '@' + Thread.currentThread().getId());
         try {
             if (null == connection) {
                 DatabaseService dbService = services.getService(DatabaseService.class);
                 connection = needsWritable ? dbService.getWritable(contextID) : dbService.getReadOnly(contextID);
+                connection.setAutoCommit(false);
                 ownsConnection = true;
-                session.setParameter(PARAMETER_NAME, connection);
+                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
                 sessionParameterSet = true;
             } else if (needsWritable && connection.isReadOnly()) {
                 connection = services.getService(DatabaseService.class).getWritable(contextID);
+                connection.setAutoCommit(false);
                 ownsConnection = true;
                 sessionParameterSet = false;
             } else {
@@ -153,7 +153,7 @@ public class ConnectionHelper {
      * @return The storage parameters
      */
     public StorageParameters getParameters() {
-        return StorageParameters.newInstance(PARAMETER_NAME, connection);
+        return StorageParameters.newInstance(Connection.class.getName(), connection);
     }
 
     /**
@@ -203,7 +203,7 @@ public class ConnectionHelper {
             }
         }
         if (sessionParameterSet && null != session) {
-            session.setParameter(PARAMETER_NAME, null);
+            session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
         }
     }
 

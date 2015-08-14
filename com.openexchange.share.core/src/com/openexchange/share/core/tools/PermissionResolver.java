@@ -205,7 +205,7 @@ public class PermissionResolver {
         GuestInfo guest = knownGuests.get(key);
         if (null == guest) {
             try {
-                guest = services.getService(ShareService.class).getGuestInfo(session.getContextId(), guestID);
+                guest = services.getService(ShareService.class).getGuestInfo(session, guestID);
                 if (guest != null) {
                     knownGuests.put(key, guest);
                 }

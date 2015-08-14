@@ -86,14 +86,13 @@ public interface ShareService {
     GuestInfo resolveGuest(String token) throws OXException;
 
     /**
-     * Gets the guest info for the given user. If the user is no guest, <code>null</code> is returned.
+     * Gets the guest info for the given user identifier. If no guest user is found, <code>null</code> is returned.
      *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return The guest info or <code>null</code>
-     * @throws OXException If loading the according user object fails
+     * @param session The session
+     * @param guestID The user identifier of the guest
+     * @return The guest info, or <code>null</code> if no guest user with this identifier was found
      */
-    GuestInfo getGuestInfo(int contextId, int userId) throws OXException;
+    GuestInfo getGuestInfo(Session session, int guestID) throws OXException;
 
     /**
      * Resolves the supplied token and path to a single share. If the session's user is the guest user behind the base token himself, the

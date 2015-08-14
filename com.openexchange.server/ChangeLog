@@ -1,3 +1,7 @@
+* 2015-08-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40369: Avoid concurrent access to running database transactions
+
 * 2015-08-13 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 40405: Use -T option for token
