@@ -1,10 +1,15 @@
+* 2015-08-14 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40408: Added -T option to ListSharesCLT to list shares identified by token and path or share url
+ - Fix for bug 40405: Bug fixed while refactoring ListSharesCLT for bug 40408
+
 * 2015-08-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40369: Avoid concurrent access to running database transactions
 
 * 2015-08-13 - jan.bauerdick@open-xchange.com
 
- - Fix for bug 40405: Use -T option for token
+ - Fix for bug 40407: Use -T option for token
 
 * 2015-08-13 - thorben.betten@open-xchange.com
 
