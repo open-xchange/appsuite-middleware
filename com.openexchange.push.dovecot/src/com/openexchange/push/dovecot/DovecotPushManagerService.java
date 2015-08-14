@@ -244,7 +244,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      */
     public DovecotPushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
         synchronized (this) {
-            DovecotPushListener listener = new DovecotPushListener(newSession, permanent, this, services);
+            DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, newSession, permanent, this, services);
             // Replace old/existing one
             listeners.put(SimpleKey.valueOf(newSession), listener);
             return listener;
@@ -338,10 +338,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 SimpleKey key = SimpleKey.valueOf(userId, contextId);
                 try {
                     if (false == listeners.containsKey(key)) {
-                        DovecotPushListener listener = new DovecotPushListener(session, false, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, session, false, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        String reason = listener.initateRegistration();
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
@@ -438,10 +438,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 try {
                     DovecotPushListener current = listeners.get(key);
                     if (null == current) {
-                        DovecotPushListener listener = new DovecotPushListener(session, true, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, session, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        String reason = listener.initateRegistration();
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
@@ -454,10 +454,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                     } else if (!current.isPermanent()) {
                         // Cancel current & replace
                         current.unregister(false);
-                        DovecotPushListener listener = new DovecotPushListener(session, true, this, services);
+                        DovecotPushListener listener = new DovecotPushListener(uri, authLogin, authPassword, session, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        String reason = listener.initateRegistration();
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;

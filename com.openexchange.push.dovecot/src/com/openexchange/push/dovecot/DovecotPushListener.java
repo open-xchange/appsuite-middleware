@@ -49,19 +49,16 @@
 
 package com.openexchange.push.dovecot;
 
-import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import java.net.URI;
+import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
+import javax.mail.StoreClosedException;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
-import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -72,6 +69,8 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.dovecot.commands.RegistrationCommand;
+import com.openexchange.push.dovecot.commands.UnregistrationCommand;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
@@ -80,15 +79,8 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.sun.mail.iap.BadCommandException;
-import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.protocol.IMAPProtocol;
-
 
 /**
  * {@link DovecotPushListener}
@@ -106,17 +98,34 @@ public class DovecotPushListener implements PushListener, Runnable {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
+    private final String authPassword;
+    private final String authLogin;
+    private final URI uri;
     private final boolean permanent;
     private final Session session;
     private final ServiceLookup services;
     private final DovecotPushManagerService pushManager;
-    private ScheduledTimerTask refreshTask;
+
+    private boolean initialized;
+    private ScheduledTimerTask refreshLockTask;
+    private ScheduledTimerTask retryTask;
 
     /**
      * Initializes a new {@link DovecotPushListener}.
+     *
+     * @param uri The URL end-point
+     * @param authLogin The option login
+     * @param authPassword The optional password
+     * @param session The session
+     * @param permanent <code>true</code> if associated with a permanent listener; otherwise <code>false</code>
+     * @param pushManager The Dovecot push manager instance
+     * @param services The OSGi service look-up
      */
-    public DovecotPushListener(Session session, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
+    public DovecotPushListener(URI uri, final String authLogin, final String authPassword, Session session, boolean permanent, DovecotPushManagerService pushManager, ServiceLookup services) {
         super();
+        this.uri = uri;
+        this.authLogin = authLogin;
+        this.authPassword = authPassword;
         this.pushManager = pushManager;
         this.permanent = permanent;
         this.session = session;
@@ -179,19 +188,23 @@ public class DovecotPushListener implements PushListener, Runnable {
     /**
      * Initializes registration for this listener.
      *
-     * @param uri The URL end-point
-     * @param authLogin The option login
-     * @param authPassword The optional password
-     * @return <code>true</code> if regustratiuon was successful; otherwise <code>false</code>
-     * @throws OXException If registration fails
+     * @return A reason string i case registration failed; otherwise <code>null</code> on success
+     * @throws OXException If registration failed hard
      */
-    public synchronized String initateRegistration(final URI uri, final String authLogin, final String authPassword) throws OXException {
+    public synchronized String initateRegistration() throws OXException {
+        if (initialized) {
+            // Already initialized
+            return null;
+        }
+
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
 
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        boolean scheduleRetry = false;
+        String logInfo = null;
         try {
             MailService mailService = services.getOptionalService(MailService.class);
             if (null == mailService) {
@@ -200,12 +213,12 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
 
             // Connect it
-            final Session session = this.session;
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
             // Get IMAP store
             final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+            logInfo = imapStore.toString();
 
             // Check capability
             if (!imapStore.hasCapability("METADATA")) {
@@ -214,74 +227,28 @@ public class DovecotPushListener implements PushListener, Runnable {
                 return "No \"METADATA\" capability advertised";
             }
 
-            // Grab INBOX folder
+            // Proceed & grab INBOX folder
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
-            Boolean result = (Boolean) imapFolder.doCommand(new ProtocolCommand() {
-
-                @Override
-                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                    // Craft IMAP command
-                    String command;
-                    {
-                        StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA \"\" (");
-
-                        // Append path for Dovecot HTTP-Notify plug-in
-                        cmdBuilder.append("/private/vendor/vendor.dovecot/http-notify ");
-
-                        // User
-                        cmdBuilder.append("\"user=").append(session.getUserId()).append('@').append(session.getContextId()).append('"');
-
-                        // URL
-                        /*-
-                         * Currently not needed as statically configured in Dovecot plug-in
-                         *
-                        if (null != uri) {
-                            cmdBuilder.append('\t').append("url=").append(uri);
-                        }
-                        */
-
-                        // Auth data
-                        /*-
-                         * Currently not needed as statically configured in Dovecot plug-in
-                         *
-                        if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
-                            cmdBuilder.append('\t').append("auth=basic:").append(authLogin).append(':').append(authPassword);
-                        }
-                        */
-
-                        // Closing parenthesis
-                        cmdBuilder.append(")");
-                        command = cmdBuilder.toString();
-                    }
-
-                    // Issue command
-                    Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
-                    Response response = r[r.length - 1];
-                    if (response.isOK()) {
-                        LOGGER.info("Advertised push notification for {} using: {}", imapStore, command);
-                        return Boolean.TRUE;
-                    } else if (response.isBAD()) {
-                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else if (response.isNO()) {
-                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else {
-                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        protocol.handleResult(response);
-                    }
-                    return Boolean.FALSE;
-                }
-            });
+            Boolean result = (Boolean) imapFolder.doCommand(new RegistrationCommand(imapFolder, session));
 
             if (false == result.booleanValue()) {
                 return "SETMETADATA command failed";
             }
 
+            // Mark as initialized
+            initialized = true;
+
+            // Schedule to refresh cluster lock
             long delay = TIMEOUT_THRESHOLD_MILLIS;
-            refreshTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
             return null;
+        } catch (FolderClosedException e) {
+            //scheduleRetry = true;
+            throw MimeMailException.handleMessagingException(e);
+        } catch (StoreClosedException e) {
+            //scheduleRetry = true;
+            throw MimeMailException.handleMessagingException(e);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (OXException e) {
@@ -293,6 +260,27 @@ public class DovecotPushListener implements PushListener, Runnable {
         } finally {
             closeMailAccess(mailAccess);
             mailAccess = null;
+
+            if (scheduleRetry) {
+                long delay = 5000L;
+                final String inf = logInfo;
+                Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            initateRegistration();
+                        } catch (Exception e) {
+                            if (null == inf) {
+                                LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", session.getUserId(), session.getContextId());
+                            } else {
+                                LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", inf, session.getUserId(), session.getContextId());
+                            }
+                        }
+                    }
+                };
+                retryTask = timerService.schedule(r, delay);
+            }
         }
     }
 
@@ -301,46 +289,52 @@ public class DovecotPushListener implements PushListener, Runnable {
      *
      * @throws OXException If unregistration fails
      */
-    public boolean unregister(boolean tryToReconnect) throws OXException {
-        synchronized (this) {
-            // Cancel timer task
-            ScheduledTimerTask refreshTask = this.refreshTask;
-            if (null != refreshTask) {
-                this.refreshTask = null;
-                refreshTask.cancel();
-            }
+    public synchronized boolean unregister(boolean tryToReconnect) throws OXException {
+        // Cancel timer tasks
+        ScheduledTimerTask retryTask = this.retryTask;
+        if (null != retryTask) {
+            this.retryTask = null;
+            retryTask.cancel();
+        }
 
-            boolean reconnected = false;
-            DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
-            if (null == anotherListener) {
-                // No other listener available
+        ScheduledTimerTask refreshLockTask = this.refreshLockTask;
+        if (null != refreshLockTask) {
+            this.refreshLockTask = null;
+            refreshLockTask.cancel();
+        }
+
+        boolean reconnected = false;
+        DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
+        if (null == anotherListener) {
+            // No other listener available
+            // Give up lock and return
+            try {
+                pushManager.releaseLock(new SessionInfo(session, permanent));
+            } catch (Exception e) {
+                LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+            }
+        } else {
+            try {
+                // No need to re-execute registration
+                reconnected = true;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 // Give up lock and return
                 try {
                     pushManager.releaseLock(new SessionInfo(session, permanent));
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                }
-            } else {
-                try {
-                    // No need to re-execute registration
-                    reconnected = true;
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                    // Give up lock and return
-                    try {
-                        pushManager.releaseLock(new SessionInfo(session, permanent));
-                    } catch (Exception x) {
-                        LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
-                    }
+                } catch (Exception x) {
+                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
                 }
             }
-
-            if (false == reconnected) {
-                doUnregistration();
-            }
-
-            return reconnected;
         }
+
+        if (false == reconnected) {
+            doUnregistration();
+            // Mark as uninitialized
+            initialized = false;
+        }
+
+        return reconnected;
     }
 
     private void doUnregistration() throws OXException {
@@ -354,33 +348,8 @@ public class DovecotPushListener implements PushListener, Runnable {
 
                 // Get IMAP store
                 IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
-                final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
-
-                imapFolder.doCommand(new ProtocolCommand() {
-
-                    @Override
-                    public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                        // Craft IMAP command
-                        String command = "SETMETADATA \"\" (/private/vendor/vendor.dovecot/http-notify NIL)";
-
-                        // Issue command
-                        Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
-                        Response response = r[r.length - 1];
-                        if (response.isOK()) {
-                            return Boolean.TRUE;
-                        } else if (response.isBAD()) {
-                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                            throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                        } else if (response.isNO()) {
-                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                            throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                        } else {
-                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                            protocol.handleResult(response);
-                        }
-                        return Boolean.FALSE;
-                    }
-                });
+                IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
+                imapFolder.doCommand(new UnregistrationCommand(imapFolder));
             }
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

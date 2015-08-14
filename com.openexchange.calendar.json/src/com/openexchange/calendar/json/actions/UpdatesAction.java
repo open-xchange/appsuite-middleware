@@ -76,6 +76,8 @@ import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -125,26 +127,28 @@ public final class UpdatesAction extends AppointmentAction {
         final int folderId = req.getFolderId();
 
         boolean showAppointmentInAllFolders = false;
-
         if (folderId == 0) {
             showAppointmentInAllFolders = true;
         }
 
         boolean bIgnoreDelete = false;
         boolean bIgnoreModified = false;
-
-        if (ignore != null && ignore.indexOf("deleted") != -1) {
-            bIgnoreDelete = true;
-        }
-
-        if (ignore != null && ignore.indexOf("changed") != -1) {
-            bIgnoreModified = true;
+        if (null != ignore) {
+            if (ignore.indexOf("deleted") >= 0) {
+                bIgnoreDelete = true;
+            }
+            if (ignore.indexOf("changed") >= 0) {
+                bIgnoreModified = true;
+            }
         }
 
         if (bIgnoreModified && bIgnoreDelete) {
             // nothing requested
-
             return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+        }
+
+        if (!bIgnoreDelete && folderId == 0) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
 
         final ServerSession session = req.getSession();
@@ -161,14 +165,12 @@ public final class UpdatesAction extends AppointmentAction {
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
-                    it = appointmentsql.getModifiedAppointmentsBetween(
-                        session.getUserId(),
-                        start,
-                        end,
-                        _appointmentFields,
-                        requestedTimestamp,
-                        0,
-                        Order.NO_ORDER);
+                    if (start == null) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);
+                    } else if (end == null) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_END);
+                    }
+                    it = appointmentsql.getModifiedAppointmentsBetween(session.getUserId(), start, end, _appointmentFields, requestedTimestamp, 0, Order.NO_ORDER);
                 } else {
                     if (start == null || end == null) {
                         it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
@@ -245,6 +247,9 @@ public final class UpdatesAction extends AppointmentAction {
                         timestamp = lastModified;
                     }
                 }
+
+                SearchIterators.close(it);
+                it = null;
             }
 
             if (!bIgnoreDelete) {
@@ -266,9 +271,7 @@ public final class UpdatesAction extends AppointmentAction {
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         } finally {
-            if (it != null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

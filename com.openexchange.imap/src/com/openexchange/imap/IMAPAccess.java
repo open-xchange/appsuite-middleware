@@ -179,7 +179,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             synchronized (IMAPAccess.class) {
                 b = checkConnectivityIfPolled;
                 if (null == b) {
-                    boolean defaultValue = true;
+                    boolean defaultValue = false;
                     ConfigurationService configService = Services.optService(ConfigurationService.class);
                     if (null == configService) {
                         return defaultValue;
@@ -663,7 +663,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            boolean certainPassword = false; // ("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            boolean certainPassword = false;
             if (certainPassword) {
                 tmpPass = "secret";
             }
@@ -721,7 +721,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("mail.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false;
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);

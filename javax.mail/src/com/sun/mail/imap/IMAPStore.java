@@ -954,8 +954,10 @@ public class IMAPStore extends Store
                 if (p.hasCapability("ID")) {
                     try {
                         p.id(clientParams);
-                    } catch (Exception e) {
-                        // Ignore errors
+                    } catch (CommandFailedException cex) {
+                        // Swallow "NO" responses
+                    } catch (BadCommandException e) {
+                        // Swallow "BAD" responses
                     }
                 }
             } else {
