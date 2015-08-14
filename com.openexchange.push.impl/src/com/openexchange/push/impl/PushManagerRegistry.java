@@ -59,7 +59,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -340,7 +342,8 @@ public final class PushManagerRegistry implements PushListenerService {
 
             initialPushUsers.removeAll(toStop);
 
-            if (toStart.isEmpty() && toStop.isEmpty()) {
+            boolean nothingToStop = toStop.isEmpty();
+            if (nothingToStop && toStart.isEmpty()) {
                 // Nothing to do
                 return;
             }
@@ -348,35 +351,40 @@ public final class PushManagerRegistry implements PushListenerService {
             // Determine currently available push managers
             List<PushManagerService> managers = new LinkedList<PushManagerService>(map.values());
 
+            // Stop permanent candidates (release acquired resources, etc.)
+            if (false == nothingToStop) {
+                for (PushUser pushUser : toStop) {
+                    boolean rescheduled = false;
+                    for (PushManagerService pushManager : managers) {
+                        if (pushManager instanceof PushManagerExtendedService) {
+                            try {
+                                boolean stopped = stopPermanentListenerFor(pushUser, (PushManagerExtendedService) pushManager, false);
+                                if (stopped) {
+                                    rescheduled = true;
+                                    LOG.debug("Rescheduling permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                                }
+                            } catch (OXException e) {
+                                LOG.error("Error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
+                            } catch (RuntimeException e) {
+                                LOG.error("Runtime error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
+                            }
+                        }
+                    }
+
+                    if (rescheduled) {
+                        LOG.info("Rescheduled permanent push listener for user {} in context {} on another cluster node.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
+                    }
+                }
+
+                // Park a while until stop completed
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
+            }
+
             // Start permanent candidates
             boolean allowPermanentPush = isPermanentPushAllowed();
             for (PushManagerService pushManager : managers) {
                 if (pushManager instanceof PushManagerExtendedService) {
                     startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
-                }
-            }
-
-            // Stop permanent candidates
-            for (PushUser pushUser : toStop) {
-                boolean rescheduled = false;
-                for (PushManagerService pushManager : managers) {
-                    if (pushManager instanceof PushManagerExtendedService) {
-                        try {
-                            boolean stopped = stopPermanentListenerFor(pushUser, (PushManagerExtendedService) pushManager, false);
-                            if (stopped) {
-                                rescheduled = true;
-                                LOG.debug("Rescheduling permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
-                            }
-                        } catch (OXException e) {
-                            LOG.error("Error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
-                        } catch (RuntimeException e) {
-                            LOG.error("Runtime error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
-                        }
-                    }
-                }
-
-                if (rescheduled) {
-                    LOG.info("Rescheduled permanent push listener for user {} in context {} on another cluster node.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
                 }
             }
         }
