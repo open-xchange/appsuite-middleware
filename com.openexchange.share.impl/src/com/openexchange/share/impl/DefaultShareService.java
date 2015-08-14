@@ -178,6 +178,23 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<ShareInfo> getShare(String token, String path) throws OXException {
+        if (Strings.isEmpty(token) || Strings.isEmpty(path)) {
+            return null;
+        }
+        GuestShare share = resolveToken(token);
+        GuestInfo guest = resolveGuest(token);
+        ShareTarget target = share.resolveTarget(path);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(share.getGuest().getContextID(), target.getModule(), target.getFolder(), target.getItem(), StorageParameters.NO_PARAMETERS);
+        for (Share s : shares) {
+            if (s.getCreatedBy() != guest.getCreatedBy() || s.getGuest() != guest.getGuestID() || !share.getGuest().equals(guest)) {
+                shares.remove(s);
+            }
+        }
+        return createShareInfos(services, guest.getContextID(), shares);
+    }
+
+    @Override
     public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
         int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);

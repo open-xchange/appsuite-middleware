@@ -109,6 +109,16 @@ public interface ShareService {
     ShareInfo getShare(Session session, String token, String path) throws OXException;
 
     /**
+     * Resolves the supplied token and path to a single share.
+     *
+     * @param token The token to resolve
+     * @param path The path to the share target
+     * @return The share
+     * @throws OXException On error
+     */
+    List<ShareInfo> getShare(String token, String path) throws OXException;
+
+    /**
      * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
      * <p/>
      * <b>Remarks:</b>

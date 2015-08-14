@@ -82,6 +82,15 @@ public interface ShareMBean {
     String listShares(int contextId, int userId) throws OXException;
 
     /**
+     * List share identified by supplied token
+     * 
+     * @param token The token
+     * @return The share
+     * @throws OXException On error
+     */
+    String listShare(String token) throws OXException;
+
+    /**
      * Removes all targets identified by supplied token.
      * @param token The token
      * @param path The share path
