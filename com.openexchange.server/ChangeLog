@@ -1,3 +1,7 @@
+* 2015-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40395: Leave subscription status untouched when doing cascading permission changes
+
 * 2015-08-14 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 40408: Added -T option to ListSharesCLT to list shares identified by token and path or share url

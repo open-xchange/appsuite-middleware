@@ -344,7 +344,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         /*
                          * Switch back to false before update due to the recursive nature of FolderStorage.updateFolder in some implementations
                          */
-                        decorator.put("cascadePermissions", false);
+                        decorator.put("cascadePermissions", Boolean.FALSE);
                     }
                     /*
                      * Change permissions either in real or in virtual storage

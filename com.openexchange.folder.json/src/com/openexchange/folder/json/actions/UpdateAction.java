@@ -156,7 +156,7 @@ public final class UpdateAction extends AbstractFolderAction {
             .put("altNames", request.getParameter("altNames"))
             .put("autorename", request.getParameter("autorename"))
             .put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("cascadePermissions", cascadePermissions)
+            .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
             .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
             .put(id, folderService);
 
