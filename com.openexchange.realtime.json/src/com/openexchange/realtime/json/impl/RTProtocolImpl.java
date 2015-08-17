@@ -50,10 +50,12 @@
 package com.openexchange.realtime.json.impl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.NextSequence;
 import com.openexchange.realtime.json.protocol.RTClientState;
@@ -123,28 +125,34 @@ public class RTProtocolImpl implements RTProtocol {
 
     @Override
     public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws RealtimeException {
-        state.lock();
         try {
-            state.touch();
-            stanza.trace("Received message in RTProtocol with asynchronous acknowledgements");
-            boolean enqueued = false;
-            if (newState) {
-                stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
-                enqueueNextSequence(stanza.getFrom(), state, transmitter);
-                enqueued = true;
-            }
+            if (state.tryLock(5, TimeUnit.SECONDS)) {
+                try {
+                    state.touch();
+                    stanza.trace("Received message in RTProtocol with asynchronous acknowledgements");
+                    boolean enqueued = false;
+                    if (newState) {
+                        stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
+                        enqueueNextSequence(stanza.getFrom(), state, transmitter);
+                        enqueued = true;
+                    }
 
-            if (gate.handle(stanza, stanza.getTo())) {
-                stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
-                enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
-                enqueued = true;
-            }
+                    if (gate.handle(stanza, stanza.getTo())) {
+                        stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
+                        enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                        enqueued = true;
+                    }
 
-            if (enqueued) {
-                emptyBuffer(state, transmitter);
+                    if (enqueued) {
+                        emptyBuffer(state, transmitter);
+                    }
+                } finally {
+                    state.unlock();
+                }
             }
-        } finally {
-            state.unlock();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
