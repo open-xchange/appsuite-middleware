@@ -91,10 +91,13 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
     private final String name;
+    private final String lockScope;
     private final StanzaSequenceGateManagement managementObject;
 
     public StanzaSequenceGate(String name) {
+        super();
         this.name = name;
+        this.lockScope = new StringBuilder("gate-").append(name).toString();
         this.managementObject = new StanzaSequenceGateManagement(name);
         initManagementObject(managementObject);
     }
@@ -177,7 +180,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             return false;
         }
 
-        stanza.getSequencePrincipal().lock("gate");
+        stanza.getSequencePrincipal().lock(lockScope);
         try {
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
             /* We haven't recorded a threshold (upper bound of last known sequence number) for this principal, yet so we'll add one */
@@ -285,7 +288,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                 }
             }
         } finally {
-            stanza.getSequencePrincipal().unlock("gate");
+            stanza.getSequencePrincipal().unlock(lockScope);
         }
 
     }
@@ -297,7 +300,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
      * @throws RealtimeException
      */
     public void resetThreshold(ID constructedId, long newSequence) throws RealtimeException {
-        constructedId.lock("gate");
+        constructedId.lock(lockScope);
         try {
             List<StanzaWithCustomAction> list = inboxes.get(constructedId);
             if (list != null) {
@@ -306,7 +309,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
             notifyManagementSequenceNumbers();
         } finally {
-            constructedId.unlock("gate");
+            constructedId.unlock(lockScope);
         }
     }
 
