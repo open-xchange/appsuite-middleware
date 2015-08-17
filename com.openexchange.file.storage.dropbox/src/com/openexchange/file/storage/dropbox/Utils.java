@@ -176,7 +176,7 @@ public final class Utils {
             if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
                 return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, path);
             }
-            if (DropboxServerException._403_FORBIDDEN == serverException.error && Strings.asciiLowerCase(e.getMessage()).indexOf("access token") >= 0) {
+            if (DropboxServerException._403_FORBIDDEN == serverException.error && Strings.asciiLowerCase(e.toString()).indexOf("access token") >= 0) {
                 return OAuthExceptionCodes.INVALID_ACCOUNT.create();
             }
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(),
