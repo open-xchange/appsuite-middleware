@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
 
 /**

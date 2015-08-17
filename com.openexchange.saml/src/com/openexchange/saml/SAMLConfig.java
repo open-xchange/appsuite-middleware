@@ -142,4 +142,11 @@ public interface SAMLConfig {
      */
     String getLogoutResponseTemplate();
 
+    /**
+     * Gets whether SAML-specific auto-login is enabled.
+     *
+     * @return <code>true</code> if auto-login is on.
+     */
+    boolean isAutoLoginEnabled();
+
 }

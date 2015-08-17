@@ -443,13 +443,14 @@ public class Protocol {
      * Disconnect.
      */
     protected synchronized void disconnect() {
+    Socket socket = this.socket;
 	if (socket != null) {
+	    this.socket = null;
 	    try {
 		socket.close();
 	    } catch (IOException e) {
 		// ignore it
 	    }
-	    socket = null;
 	}
     }
 

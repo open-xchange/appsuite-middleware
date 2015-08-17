@@ -274,34 +274,42 @@ public class RdbUserStorage extends UserStorage {
     public void deleteUser(Connection con, Context context, int userId) throws OXException {
         try {
             /*
-             * fire delete event beforehand
-             */
-            DeleteEvent deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context.getContextId());
-            DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
-            /*
-             * fetch data to copy into del_user table
+             * fetch required data of deleted user
              */
             int contactId;
             int uidNumber;
             int gidNumber;
             int guestCreatedBy;
+            String mail;
             ResultSet result = null;
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("SELECT contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
+                stmt = con.prepareStatement("SELECT mail,contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
                     throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(context.getContextId()));
                 }
-                contactId = result.getInt(1);
-                uidNumber = result.getInt(2);
-                gidNumber = result.getInt(3);
-                guestCreatedBy = result.getInt(4);
+                mail = result.getString(1);
+                contactId = result.getInt(2);
+                uidNumber = result.getInt(3);
+                gidNumber = result.getInt(4);
+                guestCreatedBy = result.getInt(5);
             } finally {
                 closeSQLStuff(result, stmt);
             }
+            /*
+             * prpeare & fire delete event
+             */
+            DeleteEvent deleteEvent;
+            if (0 < guestCreatedBy) {
+                int subType = Strings.isEmpty(mail) ? DeleteEvent.SUBTYPE_ANONYMOUS_GUEST : DeleteEvent.SUBTYPE_INVITED_GUEST;
+                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context);
+            } else {
+                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
+            }
+            DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
             /*
              * insert tombstone record into del_user table
              */
@@ -352,6 +360,45 @@ public class RdbUserStorage extends UserStorage {
                 stmt.executeUpdate();
             } finally {
                 closeSQLStuff(stmt);
+            }
+            /*
+             * reassign guest user created-by identifier to someone else for guest users created by the deleted user
+             */
+            if (0 >= guestCreatedBy) {
+                List<Integer> guestUserIDs = new ArrayList<Integer>();
+                try {
+                    stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?;");
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, userId);
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        guestUserIDs.add(I(result.getInt(1)));
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+                for (Integer guestUserID : guestUserIDs) {
+                    int newGuestCreatedBy;
+                    try {
+                        stmt = con.prepareStatement("SELECT created_by FROM share WHERE cid=? AND guest=? AND created_by<>? ORDER BY created ASC LIMIT 1;");
+                        stmt.setInt(1, context.getContextId());
+                        stmt.setInt(2, guestUserID.intValue());
+                        stmt.setInt(3, userId);
+                        result = stmt.executeQuery();
+                        newGuestCreatedBy = result.next() ? result.getInt(1) : context.getMailadmin();
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                    }
+                    try {
+                        stmt = con.prepareStatement("UPDATE user SET guestCreatedBy=? WHERE cid=? AND id=?;");
+                        stmt.setInt(1, newGuestCreatedBy);
+                        stmt.setInt(2, context.getContextId());
+                        stmt.setInt(3, guestUserID.intValue());
+                        stmt.executeUpdate();
+                    } finally {
+                        closeSQLStuff(stmt);
+                    }
+                }
             }
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());

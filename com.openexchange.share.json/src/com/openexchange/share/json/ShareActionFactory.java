@@ -56,10 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.AllAction;
-import com.openexchange.share.json.actions.DeleteAction;
 import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetAction;
 import com.openexchange.share.json.actions.GetLinkAction;
 import com.openexchange.share.json.actions.InviteAction;
 import com.openexchange.share.json.actions.SendLinkAction;
@@ -83,9 +80,6 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
      */
     public ShareActionFactory(ServiceLookup services) {
         super();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("get", new GetAction(services));
         actions.put("update", new UpdateLinkAction(services));
         actions.put("invite", new InviteAction(services));
         actions.put("getLink", new GetLinkAction(services));

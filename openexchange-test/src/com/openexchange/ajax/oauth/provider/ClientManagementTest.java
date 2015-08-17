@@ -171,7 +171,9 @@ public class ClientManagementTest {
             updatedClientData.setWebsite(Strings.reverse(client.getWebsite()));
             IconDto updatedIcon = new IconDto();
             updatedIcon.setMimeType("image/png");
-            byte[] updatedIconBytes = client.getIcon().getData();
+            byte[] originalIconBytes = client.getIcon().getData();
+            byte[] updatedIconBytes = new byte[originalIconBytes.length];
+            System.arraycopy(originalIconBytes, 0, updatedIconBytes, 0, originalIconBytes.length);
             Arrays.sort(updatedIconBytes);
             updatedIcon.setData(updatedIconBytes);
             updatedClientData.setIcon(updatedIcon);

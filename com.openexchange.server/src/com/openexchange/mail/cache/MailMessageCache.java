@@ -279,8 +279,8 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
-                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+             @SuppressWarnings("unchecked")
+            DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }
@@ -319,8 +319,8 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
-                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+             @SuppressWarnings("unchecked")
+            DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
             }

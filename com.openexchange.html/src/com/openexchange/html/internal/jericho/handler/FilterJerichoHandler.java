@@ -487,17 +487,20 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             } else {
                 if (checkMaxContentSize(content.length())) {
-                    if (content instanceof Segment ? ((Segment) content).isWhiteSpace() : isWhiteSpace(content)) {
-                        htmlBuilder.append(content);
-                    } else {
-                        /*-
-                         * Should we re-encode prior to appending?
-                         * E.g. "<" ==> "&lt;"
-                         *
-                         * htmlBuilder.append(CharacterReference.reencode(content));
-                         */
-                        htmlBuilder.append(content);
-                    }
+                    //    if (content instanceof Segment ? ((Segment) content).isWhiteSpace() : isWhiteSpace(content)) {
+                    //        htmlBuilder.append(content);
+                    //    } else {
+                    //        /*-
+                    //         * Should we re-encode prior to appending?
+                    //         * E.g. "<" ==> "&lt;"
+                    //         *
+                    //         * htmlBuilder.append(CharacterReference.reencode(content));
+                    //         */
+                    //        htmlBuilder.append(content);
+                    //    }
+
+                    htmlBuilder.append(content);
+
                 }
             }
         }

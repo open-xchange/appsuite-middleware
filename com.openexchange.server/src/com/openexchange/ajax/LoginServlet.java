@@ -828,6 +828,7 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
+        session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
     }
 
     /**

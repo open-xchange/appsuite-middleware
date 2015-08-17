@@ -51,6 +51,7 @@ package com.openexchange.ajax.image;
 
 import java.io.IOException;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -81,7 +82,7 @@ public class ImageParser extends AbstractAJAXParser<ImageResponse> {
      * @see com.openexchange.ajax.framework.AbstractAJAXParser#checkResponse(org.apache.http.HttpResponse)
      */
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         fileBytes = EntityUtils.toByteArray(entity);

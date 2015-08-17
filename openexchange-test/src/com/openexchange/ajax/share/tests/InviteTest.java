@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -62,10 +61,10 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.AllRequest;
+import com.openexchange.ajax.share.actions.FileShare;
+import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.InviteResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -210,12 +209,32 @@ public class InviteTest extends ShareTest {
         }
 
         /*
-         * Assert that all shares have been created and create client for anonymous guest
+         * Assert that all shares have been created and create client for guest
          */
-        List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
-        List<ParsedShare> shares = getSharesForTargets(allShares, targets);
-        assertEquals(targets.size(), shares.size());
-        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), guestRecipient);
+        for (ShareTarget target : targets) {
+            if (target.isFolder()) {
+                List<FolderShare> shares = getFolderShares(EnumAPI.OX_NEW, target.getModule());
+                FolderShare matchingShare = null;
+                for (FolderShare share : shares) {
+                    if (share.getObjectID() == Integer.parseInt(target.getFolder())) {
+                        matchingShare = share;
+                    }
+                }
+                assertNotNull(matchingShare);
+            } else {
+                List<FileShare> shares = getFileShares();
+                FileShare matchingShare = null;
+                for (FileShare share : shares) {
+                    if (share.getId().equals(target.getItem())) {
+                        matchingShare = share;
+                    }
+                }
+                assertNotNull(matchingShare);
+            }
+        }
+
+        String shareURL = discoverInvitationLink(client, guestRecipient.getEmailAddress());
+        GuestClient guestClient = new GuestClient(shareURL, guestRecipient);
 
         /*
          * Check folder permissions for internal recipient
@@ -279,20 +298,6 @@ public class InviteTest extends ShareTest {
             }
             assertTrue(foundValidGuestPermission);
         }
-    }
-
-    private List<ParsedShare> getSharesForTargets(List<ParsedShare> allShares, List<ShareTarget> targets) {
-        List<ParsedShare> shares = new LinkedList<ParsedShare>();
-        for (ParsedShare ps : allShares) {
-            for (ShareTarget target : targets) {
-                if (target.equals(ps.getTarget())) {
-                    shares.add(ps);
-                    break;
-                }
-            }
-        }
-
-        return shares;
     }
 
     private void checkFilePermission(int entity, int expectedBits, File file) {

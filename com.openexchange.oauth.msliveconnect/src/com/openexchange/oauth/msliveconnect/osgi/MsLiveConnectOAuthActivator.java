@@ -102,7 +102,7 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("msliveconnect".equals(capability)) {
                         final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
+                        if (session.isAnonymous() || session.getUser().isGuest()) {
                             return false;
                         }
 

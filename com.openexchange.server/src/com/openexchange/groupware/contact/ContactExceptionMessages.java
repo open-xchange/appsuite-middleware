@@ -68,8 +68,6 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String IMAGE_DOWNSCALE_FAILED_DISPLAY = "Unable to scale image down.";
 
-    public final static String SQL_ERROR_DISPLAY = "Error while reading/writing data from/to the database.";
-
     public final static String AGGREGATING_CONTACTS_DISABLED_DISPLAY = "This feature has not been enabled";
 
     public final static String NO_CREATE_DISPLAY = "You do not have the appropriate permission to create objects in the folder \"%1$s\".";
@@ -139,6 +137,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
 
     public final static String TOO_MANY_PATTERNS_DISPLAY = "The query \"%1$s\" contains too many patterns. Please shorten the query and try again.";
+
+    public final static String IGNORED_PATTERN_DISPLAY = "The pattern \"%1$s\" has been ignored during search.";
 
     private ContactExceptionMessages() {
         super();

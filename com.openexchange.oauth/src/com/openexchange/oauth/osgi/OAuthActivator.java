@@ -84,6 +84,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.UserService;
 
 /**
  * {@link OAuthActivator} - The activator for OAuth bundle.
@@ -106,7 +107,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class };
+            CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class };
     }
 
     @Override

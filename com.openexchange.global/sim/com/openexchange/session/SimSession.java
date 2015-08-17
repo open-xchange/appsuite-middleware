@@ -240,5 +240,4 @@ public class SimSession implements Session {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
-
 }

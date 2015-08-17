@@ -49,32 +49,23 @@
 
 package com.openexchange.group.internal;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * Tool methods for groups.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupTools {
-
-    /**
-     * Cloneable object for group 0.
-     */
-    static final Group GROUP_ZERO;
-
-    static final Group GUEST_GROUP;
+public class GroupTools {
 
     /**
      * Prevent instantiation
@@ -83,56 +74,36 @@ public final class GroupTools {
         super();
     }
 
-    public static Group getGroupZero(final Context ctx) throws OXException {
-        final Group retval;
-        try {
-            retval = (Group) GROUP_ZERO.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw UserExceptionCode.NOT_CLONEABLE.create(e, Group.class.getName());
-        }
-        final UserStorage ustor = UserStorage.getInstance();
-        retval.setMember(ustor.listAllUser(ctx));
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ALL_USERS));
-        return retval;
+    /**
+     * Gets the static "All users" group (group <code>0</code>), containing all regular users in the context.
+     *
+     * @param context The context to get the all users group for
+     * @return The all users group
+     */
+    public static Group getGroupZero(Context context) throws OXException {
+        Group group = new Group();
+        group.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
+        group.setMember(UserStorage.getInstance().listAllUser(null, context, false, false));
+        group.setLastModified(new Date());
+        User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
+        group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.ALL_USERS));
+        return group;
     }
 
-    public static Group getGuestGroup(final Context ctx) throws OXException {
-        final Group retval;
-        try {
-            retval = (Group) GUEST_GROUP.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw UserExceptionCode.NOT_CLONEABLE.create(e, Group.class.getName());
-        }
-
-        final UserStorage ustor = UserStorage.getInstance();
-        // FIXME
-        User[] users = ustor.getUser(ctx);
-        List<Integer> guestIds = new ArrayList<Integer>(users.length);
-        for (User user : users) {
-            if (user.isGuest()) {
-                guestIds.add(user.getId());
-            }
-        }
-
-        int[] tmp = new int[guestIds.size()];
-        for (int i = 0; i < tmp.length; i++) {
-            tmp[i] = guestIds.get(i);
-        }
-        retval.setMember(tmp);
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.GUEST_GROUP));
-        return retval;
+    /**
+     * Gets the static "Guests" group (group {@link Integer#MAX_VALUE}), containing all guest users in the context.
+     *
+     * @param context The context to get the guest group for
+     * @return The guest group
+     */
+    public static Group getGuestGroup(Context context) throws OXException {
+        Group group = new Group();
+        group.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
+        group.setMember(UserStorage.getInstance().listAllUser(null, context, true, true));
+        group.setLastModified(new Date());
+        User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
+        group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.GUEST_GROUP));
+        return group;
     }
 
-    static {
-        GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
-        GUEST_GROUP = new Group();
-        GUEST_GROUP.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
-    }
 }

@@ -59,7 +59,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.user.UserService;
@@ -98,18 +97,6 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
-    }
-
-    private static final class OAuthScopeDescription implements LocalizableStrings {
-        // Application 'xyz' requires following permissions:
-        //  - Read all your appointments.
-        //  - ...
-        public static final String READ_ONLY = "Read all your appointments.";
-
-        // Application 'xyz' requires following permissions:
-        //  - Create, modify and delete appointments.
-        //  - ...
-        public static final String WRITABLE = "Create, modify and delete appointments.";
     }
 
 }

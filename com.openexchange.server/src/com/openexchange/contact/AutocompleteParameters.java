@@ -48,12 +48,14 @@
  */
 package com.openexchange.contact;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.exception.OXException;
 
 /**
  * An {@link AutocompleteParameters} instance encapsulates additional parameters
@@ -85,6 +87,7 @@ public class AutocompleteParameters implements Map<String, Object> {
 	public static final String IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
 
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
+	private List<OXException> warnings;
 
 	private AutocompleteParameters() {
 		super();
@@ -198,6 +201,27 @@ public class AutocompleteParameters implements Map<String, Object> {
 
 		return (String) object;
 	}
+
+    /**
+     * Gets the warnings.
+     *
+     * @return The warnings, or <code>null</code> if there were none
+     */
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    /**
+     * Adds a warning.
+     *
+     * @param warning The warning to add
+     */
+    public void addWarning(OXException warning) {
+        if (null == warnings) {
+            warnings = new ArrayList<OXException>();
+        }
+        warnings.add(warning);
+    }
 
 	/*
 	 * Map implementation

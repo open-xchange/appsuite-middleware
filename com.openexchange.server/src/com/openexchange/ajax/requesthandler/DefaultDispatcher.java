@@ -137,22 +137,23 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
+
         addLogProperties(requestData, false);
+        List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
         try {
-            final List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
-            final AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
+            AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
             /*
              * Set request context
              */
             RequestContextHolder.set(buildRequestContext(modifiedRequestData));
 
-            final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
+            AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
             }
 
-            final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
+            AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
             }
@@ -160,7 +161,7 @@ public class DefaultDispatcher implements Dispatcher {
             /*
              * Validate request headers for caching
              */
-            final AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
+            AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
             if (etagResult != null) {
                 return etagResult;
             }
@@ -168,7 +169,7 @@ public class DefaultDispatcher implements Dispatcher {
             /*
              * Validate request headers for resume
              */
-            final AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
+            AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
             if (failedResult != null) {
                 return failedResult;
             }
@@ -203,17 +204,28 @@ public class DefaultDispatcher implements Dispatcher {
             /*
              * Perform request
              */
-            final AJAXRequestResult result = callAction(action, modifiedRequestData, session);
+            AJAXRequestResult result = callAction(action, modifiedRequestData, session);
             if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
                 // No further processing
                 return result;
             }
 
             return customizeResult(modifiedRequestData, result, customizers, session);
-        } catch (final RuntimeException e) {
+        } catch (OXException e) {
+            for (AJAXActionCustomizer customizer : customizers) {
+                if (customizer instanceof AJAXExceptionHandler) {
+                    try {
+                        ((AJAXExceptionHandler) customizer).exceptionOccurred(requestData, e, session);
+                    } catch (Exception x) {
+                        // Discard. Not our problem, we need to get on with this!
+                    }
+                }
+            }
+            throw e;
+        } catch (RuntimeException e) {
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
                 // Handle special Rhino wrapper error
-                final Throwable wrapped = e.getCause();
+                Throwable wrapped = e.getCause();
                 if (wrapped instanceof OXException) {
                     throw (OXException) wrapped;
                 }
@@ -597,6 +609,13 @@ public class DefaultDispatcher implements Dispatcher {
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
+    /**
+     * Removes the specified customizer factory
+     */
+	public void removeCustomizer(AJAXActionCustomizerFactory factory) {
+		this.customizerFactories.remove(factory);
+	}
+
 
     /**
      * Releases specified factory from given module.
@@ -756,5 +775,6 @@ public class DefaultDispatcher implements Dispatcher {
         }
 
 	} // End of class Strings
+
 
 }

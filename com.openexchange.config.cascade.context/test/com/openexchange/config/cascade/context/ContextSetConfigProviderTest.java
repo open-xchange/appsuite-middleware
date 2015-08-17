@@ -88,6 +88,9 @@ public class ContextSetConfigProviderTest {
     private ContextService contexts;
 
     @Mock
+    private Context context;
+
+    @Mock
     private ConfigurationService config;
 
     @Mock
@@ -109,7 +112,7 @@ public class ContextSetConfigProviderTest {
             Collections.<String, Object>singletonMap("configname", properties));
 
         when(config.getYamlInFolder(anyString())).thenReturn(yamlFiles);
-        when(userPermissions.getUserPermissionBits(anyInt(), (Context) any())).thenReturn( new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
+        when(userPermissions.getUserPermissionBits(anyInt(), (Context) any())).thenReturn( new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, context));
 
         SimpleServiceLookup services = new SimpleServiceLookup();
         services.add(ContextService.class, contexts);

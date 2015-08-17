@@ -1382,11 +1382,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         if (null != parent) {
                             final String parentFullName = parent.getFullName();
                             boolean ignoreSubscription = this.ignoreSubscriptions;
+                            ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session, ignoreSubscription);
                             ListLsubCache.addSingle(parentFullName, accountId, createMe, session, ignoreSubscription);
                             if ("".equals(parentFullName)) {
                                 ListLsubCache.addSingle(MailFolder.DEFAULT_FOLDER_ID, accountId, createMe, session, ignoreSubscription);
                             }
-                            ListLsubCache.addSingle(createMe.getFullName(), accountId, createMe, session, ignoreSubscription);
                         } else {
                             ListLsubCache.clearCache(accountId, session);
                         }

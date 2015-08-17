@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.StoredSession;
@@ -65,7 +66,7 @@ import com.openexchange.sessionstorage.StoredSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Obfuscator {
+public class Obfuscator implements ObfuscatorService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
 
@@ -141,7 +142,8 @@ public class Obfuscator {
         return sessionImpl;
     }
 
-    private String obfuscate(final String string) {
+    @Override
+    public String obfuscate(final String string) {
         if (isEmpty(string)) {
             return string;
         }
@@ -153,7 +155,8 @@ public class Obfuscator {
         }
     }
 
-    private String unobfuscate(final String string) {
+    @Override
+    public String unobfuscate(final String string) {
         if (isEmpty(string)) {
             return string;
         }

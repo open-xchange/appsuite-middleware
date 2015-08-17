@@ -1152,6 +1152,8 @@ public class ContactServiceImpl extends DefaultContactService {
                  */
                 return new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
             }
+        } catch (OXException e) {
+            throw e;
         } catch (Exception e) {
             if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
                 throw (OXException)e.getCause();

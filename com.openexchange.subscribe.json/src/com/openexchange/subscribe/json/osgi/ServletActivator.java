@@ -51,7 +51,6 @@ package com.openexchange.subscribe.json.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -79,7 +78,7 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class, ConfigurationService.class };
+        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -108,12 +107,11 @@ public class ServletActivator extends AbstractSessionServletActivator {
 
     private void createMultipleHandler() {
         SubscriptionExecutionService subscriptionExecutionService = getService(SubscriptionExecutionService.class);
-        ConfigurationService config = getService(ConfigurationService.class);
 
         SubscriptionMultipleFactory subscriptionsFactory = new SubscriptionMultipleFactory(
             discoverer,
             subscriptionExecutionService,
-            secretService = new WhiteboardSecretService(context), config);
+            secretService = new WhiteboardSecretService(context));
         secretService.open();
         final SubscriptionSourceMultipleFactory subscriptionSourcesFactory = new SubscriptionSourceMultipleFactory(discoverer);
 

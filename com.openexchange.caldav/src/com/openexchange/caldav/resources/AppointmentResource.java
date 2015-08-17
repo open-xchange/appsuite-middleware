@@ -85,8 +85,8 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -429,36 +429,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
-    private List<CalendarDataObject> parse(final InputStream body) throws IOException, ConversionError {
-        UnsynchronizedByteArrayOutputStream baos = null;
+    private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
         try {
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
-            baos = new UnsynchronizedByteArrayOutputStream(8192);
-            for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
-                baos.write(buf, 0, read);
+            if (LOG.isTraceEnabled()) {
+                byte[] iCal = Streams.stream2bytes(body);
+                LOG.trace(new String(iCal, Charsets.UTF_8));
+                body = Streams.newByteArrayInputStream(iCal);
             }
-            return this.parse(new String(baos.toByteArray(), "UTF-8"));
+            return factory.getIcalParser().parseAppointments(
+                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         } finally {
-            Streams.close(baos);
             Streams.close(body);
         }
-    }
-
-    private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
-        LOG.trace(iCal);
-        /*
-         * apply patches
-         */
-        String patchedICal = iCal;
-
-        //XXX to make the UserResolver do it's job correctly
-        //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
-        /*
-         * parse appointments
-         */
-        return factory.getIcalParser().parseAppointments(
-            patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
 
     private static boolean differs(Object value1, Object value2) {

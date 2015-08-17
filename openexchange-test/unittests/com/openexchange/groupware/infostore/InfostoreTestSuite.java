@@ -97,7 +97,6 @@ public class InfostoreTestSuite {
         tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.InsertDocumentIntoDelTableActionTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.ValidationChainTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);

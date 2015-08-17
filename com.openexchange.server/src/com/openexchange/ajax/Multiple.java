@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -59,6 +60,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -85,6 +87,7 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
@@ -105,7 +108,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
@@ -152,46 +154,48 @@ public class Multiple extends SessionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        // Acquire session
+        ServerSession session = getSessionObject(req);
+        if (session == null) {
+            OXException e = AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            e.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
+            LOG.error("Missing '{}' parameter.", PARAMETER_SESSION, e);                                
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, e.getDisplayMessage(Locale.US));
+            return;
+        }
+        
+        // Parse request body into a JSON array
         JSONArray dataArray;
         {
-            final Reader reader = AJAXServlet.getReaderFor(req);
+            Reader reader = AJAXServlet.getReaderFor(req);
             try {
                 dataArray = new JSONArray(reader);
-            } catch (final JSONException e) {
-                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-                LOG.warn("{}{}", exc.getMessage(), Tools.logHeaderForError(req), exc);
-                dataArray = new JSONArray();
-            } finally {
-                Streams.close(reader);
+            } catch (JSONException e) {
+                OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
+                exc.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
+                LOG.error("Received invalid JSON body in multiple request for user {} in context {} (exceptionId: {})", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), exc.getExceptionId(), e);                                
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, exc.getDisplayMessage(localeFrom(session)));
+                return;
             }
         }
-        // Aquire session
-        final ServerSession session = getSessionObject(req);
-        if (session == null) {
-            final OXException e = AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
-            log(RESPONSE_ERROR, e);
-            sendError(resp);
-        }
+
+        // Handle parsed JSON array
         try {
-            // Process multiple request
-            JSONArray respArr = null;
-            try {
-                respArr = perform(dataArray, req, session);
-            } catch (final JSONException e) {
-                logError(RESPONSE_ERROR, session, e);
-                sendError(resp);
-            } catch (final OXException e) {
-                logError(RESPONSE_ERROR, session, e);
-                sendError(resp);
-            } catch (final RuntimeException e) {
-                logError(RESPONSE_ERROR, session, e);
-                sendError(resp);
-            }
+            JSONArray respArr = perform(dataArray, req, session);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             final Writer writer = resp.getWriter();
             writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
             writer.flush();
+        } catch (final JSONException e) {
+            logError(RESPONSE_ERROR, session, e);
+            sendError(resp);
+        } catch (final OXException e) {
+            logError(RESPONSE_ERROR, session, e);
+            sendError(resp);
+        } catch (final RuntimeException e) {
+            logError(RESPONSE_ERROR, session, e);
+            sendError(resp);
         } finally {
             LogProperties.removeLogProperties();
         }
@@ -273,7 +277,19 @@ public class Multiple extends SessionServlet {
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
                     if (null != jsonInOut) {
-                        respArr.put(jsonInOut.getOutputObject());
+                        JSONValue outputObj = jsonInOut.getOutputObject();
+                        if (null == outputObj) {
+                            OXJSONWriter jsonWriter = new OXJSONWriter();
+                            jsonWriter.object();
+                            try {
+                                ResponseWriter.writeException(OXException.general("Failed to handle JSON request: " + jsonInOut.getInputObject().toString()), jsonWriter, localeFrom(session), false);
+                            } finally {
+                                jsonWriter.endObject();
+                            }
+                            respArr.put(jsonWriter.getObject());
+                        } else {
+                            respArr.put(outputObj);
+                        }
                     }
                 }
             } finally {
@@ -450,6 +466,13 @@ public class Multiple extends SessionServlet {
                     }
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
+                    if (null != result.getException()) {
+                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
+                        ResponseWriter.writeException(result.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
+                    }
+                    if (null != result.getWarnings() && 0 < result.getWarnings().size()) {
+                        ResponseWriter.writeWarnings(new ArrayList<OXException>(result.getWarnings()), jsonWriter, localeFrom(session));
+                    }
                 } catch (final OXException e) {
                     logError(e.getMessage(), session, e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
@@ -684,10 +707,10 @@ public class Multiple extends SessionServlet {
         return null;
     }
 
-    /** Writes JSON array to given writer. */
-    private static void writeTo(final JSONArray respArr, final Writer writer) throws IOException {
+    /** Writes JSON value to given writer. */
+    private static void writeTo(final JSONValue jValue, final Writer writer) throws IOException {
         try {
-            respArr.write(writer);
+            jValue.write(writer);
         } catch (final JSONException e) {
             throw new IOException(e.getMessage(), e);
         }

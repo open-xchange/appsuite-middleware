@@ -49,65 +49,92 @@
 
 package com.openexchange.filestore.sproxyd.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
+import javax.annotation.concurrent.ThreadSafe;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.osgi.ExceptionUtils;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link EndpointPool}
+ * A {@link EndpointPool} manages a set of endpoints for the sproxyd client. The available
+ * endpoints are returned in a round-robin manner. If endpoints become unavailable they can
+ * be blacklisted. Every host on the blacklist is periodically checked by a heartbeat for
+ * availability. If a formerly blacklisted host becomes available again, it is removed from
+ * the blacklist and returned to the pool of available hosts. The process of blacklisting
+ * an endpoint is up to the client.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@ThreadSafe
 public class EndpointPool {
 
     private static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private final List<Endpoint> available;
+    private final List<String> available;
 
-    private final List<Endpoint> blacklist;
+    private final List<String> blacklist;
 
     private final AtomicInteger counter;
 
     private final String filestoreId;
 
-    public EndpointPool(String filestoreId, List<Endpoint> endpointUrls, DefaultHttpClient httpClient, TimerService timerService) {
+    private ScheduledTimerTask heartbeat;
+
+    /**
+     * Initializes a new {@link EndpointPool}.
+     *
+     * @param filestoreId The filestore ID
+     * @param endpointUrls A list of endpoint URLs to manage; must not be empty; URLs must always end with a trailing slash
+     * @param httpClient
+     * @param heartbeatInterval
+     * @param timerService
+     */
+    public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
         super();
         this.filestoreId = filestoreId;
+        int size = endpointUrls.size();
         available = new ArrayList<>(endpointUrls);
-        blacklist = new ArrayList<>(endpointUrls.size());
-        counter = new AtomicInteger(endpointUrls.size());
-        if (endpointUrls.size() > 1) {
-            LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
-            timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), 60000l, 60000l);
+        blacklist = new ArrayList<>(size);
+        counter = new AtomicInteger(size);
+        if (endpointUrls.isEmpty()) {
+            throw new IllegalArgumentException("Paramater 'endpointUrls' must not be empty");
         }
+
+        LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
+        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), heartbeatInterval, heartbeatInterval);
     }
 
-    public Endpoint get() {
+    /**
+     * Gets an available endpoint.
+     *
+     * @param contextId The context ID
+     * @param userId The userID
+     * @return The endpoint or <code>null</code> if all endpoints have been blacklisted
+     */
+    public Endpoint get(int contextId, int userId) {
         lock.readLock().lock();
         try {
+            if (available.isEmpty()) {
+                return null;
+            }
+
             int next = counter.incrementAndGet();
             if (next < 0) {
                 int newNext = available.size();
                 counter.compareAndSet(next, newNext);
                 next = newNext;
             }
-            Endpoint endpoint = available.get(next % available.size());
+            Endpoint endpoint = new Endpoint(available.get(next % available.size()), contextId, userId);
             LOG.debug("Sproxyd endpoint pool [{}]: Returning endpoint {}", filestoreId, endpoint);
             return endpoint;
         } finally {
@@ -115,32 +142,51 @@ public class EndpointPool {
         }
     }
 
-    public void blacklist(Endpoint endpoint) {
+    /**
+     * Removes an endpoint from the list of available ones and adds it to the blacklist.
+     *
+     * @param url The base URL of the endpoint
+     */
+    public void blacklist(String url) {
         lock.writeLock().lock();
         try {
-            // only blacklist if there are more endpoints available
-            if (available.size() > 1 && available.remove(endpoint)) {
-                LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is added to blacklist", filestoreId, endpoint);
-                blacklist.add(endpoint);
+            if (available.remove(url)) {
+                LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is added to blacklist", filestoreId, url);
+                blacklist.add(url);
             }
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void unblacklist(Endpoint endpoint) {
+    /**
+     * Removes an endpoint from the blacklist and adds it back to list of available ones.
+     *
+     * @param url The base URL of the endpoint
+     */
+    public void unblacklist(String url) {
         lock.writeLock().lock();
         try {
-            if (blacklist.remove(endpoint)) {
-                LOG.info("Sproxyd endpoint pool [{}]: Endpoint {} is removed from blacklist", filestoreId, endpoint);
-                available.add(endpoint);
+            if (blacklist.remove(url)) {
+                LOG.info("Sproxyd endpoint pool [{}]: Endpoint {} is removed from blacklist", filestoreId, url);
+                available.add(url);
             }
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public List<Endpoint> getBlacklist() {
+    /**
+     * Closes this endpoint pool instance. The blacklist heartbeat task is cancelled.
+     */
+    public synchronized void close() {
+        if (heartbeat != null) {
+            heartbeat.cancel();
+            heartbeat = null;
+        }
+    }
+
+    private List<String> getBlacklist() {
         lock.readLock().lock();
         try {
             return new ArrayList<>(blacklist);
@@ -165,33 +211,22 @@ public class EndpointPool {
         @Override
         public void run() {
             try {
-                List<Endpoint> blacklist = endpoints.getBlacklist();
+                List<String> blacklist = endpoints.getBlacklist();
                 if (blacklist.isEmpty()) {
                     LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist is empty, nothing to do", filestoreId);
                     return;
                 }
 
                 LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, blacklist.size());
-                for (Endpoint endpoint : blacklist) {
-                    HttpGet get = null;
-                    HttpResponse response = null;
-                    try {
-                        get = new HttpGet(endpoint.getConfUrl());
-                        response = httpClient.execute(get);
-                        int status = response.getStatusLine().getStatusCode();
-                        if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
-                            endpoints.unblacklist(endpoint);
-                        }
-                    } catch (ClientProtocolException e) {
+                for (String endpoint : blacklist) {
+                    if (Utils.endpointUnavailable(endpoint, httpClient)) {
                         LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
-                    } catch (IOException e) {
-                        LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
-                    } finally {
-                        Utils.close(get, response);
+                    } else {
+                        endpoints.unblacklist(endpoint);
                     }
                 }
             } catch (Throwable t) {
-                LOG.info("Sproxyd endpoint pool [{}]: Error during heartbeat execution", filestoreId, t);
+                LOG.error("Sproxyd endpoint pool [{}]: Error during heartbeat execution", filestoreId, t);
                 ExceptionUtils.handleThrowable(t);
             }
         }

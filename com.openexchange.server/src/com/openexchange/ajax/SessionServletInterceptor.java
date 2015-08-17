@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -62,9 +64,12 @@ public interface SessionServletInterceptor {
 
     /**
      * This method allows to modify arbitrary attributes in the session before the session is used to process a request.
+     *
      * @param session Session to check.
+     * @param req The associated incoming HTTP request
+     * @param resp The associated HTTP response
      * @throws OXException To interrupt processing the request. The exception is then responded to the client.
      */
-    void intercept(Session session) throws OXException;
+    void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException;
 
 }

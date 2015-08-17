@@ -205,6 +205,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     }
 
     private void failMovingEntryAsOtherUser(final DocumentMetadata document) {
+        long originalFolderID = document.getFolderId();
         document.setFolderId(folderId2);
         try {
             infostore.saveDocumentMetadata(document, Long.MAX_VALUE, session2);
@@ -212,6 +213,8 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         } catch (final OXException x) {
             x.printStackTrace();
             assertTrue(true);
+        } finally {
+            document.setFolderId(originalFolderID);
         }
     }
 

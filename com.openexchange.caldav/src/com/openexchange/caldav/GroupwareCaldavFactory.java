@@ -68,6 +68,8 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -242,11 +244,25 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         private Date minDateTime = null;
         private Date maxDateTime = null;
         private String treeID;
+        private UserizedFolder defaultFolder = null;
 
         public State(final GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
             this.knownCollections = new HashMap<WebdavPath, CommonCollection>();
+        }
+
+        /**
+         * Gets the user's default calendar folder.
+         *
+         * @return The default folder
+         */
+        public UserizedFolder getDefaultFolder() throws OXException {
+            if (null == defaultFolder) {
+                defaultFolder = factory.getFolderService().getDefaultFolder(
+                    factory.getUser(), getTreeID(), CalendarContentType.getInstance(), factory.getSession(), null);
+            }
+            return defaultFolder;
         }
 
         /**

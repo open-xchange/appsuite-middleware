@@ -77,6 +77,7 @@ import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.RemoteInternalPreviewService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -241,6 +242,11 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             requestData.putParameter("scaleType", "cover");
             this.requestData = requestData;
         }
+        
+        @Override
+        public void setThreadName(ThreadRenamer threadRenamer) {
+            threadRenamer.renamePrefix("Async-DC-Trigger");
+        }
 
         @Override
         public Void call() {
@@ -268,7 +274,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                         RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
                         if (null != candidate) {
                             AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                            LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
                             numberOfPregeneratedPreviews--;
+                        } else {
+                            LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
                         }
                     }
                 } catch (Exception e) {

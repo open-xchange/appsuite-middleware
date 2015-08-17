@@ -163,11 +163,11 @@ public class OXFolderDependentDeleter {
          * delete targets via share service
          */
         ShareService shareService = ServerServiceRegistry.getServize(ShareService.class, true);
-        session.setParameter(Connection.class.getName(), con);
+        session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), con);
         try {
             shareService.deleteTargets(session, targets, true);
         } finally {
-            session.setParameter(Connection.class.getName(), null);
+            session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
         }
     }
 

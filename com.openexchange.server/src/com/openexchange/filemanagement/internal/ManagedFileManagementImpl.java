@@ -92,7 +92,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
 
-    private static final int DELAY = 30000;
+    private static final int DELAY = 10000;
+
+    private static final int INITIAL_DELAY = 1000;
 
     private class FileManagementPropertyListener implements PropertyListener {
 
@@ -155,7 +157,6 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
 
                 // Check for expired files
-                boolean isDebugEnabled = logger.isDebugEnabled();
                 long now = System.currentTimeMillis();
                 for (Iterator<ManagedFileImpl> iter = tfiles.values().iterator(); iter.hasNext();) {
                     ManagedFileImpl cur = iter.next();
@@ -167,12 +168,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         if (cur.isDeleted() || ((now - cur.getLastAccess()) > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
                             cur.delete();
                             iter.remove();
-
-                            if (isDebugEnabled) {
-                                File file = cur.getFile();
-                                String fname = null == file ? "" : file.getName();
-                                logger.debug("Removed expired managed file {}", fname);
-                            }
+                            File file = cur.getFile();
+                            String fname = null == file ? "" : file.getName();
+                            logger.debug("Removed expired managed file {}", fname);
                         } else {
                             existentFiles.remove(cur.getFile());
                         }
@@ -227,7 +225,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         tmpDirReference.set(getTmpDirByPath(path));
 
         // Register timer task
-        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), DELAY, DELAY);
+        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
         timerTaskReference = new AtomicReference<ScheduledTimerTask>(timerTask);
     }
 
@@ -626,7 +624,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     void startUp() {
         if (stopTimerTask()) {
-            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), DELAY, DELAY));
+            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
         }
     }
 

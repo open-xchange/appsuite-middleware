@@ -71,7 +71,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.ResponseFields;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
@@ -99,14 +98,12 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     private final SubscriptionExecutionService executor;
     private final SecretService secretService;
     private final SubscriptionSourceDiscoveryService discovery;
-    private final ConfigurationService config;
 
     /**
      * Initializes a new {@link SubscriptionMultipleHandler}.
      */
-    public SubscriptionMultipleHandler(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService, ConfigurationService config) {
+    public SubscriptionMultipleHandler(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
         super();
-        this.config = config;
         this.discovery = discovery;
         this.executor = executor;
         this.secretService = secretService;
@@ -134,14 +131,8 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 MISSING_PARAMETER.create("action");
                 return null;
             } else if (action.equals("new")) {
-                if (!config.getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
-                    throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
-                }
                 return createSubscription(request, session);
             } else if (action.equals("update")) {
-                if (!config.getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
-                    throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
-                }
                 return updateSubscription(request, session);
             } else if (action.equals("delete")) {
                 return deleteSubscriptions(request, session);
@@ -152,9 +143,6 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             } else if (action.equals("list")) {
                 return listSubscriptions(request, session);
             } else if (action.equals("refresh")) {
-                if (!config.getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
-                    throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
-                }
                 return refreshSubscriptions(request, session);
             } else if (action.equals("fetch")) {
                 return fetchSubscription(request, session);

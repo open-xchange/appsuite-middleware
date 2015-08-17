@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Aug 05 2015 Thorben Betten <thorben.betten@open-xchange.com>
+First release candidate for 7.8.0
 * Fri Dec 12 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Thorben Betten <thorben.betten@open-xchange.com>
@@ -77,16 +79,8 @@ Build for patch 2014-11-20
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.8.0 release
-* Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.8.0 release
-* Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.6.2 release
 * Fri Oct 31 2014 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.6.2 release
-* Fri Oct 31 2014 Thorben Betten <thorben.betten@open-xchange.com>
-First candidate for 7.6.2 release
-* Thu Oct 30 2014 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.6.2 release
 * Mon Oct 27 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2014-10-30
 * Fri Oct 17 2014 Thorben Betten <thorben.betten@open-xchange.com>

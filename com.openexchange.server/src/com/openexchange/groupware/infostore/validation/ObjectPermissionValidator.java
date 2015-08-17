@@ -57,7 +57,9 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -108,13 +110,30 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                 return validation;
             }
             /*
+             * check applied permission bits
+             */
+            for (ObjectPermission permission : objectPermissions) {
+                int bits = permission.getPermissions();
+                if (ObjectPermission.WRITE != bits && ObjectPermission.DELETE != bits && ObjectPermission.READ != bits) {
+                    validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "Invalid permission bits: " + bits);
+                    validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(permission.getEntity())));
+                    return validation;
+                }
+            }
+            /*
              * check existence of each group permission entity
              */
             int[] groupIDs = getGroupEntities(objectPermissions);
             if (null != groupIDs) {
                 for (int groupID : groupIDs) {
                     try {
-                        ServerServiceRegistry.getServize(GroupService.class).getGroup(session.getContext(), groupID);
+                        Group group = ServerServiceRegistry.getServize(GroupService.class).getGroup(session.getContext(), groupID);
+                        if (GroupStorage.GUEST_GROUP_IDENTIFIER == group.getIdentifier()) {
+                            // invalid group
+                            validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "Group " + group.getDisplayName() + " can't be used for object permissions.");
+                            validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(groupID)));
+                            return validation;
+                        }
                     } catch (OXException e) {
                         if ("GRP-0017".equals(e.getErrorCode())) {
                             // group not found

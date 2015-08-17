@@ -52,12 +52,11 @@ package com.openexchange.saml;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.impl.SAMLLoginRequestHandler;
 import com.openexchange.saml.impl.SAMLLogoutRequestHandler;
 import com.openexchange.session.Session;
-import com.openexchange.session.reservation.SessionReservationService;
 
 /**
  * The interface for SAML 2.0 Web SSO support.
@@ -79,7 +78,7 @@ public interface SAMLWebSSOProvider {
 
     /**
      * Handles an authentication response from the IdP. After successful validation of the response and determining
-     * the principal, the user agent is redirected to the 'redeemReservation' login action, where his session is created
+     * the principal, the user agent is redirected to the 'samlLogin' login action, where his session is created
      * and the session cookies are set.
      *
      * @param httpRequest The servlet request
@@ -87,8 +86,7 @@ public interface SAMLWebSSOProvider {
      * @param binding The binding used to call the assertion consumer service
      * @throws OXException If an error occurs while processing the response
      * @throws IOException If writing to the servlet response fails
-     * @see SessionReservationService
-     * @see RedeemReservationLogin
+     * @see SAMLLoginRequestHandler
      */
     void handleAuthnResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws OXException, IOException;
 

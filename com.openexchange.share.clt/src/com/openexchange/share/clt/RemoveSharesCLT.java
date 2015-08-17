@@ -49,6 +49,8 @@
 
 package com.openexchange.share.clt;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -96,8 +98,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         if (cmd.hasOption("i")) {
             userId = cmd.getOptionValue("i");
         }
-        if (cmd.hasOption("t")) {
-            token = cmd.getOptionValue("t");
+        if (cmd.hasOption("T")) {
+            token = cmd.getOptionValue("T");
         }
         iKnowWhatIamDoing = cmd.hasOption("f");
     }
@@ -138,7 +140,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
         options.addOption("i", "userid", true, "The id of the user who created the shares.");
-        options.addOption("t", "tokens", true, "Token to remove.");
+        options.addOption("T", "token", true, "Token or URL to remove.");
         options.addOption("f", "force", false, "Force removal of token.");
     }
 
@@ -152,6 +154,9 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
             if (null != token && !token.isEmpty()) {
+                if (isShareURL(token)) {
+                    token = extractTokenFromURL(token);
+                }
                 Pair<String, String> tokenAndPath = parseToken(token);
                 String shareToken = tokenAndPath.getFirst();
                 String targetPath = tokenAndPath.getSecond();
@@ -192,6 +197,21 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
         }
 
         return new Pair<String, String>(shareToken, targetPath);
+    }
+
+    private final Pattern PATTERN = Pattern.compile("\\Ahttps?:\\/\\/.*?\\/ajax\\/share\\/(.*?)\\z");
+
+    private boolean isShareURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        return m.matches();
+    }
+
+    private String extractTokenFromURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        if (m.matches()) {
+            return m.group(1);
+        }
+        return url;
     }
 
 }

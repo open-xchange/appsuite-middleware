@@ -49,7 +49,11 @@
 
 package com.openexchange.imap;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -115,6 +119,26 @@ public enum IMAPClientParameters {
         buf.append('-').append(session.getContextId());
         buf.append('-').append(imapStore.hashCode());
         return buf.toString();
+    }
+
+    /**
+     * Sets the default client parameters.
+     *
+     * @param imapStore The IMAP store to connect to
+     * @param session The associated Groupware session
+     */
+    public static void setDefaultClientParameters(IMAPStore imapStore, Session session) {
+        // Generate the IMAP session information
+        String sessionInformation = IMAPClientParameters.generateSessionInformation(session, imapStore);
+        LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+
+        // Generate & set client parameters
+        Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
+        clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
+        clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), sessionInformation);
+        clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
+        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
+        imapStore.setClientParameters(clientParams);
     }
 
 }

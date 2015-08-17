@@ -115,7 +115,8 @@ public class LoginScreenTest extends ShareTest {
          */
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingPermission.getEntity());
         checkGuestPermission(perm, guest);
-        GuestClient guestClient = resolveShare(guest.getShareURL());
+        String shareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(shareURL);
         /*
          * Set password for guest user
          */
@@ -128,7 +129,7 @@ public class LoginScreenTest extends ShareTest {
         /*
          * Re-login with PW and check params
          */
-        guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()), newPW);
+        guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
         assertEquals("guest", resolveResponse.getLoginType());
         assertEquals("INFO", resolveResponse.getMessageType());

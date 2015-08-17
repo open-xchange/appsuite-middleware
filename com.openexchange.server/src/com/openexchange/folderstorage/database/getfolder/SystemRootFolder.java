@@ -52,16 +52,19 @@ package com.openexchange.folderstorage.database.getfolder;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link SystemRootFolder} - Gets the system shared folder.
@@ -116,19 +119,34 @@ public final class SystemRootFolder {
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
     public static List<String[]> getSystemRootFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getUserRootFoldersIterator(user.getId(), user.getGroups(), userPerm, ctx)).asList();
-        final List<String[]> ret = new ArrayList<String[]>(list.size());
-        for (final FolderObject folderObject : list) {
-            int folderId = folderObject.getObjectID();
-            String displayName = FolderObject.getFolderString(folderId, user.getLocale());
-            if (displayName == null) {
-                displayName = folderObject.getFolderName();
+        return getSystemRootFolderSubfolder(user.getLocale());
+    }
+
+    private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system root folder for given user.
+     *
+     * @return The subfolder identifiers of database folder representing system root folder for given user
+     */
+    private static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+        /*
+         * The system root folder
+         */
+        List<String[]> list = CACHED_SUBFOLDERS.get(locale);
+        if (null == list) {
+            final StringHelper sh = StringHelper.valueOf(locale);
+            final List<String[]> newList = new ArrayList<String[]>(4);
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+            list = CACHED_SUBFOLDERS.putIfAbsent(locale, newList);
+            if (null == list) {
+                list = newList;
             }
-
-            ret.add(new String[] { String.valueOf(folderId), displayName });
         }
-
-        return ret;
+        return list;
     }
 
 }

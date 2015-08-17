@@ -51,15 +51,15 @@ package com.openexchange.file.storage.json.actions.files;
 
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
+import static com.openexchange.java.Streams.bufferedInputStreamFor;
 import static com.openexchange.tools.images.ImageTransformationUtility.seemsLikeThumbnailRequest;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -71,7 +71,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
@@ -105,104 +107,71 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        final ServerSession session = request.getSession();
-
+        FileID fileID = new FileID(request.getId());
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        final String id = request.getId();
-        final String version = request.getVersion();
-
-        final Document document = (request.getCachedDocument() == null) ? fileAccess.getDocumentAndMetadata(id, version) : request.getCachedDocument();
-        if (document != null) {
-            IFileHolder.RandomAccessClosure rac = null;
-            IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-
-                @Override
-                public InputStream newStream() throws OXException, IOException {
-                    InputStream inputStream = document.getData();
-                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                        return inputStream;
-                    }
-                    return new BufferedInputStream(inputStream, 65536);
-                }
-            };
-            rac = new IDBasedFileAccessRandomAccessClosure(id, version, document.getSize(), session);
-            FileHolder fileHolder = new FileHolder(isClosure, document.getSize(), document.getMimeType(), document.getName());
-            fileHolder.setRandomAccessClosure(rac);
-
+        /*
+         * handle request for thumbnails directly if supported by storage
+         */
+        if (seemsLikeThumbnailRequest(request.getRequestData()) &&
+            fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.THUMBNAIL_IMAGES)) {
+            File metadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+            InputStreamClosure isClosure = getThumbnailStream(request.getSession(), request.getId(), request.getVersion());
+            IFileHolder fileHolder = new FileHolder(isClosure, -1, null, metadata.getFileName());
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            String etag = document.getEtag();
-            if (null != etag) {
-                result.setHeader(ETAG, etag);
-            }
-            long lastModified = document.getLastModified();
-            if (lastModified > 0) {
-                result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(new Date(lastModified)));
-            }
+            createAndSetETag(metadata, request, result);
+            setLastModified(metadata, result);
             return result;
         }
-
-        // The regular way
-        File fileMetadata = fileAccess.getFileMetadata(id, version);
-        IFileHolder.RandomAccessClosure rac = null;
-        IFileHolder.InputStreamClosure isClosure;
-        {
-            if (seemsLikeThumbnailRequest(request.getRequestData())) {
-                isClosure = new IFileHolder.InputStreamClosure() {
-
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                        InputStream inputStream;
-                        try {
-                            inputStream = fileAccess.optThumbnailStream(id, version);
-                        } catch (OXException e) {
-                            LOGGER.debug("Unable to retrieve thumbnail for file: {}", id, e);
-                            inputStream = null;
-                        }
-                        if (null == inputStream) {
-                            inputStream = fileAccess.getDocument(id, version);
-                        }
-                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                            return inputStream;
-                        }
-                        return new BufferedInputStream(inputStream, 65536);
-                    }
-                };
-            } else {
-                isClosure = new IFileHolder.InputStreamClosure() {
-
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                        InputStream inputStream = fileAccess.getDocument(id, version);
-                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                            return inputStream;
-                        }
-                        return new BufferedInputStream(inputStream, 65536);
-                    }
-                };
-                rac = new IDBasedFileAccessRandomAccessClosure(id, version, fileMetadata.getFileSize(), session);
+        /*
+         * prepare result for efficient document retrieval enabled storages if possible
+         */
+        if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.EFFICIENT_RETRIEVAL)) {
+            Document document = request.getCachedDocument();
+            if (null == document) {
+                document = fileAccess.getDocumentAndMetadata(request.getId(), request.getVersion());
+            }
+            if (null != document) {
+                FileHolder fileHolder = new FileHolder(getDocumentStream(document), document.getSize(), document.getMimeType(), document.getName());
+                AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+                if (null != document.getEtag()) {
+                    setETag(document.getEtag(), 0, result);
+                }
+                if (0 < document.getLastModified()) {
+                    setLastModified(new Date(document.getLastModified()), result);
+                }
+                if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                    fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), document.getSize(), request.getSession()));
+                }
+                return result;
             }
         }
-
-        FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-        if (null != rac) {
-            fileHolder.setRandomAccessClosure(rac);
-        }
-
+        /*
+         * prepare regular document result as fallback
+         */
+        File metadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+        InputStreamClosure isClosure = getDocumentStream(request.getSession(), request.getId(), request.getVersion());
+        FileHolder fileHolder = new FileHolder(isClosure, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName());
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-        createAndSetETag(fileMetadata, request, result);
-
-        Date lastModified = fileMetadata.getLastModified();
-        if (null != lastModified) {
-            result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(lastModified));
+        createAndSetETag(metadata, request, result);
+        setLastModified(metadata, result);
+        if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
+            fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), metadata.getFileSize(), request.getSession()));
         }
-
         return result;
     }
 
     private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
         setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
+    }
+
+    private void setLastModified(File fileMetadata, AJAXRequestResult result) throws OXException {
+        setLastModified(fileMetadata.getLastModified(), result);
+    }
+
+    private void setLastModified(Date lastModified, AJAXRequestResult result) throws OXException {
+        if (null != lastModified) {
+            result.setHeader(LAST_MODIFIED, Tools.formatHeaderDate(lastModified));
+        }
     }
 
     @Override
@@ -255,6 +224,70 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
     // -----------------------------------------------------------------------------------------------------------
 
+    /**
+     * Tries to get a file's thumbnail directly, falling back to the regular document stream if not available.
+     *
+     * @param session The session
+     * @param id The identifier of the file to get the thumbnail stream for
+     * @param version The file version to retrieve the thumbnail for
+     * @return A file holder providing access to the thumbnail data
+     */
+    private static IFileHolder.InputStreamClosure getThumbnailStream(final ServerSession session, final String id, final String version) {
+        return new IFileHolder.InputStreamClosure() {
+
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                InputStream inputStream;
+                try {
+                    inputStream = fileAccess.optThumbnailStream(id, version);
+                } catch (OXException e) {
+                    LOGGER.debug("Unable to retrieve thumbnail for file: {}, falling back to regular document stream.", id, e);
+                    inputStream = null;
+                }
+                if (null == inputStream) {
+                    inputStream = fileAccess.getDocument(id, version);
+                }
+                return bufferedInputStreamFor(inputStream);
+            }
+        };
+    }
+
+    /**
+     * Gets an input stream closure for a specific file.
+     *
+     * @param session The session
+     * @param id The identifier of the file to get the input stream for
+     * @param version The file version to retrieve the input stream for
+     * @return A file holder providing access to the document data
+     */
+    private static IFileHolder.InputStreamClosure getDocumentStream(final ServerSession session, final String id, final String version) {
+        return new IFileHolder.InputStreamClosure() {
+
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                return bufferedInputStreamFor(fileAccess.getDocument(id, version));
+            }
+        };
+    }
+
+    /**
+     * Gets an input stream closure for a document.
+     *
+     * @param document The document
+     * @return A file holder providing access to the document data
+     */
+    private static IFileHolder.InputStreamClosure getDocumentStream(final Document document) {
+        return new IFileHolder.InputStreamClosure() {
+
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                return bufferedInputStreamFor(document.getData());
+            }
+        };
+    }
+
     private static class IDBasedFileAccessRandomAccessClosure implements IFileHolder.RandomAccessClosure {
 
         private final String id;
@@ -290,7 +323,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         }
     }
 
-    private static class IDBasedFileAccessRandomAccess implements IFileHolder.RandomAccess {
+    private static class IDBasedFileAccessRandomAccess implements IFileHolder.RandomAccess, IFileHolder.InputStreamClosure {
 
         private final String id;
         private final String version;
@@ -360,6 +393,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             return length;
         }
 
+        @Override
+        public InputStream newStream() throws OXException, IOException {
+            IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
+            return bufferedInputStreamFor(newFileAccess.getDocument(id, version));
+        }
 
         @Override
         public String toString() {
@@ -374,6 +412,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             builder.append("length=").append(length).append(", pos=").append(pos).append(']');
             return builder.toString();
         }
+
     }
 
 }

@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.database.Databases;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -115,7 +116,7 @@ public class FilenameReserverImpl implements FilenameReserver {
     public FilenameReservation reserve(DocumentMetadata document, boolean adjustAsNeeded) throws OXException {
         return reserve(Collections.singletonList(document), adjustAsNeeded).get(document);
     }
-    
+
     /**
      * Reserves the filenames of the supplied documents in their target folders.
      *
@@ -194,6 +195,8 @@ public class FilenameReserverImpl implements FilenameReserver {
                 con.commit();
                 committed = true;
             }
+        } catch (IncorrectStringSQLException e) {
+            throw AbstractInfostoreAction.handleIncorrectStringError(e, null);
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {

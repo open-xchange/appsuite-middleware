@@ -2194,7 +2194,7 @@ public final class MimeMessageUtility {
         }
         return charset;
     }
-
+    
     /**
      * Reads the textual content from specified part.
      *
@@ -2205,6 +2205,20 @@ public final class MimeMessageUtility {
      * @throws IOException If reading content fails with an I/O error
      */
     public static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        return readContent(mailPart, contentType, false);
+    }
+
+    /**
+     * Reads the textual content from specified part.
+     *
+     * @param mailPart The mail part
+     * @param contentType The content type
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @return The textual part or <code>null</code> if part does not exist
+     * @throws OXException If reading content fails
+     * @throws IOException If reading content fails with an I/O error
+     */
+    public static String readContent(final MailPart mailPart, final ContentType contentType, boolean errorOnNoContent) throws OXException, IOException {
         if (null == mailPart) {
             return null;
         }
@@ -2214,15 +2228,15 @@ public final class MimeMessageUtility {
         final String charset = getCharset(mailPart, contentType);
         try {
             if (contentType.startsWith("text/htm")) {
-                final String html = MessageUtility.readMailPart(mailPart, charset);
+                final String html = MessageUtility.readMailPart(mailPart, charset, errorOnNoContent);
                 return MessageUtility.simpleHtmlDuplicateRemoval(html);
             }
-            return MessageUtility.readMailPart(mailPart, charset);
+            return MessageUtility.readMailPart(mailPart, charset, errorOnNoContent);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
-            return MessageUtility.readMailPart(mailPart, fallback);
+            return MessageUtility.readMailPart(mailPart, fallback, errorOnNoContent);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 LOG.warn("Mail part removed in the meantime.", e);

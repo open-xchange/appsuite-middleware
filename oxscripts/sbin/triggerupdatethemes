@@ -1,0 +1,79 @@
+#!/bin/bash 
+
+UPDATE_THEMES=/opt/open-xchange/appsuite/share/update-themes.sh
+UPDATE_NEEDED_TRIGGER=/opt/open-xchange/appsuite/apps/themes/.need_update
+
+# The OX init script now has to check for a "dirty" file at startup.
+# If such a file exists we have to trigger the ui theme generation via
+# update-themes --if-needed.
+# If the ui packages are recent enough it would be enough to simply trigger
+# update-themes.sh --if-needed without a previous check.
+#
+# The dirty file will be removed after the theme generation and startup will
+# continue normally.
+# The server will refuse to start if theme generation fails.
+#
+trigger_update_themes () {
+  # Additionally check for trigger if older frontend package doesn't support
+  # --if-needed switch, yet
+  if [ -x $UPDATE_THEMES ] && [ -f $UPDATE_NEEDED_TRIGGER ]; then
+    $UPDATE_THEMES --if-needed
+    if [ $? -ne 0 ]; then
+      echo "Invoking update-themes failed. Refusing to start backend as long as frontend is in an inconsistent state."
+      echo "Run triggerupdatethemes -r to force server start (Not recommended, will cause inconsistent ui)"
+      exit 1
+    fi
+  fi
+}
+
+# Remove the file that causes theme rebuilds.
+# This can be used if an admin wants to prevent update-themes.sh to be run at
+# server start
+#
+remove_trigger () {
+  if [ -f $UPDATE_NEEDED_TRIGGER ]
+  then
+    echo "Removing $UPDATE_NEEDED_TRIGGER"
+    rm "$UPDATE_NEEDED_TRIGGER"
+  else
+    echo "Nothing to remove"
+  fi
+}
+
+function show_usage() {
+echo "
+Usage:
+$0 [OPTIONS]
+
+Possible OPTIONS:
+  -u      - Trigger update-themes
+  -r      - Remove dirty file that triggers an ui theme rebuild (Not recommended, will cause inconsistent ui)
+  -h      - Print usage help
+"
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    show_usage
+  else   
+    while getopts ":urh" opt; do
+      case $opt in
+        u)
+          trigger_update_themes
+          ;;
+        r)
+          remove_trigger
+          ;;
+        h)
+          show_usage
+          ;;
+        \?)
+          echo "Invalid option: -$OPTARG. Use -h to show usage"  >&2
+          exit 1
+          ;;
+      esac
+    done
+  fi
+}
+
+main $@

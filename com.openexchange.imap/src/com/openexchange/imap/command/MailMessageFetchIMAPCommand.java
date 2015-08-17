@@ -57,9 +57,11 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.FetchProfile;
@@ -515,7 +517,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
-        for (int j = 0; j < itemCount; j++) {
+        for (int j = itemCount; j-- > 0;) {
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
@@ -697,34 +699,23 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            final InternetHeaders h;
+            List<Header> headers;
             {
-                final InputStream headerStream;
-                if (item instanceof BODY) {
-                    /*
-                     * IMAP4rev1
-                     */
-                    headerStream = ((BODY) item).getByteArrayInputStream();
-                } else {
-                    /*
-                     * IMAP4
-                     */
-                    headerStream = ((RFC822DATA) item).getByteArrayInputStream();
-                }
-                h = new InternetHeaders();
+                InputStream headerStream = item instanceof BODY ? ((BODY) item).getByteArrayInputStream() : ((RFC822DATA) item).getByteArrayInputStream();
                 if (null == headerStream) {
                     logger.debug("Cannot retrieve headers from message #{} in folder {}", msg.getSeqnum(), msg.getFolder());
+                    headers = Collections.emptyList();
                 } else {
-                    h.load(headerStream);
+                    headers = InternetHeaders.parse(headerStream);
                 }
             }
-            final Set<String> headerFields = new HashSet<String>(this.headerFields);
-            for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
-                final Header hdr = (Header) e.nextElement();
-                final String name = hdr.getName();
+
+            Set<String> headerFields = new HashSet<String>(this.headerFields);
+            for (Header hdr : headers) {
+                String name = hdr.getName();
                 headerFields.remove(Strings.toLowerCase(name));
                 {
-                    final HeaderHandler headerHandler = hh.get(name);
+                    HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
                         headerHandler.handle(hdr, msg);
                     }

@@ -112,4 +112,9 @@ public class TestConfig implements SAMLConfig {
         return null;
     }
 
+    @Override
+    public boolean isAutoLoginEnabled() {
+        return true;
+    }
+
 }

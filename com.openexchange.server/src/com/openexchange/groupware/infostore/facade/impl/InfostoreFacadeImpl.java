@@ -1084,14 +1084,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
+        perform(new DeleteVersionAction(this, QUERIES, context, delVers, session), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
-        /*
-         * delete object permissions
-         */
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
     }
 
@@ -1474,14 +1471,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
         removeFiles(context, filestoreLocations, folderAdmins.toArray());
-
         /*
-         * Delete documents and all versions from database
+         * Delete documents, all versions and object permissions from database
          */
+        perform(new DeleteVersionAction(this, QUERIES, context, allVersions, null), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
-        /*
-         * delete object permissions
-         */
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
@@ -1747,32 +1741,34 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
-        Metadata[] cols = addLastModifiedIfNeeded(columns);
+        Metadata[] fields = Tools.getFieldsToQuery(columns, Metadata.LAST_MODIFIED_LITERAL, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
         Context context = session.getContext();
-        User user = session.getUser();
         /*
          * search documents shared by user
          */
-        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsByUser(context, user, cols, sort, order, start, end, db);
-        iterator.setCustomizer(new DocumentCustomizer() {
-
-            @Override
-            public DocumentMetadata handle(DocumentMetadata document) {
+        List<DocumentMetadata> documents;
+        InfostoreIterator iterator = null;
+        try {
+            iterator = InfostoreIterator.sharedDocumentsByUser(context, session.getUser(), fields, sort, order, start, end, db);
+            documents = Tools.removeNonPrivate(iterator, session, db);
+        } finally {
+            SearchIterators.close(iterator);
+        }
+        if (contains(columns, Metadata.SHAREABLE_LITERAL)) {
+            for (DocumentMetadata document : documents) {
                 /*
-                 * assume document still shareable
+                 * assume document still shareable if loaded via "shared documents" query
                  */
                 document.setShareable(true);
-                return document;
             }
-        });
-        TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iterator);
+        }
         if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = lockedUntilLoader.add(timedResult, context, (Map<Integer, List<Lock>>) null);
+            documents = lockedUntilLoader.add(documents, context, (Map<Integer, List<Lock>>) null);
         }
         if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-            timedResult = objectPermissionLoader.add(timedResult, context, (Map<Integer, List<ObjectPermission>>) null);
+            documents = objectPermissionLoader.add(documents, context, (Map<Integer, List<ObjectPermission>>) null);
         }
-        return timedResult;
+        return new InfostoreTimedResult(new SearchIteratorAdapter<DocumentMetadata>(documents.iterator(), documents.size()));
     }
 
     @Override
@@ -1919,6 +1915,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final ServerSession session) throws OXException {
         final Context context = session.getContext();
         final User user = session.getUser();
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
 
         InfostoreIterator newIter = null;
         InfostoreIterator modIter = null;
@@ -1986,7 +1983,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
-            final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
             delta = lockedUntilLoader.add(delta, context, locks);
         }
         if (addNumberOfVersions) {

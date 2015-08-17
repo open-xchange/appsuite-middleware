@@ -68,7 +68,7 @@ public class Bug21532Test extends AbstractSanitizing {
             "\r\n" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
             "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><!-- [if !supportLists]--><!-- <![endif] --></html>";
+            " </head><body><!-- [if !supportLists]--></body><!-- <![endif] --></html>";
 
         assertEquals("Unexpected return value", expected, content);
     }

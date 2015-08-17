@@ -250,7 +250,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     result.addActionForClient(uploadAction);
                     return 1;
                 }
-            } else if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
+            } else if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
                 /*
                  * checksum mismatch for .drive-meta file, enforce server-side re-calculation of .drive-meta file's checksum to be safe
                  */
@@ -380,7 +380,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * name clash for new/modified files, check file equivalence
              */
-            if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
+            if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
                 /*
                  * server's metadata file always wins, let client re-download the file
                  */
@@ -460,7 +460,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     private boolean mayDelete(FileVersion version) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
+        if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
             return false;
         }
         int deletePermission = getPermission().getDeletePermission();
@@ -491,7 +491,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     private boolean mayModify(FileVersion version) throws OXException {
-        if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
+        if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(version.getName())) {
             return false;
         }
         int writePermission = getPermission().getWritePermission();

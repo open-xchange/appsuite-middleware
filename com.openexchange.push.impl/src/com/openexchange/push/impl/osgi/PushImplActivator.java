@@ -88,6 +88,7 @@ import com.openexchange.push.impl.groupware.PushDeleteListener;
 import com.openexchange.push.impl.mbean.PushMBeanImpl;
 import com.openexchange.push.mbean.PushMBean;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -109,7 +110,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class };
     }
 
     @Override
@@ -133,6 +134,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
+            trackService(HazelcastInstance.class);
 
             // Track management service & register MBean
             {
@@ -191,7 +193,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
                 } else {
-                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
                 }
             }
 

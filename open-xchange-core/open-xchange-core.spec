@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1172,7 +1172,6 @@ ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open
 
 # SoftwareChange_Request-2470
 ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
 
 # SoftwareChange_Request-2530
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
@@ -1207,6 +1206,9 @@ ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/
 
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
+
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1248,6 +1250,16 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-17 (2666)
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
+* Tue Aug 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-10 (2655)
+* Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-03 (2650)
+* Thu Jul 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-27 (2626)
 * Wed Jul 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-07-20 (2614)
 * Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1259,13 +1271,13 @@ Build for patch 2015-06-29 (2578)
 * Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-06-26 (2573)
-* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
-* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2015-06-08 (2540)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2539)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1374,8 +1386,6 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.0 release
-* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.6.2 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1386,10 +1396,6 @@ Build for patch 2014-11-03
 Build for patch 2014-10-30
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-04
-* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-11-03
-* Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2014-10-22
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-03
 * Fri Oct 24 2014 Marcus Klein <marcus.klein@open-xchange.com>

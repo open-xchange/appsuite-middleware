@@ -180,7 +180,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             return contact;
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.back();
         }
@@ -248,7 +248,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
             DBUtils.rollback(connection);
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             DBUtils.rollback(connection);
             throw e;
@@ -285,7 +285,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(connection);
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             DBUtils.rollback(connection);
             throw e;
@@ -330,7 +330,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(connection);
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             DBUtils.rollback(connection);
             throw e;
@@ -368,7 +368,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             connectionHelper.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(connection);
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             DBUtils.rollback(connection);
             throw e;
@@ -490,7 +490,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backWritable();
         }
@@ -558,7 +558,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             DBUtils.rollback(connectionHelper.getWritable());
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.back();
         }
@@ -613,7 +613,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         try {
             return executor.count(connection, Table.CONTACTS, contextID, userID, parse(folderId), canReadAll);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backReadOnly();
         }
@@ -675,7 +675,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backReadOnly();
         }
@@ -725,7 +725,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backReadOnly();
         }
@@ -820,7 +820,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backReadOnly();
         }
@@ -870,7 +870,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             return getSearchIterator(contacts);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backReadOnly();
         }
@@ -1057,7 +1057,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (newCon) {
                 DBUtils.rollback(con);
             }
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             if (newCon) {
                 DBUtils.rollback(con);
@@ -1144,7 +1144,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             executor.insert(con, Table.CONTACTS, contact, Fields.CONTACT_DATABASE_ARRAY);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
         return objectId;
     }
@@ -1174,7 +1174,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (newCon) {
                 DBUtils.rollback(con);
             }
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (newCon && null != dbService) {
                 dbService.backWritable(contextId, con);
@@ -1218,7 +1218,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             return contact;
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             dbService.backReadOnly(contextId, con);
         }
@@ -1249,7 +1249,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         } catch (final DataTruncation e) {
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             connectionHelper.backWritable();
         }
@@ -1261,7 +1261,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         try {
             executor.update(con, Table.CONTACTS, contextId, contactId, System.currentTimeMillis(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
     }
 

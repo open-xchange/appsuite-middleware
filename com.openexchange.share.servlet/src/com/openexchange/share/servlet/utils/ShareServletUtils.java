@@ -151,7 +151,7 @@ public final class ShareServletUtils {
             /*
              * construct & send redirect
              */
-            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, loginConfig);
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, target, loginConfig);
             LOG.debug("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
             response.sendRedirect(url);
             return true;
@@ -188,8 +188,9 @@ public final class ShareServletUtils {
          * parse login request
          */
         String[] additionalsForHash = new String[] { String.valueOf(guest.getContextID()), String.valueOf(guest.getGuestID()) };
+        String client = LoginTools.parseClient(request, false, loginConfig.getDefaultClient());
         LoginRequestImpl loginRequest = LoginTools.parseLogin(request, getLogin(guest), null, false,
-            loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
+            client, loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
         loginRequest.setTransient(tranzient);
         /*
          * perform regular guest login

@@ -77,6 +77,7 @@ import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -152,7 +153,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
     }
 
     Logger myLog = LoggerFactory.getLogger("MyLog");
-    
+
     @Override
     public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is,
             final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
@@ -179,15 +180,19 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
+        SearchIterator<VCardImport> importVCards = null;
         try {
             int count = 0;
             int limit = getLimit(session);
 
             VCardService vCardService = ImportExportServices.getVCardService();
-            
+
             VCardParameters vCardParameters = vCardService.createParameters(session);
             vCardParameters.setKeepOriginalVCard(true);
-            SearchIterator<VCardImport> importVCards = vCardService.importVCards(is, vCardParameters);
+            importVCards = vCardService.importVCards(is, vCardParameters);
+            if (false == importVCards.hasNext()) {
+                throw ImportExportExceptionCodes.NO_VCARD_FOUND.create();
+            }
             while (importVCards.hasNext()) {
                 ImportResult importResult = new ImportResult();
                 if (limit <= 0 || count <= limit) {
@@ -215,6 +220,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                             importResult.setException(oxEx);
                             LOG.debug("cannot import contact object", oxEx);
                         }
+                        importResult.setFolder(String.valueOf(contactObj.getParentFolderID()));
                         importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
                         importResult.setDate(contactObj.getLastModified());
                     }
@@ -231,6 +237,8 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         } catch (final IOException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
+        } finally {
+            SearchIterators.close(importVCards);
         }
 
         return list;

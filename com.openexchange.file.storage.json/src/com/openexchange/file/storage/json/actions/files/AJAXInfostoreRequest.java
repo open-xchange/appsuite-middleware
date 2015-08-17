@@ -558,20 +558,42 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean notifyPermissionEntities() throws OXException {
-        parseFile();
+        parseNotification();
         return notifyPermissionEntities;
     }
 
     @Override
     public Transport getNotificationTransport() throws OXException {
-        parseFile();
+        parseNotification();
         return notificationTransport;
     }
 
     @Override
     public String getNotifiactionMessage() throws OXException {
-        parseFile();
+        parseNotification();
         return notificationMessage;
+    }
+
+    @Override
+    public List<Integer> getEntities() throws OXException {
+        JSONObject data = getBodyAsJSONObject();
+        if (false == data.hasAndNotNull("entities")) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("entities");
+        }
+        try {
+            JSONArray jsonArray = data.getJSONArray("entities");
+            List<Integer> entityIDs = new ArrayList<Integer>(jsonArray.length());
+            entityIDs = new ArrayList<Integer>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                entityIDs.add(Integer.valueOf(jsonArray.getInt(i)));
+            }
+            if (0 >= entityIDs.size()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entities");
+            }
+            return entityIDs;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     private int getInt(final Param param) {
@@ -693,6 +715,44 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return (JSONArray) obj;
     }
 
+    protected void parseNotification() throws OXException {
+        if (null == notificationTransport) {
+            JSONObject object = getBodyAsJSONObject();
+            JSONObject jNotification = object.optJSONObject("notification");
+            if (jNotification != null) {
+                Transport transport = Transport.MAIL;
+                if (jNotification.hasAndNotNull("transport")) {
+                    try {
+                        transport = Transport.forID(jNotification.getString("transport"));
+                        if (transport == null) {
+                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                        }
+                    } catch (JSONException e) {
+                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                    }
+                }
+                notificationTransport = transport;
+                notifyPermissionEntities = true;
+                String message = jNotification.optString("message", null);
+                if (Strings.isNotEmpty(message)) {
+                    notificationMessage = message;
+                }
+            }
+        }
+    }
+
+    private JSONObject getBodyAsJSONObject() throws OXException {
+        JSONObject object = (JSONObject) data.getData();
+        if (object == null) {
+            try {
+                object = new JSONObject(data.getParameter(JSON));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
+        return object;
+    }
+
     protected void parseFile() throws OXException {
         if (file != null) {
             return;
@@ -700,34 +760,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         requireFileMetadata();
 
         JSONObject jFile;
-        JSONObject object = (JSONObject) data.getData();
-        if (object == null) {
-            try {
-                object = new JSONObject(data.getParameter(JSON));
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-            }
-        }
+        JSONObject object = getBodyAsJSONObject();
 
         if (object.hasAndNotNull("file")) {
             try {
                 jFile = object.getJSONObject("file");
-                JSONObject jNotification = object.optJSONObject("notification");
-                if (jNotification != null) {
-                    Transport transport = Transport.MAIL;
-                    if (jNotification.hasAndNotNull("transport")) {
-                        transport = Transport.forID(jNotification.getString("transport"));
-                        if (transport == null) {
-                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                        }
-                    }
-                    notificationTransport = transport;
-                    notifyPermissionEntities = true;
-                    String message = jNotification.optString("message", null);
-                    if (Strings.isNotEmpty(message)) {
-                        notificationMessage = message;
-                    }
-                }
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }

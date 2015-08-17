@@ -71,20 +71,21 @@ import com.openexchange.startup.impl.SignalStartedServiceImpl;
 public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMigrationMonitorService, DBMigrationMonitorService> {
 
     /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationMonitorTracker.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("StartUp-Logger");
 
     private final BundleContext context;
     private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
 
     /**
      * Initializes a new {@link DBMigrationMonitorTracker}.
+     * @param signalStartedRegistrationRef
      *
      * @param context The bundle context
      */
-    public DBMigrationMonitorTracker(BundleContext context) {
+    public DBMigrationMonitorTracker(AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef, BundleContext context) {
         super();
         this.context = context;
-        signalStartedRegistrationRef = new AtomicReference<ServiceRegistration<SignalStartedService>>();
+        this.signalStartedRegistrationRef = signalStartedRegistrationRef;
     }
 
     @Override
@@ -131,10 +132,6 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
 
     @Override
     public void removedService(final ServiceReference<DBMigrationMonitorService> reference, final DBMigrationMonitorService service) {
-        ServiceRegistration<SignalStartedService> signalStartedRegistration = signalStartedRegistrationRef.getAndSet(null);
-        if (signalStartedRegistration != null) {
-            signalStartedRegistration.unregister();
-        }
         context.ungetService(reference);
     }
 

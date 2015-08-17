@@ -51,51 +51,164 @@ package com.openexchange.realtime.packet;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.util.LockMap;
+import com.openexchange.realtime.util.OwnerAwareReentrantLock;
 
 /**
  * {@link IDManager} - Manages {@link Lock}s associated with {@link ID}s and can be instructed to clean those states as it acts as a
  * {@link RealtimeJanitor}.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
 public class IDManager extends AbstractRealtimeJanitor {
 
-    protected final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(IDManager.class);
 
+    /** The global map for locks associated with an ID */
+    protected final ConcurrentHashMap<ID, LockMap> LOCKS;
+
+    /**
+     * Initializes a new {@link IDManager}.
+     */
     public IDManager() {
-        LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
+        LOCKS = new ConcurrentHashMap<ID, LockMap>(16, 0.9F, 1);
     }
 
     /**
-     * Get a "scope"-wide lock for a given {@link ID}.
-     * 
+     * Gets a "scope"-wide lock for a given {@link ID}.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>NOTE</b>:<br>
+     * Only for testing!
+     * </div>
+     *
      * @param id The id to associate the {@link Lock} with
      * @param scope The scope to be used for the {@link Lock}
      * @return The "scope"-wide lock for a given {@link ID}.
      */
-    public Lock getLock(ID id, String scope) {
-        ConcurrentHashMap<String, Lock> locksPerId = LOCKS.get(id);
+    protected OwnerAwareReentrantLock getLock(ID id, String scope) {
+        LockMap locksPerId = LOCKS.get(id);
         if (locksPerId == null) {
-            locksPerId = new ConcurrentHashMap<String, Lock>();
-            ConcurrentHashMap<String, Lock> meantime = LOCKS.putIfAbsent(id, locksPerId);
+            locksPerId = new LockMap();
+            LockMap meantime = LOCKS.putIfAbsent(id, locksPerId);
             locksPerId = (meantime != null) ? meantime : locksPerId;
         }
-        Lock lock = locksPerId.get(scope);
-        if (lock == null) {
-            lock = new ReentrantLock();
-            Lock l = locksPerId.putIfAbsent(scope, lock);
-            lock = (l != null) ? l : lock;
+
+        OwnerAwareReentrantLock lock = null;
+        synchronized (locksPerId) {
+            if (locksPerId.isValid()) {
+                lock = locksPerId.get(scope);
+                if (lock == null) {
+                    lock = new OwnerAwareReentrantLock();
+                    locksPerId.put(scope, lock);
+                }
+            }
         }
-        return lock;
+
+        if (lock != null) {
+            return lock;
+        }
+
+        // Retry w/o holding monitor...
+        return getLock(id, scope);
     }
+
+    /**
+     * Acquires a "scope"-wide lock for a given {@link ID}.
+     *
+     * @param id The id to associate the {@link Lock} with
+     * @param scope The scope to be used for the {@link Lock}
+     * @return The acquired "scope"-wide lock for a given {@link ID}.
+     */
+    public void lock(ID id, String scope) {
+        LockMap locksPerId = LOCKS.get(id);
+        if (locksPerId == null) {
+            locksPerId = new LockMap();
+            LockMap meantime = LOCKS.putIfAbsent(id, locksPerId);
+            locksPerId = (meantime != null) ? meantime : locksPerId;
+        }
+
+        OwnerAwareReentrantLock lock = null;
+        synchronized (locksPerId) {
+            if (locksPerId.isValid()) {
+                lock = locksPerId.get(scope);
+                if (lock == null) {
+                    lock = new OwnerAwareReentrantLock();
+                    locksPerId.put(scope, lock);
+                }
+            }
+        }
+
+        // Acquire lock w/o holding monitor
+        if (null != lock) {
+            lock.lock();
+            return;
+        }
+
+        // Retry w/o holding monitor...
+        lock(id, scope);
+    }
+
+    /**
+     * Releases a "scope"-wide lock for a given {@link ID}.
+     *
+     * @param id The id to associate the {@link Lock} with
+     * @param scope The scope to be used for the {@link Lock}
+     * @return The acquired "scope"-wide lock for a given {@link ID}.
+     */
+    public void unlock(ID id, String scope) {
+        LockMap locksPerId = LOCKS.get(id);
+        if (locksPerId == null) {
+            return;
+        }
+
+        OwnerAwareReentrantLock lock = null;
+        synchronized (locksPerId) {
+            lock = locksPerId.get(scope);
+        }
+
+        // Unlock w/o holding monitor
+        if (lock != null) {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            } else {
+                Thread owner = lock.getOwner();
+                if (null != owner) {
+                    Throwable t = new FastThrowable();
+                    t.setStackTrace(owner.getStackTrace());
+                    LOG.error("Tried to unlock, but is no owner. Current owner is {}.", owner.getName(), t);
+                }
+            }
+        }
+    }
+
 
     @Override
     public void cleanupForId(ID id) {
-        LOCKS.remove(id);
+        LockMap locksPerId = LOCKS.get(id);
+
+        synchronized (locksPerId) {
+            if (false == locksPerId.hasOwners()) {
+                locksPerId.markDeprecated();
+                LOCKS.remove(id);
+            }
+        }
+    }
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("No owner");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
     }
 
 }

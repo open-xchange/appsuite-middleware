@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -90,6 +91,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
+import com.openexchange.mail.event.EventPool;
+import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -602,10 +605,19 @@ public final class NewAction extends AbstractMailAction {
                             sentMail.setFlags(flags);
                         }
                         uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
-                        try {
+                        /*
+                         * Post event
+                         */
+                        if (MailAccount.DEFAULT_ID == accountId) {
                             /*
-                             * Update cache
+                             * TODO: Event only for primary account?
                              */
+                            EventPool.getInstance().put(new PooledEvent(session.getContextId(), session.getUserId(), accountId, prepareFullname(accountId, sentFullname), true, true, true, session));
+                        }
+                        /*
+                         * Update cache
+                         */
+                        try {
                             MailMessageCache.getInstance().removeFolderMessages(
                                 accountId,
                                 sentFullname,

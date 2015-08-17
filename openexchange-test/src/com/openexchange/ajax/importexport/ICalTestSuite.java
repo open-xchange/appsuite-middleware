@@ -66,7 +66,6 @@ public final class ICalTestSuite {
 		tests.addTestSuite(ICalTaskExportTest.class);
 		tests.addTestSuite(ICalAppointmentExportTest.class);
 		tests.addTestSuite(ICalSeriesTests.class);
-		tests.addTestSuite(Bug6825Test_TruncationOfFields.class);
 		tests.addTestSuite(Bug9840Test.class);
 		tests.addTestSuite(Bug11724Test.class);
 		tests.addTestSuite(Bug11868Test.class);

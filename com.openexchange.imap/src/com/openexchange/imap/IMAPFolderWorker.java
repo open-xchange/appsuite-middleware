@@ -224,6 +224,33 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
     }
 
+    /**
+     * Gets the associated session
+     *
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the IMAP server information
+     *
+     * @return The IMAP server information
+     */
+    public IMAPServerInfo getImapServerInfo() {
+        return imapServerInfo;
+    }
+
     private void openFolder(final int desiredMode, final IMAPFolder imapFolder) throws MessagingException {
         try {
             imapFolder.open(desiredMode);

@@ -81,6 +81,7 @@ import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthProviderServiceImpl}
@@ -112,7 +113,9 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, Session session) throws OXException {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
         // Check if user is allowed to create more grants
         int distinctGrants = grantStorage.countDistinctGrants(contextId, userId);
         if (distinctGrants >= MAX_CLIENTS_PER_USER) {
@@ -121,7 +124,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
         // Adjust scope based on users permissions
         CapabilityService capabilityService = requireService(CapabilityService.class, services);
-        CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
 
         List<String> grantedTokens = new LinkedList<>();
         for (String token : scope.get()) {

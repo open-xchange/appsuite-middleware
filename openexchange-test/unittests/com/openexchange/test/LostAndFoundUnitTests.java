@@ -81,7 +81,6 @@ public class LostAndFoundUnitTests {
         tests.addTest(com.openexchange.groupware.importexport.ICalImportTest.suite());
         tests.addTest(com.openexchange.groupware.importexport.OutlookCSVContactImportTest.suite());
         tests.addTest(com.openexchange.groupware.importexport.SizedInputStreamTest.suite());
-        tests.addTest(com.openexchange.groupware.importexport.VCardImportTest.suite());
         tests.addTestSuite(com.openexchange.folder.FolderTest.class);
         tests.addTestSuite(com.openexchange.groupware.CalendarPerformanceTests.class);
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarMoveTest.class);

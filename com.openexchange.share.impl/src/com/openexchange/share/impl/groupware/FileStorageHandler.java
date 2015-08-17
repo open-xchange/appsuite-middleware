@@ -57,16 +57,15 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.infostore.PermissionHelper;
-import com.openexchange.groupware.container.EffectiveObjectPermissions;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -110,18 +109,27 @@ public class FileStorageHandler implements ModuleHandler {
                     files.add(new FileTargetProxy(file, isPublic));
                 }
             } else {
-                IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
                 Iterator<ShareTarget> targetIt = targets.iterator();
                 Iterator<Boolean> publicIt = publicFlags.iterator();
-                while (targetIt.hasNext()) {
-                    ShareTarget target = targetIt.next();
-                    boolean isPublic = publicIt.next().booleanValue();
-                    FileID fileID = new FileID(target.getItem());
-                    if (fileID.getFolderId() == null) {
-                        fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+                try {
+                    fileAccess.startTransaction();
+                    while (targetIt.hasNext()) {
+                        ShareTarget target = targetIt.next();
+                        boolean isPublic = publicIt.next().booleanValue();
+                        FileID fileID = new FileID(target.getItem());
+                        if (fileID.getFolderId() == null) {
+                            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+                        }
+                        File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                        files.add(new FileTargetProxy(file, isPublic));
                     }
-                    File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                    files.add(new FileTargetProxy(file, isPublic));
+                    fileAccess.commit();
+                } catch (OXException e) {
+                    fileAccess.rollback();
+                    throw e;
+                } finally {
+                    fileAccess.finish();
                 }
             }
         } finally {
@@ -200,18 +208,7 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean canShare(TargetProxy proxy, HandlerParameters parameters) {
-        File file = ((FileTargetProxy) proxy).getFile();
-        List<ObjectPermission> objectPermissions = PermissionHelper.getObjectPermissions(file.getObjectPermissions());
-        if (objectPermissions == null || objectPermissions.isEmpty()) {
-            return false;
-        }
-
-        ObjectPermission objectPermission = EffectiveObjectPermissions.find(parameters.getUser(), objectPermissions);
-        if (objectPermission == null) {
-            return false;
-        }
-
-        return objectPermission.canWrite();
+        return ((FileTargetProxy) proxy).getFile().isShareable();
     }
 
     @Override
@@ -230,9 +227,12 @@ public class FileStorageHandler implements ModuleHandler {
                     fileAccess.startTransaction();
                     for (TargetProxy proxy : modified) {
                         File file = ((FileTargetProxy) proxy).getFile();
+                        FileID fileID = new FileID(file.getId());
+                        if (false == fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.OBJECT_PERMISSIONS)) {
+                            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(fileID.getService(), file.getFolderId(), parameters.getContext().getContextId());
+                        }
                         fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                     }
-
                     fileAccess.commit();
                 } catch (OXException e) {
                     fileAccess.rollback();

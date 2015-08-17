@@ -49,15 +49,19 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheckFactory;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionFactory;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookupFactory;
 
 
 /**
@@ -67,9 +71,8 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionFa
  */
 public class PortableSessionActivator implements BundleActivator {
 
-    private volatile ServiceRegistration<CustomPortableFactory> registrationForSessionFactory;
-    private volatile ServiceRegistration<CustomPortableFactory> registrationForSessionExistenceCheckFactory;
-    private volatile ServiceTracker<SessiondService, SessiondService> tracker;
+    private volatile List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations;
+    private volatile List<ServiceTracker<?, ?>> trackers;
 
     /**
      * Initializes a new {@link PortableSessionActivator}.
@@ -82,18 +85,31 @@ public class PortableSessionActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSessionActivator.class);
         try {
-            // Tracker for SessiondService
+            // Trackers
+            List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(4);
+            this.trackers = trackers;
             {
                 ServiceTracker<SessiondService, SessiondService> tracker = new ServiceTracker<SessiondService, SessiondService>(context, SessiondService.class, new SessiondServiceTracker(context));
-                this.tracker = tracker;
+                trackers.add(tracker);
+                tracker.open();
+            }
+            {
+                ServiceTracker<ObfuscatorService, ObfuscatorService> tracker = new ServiceTracker<ObfuscatorService, ObfuscatorService>(context, ObfuscatorService.class, new ObfuscatorServiceTracker(context));
+                trackers.add(tracker);
                 tracker.open();
             }
 
-            // Create & register portable session factory
-            registrationForSessionFactory = context.registerService(CustomPortableFactory.class, new PortableSessionFactory(), null);
+            List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = new ArrayList<ServiceRegistration<CustomPortableFactory>>(4);
+            this.portablesRegistrations = portablesRegistrations;
 
             // Create & register portable session factory
-            registrationForSessionExistenceCheckFactory = context.registerService(CustomPortableFactory.class, new PortableSessionExistenceCheckFactory(), null);
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionExistenceCheckFactory(), null));
+
+            // Create & register portable factory
+            portablesRegistrations.add(context.registerService(CustomPortableFactory.class, new PortableSessionRemoteLookupFactory(), null));
 
             logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
         } catch (Exception e) {
@@ -106,29 +122,24 @@ public class PortableSessionActivator implements BundleActivator {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSessionActivator.class);
         try {
             {
-                ServiceTracker<SessiondService, SessiondService> tracker = this.tracker;
-                if (null != tracker) {
-                    tracker.close();
-                    this.tracker = null;
+                List<ServiceTracker<?, ?>> trackers = this.trackers;
+                if (null != trackers) {
+                    this.trackers = null;
+                    for (ServiceTracker<?,?> tracker : trackers) {
+                        tracker.close();
+                    }
                 }
             }
 
             {
-                ServiceRegistration<CustomPortableFactory> registration = this.registrationForSessionFactory;
-                if (null != registration) {
-                    registration.unregister();
-                    this.registrationForSessionFactory = null;
+                List<ServiceRegistration<CustomPortableFactory>> portablesRegistrations = this.portablesRegistrations;
+                if (null != portablesRegistrations) {
+                    this.portablesRegistrations = null;
+                    for (ServiceRegistration<CustomPortableFactory> registration : portablesRegistrations) {
+                        registration.unregister();
+                    }
                 }
             }
-
-            {
-                ServiceRegistration<CustomPortableFactory> registration = this.registrationForSessionExistenceCheckFactory;
-                if (null != registration) {
-                    registration.unregister();
-                    this.registrationForSessionExistenceCheckFactory = null;
-                }
-            }
-
             logger.info("Successfully stopped bundle {}", context.getBundle().getSymbolicName());
         } catch (Exception e) {
             logger.error("Failed to stop bundle {}", context.getBundle().getSymbolicName(), e);

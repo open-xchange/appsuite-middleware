@@ -149,7 +149,7 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         statusCode = resp.getStatusLine().getStatusCode();
         reasonPhrase = resp.getStatusLine().getReasonPhrase();
         if (failOnNonRedirect) {
@@ -160,11 +160,6 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
             parseCookies(resp);
         }
         return EntityUtils.toString(resp.getEntity());
-    }
-
-    @Override
-    public String checkResponse(final HttpResponse resp, final HttpRequest request) throws ParseException, IOException {
-        return this.checkResponse(resp);
     }
 
     protected static final void parseCookies(HttpResponse resp) {

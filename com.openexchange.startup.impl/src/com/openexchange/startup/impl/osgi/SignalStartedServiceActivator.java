@@ -49,8 +49,11 @@
 
 package com.openexchange.startup.impl.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.startup.SignalStartedService;
 
 /**
  * {@link SignalStartedServiceActivator}
@@ -60,11 +63,14 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
+    private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
+
     /**
      * Initializes a new {@link SignalStartedServiceActivator}.
      */
     public SignalStartedServiceActivator() {
         super();
+        signalStartedRegistrationRef = new AtomicReference<ServiceRegistration<SignalStartedService>>();
     }
 
     @Override
@@ -74,8 +80,17 @@ public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(context));
+        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(signalStartedRegistrationRef, context));
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        ServiceRegistration<SignalStartedService> signalStartedRegistration = signalStartedRegistrationRef.getAndSet(null);
+        if (signalStartedRegistration != null) {
+            signalStartedRegistration.unregister();
+        }
+        super.stopBundle();
     }
 
 }

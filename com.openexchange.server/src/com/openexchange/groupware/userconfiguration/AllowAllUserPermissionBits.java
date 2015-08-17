@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link AllowAllUserPermissionBits} - Allows all.
@@ -57,8 +58,16 @@ package com.openexchange.groupware.userconfiguration;
  */
 public class AllowAllUserPermissionBits extends UserPermissionBits {
 
+    /**
+     * @deprecated Use {@link #AllowAllUserPermissionBits(int, int[], Context)}
+     */
+    @Deprecated
     public AllowAllUserPermissionBits(final int userId, final int[] groups, final int contextId) {
         super(0, userId, groups, contextId);
+    }
+
+    public AllowAllUserPermissionBits(final int userId, final int[] groups, final Context context) {
+        super(0, userId, groups, context);
     }
 
     private static final long serialVersionUID = 1L;

@@ -49,9 +49,13 @@
 
 package com.openexchange.share.json.actions;
 
+import java.util.Date;
+import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
@@ -59,9 +63,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.json.ShareLink;
-import com.openexchange.share.json.ShareResultConverter;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,17 +98,49 @@ public class GetLinkAction extends AbstractShareAction {
          * reuse existing or create a new anonymous share as needed
          */
         boolean isNew = false;
-        ShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
-            shareInfo = createdShare.getFirstInfo();
-            isNew = true;
+        ShareInfo shareInfo = null;
+        for (int i = 0; i < 5 && null == shareInfo; i++) {
+            try {
+                shareInfo = discoverLink(session, target);
+                if (null == shareInfo) {
+                    AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
+                    CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
+                    shareInfo = createdShare.getFirstInfo();
+                    isNew = true;
+                }
+            } catch (OXException e) {
+                /*
+                 * try again in case of concurrent modifications
+                 */
+                if (i < 4 && ("IFO-1302".equals(e.getErrorCode()) || "FLD-1022".equals(e.getErrorCode()))) {
+                    org.slf4j.LoggerFactory.getLogger(GetLinkAction.class).info(
+                        "Detected concurrent modification during link creation: \"{}\" - trying again...", e.getMessage());
+                    continue;
+                }
+                throw e;
+            }
         }
         /*
-         * wrap into share link & return appropriate result
+         * return appropriate result
          */
-        return new AJAXRequestResult(new ShareLink(shareInfo, isNew), shareInfo.getShare().getModified(), ShareResultConverter.INPUT_FORMAT);
+        JSONObject jsonResult = new JSONObject();
+        try {
+            jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
+            jsonResult.put("entity", shareInfo.getGuest().getGuestID());
+            jsonResult.put("is_new", isNew);
+            Date expiryDate = shareInfo.getShare().getExpiryDate();
+            if (null != expiryDate) {
+                jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
+            }
+            jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
+            Map<String, Object> meta = shareInfo.getShare().getMeta();
+            if (null != meta) {
+                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+        return new AJAXRequestResult(jsonResult, shareInfo.getShare().getModified(), "json");
     }
 
 }

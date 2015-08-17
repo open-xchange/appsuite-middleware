@@ -64,6 +64,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -439,15 +440,18 @@ public abstract class AbstractPerformer {
         return folderStorageDiscoverer;
     }
 
-    protected static final class UpdateFolder extends AbstractFolder {
+    protected static final class UpdateFolder extends AbstractFolder implements SetterAwareFolder {
 
         private static final long serialVersionUID = -6666991788068206301L;
+
+        private boolean containsSubscribed;
 
         /**
          * Initializes a new {@link UpdateFolder}.
          */
         public UpdateFolder() {
             super();
+            containsSubscribed = false;
         }
 
         @Override
@@ -458,6 +462,17 @@ public abstract class AbstractPerformer {
         @Override
         public boolean isCacheable() {
             return false;
+        }
+
+        @Override
+        public boolean containsSubscribed() {
+            return containsSubscribed;
+        }
+
+        @Override
+        public void setSubscribed(boolean subscribed) {
+            super.setSubscribed(subscribed);
+            containsSubscribed = true;
         }
     }
 

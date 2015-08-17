@@ -53,6 +53,7 @@ import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -221,6 +222,7 @@ public class ReplicationMonitor {
 
     private static boolean isUpToDate(final long masterTransaction, final long slaveTransaction) {
         // TODO handle overflow
+        LOG.trace("Replication monitor transaction position is {} on master and {} on slave.", L(masterTransaction), L(slaveTransaction));
         return slaveTransaction >= masterTransaction;
     }
 

@@ -277,7 +277,6 @@ public class IMAPStore extends Store
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
     private boolean peek = false;
-    private volatile boolean allowUnsafeConnectedCheck = true; // Whether isConnectedUnsafe() may bypass NOOP connectivity check
 
     private long myValidity;
 
@@ -774,6 +773,21 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Gets the denoted client parameter (advertised via <code>"ID"</code> command).
+     *
+     * @param name The parameter name
+     * @return The value or <code>null</code> if there is no such client parameter set
+     */
+    public String getClientParameter(String name) {
+        if (null == name) {
+            return null;
+        }
+        
+        Map<String, String> clientParameters = this.clientParameters;
+        return null == clientParameters ? null : clientParameters.get(name);
+    }
+
+    /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
      * specified by various properties. <p>
@@ -940,8 +954,10 @@ public class IMAPStore extends Store
                 if (p.hasCapability("ID")) {
                     try {
                         p.id(clientParams);
-                    } catch (Exception e) {
-                        // Ignore errors
+                    } catch (CommandFailedException cex) {
+                        // Swallow "NO" responses
+                    } catch (BadCommandException e) {
+                        // Swallow "BAD" responses
                     }
                 }
             } else {
@@ -2124,7 +2140,6 @@ public class IMAPStore extends Store
 	    } catch (BadCommandException bex) {
 		// NAMESPACE not supported, ignore it
 	    } catch (ConnectionException cex) {
-        allowUnsafeConnectedCheck = false;
 		throw new StoreClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -2185,7 +2200,6 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
-        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2214,7 +2228,6 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
-        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2361,7 +2374,6 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("IDLE not supported", bex);
 	} catch (ConnectionException cex) {
-        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2421,7 +2433,6 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("ID not supported", bex);
 	} catch (ConnectionException cex) {
-        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2505,23 +2516,7 @@ public class IMAPStore extends Store
      * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
      */
     public boolean isConnectedUnsafe() {
-        boolean superConnected = super.isConnected();
-        if (!superConnected) {
-            // If we haven't been connected at all, return false
-            return false;
-        }
-        return allowUnsafeConnectedCheck ? superConnected : isConnected();
-    }
-
-    /**
-     * Sets the whether an unsafe connectivity check may be performed
-     * <p>
-     * "unsafe" in terms of no {@link IMAPProtocol#noop() NOOP} command is issued to check connection state.
-     *
-     * @param allowUnsafeConnectedCheck <code>true</code> to allow an unsafe connectivity check; otherwise <code>false</code>
-     */
-    public void setAllowUnsafeConnectedCheck(boolean allowUnsafeConnectedCheck) {
-        this.allowUnsafeConnectedCheck = allowUnsafeConnectedCheck;
+        return super.isConnected();
     }
 
 }

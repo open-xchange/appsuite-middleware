@@ -96,9 +96,12 @@ public class FileMetadataWriter {
      * @param file The file to write
      * @return A JSON object holding the serialized file
      */
-    public JSONObject write(AJAXInfostoreRequest request, final File file) {
+    public JSONObject write(final AJAXInfostoreRequest request, final File file) {
+        /*
+         * serialize regular fields
+         */
         final JsonFieldHandler handler = new JsonFieldHandler(request);
-        return File.Field.inject(new AbstractFileFieldHandler() {
+        JSONObject jsonObject = File.Field.inject(new AbstractFileFieldHandler() {
 
             @Override
             public Object handle(Field field, Object... args) {
@@ -111,6 +114,21 @@ public class FileMetadataWriter {
                 return jsonObject;
             }
         }, new JSONObject());
+        /*
+         * render additional fields if available
+         */
+        if (null != fieldCollector) {
+            List<AdditionalFileField> additionalFields = fieldCollector.getFields();
+            for (AdditionalFileField additionalField : additionalFields) {
+                try {
+                    Object value = additionalField.getValue(file, request.getSession());
+                    jsonObject.put(additionalField.getColumnName(), additionalField.renderJSON(request.getRequestData(), value));
+                } catch (JSONException e) {
+                    LOG.error("Error writing field: {}", additionalField.getColumnName(), e);
+                }
+            }
+        }
+        return jsonObject;
     }
 
     /**

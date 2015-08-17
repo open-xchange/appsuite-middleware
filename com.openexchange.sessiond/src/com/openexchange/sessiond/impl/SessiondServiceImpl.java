@@ -283,6 +283,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public Collection<String> findSessions(SessionFilter filter) throws OXException {
+        return SessionHandler.findLocalSessions(filter);
+    }
+
+    @Override
     public Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException {
         List<String> local = SessionHandler.findLocalSessions(filter);
         List<String> remote = SessionHandler.findRemoteSessions(filter);

@@ -203,90 +203,12 @@ public class DefaultNotificationService implements ShareNotificationService {
 
     @Override
     public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData) {
-        if (transport != Transport.MAIL) {
-            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
-        }
+        return sendShareNotifications(transport, entities, message, target, session, hostData, notifyDecision);
+    }
 
-        List<OXException> warnings = new ArrayList<OXException>();
-        GroupService groupService = serviceLookup.getService(GroupService.class);
-        ContextService contextService = serviceLookup.getService(ContextService.class);
-        UserService userService = serviceLookup.getService(UserService.class);
-        Context context;
-        try {
-            context = contextService.getContext(session.getContextId());
-        } catch (OXException e) {
-            collectWarning(warnings, e);
-            return warnings;
-        }
-
-        Map<Integer, User> usersById = new HashMap<>();
-        for (int userId : entities.getUsers()) {
-            User user = null;
-            try {
-                user = userService.getUser(userId, context);
-                if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
-                    usersById.put(userId, user);
-                }
-            } catch (OXException e) {
-                String mailAddress = null;
-                if (user != null) {
-                    mailAddress = user.getMail();
-                }
-                collectWarning(warnings, e, mailAddress);
-            }
-        }
-
-        for (int groupId : entities.getGroups()) {
-            int[] members;
-            try {
-                members = groupService.getGroup(context, groupId).getMember();
-            } catch (OXException e) {
-                collectWarning(warnings, e);
-                continue;
-            }
-            for (int userId : members) {
-                if (!usersById.containsKey(userId)) {
-                    User user = null;
-                    try {
-                        user = userService.getUser(userId, context);
-                        if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
-                            usersById.put(userId, user);
-                        }
-                    } catch (OXException e) {
-                        String mailAddress = null;
-                        if (user != null) {
-                            mailAddress = user.getMail();
-                        }
-                        collectWarning(warnings, e, mailAddress);
-                    }
-                }
-            }
-        }
-
-        // remove sharing user if he somehow made it into the list of recipients
-        usersById.remove(session.getUserId());
-        for (int userId : usersById.keySet()) {
-            User user = null;
-            try {
-                user = usersById.get(userId);
-                String shareUrl;
-                if (user.isGuest()) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken() + '/' + target.getPath());
-                } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, target);
-                }
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), message, shareUrl, session, hostData);
-                send(shareNotification);
-            } catch (Exception e) {
-                String mailAddress = null;
-                if (user != null) {
-                    mailAddress = user.getMail();
-                }
-                collectWarning(warnings, e, mailAddress);
-            }
-        }
-
-        return warnings;
+    @Override
+    public List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData) {
+        return sendShareNotifications(transport, entities, message, target, session, hostData, null);
     }
 
     @Override
@@ -403,6 +325,106 @@ public class DefaultNotificationService implements ShareNotificationService {
         } catch (AddressException e) {
             throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(user.getMail());
         }
+    }
+
+    /**
+     * (Re-)Sends notifications about one or more shares to multiple recipients.
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param entities The entities to notify
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param session The session of the notifying user
+     * @param hostData The host data to generate share links
+     * @param notifyDecision The notify decision to consider, or <code>null</code> to always send a notification
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
+    private List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData, NotifyDecision notifyDecision) {
+        if (transport != Transport.MAIL) {
+            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
+        }
+
+        List<OXException> warnings = new ArrayList<OXException>();
+        GroupService groupService = serviceLookup.getService(GroupService.class);
+        ContextService contextService = serviceLookup.getService(ContextService.class);
+        UserService userService = serviceLookup.getService(UserService.class);
+        Context context;
+        try {
+            context = contextService.getContext(session.getContextId());
+        } catch (OXException e) {
+            collectWarning(warnings, e);
+            return warnings;
+        }
+
+        Map<Integer, User> usersById = new HashMap<>();
+        for (int userId : entities.getUsers()) {
+            User user = null;
+            try {
+                user = userService.getUser(userId, context);
+                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(
+                    transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
+                    usersById.put(userId, user);
+                }
+            } catch (OXException e) {
+                String mailAddress = null;
+                if (user != null) {
+                    mailAddress = user.getMail();
+                }
+                collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        for (int groupId : entities.getGroups()) {
+            int[] members;
+            try {
+                members = groupService.getGroup(context, groupId).getMember();
+            } catch (OXException e) {
+                collectWarning(warnings, e);
+                continue;
+            }
+            for (int userId : members) {
+                if (!usersById.containsKey(userId)) {
+                    User user = null;
+                    try {
+                        user = userService.getUser(userId, context);
+                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(
+                            transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
+                            usersById.put(userId, user);
+                        }
+                    } catch (OXException e) {
+                        String mailAddress = null;
+                        if (user != null) {
+                            mailAddress = user.getMail();
+                        }
+                        collectWarning(warnings, e, mailAddress);
+                    }
+                }
+            }
+        }
+
+        // remove sharing user if he somehow made it into the list of recipients
+        usersById.remove(session.getUserId());
+        for (int userId : usersById.keySet()) {
+            User user = null;
+            try {
+                user = usersById.get(userId);
+                String shareUrl;
+                if (user.isGuest()) {
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken() + '/' + target.getPath());
+                } else {
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
+                }
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), message, shareUrl, session, hostData);
+                send(shareNotification);
+            } catch (Exception e) {
+                String mailAddress = null;
+                if (user != null) {
+                    mailAddress = user.getMail();
+                }
+                collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        return warnings;
     }
 
     private static void collectWarning(List<OXException> warnings, Exception e, String emailAddress) {

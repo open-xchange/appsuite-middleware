@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -75,6 +76,7 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
+import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.ThreadableCache;
@@ -156,6 +158,10 @@ public final class IMAPActivator extends HousekeepingActivator {
             track(CacheEventService.class, new ListLsubInvalidator(context));
             trackService(FolderService.class);
             openTrackers();
+            /*
+             * Command provider
+             */
+            registerService(CommandProvider.class, new ListLsubCommandProvider());
             /*
              * Initialize cache regions
              */
@@ -250,6 +256,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
                                 IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
+                                ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
                             }
                         }
                     }

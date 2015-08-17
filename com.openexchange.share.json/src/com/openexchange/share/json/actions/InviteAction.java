@@ -92,7 +92,7 @@ public class InviteAction extends AbstractShareAction {
              * parse targets, recipients & further parameters
              */
             JSONObject data = (JSONObject) requestData.requireData();
-            ShareRecipient recipient = getParser().parseRecipient(data.getJSONObject("recipient"));
+            ShareRecipient recipient = getParser().parseRecipient(data.getJSONObject("recipient"), getTimeZone(requestData, session));
             checkRecipient(recipient);
             ShareTarget target = getParser().parseTarget(data.getJSONObject("target"));
             String message = data.optString("message", null);
@@ -105,9 +105,11 @@ public class InviteAction extends AbstractShareAction {
             List<OXException> warnings = getNotificationService().sendShareCreatedNotifications(
                 Transport.MAIL, createdShares, message, session, requestData.getHostData());
             /*
-             * return empty result (including warnings) in case of success
+             * return appropriate result (including warnings)
              */
-            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), shareInfo.getShare().getModified(), "json");
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("entity", shareInfo.getGuest().getGuestID());
+            AJAXRequestResult result = new AJAXRequestResult(jsonResult, shareInfo.getShare().getModified(), "json");
             result.addWarnings(warnings);
             return result;
         } catch (JSONException e) {

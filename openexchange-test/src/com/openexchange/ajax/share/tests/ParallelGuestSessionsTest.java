@@ -114,11 +114,12 @@ public class ParallelGuestSessionsTest extends ShareTest {
         /*
          * check access to share, using the same ajax session as the sharing user
          */
+        String shareURL = discoverShareURL(guest);
         AJAXSession sharedSession = getSession();
         String oldSessionID = sharedSession.getId();
         try {
             sharedSession.setId(null);
-            GuestClient guestClient = new GuestClient(sharedSession, guest.getShareURL(), guestPermission.getRecipient(), true, false);
+            GuestClient guestClient = new GuestClient(sharedSession, shareURL, guestPermission.getRecipient(), true, false);
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(guestPermission);
         } finally {

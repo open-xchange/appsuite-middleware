@@ -54,7 +54,6 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -117,7 +116,6 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
-import com.openexchange.version.Version;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -173,6 +171,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The scheduled timer task to clean-up maps.
      */
     private static volatile ScheduledTimerTask cleanUpTimerTask;
+    
+    private static Boolean checkConnectivityIfPolled;
+    private static boolean checkConnectivityIfPolled() {
+        Boolean b = checkConnectivityIfPolled;
+        if (null == b) {
+            synchronized (IMAPAccess.class) {
+                b = checkConnectivityIfPolled;
+                if (null == b) {
+                    boolean defaultValue = false;
+                    ConfigurationService configService = Services.optService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    b = Boolean.valueOf(configService.getBoolProperty("com.openexchange.imap.storecache.checkConnectivityIfPolled", defaultValue));
+                    checkConnectivityIfPolled = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
 
     /*-
      * Member section
@@ -425,7 +443,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
-                    } else if (imapStore.isConnectedUnsafe()) {
+                    } else if (imapStore.isConnected()) {
                         imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
@@ -645,7 +663,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            boolean certainPassword = false; // ("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            boolean certainPassword = false;
             if (certainPassword) {
                 tmpPass = "secret";
             }
@@ -703,7 +721,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("mail.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false;
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -880,7 +898,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 properties.put("mail.imap.authAwait", "true");
                 properties.put("mail.imap.accountId", Integer.toString(accountId));
             }
-            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null));
+            boolean checkConnectivityIfPolled = checkConnectivityIfPolled();
+            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), checkConnectivityIfPolled);
             if (null == borrowedIMAPStore) {
                 throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
             }
@@ -924,12 +943,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
+            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         }
         /*
          * ... and connect it
@@ -983,8 +997,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
-        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp);
+    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws MessagingException, OXException {
+        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp, checkConnectivityIfPolled);
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
@@ -1044,11 +1058,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isConnected() {
-        if (!connected) {
-            return false;
-        }
-        IMAPStore imapStore = this.imapStore;
-        return (connected = ((imapStore != null) && imapStore.isConnectedUnsafe()));
+        /*-
+         *
+         if (!connected) {
+             return false;
+         }
+        return (connected = ((imapStore != null) && imapStore.isConnected()));
+         */
+        return connected;
     }
 
     @Override

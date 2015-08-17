@@ -50,6 +50,11 @@
 
 package com.openexchange.hazelcast.osgi;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -254,15 +259,26 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
     void stopHazelcast() throws Exception {
         HazelcastInstance hazelcast = this.hazelcastInstance;
         if (null != hazelcast) {
-            String lf = Strings.getLineSeparator();
-            LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
-            long start = System.currentTimeMillis();
-
-            // Do shut-down
-            hazelcast.getLifecycleService().shutdown();
             this.hazelcastInstance = null;
             HazelcastMBeanImpl.setHazelcastInstance(null);
 
+            // Do shut-down
+            String lf = Strings.getLineSeparator();
+            long start = System.currentTimeMillis();
+            Future<Void> shutDownTask = initiateShutDown(hazelcast);
+            try {
+                LOG.info("{}Hazelcast:{}    Awaiting graceful Hazelcast shut-down...{}", lf, lf, lf);
+                shutDownTask.get(10L, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOG.warn("{}Hazelcast:{}    Awaiting graceful Hazecast shut-down was interrupted{}", lf, lf, lf, e);
+            } catch (ExecutionException e) {
+                LOG.error("{}Hazelcast:{}    Failed to await graceful Hazecast shut-down{}", lf, lf, lf, e.getCause());
+            } catch (TimeoutException x) {
+                LOG.info("{}Hazelcast:{}    Timed out while awaiting graceful Hazecast shut-down. Forcing immediate shut-down...{}", lf, lf, lf);
+                shutDownTask.cancel(true);
+                hazelcast.getLifecycleService().terminate();
+            }
             LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
         }
     }
@@ -310,6 +326,20 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
         this.hazelcastInstance = hazelcast;
         return hazelcast;
+    }
+
+    private Future<Void> initiateShutDown(final HazelcastInstance hzInstance) {
+        Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
+                // Graceful shut-down
+                hzInstance.getLifecycleService().shutdown();
+            }
+        };
+        FutureTask<Void> ft = new FutureTask<Void>(r, null);
+        new Thread(ft, "Hazelcast Shut-Down Performer").start();
+        return ft;
     }
 
 }

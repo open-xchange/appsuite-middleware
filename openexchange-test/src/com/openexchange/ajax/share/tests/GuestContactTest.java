@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.share.tests;
 
+import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -65,24 +67,14 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
-
 
 /**
  * {@link GuestContactTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class GuestContactTest extends ShareTest {
-
-    private File file;
-    private ExtendedPermissionEntity guest;
-    private final long now = System.currentTimeMillis();
-    private final String GUEST_DISPLAYNAME = "Test Guest Contact " + now;
-    private final String GUEST_MAIL = "testGuestContact@" + now + ".example.org";
-    private final String GUEST_PASSWORD = String.valueOf(now);
-
 
     /**
      * Initializes a new {@link GuestContactTest}.
@@ -92,12 +84,18 @@ public class GuestContactTest extends ShareTest {
         super(name);
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        FolderObject infostore = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
-        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(GUEST_MAIL, GUEST_DISPLAYNAME, GUEST_PASSWORD));
-        file = insertSharedFile(infostore.getObjectID(), guestPermission);
+    public void testCreateGuestContact() throws Exception {
+        /*
+         * create folder and a shared file inside
+         */
+        String guestName = randomUID();
+        String guestMail = guestName + "@example.com";
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        File file = insertSharedFile(folder.getObjectID(), guestPermission);
+        /*
+         * check permissions
+         */
         FileStorageObjectPermission matchingPermission = null;
         for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
@@ -107,18 +105,13 @@ public class GuestContactTest extends ShareTest {
         }
         assertNotNull("No matching permission in created file found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
-        guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testCreateGuestContact() throws Exception {
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = new GuestClient(guest.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
@@ -127,28 +120,61 @@ public class GuestContactTest extends ShareTest {
         Contact contact = getResponse.getContact();
         assertEquals("Contacts does not match", contact, guestContact);
         assertNotNull("Contact is null.", contact);
-        assertEquals("Wrong display name.", GUEST_DISPLAYNAME, contact.getDisplayName());
-        assertEquals("Wrong email address.", GUEST_MAIL, contact.getEmail1());
+        assertEquals("Wrong display name.", guestName, contact.getDisplayName());
+        assertEquals("Wrong email address.", guestMail, contact.getEmail1());
         assertTrue("Contact id is 0.", contact.getObjectID() != 0);
     }
 
     public void testUpdateGuestContact() throws Exception {
+        /*
+         * create folder and a shared file inside
+         */
+        String guestName = randomUID();
+        String guestMail = guestName + "@example.com";
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        File file = insertSharedFile(folder.getObjectID(), guestPermission);
+        /*
+         * check permissions
+         */
+        FileStorageObjectPermission matchingPermission = null;
+        for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
-        GuestClient guestClient = new GuestClient(guest.getShareURL(), GUEST_MAIL, GUEST_PASSWORD);
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
         GetRequest guestGetRequest = new GetRequest(guest.getEntity(), guestClient.getValues().getTimeZone());
         GetResponse guestGetResponse = guestClient.execute(guestGetRequest);
         Contact guestContact = guestGetResponse.getContact();
         User guestUser = guestGetResponse.getUser();
-        guestContact.setDisplayName(GUEST_DISPLAYNAME + "modified");
+        /*
+         * update guest's display name
+         */
+        guestContact.setDisplayName(guestName + "_modified");
         UpdateRequest updateRequest = new UpdateRequest(guestContact, guestUser);
         UpdateResponse updateResponse = guestClient.execute(updateRequest);
         assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
-
+        /*
+         * check guest
+         */
         GetRequest getRequest = new GetRequest(guest.getEntity(), client.getValues().getTimeZone());
         GetResponse getResponse = client.execute(getRequest);
         Contact contact = getResponse.getContact();
-        assertEquals("Display name was not updated", GUEST_DISPLAYNAME + "modified", contact.getDisplayName());
-        contact.setDisplayName(GUEST_DISPLAYNAME);
+        assertEquals("Display name was not updated", guestName + "_modified", contact.getDisplayName());
+        /*
+         * try to update guest's display name as sharing user
+         */
+        contact.setDisplayName(guestName);
         UpdateRequest updateRequest2 = new UpdateRequest(guestContact, guestUser, false);
         UpdateResponse updateResponse2 = client.execute(updateRequest2);
         assertTrue("Client was able to update foreign contact.", updateResponse2.hasError());
@@ -156,25 +182,57 @@ public class GuestContactTest extends ShareTest {
     }
 
     public void testOtherUser() throws Exception {
+        /*
+         * create folder and a shared file inside
+         */
+        String guestName = randomUID();
+        String guestMail = guestName + "@example.com";
+        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(guestMail, guestName));
+        File file = insertSharedFile(folder.getObjectID(), guestPermission);
+        /*
+         * check permissions
+         */
+        FileStorageObjectPermission matchingPermission = null;
+        for (FileStorageObjectPermission permission : file.getObjectPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         assertTrue("Guest id must not be -1", guest.getEntity() > -1);
+        /*
+         * get guest contact as other user
+         */
         AJAXClient secondClient = new AJAXClient(AJAXClient.User.User2);
         GetRequest getRequest = new GetRequest(guest.getEntity(), secondClient.getValues().getTimeZone());
         GetResponse getResponse = secondClient.execute(getRequest);
         assertFalse("Contact could not be loaded.", getResponse.hasError());
         Contact contact = getResponse.getContact();
         User user = getResponse.getUser();
-        assertEquals("Wrong contact loaded.", GUEST_DISPLAYNAME, contact.getDisplayName());
-        assertEquals("Wrong contact loaded.", GUEST_MAIL, contact.getEmail1());
+        assertEquals("Wrong contact loaded.", guestName, contact.getDisplayName());
+        assertEquals("Wrong contact loaded.", guestMail, contact.getEmail1());
+        /*
+         * try to update guest's display name as foreign user
+         */
         contact.setDisplayName("This should not work");
         UpdateRequest updateRequest = new UpdateRequest(contact, user, false);
         UpdateResponse updateResponse = secondClient.execute(updateRequest);
         assertTrue("Any user can change contact data.", updateResponse.hasError());
         assertEquals(ContactExceptionCodes.NO_CHANGE_PERMISSION.getNumber(), updateResponse.getException().getCode());
-        //TODO
-//        DeleteRequest deleteRequest = new DeleteRequest(shares, System.currentTimeMillis(), false);
-//        CommonDeleteResponse deleteResponse = secondClient.execute(deleteRequest);
-//        assertTrue("Any user can delete any shares.", deleteResponse.hasError());
-//        assertEquals(FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.getNumber(), deleteResponse.getException().getCode());
+        /*
+         * try to delete guest contact as foreign user
+         */
+        DeleteRequest deleteRequest = new DeleteRequest(contact, false);
+        CommonDeleteResponse deleteResponse = secondClient.execute(deleteRequest);
+        assertTrue("Any user can delete any shares.", deleteResponse.hasError());
     }
 
 }

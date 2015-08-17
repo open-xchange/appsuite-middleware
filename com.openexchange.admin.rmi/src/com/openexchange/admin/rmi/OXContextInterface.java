@@ -393,6 +393,20 @@ public interface OXContextInterface extends Remote {
      * Get specified context details
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context IDs of these objects should be set.
+     * @param auth The context-specific credentials
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Context getOwnData(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
+     * Get specified context details
+     *
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context IDs of these objects should be set.
      * @param auth
      * @return
      * @throws RemoteException

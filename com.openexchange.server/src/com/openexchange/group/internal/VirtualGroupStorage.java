@@ -91,9 +91,9 @@ public final class VirtualGroupStorage extends GroupStorage {
     @Override
     public Group getGroup(final int gid, final Context ctx) throws OXException {
         final Group retval;
-        if (GroupTools.GROUP_ZERO.getIdentifier() == gid) {
+        if (GroupStorage.GROUP_ZERO_IDENTIFIER == gid) {
             retval = GroupTools.getGroupZero(ctx);
-        } else if (GroupTools.GUEST_GROUP.getIdentifier() == gid) {
+        } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == gid) {
             retval = GroupTools.getGuestGroup(ctx);
         } else {
             retval = delegate.getGroup(gid, ctx);

@@ -51,13 +51,11 @@ package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -74,14 +72,7 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
-        if (!services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.subscribe.createModifyEnabled", false)) {
-            throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
-        }
-
-        Subscription subscription = getSubscription(
-            subscribeRequest.getRequestData(),
-            subscribeRequest.getServerSession(),
-            services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+        Subscription subscription = getSubscription(subscribeRequest.getRequestData(), subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         subscription.setId(-1);
 
         SubscriptionSource subscriptionSource = subscription.getSource();
@@ -91,21 +82,6 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
 
         subscriptionSource.getSubscribeService().subscribe(subscription);
 
-        //        String urlPrefix = "";
-        //        {
-        //            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
-        //            if (serverUrl != null) {
-        //                urlPrefix = serverUrl;
-        //            }
-        //        }
-
-        // JSONObject jsonTemp = new SubscriptionJSONWriter().write(
-        // subscription,
-        // subscription.getSource().getFormDescription(),
-        // urlPrefix,
-        // subscribeRequest.getTimeZone());
-
         return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");
     }
-
 }

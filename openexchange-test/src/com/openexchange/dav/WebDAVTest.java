@@ -49,6 +49,10 @@
 
 package com.openexchange.dav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -86,8 +90,8 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.ajax.oauth.provider.OAuthSession;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
@@ -102,7 +106,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
-import static org.junit.Assert.*;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
@@ -382,7 +385,7 @@ public abstract class WebDAVTest {
         return getLogin(getUser());
     }
 
-    protected static String getusername() throws OXException {
+    protected static String getUsername() throws OXException {
         return getUsername(getUser());
     }
 

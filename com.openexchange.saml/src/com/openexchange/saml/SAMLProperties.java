@@ -118,5 +118,9 @@ public class SAMLProperties {
      */
     public static final String LOGOUT_RESPONSE_POST_TEMPLATE = "com.openexchange.saml.logoutResponseTemplate";
 
+    /**
+     * Whether SAML-specific auto-login is enabled.
+     */
+    public static final String ENABLE_AUTO_LOGIN = "com.openexchange.saml.enableAutoLogin";
 
 }
