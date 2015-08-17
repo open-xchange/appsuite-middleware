@@ -402,7 +402,7 @@ public class IMAPDefaultFolderChecker {
                 ListLsubEntry entry = size == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
 
                 // Check entry
-                ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session, ignoreSubscription);
+                ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session);
                 if (!cached.exists()) {
                     LOG.warn("{} SPECIAL-USE marked folder \"{}\" does not exist. Skipping... (user={}, context={})", SPECIAL_USES[index], entry.getFullName(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     return Boolean.FALSE;
