@@ -79,6 +79,7 @@ import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Revision;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -89,6 +90,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
@@ -443,12 +445,37 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 /*
                  * insert new file
                  */
-                fileMetadata.setTitle(file.getFileName());
-                Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
-                insert.getMediaHttpUploader().setDirectUploadEnabled(true);
-                String newId = insert.execute().getId();
-                file.setId(newId);
-                return new IDTuple(file.getFolderId(), newId);
+                ThresholdFileHolder sink = null;
+                try {
+                    sink = new ThresholdFileHolder();
+                    sink.write(data);
+
+                    String name = file.getFileName();
+                    String fileName = name;
+                    int count = 0;
+
+                    while (true) {
+                        try {
+                            fileMetadata.setTitle(fileName);
+                            Drive.Files.Insert insert = drive.files().insert(fileMetadata, new InputStreamContent(file.getFileMIMEType(), sink.getStream()));
+                            insert.getMediaHttpUploader().setDirectUploadEnabled(true);
+                            com.google.api.services.drive.model.File gDriveFile = insert.execute();
+                            String newId = gDriveFile.getId();
+                            file.setId(newId);
+                            return new IDTuple(file.getFolderId(), newId);
+                        } catch (com.google.api.client.http.HttpResponseException e) {
+                            if (SC_CONFLICT != e.getStatusCode()) {
+                                throw e;
+                            }
+
+                            fileName = FileStorageUtility.enhance(name, ++count);
+                        }
+                    }
+
+                } finally {
+                    Streams.close(sink);
+                }
+
             } else {
                 /*
                  * upload new version of existing file, adjusting metadata as requested

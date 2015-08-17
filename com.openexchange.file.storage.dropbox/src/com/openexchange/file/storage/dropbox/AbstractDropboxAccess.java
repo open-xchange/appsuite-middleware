@@ -68,6 +68,9 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractDropboxAccess {
 
+    /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
+    protected static final int SC_CONFLICT = 409;
+
     protected final DropboxOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;

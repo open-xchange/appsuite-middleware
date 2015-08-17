@@ -100,7 +100,10 @@ public abstract class BoxClosure<R> {
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
-    private static final int SC_UNAUTHORIZED = 401;
+    protected static final int SC_UNAUTHORIZED = 401;
+
+    /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
+    protected static final int SC_CONFLICT = 409;
 
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxAccess boxAccess, Session session) throws OXException {
         try {
@@ -112,7 +115,7 @@ public abstract class BoxClosure<R> {
                 BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, newBoxAccess, session);
             }
-            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getCustomMessage());
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getMessage());
         } catch (AuthFatalFailureException e) {
             if (!handleAuthError) {
                 throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
