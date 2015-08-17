@@ -1,3 +1,7 @@
+* 2015-08-17 - jan.bauerdick@openx-change.com
+
+ - Fix for bug 40411: Use correct exit code
+
 * 2015-08-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 40410: Auto-select new non-conflicting file name
