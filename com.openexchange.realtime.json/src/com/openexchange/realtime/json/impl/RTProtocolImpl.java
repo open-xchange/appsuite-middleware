@@ -161,17 +161,17 @@ public class RTProtocolImpl implements RTProtocol {
             state.touch();
             stanza.trace("Received message in RTProtocol with synchronous acknowledgements");
             if (newState) {
-                stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
+                stanza.trace("We have no state about this client " + stanza.getFrom() + " sending nextSequence message");
                 enqueueNextSequence(stanza.getFrom(), state, transmitter);
-            }
-            //Remember the original sequence as it might get changed for local or remote delivery
-            long sequenceNumber = stanza.getSequenceNumber();
-            if (gate.handle(stanza, stanza.getTo())) {
-                stanza.trace("Adding receipt for client message " + sequenceNumber + " to acknowledgement list");
-                acknowledgements.add(sequenceNumber);
             }
         } finally {
             state.unlock();
+        }
+        //Remember the original sequence as it might get changed for local or remote delivery
+        long sequenceNumber = stanza.getSequenceNumber();
+        if (gate.handle(stanza, stanza.getTo())) {
+            stanza.trace("Adding receipt for client message " + sequenceNumber + " to acknowledgement list");
+            acknowledgements.add(sequenceNumber);
         }
     }
 
