@@ -1,3 +1,7 @@
+* 2015-08-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 40443: Added dependency to open-xchange-system package to util-linux or which so the tool which is installed and available.
+
 * 2015-08-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 40395: Leave subscription status untouched when doing cascading permission changes
