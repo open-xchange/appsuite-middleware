@@ -94,7 +94,12 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
     private final String lockScope;
     private final StanzaSequenceGateManagement managementObject;
 
-    public StanzaSequenceGate(String name) {
+    /**
+     * Initializes a new {@link StanzaSequenceGate}.
+     *
+     * @param name The unique name for this gate
+     */
+    protected StanzaSequenceGate(String name) {
         super();
         this.name = name;
         this.lockScope = new StringBuilder("gate-").append(name).toString();
