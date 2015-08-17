@@ -239,9 +239,11 @@ public final class PushManagerRegistry implements PushListenerService {
      * @param pushUsers The push users
      * @param extendedService The associated extended push manager
      * @param allowPermanentPush Whether permanent push is allowed at all
+     * @return The actually started ones
      */
-    private void startPermanentListenersFor(Collection<PushUser> pushUsers, PushManagerExtendedService extendedService, boolean allowPermanentPush) {
+    private List<PushUser> startPermanentListenersFor(Collection<PushUser> pushUsers, PushManagerExtendedService extendedService, boolean allowPermanentPush) {
         // Always called when holding synchronized lock
+        List<PushUser> startedOnes = new LinkedList<PushUser>();
         if (allowPermanentPush && extendedService.supportsPermanentListeners()) {
             for (PushUser pushUser : pushUsers) {
                 int retry = 2;
@@ -251,6 +253,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         retry = 0;
                         if (null != pl) {
                             LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
+                            startedOnes.add(pushUser);
                         }
                     } catch (OXException e) {
                         if (PushExceptionCodes.AUTHENTICATION_ERROR.equals(e) || PushExceptionCodes.MISSING_PASSWORD.equals(e)) {
@@ -282,6 +285,8 @@ public final class PushManagerRegistry implements PushListenerService {
                 }
             }
         }
+        Collections.sort(startedOnes);
+        return startedOnes;
     }
 
     /**
@@ -323,8 +328,9 @@ public final class PushManagerRegistry implements PushListenerService {
      *
      * @param pushUsers The push users
      * @param parkNanos The number of nanoseconds to wait prior to starting listeners
+     * @return The actually started ones
      */
-    public void applyInitialListeners(List<PushUser> pushUsers, long parkNanos) {
+    public List<PushUser> applyInitialListeners(List<PushUser> pushUsers, long parkNanos) {
         synchronized (this) {
             Collection<PushUser> toStop;
             {
@@ -345,7 +351,7 @@ public final class PushManagerRegistry implements PushListenerService {
             boolean nothingToStop = toStop.isEmpty();
             if (nothingToStop && toStart.isEmpty()) {
                 // Nothing to do
-                return;
+                return Collections.emptyList();
             }
 
             // Determine currently available push managers
@@ -383,12 +389,16 @@ public final class PushManagerRegistry implements PushListenerService {
             }
 
             // Start permanent candidates
+            List<PushUser> startedOnes = new LinkedList<PushUser>();
             boolean allowPermanentPush = isPermanentPushAllowed();
             for (PushManagerService pushManager : managers) {
                 if (pushManager instanceof PushManagerExtendedService) {
-                    startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
+                    List<PushUser> started = startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
+                    startedOnes.addAll(started);
                 }
             }
+            Collections.sort(startedOnes);
+            return startedOnes;
         }
     }
 
@@ -540,6 +550,48 @@ public final class PushManagerRegistry implements PushListenerService {
                             LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
                         } catch (RuntimeException e) {
                             LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Stops all permanent listeners.
+     */
+    public void stopAllPermanentListener() {
+        synchronized (this) {
+            for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                PushManagerService pushManager = pushManagersIterator.next();
+                if (pushManager instanceof PushManagerExtendedService) {
+                    PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
+
+                    // Determine current push manager's listeners
+                    List<PushUserInfo> availablePushUsers;
+                    try {
+                        availablePushUsers = extendedService.getAvailablePushUsers();
+                    } catch (OXException e) {
+                        LOG.error("Error while determining available push users by push manager \"{}\".", pushManager, e);
+                        availablePushUsers = Collections.emptyList();
+                    }
+
+                    // Stop the permanent ones
+                    for (PushUserInfo pushUserInfo : availablePushUsers) {
+                        if (pushUserInfo.isPermanent()) {
+                            int userId = pushUserInfo.getUserId();
+                            int contextId = pushUserInfo.getContextId();
+                            try {
+                                // Stop listener for session
+                                boolean stopped = stopPermanentListenerFor(pushUserInfo.getPushUser(), extendedService, true);
+                                if (stopped) {
+                                    LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
+                                }
+                            } catch (OXException e) {
+                                LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
+                            } catch (RuntimeException e) {
+                                LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
+                            }
                         }
                     }
                 }
