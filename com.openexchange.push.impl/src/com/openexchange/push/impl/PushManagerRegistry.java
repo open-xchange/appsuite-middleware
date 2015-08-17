@@ -360,14 +360,12 @@ public final class PushManagerRegistry implements PushListenerService {
             // Stop permanent candidates (release acquired resources, etc.)
             if (false == nothingToStop) {
                 for (PushUser pushUser : toStop) {
-                    boolean rescheduled = false;
                     for (PushManagerService pushManager : managers) {
                         if (pushManager instanceof PushManagerExtendedService) {
                             try {
                                 boolean stopped = stopPermanentListenerFor(pushUser, (PushManagerExtendedService) pushManager, false);
                                 if (stopped) {
-                                    rescheduled = true;
-                                    LOG.debug("Rescheduling permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
+                                    LOG.debug("Stopped permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
                                 }
                             } catch (OXException e) {
                                 LOG.error("Error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
@@ -375,10 +373,6 @@ public final class PushManagerRegistry implements PushListenerService {
                                 LOG.error("Runtime error while stopping permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                             }
                         }
-                    }
-
-                    if (rescheduled) {
-                        LOG.info("Rescheduled permanent push listener for user {} in context {} on another cluster node.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
                     }
                 }
             }
