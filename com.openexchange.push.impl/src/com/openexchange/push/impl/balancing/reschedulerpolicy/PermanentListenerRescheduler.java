@@ -201,7 +201,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         try {
-            planReschedule(false);
+            planReschedule(true);
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -210,7 +210,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         try {
-            planReschedule(false);
+            planReschedule(true);
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -355,7 +355,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             hzInstancerRef.set(hzInstance);
 
-            planReschedule(false);
+            planReschedule(true);
 
             return hzInstance;
         } catch (Exception e) {
