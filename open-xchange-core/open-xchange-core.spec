@@ -1210,6 +1210,10 @@ ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xcha
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
+# SoftwareChange_Request-2672
+ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
