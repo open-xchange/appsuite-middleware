@@ -156,7 +156,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     public String[] requiredTables() {
-        return new String[] { "snippetAttachment" };
+        return new String[] { "snippet" };
     }
 
     @Override
