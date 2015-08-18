@@ -135,7 +135,12 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                     setName(null == accountDisplayName ? dir.getName() : accountDisplayName);
                 } else {
                     com.box.boxjavalibv2.dao.BoxFolder parent = dir.getParent();
-                    setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                    // A shared folder does not have a parent in the current user's "context"
+                    if (parent == null) {
+                        setParentId(FileStorageFolder.ROOT_FULLNAME);
+                    } else {
+                        setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                    }
                     setName(dir.getName());
                 }
 
