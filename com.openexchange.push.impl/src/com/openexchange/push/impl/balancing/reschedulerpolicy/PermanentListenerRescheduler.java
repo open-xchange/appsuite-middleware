@@ -576,6 +576,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             // Request to stop on remote nodes
                             IExecutorService executor = hzInstance.getExecutorService("default");
                             Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableDropAllPermanentListenerCallable(master.getUuid()), capableMembers);
+
+                            // Stop all on local node, too
+                            PushManagerRegistry.getInstance().stopAllPermanentListener();
+
+                            // Await remote nodes to stop permanent listeners
                             for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
                                 Member member = entry.getKey();
                                 Future<Boolean> future = entry.getValue();
@@ -622,9 +627,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                     }
                                 }
                             }
-
-                            // Stop all on local node, too
-                            PushManagerRegistry.getInstance().stopAllPermanentListener();
 
                             // Safety park to ensure all resources are released
                             LockSupport.parkNanos(_2secNanos);
