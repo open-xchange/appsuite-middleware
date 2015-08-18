@@ -57,6 +57,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.jackrabbit.webdav.DavException;
@@ -172,6 +173,19 @@ public class WebDAVClient {
 
     public void doPut(final PutMethod put) throws HttpException, IOException {
         this.doPut(put, StatusCodes.SC_CREATED);
+    }
+
+    public String doGet(GetMethod get, int expectedStatus) throws HttpException, IOException {
+        try {
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(get));
+            return get.getResponseBodyAsString();
+        } finally {
+            release(get);
+        }
+    }
+
+    public String doGet(GetMethod get) throws HttpException, IOException {
+        return doGet(get, StatusCodes.SC_OK);
     }
 
     public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException, DavException {
