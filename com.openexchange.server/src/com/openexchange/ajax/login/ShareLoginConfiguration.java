@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.share.servlet.internal;
+package com.openexchange.ajax.login;
 
 import java.util.Date;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.configuration.InitProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
@@ -67,12 +67,78 @@ import com.openexchange.share.GuestShare;
  */
 public class ShareLoginConfiguration {
 
+    public enum ShareLoginProperty implements InitProperty {
+
+        /**
+         * <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall back to the
+         * default login configuration
+         */
+        AUTO_LOGIN("com.openexchange.share.autoLogin", null),
+
+        /**
+         * The client name to use for automatically logged-in guest sessions
+         */
+        CLIENT_NAME("com.openexchange.share.clientName", "open-xchange-appsuite"),
+
+        /**
+         * The client version to use for automatically logged-in guest sessions
+         */
+        CLIENT_VERSION("com.openexchange.share.clientVersion", "Share"),
+
+        /**
+         * The TTL for the client cookies written when accessing a share, or <code>null</code> to fall back to the default login
+         * configuration
+         */
+        COOKIE_TTL("com.openexchange.share.cookieTTL", "-1"),
+
+        /**
+         * <code>true</code> if guest sessions should be transient, <code>false</code>, otherwise
+         */
+        TRANSIENT_SESSIONS("com.openexchange.share.transientSessions", "true"),
+
+        ;
+
+        private final String propertyName;
+        private final String defaultValue;
+
+        private ShareLoginProperty(String propertyName, String defaultValue) {
+            this.propertyName = propertyName;
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public String getDefaultValue() {
+            return defaultValue;
+        }
+
+    }
+
     private Boolean shareAutoLogin;
     private String shareClientName;
     private String shareClientVersion;
     private Integer shareCookieTTL;
     private boolean shareTransientSessions;
-    private byte[] cookieHashSalt;
+
+    /**
+     * Initializes a new {@link ShareLoginConfiguration}.
+     *
+     * @param shareAutoLogin <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall
+     *                       back to the default login configuration
+     * @param shareClientName The client name to use for automatically logged-in guest sessions
+     * @param shareClientVersion The client version to use for automatically logged-in guest sessions
+     * @param shareCookieTTL The TTL for the client cookies written when accessing a share, or <code>null</code> to fall back to the
+     *                       default login configuration
+     * @param shareTransientSessions <code>true</code> if guest sessions should be transient, <code>false</code>, otherwise
+     */
+    public ShareLoginConfiguration(Boolean shareAutoLogin, String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
+        super();
+        reinitialise(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
+    }
 
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
@@ -110,6 +176,19 @@ public class ShareLoginConfiguration {
         if (null == defaultConfig) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("no default login configuration available");
         }
+        return getLoginConfig(defaultConfig);
+    }
+
+    /**
+     * Gets the default login configuration used when logging in through the share servlet.
+     *
+     * @param defaultConfig The default login configuration (as available via {@link LoginServlet#getLoginConfiguration()})
+     * @return The share login configuration
+     */
+    public LoginConfiguration getLoginConfig(LoginConfiguration defaultConfig) {
+        /*
+         * construct custom login config based on default template, overridden with share-specific values
+         */
         return new LoginConfiguration(
             defaultConfig.getUiWebPath(), // com.openexchange.UIWebPath
             null != shareAutoLogin ? shareAutoLogin.booleanValue() : defaultConfig.isSessiondAutoLogin(),
@@ -141,12 +220,22 @@ public class ShareLoginConfiguration {
     }
 
     /**
-     * Gets the cookie hash salt as configured via <code>com.openexchange.cookie.hash.salt</code>.
+     * (Re-)initializes the configuration.
      *
-     * @return The cookie hash salt as byte array
+     * @param shareAutoLogin <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall
+     *                       back to the default login configuration
+     * @param shareClientName The client name to use for automatically logged-in guest sessions
+     * @param shareClientVersion The client version to use for automatically logged-in guest sessions
+     * @param shareCookieTTL The TTL for the client cookies written when accessing a share, or <code>null</code> to fall back to the
+     *                       default login configuration
+     * @param shareTransientSessions <code>true</code> if guest sessions should be transient, <code>false</code>, otherwise
      */
-    public byte[] getCookieHashSalt() {
-        return cookieHashSalt;
+    private void reinitialise(Boolean shareAutoLogin, String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
+        this.shareAutoLogin = shareAutoLogin;
+        this.shareClientName = shareClientName;
+        this.shareClientVersion = shareClientVersion;
+        this.shareCookieTTL = shareCookieTTL;
+        this.shareTransientSessions = shareTransientSessions;
     }
 
     /**
@@ -159,18 +248,14 @@ public class ShareLoginConfiguration {
         /*
          * get share-specific login config overrides from configuration service
          */
-        String shareAutoLogin = configService.getProperty("com.openexchange.share.autoLogin");
-        if (false == Strings.isEmpty(shareAutoLogin)) {
-            this.shareAutoLogin = Boolean.valueOf(shareAutoLogin);
-        }
-        this.shareClientName = configService.getProperty("com.openexchange.share.clientName", "open-xchange-appsuite");
-        this.shareClientVersion = configService.getProperty("com.openexchange.share.clientVersion", "Share");
-        String shareCookieTTL = configService.getProperty("com.openexchange.share.cookieTTL");
-        if (false == Strings.isEmpty(shareCookieTTL)) {
-            this.shareCookieTTL = Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTL));
-        }
-        this.shareTransientSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
-        this.cookieHashSalt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+        String shareAutoLoginValue = configService.getProperty(ShareLoginProperty.AUTO_LOGIN.getPropertyName());
+        Boolean shareAutoLogin = Strings.isEmpty(shareAutoLoginValue) ? null : Boolean.valueOf(shareAutoLoginValue);
+        String shareClientName = configService.getProperty(ShareLoginProperty.CLIENT_NAME.getPropertyName(), ShareLoginProperty.CLIENT_NAME.getDefaultValue());
+        String  shareClientVersion = configService.getProperty(ShareLoginProperty.CLIENT_VERSION.getPropertyName(), ShareLoginProperty.CLIENT_VERSION.getDefaultValue());
+        String shareCookieTTLValue = configService.getProperty(ShareLoginProperty.COOKIE_TTL.getPropertyName());
+        Integer shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
+        boolean shareTransientSessions = configService.getBoolProperty(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName(), Boolean.valueOf(ShareLoginProperty.TRANSIENT_SESSIONS.getDefaultValue()));
+        reinitialise(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 
     /**

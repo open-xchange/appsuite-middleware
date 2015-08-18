@@ -87,7 +87,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
      *
      * @param login
      */
-    public GuestLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+    public GuestLogin(ShareLoginConfiguration conf, Set<LoginRampUpService> rampUp) {
         super(conf, rampUp);
     }
 

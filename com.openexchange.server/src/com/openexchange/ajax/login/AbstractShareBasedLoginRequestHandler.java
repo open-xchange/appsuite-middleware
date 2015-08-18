@@ -50,9 +50,9 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
-import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
+import static com.openexchange.ajax.LoginServlet.getShareCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
@@ -108,7 +108,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLoginRequestHandler {
 
     /** The login configuration */
-    protected final LoginConfiguration conf;
+    protected final ShareLoginConfiguration conf;
 
     /**
      * Initializes a new {@link AbstractShareBasedLoginRequestHandler}.
@@ -116,7 +116,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @param conf The login configuration
      * @param rampUpServices The ramp-up services
      */
-    protected AbstractShareBasedLoginRequestHandler(LoginConfiguration conf, Set<LoginRampUpService> rampUpServices) {
+    protected AbstractShareBasedLoginRequestHandler(ShareLoginConfiguration conf, Set<LoginRampUpService> rampUpServices) {
         super(rampUpServices);
         this.conf = conf;
     }
@@ -161,7 +161,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         String targetPath = httpRequest.getParameter("target");
         final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
 
-        final LoginConfiguration conf = this.conf;
+        final LoginConfiguration conf = this.conf.getLoginConfig(share);
         LoginClosure loginClosure = new LoginClosure() {
 
             @Override
@@ -298,9 +298,10 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 /*
                  * set secret, share and public session cookies
                  */
-                String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseClient(request, false, loginConfig.getDefaultClient()));
-                response.addCookie(configureCookie(new Cookie(SHARE_PREFIX + hash, share.getGuest().getBaseToken()), request, loginConfig));
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
+                if (loginConfig.isSessiondAutoLogin()) {
+                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+                }
                 String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                 if (null != altId) {
                     response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
