@@ -1214,6 +1214,9 @@ ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xcha
 ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
