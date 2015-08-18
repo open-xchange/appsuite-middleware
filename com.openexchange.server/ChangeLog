@@ -1,3 +1,7 @@
+* 2015-08-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40468: Don't signal admin flag for virtual file storage root folders
+
 * 2015-08-17 - jan.bauerdick@openx-change.com
 
  - Fix for bug 40411: Use correct exit code
