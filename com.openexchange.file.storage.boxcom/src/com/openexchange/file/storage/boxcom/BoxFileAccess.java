@@ -74,6 +74,7 @@ import com.box.boxjavalibv2.resourcemanagers.IBoxFilesManager;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
 import com.box.restclientv2.requestsbase.BoxFileUploadRequestObject;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -82,12 +83,14 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -404,6 +407,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+
+
+
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
@@ -422,15 +428,43 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                             boxAccess.getExtendedBoxClient().getFilesManager().preflightCheck(id, reqObj);
                         }
                     }
-                    final BoxFile boxFile;
+                    BoxFile boxFile = null;
                     if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
-                        BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, file.getFileName(), data);
-                        boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                        ThresholdFileHolder sink = null;
+                        try {
+                            sink = new ThresholdFileHolder();
+                            sink.write(data);
+
+                            int count = 0;
+                            String name = file.getFileName();
+                            String fileName = name;
+
+                            boolean retry = true;
+                            while (retry) {
+                                try {
+                                    BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, fileName, sink.getStream());
+                                    boxFile = boxClient.getFilesManager().uploadFile(reqObj);
+                                    retry = false;
+                                } catch (BoxServerException e) {
+                                    if (SC_CONFLICT != e.getStatusCode()) {
+                                        throw e;
+                                    }
+                                    fileName = FileStorageUtility.enhance(name, ++count);
+                                }
+                            }
+                        } finally {
+                            Streams.close(sink);
+                        }
                     } else {
                         BoxFile boxfile = boxClient.getFilesManager().getFile(id, null);
                         checkFileValidity(boxfile);
                         BoxFileUploadRequestObject reqObj = BoxFileUploadRequestObject.uploadFileRequestObject(boxFolderId, id, data);
                         boxFile = boxClient.getFilesManager().uploadNewVersion(id, reqObj);
+                    }
+
+                    if (null == boxFile) {
+                        IllegalStateException x = new IllegalStateException("box.com upload failed");
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     }
 
                     BoxFileRequestObject req = new BoxFileRequestObject();

@@ -23,6 +23,11 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       system integration specific infrastructure
 Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
+%if 0%{?suse_version} && 0%{?suse_version} <= 1210
+Requires:      util-linux
+%else
+Requires:      which
+%endif
 
 %description
 system integration specific infrastructure

@@ -178,6 +178,23 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<ShareInfo> getShare(String token, String path) throws OXException {
+        if (Strings.isEmpty(token) || Strings.isEmpty(path)) {
+            return null;
+        }
+        GuestShare share = resolveToken(token);
+        GuestInfo guest = resolveGuest(token);
+        ShareTarget target = share.resolveTarget(path);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(share.getGuest().getContextID(), target.getModule(), target.getFolder(), target.getItem(), StorageParameters.NO_PARAMETERS);
+        for (Share s : shares) {
+            if (s.getCreatedBy() != guest.getCreatedBy() || s.getGuest() != guest.getGuestID() || !share.getGuest().equals(guest)) {
+                shares.remove(s);
+            }
+        }
+        return createShareInfos(services, guest.getContextID(), shares);
+    }
+
+    @Override
     public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
         int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
@@ -376,18 +393,22 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public GuestInfo getGuestInfo(int contextId, int userId) throws OXException {
+    public GuestInfo getGuestInfo(Session session, int guestID) throws OXException {
+        User user = null;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, false);
         try {
-            User user = services.getService(UserService.class).getUser(userId, contextId);
-            if (user.isGuest()) {
-                return new DefaultGuestInfo(services, contextId, user, getLinkTarget(contextId, user));
-            }
+            user = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, utils.getContext(session));
+            connectionHelper.commit();
         } catch (OXException e) {
-            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+            if (false == UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 throw e;
             }
+        } finally {
+            connectionHelper.finish();
         }
-
+        if (null != user && user.isGuest()) {
+            return new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user));
+        }
         return null;
     }
 

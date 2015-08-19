@@ -205,8 +205,7 @@ public class AutoLoginTools {
             /*
              * extract share token from supplied cookies, based on the "plain" request hash
              */
-            String client = LoginTools.parseClient(request, false, loginConfig.getDefaultClient());
-            String shareCookieName = LoginServlet.SHARE_PREFIX + HashCalculator.getInstance().getHash(request, client);
+            String shareCookieName = LoginServlet.getShareCookieName(request);
             String shareToken = null;
             for (Cookie cookie : cookies) {
                 if (cookie.getName().startsWith(shareCookieName)) {

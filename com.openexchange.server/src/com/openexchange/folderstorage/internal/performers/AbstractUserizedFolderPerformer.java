@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.performers;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -590,12 +591,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             guestIDs.add(permission.getEntity());
         }
 
+        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+        boolean sessionParameterSet = false;
         try {
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            session.setParameter(Connection.class.getName(), connection);
+            if (false == session.containsParameter(Connection.class.getName() + '@' + Thread.currentThread().getId())) {
+                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
+                sessionParameterSet = true;
+            }
             shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(contentType.getModule(), folderID)), guestIDs);
         } finally {
-            session.setParameter(Connection.class.getName(), null);
+            if (sessionParameterSet) {
+                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+            }
         }
     }
 
@@ -615,8 +622,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
 
             CreatedShares shares = null;
+            boolean sessionParameterSet = false;
             try {
-                session.setParameter(Connection.class.getName(), connection);
+                if (false == session.containsParameter(Connection.class.getName() + '@' + Thread.currentThread().getId())) {
+                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
+                    sessionParameterSet = true;
+                }
                 for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
                     List<GuestPermission> permissions = entry.getValue();
                     List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
@@ -634,7 +645,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     }
                 }
             } finally {
-                session.setParameter(Connection.class.getName(), null);
+                if (sessionParameterSet) {
+                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+                }
             }
         }
     }
@@ -680,13 +693,33 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     protected void checkAnonymousPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
         if (comparedPermissions.hasAddedGuests()) {
+            Permission addedAnonymousPermission = null;
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer addedGuest : addedGuests) {
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(addedGuest);
-                if (isAnonymous(guestInfo) && isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
-                    Permission permission = comparedPermissions.getAddedGuestPermission(addedGuest);
-                    throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
+                if (isAnonymous(guestInfo)) {
+                    /*
+                     * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
+                     */
+                    if (null == addedAnonymousPermission) {
+                        addedAnonymousPermission = comparedPermissions.getAddedGuestPermission(addedGuest);
+                    } else {
+                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+                            Permissions.createPermissionBits(addedAnonymousPermission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
+                    }
+                    checkReadOnly(folder, addedAnonymousPermission);
+                    if (isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
+                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+                            Permissions.createPermissionBits(addedAnonymousPermission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
+                    }
                 }
+            }
+            /*
+             * check for an already existing anonymous permission if a new one should be added
+             */
+            if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+                    Permissions.createPermissionBits(addedAnonymousPermission), addedAnonymousPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
             }
         }
 
@@ -699,12 +732,51 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
 
         if (comparedPermissions.hasNewGuests()) {
+            GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
+                    /*
+                     * allow only one anonymous permission with "read-only" permission bits
+                     */
                     checkReadOnly(folder, guestPermission);
+                    if (null == newAnonymousPermission) {
+                        newAnonymousPermission = guestPermission;
+                    } else {
+                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+                            Permissions.createPermissionBits(guestPermission), guestPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+                    }
+                }
+            }
+            /*
+             * check for an already existing anonymous permission if a new one should be added
+             */
+            if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+                    Permissions.createPermissionBits(newAnonymousPermission), newAnonymousPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+            }
+        }
+    }
+
+    /**
+     * Gets a value indicating whether the original permissions in the supplied compared permissions instance already contain an
+     * "anonymous" entity one or not.
+     *
+     * @param comparedPermissions The compared permissions to check
+     * @return <code>true</code> if there's an "anonymous" entity in the original permissions, <code>false</code>, otherwise
+     */
+    private static boolean containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
+        Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
+        if (null != originalPermissions && 0 < originalPermissions.size()) {
+            for (Permission originalPermission : originalPermissions) {
+                if (false == originalPermission.isGroup()) {
+                    GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
+                    if (null != guestInfo && isAnonymous(guestInfo)) {
+                        return true;
+                    }
                 }
             }
         }
+        return false;
     }
 
     private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {

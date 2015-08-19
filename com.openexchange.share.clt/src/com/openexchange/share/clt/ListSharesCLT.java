@@ -49,6 +49,8 @@
 
 package com.openexchange.share.clt;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -59,6 +61,7 @@ import org.apache.commons.cli.Options;
 import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.java.Strings;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
@@ -72,6 +75,8 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
     private String contextId;
 
     private String userId;
+
+    private String token;
 
     public ListSharesCLT() {
         super();
@@ -89,6 +94,9 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
         if (cmd.hasOption("i")) {
             userId = cmd.getOptionValue("i");
         }
+        if (cmd.hasOption("T")) {
+            token = cmd.getOptionValue("T");
+        }
     }
 
     @Override
@@ -98,12 +106,18 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        int cid;
-        try {
-            cid = Integer.parseInt(contextId);
-            authenticator.doAuthentication(login, password, cid);
-        } catch (NumberFormatException e) {
-            throw new MBeanException(e);
+        if (null == contextId || contextId.isEmpty() || "-1".equals(contextId)) {
+            //oxadminmaster required
+            authenticator.doAuthentication(login, password);
+        } else {
+            //context admin required
+            int cid;
+            try {
+                cid = Integer.parseInt(contextId);
+                authenticator.doAuthentication(login, password, cid);
+            } catch (NumberFormatException e) {
+                throw new MBeanException(e);
+            }
         }
     }
 
@@ -121,27 +135,50 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
         options.addOption("i", "userid", true, "The user id.");
+        options.addOption("T", "token", true, "Token or URL.");
     }
 
     @Override
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        if (null == contextId || contextId.isEmpty()) {
-            throw new MissingOptionException("ContextId is missing.");
+        if ((null == contextId || contextId.isEmpty()) && Strings.isEmpty(token)) {
+            throw new MissingOptionException("ContextId or share token is missing.");
         }
         String result;
         ObjectName objectName = getObjectName(ShareMBean.class.getName(), ShareMBean.DOMAIN);
         ShareMBean mbean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, ShareMBean.class, false);
         try {
-            if (null != userId && !userId.isEmpty()) {
-                result = mbean.listShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+            if (null == contextId || contextId.isEmpty() || "-1".equals(contextId)) {
+                if (isShareURL(token)) {
+                    token = extractTokenFromURL(token);
+                }
+                result = mbean.listShare(token);
             } else {
-                result = mbean.listShares(Integer.parseInt(contextId));
+                if (null != userId && !userId.isEmpty()) {
+                    result = mbean.listShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+                } else {
+                    result = mbean.listShares(Integer.parseInt(contextId));
+                }
             }
         } catch (NumberFormatException e) {
             throw new ParseException("Cannot parse value: " + e.getMessage());
         }
         System.out.println(result);
         return null;
+    }
+
+    private final Pattern PATTERN = Pattern.compile("\\Ahttps?:\\/\\/.*?\\/ajax\\/share\\/(.*?)\\z");
+
+    private boolean isShareURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        return m.matches();
+    }
+
+    private String extractTokenFromURL(String url) {
+        Matcher m = PATTERN.matcher(url);
+        if (m.matches()) {
+            return m.group(1);
+        }
+        return url;
     }
 
 }

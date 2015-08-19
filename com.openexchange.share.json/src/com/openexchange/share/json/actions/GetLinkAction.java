@@ -98,12 +98,27 @@ public class GetLinkAction extends AbstractShareAction {
          * reuse existing or create a new anonymous share as needed
          */
         boolean isNew = false;
-        ShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
-            shareInfo = createdShare.getFirstInfo();
-            isNew = true;
+        ShareInfo shareInfo = null;
+        for (int i = 0; i < 5 && null == shareInfo; i++) {
+            try {
+                shareInfo = discoverLink(session, target);
+                if (null == shareInfo) {
+                    AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
+                    CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
+                    shareInfo = createdShare.getFirstInfo();
+                    isNew = true;
+                }
+            } catch (OXException e) {
+                /*
+                 * try again in case of concurrent modifications
+                 */
+                if (i < 4 && ("IFO-1302".equals(e.getErrorCode()) || "FLD-1022".equals(e.getErrorCode()))) {
+                    org.slf4j.LoggerFactory.getLogger(GetLinkAction.class).info(
+                        "Detected concurrent modification during link creation: \"{}\" - trying again...", e.getMessage());
+                    continue;
+                }
+                throw e;
+            }
         }
         /*
          * return appropriate result

@@ -47,81 +47,28 @@
  *
  */
 
-package com.openexchange.share.impl.mbean;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.configuration;
 
 
 /**
- * {@link ShareMBean}
+ * {@link InitProperty}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ShareMBean {
-
-    public final static String DOMAIN = "com.openexchange.share";
+public interface InitProperty {
 
     /**
-     * Lists all shares in supplied context.
+     * Gets the property name.
      *
-     * @param contextId The contextId
-     * @return The shares
-     * @throws OXException On error
+     * @return The property name
      */
-    String listShares(int contextId) throws OXException;
+    String getPropertyName();
 
     /**
-     * Lists all shares in supplied context created by supplied user.
+     * Gets the default property value.
      *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @return The shares
-     * @throws OXException On error
+     * @return The default value
      */
-    String listShares(int contextId, int userId) throws OXException;
-
-    /**
-     * List share identified by supplied token
-     * 
-     * @param token The token
-     * @return The share
-     * @throws OXException On error
-     */
-    String listShare(String token) throws OXException;
-
-    /**
-     * Removes all targets identified by supplied token.
-     * @param token The token
-     * @param path The share path
-     * @throws OXException
-     */
-    int removeShare(String token, String path) throws OXException;
-
-    /**
-     * Removes all targets in supplied context identified by supplied token.
-     * @param shareToken The token
-     * @param targetPath The share path
-     * @param contextId The contextId
-     * @throws OXException
-     */
-    int removeShare(String shareToken, String targetPath, int contextId) throws OXException;
-
-    /**
-     * Remove all shares from supplied context.
-     *
-     * @param contextId The contextId
-     * @throws OXException On error
-     */
-    int removeShares(int contextId) throws OXException;
-
-    /**
-     * Removes all shares in supplied context created by supplied user.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @throws OXException On error
-     */
-    int removeShares(int contextId, int userId) throws OXException;
+    String getDefaultValue();
 
 }

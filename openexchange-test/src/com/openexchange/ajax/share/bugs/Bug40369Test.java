@@ -51,11 +51,14 @@ package com.openexchange.ajax.share.bugs;
 
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 
 /**
@@ -67,7 +70,7 @@ import com.openexchange.share.ShareTarget;
  */
 public class Bug40369Test extends ShareTest {
 
-    private static final int NUM_THREADS = 10;
+    private static final int NUM_THREADS = 20;
 
     /**
      * Initializes a new {@link Bug40369Test}.
@@ -78,7 +81,23 @@ public class Bug40369Test extends ShareTest {
         super(name);
     }
 
-    public void testCreateLinkConcurrently() throws Exception {
+    public void testCreateFolderLinkConcurrentlyRandomly() throws Exception {
+        testCreateFolderLinkConcurrently(randomFolderAPI(), randomModule());
+    }
+
+    public void noTestCreateFolderLinkConcurrentlyExtensively() throws Exception {
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (int module : TESTED_MODULES) {
+                testCreateFolderLinkConcurrently(api, module);
+            }
+        }
+    }
+
+    private void testCreateFolderLinkConcurrently(EnumAPI api, int module) throws Exception {
+        testCreateFolderLinkConcurrently(api, module, getDefaultFolder(module));
+    }
+
+    public void testCreateFileLinkConcurrently() throws Exception {
         /*
          * create folder and a file inside
          */
@@ -88,30 +107,17 @@ public class Bug40369Test extends ShareTest {
          * get a link for the file concurrently
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        final GetLinkRequest request = new GetLinkRequest(target, getTimeZone());
-        request.setFailOnError(false);
-        Thread[] threads = new Thread[NUM_THREADS];
-        final GetLinkResponse[] responses = new GetLinkResponse[threads.length];
-        for (int i = 0; i < threads.length; i++) {
-            final int index = i;
-            threads[i] = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        responses[index] = client.execute(request);
-                    } catch (Exception e) {
-                        fail(e.getMessage());
-                    }
-                }
-            });
-        }
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].start();
-        }
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
-        }
+        GetLinkResponse[] responses = getLinkConcurrently(target, NUM_THREADS);
+        /*
+         * check that there's exactly one anonymous guest entity in file afterwards
+         */
+        file = getFile(file.getId());
+        assertNotNull(file.getObjectPermissions());
+        assertEquals(1, file.getObjectPermissions().size());
+        FileStorageObjectPermission matchingPermission = file.getObjectPermissions().get(0);
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        assertNotNull(guest);
         /*
          * check responses, assert the same link for the same target, thereof one marked as "new"
          */
@@ -133,6 +139,84 @@ public class Bug40369Test extends ShareTest {
                 oneNew = true;
             }
         }
+    }
+
+    private void testCreateFolderLinkConcurrently(EnumAPI api, int module, int parent) throws Exception {
+        /*
+         * create folder
+         */
+        FolderObject folder = insertPrivateFolder(api, module, parent);
+        /*
+         * get a link for the file concurrently
+         */
+        ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
+        GetLinkResponse[] responses = getLinkConcurrently(target, NUM_THREADS);
+        /*
+         * check that there's exactly one anonymous guest entity in folder afterwards
+         */
+        folder = getFolder(api, folder.getObjectID());
+        assertNotNull(folder.getPermissions());
+        assertEquals(2, folder.getPermissions().size());
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created file found", matchingPermission);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        assertNotNull(guest);
+        /*
+         * check responses, assert the same link for the same target, thereof one marked as "new"
+         */
+        String shareURL = null;
+        boolean oneNew = false;
+        for (GetLinkResponse response : responses) {
+            if (response.hasError()) {
+                fail(response.getErrorMessage());
+                continue;
+            }
+            ShareLink shareLink = response.getShareLink();
+            assertNotNull(shareLink);
+            if (null == shareURL) {
+                shareURL = shareLink.getShareURL();
+            } else {
+                assertEquals(shareURL, shareLink.getShareURL());
+            }
+            if (shareLink.isNew()) {
+                assertFalse(oneNew);
+                oneNew = true;
+            }
+        }
+    }
+
+    private GetLinkResponse[] getLinkConcurrently(ShareTarget target, int numThreads) throws Exception {
+        final GetLinkRequest request = new GetLinkRequest(target, getTimeZone());
+        request.setFailOnError(false);
+        Thread[] threads = new Thread[numThreads];
+        final GetLinkResponse[] responses = new GetLinkResponse[threads.length];
+        for (int i = 0; i < threads.length; i++) {
+            final int index = i;
+            threads[i] = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        responses[index] = client.execute(request);
+                    } catch (Exception e) {
+                        fail(e.getMessage());
+                    }
+                }
+            });
+        }
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].start();
+        }
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+        return responses;
     }
 
 }

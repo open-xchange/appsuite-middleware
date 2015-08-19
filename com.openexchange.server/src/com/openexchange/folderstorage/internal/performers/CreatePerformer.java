@@ -223,7 +223,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              */
             Permission[] permissions = toCreate.getPermissions();
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), permissions, new Permission[0], shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0], shareService);
             final String newId;
             try {
                 /*

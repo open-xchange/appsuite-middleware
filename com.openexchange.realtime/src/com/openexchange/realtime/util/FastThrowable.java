@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,17 +47,29 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.realtime.util;
 
 
 /**
- * {@link TOnlineDETEst}
+ * {@link FastThrowable} - A fast {@link Throwable}.
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class TOnlineDETEst extends GenericSubscribeServiceTestHelpers{
-    public void testTOnlineDE(){
-        checkSingleCrawler("t-online.de");
+public class FastThrowable extends Throwable {
+
+    /**
+     * Initializes a new {@link FastThrowable}.
+     *
+     * @param message The message
+     */
+    public FastThrowable(String message) {
+        super(null == message ? "<unknkown>" : message);
+    }
+
+    @Override
+    public Throwable fillInStackTrace() {
+        return this;
     }
 
 }

@@ -57,7 +57,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.ComparedPermissions;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
@@ -72,22 +72,21 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ComparedFolderPermissions extends ComparedPermissions<Permission, GuestPermission> {
 
-    private final Context context;
+    private final Session session;
     private final ShareService shareService;
     private final Map<Integer, GuestInfo> guestInfos;
 
     /**
      * Initializes a new {@link ComparedFolderPermissions}.
      *
-     * @param context The context
+     * @param session The session
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
      * @param shareService The share service
-     * @throws OXException
      */
-    public ComparedFolderPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, ShareService shareService) throws OXException {
+    public ComparedFolderPermissions(Session session, Permission[] newPermissions, Permission[] originalPermissions, ShareService shareService) throws OXException {
         super(newPermissions, originalPermissions);
-        this.context = context;
+        this.session = session;
         this.shareService = shareService;
         guestInfos = new HashMap<>();
         calc();
@@ -96,14 +95,14 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
     /**
      * Initializes a new {@link ComparedFolderPermissions}.
      *
-     * @param context The context
+     * @param session The session
      * @param newFolder The modified object sent by the client; not <code>null</code>
      * @param origFolder The original object loaded from the storage; not <code>null</code>
      * @param shareService The share service
      * @throws OXException If errors occur when loading additional data for the comparison
      */
-    public ComparedFolderPermissions(Context context, Folder newFolder, Folder origFolder, ShareService shareService) throws OXException {
-        this(context, newFolder.getPermissions(), origFolder.getPermissions(), shareService);
+    public ComparedFolderPermissions(Session session, Folder newFolder, Folder origFolder, ShareService shareService) throws OXException {
+        this(session, newFolder.getPermissions(), origFolder.getPermissions(), shareService);
     }
 
     @Override
@@ -170,7 +169,7 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
     public GuestInfo getGuestInfo(int guestId) throws OXException {
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
-            guestInfo = shareService.getGuestInfo(context.getContextId(), guestId);
+            guestInfo = shareService.getGuestInfo(session, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }

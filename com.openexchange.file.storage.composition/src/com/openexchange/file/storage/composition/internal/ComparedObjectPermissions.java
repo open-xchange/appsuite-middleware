@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.ComparedPermissions;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
@@ -74,35 +75,32 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ComparedObjectPermissions extends ComparedPermissions<FileStorageObjectPermission, FileStorageGuestObjectPermission> {
 
-    private ShareService shareService;
-
-    private final int contextId;
-
+    private final Session session;
     private final Map<Integer, GuestInfo> guestInfos;
+
+    private ShareService shareService;
 
     /**
      * Initializes a new {@link ComparedObjectPermissions}.
      *
-     * @param contextId The context ID
+     * @param session The session
      * @param oldMetadata The old metadata, or <code>null</code> for new documents
      * @param newMetadata The new metadata
-     * @throws OXException
      */
-    public ComparedObjectPermissions(int contextId, File oldMetadata, File newMetadata) throws OXException {
-        this(contextId, null == oldMetadata ? null : oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
+    public ComparedObjectPermissions(Session session, File oldMetadata, File newMetadata) throws OXException {
+        this(session, null == oldMetadata ? null : oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
     }
 
     /**
      * Initializes a new {@link ComparedObjectPermissions}.
      *
-     * @param contextId The context ID
+     * @param session The session
      * @param oldPermissions The old object permissions, or <code>null</code> for new documents
      * @param newPermissions The new object permissions
-     * @throws OXException
      */
-    public ComparedObjectPermissions(int contextId, List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) throws OXException {
+    public ComparedObjectPermissions(Session session, List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) throws OXException {
         super(newPermissions, oldPermissions);
-        this.contextId = contextId;
+        this.session = session;
         guestInfos = new HashMap<>();
         calc();
     }
@@ -170,7 +168,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
     public GuestInfo getGuestInfo(int guestId) throws OXException {
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
-            guestInfo = getShareService().getGuestInfo(contextId, guestId);
+            guestInfo = getShareService().getGuestInfo(session, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }

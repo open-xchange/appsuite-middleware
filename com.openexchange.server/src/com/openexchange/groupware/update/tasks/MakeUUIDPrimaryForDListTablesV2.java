@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,41 @@
  *
  */
 
-package com.openexchange.share.impl.mbean;
+package com.openexchange.groupware.update.tasks;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ShareMBean}
+ * {@link MakeUUIDPrimaryForDListTablesV2}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public interface ShareMBean {
+public class MakeUUIDPrimaryForDListTablesV2 extends MakeUUIDPrimaryForDListTables {
 
-    public final static String DOMAIN = "com.openexchange.share";
-
-    /**
-     * Lists all shares in supplied context.
-     *
-     * @param contextId The contextId
-     * @return The shares
-     * @throws OXException On error
-     */
-    String listShares(int contextId) throws OXException;
-
-    /**
-     * Lists all shares in supplied context created by supplied user.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @return The shares
-     * @throws OXException On error
-     */
-    String listShares(int contextId, int userId) throws OXException;
-
-    /**
-     * List share identified by supplied token
-     * 
-     * @param token The token
-     * @return The share
-     * @throws OXException On error
-     */
-    String listShare(String token) throws OXException;
-
-    /**
-     * Removes all targets identified by supplied token.
-     * @param token The token
-     * @param path The share path
-     * @throws OXException
-     */
-    int removeShare(String token, String path) throws OXException;
-
-    /**
-     * Removes all targets in supplied context identified by supplied token.
-     * @param shareToken The token
-     * @param targetPath The share path
-     * @param contextId The contextId
-     * @throws OXException
-     */
-    int removeShare(String shareToken, String targetPath, int contextId) throws OXException;
-
-    /**
-     * Remove all shares from supplied context.
-     *
-     * @param contextId The contextId
-     * @throws OXException On error
-     */
-    int removeShares(int contextId) throws OXException;
-
-    /**
-     * Removes all shares in supplied context created by supplied user.
-     *
-     * @param contextId The contextId
-     * @param userId The userId
-     * @throws OXException On error
-     */
-    int removeShares(int contextId, int userId) throws OXException;
-
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        super.perform(params);
+        
+        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        try {
+            DBUtils.startTransaction(connection);
+            Tools.modifyColumns(connection, TABLE, new Column("cid", "INT4 NOT NULL"));
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(connection);
+            Database.backNoTimeout(params.getContextId(), true, connection);
+        }
+    }
 }

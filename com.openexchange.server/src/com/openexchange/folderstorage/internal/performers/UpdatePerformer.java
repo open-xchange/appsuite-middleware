@@ -230,7 +230,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
@@ -344,7 +344,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         /*
                          * Switch back to false before update due to the recursive nature of FolderStorage.updateFolder in some implementations
                          */
-                        decorator.put("cascadePermissions", false);
+                        decorator.put("cascadePermissions", Boolean.FALSE);
                     }
                     /*
                      * Change permissions either in real or in virtual storage

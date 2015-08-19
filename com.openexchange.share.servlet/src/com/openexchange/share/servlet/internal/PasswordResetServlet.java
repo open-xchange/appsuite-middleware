@@ -80,8 +80,8 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareAuthenticated;
-import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -98,16 +98,16 @@ public class PasswordResetServlet extends AbstractShareServlet {
     private static final long serialVersionUID = -598655895873570676L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
-    private final ShareLoginConfiguration loginConfig;
+    private final byte[] hashSalt;
 
     /**
      * Initializes a new {@link PasswordResetServlet}.
      *
-     * @param loginConfig
+     * @param hashSalt The hash salt to use
      */
-    public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
+    public PasswordResetServlet(byte[] hashSalt) {
         super();
-        this.loginConfig = loginConfig;
+        this.hashSalt = hashSalt;
     }
 
     @Override
@@ -303,7 +303,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.reset();
         md.update(toHash.getBytes("UTF-8"));
-        md.update(loginConfig.getCookieHashSalt());
+        md.update(hashSalt);
         byte[] hash = md.digest();
         // URL safe encoding without padding. Don't use plain base64 here!
         return BaseEncoding.base64Url().omitPadding().encode(hash);

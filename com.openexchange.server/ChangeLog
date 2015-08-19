@@ -1,10 +1,44 @@
-* 2015-07-29 - martin.herfurth@open-xchange.com
+* 2015-08-19 - thorben.betten@open-xchange.com
 
- - Fix for bug 40433: Fixed bad UpdateTask/CreateTableTask
+ - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table
+
+* 2015-08-18 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 38068: Fold references header in custom headers supplied by OX7 UI
+
+* 2015-08-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40468: Don't signal admin flag for virtual file storage root folders
+
+* 2015-08-17 - jan.bauerdick@openx-change.com
+
+ - Fix for bug 40411: Use correct exit code
+
+* 2015-08-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40410: Auto-select new non-conflicting file name
+ - Fix for bug 40437: Fixed re-authorize action
+
+* 2015-08-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 40443: Added dependency to open-xchange-system package to util-linux or which so the tool which is installed and available.
+
+* 2015-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40395: Leave subscription status untouched when doing cascading permission changes
+
+* 2015-08-14 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40408: Added -T option to ListSharesCLT to list shares identified by token and path or share url
+ - Fix for bug 40405: Bug fixed while refactoring ListSharesCLT for bug 40408
+
+* 2015-08-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40369: Avoid concurrent access to running database transactions
 
 * 2015-08-13 - jan.bauerdick@open-xchange.com
 
- - Fix for bug 40405: Use -T option for token
+ - Fix for bug 40407: Use -T option for token
 
 * 2015-08-13 - thorben.betten@open-xchange.com
 
@@ -44,6 +78,7 @@
 * 2015-07-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 40277: NPE in conflict handler.
+ - Fix for bug 40433: Fixed bad UpdateTask/CreateTableTask
 
 * 2015-08-07 - thorben.betten@open-xchange.com
 

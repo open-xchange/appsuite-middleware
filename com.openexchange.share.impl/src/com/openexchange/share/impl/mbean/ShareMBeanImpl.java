@@ -54,6 +54,7 @@ import java.util.List;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -85,6 +86,17 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
+    public String listShare(String token) throws OXException {
+        String path = null;
+        if (Strings.isNotEmpty(token) && token.contains("/")) {
+            String[] split = token.split("/");
+            path = split[1];
+            token = split[0];
+        }
+        return formatForCLT(shareService.getShare(token, path));
+    }
+
+    @Override
     public int removeShare(String token, String path) throws OXException {
         if (null != path && !path.isEmpty() && !"".equals(path)) {
             token = token + "/" + path;
@@ -112,11 +124,15 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     private static String formatForCLT(List<ShareInfo> shareInfo) throws OXException {
         StringBuilder sb = new StringBuilder();
+        if (null == shareInfo || shareInfo.isEmpty()) {
+            sb.append("No shares found.");
+            return sb.toString();
+        }
         for (ShareInfo info : shareInfo) {
             sb.append("Token: ").append(info.getToken()).append(" (");
             Share share = info.getShare();
             ShareTarget target = share.getTarget();
-            sb.append("Share [created by ").append(share.getCreatedBy()).append(", guest=").append(share.getGuest())
+            sb.append("Share [created by ").append(share.getCreatedBy()).append(" in context ").append(info.getGuest().getContextID()).append(", guest=").append(share.getGuest())
               .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
               .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
             sb.append("\n");

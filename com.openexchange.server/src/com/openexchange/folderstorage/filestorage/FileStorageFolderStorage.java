@@ -163,7 +163,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 }
                 TransactionManager transactionManager = TransactionManager.getTransactionManager(parameters);
                 Session session = parameters.getSession();
-                session.setParameter(Connection.class.getName(), transactionManager.getConnection());
+                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), transactionManager.getConnection());
                 transactionManager.transactionStarted(this);
             }
         }
@@ -183,7 +183,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 storageParameters.putParameter(getFolderType(), PARAM, null);
                 Session session = storageParameters.getSession();
                 if (null != session && session.containsParameter(Connection.class.getName())) {
-                    session.setParameter(Connection.class.getName(), null);
+                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
                 }
             }
             addWarnings(storageParameters, folderAccess);
@@ -200,7 +200,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 storageParameters.putParameter(getFolderType(), PARAM, null);
                 Session session = storageParameters.getSession();
                 if (null != session && session.containsParameter(Connection.class.getName())) {
-                    session.setParameter(Connection.class.getName(), null);
+                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
                 }
             }
             addWarnings(storageParameters, folderAccess);

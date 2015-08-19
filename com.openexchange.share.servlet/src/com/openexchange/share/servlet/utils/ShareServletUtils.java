@@ -49,14 +49,12 @@
 
 package com.openexchange.share.servlet.utils;
 
-import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
@@ -65,10 +63,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.AutoLoginTools;
-import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.ajax.login.ShareLoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -81,7 +79,6 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -96,7 +93,6 @@ public final class ShareServletUtils {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServletUtils.class);
     private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
-    private static final AtomicReference<ShareLoginConfiguration> SHARE_LOGIN_CONFIG = new AtomicReference<ShareLoginConfiguration>();
 
     /**
      * Initializes a new {@link ShareServletUtils}.
@@ -106,21 +102,12 @@ public final class ShareServletUtils {
     }
 
     /**
-     * Sets the login configuration for shares needed by redirecting handlers.
-     *
-     * @param configuration The login configuration for shares
-     */
-    public static void setShareLoginConfiguration(ShareLoginConfiguration configuration) {
-        SHARE_LOGIN_CONFIG.set(configuration);
-    }
-
-    /**
      * Gets the login configuration for shares
      *
      * @return The login configuration for shares
      */
     public static ShareLoginConfiguration getShareLoginConfiguration() {
-        ShareLoginConfiguration config = SHARE_LOGIN_CONFIG.get();
+        ShareLoginConfiguration config = LoginServlet.getShareLoginConfiguration();
         if (config == null) {
             throw new IllegalStateException("ShareServletUtils have not been initialized yet!");
         }
@@ -146,8 +133,9 @@ public final class ShareServletUtils {
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
             LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
-            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseClient(request, false, loginConfig.getDefaultClient()));
-            response.addCookie(configureCookie(new Cookie(SHARE_PREFIX + hash, share.getGuest().getBaseToken()), request, loginConfig));
+            if (loginConfig.isSessiondAutoLogin()) {
+                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+            }
             /*
              * construct & send redirect
              */

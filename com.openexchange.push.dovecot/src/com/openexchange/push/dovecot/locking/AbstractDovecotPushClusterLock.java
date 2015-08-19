@@ -137,10 +137,11 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
         }
 
         // Check regular SessiondService (but might yield negative result in case of a "transient" session
+        String sessionId = value.substring(pos + 1);
         {
             SessiondService sessiondService = services.getService(SessiondService.class);
             if (null != sessiondService) {
-                if (sessiondService.getSession(value.substring(pos + 1)) != null) {
+                if (sessiondService.getSession(sessionId) != null) {
                     return true;
                 }
             }
@@ -158,7 +159,7 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
 
             if (!otherMembers.isEmpty()) {
                 IExecutorService executor = hzInstance.getExecutorService("default");
-                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(value), otherMembers);
+                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(sessionId), otherMembers);
                 for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
                     Future<Boolean> future = entry.getValue();
                     // Check Future's return value

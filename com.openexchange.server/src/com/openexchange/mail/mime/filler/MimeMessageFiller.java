@@ -516,7 +516,12 @@ public class MimeMessageFiller {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
             if (isCustomOrReplyHeader(name)) {
-                mimeMessage.setHeader(name, entry.getValue());
+                String value = entry.getValue();
+                if(HDR_REFERENCES.equals(name)) {
+                    mimeMessage.setHeader(name, MimeMessageUtility.fold(12, value));
+                } else {
+                    mimeMessage.setHeader(name, value);
+                }
             }
         }
     }
