@@ -653,7 +653,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                             // Apply newly calculated initial permanent listeners
                             List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(myList, _2secNanos);
-                            LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes);
+                            LOG.info("This cluster member \"{}\" now runs permanent listeners for: {}", localMember, startedOnes);
                         } else {
                             LOG.info("Awaiting the permanent listeners to start as dictated by master \"{}\"", master);
                         }
