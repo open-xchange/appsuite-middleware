@@ -144,11 +144,11 @@ public class ResourceJsonResultConverter implements ResultConverter {
                     AnonymizerService<Resource> anonymizer = Anonymizers.optAnonymizerFor(Module.RESOURCE);
                     for (Resource resource : deleted) {
                         resource = anonymizer.anonymize(resource, session);
-                        jResources.put(ResourceWriter.writeResource(resource));
+                        jDeletedResources.put(ResourceWriter.writeResource(resource));
                     }
                 } else {
                     for (Resource resource : deleted) {
-                        jResources.put(ResourceWriter.writeResource(resource));
+                        jDeletedResources.put(ResourceWriter.writeResource(resource));
                     }
                 }
             }
