@@ -787,10 +787,10 @@ class UpdateData {
             TaskIterator ti;
             if (own) {
                 ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
-                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE }, emptyList, listWithFolder, emptyList);
+                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE, CalendarObject.TITLE }, emptyList, listWithFolder, emptyList);
             } else {
                 ti = storage.search(ctx, getUserId(), search, 0, Order.ASCENDING, new int[] {
-                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE }, listWithFolder, emptyList, emptyList);
+                    Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE, CalendarObject.TITLE }, listWithFolder, emptyList, emptyList);
             }
 
             final boolean next = TaskLogic.makeRecurrence(updated);

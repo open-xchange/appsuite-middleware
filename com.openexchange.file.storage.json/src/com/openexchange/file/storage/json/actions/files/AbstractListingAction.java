@@ -75,6 +75,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.RemoteInternalPreviewService;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -129,7 +130,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
                     SearchIterator<File> sf = new SearchIteratorDelegator<File>(files);
                     timedResult = new TimedResultImpl(sf, timedResult.sequenceNumber());
-                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService, Services.getThreadControlService()));
                 } finally {
                     SearchIterators.close(results);
                 }
@@ -164,7 +165,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     }
 
                     results = new SearchIteratorDelegator<File>(files);
-                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService, Services.getThreadControlService()));
                 } finally {
                     SearchIterators.close(searchIterator);
                 }
@@ -197,7 +198,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     }
 
                     results = new SearchIteratorDelegator<File>(files);
-                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService));
+                    threadPool.submit(new TriggerPreviewServiceTask(files, FileStorageUtility.getNumberOfPregeneratedPreviews(), request, previewService, Services.getThreadControlService()));
                 } finally {
                     SearchIterators.close(searchIterator);
                 }
@@ -222,18 +223,20 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
     private static final class TriggerPreviewServiceTask extends AbstractTask<Void> {
 
+        private final ThreadControlService threadControl;
         final ServerSession session;
         private final List<File> files;
         private final AJAXRequestData requestData;
         private final PreviewService previewService;
         private int numberOfPregeneratedPreviews;
 
-        TriggerPreviewServiceTask(List<File> files, int numberOfPregeneratedPreviews, InfostoreRequest request, PreviewService previewService) throws OXException {
+        TriggerPreviewServiceTask(List<File> files, int numberOfPregeneratedPreviews, InfostoreRequest request, PreviewService previewService, ThreadControlService threadControl) throws OXException {
             super();
             this.files = files;
             this.numberOfPregeneratedPreviews = numberOfPregeneratedPreviews;
             this.session = request.getSession();
             this.previewService = previewService;
+            this.threadControl = null == threadControl ? ThreadControlService.DUMMY_CONTROL : threadControl;
 
             AJAXRequestData requestData = request.getRequestData().copyOf();
             requestData.putParameter("width", "160");
@@ -242,7 +245,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             requestData.putParameter("scaleType", "cover");
             this.requestData = requestData;
         }
-        
+
         @Override
         public void setThreadName(ThreadRenamer threadRenamer) {
             threadRenamer.renamePrefix("Async-DC-Trigger");
@@ -250,38 +253,46 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
         @Override
         public Void call() {
-            IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-            for (Iterator<File> iter = files.iterator(); numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
-                final String id = iter.next().getId();
+            Thread currentThread = Thread.currentThread();
+            boolean added = threadControl.addThread(currentThread);
+            try {
+                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                    final String id = iter.next().getId();
 
-                try {
-                    File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                    if (fileMetadata.getFileSize() != 0) {
-                        IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+                    try {
+                        File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                        if (fileMetadata.getFileSize() != 0) {
+                            IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
-                            @Override
-                            public InputStream newStream() throws OXException, IOException {
-                                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                                InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                                if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                                    return inputStream;
+                                @Override
+                                public InputStream newStream() throws OXException, IOException {
+                                    IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                                    InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+                                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                                        return inputStream;
+                                    }
+                                    return new BufferedInputStream(inputStream, 65536);
                                 }
-                                return new BufferedInputStream(inputStream, 65536);
-                            }
-                        };
-                        FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+                            };
+                            FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
-                        RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
-                        if (null != candidate) {
-                            AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
-                            LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
-                            numberOfPregeneratedPreviews--;
-                        } else {
-                            LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+                            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
+                            if (null != candidate) {
+                                AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
+                                numberOfPregeneratedPreviews--;
+                            } else {
+                                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+                            }
                         }
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", id, session.getUserId(), session.getContextId(), e);
                     }
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", id, session.getUserId(), session.getContextId(), e);
+                }
+            } finally {
+                if (added) {
+                    threadControl.removeThread(currentThread);
                 }
             }
             return null;

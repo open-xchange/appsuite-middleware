@@ -113,6 +113,9 @@ public abstract class AbstractGoogleDriveAccess {
         return rootFolderId;
     }
 
+    /** Status code (400) indicating the request sent by the client was syntactically incorrect. */
+    protected static final int SC_BAD_REQUEST = 400;
+
     /** Status code (401) indicating that the request requires HTTP authentication. */
     protected static final int SC_UNAUTHORIZED = 401;
 

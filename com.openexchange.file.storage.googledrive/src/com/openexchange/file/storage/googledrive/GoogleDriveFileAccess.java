@@ -127,6 +127,19 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         this.userId = session.getUserId();
     }
 
+    private List<Revision> optRevisions(Drive drive, String id) throws IOException, HttpResponseException {
+        List<Revision> revisions;
+        try {
+            revisions = drive.revisions().list(id).setFields("items/id").execute().getItems();
+        } catch (HttpResponseException e) {
+            if (e.getStatusCode() != SC_BAD_REQUEST) {
+                throw e;
+            }
+            revisions = null;
+        }
+        return revisions;
+    }
+
     @Override
     public void startTransaction() throws OXException {
         // Nope
@@ -408,7 +421,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              * thumbnail link is valid for latest revision only
              */
             if (CURRENT_VERSION != version) {
-                List<Revision> revisions = drive.revisions().list(id).setFields("items/id").execute().getItems();
+                List<Revision> revisions = optRevisions(drive, id);
                 if (null == revisions || 0 == revisions.size() || false == version.equals(revisions.get(revisions.size() - 1).getId())) {
                     return null;
                 }
@@ -628,7 +641,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 for (com.google.api.services.drive.model.File file : fileList.getItems()) {
                     GoogleDriveFile metadata = createFile(folderId, file.getId(), file, fields);
                     if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                        List<Revision> revisions = drive.revisions().list(metadata.getId()).setFields("items/id").execute().getItems();
+                        List<Revision> revisions = optRevisions(drive, metadata.getId());
                         if (null != revisions && 0 < revisions.size()) {
                             metadata.setNumberOfVersions(revisions.size());
                             metadata.setVersion(revisions.get(revisions.size() - 1).getId());
@@ -700,7 +713,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         deletedFiles.add(metadata);
                     } else {
                         if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                            List<Revision> revisions = drive.revisions().list(metadata.getId()).setFields("items/id").execute().getItems();
+                            List<Revision> revisions = optRevisions(drive, metadata.getId());
                             if (null != revisions && 0 < revisions.size()) {
                                 metadata.setNumberOfVersions(revisions.size());
                                 metadata.setVersion(revisions.get(revisions.size() - 1).getId());
@@ -821,7 +834,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 for (com.google.api.services.drive.model.File file : fileList.getItems()) {
                     GoogleDriveFile metadata = createFile(folderId, file.getId(), file, fields);
                     if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
-                        List<Revision> revisions = drive.revisions().list(metadata.getId()).setFields("items/id").execute().getItems();
+                        List<Revision> revisions = optRevisions(drive, metadata.getId());
                         if (null != revisions && 0 < revisions.size()) {
                             metadata.setNumberOfVersions(revisions.size());
                             metadata.setVersion(revisions.get(revisions.size() - 1).getId());

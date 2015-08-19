@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,58 @@
  *
  */
 
-package com.openexchange.startup;
+package com.openexchange.snippet.rdb.groupware;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.snippet.rdb.Services;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ThreadControlService} - The thread control to register interruptable threads on shut-down.
+ * {@link RdbSnippetAttachmentBinaryCreateTableUpdateTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ThreadControlService {
+public class RdbSnippetAttachmentBinaryCreateTableUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * The dummy thread control that does nothing at all.
+     * Initialises a new {@link RdbSnippetAttachmentBinaryCreateTableUpdateTask}.
      */
-    public static final ThreadControlService DUMMY_CONTROL = new ThreadControlService() {
+    public RdbSnippetAttachmentBinaryCreateTableUpdateTask() {
+        super();
+    }
 
-        @Override
-        public boolean removeThread(Thread thread) {
-            return false;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        DatabaseService dbService = Services.getService(DatabaseService.class);
+        Connection con = dbService.getForUpdateTask(cid);
+        PreparedStatement stmt = null;
+        try {
+            if (Tools.tableExists(con, RdbSnippetTables.getSnippetAttachmentBinaryName())) {
+                return;
+            }
+            stmt = con.prepareStatement(RdbSnippetTables.getSnippetAttachmentBinaryTable());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            dbService.backForUpdateTask(cid, con);
+            DBUtils.closeSQLStuff(stmt);
         }
+    }
 
-        @Override
-        public void interruptAll() {
-            // Nothing to do
-        }
-
-        @Override
-        public Collection<Thread> getCurrentThreads() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public boolean addThread(Thread thread) {
-            return false;
-        }
-    };
-
-    // -------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Adds specified thread to this thread control
-     *
-     * @param thread The thread to add
-     * @return <code>true</code> if successfully added; otherwise <code>false</code>
-     */
-    boolean addThread(Thread thread);
-
-    /**
-     * Removes specified thread from this thread control
-     *
-     * @param thread The thread to remove
-     * @return <code>true</code> if successfully removed; otherwise <code>false</code> if no such thread is present in this thread control
-     */
-    boolean removeThread(Thread thread);
-
-    /**
-     * Gets the (unmodifiable) {@link Collection} view on currently managed threads.
-     *
-     * @return The currently managed threads
-     */
-    Collection<Thread> getCurrentThreads();
-
-    /**
-     * Interrupts all currently managed threads.
-     */
-    void interruptAll();
-
+    @Override
+    public String[] getDependencies() {
+        return new String[] { RdbSnippetCreateTableTask.class.getName(), RdbSnipptetFixAttachmentPrimaryKey.class.getName() };
+    }
 }

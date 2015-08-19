@@ -142,7 +142,7 @@ public final class BoxFile extends DefaultFile {
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     MimeTypeMap map = Services.getService(MimeTypeMap.class);
-                    String contentType = map.getContentType(name);
+                    String contentType = null == map ? "application/octet-stream" : map.getContentType(name);
                     setFileMIMEType(contentType);
                 }
                 if (set.contains(Field.FILE_SIZE)) {

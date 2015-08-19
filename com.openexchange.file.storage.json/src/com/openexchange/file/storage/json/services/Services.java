@@ -61,6 +61,7 @@ import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -148,6 +149,11 @@ public class Services {
     public static PreviewService getPreviewService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(PreviewService.class);
+    }
+
+    public static ThreadControlService getThreadControlService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ThreadControlService.class);
     }
 
 }

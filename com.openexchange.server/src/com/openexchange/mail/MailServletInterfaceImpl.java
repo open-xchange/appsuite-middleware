@@ -184,6 +184,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -1919,15 +1920,45 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
         }
         /*
-         * Set account information
+         * Set account information & filter null elements
          */
-        List<MailMessage> l = new LinkedList<MailMessage>();
-        for (MailMessage mail : mails) {
-            if (mail != null) {
-                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                    mail.setAccountId(accountId);
+        {
+            List<MailMessage> l = null;
+            int j = 0;
+
+            boolean b = true;
+            while (b && j < mails.length) {
+                MailMessage mail = mails[j];
+                if (mail == null) {
+                    l = new ArrayList<MailMessage>(mails.length);
+                    if (j > 0) {
+                        for (int k = 0; k < j; k++) {
+                            l.add(mails[k]);
+                        }
+                    }
+                    b = false;
+                } else {
+                    if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                        mail.setAccountId(accountId);
+                    }
+                    j++;
                 }
-                l.add(mail);
+            }
+
+            if (null != l && j < mails.length) {
+                while (j < mails.length) {
+                    MailMessage mail = mails[j];
+                    if (mail != null) {
+                        if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                            mail.setAccountId(accountId);
+                        }
+                        l.add(mail);
+                    }
+                    j++;
+                }
+
+                mails = l.toArray(new MailMessage[l.size()]);
+                l = null; // Help GC
             }
         }
         /*
@@ -1947,7 +1978,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
-        return new SearchIteratorDelegator<MailMessage>(l);
+        return new ArrayIterator<MailMessage>(mails);
     }
 
     private static boolean onlyNull(MailMessage[] mails) {
