@@ -989,7 +989,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         simpleDataCheck(cdao, edao, uid);
         fillUserParticipants(cdao);
-        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        if (isInsert) {
+            recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        }
         return isInsert;
     }
 
@@ -1839,6 +1841,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.changeRecurrenceString(cdao);
             }
             cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+            correctStartAndEndDate(cdao);
             cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
@@ -1848,6 +1851,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return CalendarCollectionService.RECURRING_EXCEPTION_DELETE;
         }
         return CalendarCollectionService.RECURRING_NO_ACTION;
+    }
+
+    private void correctStartAndEndDate(CalendarDataObject cdao) throws OXException {
+        RecurringResultsInterface results = recColl.calculateFirstRecurring(cdao);
+        RecurringResultInterface result = results.getRecurringResult(0);
+        if (cdao.getStartDate().getTime() != result.getStart()) {
+            cdao.setStartDate(new Date(result.getStart()));
+        }
+        if (cdao.getEndDate().getTime() != result.getEnd()) {
+            cdao.setEndDate(new Date(result.getEnd()));
+        }
     }
 
     private void calculateEndDateForNoType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
@@ -1995,7 +2009,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-            //checkAndRemoveRecurrenceFields(cdao);
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
             cdao.setRecurrence(edao.getRecurrence());
             /*
              * Return specified recurring action unchanged
