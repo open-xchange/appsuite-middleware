@@ -11,6 +11,7 @@
 
  - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table + Return proper SQL CREATE statement
  - Fix for bug 40439: Introduced a special "ShutDownRuntimeException" that gets thrown if services are attempted being obtained during shut-down
+ - Fix for bug 40514: Optionally get a file's revisions
 
 * 2015-08-18 - lars.hoogestraat@open-xchange.com
 
