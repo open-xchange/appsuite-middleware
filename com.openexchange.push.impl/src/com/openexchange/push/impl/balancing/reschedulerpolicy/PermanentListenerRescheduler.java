@@ -413,8 +413,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         public Void call() {
             synchronized (monitor) {
                 try {
-                    LOG.info("Rescheduling for the following push users: {}", allPushUsers);
-
                     // Get local member
                     Member localMember = hzInstance.getCluster().getLocalMember();
 
@@ -447,9 +445,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                     if (isCapable) {
                                         capableMembers.add(member);
                                         memberAdded = true;
-                                        LOG.info("Allowed {} on cluster member \"{}\", hence considered for rescheduling computation.", PushManagerExtendedService.class.getSimpleName(), member);
+                                        LOG.info("Cluster member \"{}\" also runs a {}, hence considered as companion.", member, PushManagerExtendedService.class.getSimpleName());
                                     } else {
-                                        LOG.info("Disallowed {} on cluster member \"{}\", hence ignored for rescheduling computation.", PushManagerExtendedService.class.getSimpleName(), member);
+                                        LOG.info("Cluster member \"{}\" does not run a {}, hence ignored.", member, PushManagerExtendedService.class.getSimpleName());
                                     }
                                 } catch (InterruptedException e) {
                                     // Interrupted - Keep interrupted state
