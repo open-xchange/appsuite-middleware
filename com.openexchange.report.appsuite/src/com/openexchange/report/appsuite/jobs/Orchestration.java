@@ -50,17 +50,25 @@
 package com.openexchange.report.appsuite.jobs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.Member;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.report.appsuite.ContextReport;
@@ -72,7 +80,6 @@ import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.serialization.PortableReport;
 import com.openexchange.report.appsuite.serialization.Report;
 
-
 /**
  * The {@link Orchestration} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast:
  *
@@ -81,7 +88,7 @@ import com.openexchange.report.appsuite.serialization.Report;
  *
  *
  * A Lock com.openexchange.report.Reports.[reportType] that acts as a cluster-wide lock for the given resourceType to coordinate
- * when to set up a  new report
+ * when to set up a new report
  * A Lock com.openexchange.report.Reports.Merge.[reportType] that protects the merge operations for the global report
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -136,12 +143,10 @@ public class Orchestration implements ReportService {
     @Override
     public String run(String reportType) throws OXException {
         // Start a new report run or retrieve the UUID of an already running report
-
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
         String uuid;
         IMap<String, PortableReport> pendingReports;
-        int numberOfTasks;
         List<Integer> allContextIds;
         // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
@@ -163,14 +168,6 @@ public class Orchestration implements ReportService {
             // Load all contextIds
             allContextIds = Services.getService(ContextService.class).getAllContextIds();
 
-            // Chop them up into blocks of 200 each + a remainder
-            numberOfTasks = allContextIds.size() / 200;
-
-            int rest = allContextIds.size() % 200;
-            if (rest > 0) {
-                numberOfTasks++;
-            }
-
             // Set up the report instance
             Report report = new Report(uuid, reportType, System.currentTimeMillis());
             report.setNumberOfTasks(allContextIds.size());
@@ -184,21 +181,38 @@ public class Orchestration implements ReportService {
         }
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        ExecutorService executorService = hazelcast.getExecutorService(REPORT_TYPE_DEFAULT);
+        IExecutorService executorService = hazelcast.getExecutorService(REPORT_TYPE_DEFAULT);
 
-        for (int i = 0; i < numberOfTasks; i++) {
-            int startIndex = i * 200;
-            int endIndex = (i + 1) * 200;
-            if (endIndex >= allContextIds.size()) {
-                endIndex = allContextIds.size();
+        DatabaseService databaseService = Services.getService(DatabaseService.class);
+
+        List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
+
+        while (!contextsToProcess.isEmpty()) {
+            Integer firstRemainingContext = contextsToProcess.get(0);
+            Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
+            Member member = getRandomMember(hazelcast);
+
+            executorService.executeOnMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
+
+            for (int i = 0; i < contextsInSameSchema.length; i++) {
+                contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
             }
-
-            List<Integer> chunk = new ArrayList<Integer>(allContextIds.subList(startIndex, endIndex)); // Create new ArrayList, so it is serializable
-            executorService.submit(new AnalyzeContextBatch(uuid, reportType, chunk));
+            System.out.println("After this round " + contextsToProcess.size() + " contexts have to get processed!");
         }
-
-
         return uuid;
+    }
+
+    private Member getRandomMember(HazelcastInstance hazelcast) {
+        Set<Member> members = hazelcast.getCluster().getMembers();
+        int i = 0;
+        int max = new Random().nextInt(members.size());
+        Iterator<Member> iterator = members.iterator();
+        Member member = iterator.next();
+        while (iterator.hasNext() && (i < max)) {
+            member = iterator.next();
+            i++;
+        }
+        return member;
     }
 
     /**
@@ -248,7 +262,8 @@ public class Orchestration implements ReportService {
     }
 
     // Called by the AnalyzeContextBatch for every context so the context specific entries can be
-    // added to the global report
+    // added to the global report. Adds context to general report and mark context as done
+
     public void done(ContextReport contextReport) {
 
         String reportType = contextReport.getType();
@@ -263,7 +278,7 @@ public class Orchestration implements ReportService {
         ILock lock = hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
         Report report;
         try {
-            if(!lock.tryLock(60, TimeUnit.MINUTES)) {
+            if (!lock.tryLock(60, TimeUnit.MINUTES)) {
                 // Abort report
                 flushPending(contextReport.getUUID(), reportType);
                 LOG.error("Could not acquire merge lock! Aborting {} for type: {}", contextReport.getUUID(), reportType);
@@ -281,7 +296,7 @@ public class Orchestration implements ReportService {
                 return;
             }
             // Run all applicable cumulators to add the context report results to the global report
-            for(ContextReportCumulator cumulator: Services.getContextReportCumulators()) {
+            for (ContextReportCumulator cumulator : Services.getContextReportCumulators()) {
                 if (cumulator.appliesTo(reportType)) {
                     cumulator.merge(contextReport, report);
                 }
@@ -306,14 +321,14 @@ public class Orchestration implements ReportService {
         // Looks like this was the last context result we were waiting for
         // So finish up the report
         // First run the global system handlers
-        for(ReportSystemHandler handler: Services.getSystemHandlers()) {
+        for (ReportSystemHandler handler : Services.getSystemHandlers()) {
             if (handler.appliesTo(reportType)) {
                 handler.runSystemReport(report);
             }
         }
 
         // And perform the finishing touches
-        for(ReportFinishingTouches handler: Services.getFinishingTouches()) {
+        for (ReportFinishingTouches handler : Services.getFinishingTouches()) {
             if (handler.appliesTo(reportType)) {
                 handler.finish(report);
             }
@@ -328,8 +343,10 @@ public class Orchestration implements ReportService {
         lock.destroy();
     }
 
-    public void abort(String uuid, String reportType, int ctxId) {
-        // This contextReport failed, so at least decrese the number of pending tasks
+    private static int abortCount = 0;
+
+    public void abort(String uuid, String reportType) {
+        // This contextReport failed, so at least decrease the number of pending tasks
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
         IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
@@ -337,9 +354,9 @@ public class Orchestration implements ReportService {
         ILock lock = hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
         Report report;
         try {
-            if(!lock.tryLock(10, TimeUnit.MINUTES)) {
+            if (!lock.tryLock(10, TimeUnit.MINUTES)) {
                 // Abort report
-                lock = null; // Don't care about locking then
+                lock = null;// Don't care about locking then
             }
         } catch (InterruptedException e) {
             return;
@@ -354,6 +371,8 @@ public class Orchestration implements ReportService {
             }
             // Mark context as done
             report.markTaskAsDone();
+            abortCount++;
+            System.out.println("Currently aborted " + abortCount + " contexts.");
             // Save it back to hazelcast
             pendingReports.put(report.getUUID(), PortableReport.wrap(report));
         } finally {

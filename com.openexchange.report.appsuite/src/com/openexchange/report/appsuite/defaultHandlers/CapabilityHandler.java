@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -101,19 +101,27 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     @Override
     public void runUserReport(UserReport userReport) {
+        //TODO improve performance!
         try {
-            // First look up the capabilities for this user
-            CapabilitySet capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+            long startUserReport = System.currentTimeMillis();
+            Set<Capability> capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId()).asSet();
+            if (userReport.getContext().getContextId() == 328) {
+                System.out.println(userReport.getUser().getId() + " Retrieving capabilities took " + (System.currentTimeMillis() - startUserReport) + "ms.");
+            }
 
+            long prepareCollection = System.currentTimeMillis();
             // Next, turn them into a list of strings
             ArrayList<String> c = new ArrayList<String>(capabilities.size());
-
             for (Capability capability : capabilities) {
                 c.add(capability.getId().toLowerCase());
             }
 
             // Sort them alphabetically so we can more easily find the same list of capabilities again
             Collections.sort(c);
+            if (userReport.getContext().getContextId() == 328) {
+                System.out.println(userReport.getUser().getId() + " Preparing collection took " + (System.currentTimeMillis() - prepareCollection) + "ms.");
+            }
+            long restWork = System.currentTimeMillis();
 
             StringBuilder cString = new StringBuilder();
             for (String cap : c) {
@@ -139,6 +147,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             } else {
                 userReport.set("macdetail", "mailadmin", Boolean.FALSE);
             }
+            if (userReport.getContext().getContextId() == 328) {
+                System.out.println(userReport.getUser().getId() + " All the rest " + (System.currentTimeMillis() - restWork) + "ms.");
+            }
+
         } catch (OXException e) {
             LOG.error("", e);
         }

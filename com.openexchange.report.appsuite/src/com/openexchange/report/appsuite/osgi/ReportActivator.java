@@ -7,6 +7,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -37,7 +38,7 @@ public class ReportActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ContextService.class, UserService.class, HazelcastInstance.class,
-            CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class };
+            CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
