@@ -1,3 +1,7 @@
+* 2015-08-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table
+
 * 2015-07-27 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 39862: Null guard
