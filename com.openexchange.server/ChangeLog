@@ -10,6 +10,7 @@
 * 2015-08-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table
+ - Fix for bug 40439: Introduced a special "ShutDownRuntimeException" that gets thrown if services are attempted being obtained during shut-down
 
 * 2015-08-18 - lars.hoogestraat@open-xchange.com
 
