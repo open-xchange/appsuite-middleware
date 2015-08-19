@@ -50,6 +50,7 @@
 package com.openexchange.startup;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * {@link ThreadControlService} - The thread control to register interruptable threads on shut-down.
@@ -58,6 +59,34 @@ import java.util.Collection;
  * @since v7.8.0
  */
 public interface ThreadControlService {
+
+    /**
+     * The dummy thread control that does nothing at all.
+     */
+    public static final ThreadControlService DUMMY_CONTROL = new ThreadControlService() {
+
+        @Override
+        public boolean removeThread(Thread thread) {
+            return false;
+        }
+
+        @Override
+        public void interruptAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public Collection<Thread> getCurrentThreads() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public boolean addThread(Thread thread) {
+            return false;
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Adds specified thread to this thread control
