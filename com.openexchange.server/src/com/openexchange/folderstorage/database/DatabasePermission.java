@@ -59,6 +59,8 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public final class DatabasePermission implements Permission {
 
+    private static final long serialVersionUID = -7152653657127451770L;
+
     private int system;
 
     private int deletePermission;
@@ -269,6 +271,14 @@ public final class DatabasePermission implements Permission {
     @Override
     public boolean isVisible() {
         return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(64)
+            .append((admin ? "_FolderAdmin" : "")).append((group ? "Group" : "User")).append(entity).append('@')
+            .append(folderPermission).append('.').append(readPermission).append('.').append(writePermission).append('.').append(deletePermission)
+            .append(' ').append("system").append('=').append(system).toString();
     }
 
 }
