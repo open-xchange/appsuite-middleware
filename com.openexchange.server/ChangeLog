@@ -1,3 +1,7 @@
+* 2015-08-19 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 40452: Ensure title is checked when checking recurring task for duplicates
+
 * 2015-08-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38404: Creator of series is losing his confirmation status, if change exceptions are created.
