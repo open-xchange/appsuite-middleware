@@ -62,16 +62,16 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link RdbSnipptetAttachmentBinaryCreateTableUpdateTask}
+ * {@link RdbSnippetAttachmentBinaryCreateTableUpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RdbSnipptetAttachmentBinaryCreateTableUpdateTask extends UpdateTaskAdapter {
+public class RdbSnippetAttachmentBinaryCreateTableUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initialises a new {@link RdbSnipptetAttachmentBinaryCreateTableUpdateTask}.
+     * Initialises a new {@link RdbSnippetAttachmentBinaryCreateTableUpdateTask}.
      */
-    public RdbSnipptetAttachmentBinaryCreateTableUpdateTask() {
+    public RdbSnippetAttachmentBinaryCreateTableUpdateTask() {
         super();
     }
 
