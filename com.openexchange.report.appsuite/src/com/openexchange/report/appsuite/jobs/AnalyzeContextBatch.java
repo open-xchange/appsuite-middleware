@@ -210,7 +210,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                 for (int i = 1; i <= 3; i++) {
                     try {
                         LOG.info("Schema update in progress. Wait {} of 3 and try again", i);
-                        Thread.sleep(10000L);
+                        Thread.sleep(30000L);
                         return Services.getService(ContextService.class).getContext(contextId);
                     } catch (InterruptedException e1) {
                         // should not happen

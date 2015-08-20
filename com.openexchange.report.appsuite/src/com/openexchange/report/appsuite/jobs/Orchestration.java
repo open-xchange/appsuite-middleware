@@ -188,16 +188,18 @@ public class Orchestration implements ReportService {
         List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
 
         while (!contextsToProcess.isEmpty()) {
+            LOG.info("{} contexts still to assign.", contextsToProcess.size());
             Integer firstRemainingContext = contextsToProcess.get(0);
             Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
+
             Member member = getRandomMember(hazelcast);
+            LOG.info("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
 
             executorService.executeOnMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
 
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
             }
-            System.out.println("After this round " + contextsToProcess.size() + " contexts have to get processed!");
         }
         return uuid;
     }
@@ -343,8 +345,6 @@ public class Orchestration implements ReportService {
         lock.destroy();
     }
 
-    private static int abortCount = 0;
-
     public void abort(String uuid, String reportType) {
         // This contextReport failed, so at least decrease the number of pending tasks
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
@@ -371,8 +371,6 @@ public class Orchestration implements ReportService {
             }
             // Mark context as done
             report.markTaskAsDone();
-            abortCount++;
-            System.out.println("Currently aborted " + abortCount + " contexts.");
             // Save it back to hazelcast
             pendingReports.put(report.getUUID(), PortableReport.wrap(report));
         } finally {
