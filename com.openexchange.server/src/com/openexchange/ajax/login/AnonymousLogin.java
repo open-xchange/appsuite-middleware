@@ -85,7 +85,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
      *
      * @param login
      */
-    public AnonymousLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+    public AnonymousLogin(ShareLoginConfiguration conf, Set<LoginRampUpService> rampUp) {
         super(conf, rampUp);
     }
 

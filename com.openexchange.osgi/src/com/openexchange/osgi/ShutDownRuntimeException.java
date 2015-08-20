@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,51 @@
  *
  */
 
-package com.openexchange.snippet.rdb.groupware;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.snippet.rdb.Services;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
+package com.openexchange.osgi;
 
 /**
- * {@link RdbSnipptetAttachmentBinaryCreateTableUpdateTask}
+ * {@link ShutDownRuntimeException} - Thrown if a shut-down has been initiated.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class RdbSnipptetAttachmentBinaryCreateTableUpdateTask extends UpdateTaskAdapter {
+public class ShutDownRuntimeException extends RuntimeException {
+
+    private static final long serialVersionUID = -8818954753984880228L;
 
     /**
-     * Initialises a new {@link RdbSnipptetAttachmentBinaryCreateTableUpdateTask}.
+     * Initializes a new {@link ShutDownRuntimeException} with default message <code>"The server is about to shut-down"</code>.
      */
-    public RdbSnipptetAttachmentBinaryCreateTableUpdateTask() {
-        super();
+    public ShutDownRuntimeException() {
+        super("The server is about to shut-down");
     }
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(cid);
-        PreparedStatement stmt = null;
-        try {
-            if (Tools.tableExists(con, RdbSnippetTables.getSnippetAttachmentBinaryName())) {
-                return;
-            }
-            stmt = con.prepareStatement(RdbSnippetTables.getSnippetAttachmentBinaryTable());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            dbService.backForUpdateTask(cid, con);
-            DBUtils.closeSQLStuff(stmt);
-        }
+    /**
+     * Initializes a new {@link ShutDownRuntimeException}.
+     *
+     * @param message The detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     */
+    public ShutDownRuntimeException(String message) {
+        super(message);
     }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] { RdbSnippetCreateTableTask.class.getName(), RdbSnipptetFixAttachmentPrimaryKey.class.getName() };
+    /**
+     * Initializes a new {@link ShutDownRuntimeException}.
+     *
+     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.)
+     */
+    public ShutDownRuntimeException(Throwable cause) {
+        super(cause);
     }
+
+    /**
+     * Initializes a new {@link ShutDownRuntimeException}.
+     *
+     * @param message The detail message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.)
+     */
+    public ShutDownRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

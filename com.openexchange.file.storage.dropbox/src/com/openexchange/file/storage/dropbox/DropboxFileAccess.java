@@ -63,6 +63,7 @@ import com.dropbox.client2.DropboxAPI.ThumbFormat;
 import com.dropbox.client2.DropboxAPI.ThumbSize;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -321,18 +322,42 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final long fileSize = file.getFileSize();
             final long length = fileSize > 0 ? fileSize : -1L;
-            final Entry entry;
+            Entry entry = null;
             if (Strings.isEmpty(path) || !exists(file.getFolderId(), file.getId(), CURRENT_VERSION)) {
                 // Create
-                entry = dropboxAPI.putFile(
-                    new StringBuilder(file.getFolderId()).append('/').append(file.getFileName()).toString(),
-                    data,
-                    length,
-                    null,
-                    null);
-                DropboxFile savedFile = new DropboxFile(entry, userId);
-                file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
-                return savedFile.getIDTuple();
+                ThresholdFileHolder sink = null;
+                try {
+                    sink = new ThresholdFileHolder();
+                    sink.write(data);
+
+                    String name = file.getFileName();
+                    String fileName = name;
+                    int count = 0;
+
+                    boolean retry = true;
+                    while (retry) {
+                        try {
+                            entry = dropboxAPI.putFile(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString(), sink.getStream(), length, null, null);
+                            retry = false;
+                        } catch (DropboxServerException e) {
+                            if (SC_CONFLICT != e.error) {
+                                throw e;
+                            }
+                            fileName = FileStorageUtility.enhance(name, ++count);
+                        }
+                    }
+
+                    if (null == entry) {
+                        IllegalStateException x = new IllegalStateException("Dropbox upload failed");
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
+                    }
+
+                    DropboxFile savedFile = new DropboxFile(entry, userId);
+                    file.copyFrom(savedFile, Field.ID, Field.FOLDER_ID, Field.VERSION, Field.FILE_SIZE, Field.FILENAME, Field.LAST_MODIFIED, Field.CREATED);
+                    return savedFile.getIDTuple();
+                } finally {
+                    Streams.close(sink);
+                }
             } else {
                 // Update, adjust metadata as needed
                 entry = dropboxAPI.putFileOverwrite(path, data, length, null);

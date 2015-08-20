@@ -1210,6 +1210,22 @@ ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xcha
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
+# SoftwareChange_Request-2672
+ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
+
+# SoftwareChange_Request-2662
+ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
+
+# SoftwareChange_Request-2652
+ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1250,6 +1266,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-12 (2671)
 * Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>

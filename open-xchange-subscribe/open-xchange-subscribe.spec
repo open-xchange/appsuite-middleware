@@ -168,6 +168,11 @@ if [ ${1:-0} -eq 2 ]; then
     
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
+
+    # SoftwareChange_Request-2670
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/t-online.yml 7.8.0~ -- "$@"
+    ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
+    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
     
 fi
 
@@ -191,6 +196,8 @@ fi
 %doc docs/
 
 %changelog
+* Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-12 (2671)
 * Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>

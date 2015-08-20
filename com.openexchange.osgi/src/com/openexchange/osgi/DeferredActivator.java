@@ -202,6 +202,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected final AtomicBoolean started;
 
     /**
+     * A flag to indicate that a stop has been performed.
+     */
+    protected volatile boolean stopPerformed;
+
+    /**
      * The bit mask reflecting already tracked needed services.
      */
     private int availability;
@@ -513,6 +518,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     }
 
     private void startUp(final boolean async) throws Exception {
+        stopPerformed = false;
         if (async) {
             final Runnable task = new Runnable() {
 
@@ -555,6 +561,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             LOG.error("", e);
             throw e;
         } finally {
+            stopPerformed = true;
             reset();
         }
     }
@@ -591,6 +598,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
+        if (stopPerformed) {
+            throw new ShutDownRuntimeException();
+        }
+
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
@@ -615,6 +626,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @SuppressWarnings("unchecked")
     @Override
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        if (stopPerformed) {
+            throw new ShutDownRuntimeException();
+        }
+
         ServiceProvider<?> serviceProvider = services.get(clazz);
         if (null != serviceProvider) {
             Object service = serviceProvider.getService();

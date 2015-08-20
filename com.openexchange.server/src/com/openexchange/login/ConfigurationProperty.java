@@ -49,6 +49,7 @@
 
 package com.openexchange.login;
 
+import com.openexchange.configuration.InitProperty;
 import com.openexchange.sessiond.SessiondProperty;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.sessiond.SessiondProperty;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ConfigurationProperty {
+public enum ConfigurationProperty implements InitProperty {
 
     /**
      * Configures if some user is able to reenter his existing session after closing the browser tab or the complete browser. Setting this
@@ -137,10 +138,12 @@ public enum ConfigurationProperty {
         this.defaultValue = defaultValue;
     }
 
+    @Override
     public String getPropertyName() {
         return propertyName;
     }
 
+    @Override
     public String getDefaultValue() {
         return defaultValue;
     }

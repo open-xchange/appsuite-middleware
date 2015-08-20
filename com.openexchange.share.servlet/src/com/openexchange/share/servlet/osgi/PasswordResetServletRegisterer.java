@@ -57,7 +57,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.share.servlet.internal.PasswordResetServlet;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 
 /**
  * Dependently registers the share servlet.
@@ -71,7 +70,7 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
 
     private final BundleContext context;
     private final Lock lock;
-    private final ShareLoginConfiguration loginConfig;
+    private final byte[] hashSalt;
 
     private String alias;
     private HttpService httpService;
@@ -80,14 +79,13 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
     /**
      * Initializes a new {@link PasswordResetServletRegisterer}.
      *
-     * @param shareHandlerRegistry The share handler registry
      * @param context The bundle context
-     * @param loginConfig
+     * @param hashSalt The hash salt to use
      */
-    public PasswordResetServletRegisterer(BundleContext context, ShareLoginConfiguration loginConfig) {
+    public PasswordResetServletRegisterer(BundleContext context, byte[] hashSalt) {
         super();
         this.context = context;
-        this.loginConfig = loginConfig;
+        this.hashSalt = hashSalt;
         this.lock = new ReentrantLock();
     }
 
@@ -147,7 +145,7 @@ public final class PasswordResetServletRegisterer implements ServiceTrackerCusto
 
     private boolean registerServlet(String alias, HttpService httpService) {
         try {
-            httpService.registerServlet(alias, new PasswordResetServlet(loginConfig), null, null);
+            httpService.registerServlet(alias, new PasswordResetServlet(hashSalt), null, null);
             LOG.info("PasswordResetServlet successfully registered");
             return true;
         } catch (Exception e) {

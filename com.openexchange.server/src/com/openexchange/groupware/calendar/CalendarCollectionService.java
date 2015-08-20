@@ -346,7 +346,7 @@ public interface CalendarCollectionService {
 
     public void checkUserParticipantObject(final UserParticipant up, final int folder_type) throws OXException;
 
-    public boolean detectTimeChange(final CalendarDataObject cdao, final CalendarDataObject edao);
+    public boolean detectTimeChange(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException;
 
     /**
      * Gets an appointment by specified ID

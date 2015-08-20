@@ -189,7 +189,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
                             if (Strings.isEmpty(adminLogin)) {
                                 System.out.println("You must provide administrative credentials to proceed.");
                                 printHelp(options);
-                                System.exit(-1);
+                                // Use correct exit code, see com.openexchange.admin.console.BasicCommandlineOptions.SYSEXIT_MISSING_OPTION
+                                System.exit(104);
                                 return null;
                             }
 
@@ -197,7 +198,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
                             if (Strings.isEmpty(adminPassword)) {
                                 System.out.println("You must provide administrative credentials to proceed.");
                                 printHelp(options);
-                                System.exit(-1);
+                                // Use correct exit code, see com.openexchange.admin.console.BasicCommandlineOptions.SYSEXIT_MISSING_OPTION
+                                System.exit(104);
                                 return null;
                             }
 

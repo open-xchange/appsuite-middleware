@@ -47,17 +47,28 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.configuration;
 
 
 /**
- * {@link TOnlineDETEst}
+ * {@link InitProperty}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class TOnlineDETEst extends GenericSubscribeServiceTestHelpers{
-    public void testTOnlineDE(){
-        checkSingleCrawler("t-online.de");
-    }
+public interface InitProperty {
+
+    /**
+     * Gets the property name.
+     *
+     * @return The property name
+     */
+    String getPropertyName();
+
+    /**
+     * Gets the default property value.
+     *
+     * @return The default value
+     */
+    String getDefaultValue();
 
 }

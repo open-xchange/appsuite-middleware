@@ -157,11 +157,8 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
         public int performUpdate(final Connection writeCon) throws SQLException {
 			stmt = writeCon.prepareStatement(sql);
 			fillStatement();
-			statementString = stmt.toString();
-			LOG.trace(statementString);
-			final int updated =  stmt.executeUpdate();
-			//System.out.println(String.format("%d ::: %s",updated,statementString));
-			return updated;
+			LOG.trace("{}", stmt);
+			return stmt.executeUpdate();
 		}
 
 		public abstract void fillStatement() throws SQLException;
