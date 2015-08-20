@@ -1,6 +1,7 @@
 * 2015-08-20 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 40527: Use correct folder ID in share link for internal users
+ - Fix for bug 40508: Add "edit_password" capability to capability set for non-anonymous guests
 
 * 2015-08-19 - lars.hoogestraat@open-xchange.com
 
