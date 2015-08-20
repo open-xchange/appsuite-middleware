@@ -535,7 +535,7 @@ public class ReportClientBase extends AbstractJMXTools {
                 done = !found;
 
                 if (!done) {
-                    Thread.sleep(silent ? 60000 : 1000);
+                    Thread.sleep(silent ? 60000 : 10000);
                 }
             }
         } catch (Exception e) {
