@@ -50,6 +50,7 @@
 package com.openexchange.share.core.tools;
 
 import org.apache.http.client.utils.URIBuilder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
@@ -90,9 +91,17 @@ public class ShareLinks {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
+        StringBuilder fragment = new StringBuilder(64);
         if (Strings.isNotEmpty(item)) {
-            fragment.append("&item=").append(item);
+            fragment.append("!&app=io.ox/").append(module).append("&folder=").append(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+            String[] fileId = item.split("/");
+            if (fileId.length == 2) {
+                fragment.append("&item=").append(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID).append("/").append(fileId[1]);
+            } else {
+                fragment.append("&item=").append(item);
+            }
+        } else {
+            fragment.append("!&app=io.ox/").append(module).append("&folder=").append(folder);
         }
 
         return prepare(hostData)
