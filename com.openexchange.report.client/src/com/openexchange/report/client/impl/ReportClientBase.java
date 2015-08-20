@@ -698,7 +698,7 @@ public class ReportClientBase extends AbstractJMXTools {
         if (interval < 1000) {
             return interval + " milliseconds";
         }
-        long diffInSeconds = interval / 1000;
+        long diffInSeconds = (interval / 1000) * (110/100);
 
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
