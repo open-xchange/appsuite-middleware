@@ -66,6 +66,7 @@ import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
 import ezvcard.ValidationWarnings;
 import ezvcard.io.text.VCardReader;
+import ezvcard.util.IOUtils;
 
 /**
  * {@link VCardImportIterator}
@@ -95,7 +96,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
         vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
-        reader = new VCardReader(vCardStream);
+        reader = new VCardReader(IOUtils.utf8Reader(vCardStream));
     }
 
     /**
