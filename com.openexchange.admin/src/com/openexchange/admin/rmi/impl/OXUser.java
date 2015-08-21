@@ -1026,7 +1026,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 Integer fsId = getData(ctx, usrdata, credentials).getFilestoreId();
                 if (fsId == null || fsId.intValue() <= 0) {
                     if (!allowChangingQuotaIfNoFileStorageSet) {
-                        throw new StorageException("Quota cannot be changed for user " + userid + " in context " + ctx.getId() + " since that user has no file storage set.");
+                        throw new StorageException("Quota cannot be changed for user " + userid + " in context " + ctx.getId() + " since that user has no file storage set. See \"ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET\".");
                     }
 
                     // Auto-select next suitable file storage
