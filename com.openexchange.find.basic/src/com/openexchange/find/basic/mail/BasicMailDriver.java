@@ -315,15 +315,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private FullnameArgument determineFolder(AbstractFindRequest request) throws OXException {
         String folderName = request.getFolderId();
         if (invalidAllMessagesFolder && folderName == null) {
-            if (request instanceof AutocompleteRequest) {
-                String prefix = ((AutocompleteRequest) request).getPrefix();
-                if (null == prefix || prefix.length() > 0) {
-                    throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
-                }
-
-                // The special auto-complete request to retrieve available facets
-                folderName = MailFolder.DEFAULT_FOLDER_ID;
+            if (!(request instanceof AutocompleteRequest) || false != ((AutocompleteRequest) request).isCheck()) {
+                throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
             }
+
+            // The special auto-complete to retrieve available facets
+            folderName = MailFolder.DEFAULT_FOLDER_ID;
         }
         if (folderName == null) {
             folderName = virtualAllMessagesFolder;
