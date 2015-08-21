@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

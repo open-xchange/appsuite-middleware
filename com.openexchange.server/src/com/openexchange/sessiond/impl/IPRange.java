@@ -175,6 +175,7 @@ public class IPRange {
      *
      * @param string The string to parse
      * @return The resulting IP range or <code>null</code> if passed string is empty
+     * @throws IllegalArgumentException If parsing fails
      */
     public static IPRange parseRange(final String string) {
         if (com.openexchange.java.Strings.isEmpty(string)) {

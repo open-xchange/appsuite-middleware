@@ -711,6 +711,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             capabilities.add(getCapability("guest"));
             capabilities.remove(getCapability("share_links"));
             capabilities.remove(getCapability("invite_guests"));
+            if (!Strings.isEmpty(user.getMail())) {
+                capabilities.add(getCapability("edit_password"));
+            }
         }
     }
 

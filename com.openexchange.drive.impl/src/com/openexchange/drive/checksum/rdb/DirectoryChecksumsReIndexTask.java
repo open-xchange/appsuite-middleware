@@ -47,86 +47,78 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DriveCreateTableTask}
+ * {@link DirectoryChecksumsReIndexTask}
+ *
+ * Removes the obsolete <code>(folder, cid)</code> and <code>(checksum, cid)</code> indices and creates the following new ones:
+ * <code>(cid, user, folder)</code> and <code>(cid, checksum)</code>
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveCreateTableTask extends UpdateTaskAdapter {
-
-    /**
-     * Initializes a new {@link DriveCreateTableTask}.
-     */
-    public DriveCreateTableTask() {
-        super();
-    }
-
-    @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
-        boolean transactional = false;
-        try {
-            writeCon.setAutoCommit(false); // BEGIN
-            transactional = true;
-            final String[] tableNames = DriveCreateTableService.getTablesToCreate();
-            final String[] createStmts = DriveCreateTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                }
-            }
-            writeCon.commit(); // COMMIT
-        } catch (final OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
-            }
-            dbService.backForUpdateTask(contextId, writeCon);
-        }
-    }
+public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] { DirectoryChecksumsAddUserAndETagColumnTask.class.getName() };
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
+        try {
+            connection.setAutoCommit(false);
+            /*
+             * remove obsolete indices as needed
+             */
+            String oldIndexName = Tools.existsIndex(connection, "directoryChecksums", new String[] { "checksum", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "directoryChecksums", oldIndexName);
+            }
+            oldIndexName = Tools.existsIndex(connection, "directoryChecksums", new String[] { "folder", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "directoryChecksums", oldIndexName);
+            }
+            /*
+             * create new indices
+             */
+            Tools.createIndex(connection, "directoryChecksums", new String[] { "cid", "checksum" });
+            Tools.createIndex(connection, "directoryChecksums", new String[] { "cid", "user", "folder" });
+            /*
+             * commit
+             */
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(connection);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            }
+        }
     }
 
 }
