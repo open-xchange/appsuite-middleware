@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,15 +79,18 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
+
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.slf4j.Logger;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -128,6 +132,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -2758,6 +2763,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    private static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
+        for (IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws OXException {
         /*
@@ -2820,7 +2834,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if ((properties.getRateLimitPrimaryOnly() && MailAccount.DEFAULT_ID == accountId) || !properties.getRateLimitPrimaryOnly()) {
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                    transport.sendMailMessage(composedMail, ComposeType.NEW);
+                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
@@ -2862,7 +2878,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailMessage sentMail;
             startTransport = System.currentTimeMillis();
             MailProperties properties = MailProperties.getInstance();
-            if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+            if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                sentMail = transport.sendMailMessage(composedMail, ComposeType.NEW);
+            } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                 int rateLimit = properties.getRateLimit();
                 rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                 sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
