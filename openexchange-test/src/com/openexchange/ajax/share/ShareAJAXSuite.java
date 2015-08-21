@@ -52,6 +52,7 @@ package com.openexchange.ajax.share;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.share.bugs.Bug40369Test;
+import com.openexchange.ajax.share.bugs.Bug40548Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
@@ -128,6 +129,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(NotifyFolderSharesTest.class);
         tests.addTestSuite(NotifyFileSharesTest.class);
         tests.addTestSuite(Bug40369Test.class);
+        tests.addTestSuite(Bug40548Test.class);
         return tests;
     }
 

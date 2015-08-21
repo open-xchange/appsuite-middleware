@@ -260,9 +260,14 @@ public abstract class OXUtilStorageInterface {
     public abstract void unregisterFilestore(final int store_id) throws StorageException;
 
     /**
-     * Iterates across all existing filestores and searches for one having enough space for a context.
+     * Iterates across all existing file storages and searches for one having enough space for a context.
      */
     public abstract Filestore findFilestoreForContext() throws StorageException;
+
+    /**
+     * Iterates across all existing file storages and searches for one having enough space for a user.
+     */
+    public abstract Filestore findFilestoreForUser() throws StorageException;
 
     /**
      * Checks if specified file storage offers enough space for a further context assignment.
