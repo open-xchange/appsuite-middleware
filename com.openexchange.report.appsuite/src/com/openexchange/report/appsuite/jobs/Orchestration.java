@@ -182,13 +182,12 @@ public class Orchestration implements ReportService {
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
         IExecutorService executorService = hazelcast.getExecutorService(REPORT_TYPE_DEFAULT);
-
         DatabaseService databaseService = Services.getService(DatabaseService.class);
 
         List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
 
+        LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
-            LOG.info("{} contexts still to assign.", contextsToProcess.size());
             Integer firstRemainingContext = contextsToProcess.get(0);
             Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
 
@@ -200,6 +199,7 @@ public class Orchestration implements ReportService {
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
             }
+            LOG.info("{} contexts still to assign.", contextsToProcess.size());
         }
         return uuid;
     }
