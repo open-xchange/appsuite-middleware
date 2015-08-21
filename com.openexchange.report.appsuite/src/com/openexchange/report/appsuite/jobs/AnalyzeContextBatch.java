@@ -50,7 +50,9 @@
 package com.openexchange.report.appsuite.jobs;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -58,6 +60,7 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
+import com.openexchange.report.appsuite.ReportExceptionCodes;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
@@ -70,7 +73,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AnalyzeContextBatch implements Runnable, Serializable {
+public class AnalyzeContextBatch implements Callable<Void>, Serializable {
 
     private static final long serialVersionUID = -578253218760102061L;
 
@@ -78,7 +81,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
 
     private final String uuid;
     private String reportType;
-    private final List<Integer> contextIds;
+    private List<Integer> contextIds;
 
     /**
      *
@@ -96,7 +99,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
     }
 
     @Override
-    public void run() {
+    public Void call() throws Exception {
         int previousPriority = Thread.currentThread().getPriority();
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
@@ -115,15 +118,23 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                     handleGuests(ctx, contextReport);
 
                     Orchestration.getInstance().done(contextReport);
-                } catch (Exception e) {
-                    LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, e);
+                } catch (OXException oxException) {
+                    if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
+                        LOG.info("Stop execution of report generation due to an user intruction!");
+                        contextIds = Collections.emptyList();
+                        break;
+                    }
+                    LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, oxException);
                     Orchestration.getInstance().abort(uuid, reportType);
                     continue;
+                } catch (Exception e) {
+                    LOG.error("Unexpected error while context report generation!");
                 }
             }
         } finally {
             Thread.currentThread().setPriority(previousPriority);
         }
+        return null;
     }
 
     /**

@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
+import com.openexchange.report.appsuite.ReportExceptionCodes;
 import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportSystemHandler;
@@ -194,7 +195,7 @@ public class Orchestration implements ReportService {
             Member member = getRandomMember(hazelcast);
             LOG.info("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
 
-            executorService.executeOnMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
+            executorService.submitToMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
 
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
@@ -265,9 +266,7 @@ public class Orchestration implements ReportService {
 
     // Called by the AnalyzeContextBatch for every context so the context specific entries can be
     // added to the global report. Adds context to general report and mark context as done
-
-    public void done(ContextReport contextReport) {
-
+    public void done(ContextReport contextReport) throws OXException {
         String reportType = contextReport.getType();
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
@@ -286,7 +285,7 @@ public class Orchestration implements ReportService {
                 LOG.error("Could not acquire merge lock! Aborting {} for type: {}", contextReport.getUUID(), reportType);
             }
         } catch (InterruptedException e) {
-            return;
+            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_LOCK.create();
         }
         try {
             report = PortableReport.unwrap(pendingReports.get(contextReport.getUUID()));
@@ -295,7 +294,7 @@ public class Orchestration implements ReportService {
                 lock.unlock();
                 lock.destroy();
                 lock = null;
-                return;
+                throw ReportExceptionCodes.REPORT_GENERATION_CANCELED.create();
             }
             // Run all applicable cumulators to add the context report results to the global report
             for (ContextReportCumulator cumulator : Services.getContextReportCumulators()) {

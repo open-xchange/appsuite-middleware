@@ -472,6 +472,7 @@ public class ReportClientBase extends AbstractJMXTools {
             CompositeData report = (CompositeData) server.invoke(getAppSuiteReportingName(), "retrieveLastReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
 
             if (report == null) {
+                System.out.println();
                 System.out.println(NO_REPORT_FOUND_MSG);
                 return;
             }

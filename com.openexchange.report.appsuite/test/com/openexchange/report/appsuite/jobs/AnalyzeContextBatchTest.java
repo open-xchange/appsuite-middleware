@@ -116,7 +116,7 @@ public class AnalyzeContextBatchTest {
             }
         };
 
-        analyzeContextBatch.run();
+        analyzeContextBatch.call();
     }
 
 }
