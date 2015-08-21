@@ -128,6 +128,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -2779,6 +2780,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    private static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
+        for (IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws OXException {
         /*
@@ -2841,7 +2851,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                    transport.sendMailMessage(composedMail, ComposeType.NEW);
+                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
@@ -2883,7 +2895,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             MailMessage sentMail;
             startTransport = System.currentTimeMillis();
             MailProperties properties = MailProperties.getInstance();
-            if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+            if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                sentMail = transport.sendMailMessage(composedMail, ComposeType.NEW);
+            } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                 int rateLimit = properties.getRateLimit();
                 rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                 sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
