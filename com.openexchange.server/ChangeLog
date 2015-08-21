@@ -1,3 +1,7 @@
+* 2015-08-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 40513: Keep track of temporary files that are still processing and prevent deleting those until they are done
+
 * 2015-08-21 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 40471: Ensure UTF-8 encoding is used when writing / reading VCards
