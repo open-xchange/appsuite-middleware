@@ -89,7 +89,6 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -913,7 +912,7 @@ public final class MailMessageParser {
         // Check for "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data"
         SMIMESigned smimeSigned = null;
         try {
-            if ("multipart/signed".equals(lcct)) {
+            if (isMultipartSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
             } else if (isSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
@@ -1193,6 +1192,10 @@ public final class MailMessageParser {
 
     private static boolean isSigned(String lcct, ContentType ct) {
         return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+    }
+
+    private static boolean isMultipartSigned(String lcct, ContentType ct) {
+        return "multipart/signed".equals(lcct) && "application/pkcs7-signature".equals(ct.getParameter("protocol"));
     }
 
     /**
