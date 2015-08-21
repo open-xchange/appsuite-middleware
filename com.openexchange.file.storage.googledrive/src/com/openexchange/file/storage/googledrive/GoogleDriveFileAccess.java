@@ -949,8 +949,13 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             if (FileStorageFileAccess.CURRENT_VERSION != version || null == fields || fields.contains(Field.NUMBER_OF_VERSIONS) || fields.contains(Field.VERSION)) {
                 if (FileStorageFileAccess.CURRENT_VERSION == version) {
                     List<Revision> revisions = drive.revisions().list(id).setFields("items/id").execute().getItems();
-                    metadata.setNumberOfVersions(revisions.size());
-                    metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                    if (revisions!= null && !revisions.isEmpty()) {
+                        metadata.setNumberOfVersions(revisions.size());
+                        metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                    } else {
+                        metadata.setNumberOfVersions(1);
+                        metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
+                    }
                     return metadata;
                 } else {
                     List<Revision> revisions = drive.revisions().list(id).execute().getItems();

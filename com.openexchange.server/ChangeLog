@@ -1,6 +1,7 @@
 * 2015-08-21 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 40513: Keep track of temporary files that are still processing and prevent deleting those until they are done
+ - Fix for bug 40516: Fall-back value for version number in case Google Drive returns an empty map (aligned according to the rest method calls)
 
 * 2015-08-21 - lars.hoogestraat@open-xchange.com
 
