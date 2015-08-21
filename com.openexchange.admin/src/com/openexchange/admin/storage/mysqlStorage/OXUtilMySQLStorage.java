@@ -1197,7 +1197,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public Filestore findFilestoreForUser() throws StorageException {
+        return findFilestoreForEntity(false);
+    }
+
+    @Override
     public Filestore findFilestoreForContext() throws StorageException {
+        return findFilestoreForEntity(true);
+    }
+
+    private Filestore findFilestoreForEntity(boolean forContext) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1207,14 +1216,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Define candidate class
             class Candidate {
                 final int id;
-                final int maxNumberOfContexts;
-                final int numberOfContexts;
+                final int maxNumberOfEntities;
+                final int numberOfEntities;
 
                 Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
                     super();
                     this.id = id;
-                    this.maxNumberOfContexts = maxNumberOfContexts;
-                    this.numberOfContexts = numberOfContexts;
+                    this.maxNumberOfEntities = maxNumberOfContexts;
+                    this.numberOfEntities = numberOfContexts;
                 }
             }
 
@@ -1268,15 +1277,29 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
             for (Candidate candidate : candidates) {
-                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                if (candidate.maxNumberOfEntities > 0) {
+                    int entityCount = candidate.numberOfEntities;
+
                     // Get user count information
                     Integer count = filestoreUserCounts.get(Integer.valueOf(candidate.id));
-                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+                    if (null != count) {
+                        entityCount += count.intValue();
+                    }
 
-                    // Get filestore
-                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
-                    if (enoughSpaceForContext(filestore)) {
-                        return filestore;
+                    if (entityCount < candidate.maxNumberOfEntities) {
+                        FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+
+                        // Get filestore
+                        Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
+                        if (forContext) {
+                            if (enoughSpaceForContext(filestore)) {
+                                return filestore;
+                            }
+                        } else {
+                            if (enoughSpaceForUser(filestore)) {
+                                return filestore;
+                            }
+                        }
                     }
                 }
             }
