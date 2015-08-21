@@ -88,6 +88,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
@@ -124,12 +125,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private final AdminCache cache;
     private final PropertyHandler prop;
     private final BundleContext context;
+    private final boolean allowChangingQuotaIfNoFileStorageSet;
 
     public OXUser(final BundleContext context) throws StorageException {
         super();
         this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
+        allowChangingQuotaIfNoFileStorageSet = Boolean.parseBoolean(prop.getProp("ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET", "false").trim());
         LOGGER.info("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator(this.context);
         try {
@@ -706,7 +709,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final int user_id = user.getId().intValue();
             final OXUserStorageInterface oxuser = this.oxu;
             final OXContextInterface oxctx = AdminServiceRegistry.getInstance().getService(OXContextInterface.class, true);
-            
+
             Context storageContext = oxctx.getOwnData(ctx, auth);
             User storageUser = oxuser.getData(ctx, new User[] { user })[0];
 
@@ -734,7 +737,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             ctx.setFilestoreId(Integer.valueOf(srcStore_id));
             if (srcStore_id == destFilestore.getId().intValue()) {
-                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
+                // Ok when moving from context to user
+                //throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
             }
 
             // Check storage name
@@ -1012,6 +1016,37 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         final boolean isContextAdmin = tool.isContextAdmin(ctx, userid.intValue());
+
+        // Is a quota specified that implies to assign a file storage?
+        Long maxQuota = usrdata.getMaxQuota();
+        if (maxQuota != null) {
+            long quota_max_temp = maxQuota.longValue();
+            if (quota_max_temp != -1) {
+                // A valid quota is specified - ensure an appropriate file storage is set
+                Integer fsId = getData(ctx, usrdata, credentials).getFilestoreId();
+                if (fsId == null || fsId.intValue() <= 0) {
+                    if (!allowChangingQuotaIfNoFileStorageSet) {
+                        throw new StorageException("Quota cannot be changed for user " + userid + " in context " + ctx.getId() + " since that user has no file storage set.");
+                    }
+
+                    // Auto-select next suitable file storage
+                    Filestore filestoreForUser = OXUtilStorageInterface.getInstance().findFilestoreForUser();
+
+                    // Move from context to individual user file storage
+                    try {
+                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials);
+                    } catch (RemoteException e) {
+                        throw new StorageException(e);
+                    } catch (NoSuchFilestoreException e) {
+                        throw new StorageException(e);
+                    }
+                } else {
+                    if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
+                        throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
+                    }
+                }
+            }
+        }
 
         oxu.change(ctx, usrdata);
 

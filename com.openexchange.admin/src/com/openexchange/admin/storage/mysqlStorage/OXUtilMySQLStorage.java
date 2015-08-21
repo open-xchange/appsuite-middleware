@@ -601,10 +601,27 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     prep.setInt(4, filestoreId);
                     changed = prep.executeUpdate() > 0;
                     Databases.closeSQLStuff(prep);
+
+                    if (changed) {
+                        prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
+                        prep.setInt(1, contextId);
+                        prep.setInt(2, userId);
+                        boolean entryAvailable = prep.executeQuery().next();
+                        Databases.closeSQLStuff(prep);
+
+                        if (false == entryAvailable) {
+                            prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                            prep.setInt(1, contextId);
+                            prep.setInt(2, userId);
+                            prep.setLong(3, 0L);
+                            prep.executeUpdate();
+                            Databases.closeSQLStuff(prep);
+                        }
+                    }
                 }
 
                 {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and filestore_name != ?");
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and (filestore_name IS NULL OR filestore_name != ?)");
                     prep.setString(1, filestoreName);
                     prep.setInt(2, contextId);
                     prep.setInt(3, userId);
