@@ -109,6 +109,8 @@ public final class Mp3ImageDataSource implements ImageDataSource {
 
     private static final Mp3ImageDataSource INSTANCE = new Mp3ImageDataSource();
 
+    private static final int TEMP_FILE_TTL = 300000;
+
     /**
      * Gets the instance.
      *
@@ -244,7 +246,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
 
     private Object getObjectValue(final String identifier, final AbstractTagFrameBody imageFrameBody) {
         final AbstractDataType dataType = imageFrameBody.getObject(identifier);
-        return null == dataType ? null: dataType.getValue();
+        return null == dataType ? null : dataType.getValue();
     }
 
     @Override
@@ -363,13 +365,13 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             final String fileName = audioFile.getFileName();
             final ManagedFile managedFile;
             if (null == fileName) {
-                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
             } else {
                 final int pos = fileName.indexOf('.');
                 if (pos > 0) {
-                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos)); // Stream is closed during creation of ManagedFile
+                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
                 } else {
-                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed during creation of ManagedFile
+                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
                 }
             }
             managedFile.setContentType(audioFile.getFileMIMEType());
