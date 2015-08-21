@@ -206,6 +206,10 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
      */
     VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS("Inapplicable permissions of user \"%1$s\"", CATEGORY_USER_INPUT, 2104, InfostoreExceptionMessages.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY),
+    /**
+     * Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.
+     */
+    CONCURRENT_VERSION_CREATION("Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.", CATEGORY_ERROR, 2105, InfostoreExceptionMessages.CONCURRENT_VERSION_CREATION_MSG_DISPLA),
 
     ;
 
