@@ -47,33 +47,40 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DirectoryChecksumsReIndexTask}
+ * {@link DirectoryChecksumsAddUserAndETagColumnTask}
  *
- * Removes the obsolete <code>(folder, cid)</code> and <code>(checksum, cid)</code> indices and creates the following new ones:
- * <code>(cid, user, folder)</code> and <code>(cid, checksum)</code>
+ * Deletes all existing directory checksums if the <code>user</code> column not yet exists, then
+ * <ul>
+ * <li>modifies the column <code>sequence</code> to <code>sequence BIGINT(20) DEFAULT NULL</code></li>
+ * <li>adds the column <code>user INT4 UNSIGNED DEFAULT NULL</code></li>
+ * <li>adds the column <code>etag VARCHAR(255) DEFAULT NULL</code></li>
+ * </ul>
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
+public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { DirectoryChecksumsAddUserAndETagColumnTask.class.getName() };
+        return new String[] { DriveCreateTableTask.class.getName() };
     }
 
     @Override
@@ -84,25 +91,14 @@ public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            /*
-             * remove obsolete indices as needed
-             */
-            String oldIndexName = Tools.existsIndex(connection, "directoryChecksums", new String[] { "checksum", "cid" });
-            if (null != oldIndexName) {
-                Tools.dropIndex(connection, "directoryChecksums", oldIndexName);
+            if (false == Tools.columnExists(connection, "directoryChecksums", "user")) {
+                deleteDirectoryChecksums(connection);
             }
-            oldIndexName = Tools.existsIndex(connection, "directoryChecksums", new String[] { "folder", "cid" });
-            if (null != oldIndexName) {
-                Tools.dropIndex(connection, "directoryChecksums", oldIndexName);
+            if (false == Tools.isNullable(connection, "directoryChecksums", "sequence")) {
+                Tools.modifyColumns(connection, "directoryChecksums", new Column("sequence", "BIGINT(20) DEFAULT NULL"));
             }
-            /*
-             * create new indices
-             */
-            Tools.createIndex(connection, "directoryChecksums", new String[] { "cid", "checksum" });
-            Tools.createIndex(connection, "directoryChecksums", new String[] { "cid", "user", "folder" });
-            /*
-             * commit
-             */
+            Tools.checkAndAddColumns(connection, "directoryChecksums",
+                new Column("user", "INT4 UNSIGNED DEFAULT NULL"), new Column("etag", "VARCHAR(255) DEFAULT NULL"));
             connection.commit();
             committed = true;
         } catch (SQLException e) {
@@ -118,6 +114,22 @@ public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
             } else {
                 dbService.backForUpdateTaskAfterReading(contextID, connection);
             }
+        }
+    }
+
+    /**
+     * Deletes all entries from the <code>directoryChecksums</code> table.
+     *
+     * @param connection The connection
+     * @throws SQLException
+     */
+    private static void deleteDirectoryChecksums(Connection connection) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            stmt.execute("DELETE FROM directoryChecksums;");
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 

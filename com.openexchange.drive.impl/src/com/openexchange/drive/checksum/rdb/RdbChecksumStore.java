@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.drive.impl.checksum.rdb.SQL.escapeFile;
-import static com.openexchange.drive.impl.checksum.rdb.SQL.escapeFolder;
-import static com.openexchange.drive.impl.checksum.rdb.SQL.unescapeFile;
-import static com.openexchange.drive.impl.checksum.rdb.SQL.unescapeFolder;
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFolder;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFolder;
 import static com.openexchange.java.Strings.reverse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

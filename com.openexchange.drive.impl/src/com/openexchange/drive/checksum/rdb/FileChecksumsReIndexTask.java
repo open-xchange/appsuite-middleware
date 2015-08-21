@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -59,21 +59,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DirectoryChecksumsAddViewColumnTask}
+ * {@link FileChecksumsReIndexTask}
  *
- * Adds the column <code>view INT NOT NULL DEFAULT 0</code> to the <code>directoryChecksums</code> table.
+ * Removes the obsolete <code>(folder, cid)</code> and <code>(checksum, cid)</code> indices and creates the following new ones:
+ * <code>(cid, folder)</code> and <code>(cid, checksum)</code>
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksumsAddViewColumnTask extends UpdateTaskAdapter {
+public class FileChecksumsReIndexTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { DirectoryChecksumsReIndexTask.class.getName() };
+        return new String[] { DirectoryChecksumsAddUserAndETagColumnTask.class.getName() };
     }
 
     @Override
@@ -84,7 +84,25 @@ public class DirectoryChecksumsAddViewColumnTask extends UpdateTaskAdapter {
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connection, "directoryChecksums", new Column("view", "INT NOT NULL DEFAULT 0"));
+            /*
+             * remove obsolete indices as needed
+             */
+            String oldIndexName = Tools.existsIndex(connection, "fileChecksums", new String[] { "checksum", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "fileChecksums", oldIndexName);
+            }
+            oldIndexName = Tools.existsIndex(connection, "fileChecksums", new String[] { "folder", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "fileChecksums", oldIndexName);
+            }
+            /*
+             * create new indices
+             */
+            Tools.createIndex(connection, "fileChecksums", new String[] { "cid", "checksum" });
+            Tools.createIndex(connection, "fileChecksums", new String[] { "cid", "folder" });
+            /*
+             * commit
+             */
             connection.commit();
             committed = true;
         } catch (SQLException e) {
