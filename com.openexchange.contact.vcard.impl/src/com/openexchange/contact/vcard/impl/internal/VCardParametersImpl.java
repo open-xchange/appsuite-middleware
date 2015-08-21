@@ -73,6 +73,7 @@ public class VCardParametersImpl implements VCardParameters {
     private long maxVCardSize;
     private boolean keepOriginalVCard;
     private boolean removeImageFromKeptVCard;
+    private boolean enforceUtf8;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -189,6 +190,16 @@ public class VCardParametersImpl implements VCardParameters {
     public VCardParameters setRemoveImageFromKeptVCard(boolean removeImageFromKeptVCard) {
         this.removeImageFromKeptVCard = removeImageFromKeptVCard;
         return this;
+    }
+
+    @Override
+    public boolean isEnforceUtf8() {
+        return enforceUtf8;
+    }
+
+    @Override
+    public void setEnforceUtf8(boolean enforceUtf8) {
+        this.enforceUtf8 = enforceUtf8;
     }
 
 }

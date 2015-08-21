@@ -169,7 +169,11 @@ public class DefaultVCardService implements VCardService {
         WriterChainText writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
-            writerChain.go(IOUtils.utf8Writer(fileHolder.asOutputStream()));
+            if(parameters.isEnforceUtf8()) {
+                writerChain.go(IOUtils.utf8Writer(fileHolder.asOutputStream()));
+            } else {
+                writerChain.go(fileHolder.asOutputStream());
+            }
             return fileHolder;
         } catch (IOException e) {
             Streams.close(fileHolder);
