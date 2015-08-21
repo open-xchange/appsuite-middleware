@@ -198,6 +198,27 @@ public interface ManagedFileManagement {
     ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException;
 
     /**
+     * Creates a new managed file from the specified input stream and with the specified TTL
+     * 
+     * @param inputStream The input stream whose content is filled into newly created file
+     * @param optExtension An optional file extension; e.g. <code>".txt"</code>
+     * @param @param ttl The custom time-to-live or <code>-1</code> to use default one
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    ManagedFile createManagedFile(InputStream inputStream, String optExtension, int ttl) throws OXException;
+    
+    /**
+     * Creates a new managed file from the specified input stream and with the specified TTL
+     * 
+     * @param inputStream The input stream whose content is filled into newly created file
+     * @param @param ttl The custom time-to-live or <code>-1</code> to use default one
+     * @return A new managed file
+     * @throws OXException If a new managed file cannot be created from specified content
+     */
+    ManagedFile createManagedFile(InputStream inputStream, int ttl) throws OXException;
+
+    /**
      * Creates a new managed file from specified bytes.
      * <p>
      * Size attribute is already set in returned managed file.

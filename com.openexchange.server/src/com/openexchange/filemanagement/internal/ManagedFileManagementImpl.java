@@ -59,9 +59,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +78,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileFilter;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.ConcurrentSet;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -124,17 +126,19 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         private final int time2live;
         private final AtomicReference<File> tmpDirReference;
         private final FileFilter defaultPrefixFilter;
-        private final Set<File> existentFiles;
+        private final Map<String, File> existentFiles;
+        private Set<String> pFiles;
 
         /**
          * Initializes a new {@link FileManagementTask}.
          */
-        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, int time2live, AtomicReference<File> tmpDirReference, final String prefix, org.slf4j.Logger logger) {
+        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, Set<String> processing, int time2live, AtomicReference<File> tmpDirReference, final String prefix, org.slf4j.Logger logger) {
             super();
             tfiles = files;
+            pFiles = processing;
             this.time2live = time2live;
             this.tmpDirReference = tmpDirReference;
-            existentFiles = new HashSet<File>(256, 0.9f);
+            existentFiles = new HashMap<String, File>(256, 0.9f);
             defaultPrefixFilter = new FileFilter() {
 
                 @Override
@@ -149,11 +153,11 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         public void run() {
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
-                Set<File> existentFiles = this.existentFiles;
+                Map<String, File> existentFiles = this.existentFiles;
                 existentFiles.clear();
                 File directory = tmpDirReference.get();
                 for (File tmpFile : directory.listFiles(defaultPrefixFilter)) {
-                    existentFiles.add(tmpFile);
+                    existentFiles.put(tmpFile.getName(), tmpFile);
                 }
 
                 // Check for expired files
@@ -165,25 +169,29 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     } else {
                         // Expired if deleted OR time-to-live has elapsed
                         int optTimeToLive = cur.optTimeToLive();
-                        if (cur.isDeleted() || ((now - cur.getLastAccess()) > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
+                        long l = now - cur.getLastAccess();
+                        if (cur.isDeleted() || (l > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
                             cur.delete();
                             iter.remove();
                             File file = cur.getFile();
                             String fname = null == file ? "" : file.getName();
                             logger.debug("Removed expired managed file {}", fname);
                         } else {
-                            existentFiles.remove(cur.getFile());
+                            // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
+                            existentFiles.remove(cur.getFileName());
                         }
                     }
                 }
 
                 // Check for orphaned files belonging to this JVM instance
-                for (File orphaned : existentFiles) {
-                    String name = orphaned.getName();
-                    if (!orphaned.delete()) {
-                        logger.warn("Temporary file could not be deleted: {}", name);
+                for (String name : existentFiles.keySet()) {
+                    File orphaned = existentFiles.get(name);
+                    if (!pFiles.contains(name)) {
+                        if (!orphaned.delete()) {
+                            logger.warn("Temporary file could not be deleted: {}", name);
+                        }
+                        logger.debug("Removed orphaned managed file {}", name);
                     }
-                    logger.debug("Removed orphaned managed file {}", name);
                 }
             } catch (Throwable t) {
                 logger.error("", t);
@@ -203,10 +211,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     private final TimerService timer;
     private final DispatcherPrefixService dispatcherPrefixService;
     private final ConcurrentMap<String, ManagedFileImpl> files;
+    private final Set<String> processing;
     private final PropertyListener propertyListener;
     private final AtomicReference<File> tmpDirReference;
     private final AtomicReference<ScheduledTimerTask> timerTaskReference;
-
 
     /**
      * Initializes a new {@link ManagedFileManagementImpl}.
@@ -217,6 +225,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         this.timer = timer;
         this.dispatcherPrefixService = dispatcherPrefixService;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
+        processing = new ConcurrentSet<String>();
 
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
         this.tmpDirReference = tmpDirReference;
@@ -225,7 +234,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         tmpDirReference.set(getTmpDirByPath(path));
 
         // Register timer task
-        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
+        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, processing, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
         timerTaskReference = new AtomicReference<ScheduledTimerTask>(timerTask);
     }
 
@@ -348,6 +357,16 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         return createManagedFile0(null, inputStream, true, optExtension, -1);
     }
 
+    @Override
+    public ManagedFile createManagedFile(InputStream inputStream, String optExtension, int ttl) throws OXException {
+        return createManagedFile0(null, inputStream, true, optExtension, ttl);
+    }
+
+    @Override
+    public ManagedFile createManagedFile(InputStream inputStream, int ttl) throws OXException {
+        return createManagedFile0(null, inputStream, true, null, ttl);
+    }
+
     private ManagedFile createManagedFile0(String identifier, InputStream inputStream, boolean closeStream, String optExtension, int optTtl) throws OXException {
         return createManagedFile0(identifier, inputStream, closeStream, optExtension, optTtl, true);
     }
@@ -366,6 +385,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 if (null == tmpFile) {
                     // Flush input stream's content via output stream to newly created file
                     tmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
+
+                    // Put it in processing set so it won't get deleted by the task
+                    processing.add(tmpFile.getName());
+                    
                     tmpFile.deleteOnExit();
                     OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                     try {
@@ -412,6 +435,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 distributed.register(id);
             }
         }
+
+        // Remove it from processing map
+        processing.remove(tmpFile.getName());
 
         return mf;
     }
@@ -624,7 +650,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     void startUp() {
         if (stopTimerTask()) {
-            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
+            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, processing, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
         }
     }
 
