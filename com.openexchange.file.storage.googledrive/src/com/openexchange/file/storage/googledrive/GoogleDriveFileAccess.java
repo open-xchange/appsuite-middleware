@@ -645,6 +645,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         if (null != revisions && 0 < revisions.size()) {
                             metadata.setNumberOfVersions(revisions.size());
                             metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                        } else {
+                            metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
+                            metadata.setNumberOfVersions(1);
                         }
                     }
                     files.add(metadata);
@@ -717,6 +720,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             if (null != revisions && 0 < revisions.size()) {
                                 metadata.setNumberOfVersions(revisions.size());
                                 metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                            } else {
+                                metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
+                                metadata.setNumberOfVersions(1);
                             }
                         }
                         if (Long.MIN_VALUE == updateSince || null != metadata.getCreated() && metadata.getCreated().getTime() > updateSince) {
@@ -838,6 +844,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         if (null != revisions && 0 < revisions.size()) {
                             metadata.setNumberOfVersions(revisions.size());
                             metadata.setVersion(revisions.get(revisions.size() - 1).getId());
+                        } else {
+                            metadata.setVersion(FileStorageFileAccess.CURRENT_VERSION);
+                            metadata.setNumberOfVersions(1);
                         }
                     }
                     files.add(metadata);
