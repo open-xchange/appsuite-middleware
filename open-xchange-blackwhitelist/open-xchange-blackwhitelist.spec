@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 30
+%define         ox_release 29
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -55,8 +55,6 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
-* Mon Aug 17 2015 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2015-08-24 (2674)
 * Mon Aug 17 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-08-12 (2671)
 * Tue Aug 04 2015 Carsten Hoeger <choeger@open-xchange.com>
