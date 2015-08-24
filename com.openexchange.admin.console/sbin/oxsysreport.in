@@ -88,6 +88,7 @@ PROCS='
     df;
     dmesg;
     free;
+    getmissingservices;
     java -version;
     listbundles;
     listconfigdiff;
