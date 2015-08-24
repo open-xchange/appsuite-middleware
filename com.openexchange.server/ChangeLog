@@ -1,3 +1,7 @@
+* 2015-08-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40627: Anonymize extended permission entities
+
 * 2015-08-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 40534: Avoid inheriting virtual "all guests" permission on folder creation
