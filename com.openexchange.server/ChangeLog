@@ -8,6 +8,7 @@
  - Fix for bug 40655: Advertise client parameter when in authenticated state
  - Fix for bug 40518: Fixed type in liquibase changeset
  - Fix for bug 40653: Added null guard to debug logging
+ - Fix for bug 40638: Added null guard when serving an action=path request
 
 * 2015-08-24 - ioannis.chouklis@open-xchange.com
 
