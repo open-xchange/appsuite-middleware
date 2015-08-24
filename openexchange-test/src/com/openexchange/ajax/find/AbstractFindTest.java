@@ -223,7 +223,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
-
+    
     /**
      * Performs an autocomplete request and returns the facets.
      *
@@ -272,6 +272,42 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected static String randomUID() {
         return UUID.randomUUID().toString();
     }
+    
+    /**
+     * Performs an autocomplete request and returns the facets.
+     *
+     * @param client The AJAX client
+     * @param module The module
+     * @param prefix The prefix
+     * @return The facets
+     * @throws Exception
+     */
+    public static List<Facet> autocomplete(AJAXClient client, Module module, String prefix) throws Exception {
+        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, module.getIdentifier());
+        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+        return autocompleteResponse.getFacets();
+    }
+    
+    /**
+     * Performs a query request using the supplied active facets.
+     *
+     * @param client The AJAX client
+     * @param module The module
+     * @param facets The active facets
+     * @return The found documents
+     * @throws Exception
+     */
+    public static List<PropDocument> query(AJAXClient client, Module module, List<ActiveFacet> facets) throws Exception {
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
+        QueryResponse queryResponse = client.execute(queryRequest);
+        SearchResult result = queryResponse.getSearchResult();
+        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        List<Document> documents = result.getDocuments();
+        for (Document document : documents) {
+            propDocuments.add((PropDocument) document);
+        }
+        return propDocuments;
+    }
 
     /**
      * Searches the given facet type within the list of facets.
@@ -280,7 +316,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @param facets The facets to search in
      * @return The found facet or <code>null</code>
      */
-    protected static Facet findByType(FacetType type, List<Facet> facets) {
+    public static Facet findByType(FacetType type, List<Facet> facets) {
         for (Facet facet : facets) {
             if (facet.getType() == type) {
                 return facet;
@@ -297,7 +333,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @param facet The facet
      * @return The found value or <code>null</code> if not present
      */
-    protected static FacetValue findByValueId(String valueId, DefaultFacet facet) {
+    public static FacetValue findByValueId(String valueId, DefaultFacet facet) {
         for (FacetValue value : facet.getValues()) {
             if (valueId.equals(value.getId())) {
                 return value;
@@ -315,7 +351,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @param value The value to check
      * @return The found document, or <code>null</code> if not found
      */
-    protected static PropDocument findByProperty(List<PropDocument> documents, String property, String value) {
+    public static PropDocument findByProperty(List<PropDocument> documents, String property, String value) {
         for (PropDocument propDocument : documents) {
             if (value.equals(propDocument.getProps().get(property))) {
                 return propDocument;
@@ -330,7 +366,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @param facets The facets to check
      * @param displayName The display name to check
      */
-    protected static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
+    public static FacetValue findByDisplayName(List<Facet> facets, String displayName) {
         return findByDisplayName(facets, displayName, null);
     }
 
@@ -341,7 +377,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @param displayName The display name to check
      * @param detail The detail string if it shall also be checked. Otherwise <code>null</code>.
      */
-    protected static FacetValue findByDisplayName(List<Facet> facets, String displayName, String detail) {
+    public static FacetValue findByDisplayName(List<Facet> facets, String displayName, String detail) {
         for (Facet facet : facets) {
             if (facet instanceof SimpleFacet) {
                 SimpleFacet ff = (SimpleFacet) facet;
@@ -369,30 +405,30 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return null;
     }
 
-    protected static ActiveFacet createFolderTypeFacet(FolderType type) {
+    public static ActiveFacet createFolderTypeFacet(FolderType type) {
         return createActiveFacet(
             CommonFacetType.FOLDER_TYPE,
             type.getIdentifier(),
             new Filter(Collections.singletonList(CommonFacetType.FOLDER_TYPE.getId()), type.getIdentifier()));
     }
 
-    protected static ActiveFacet createQuery(String query) {
+    public static ActiveFacet createQuery(String query) {
         return createActiveFacet(CommonFacetType.GLOBAL, CommonFacetType.GLOBAL.getId(), CommonFacetType.GLOBAL.getId(), query);
     }
 
-    protected static ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
+    public static ActiveFacet createActiveFacet(FacetType type, int valueId, Filter filter) {
         return new ActiveFacet(type, Integer.toString(valueId), filter);
     }
 
-    protected static ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
+    public static ActiveFacet createActiveFacet(FacetType type, String valueId, Filter filter) {
         return new ActiveFacet(type, valueId, filter);
     }
 
-    protected static ActiveFacet createActiveFacet(SimpleFacet facet) {
+    public static ActiveFacet createActiveFacet(SimpleFacet facet) {
         return new ActiveFacet(facet.getType(), facet.getType().getId(), facet.getFilter());
     }
 
-    protected static ActiveFacet createActiveFacet(DefaultFacet facet, FacetValue value) {
+    public static ActiveFacet createActiveFacet(DefaultFacet facet, FacetValue value) {
         if (value.hasOptions()) {
             Option option = value.getOptions().get(0);
             return new ActiveFacet(facet.getType(), option.getId(), option.getFilter());
@@ -401,7 +437,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return new ActiveFacet(facet.getType(), value.getId(), value.getFilter());
     }
 
-    protected static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
+    public static ActiveFacet createActiveFacet(FacetType type, int valueId, String field, String query) {
         Filter filter = new FilterBuilder()
             .addField(field)
             .addQuery(query)
@@ -409,7 +445,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return new ActiveFacet(type, Integer.toString(valueId), filter);
     }
 
-    protected static ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
+    public static ActiveFacet createActiveFacet(FacetType type, String valueId, String field, String query) {
         Filter filter = new FilterBuilder()
             .addField(field)
             .addQuery(query)
@@ -417,11 +453,15 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         return new ActiveFacet(type, valueId, filter);
     }
 
-    protected static ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
+    public static ActiveFacet createActiveFieldFacet(FacetType type, String field, String query) {
         Filter filter = new FilterBuilder()
             .addField(field)
             .addQuery(query)
             .build();
         return new ActiveFacet(type, type.getId(), filter);
+    }
+    
+    public static ActiveFacet createActiveFolderFacet(String folderId) {
+        return createActiveFacet(CommonFacetType.FOLDER, folderId, Filter.NO_FILTER);
     }
 }
