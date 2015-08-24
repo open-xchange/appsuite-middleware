@@ -51,6 +51,7 @@ package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
@@ -195,7 +196,13 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 copy2File(referencedPart.getInputStream());
                 setHeaders(referencedPart);
             }
-            LOG.debug("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
+            ManagedFile mf = file;
+            if (null != mf) {
+                File tmpFile = mf.getFile();
+                if (null != tmpFile) {
+                    LOG.debug("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB), tmpFile.getName());
+                }
+            }
         }
         if (!containsFileName() && referencedPart.containsFileName()) {
             setFileName(referencedPart.getFileName());

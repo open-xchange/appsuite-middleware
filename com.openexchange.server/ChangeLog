@@ -5,6 +5,7 @@
 * 2015-08-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 38603: Do store a copy in standard sent folder if message has been partially sent
+ - Fix for bug 40653: Added null guard to debug logging
 
 * 2015-08-21 - thorben.betten@open-xchange.com
 
