@@ -1,3 +1,9 @@
+open-xchange-saml-core (7.6.2-6) stable; urgency=medium
+
+  * Build for patch 2015-08-24 (2674)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 24 Aug 2015 15:28:49 +0200
+
 open-xchange-saml-core (7.6.2-5) stable; urgency=medium
 
   * Build for patch 2015-08-12 (2671)
