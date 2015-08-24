@@ -1,3 +1,7 @@
+* 2015-08-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40534: Avoid inheriting virtual "all guests" permission on folder creation
+
 * 2015-08-21 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 40645: Check for S/MIME protocol for signed multipart messages, when validating SMIME signature
