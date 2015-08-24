@@ -9,6 +9,7 @@
  - Fix for bug 40518: Fixed type in liquibase changeset
  - Fix for bug 40653: Added null guard to debug logging
  - Fix for bug 40638: Added null guard when serving an action=path request
+ - Fix for bug 40640: Also check start/end date content
 
 * 2015-08-24 - ioannis.chouklis@open-xchange.com
 
