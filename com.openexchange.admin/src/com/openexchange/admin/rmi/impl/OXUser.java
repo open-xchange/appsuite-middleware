@@ -1008,7 +1008,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Integer filestoreId = usrdata.getFilestoreId();
             if (filestoreId != null) {
                 if (!tool.existsStore(filestoreId.intValue())) {
-                    final InvalidDataException inde = new InvalidDataException("No such filestore with id " + ctx.getFilestoreId());
+                    final InvalidDataException inde = new InvalidDataException("No such filestore with id " + filestoreId.intValue());
                     LOGGER.error("", inde);
                     throw inde;
                 }
@@ -1030,7 +1030,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     }
 
                     // Auto-select next suitable file storage
-                    Filestore filestoreForUser = OXUtilStorageInterface.getInstance().findFilestoreForUser();
+                    OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+                    int fileStorageToPrefer = oxutil.getFilestoreIdFromContext(ctx.getId().intValue());
+                    Filestore filestoreForUser = oxutil.findFilestoreForUser(fileStorageToPrefer);
 
                     // Move from context to individual user file storage
                     try {

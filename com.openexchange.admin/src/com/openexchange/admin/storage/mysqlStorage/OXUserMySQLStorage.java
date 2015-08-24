@@ -1520,6 +1520,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number) throws StorageException {
+        int contextId = ctx.getId().intValue();
+
         // Find file storage for user if a valid quota is specified
         Long maxQuota = usrdata.getMaxQuota();
         if (maxQuota != null) {
@@ -1529,7 +1531,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 Integer fsId = usrdata.getFilestoreId();
                 if (fsId == null || fsId.intValue() <= 0) {
                     // Auto-select next suitable file storage
-                    Filestore filestoreForUser = OXUtilStorageInterface.getInstance().findFilestoreForUser();
+                    OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+                    int fileStorageToPrefer = oxutil.getFilestoreIdFromContext(contextId);
+                    Filestore filestoreForUser = oxutil.findFilestoreForUser(fileStorageToPrefer);
                     usrdata.setFilestoreId(filestoreForUser.getId());
                 } else {
                     if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
@@ -1544,7 +1548,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         try {
             ps = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
-            int contextId = ctx.getId().intValue();
             ps.setInt(1, contextId);
             final ResultSet rs = ps.executeQuery();
             int admin_id = 0;

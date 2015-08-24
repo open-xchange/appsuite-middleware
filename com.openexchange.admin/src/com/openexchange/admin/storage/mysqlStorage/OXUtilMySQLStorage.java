@@ -1214,7 +1214,49 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Filestore findFilestoreForUser() throws StorageException {
+    public int getFilestoreIdFromContext(int contextId) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+
+            stmt = con.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                throw new StorageException("There is no context with identifier " + contextId);
+            }
+
+            return rs.getInt(1);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Filestore findFilestoreForUser(int fileStoreId) throws StorageException {
+        if (fileStoreId > 0) {
+            Filestore filestore = getFilestore(fileStoreId, false);
+            if (enoughSpaceForUser(filestore)) {
+                return filestore;
+            }
+        }
+
         return findFilestoreForEntity(false);
     }
 
