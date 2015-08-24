@@ -49,7 +49,9 @@
 
 package com.openexchange.share.servlet.utils;
 
+import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
+import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +82,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -129,12 +132,23 @@ public final class ShareServletUtils {
             session = loginResult.getSession();
             Tools.disableCaching(response);
             /*
-             * set secret, share and public session cookies
+             * set secret & share cookies
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
+            response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
             if (loginConfig.isSessiondAutoLogin()) {
                 response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+            }
+            /*
+             * set public session cookie if not yet present
+             */
+            String publicCookieName = getPublicSessionCookieName(request);
+            Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
+            if (null == cookie) {
+                String alternativeID = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                if (null != alternativeID) {
+                    response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig));
+                }
             }
             /*
              * construct & send redirect
