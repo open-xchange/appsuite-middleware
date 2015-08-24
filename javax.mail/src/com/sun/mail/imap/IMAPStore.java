@@ -947,28 +947,11 @@ public class IMAPStore extends Store
 
 	// issue special ID command to Yahoo! Mail IMAP server
 	// http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
-	{
-	    Map<String, String> clientParams = clientParameters;
-        if (null != clientParams || guid != null) {
-            if (guid == null) {
-                if (p.hasCapability("ID")) {
-                    try {
-                        p.id(clientParams);
-                    } catch (CommandFailedException cex) {
-                        // Swallow "NO" responses
-                    } catch (BadCommandException e) {
-                        // Swallow "BAD" responses
-                    }
-                }
-            } else {
-                if (null == clientParams) {
-                    clientParams = new LinkedHashMap<String, String>(2);
-                }
-                clientParams.put("GUID", guid);
-                p.id(clientParams);
-            }
-        }
-	}
+    if (guid != null) {
+        Map<String, String> clientParams = new LinkedHashMap<String, String>(2);
+        clientParams.put("GUID", guid);
+        p.id(clientParams);
+    }
 
 	/*
 	 * Put a special "marker" in the capabilities list so we can
@@ -1028,6 +1011,22 @@ public class IMAPStore extends Store
 
 	if (proxyAuthUser != null) {
         p.proxyauth(proxyAuthUser);
+    }
+
+	/*
+	 * Advertise client parameters
+	 */
+    {
+        Map<String, String> clientParams = clientParameters;
+        if (null != clientParams && p.hasCapability("ID")) {
+            try {
+                p.id(clientParams);
+            } catch (CommandFailedException cex) {
+                // Swallow "NO" responses
+            } catch (BadCommandException e) {
+                // Swallow "BAD" responses
+            }
+        }
     }
 
 	/*
