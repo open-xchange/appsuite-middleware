@@ -209,7 +209,7 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.
      */
-    CONCURRENT_VERSION_CREATION("Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.", CATEGORY_ERROR, 2105, InfostoreExceptionMessages.CONCURRENT_VERSION_CREATION_MSG_DISPLA),
+    CONCURRENT_VERSION_CREATION("Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.", CATEGORY_USER_INPUT, 2105, InfostoreExceptionMessages.CONCURRENT_VERSION_CREATION_MSG_DISPLA),
 
     ;
 
