@@ -441,7 +441,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean includePrivateAppointmentsOfSharedFolderOwner = false;;
 
-    private static CalendarCollection recColl = new CalendarCollection();
+    private static final CalendarCollection recColl = new CalendarCollection();
 
     final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder) throws SQLException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
