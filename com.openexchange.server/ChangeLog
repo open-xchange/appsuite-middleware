@@ -5,6 +5,7 @@
 * 2015-08-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 40534: Avoid inheriting virtual "all guests" permission on folder creation
+ - Fix for bug 40561: Include "Shared files" folder when searching
 
 * 2015-08-24 - ioannis.chouklis@open-xchange.com
 

@@ -2204,7 +2204,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         } finally {
             SearchIterators.close(searchIterator);
         }
-        if (null == documents || 0 == documents.size()) {
+        if ((null == documents || documents.isEmpty()) && !containsSharedFilesResults) {
             return SearchIteratorAdapter.emptyIterator();
         }
         List<Integer> objectIDs = Tools.getIDs(documents);
