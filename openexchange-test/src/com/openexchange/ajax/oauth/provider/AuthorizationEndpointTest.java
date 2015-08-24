@@ -168,6 +168,23 @@ public class AuthorizationEndpointTest extends EndpointTest {
         testPOSTWithMissingOrInvalidReferer(false);
     }
 
+    /**
+     * The form response must not be embedded via iframe within a foreign site to avoid clickjacking attacks.
+     * Therefore the form response must always contain the header <code>X-Frame-Options: SAMEORIGIN</code>.
+     */
+    @Test
+    public void testXFrameOptions() throws Exception {
+        GETRequest getLoginForm = new GETRequest()
+            .setHostname(hostname)
+            .setClientId(getClientId())
+            .setRedirectURI(getRedirectURI())
+            .setState(csrfState)
+            .setScope(getScope().toString());
+        GETResponse loginFormResponse = getLoginForm.execute(client);
+        String frameOptions = loginFormResponse.getHeader("X-Frame-Options");
+        assertEquals("SAMEORIGIN", frameOptions);
+    }
+
     private void testPOSTWithMissingOrInvalidReferer(boolean omit) throws Exception {
         GETRequest getLoginForm = new GETRequest()
             .setHostname(hostname)
