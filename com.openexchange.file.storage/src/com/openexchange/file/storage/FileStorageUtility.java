@@ -168,6 +168,15 @@ public final class FileStorageUtility {
             return new StringBuilder(filename).replace(matcher.start(), matcher.end(), counterString).toString();
         }
         int index = filename.lastIndexOf('.');
+
+        //See Bug 40142
+        if (filename.endsWith(".pgp")) {
+            index = filename.substring(0, filename.length() - 4).lastIndexOf('.');
+            if (index != filename.lastIndexOf('.')) {
+                return new StringBuilder(filename).insert(index, ' ' + counterString).toString();
+            }
+        }
+
         if (0 >= index) {
             index = filename.length();
         }
