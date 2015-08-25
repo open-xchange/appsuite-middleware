@@ -864,7 +864,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             ctx.setFilestoreId(destFilestore.getId());
             if (srcStore_id == destFilestore.getId().intValue()) {
-                throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
+                // Ok
+                // throw new InvalidDataException("The identifiers for the source and destination storage are equal: " + destFilestore);
             }
 
             // Check storage name
