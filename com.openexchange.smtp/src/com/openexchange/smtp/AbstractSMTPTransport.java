@@ -611,6 +611,15 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 mtaInfo.setReturnCode(sendFailed.getReturnCode());
                 oxe.setArgument("mta_info", mtaInfo);
             }
+            Address[] validSentAddresses = sendFailed.getValidSentAddresses();
+            if (validSentAddresses != null && validSentAddresses.length > 0) {
+                try {
+                    oxe.setArgument("sent_message", MimeMessageConverter.convertMessage(messageToSend));
+                } catch (Exception e) {
+                    // Ignore
+                    LOG.debug("Failed to convert message after a message was partially sent", e);
+                }
+            }
             throw oxe;
         } catch (final MessagingException e) {
             exception = e;

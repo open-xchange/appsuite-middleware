@@ -4081,7 +4081,23 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message bytes
              */
-            final MailMessage sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(m, session, null), ComposeType.NEW);
+            MailMessage sentMail;
+            OXException oxError = null;
+            try {
+                sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(m, session, null), ComposeType.NEW);
+            } catch (OXException e) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                    throw e;
+                }
+
+                MailMessage ma = (MailMessage) e.getArgument("sent_message");
+                if (null == ma) {
+                    throw e;
+                }
+
+                sentMail = ma;
+                oxError = e;
+            }
             JSONObject responseData = null;
             /*
              * Set \Answered flag (if appropriate) & append to sent folder
@@ -4170,6 +4186,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (null != mailAccess) {
                     mailAccess.close(true);
                 }
+            }
+            if (null != oxError) {
+                throw oxError;
             }
             return responseData;
         } catch (final MessagingException e) {
