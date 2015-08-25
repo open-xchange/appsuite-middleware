@@ -185,18 +185,10 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
      * @throws OXException
      */
     private void handleGuests(Context ctx, ContextReport contextReport) throws OXException {
-        // Now the guests of the context
         User[] guests = loadGuests(ctx);
         for (User guest : guests) {
             UserReport guestReport = new UserReport(uuid, reportType, ctx, guest, contextReport);
-            // Run User Analyzers
-            for (ReportUserHandler userHandler : Services.getUserHandlers()) {
-                if (userHandler.appliesTo(reportType)) {
-                    userHandler.runUserReport(guestReport);
-                }
-            }
 
-            // Compact User Analysis and add to context report
             for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
                 if (cumulator.appliesTo(reportType)) {
                     cumulator.merge(guestReport, contextReport);
