@@ -385,13 +385,6 @@ public final class IMAPCapabilityAndGreetingCache {
                 out.write("A11 LOGOUT\r\n".getBytes());
                 out.flush();
                 /*
-                 * Consume until socket closure
-                 */
-                i = in.read();
-                while (i != -1) {
-                    i = in.read();
-                }
-                /*
                  * Create new CAG object
                  */
                 return new CapabilityAndGreeting(capabilities, greeting);
