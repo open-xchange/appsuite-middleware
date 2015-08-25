@@ -115,7 +115,7 @@ public class Bug30359Test extends CalDAVTest {
             }
         });
 
-        int status = getWebDAVClient().getHttpClient().executeMethod(m);
+        int status = getWebDAVClient().executeMethod(m);
         assertEquals(207, status);
         String response = m.getResponseBodyAsString();
         assertNotNull(response);
