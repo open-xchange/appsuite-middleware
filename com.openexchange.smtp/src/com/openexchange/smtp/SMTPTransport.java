@@ -53,6 +53,7 @@ import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -70,6 +71,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
+
 import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
@@ -88,6 +90,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -995,6 +998,15 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             if (null != mtaInfo) {
                 mtaInfo.setReturnCode(sendFailed.getReturnCode());
                 oxe.setArgument("mta_info", mtaInfo);
+            }
+            Address[] validSentAddresses = sendFailed.getValidSentAddresses();
+            if (validSentAddresses != null && validSentAddresses.length > 0) {
+                try {
+                    oxe.setArgument("sent_message", MimeMessageConverter.convertMessage(messageToSend));
+                } catch (Exception e) {
+                    // Ignore
+                    LOG.debug("Failed to convert message after a message was partially sent", e);
+                }
             }
             throw oxe;
         } catch (final MessagingException e) {
