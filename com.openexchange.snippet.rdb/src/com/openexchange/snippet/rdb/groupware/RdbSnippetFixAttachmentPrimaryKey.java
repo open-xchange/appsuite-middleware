@@ -62,16 +62,16 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link RdbSnipptetFixAttachmentPrimaryKey}
+ * {@link RdbSnippetFixAttachmentPrimaryKey}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RdbSnipptetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
+public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link RdbSnipptetFixAttachmentPrimaryKey}.
+     * Initializes a new {@link RdbSnippetFixAttachmentPrimaryKey}.
      */
-    public RdbSnipptetFixAttachmentPrimaryKey() {
+    public RdbSnippetFixAttachmentPrimaryKey() {
         super();
     }
 
