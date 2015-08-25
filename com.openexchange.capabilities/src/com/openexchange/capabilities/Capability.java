@@ -57,7 +57,7 @@ import java.io.Serializable;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Capability implements Serializable {
+public class Capability implements Serializable, Comparable<Capability> {
 
     private static final long serialVersionUID = 8389975218424678442L;
 
@@ -114,6 +114,11 @@ public class Capability implements Serializable {
     @Override
     public String toString() {
         return id;
+    }
+
+    @Override
+    public int compareTo(Capability o) {
+        return id.compareTo(o.id);
     }
 
 }
