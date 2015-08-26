@@ -91,8 +91,13 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
 
-        for (String infoLine : pushMBean.listPushUsers()) {
-            System.out.println(infoLine);
+        String[] pushUsers = pushMBean.listPushUsers();
+        if (null == pushUsers || 0 == pushUsers.length) {
+            System.out.println("No running push users on this node.");
+        } else {
+            for (String infoLine : pushUsers) {
+                System.out.println(infoLine);
+            }
         }
 
         return null;
