@@ -324,7 +324,7 @@ public abstract class OXServlet extends WebDavServlet {
             contextId = session.getContextId();
             userId = session.getUserId();
         }
-        HostData hostData = Tools.createHostData(req, contextId, userId);
+        HostData hostData = Tools.createHostData(req, contextId, userId, false);
         DefaultRequestContext context = new DefaultRequestContext();
         context.setHostData(hostData);
         return context;

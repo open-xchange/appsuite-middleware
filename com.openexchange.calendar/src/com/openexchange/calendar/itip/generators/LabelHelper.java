@@ -259,7 +259,11 @@ public class LabelHelper {
 
     	final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
     	if (hostnameService != null) {
-    		hostname = hostnameService.getHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
+    	    if (null != mail.getRecipient().getUser() && mail.getRecipient().getUser().isGuest()) {
+    	        hostname = hostnameService.getGuestHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
+    	    } else {
+    	        hostname = hostnameService.getHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
+    	    }
     	}
 
     	if (hostname == null) {

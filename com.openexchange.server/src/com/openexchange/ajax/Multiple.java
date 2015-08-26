@@ -90,7 +90,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogProperties;
@@ -159,11 +158,11 @@ public class Multiple extends SessionServlet {
         if (session == null) {
             OXException e = AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             e.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
-            LOG.error("Missing '{}' parameter.", PARAMETER_SESSION, e);                                
+            LOG.error("Missing '{}' parameter.", PARAMETER_SESSION, e);
             Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, e.getDisplayMessage(Locale.US));
             return;
         }
-        
+
         // Parse request body into a JSON array
         JSONArray dataArray;
         {
@@ -173,7 +172,7 @@ public class Multiple extends SessionServlet {
             } catch (JSONException e) {
                 OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
                 exc.setDisplayMessage(OXExceptionStrings.BAD_REQUEST, new Object[0]);
-                LOG.error("Received invalid JSON body in multiple request for user {} in context {} (exceptionId: {})", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), exc.getExceptionId(), e);                                
+                LOG.error("Received invalid JSON body in multiple request for user {} in context {} (exceptionId: {})", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), exc.getExceptionId(), e);
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, exc.getDisplayMessage(localeFrom(session)));
                 return;
             }
@@ -415,7 +414,12 @@ public class Multiple extends SessionServlet {
                 if (null == hostnameService) {
                     jsonObj.put(HOSTNAME, req.getServerName());
                 } else {
-                    final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                    final String hn;
+                    if (session.getUser().isGuest()) {
+                        hn = hostnameService.getGuestHostname(session.getUserId(), session.getContextId());
+                    } else {
+                        hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                    }
                     jsonObj.put(HOSTNAME, null == hn ? req.getServerName() : hn);
                 }
             }

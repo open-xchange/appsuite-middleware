@@ -977,7 +977,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         if (null == hostnameService) {
             hostName = getFallbackHostname();
         } else {
-            hostName = hostnameService.getHostname(getUserId(), ctx.getContextId());
+            if (null != user && user.isGuest()) {
+                hostName = hostnameService.getGuestHostname(getUserId(), ctx.getContextId());
+            } else {
+                hostName = hostnameService.getHostname(getUserId(), ctx.getContextId());
+            }
         }
         if (null == hostName) {
             hostName = getFallbackHostname();

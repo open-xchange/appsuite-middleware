@@ -326,7 +326,11 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          */
         HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
         if (null != hostnameService) {
-            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            if (session.getUser().isGuest()) {
+                hostName = hostnameService.getGuestHostname(session.getUserId(), session.getContextId());
+            } else {
+                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            }
         }
         /*
          * Get hostname from request

@@ -49,10 +49,17 @@
 
 package com.openexchange.share.core.tools;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import org.apache.http.client.utils.URIBuilder;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.ShareConstants;
 
@@ -74,9 +81,12 @@ public class ShareLinks {
      * @return The link
      */
     public static String generateExternal(HostData hostData, String shareToken) {
-        return prepare(hostData)
-            .setPath(serverPath(hostData, "/" + shareToken))
-            .toString();
+        URIBuilder builder = prepare(hostData);
+        String guestHostname = getGuestHostname(shareToken);
+        if (false == Strings.isEmpty(guestHostname)) {
+            builder.setHost(guestHostname);
+        }
+        return builder.setPath(serverPath(hostData, '/' + shareToken)).toString();
     }
 
     /**
@@ -125,6 +135,55 @@ public class ShareLinks {
 
     private static String serverPath(HostData hostData, String endpoint) {
         return hostData.getDispatcherPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
+    }
+
+    private static String getGuestHostname(String shareToken) {
+        int contextID = -1;
+        int userID = -1;
+        try {
+            ShareToken token = new ShareToken(shareToken);
+            contextID = token.getContextID();
+            userID = token.getUserID();
+        } catch (OXException e) {
+            getLogger(ShareLinks.class).error("Error resolving share token {}", shareToken, e);
+        }
+        return getGuestHostname(contextID, userID);
+    }
+
+    private static String getGuestHostname(final int contextID, final int userID) {
+        /*
+         * try and get guest hostname from dedicated hostname service
+         */
+        String hostname = null;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(ShareLinks.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getGuestHostname(userID, contextID);
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+        if (null != hostname) {
+            return hostname;
+        }
+        /*
+         * consult the config cascade as fallback
+         */
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(ShareLinks.class, ConfigViewFactory.class, new ServiceUser<ConfigViewFactory, String>() {
+
+                @Override
+                public String call(ConfigViewFactory service) throws Exception {
+                    return service.getView(userID, contextID).opt("com.openexchange.share.guestHostname", String.class, null);
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+        return hostname;
     }
 
 }

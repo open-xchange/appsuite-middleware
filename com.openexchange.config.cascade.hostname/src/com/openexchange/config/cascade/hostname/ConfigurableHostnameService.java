@@ -64,7 +64,13 @@ public class ConfigurableHostnameService implements HostnameService {
     private final ConfigViewFactory configViews;
 
     private static final String HOSTNAME_KEY = "com.openexchange.hostname";
+    private static final String GUEST_HOSTNAME_KEY = "com.openexchange.guestHostname";
 
+    /**
+     * Initializes a new {@link ConfigurableHostnameService}.
+     *
+     * @param configViews A reference to the config view factory
+     */
     public ConfigurableHostnameService(final ConfigViewFactory configViews) {
         super();
         this.configViews = configViews;
@@ -72,11 +78,22 @@ public class ConfigurableHostnameService implements HostnameService {
 
     @Override
     public String getHostname(final int userId, final int contextId) {
+        return getHostname(HOSTNAME_KEY, userId, contextId);
+    }
+
+    @Override
+    public String getGuestHostname(int userId, int contextId) {
+        return getHostname(GUEST_HOSTNAME_KEY, userId, contextId);
+    }
+
+    private String getHostname(String property, int userId, int contextId) {
         try {
-            final ConfigView view = configViews.getView(userId, contextId);
-            return view.get(HOSTNAME_KEY, String.class);
+            ConfigView view = configViews.getView(userId, contextId);
+            return view.get(property, String.class);
         } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(ConfigurableHostnameService.class).warn("Error getting value for \"{}\": {}", property, e.getMessage(), e);
             return null;
         }
     }
+
 }
