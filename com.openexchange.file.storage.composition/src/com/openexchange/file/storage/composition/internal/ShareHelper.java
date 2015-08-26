@@ -59,14 +59,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
@@ -153,8 +156,7 @@ public class ShareHelper {
                  for (Integer guest : comparedPermissions.getAddedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
                      GuestInfo guestInfo = comparedPermissions.getGuestInfo(guest);
-                     IDManglingFile file = new IDManglingFile(document, fileAccess.getAccountAccess().getService().getId(), fileAccess.getAccountAccess().getAccountId());
-                     if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(file, guestInfo.getLinkTarget()))) {
+                     if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(document, fileAccess.getAccountAccess(), guestInfo.getLinkTarget()))) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
                      if (isAnonymous(guestInfo)) {
@@ -426,8 +428,26 @@ public class ShareHelper {
         return guestInfo.getRecipientType() == RecipientType.ANONYMOUS;
     }
 
-    private static boolean isNotEqualsTarget(File document, ShareTarget target) {
-        return !(new ShareTarget(8, document.getFolderId(), document.getId()).equals(target));
+    private static boolean isNotEqualsTarget(File document, FileStorageAccountAccess accountAccess, ShareTarget target) {
+        FileID fileId;
+        FolderID folderId;
+        if (document instanceof UserizedFile) {
+            UserizedFile uFile = (UserizedFile) document;
+            folderId = new FolderID(uFile.getOriginalFolderId());
+            fileId = new FileID(uFile.getOriginalId());
+        } else {
+            folderId = new FolderID(document.getFolderId());
+            fileId = new FileID(document.getId());
+        }
+
+        String service = accountAccess.getService().getId();
+        String account = accountAccess.getAccountId();
+        folderId.setService(service);
+        folderId.setAccountId(account);
+        fileId.setService(service);
+        fileId.setAccountId(account);
+        fileId.setFolderId(folderId.getFolderId());
+        return !(new ShareTarget(8, folderId.toUniqueID(), fileId.toUniqueID()).equals(target));
     }
 
     private static boolean isInvalidGuestPermission(FileStorageGuestObjectPermission p) {

@@ -51,8 +51,8 @@ package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.containsForeignPermissions;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
-import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
-import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;

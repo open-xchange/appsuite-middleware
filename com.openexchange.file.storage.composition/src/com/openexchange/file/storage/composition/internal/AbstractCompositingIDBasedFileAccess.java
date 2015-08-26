@@ -55,7 +55,7 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.extractRemoteAddress;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
-import static com.openexchange.file.storage.composition.internal.IDManglingFileCustomizer.fixIDs;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
