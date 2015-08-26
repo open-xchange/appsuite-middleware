@@ -89,6 +89,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Mon Aug 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-08-24 (2674)
 * Fri Aug 21 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Steffen Templin <marcus.klein@open-xchange.com>

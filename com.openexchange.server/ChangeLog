@@ -1,3 +1,11 @@
+* 2015-08-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40548: Allow a separate hostname for guest users
+
+* 2015-08-26 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40596: Disabled "DELETE" object permission
+
 * 2015-08-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities.
@@ -5,6 +13,7 @@
 * 2015-08-26 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 40622: Avoid the ClassCastException by providing the correct type when searching in distribution lists with the LdapContactStorage
+ - Fix for bug 40660: Set the filename of the temp managed file
 
 * 2015-08-25 - thorben.betten@open-xchange.com
 
@@ -30,7 +39,7 @@
 * 2015-08-21 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 40645: Check for S/MIME protocol for signed multipart messages, when validating SMIME signature
- 
+
 * 2015-08-21 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40636: Don't continue with auto-login if guest user can't be resolved
@@ -197,6 +206,7 @@
 
 * 2015-07-29 - martin.herfurth@open-xchange.com
 
+ - Fix for bug 40433: Fixed bad UpdateTask/CreateTableTask
  - Fix for bug 39571: Avoid double booking of resources.
 
 * 2015-07-28 - thorben.betten@open-xchange.com

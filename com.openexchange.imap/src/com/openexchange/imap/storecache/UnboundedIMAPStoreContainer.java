@@ -121,21 +121,21 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
             return imapStore;
         }
-        
+
         // Polled an existing instance
         IMAPStore imapStore = imapStoreWrapper.imapStore;
-        
+
         if (checkConnectivityIfPolled && (false == imapStore.isConnected())) {
             // IMAPStore instance is no more connected
             imapStore = newStore(server, port, login, pw, imapSession, session);
             LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
             return imapStore;
         }
-        
+
         // Grab associated IMAP session identifier (as advertised via "ID" command)
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-        
+
         // Should we set properties from passed session?
         // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
         // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));

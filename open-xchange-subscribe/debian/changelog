@@ -16,6 +16,12 @@ open-xchange-subscribe (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:24 +0100
 
+open-xchange-subscribe (7.6.2-30) stable; urgency=medium
+
+  * Build for patch 2015-08-24 (2674)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 24 Aug 2015 15:28:57 +0200
+
 open-xchange-subscribe (7.6.2-29) stable; urgency=medium
 
   * Build for patch 2015-08-12 (2671)

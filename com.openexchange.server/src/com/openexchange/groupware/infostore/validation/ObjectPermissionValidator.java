@@ -114,7 +114,12 @@ public class ObjectPermissionValidator implements InfostoreValidator {
              */
             for (ObjectPermission permission : objectPermissions) {
                 int bits = permission.getPermissions();
-                if (ObjectPermission.WRITE != bits && ObjectPermission.DELETE != bits && ObjectPermission.READ != bits) {
+                if (ObjectPermission.DELETE == bits) {
+                    validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "DELETE object permission is not allowed.");
+                    validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(permission.getEntity())));
+                    return validation;
+                }
+                if (ObjectPermission.WRITE != bits && ObjectPermission.READ != bits) {
                     validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "Invalid permission bits: " + bits);
                     validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(permission.getEntity())));
                     return validation;
