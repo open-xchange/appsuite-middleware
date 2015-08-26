@@ -66,6 +66,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc microf
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-24 (2674)
 * Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
