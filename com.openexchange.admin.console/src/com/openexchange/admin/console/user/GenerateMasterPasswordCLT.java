@@ -175,6 +175,11 @@ public class GenerateMasterPasswordCLT {
         StringBuilder builder = new StringBuilder();
         String mpasswdFilename = parameters.get(Parameter.mpasswdfile);
         File file = new File(mpasswdFilename);
+        
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             boolean updated = false;
