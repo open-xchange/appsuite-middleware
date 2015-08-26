@@ -13,6 +13,7 @@
 * 2015-08-26 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 40622: Avoid the ClassCastException by providing the correct type when searching in distribution lists with the LdapContactStorage
+ - Fix for bug 40660: Set the filename of the temp managed file
 
 * 2015-08-25 - thorben.betten@open-xchange.com
 
