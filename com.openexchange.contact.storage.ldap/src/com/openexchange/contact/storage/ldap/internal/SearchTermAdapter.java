@@ -55,6 +55,8 @@ import com.openexchange.contact.storage.ldap.mapping.LdapBooleanMapping;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
@@ -78,28 +80,28 @@ public class SearchTermAdapter {
     private final LdapMapper mapper;
     private final LdapIDResolver idResolver;
 
-	/**
-	 * Initializes a new {@link SearchAdapter}.
-	 *
-	 * @param term
-	 * @throws OXException
-	 */
-	public SearchTermAdapter(SearchTerm<?> term, LdapMapper mapper, LdapIDResolver idResolver) throws OXException {
-		super();
-		this.mapper = mapper;
+    /**
+     * Initializes a new {@link SearchAdapter}.
+     *
+     * @param term
+     * @throws OXException
+     */
+    public SearchTermAdapter(SearchTerm<?> term, LdapMapper mapper, LdapIDResolver idResolver) throws OXException {
+        super();
+        this.mapper = mapper;
         this.idResolver = idResolver;
-		this.filter = getTerm(term);
-	}
+        this.filter = getTerm(term);
+    }
 
     public String getFilter() {
         return filter;
-	}
+    }
 
     private String getTerm(SearchTerm<?> term) throws OXException {
         if (SingleSearchTerm.class.isInstance(term)) {
-            return getTerm((SingleSearchTerm)term);
+            return getTerm((SingleSearchTerm) term);
         } else if (CompositeSearchTerm.class.isInstance(term)) {
-            return getTerm((CompositeSearchTerm)term);
+            return getTerm((CompositeSearchTerm) term);
         } else {
             throw new IllegalArgumentException("Need either an 'SingleSearchTerm' or 'CompositeSearchTerm'.");
         }
@@ -129,14 +131,17 @@ public class SearchTermAdapter {
             term.addOperand(operands[1]);
         }
 
+        boolean dList = false;
         for (int i = 0; i < operands.length; i++) {
             if (Operand.Type.COLUMN.equals(operands[i].getType())) {
                 formatArgs[i] = ldapMapping.getLdapAttributeName(true);
                 if (null != alternativeFormatArgs) {
                     alternativeFormatArgs[i] = ldapMapping.getAlternativeLdapAttributeName(true);
                 }
+                dList = ContactField.DISTRIBUTIONLIST.equals(operands[i].getValue());
             } else if (Operand.Type.CONSTANT.equals(operands[i].getType())) {
-                String encoded = ldapMapping.encodeForFilter(operands[i].getValue(), idResolver);
+                Object value = (dList) ? compileDistributionListEntryObject(operands[i].getValue()) : operands[i].getValue();
+                String encoded = ldapMapping.encodeForFilter(value, idResolver);
                 formatArgs[i] = encoded;
                 if (null != alternativeFormatArgs) {
                     alternativeFormatArgs[i] = encoded;
@@ -145,9 +150,27 @@ public class SearchTermAdapter {
                 throw new IllegalArgumentException("unknown type in operand: " + operands[i].getType());
             }
         }
-        /*
-         * build filter
-         */
+
+        return buildFilter(term, ldapMapping, formatArgs, alternativeFormatArgs);
+    }
+
+    private DistributionListEntryObject[] compileDistributionListEntryObject(Object value) throws OXException {
+        // Search in distribution lists is not supported. The yielding filter from the object of this method will return no results.
+        DistributionListEntryObject dleo = new DistributionListEntryObject();
+        dleo.setEmailaddress(value.toString());
+        return new DistributionListEntryObject[] { dleo };
+    }
+
+    /**
+     * Builds the LDAP filter
+     * 
+     * @param term The SearchTerm
+     * @param ldapMapping The LDAPMapping
+     * @param formatArgs The format args
+     * @param alternativeFormatArgs The alternative format args
+     * @return The filter
+     */
+    private String buildFilter(SingleSearchTerm term, LdapMapping<? extends Object> ldapMapping, Object[] formatArgs, Object[] alternativeFormatArgs) {
         String filter = String.format(term.getOperation().getLdapRepresentation(), formatArgs);
         if (null != alternativeFormatArgs) {
             String alternativeFilter = String.format(term.getOperation().getLdapRepresentation(), alternativeFormatArgs);
@@ -158,7 +181,7 @@ public class SearchTermAdapter {
         return "(" + filter + ")";
     }
 
-	private String getTerm(CompositeSearchTerm term) throws OXException {
+    private String getTerm(CompositeSearchTerm term) throws OXException {
         Operation operation = term.getOperation();
         SearchTerm<?>[] terms = term.getOperands();
         StringBuilder stringBuilder = new StringBuilder();
@@ -173,6 +196,6 @@ public class SearchTermAdapter {
         } else {
             return null;
         }
-	}
+    }
 
 }
