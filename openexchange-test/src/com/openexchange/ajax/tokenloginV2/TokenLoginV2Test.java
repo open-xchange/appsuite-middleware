@@ -178,7 +178,7 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         TokenLoginV2Request login = new TokenLoginV2Request(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.8.0", REDIRECT);
         TokenLoginV2Response loginResponse = client2.execute(login);
         assertTrue("Tokenlogin failed.", loginResponse.isLoginSuccessful());
-        assertEquals("Redirect urls does not match.", REDIRECT, loginResponse.getRedirectUrl());
+        assertTrue("Redirect urls does not match.", loginResponse.getRedirectUrl().startsWith(REDIRECT));
     }
 
     public void testLoginWithPasswordInURI_doNotAccept() throws Exception {

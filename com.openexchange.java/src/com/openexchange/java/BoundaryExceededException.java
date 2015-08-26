@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,49 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.java;
 
-import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link DriveCreateTableService}
+ * {@link BoundaryExceededException}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class DriveCreateTableService extends AbstractCreateTableImpl {
+public class BoundaryExceededException extends IllegalStateException {
+
+    private static final long serialVersionUID = -3718079717376474884L;
 
     /**
-     * Initializes a new {@link DriveCreateTableService}.
+     * Initializes a new {@link BoundaryExceededException}.
      */
-    public DriveCreateTableService() {
+    public BoundaryExceededException() {
         super();
     }
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initializes a new {@link BoundaryExceededException}.
+     * @param message
+     * @param cause
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { "fileChecksums", "directoryChecksums" };
+    public BoundaryExceededException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     /**
-     * Gets the CREATE TABLE statements.
-     *
-     * @return The CREATE statements
+     * Initializes a new {@link BoundaryExceededException}.
+     * @param s
      */
-    public static String[] getCreateStmts() {
-        return new String[] { SQL.getCreateFileChecksumsTableStmt(), SQL.getCreateDirectoryChecksumsTableStmt() };
+    public BoundaryExceededException(String s) {
+        super(s);
     }
 
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    /**
+     * Initializes a new {@link BoundaryExceededException}.
+     * @param cause
+     */
+    public BoundaryExceededException(Throwable cause) {
+        super(cause);
     }
 
 }

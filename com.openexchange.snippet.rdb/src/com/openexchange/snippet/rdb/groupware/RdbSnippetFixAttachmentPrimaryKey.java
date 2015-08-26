@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,75 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.snippet.rdb.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DriveCreateTableTask}
+ * {@link RdbSnippetFixAttachmentPrimaryKey}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DriveCreateTableTask extends UpdateTaskAdapter {
+public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link DriveCreateTableTask}.
+     * Initializes a new {@link RdbSnippetFixAttachmentPrimaryKey}.
      */
-    public DriveCreateTableTask() {
+    public RdbSnippetFixAttachmentPrimaryKey() {
         super();
     }
 
-    @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
-        boolean transactional = false;
+    private <S> S getService(final Class<? extends S> clazz) throws OXException {
         try {
-            writeCon.setAutoCommit(false); // BEGIN
-            transactional = true;
-            final String[] tableNames = DriveCreateTableService.getTablesToCreate();
-            final String[] createStmts = DriveCreateTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                }
+            return Services.getService(clazz);
+        } catch (final RuntimeException e) {
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        DatabaseService dbService = getService(DatabaseService.class);
+        Connection con = dbService.getForUpdateTask(cid);
+        boolean rollback = false;
+        try {
+            if (Tools.existsPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" })) {
+                return;
             }
-            writeCon.commit(); // COMMIT
-        } catch (final OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+
+            Databases.startTransaction(con);
+            rollback = true;
+            Tools.dropPrimaryKey(con, "snippetAttachment");
+            Tools.createPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" }, new int[] { 0, 0, 0, 64 });
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            DBUtils.autocommit(con);
+            dbService.backForUpdateTask(cid, con);
         }
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] { RdbSnippetCreateTableTask.class.getName() };
     }
 
 }

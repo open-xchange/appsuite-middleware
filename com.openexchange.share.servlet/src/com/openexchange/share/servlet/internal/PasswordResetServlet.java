@@ -164,7 +164,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
                  */
                 ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
-                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, hash, Tools.createHostData(request, contextID, guestID));
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, hash, Tools.createHostData(request, contextID, guestID, storageUser.isGuest()));
 
                 /*
                  * Redirect after notification was sent.

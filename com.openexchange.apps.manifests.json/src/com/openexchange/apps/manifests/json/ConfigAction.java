@@ -95,14 +95,18 @@ public class ConfigAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        
+
         ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
         HostnameService hostNameService = services.getOptionalService(HostnameService.class);
- 
+
         String hostname;
-        
+
         if(hostNameService != null) {
-             hostname = hostNameService.getHostname(session.getUserId(), session.getContextId());
+            if (session.getUser().isGuest()) {
+                hostname = hostNameService.getGuestHostname(session.getUserId(), session.getContextId());
+            } else {
+                hostname = hostNameService.getHostname(session.getUserId(), session.getContextId());
+            }
         }
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if (null != servletRequest) {
@@ -110,21 +114,21 @@ public class ConfigAction implements AJAXActionService {
         } else {
             hostname = requestData.getHostname();
         }
-        
+
         ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
         Map<String, Object> filteredConfig = serverConfig.forClient();
-        
+
         try {
-            
+
             JSONObject jsonConfig = asJSON(filteredConfig);
             jsonConfig.put("manifests", manifestBuilder.buildManifests(session));
             return new AJAXRequestResult(jsonConfig, "json");
         } catch (JSONException je) {
             throw AjaxExceptionCodes.JSON_ERROR.create(je.getMessage());
         }
-        
+
     }
-    
+
     public JSONObject asJSON(Map<String, Object> serverConfig) throws JSONException, OXException {
         Set<Capability> capabilities = (Set<Capability>) serverConfig.remove("capabilities");
         List<SimpleEntry<String, String>> languages = (List<SimpleEntry<String, String>>) serverConfig.remove("languages");
@@ -132,7 +136,7 @@ public class ConfigAction implements AJAXActionService {
         //coerce
         JSONObject serverConfigurationObject = (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
 
-        //add additional entries that can't simply be coerced 
+        //add additional entries that can't simply be coerced
         serverConfigurationObject.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, null));
 
         final JSONArray allLanguages = new JSONArray(languages.size());

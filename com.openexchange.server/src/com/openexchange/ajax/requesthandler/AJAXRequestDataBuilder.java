@@ -147,6 +147,10 @@ public class AJAXRequestDataBuilder {
         data.setPathInfo(path);
         return this;
     }
+    
+    public AJAXRequestData build() {
+    	return build(null);
+    }
 
     public AJAXRequestData build(AJAXRequestData original) {
         if (!formatSpecified) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,25 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.ajax.infostore.actions;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+
 
 /**
- * {@link DriveDeleteListener}
+ * {@link CopyInfostoreResponse}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.0
  */
-public class DriveDeleteListener implements DeleteListener {
+public class CopyInfostoreResponse extends AbstractAJAXResponse {
 
-    @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            try {
-                deleteFileChecksums(writeCon, event.getContext().getContextId());
-                deleteDirectoryChecksums(writeCon, event.getContext().getContextId());
-            } catch (SQLException e) {
-                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (Exception e) {
-                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-            }
-        }
+    protected CopyInfostoreResponse(Response response) {
+        super(response);
     }
 
-    private static int deleteFileChecksums(Connection connection, int cid) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement("DELETE FROM fileChecksums WHERE cid=?;");
-            stmt.setInt(1, cid);
-            return SQL.logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
+    public String getID() {
+        return getResponse().getData().toString();
     }
-
-    private static int deleteDirectoryChecksums(Connection connection, int cid) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement("DELETE FROM directoryChecksums WHERE cid=?;");
-            stmt.setInt(1, cid);
-            return SQL.logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
 }

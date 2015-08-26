@@ -82,18 +82,23 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
         Session session = login.getSession();
         HostDataImpl hostData = new HostDataImpl(
             request.isSecure(),
-            determineHost(request, session.getContextId(), session.getUserId()),
+            determineHost(login, session.getContextId(), session.getUserId()),
             request.getServerPort(),
             determineHttpSessionId(request.getHttpSessionID()),
             dispatcherPrefixService.getPrefix());
         session.setParameter(HostnameService.PARAM_HOST_DATA, hostData);
     }
 
-    private String determineHost(LoginRequest request, int contextId, int userId) {
-        String host = request.getServerName();
+    private String determineHost(LoginResult loginResult, int contextId, int userId) {
+        String host = loginResult.getRequest().getServerName();
         final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
         if (null != hostnameService) {
-            String tmp = hostnameService.getHostname(userId, contextId);
+            String tmp;
+            if (loginResult.getUser().isGuest()) {
+                tmp = hostnameService.getGuestHostname(userId, contextId);
+            } else {
+                tmp = hostnameService.getHostname(userId, contextId);
+            }
             if (null != tmp) {
                 host = tmp;
             }

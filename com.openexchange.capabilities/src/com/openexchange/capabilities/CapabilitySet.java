@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * {@link CapabilitySet} - A capability set.
@@ -202,6 +203,11 @@ public final class CapabilitySet implements Iterable<Capability>, Serializable, 
      */
     public Set<Capability> asSet() {
         return new HashSet<Capability>(capabilities.values());
+    }
+
+    @Override
+    public String toString() {
+        return new TreeSet<Capability>(capabilities.values()).toString();
     }
 
 }

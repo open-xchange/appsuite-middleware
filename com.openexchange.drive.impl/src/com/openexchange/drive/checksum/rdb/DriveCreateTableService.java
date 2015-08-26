@@ -47,60 +47,55 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link DirectoryChecksumsAddViewColumnTask}
- *
- * Adds the column <code>view INT NOT NULL DEFAULT 0</code> to the <code>directoryChecksums</code> table.
+ * {@link DriveCreateTableService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksumsAddViewColumnTask extends UpdateTaskAdapter {
+public class DriveCreateTableService extends AbstractCreateTableImpl {
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] { DirectoryChecksumsReIndexTask.class.getName() };
+    /**
+     * Initializes a new {@link DriveCreateTableService}.
+     */
+    public DriveCreateTableService() {
+        super();
+    }
+
+    /**
+     * Gets the table names.
+     *
+     * @return The table names.
+     */
+    public static String[] getTablesToCreate() {
+        return new String[] { "fileChecksums", "directoryChecksums" };
+    }
+
+    /**
+     * Gets the CREATE TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { SQL.getCreateFileChecksumsTableStmt(), SQL.getCreateDirectoryChecksumsTableStmt() };
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        Connection connection = dbService.getForUpdateTask(contextID);
-        boolean committed = false;
-        try {
-            connection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connection, "directoryChecksums", new Column("view", "INT NOT NULL DEFAULT 0"));
-            connection.commit();
-            committed = true;
-        } catch (SQLException e) {
-            rollback(connection);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            rollback(connection);
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(connection);
-            if (committed) {
-                dbService.backForUpdateTask(contextID, connection);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextID, connection);
-            }
-        }
+    public String[] requiredTables() {
+        return NO_TABLES;
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
     }
 
 }

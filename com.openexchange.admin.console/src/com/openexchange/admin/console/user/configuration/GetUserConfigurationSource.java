@@ -52,10 +52,12 @@ package com.openexchange.admin.console.user.configuration;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -204,15 +206,31 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             System.out.println();
             return;
         }
+        List<CapabilitySource> capabilitySources = new ArrayList<CapabilitySource>();
+        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROVISIONING, userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.DENIED_KEY)));
+        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.CONFIGURATION, userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.DENIED_KEY)));
+        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROGRAMMATIC, userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.DENIED_KEY)));
+        capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PERMISSION, userCapabilitiesSource.get(CapabilitySourceEnum.PERMISSION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PERMISSION.getName()).get(CapabilitySource.DENIED_KEY)));
 
-        System.out.println("Capabilities sources found: ");
-        for (Entry<String, Map<String, Set<String>>> capabilitiesSource : userCapabilitiesSource.entrySet()) {
-            System.out.println("Source: " + capabilitiesSource.getKey());
-            for (Entry<String, Set<String>> value : capabilitiesSource.getValue().entrySet()) {
-                System.out.println("-- " + value.getKey() + ": " + value.getValue());
+        Collections.sort(capabilitySources, new CapabilitiesComparator());
+
+        Set<String> allowed = new TreeSet<>();
+        for (CapabilitySource source : capabilitySources) {
+            System.out.println("Source: " + source.getSource().getName());
+
+            System.out.println("-- granted:" + source.getGrantedCapabilities().toString());
+            for (String granted : source.getGrantedCapabilities()) {
+                allowed.add(granted);
             }
+            System.out.println("-- denied:" + source.getDeniedCapabilities().toString());
+            for (String denied : source.getDeniedCapabilities()) {
+                allowed.remove(denied);
+            }
+            System.out.println();
         }
-        System.out.println();
+
+        System.out.println("Granted capabilities (lowest -> highest priority; permissions -> configuration -> provisioning -> programmatic): ");
+        System.out.println(allowed.toString());
     }
 
     private final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {

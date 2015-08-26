@@ -215,35 +215,60 @@ public abstract class ListCore extends UserAbstraction {
         }
 
 //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l" },
-                 new String[] { "Id", "Name", "Displayname", "Email" }, data);
+        doOutput(new String[] { "r", "l", "l", "l", "l", "l" },
+                 new String[] { "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
     }
 
     private ArrayList<String> makeStandardData(final User user) {
         final ArrayList<String> res_data = new ArrayList<String>();
 
-        res_data.add(String.valueOf(user.getId())); // id
+        res_data.add(String.valueOf(user.getId()));// id
 
-        final String name = user.getName();
-        if (name != null && name.trim().length() > 0) {
-            res_data.add(name); // name
-        } else {
-            res_data.add(null); // name
+        {
+            final String name = user.getName();
+            if (name != null && name.trim().length() > 0) {
+                res_data.add(name);// name
+            } else {
+                res_data.add(null);// name
+            }
         }
 
-        final String displayname = user.getDisplay_name();
-        if (displayname != null && displayname.trim().length() > 0) {
-            res_data.add(displayname); // displayname
-        } else {
-            res_data.add(null); // displayname
+        {
+            final String displayname = user.getDisplay_name();
+            if (displayname != null && displayname.trim().length() > 0) {
+                res_data.add(displayname);// displayname
+            } else {
+                res_data.add(null);// displayname
+            }
         }
 
-        final String email = user.getPrimaryEmail();
-        if (email != null && email.trim().length() > 0) {
-            res_data.add(email); // email
-        } else {
-            res_data.add(null); // email
+        {
+            final String email = user.getPrimaryEmail();
+            if (email != null && email.trim().length() > 0) {
+                res_data.add(email);// email
+            } else {
+                res_data.add(null);// email
+            }
         }
+
+        {
+            final Long qmax = user.getMaxQuota();
+            if (null != qmax) {
+                res_data.add(qmax.toString());// qmax
+            } else {
+                res_data.add(null);// qmax
+            }
+        }
+
+        {
+            final Long qused = user.getUsedQuota();
+            if (null != qused) {
+                res_data.add(qused.toString());// qused
+            } else {
+                res_data.add(null);// qused
+            }
+        }
+
         return res_data;
     }
 
@@ -322,6 +347,8 @@ public abstract class ListCore extends UserAbstraction {
                 if (returntype.equals(JAVA_LANG_STRING)) {
                     datarow.add((String)methodandnames.getMethod().invoke(user, (Object[]) null));
                 } else if (returntype.equals(JAVA_LANG_INTEGER)) {
+                    datarow.add(String.valueOf(methodandnames.getMethod().invoke(user, (Object[]) null)));
+                } else if (returntype.equals(JAVA_LANG_LONG)) {
                     datarow.add(String.valueOf(methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_LANG_BOOLEAN)) {
                     datarow.add(booleantostring((Boolean)methodandnames.getMethod().invoke(user, (Object[]) null)));

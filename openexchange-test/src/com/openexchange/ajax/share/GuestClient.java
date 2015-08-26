@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -234,7 +235,9 @@ public class GuestClient extends AJAXClient {
     public GuestClient(ClientConfig config) throws Exception {
         super(getOrCreateSession(config), config.mustLogout);
         prepareClient(getHttpClient(), config.username, config.password);
-        shareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect));
+        setHostname(new URI(config.url).getHost());
+        setProtocol(new URI(config.url).getScheme());
+        shareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect), getProtocol(), getHostname());
         if (null != shareResponse.getLoginType()) {
             loginResponse = login(shareResponse, config);
             getSession().setId(loginResponse.getSessionId());
@@ -341,7 +344,7 @@ public class GuestClient extends AJAXClient {
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
-        return Executor.execute(this, loginRequest);
+        return Executor.execute(this, loginRequest, getProtocol(), getHostname());
     }
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {

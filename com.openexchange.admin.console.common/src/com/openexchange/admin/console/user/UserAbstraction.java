@@ -1859,6 +1859,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final HashSet<String> returntypes = new HashSet<String>();
         returntypes.add(JAVA_LANG_STRING);
         returntypes.add(JAVA_LANG_INTEGER);
+        returntypes.add(JAVA_LANG_LONG);
         returntypes.add(JAVA_LANG_BOOLEAN);
         returntypes.add(JAVA_UTIL_DATE);
         returntypes.add(JAVA_UTIL_HASH_SET);

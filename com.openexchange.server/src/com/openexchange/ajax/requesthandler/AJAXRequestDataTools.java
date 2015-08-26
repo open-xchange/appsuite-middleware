@@ -379,7 +379,11 @@ public class AJAXRequestDataTools {
      * @param session The associated session
      */
     public static void parseHostName(AJAXRequestData request, HttpServletRequest req, ServerSession session) {
-        parseHostName(request, req, null == session ? -1 : session.getUserId(), null == session ? -1 : session.getContextId());
+        if (null == session) {
+            parseHostName(request, req, -1, -1, false);
+        } else {
+            parseHostName(request, req, session.getUserId(), session.getContextId(), session.getUser().isGuest());
+        }
     }
 
     /**
@@ -388,16 +392,22 @@ public class AJAXRequestDataTools {
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param userId The user identifier
+     * @param isGuest <code>true</code> if the guest hostname should be preferred, <code>false</code>, otherwise
      * @param contextId The context identifier
      */
-    public static void parseHostName(AJAXRequestData request, HttpServletRequest req, int userId, int contextId) {
+    private static void parseHostName(AJAXRequestData request, HttpServletRequest req, int userId, int contextId, boolean isGuest) {
         request.setSecure(Tools.considerSecure(req));
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
             if (null == hostnameService) {
                 request.setHostname(req.getServerName());
             } else {
-                final String hn = hostnameService.getHostname(userId, contextId);
+                final String hn;
+                if (isGuest) {
+                    hn = hostnameService.getGuestHostname(userId, contextId);
+                } else {
+                    hn = hostnameService.getHostname(userId, contextId);
+                }
                 request.setHostname(null == hn ? req.getServerName() : hn);
             }
         }

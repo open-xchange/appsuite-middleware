@@ -94,23 +94,23 @@ public class LDAPHostnameCache {
     }
 
     /**
-     * Associates the given host name with specified context identifier in cache.
+     * Associates the given host names with specified context identifier in cache.
      *
      * @param contextId The context identifier
-     * @param hostname The associated host name
+     * @param hostnames The associated host names
      * @throws OXException If operation fails
      */
-    public void addHostnameToCache(int contextId, String hostname) throws OXException {
-        if (hostname != null && hostname.length() > 0) {
+    public void addHostnamesToCache(int contextId, String[] hostnames) throws OXException {
+        if (hostnames != null && hostnames.length > 0) {
             Cache cache = optCache();
             if (null != cache) {
                 Integer iContextId = I(contextId);
                 try {
-                    cache.putSafe(iContextId, hostname);
+                    cache.putSafe(iContextId, hostnames);
                 } catch (Exception e) {
                     // Put into cache failed
                     cache.remove(iContextId);
-                    cache.put(iContextId, hostname, false);
+                    cache.put(iContextId, hostnames, false);
                 }
             }
         }
@@ -122,9 +122,9 @@ public class LDAPHostnameCache {
      * @param contextId The context identifier
      * @return The associated host name or <code>null</code>
      */
-    public String getHostnameFromCache(int contextId) {
+    public String[] getHostnamesFromCache(int contextId) {
         Cache cache = optCache();
-        return null == cache ? null : (String) cache.get(I(contextId));
+        return null == cache ? null : (String[]) cache.get(I(contextId));
     }
 
     /**

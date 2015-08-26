@@ -98,7 +98,7 @@ PROCS='
     ps -eLf;
     ps faux;
     readerengine_cache_overview;
-    report -d;
+    report -o -d;
     route -n;
     showruntimestats -a;
     showruntimestats -c;

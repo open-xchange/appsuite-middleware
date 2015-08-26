@@ -215,8 +215,8 @@ public class ContactCopyTask implements CopyUserTaskService {
                         setStringOrNull(i++, stmt, entry.getLastname());
                         setStringOrNull(i++, stmt, entry.getFirstname());
                         setStringOrNull(i++, stmt, entry.getEmailaddress());
-                        setBinaryOrNull(i++, stmt, UUIDs.toByteArray(UUID.randomUUID()));
                         stmt.setInt(i++, cid);
+                        setBinaryOrNull(i++, stmt, UUIDs.toByteArray(UUID.randomUUID()));
 
                         stmt.addBatch();
                     }

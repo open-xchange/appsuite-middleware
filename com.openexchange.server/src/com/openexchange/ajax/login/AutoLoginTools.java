@@ -221,6 +221,9 @@ public class AutoLoginTools {
                 LoginResult loginResult = null;
                 try {
                     GuestInfo guest = ServerServiceRegistry.getInstance().getService(ShareService.class).resolveGuest(shareToken);
+                    if (null == guest) {
+                        return null;
+                    }
                     return loginResult = tryGuestAutologin(guest, loginConfig, request, response);
                 } finally {
                     /*

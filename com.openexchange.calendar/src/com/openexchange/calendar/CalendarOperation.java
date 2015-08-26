@@ -441,7 +441,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean includePrivateAppointmentsOfSharedFolderOwner = false;;
 
-    private static CalendarCollection recColl = new CalendarCollection();
+    private static final CalendarCollection recColl = new CalendarCollection();
 
     final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder) throws SQLException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
@@ -679,12 +679,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsShownAs() && recColl.check(I(cdao.getShownAs()), I(edao.getShownAs())) && recColl.getFieldName(Appointment.SHOWN_AS) != null) {
             ucols[uc++] = Appointment.SHOWN_AS;
         }
-        if (cdao.containsStartDate() && recColl.check(
+        if (cdao.containsStartDate() && cdao.getStartDate() != null && recColl.check(
             Long.valueOf(cdao.getStartDate().getTime()),
             Long.valueOf(edao.getStartDate().getTime())) && recColl.getFieldName(CalendarObject.START_DATE) != null) {
             ucols[uc++] = CalendarObject.START_DATE;
         }
-        if (cdao.containsEndDate() && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
+        if (cdao.containsEndDate() && cdao.getEndDate() != null && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
             ucols[uc++] = CalendarObject.END_DATE;
         }
         if (cdao.containsLocation() && recColl.check(cdao.getLocation(), edao.getLocation()) && recColl.getFieldName(Appointment.LOCATION) != null) {

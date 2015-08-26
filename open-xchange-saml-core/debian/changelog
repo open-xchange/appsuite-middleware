@@ -1,3 +1,9 @@
+open-xchange-saml-core (7.8.0-2) stable; urgency=medium
+
+  * Second candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 Aug 2015 10:32:02 +0200
+
 open-xchange-saml-core (7.8.0-1) stable; urgency=medium
 
   * First release candidate for 7.8.0
@@ -9,6 +15,12 @@ open-xchange-saml-core (7.8.0-0) unstable; urgency=medium
   * prepare for 7.8.0 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:16 +0100
+
+open-xchange-saml-core (7.6.2-6) stable; urgency=medium
+
+  * Build for patch 2015-08-24 (2674)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 24 Aug 2015 15:28:49 +0200
 
 open-xchange-saml-core (7.6.2-5) stable; urgency=medium
 

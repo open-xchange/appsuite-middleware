@@ -472,6 +472,7 @@ public class ReportClientBase extends AbstractJMXTools {
             CompositeData report = (CompositeData) server.invoke(getAppSuiteReportingName(), "retrieveLastReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
 
             if (report == null) {
+                System.out.println();
                 System.out.println(NO_REPORT_FOUND_MSG);
                 return;
             }
@@ -535,7 +536,7 @@ public class ReportClientBase extends AbstractJMXTools {
                 done = !found;
 
                 if (!done) {
-                    Thread.sleep(silent ? 60000 : 1000);
+                    Thread.sleep(silent ? 60000 : 10000);
                 }
             }
         } catch (Exception e) {
@@ -698,7 +699,7 @@ public class ReportClientBase extends AbstractJMXTools {
         if (interval < 1000) {
             return interval + " milliseconds";
         }
-        long diffInSeconds = interval / 1000;
+        long diffInSeconds = (interval / 1000) * (110/100);
 
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);

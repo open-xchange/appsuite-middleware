@@ -54,14 +54,18 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.anonymizer.Anonymizers;
+import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.tools.PermissionResolver;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExtendedPermission}
@@ -82,13 +86,21 @@ public abstract class ExtendedPermission {
         this.resolver = permissionResolver;
     }
 
-    protected void addGroupInfo(AJAXRequestData requestData, JSONObject jsonObject, Group group) throws JSONException {
+    protected void addGroupInfo(AJAXRequestData requestData, JSONObject jsonObject, Group group) throws JSONException, OXException {
         if (null != group) {
-            jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());
+            /*
+             * serialize anonymized or full group as needed
+             */
+            ServerSession session = requestData.getSession();
+            if (Anonymizers.isGuest(session)) {
+                addGroupInfo(jsonObject, Anonymizers.optAnonymize(group, Module.GROUP, session));
+            } else {
+                addGroupInfo(jsonObject, group);
+            }
         }
     }
 
-    protected void addUserInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
+    protected void addUserInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException, OXException {
         if (null != user) {
             Contact userContact = resolver.getUserContact(user.getId());
             if (null != userContact) {
@@ -99,28 +111,31 @@ public abstract class ExtendedPermission {
         }
     }
 
-    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, Contact userContact) throws JSONException {
+    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, Contact userContact) throws JSONException, OXException {
         if (null != userContact) {
-            jsonObject.putOpt(ContactFields.DISPLAY_NAME, userContact.getDisplayName());
-            JSONObject jsonContact = new JSONObject();
-            jsonContact.putOpt(ContactFields.EMAIL1, userContact.getEmail1());
-            jsonContact.putOpt(ContactFields.TITLE, userContact.getTitle());
-            jsonContact.putOpt(ContactFields.LAST_NAME, userContact.getSurName());
-            jsonContact.putOpt(ContactFields.FIRST_NAME, userContact.getGivenName());
-            jsonContact.putOpt(ContactFields.IMAGE1_URL, resolver.getImageURL(userContact.getInternalUserId()));
-            jsonObject.put("contact", jsonContact);
+            /*
+             * serialize anonymized or full contact as needed
+             */
+            ServerSession session = requestData.getSession();
+            if (Anonymizers.isGuest(session) && session.getUserId() != userContact.getInternalUserId()) {
+                addContactInfo(jsonObject, Anonymizers.optAnonymize(userContact, Module.CONTACT, session));
+            } else {
+                addContactInfo(jsonObject, userContact);
+            }
         }
     }
 
-    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
+    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException, OXException {
         if (null != user) {
-            jsonObject.putOpt(ContactFields.DISPLAY_NAME, user.getDisplayName());
-            JSONObject jsonContact = new JSONObject();
-            jsonContact.putOpt(ContactFields.EMAIL1, user.getMail());
-            jsonContact.putOpt(ContactFields.LAST_NAME, user.getSurname());
-            jsonContact.putOpt(ContactFields.FIRST_NAME, user.getGivenName());
-            jsonContact.putOpt(ContactFields.IMAGE1_URL, resolver.getImageURL(user.getId()));
-            jsonObject.put("contact", jsonContact);
+            /*
+             * serialize anonymized or full user as needed
+             */
+            ServerSession session = requestData.getSession();
+            if (Anonymizers.isGuest(session) && session.getUserId() != user.getId()) {
+                addContactInfo(jsonObject, Anonymizers.optAnonymize(user, Module.USER, session));
+            } else {
+                addContactInfo(jsonObject, user);
+            }
         }
     }
 
@@ -140,6 +155,31 @@ public abstract class ExtendedPermission {
             }
             jsonObject.putOpt("password", share.getGuest().getPassword());
         }
+    }
+
+    private void addContactInfo(JSONObject jsonObject, User user) throws JSONException {
+        jsonObject.putOpt(ContactFields.DISPLAY_NAME, user.getDisplayName());
+        JSONObject jsonContact = new JSONObject();
+        jsonContact.putOpt(ContactFields.EMAIL1, user.getMail());
+        jsonContact.putOpt(ContactFields.LAST_NAME, user.getSurname());
+        jsonContact.putOpt(ContactFields.FIRST_NAME, user.getGivenName());
+        jsonContact.putOpt(ContactFields.IMAGE1_URL, resolver.getImageURL(user.getId()));
+        jsonObject.put("contact", jsonContact);
+    }
+
+    private void addContactInfo(JSONObject jsonObject, Contact contact) throws JSONException {
+        jsonObject.putOpt(ContactFields.DISPLAY_NAME, contact.getDisplayName());
+        JSONObject jsonContact = new JSONObject();
+        jsonContact.putOpt(ContactFields.EMAIL1, contact.getEmail1());
+        jsonContact.putOpt(ContactFields.TITLE, contact.getTitle());
+        jsonContact.putOpt(ContactFields.LAST_NAME, contact.getSurName());
+        jsonContact.putOpt(ContactFields.FIRST_NAME, contact.getGivenName());
+        jsonContact.putOpt(ContactFields.IMAGE1_URL, resolver.getImageURL(contact.getInternalUserId()));
+        jsonObject.put("contact", jsonContact);
+    }
+
+    private void addGroupInfo(JSONObject jsonObject, Group group) throws JSONException {
+        jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());
     }
 
     private static long addTimeZoneOffset(long date, TimeZone timeZone) {

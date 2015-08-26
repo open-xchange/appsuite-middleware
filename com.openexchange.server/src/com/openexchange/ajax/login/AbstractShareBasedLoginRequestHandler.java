@@ -56,6 +56,7 @@ import static com.openexchange.ajax.LoginServlet.getShareCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -97,6 +98,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Cookies;
 
 
 /**
@@ -296,15 +298,22 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
                 /*
-                 * set secret, share and public session cookies
+                 * set secret & share cookies
                  */
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
                 if (loginConfig.isSessiondAutoLogin()) {
                     response.addCookie(configureCookie(new Cookie(getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
                 }
-                String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null != altId) {
-                    response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
+                /*
+                 * set public session cookie if not yet present
+                 */
+                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+                Cookie cookie = cookies.get(getPublicSessionCookieName(request));
+                if (null == cookie) {
+                    String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                    if (null != altId) {
+                        response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
+                    }
                 }
             }
         };

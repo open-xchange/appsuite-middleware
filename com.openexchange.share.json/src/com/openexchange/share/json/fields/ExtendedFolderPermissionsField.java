@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
@@ -132,7 +133,7 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
                     }
                 }
                 return jsonArray;
-            } catch (JSONException e) {
+            } catch (JSONException | OXException e) {
                 org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
             }
         }

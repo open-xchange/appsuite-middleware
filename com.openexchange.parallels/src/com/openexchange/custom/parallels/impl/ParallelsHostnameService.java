@@ -61,6 +61,7 @@ import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 
 /**
  *
@@ -77,10 +78,20 @@ public final class ParallelsHostnameService implements HostnameService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsHostnameService.class);
 
     @Override
-    public String getHostname(final int userId, final int contextId) {
+    public String getHostname(int userId, int contextId) {
+        return getHostname(userId, contextId, false);
+    }
+
+    @Override
+    public String getGuestHostname(int userId, int contextId) {
+        return getHostname(userId, contextId, true);
+    }
+
+    private String getHostname(final int userId, final int contextId, boolean isGuest) {
         if (contextId > 0) {
             final ContextService service = Services.getService(ContextService.class);
             String hostname = null;
+            String guestHostname = null;
             Context ctx;
             try {
                 ctx = service.getContext(contextId);
@@ -90,7 +101,6 @@ public final class ParallelsHostnameService implements HostnameService {
                 // load suffix for branding string dynamically in loginmappings
                 final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
                 LOG.debug("getHostname: Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), contextId);
-                boolean found_host = false;
                 if( null != suffix_branded && suffix_branded.length() != 0) {
                     for (final String login_mapping : login_mappings) {
                         if(login_mapping.startsWith(suffix_branded)){
@@ -102,17 +112,20 @@ public final class ParallelsHostnameService implements HostnameService {
                              *
                              */
                             final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
-                            if(URL_.length!=2){
-                                LOG.error("getHostname: Could not split up branded host {} login mapping for context {}", login_mapping, contextId);
-                            }else{
-                                hostname = URL_[1];
+                            if (3 <= URL_.length) {
+                                hostname = URL_[2];
                                 LOG.debug("getHostname: Successfully resolved HOST to {} for branded context {}", hostname, contextId);
-                                found_host = true;
+                                if (4 <= URL_.length) {
+                                    guestHostname = URL_[3];
+                                    LOG.debug("getHostname: Successfully resolved guest HOST to {} for branded context {}", guestHostname, contextId);
+                                }
+                            } else {
+                                LOG.error("getHostname: Could not split up branded host {} login mapping for context {}", login_mapping, contextId);
                             }
                         }
                     }
                 }
-                if(!found_host){
+                if (null == hostname){
                     // now host was provisioned, load fallback from configuration
                     hostname = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_FALLBACKHOST);
                     // use systems getHostname() if no fallbackhost is set
@@ -125,17 +138,24 @@ public final class ParallelsHostnameService implements HostnameService {
                         LOG.warn("getHostname: Unable to determine any hostname for context {}", contextId);
                     }
                 }
+                if (null == guestHostname) {
+                    // no guest host was provisioned, load fallback from configuration
+                    guestHostname = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_GUESTFALLBACKHOST);
+                    // use systems getHostname() if no fallbackhost is set
+                    if (Strings.isEmpty(guestHostname)) {
+                        guestHostname = hostname;
+                        LOG.debug("getHostname: no guest host configured, falling back to HOST {} for branded context {}", guestHostname, contextId);
+                    }
+                }
             } catch (final OXException e) {
                 LOG.error("", e);
             }
 
-            return hostname;
-        }else{
+            return isGuest ? guestHostname : hostname;
+        } else {
             LOG.error("getHostname: Got context with id {}, dont generating any hostname", contextId);
             return null;
         }
-
-
     }
 
 }

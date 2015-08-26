@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.drive.impl.checksum.rdb;
+package com.openexchange.drive.checksum.rdb;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
@@ -65,22 +63,17 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DirectoryChecksumsAddUserAndETagColumnTask}
+ * {@link DirectoryChecksumsAddViewColumnTask}
  *
- * Deletes all existing directory checksums if the <code>user</code> column not yet exists, then
- * <ul>
- * <li>modifies the column <code>sequence</code> to <code>sequence BIGINT(20) DEFAULT NULL</code></li>
- * <li>adds the column <code>user INT4 UNSIGNED DEFAULT NULL</code></li>
- * <li>adds the column <code>etag VARCHAR(255) DEFAULT NULL</code></li>
- * </ul>
+ * Adds the column <code>view INT NOT NULL DEFAULT 0</code> to the <code>directoryChecksums</code> table.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapter {
+public class DirectoryChecksumsAddViewColumnTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { DriveCreateTableTask.class.getName() };
+        return new String[] { DirectoryChecksumsReIndexTask.class.getName() };
     }
 
     @Override
@@ -91,14 +84,7 @@ public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapte
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            if (false == Tools.columnExists(connection, "directoryChecksums", "user")) {
-                deleteDirectoryChecksums(connection);
-            }
-            if (false == Tools.isNullable(connection, "directoryChecksums", "sequence")) {
-                Tools.modifyColumns(connection, "directoryChecksums", new Column("sequence", "BIGINT(20) DEFAULT NULL"));
-            }
-            Tools.checkAndAddColumns(connection, "directoryChecksums",
-                new Column("user", "INT4 UNSIGNED DEFAULT NULL"), new Column("etag", "VARCHAR(255) DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "directoryChecksums", new Column("view", "INT NOT NULL DEFAULT 0"));
             connection.commit();
             committed = true;
         } catch (SQLException e) {
@@ -114,22 +100,6 @@ public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapte
             } else {
                 dbService.backForUpdateTaskAfterReading(contextID, connection);
             }
-        }
-    }
-
-    /**
-     * Deletes all entries from the <code>directoryChecksums</code> table.
-     *
-     * @param connection The connection
-     * @throws SQLException
-     */
-    private static void deleteDirectoryChecksums(Connection connection) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            stmt.execute("DELETE FROM directoryChecksums;");
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 

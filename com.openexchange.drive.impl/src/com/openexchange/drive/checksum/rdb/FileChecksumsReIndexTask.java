@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,78 @@
  *
  */
 
-package com.openexchange.snippet.rdb.groupware;
+package com.openexchange.drive.checksum.rdb;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
+import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.snippet.rdb.Services;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link RdbSnipptetFixAttachmentPrimaryKey}
+ * {@link FileChecksumsReIndexTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Removes the obsolete <code>(folder, cid)</code> and <code>(checksum, cid)</code> indices and creates the following new ones:
+ * <code>(cid, folder)</code> and <code>(cid, checksum)</code>
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RdbSnipptetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
+public class FileChecksumsReIndexTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link RdbSnipptetFixAttachmentPrimaryKey}.
-     */
-    public RdbSnipptetFixAttachmentPrimaryKey() {
-        super();
-    }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (final RuntimeException e) {
-            throw new OXException(e);
-        }
+    @Override
+    public String[] getDependencies() {
+        return new String[] { DirectoryChecksumsAddUserAndETagColumnTask.class.getName() };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        DatabaseService dbService = getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(cid);
-        boolean rollback = false;
+        int contextID = params.getContextId();
+        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
+        Connection connection = dbService.getForUpdateTask(contextID);
+        boolean committed = false;
         try {
-            if (Tools.existsPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" })) {
-                return;
+            connection.setAutoCommit(false);
+            /*
+             * remove obsolete indices as needed
+             */
+            String oldIndexName = Tools.existsIndex(connection, "fileChecksums", new String[] { "checksum", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "fileChecksums", oldIndexName);
             }
-
-            Databases.startTransaction(con);
-            rollback = true;
-            Tools.dropPrimaryKey(con, "snippetAttachment");
-            Tools.createPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" }, new int[] { 0, 0, 0, 64 });
-            con.commit();
-            rollback = false;
+            oldIndexName = Tools.existsIndex(connection, "fileChecksums", new String[] { "folder", "cid" });
+            if (null != oldIndexName) {
+                Tools.dropIndex(connection, "fileChecksums", oldIndexName);
+            }
+            /*
+             * create new indices
+             */
+            Tools.createIndex(connection, "fileChecksums", new String[] { "cid", "checksum" });
+            Tools.createIndex(connection, "fileChecksums", new String[] { "cid", "folder" });
+            /*
+             * commit
+             */
+            connection.commit();
+            committed = true;
         } catch (SQLException e) {
+            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
+            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                DBUtils.rollback(con);
+            autocommit(connection);
+            if (committed) {
+                dbService.backForUpdateTask(contextID, connection);
+            } else {
+                dbService.backForUpdateTaskAfterReading(contextID, connection);
             }
-            DBUtils.autocommit(con);
-            dbService.backForUpdateTask(cid, con);
         }
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { RdbSnippetCreateTableTask.class.getName() };
     }
 
 }

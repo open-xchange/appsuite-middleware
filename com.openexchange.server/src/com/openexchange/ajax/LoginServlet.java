@@ -353,7 +353,7 @@ public class LoginServlet extends AJAXServlet {
 
                         LoginPerformer.getInstance().doLogout(sessionId);
                         // Drop relevant cookies
-                        SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                        SessionUtility.removeOXCookies(session, req, resp);
                         SessionUtility.removeJSESSIONID(req, resp);
                     }
                 } catch (final OXException e) {
@@ -421,7 +421,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session, req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -576,7 +576,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session, req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());

@@ -52,6 +52,7 @@ package com.openexchange.share.json.fields;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.ldap.User;
@@ -88,7 +89,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
      * @param requestData The underlying request data, or <code>null</code> if not available
      * @return The serialized extended permissions
      */
-    public JSONObject toJSON(AJAXRequestData requestData) throws JSONException {
+    public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("bits", permission.getPermissions());

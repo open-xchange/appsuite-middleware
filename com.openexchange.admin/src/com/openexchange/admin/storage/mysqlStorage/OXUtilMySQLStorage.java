@@ -601,10 +601,27 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     prep.setInt(4, filestoreId);
                     changed = prep.executeUpdate() > 0;
                     Databases.closeSQLStuff(prep);
+
+                    if (changed) {
+                        prep = con.prepareStatement("SELECT 1 FROM filestore_usage WHERE cid=? AND user=?");
+                        prep.setInt(1, contextId);
+                        prep.setInt(2, userId);
+                        boolean entryAvailable = prep.executeQuery().next();
+                        Databases.closeSQLStuff(prep);
+
+                        if (false == entryAvailable) {
+                            prep = con.prepareStatement("INSERT INTO filestore_usage (cid, user, used) VALUES (?, ?, ?)");
+                            prep.setInt(1, contextId);
+                            prep.setInt(2, userId);
+                            prep.setLong(3, 0L);
+                            prep.executeUpdate();
+                            Databases.closeSQLStuff(prep);
+                        }
+                    }
                 }
 
                 {
-                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and filestore_name != ?");
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and (filestore_name IS NULL OR filestore_name != ?)");
                     prep.setString(1, filestoreName);
                     prep.setInt(2, contextId);
                     prep.setInt(3, userId);
@@ -1197,7 +1214,58 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public int getFilestoreIdFromContext(int contextId) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+
+            stmt = con.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                throw new StorageException("There is no context with identifier " + contextId);
+            }
+
+            return rs.getInt(1);
+        } catch (final SQLException ecp) {
+            LOG.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } catch (final PoolException pe) {
+            LOG.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Filestore findFilestoreForUser(int fileStoreId) throws StorageException {
+        if (fileStoreId > 0) {
+            Filestore filestore = getFilestore(fileStoreId, false);
+            if (enoughSpaceForUser(filestore)) {
+                return filestore;
+            }
+        }
+
+        return findFilestoreForEntity(false);
+    }
+
+    @Override
     public Filestore findFilestoreForContext() throws StorageException {
+        return findFilestoreForEntity(true);
+    }
+
+    private Filestore findFilestoreForEntity(boolean forContext) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1207,14 +1275,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Define candidate class
             class Candidate {
                 final int id;
-                final int maxNumberOfContexts;
-                final int numberOfContexts;
+                final int maxNumberOfEntities;
+                final int numberOfEntities;
 
                 Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
                     super();
                     this.id = id;
-                    this.maxNumberOfContexts = maxNumberOfContexts;
-                    this.numberOfContexts = numberOfContexts;
+                    this.maxNumberOfEntities = maxNumberOfContexts;
+                    this.numberOfEntities = numberOfContexts;
                 }
             }
 
@@ -1268,15 +1336,29 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
             for (Candidate candidate : candidates) {
-                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                if (candidate.maxNumberOfEntities > 0) {
+                    int entityCount = candidate.numberOfEntities;
+
                     // Get user count information
                     Integer count = filestoreUserCounts.get(Integer.valueOf(candidate.id));
-                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+                    if (null != count) {
+                        entityCount += count.intValue();
+                    }
 
-                    // Get filestore
-                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
-                    if (enoughSpaceForContext(filestore)) {
-                        return filestore;
+                    if (entityCount < candidate.maxNumberOfEntities) {
+                        FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.intValue(), 0L);
+
+                        // Get filestore
+                        Filestore filestore = getFilestore(candidate.id, loadRealUsage, pools, null, userFilestoreUsage, con);
+                        if (forContext) {
+                            if (enoughSpaceForContext(filestore)) {
+                                return filestore;
+                            }
+                        } else {
+                            if (enoughSpaceForUser(filestore)) {
+                                return filestore;
+                            }
+                        }
                     }
                 }
             }

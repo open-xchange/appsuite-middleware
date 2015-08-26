@@ -70,8 +70,8 @@ public interface CapabilityService {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
-     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
-     *                         set, but no PasswordChangeService is available).
+     *            which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *            set, but no PasswordChangeService is available).
      * @param allowCache <code>true</code> (default) to allow fetching pre-calculated capabilities from cache; otherwise <code>false</code>
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
@@ -83,8 +83,8 @@ public interface CapabilityService {
      *
      * @param session The session
      * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
-     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
-     *                         set, but no PasswordChangeService is available).
+     *            which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *            set, but no PasswordChangeService is available).
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
@@ -139,7 +139,12 @@ public interface CapabilityService {
     List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException;
 
     /**
-     * TODO
+     * Gets the capabilities tree showing which capability comes from which source
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The capabilities tree
+     * @throws OXException If capabilities tree cannot be returned
      */
     Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException;
 }

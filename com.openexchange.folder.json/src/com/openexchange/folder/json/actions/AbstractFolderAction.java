@@ -656,10 +656,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected static final class UpdateData {
 
         private ParsedFolder folder;
-
         private NotificationData notificationData;
 
-        private UpdateData() {
+        UpdateData() {
             super();
         }
 

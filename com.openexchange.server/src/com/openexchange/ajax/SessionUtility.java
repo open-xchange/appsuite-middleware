@@ -866,6 +866,30 @@ public final class SessionUtility {
     }
 
     /**
+     * Removes the Open-Xchange cookies belonging to a specific session. This includes
+     * <ul>
+     * <li>A cookie named "open-xchange-session-<code>{session.getHash()}</code>"</li>
+     * <li>A cookie named "open-xchange-secret-<code>{session.getHash()}</code>"</li>
+     * <li>A cookie named "open-xchange-public-session-<code>{HashCalculator.getUserAgentHash(request)}</code>" matching the sessions alternative identifier</li>
+     * <li>A cookie named "open-xchange-share-<code>{HashCalculator.getUserAgentHash(request)}</code>" in case of a guest session</li>
+     * </ul>
+     *
+     * @param session The session to remove the cookies for
+     * @param request The HTTP request
+     * @param response The HTTP response
+     */
+    public static void removeOXCookies(Session session, HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        String sessionHash = session.getHash();
+        removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
+        removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
+        removeCookie(cookies, response, getPublicSessionCookieName(request), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
+        }
+    }
+
+    /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
      *
      * @param req The HTTP request
@@ -966,6 +990,38 @@ public final class SessionUtility {
             }
         }
         return null;
+    }
+
+    /**
+     * Removes a cookie matching a specific name by setting appropriate headers in the response.
+     *
+     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param response The response for instructing the client to remove the cookie
+     * @param name The name of the cookie to remove
+     * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
+     */
+    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name) {
+        return removeCookie(setCookies, response, name, null);
+    }
+
+    /**
+     * Removes a cookie matching a specific name (and optional value) by setting appropriate headers in the response.
+     *
+     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param response The response for instructing the client to remove the cookie
+     * @param name The name of the cookie to remove
+     * @param value The value of the cookie to remove, or <code>null</code> to only match by name
+     * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
+     */
+    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name, String value) {
+        if (null != setCookies && 0 < setCookies.size()) {
+            Cookie cookie = setCookies.get(name);
+            if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
+                removeCookie(cookie, response);
+                return true;
+            }
+        }
+        return false;
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //

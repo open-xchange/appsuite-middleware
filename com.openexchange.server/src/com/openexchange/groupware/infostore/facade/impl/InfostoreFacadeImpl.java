@@ -1020,6 +1020,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
             action = new CreateVersionAction(this, QUERIES, parameters.getContext(), Collections.singletonList(parameters.getDocument()), session);
         }
+
         // Perform action
         perform(action, true);
     }

@@ -554,12 +554,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     permissions.add(newMaxPermissionFor(userId));
                 }
                 if (!isSystem) {
-                    final TIntSet ignore = new TIntHashSet(2); ignore.add(userId);
+                    final TIntSet ignore = new TIntHashSet(4);
+                    ignore.add(userId);
+                    ignore.add(OCLPermission.ALL_GUESTS);
                     if (isShared) {
                         ignore.add(parent.getCreatedBy());
                     }
                     for (final OCLPermission permission : parentPermissions) {
-                        if (permission.getSystem() <= 0 && (permission.isGroupPermission() || !ignore.contains(permission.getEntity()))) {
+                        if ((permission.getSystem() <= 0) && !ignore.contains(permission.getEntity())) {
                             permissions.add(permission);
                         }
                     }

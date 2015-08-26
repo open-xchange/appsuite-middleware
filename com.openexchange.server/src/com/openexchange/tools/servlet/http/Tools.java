@@ -677,10 +677,11 @@ public final class Tools {
      * @param servletRequest The servlet request
      * @param contextId The context id or <code>-1</code> if none is available
      * @param userId The user id or <code>-1</code> if none is available
+     * @param isGuest <code>true</code> to determine the hostname for guest users, <code>false</code>, otherwise
      * @return The host data
      */
-    public static HostData createHostData(HttpServletRequest request, int contextId, int userId) {
-        String hostname = determineHostname(request, contextId, userId);
+    public static HostData createHostData(HttpServletRequest request, int contextId, int userId, boolean isGuest) {
+        String hostname = determineHostname(request, contextId, userId, isGuest);
         String servletPrefix = determineServletPrefix();
         return new HostDataImpl(considerSecure(request), hostname, request.getServerPort(), request.getSession(true).getId(), servletPrefix);
     }
@@ -857,14 +858,18 @@ public final class Tools {
         }
     }
 
-    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId) {
+    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId, final boolean isGuest) {
         String hostname = null;
         try {
             hostname = ServiceCallWrapper.tryServiceCall(Tools.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
 
                 @Override
                 public String call(HostnameService service) throws Exception {
-                    return service.getHostname(userId, contextId);
+                    if (isGuest) {
+                        return service.getGuestHostname(userId, contextId);
+                    } else {
+                        return service.getHostname(userId, contextId);
+                    }
                 }
             }, null);
         } catch (ServiceException e) {
