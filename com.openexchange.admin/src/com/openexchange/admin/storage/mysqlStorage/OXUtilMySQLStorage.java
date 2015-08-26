@@ -83,9 +83,11 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -1891,6 +1893,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         // Sort by database.
         Map<Integer, Collection<FilestoreContextBlock>> dbMap = new HashMap<Integer, Collection<FilestoreContextBlock>>();
         for (FilestoreContextBlock block : blocks) {
+            int poolId = block.writeDBPoolID;
+            String schema = block.schema;
+            if (OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(poolId, schema)) {
+                throw new StorageException(new DatabaseUpdateException("Database with pool-id " + poolId + " and schema \"" + schema + "\" needs update. Please run \"runupdate\" for that database."));
+            }
+
             Collection<FilestoreContextBlock> dbBlock = dbMap.get(I(block.writeDBPoolID));
             if (null == dbBlock) {
                 dbBlock = new ArrayList<FilestoreContextBlock>();
@@ -1944,7 +1952,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
                 FilestoreContextBlock block = blocks.get(key);
                 if (null == block) {
-                    block = new FilestoreContextBlock(temp.writeDBPoolID, temp.filestoreID);
+                    block = new FilestoreContextBlock(temp.writeDBPoolID, temp.dbSchema, temp.filestoreID);
                     blocks.put(key, block);
                 }
                 block.addForContext(temp);
@@ -1984,7 +1992,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
                                 FilestoreContextBlock block = blocks.get(key);
                                 if (null == block) {
-                                    FilestoreContextBlock newBlock = new FilestoreContextBlock(poolAndSchema.poolId, temp.filestoreID);
+                                    FilestoreContextBlock newBlock = new FilestoreContextBlock(poolAndSchema.poolId, poolAndSchema.dbSchema, temp.filestoreID);
                                     block = blocks.putIfAbsent(key, newBlock);
                                     if (null == block) {
                                         block = newBlock;
