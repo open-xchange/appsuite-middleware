@@ -231,7 +231,11 @@ public enum LdapExceptionCodes implements DisplayableOXExceptionCode {
      * An internal LDAP sort error occurred: %1$s
      */
     LDAP_SORT_ERROR("An internal LDAP sort error occurred: %s", Category.CATEGORY_ERROR, 109),
-    ;
+
+    /**
+     * The LDAP search in distribution lists for specific attributes is not supported.
+     */
+    SEARCHING_IN_DISTRIBUTION_LISTS_NOT_SUPPORTED("The LDAP search in distribution lists for specific attributes is not supported.", Category.CATEGORY_WARNING, 110, LdapExceptionMessages.SEARCH_IN_DLISTS_NOT_SUPPORTED);
 
     private static final String PREFIX = "LDAP";
 
@@ -246,7 +250,7 @@ public enum LdapExceptionCodes implements DisplayableOXExceptionCode {
         this.category = category;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
-    
+
     private LdapExceptionCodes(String message, Category category, int detailNumber) {
         this(message, category, detailNumber, null);
     }
@@ -270,7 +274,7 @@ public enum LdapExceptionCodes implements DisplayableOXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
