@@ -169,8 +169,8 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     } else {
                         // Expired if deleted OR time-to-live has elapsed
                         int optTimeToLive = cur.optTimeToLive();
-                        long l = now - cur.getLastAccess();
-                        if (cur.isDeleted() || (l > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
+                        long timeElapsed = now - cur.getLastAccess();
+                        if (cur.isDeleted() || (timeElapsed > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
                             cur.delete();
                             iter.remove();
                             File file = cur.getFile();
@@ -425,6 +425,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 id = UUID.randomUUID().toString();
             }
             mf = new ManagedFileImpl(this, id, tmpFile, optTtl, dispatcherPrefixService.getPrefix());
+            mf.setFileName(tmpFile.getName());
             mf.setSize(tmpFile.length());
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
