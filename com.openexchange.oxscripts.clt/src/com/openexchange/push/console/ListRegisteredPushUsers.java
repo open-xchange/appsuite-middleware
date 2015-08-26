@@ -61,21 +61,21 @@ import com.openexchange.push.mbean.PushMBean;
 
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link ListRegisteredPushUsers} - The command-line tool to list registered push users.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
+public class ListRegisteredPushUsers extends AbstractMBeanCLI<Void> {
 
     public static void main(String[] args) {
-        new ListPushUsers().execute(args);
+        new ListRegisteredPushUsers().execute(args);
     }
 
     /**
-     * Initializes a new {@link ListPushUsers}.
+     * Initializes a new {@link ListRegisteredPushUsers}.
      */
-    public ListPushUsers() {
+    public ListRegisteredPushUsers() {
         super();
     }
 
@@ -93,11 +93,11 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
 
-        List<List<String>> data = pushMBean.listPushUsers();
+        List<List<String>> data = pushMBean.listRegisteredPushUsers();
         if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
+            System.out.println("No registered push users.");
         } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
+            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Client" }, data);
         }
 
         return null;
@@ -115,12 +115,12 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
 
     @Override
     protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
+        return "Command-line tool to list registered push users";
     }
 
     @Override
     protected String getName() {
-        return "listpushusers";
+        return "listregisteredpushusers";
     }
 
 }

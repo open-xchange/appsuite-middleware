@@ -50,12 +50,14 @@
 package com.openexchange.push.impl.mbean;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
+import com.openexchange.push.PushUserClient;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.mbean.PushMBean;
@@ -79,21 +81,44 @@ public class PushMBeanImpl extends StandardMBean implements PushMBean {
     }
 
     @Override
-    public String[] listPushUsers() throws MBeanException {
+    public List<List<String>> listPushUsers() throws MBeanException {
         try {
-            List<PushUserInfo> pushUsers = PushManagerRegistry.getInstance().listPermanentPushUsers();
+            List<PushUserInfo> pushUsers = PushManagerRegistry.getInstance().listPushUsers();
             Collections.sort(pushUsers);
 
             int size = pushUsers.size();
-            List<String> list = new ArrayList<String>(size);
+            List<List<String>> list = new ArrayList<List<String>>(size);
             for (int i = 0; i < size; i++) {
                 PushUserInfo pushUser = pushUsers.get(i);
                 if (null != pushUser) {
-                    list.add(new StringBuilder(48).append("user=").append(pushUser.getUserId()).append(", context=").append(pushUser.getContextId()).append(", permanent=").append(pushUser.isPermanent()).toString());
+                    list.add(Arrays.asList(Integer.toString(pushUser.getContextId()), Integer.toString(pushUser.getUserId()), Boolean.toString(pushUser.isPermanent())));
                 }
             }
 
-            return list.toArray(new String[list.size()]);
+            return list;
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public List<List<String>> listRegisteredPushUsers() throws MBeanException {
+        try {
+            List<PushUserClient> pushClients = PushManagerRegistry.getInstance().listRegisteredPushUsers();
+
+            int size = pushClients.size();
+            List<List<String>> list = new ArrayList<List<String>>(size);
+            for (int i = 0; i < size; i++) {
+                PushUserClient pushClient = pushClients.get(i);
+                if (null != pushClient) {
+                    list.add(Arrays.asList(Integer.toString(pushClient.getContextId()), Integer.toString(pushClient.getUserId()), pushClient.getClient()));
+                }
+            }
+
+            return list;
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
             logger.error("", e);

@@ -72,6 +72,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserClient;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
@@ -198,12 +199,12 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /**
-     * Lists currently running permanent push users.
+     * Lists currently running push users.
      *
      * @return The push users
      */
-    public List<PushUserInfo> listPermanentPushUsers() {
-        Set<PushUserInfo> pushUsers = listPermanentPushUsers0();
+    public List<PushUserInfo> listPushUsers() {
+        Set<PushUserInfo> pushUsers = listPushUsers0();
         List<PushUserInfo> list = new ArrayList<PushUserInfo>(pushUsers);
         Collections.sort(list);
         return list;
@@ -214,7 +215,7 @@ public final class PushManagerRegistry implements PushListenerService {
      *
      * @return The push users
      */
-    private Set<PushUserInfo> listPermanentPushUsers0() {
+    private Set<PushUserInfo> listPushUsers0() {
         Set<PushUserInfo> pushUsers = new HashSet<PushUserInfo>(256);
 
         for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
@@ -230,6 +231,17 @@ public final class PushManagerRegistry implements PushListenerService {
 
         return pushUsers;
     }
+
+    /**
+     * Lists registered push users.
+     *
+     * @return The push users
+     * @throws OXException If registered push users cannot be returned
+     */
+    public List<PushUserClient> listRegisteredPushUsers() throws OXException {
+        return PushDbUtils.getPushClientRegistrations();
+    }
+
 
     // --------------------------------- The central start & stop routines for permanent listeners --------------------------------------
 

@@ -421,8 +421,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                     if (otherMembersInCluster.isEmpty()) {
                         // No other cluster members - assign all available permanent listeners to this node
-                        pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
-                        LOG.info("Applied all push user to local member (no other members available): {}", localMember);
+                        LOG.info("Going to apply all push users to local member (no other members available): {}", localMember);
+                        List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
+                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes.isEmpty() ? "none" : startedOnes.toString());
                         return null;
                     }
 
@@ -491,8 +492,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     // Check capable members
                     if (!memberAdded) {
                         // No other cluster members - assign all available permanent listeners to this node
-                        pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
-                        LOG.info("Applied all push user to local member (no other capable members): {}", localMember);
+                        LOG.info("Going to apply all push users to local member (no other capable member available): {}", localMember);
+                        List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
+                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes.isEmpty() ? "none" : startedOnes.toString());
                         return null;
                     }
 
@@ -530,7 +532,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         // Apply newly calculated initial permanent listeners
                         List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(ps, TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
 
-                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes);
+                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes.isEmpty() ? "none" : startedOnes.toString());
 
                         // For safety reason, request explicit drop on other nodes for push users started on this node
                         new DropPushUserTask(startedOnes, capableMembers, hzInstance, monitor).run();
@@ -564,7 +566,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                         // Apply newly calculated initial permanent listeners
                         List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(ps, _2secNanos);
-                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes);
+                        LOG.info("{} now runs permanent listeners for: {}", localMember, startedOnes.isEmpty() ? "none" : startedOnes.toString());
                     } else {
                         Member master = capableMembers.get(0);
                         if (localMember.getUuid().equals(master.getUuid())) {
@@ -653,7 +655,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                             // Apply newly calculated initial permanent listeners
                             List<PushUser> startedOnes = pushManagerRegistry.applyInitialListeners(myList, _2secNanos);
-                            LOG.info("This cluster member \"{}\" now runs permanent listeners for: {}", localMember, startedOnes);
+                            LOG.info("This cluster member \"{}\" now runs permanent listeners for: {}", localMember, startedOnes.isEmpty() ? "none" : startedOnes.toString());
                         } else {
                             LOG.info("Awaiting the permanent listeners to start as dictated by master \"{}\"", master);
                         }
