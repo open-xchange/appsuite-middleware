@@ -73,12 +73,13 @@ import com.openexchange.share.core.ShareConstants;
 public class ShareLinks {
 
     /**
-     * Generates a share link for a guest user based on the passed share token.
-     * The token can be a base token or an absolute one.
+     * Generates an (absolute) share link for a guest user based on the passed share token. If configured, the share link will use the
+     * guest hostname as supplied by an installed hostname service, or via the config cascade property
+     * <code>com.openexchange.share.guestHostname</code>.
      *
      * @param hostData The host data
-     * @param shareToken The share token
-     * @return The link
+     * @param shareToken The share token, either as base token or in absolute format
+     * @return The share link
      */
     public static String generateExternal(HostData hostData, String shareToken) {
         URIBuilder builder = prepare(hostData);
@@ -137,6 +138,12 @@ public class ShareLinks {
         return hostData.getDispatcherPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
     }
 
+    /**
+     * Gets the hostname to use for guest users based on a specific share token.
+     *
+     * @param shareToken The share token to get the guest hostname for
+     * @return The guest hostname, or <code>null</code> if not defined
+     */
     private static String getGuestHostname(String shareToken) {
         int contextID = -1;
         int userID = -1;
@@ -150,9 +157,16 @@ public class ShareLinks {
         return getGuestHostname(contextID, userID);
     }
 
+    /**
+     * Gets the hostname to use for guest users based on a specific context and user.
+     *
+     * @param contextID The identifier of the context to get the guest hostname for, or <code>-1</code> to use the common fallback
+     * @param userID The identifier of the user to get the guest hostname for, or <code>-1</code> to use the common fallback
+     * @return The guest hostname, or <code>null</code> if not defined
+     */
     private static String getGuestHostname(final int contextID, final int userID) {
         /*
-         * try and get guest hostname from dedicated hostname service
+         * prefer a guest hostname from dedicated hostname service
          */
         String hostname = null;
         try {
@@ -166,22 +180,21 @@ public class ShareLinks {
         } catch (ServiceException e) {
             // ignore
         }
-        if (null != hostname) {
-            return hostname;
-        }
-        /*
-         * consult the config cascade as fallback
-         */
-        try {
-            hostname = ServiceCallWrapper.tryServiceCall(ShareLinks.class, ConfigViewFactory.class, new ServiceUser<ConfigViewFactory, String>() {
+        if (null == hostname) {
+            /*
+             * consult the config cascade as fallback
+             */
+            try {
+                hostname = ServiceCallWrapper.tryServiceCall(ShareLinks.class, ConfigViewFactory.class, new ServiceUser<ConfigViewFactory, String>() {
 
-                @Override
-                public String call(ConfigViewFactory service) throws Exception {
-                    return service.getView(userID, contextID).opt("com.openexchange.share.guestHostname", String.class, null);
-                }
-            }, null);
-        } catch (ServiceException e) {
-            // ignore
+                    @Override
+                    public String call(ConfigViewFactory service) throws Exception {
+                        return service.getView(userID, contextID).opt("com.openexchange.share.guestHostname", String.class, null);
+                    }
+                }, null);
+            } catch (ServiceException e) {
+                // ignore
+            }
         }
         return hostname;
     }
