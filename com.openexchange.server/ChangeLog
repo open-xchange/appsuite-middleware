@@ -1,3 +1,7 @@
+* 2015-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities
+
 * 2015-08-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 38603: Do store a copy in standard sent folder if message has been partially sent
