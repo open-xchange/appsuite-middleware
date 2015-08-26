@@ -858,6 +858,12 @@ msgstr ""
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
+msgid ""
+"The LDAP search in distribution lists for specific attributes is not "
+"supported."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
 msgstr ""
