@@ -86,6 +86,9 @@ public class ShareLinks {
         String guestHostname = getGuestHostname(shareToken);
         if (false == Strings.isEmpty(guestHostname)) {
             builder.setHost(guestHostname);
+        } else {
+            getLogger(ShareLinks.class).warn("No hostname for guests is configured. Falling back to current host \"{}\" for share link " +
+                "generation. Please configure \"com.openexchange.share.guestHostname\" to make this warning disappear.", builder.getHost());
         }
         return builder.setPath(serverPath(hostData, '/' + shareToken)).toString();
     }
