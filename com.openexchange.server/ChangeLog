@@ -1,3 +1,7 @@
+* 2015-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities.
+
 * 2015-08-26 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 40622: Avoid the ClassCastException by providing the correct type when searching in distribution lists with the LdapContactStorage

@@ -69,6 +69,8 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.BoundaryExceededException;
+import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -269,6 +271,10 @@ public final class IMAPCapabilityAndGreetingCache {
 
         @Override
         public CapabilityAndGreeting call() throws IOException {
+            BoundedStringBuilder sb = new BoundedStringBuilder(512, 2048);
+            String greeting = null;
+            String capabilities = null;
+
             Socket s = null;
             try {
                 try {
@@ -298,7 +304,6 @@ public final class IMAPCapabilityAndGreetingCache {
                 }
                 final InputStream in = s.getInputStream();
                 final OutputStream out = s.getOutputStream();
-                final StringBuilder sb = new StringBuilder(512);
                 /*
                  * Read IMAP server greeting on connect
                  */
@@ -319,7 +324,7 @@ public final class IMAPCapabilityAndGreetingCache {
                         }
                     }
                 }
-                final String greeting = sb.toString();
+                greeting = sb.toString();
                 sb.setLength(0);
                 if (skipLF) {
                     /*
@@ -336,8 +341,8 @@ public final class IMAPCapabilityAndGreetingCache {
                 /*
                  * Read CAPABILITY response
                  */
-                final String capabilities;
                 {
+                    boolean byeChecked = false;
                     boolean nextLine = false;
                     NextLoop: do {
                         eol = false;
@@ -363,6 +368,13 @@ public final class IMAPCapabilityAndGreetingCache {
                                     eol = true;
                                 } else {
                                     sb.append(c);
+                                    if (!byeChecked && sb.length() >= 6) {
+                                        if (sb.indexOf("* BYE ", 0) == 0) {
+                                            // Received an odd "BYE" response
+                                            throw new IOException("Received BYE response from IMAP server.");
+                                        }
+                                        byeChecked = true;
+                                    }
                                 }
                             } while (!eol && ((i = in.read()) != -1));
                         }
@@ -387,6 +399,17 @@ public final class IMAPCapabilityAndGreetingCache {
                 /*
                  * Create new CAG object
                  */
+                return new CapabilityAndGreeting(capabilities, greeting);
+            } catch (BoundaryExceededException e) {
+                if (null == greeting) {
+                    // Exceeded while reading greeting
+                    throw e;
+                }
+
+                if (null == capabilities) {
+                    // Exceeded while reading greeting
+                    capabilities = sb.toString().trim();
+                }
                 return new CapabilityAndGreeting(capabilities, greeting);
             } finally {
                 if (null != s) {
