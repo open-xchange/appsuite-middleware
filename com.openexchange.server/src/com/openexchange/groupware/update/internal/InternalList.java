@@ -89,6 +89,7 @@ import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTablesV2;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
@@ -495,7 +496,7 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask());
 
         // Drops useless foreign keys from 'malPollHash' table
-        list.add( new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask());
+        list.add(new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask());
 
         // +++++++++++++++++++++++++++++++++ Version 6.20.3 starts here. +++++++++++++++++++++++++++++++++
 
@@ -759,6 +760,9 @@ public final class InternalList {
 
         // Delete remnants for removed Facebook subscription
         list.add(new com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask());
+
+        //Add primary key to dlist tables
+        list.add(new MakeUUIDPrimaryForDListTablesV2());
 
         // +++++++++++++++++++++++++++++++++ Version 7.6.3 starts here. +++++++++++++++++++++++++++++++++
 

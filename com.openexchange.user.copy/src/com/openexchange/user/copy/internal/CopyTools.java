@@ -166,6 +166,14 @@ public class CopyTools {
         }
     }
 
+    public static void setBinaryOrNull(int parameter, PreparedStatement stmt, byte[] value) throws SQLException {
+        if (value == null) {
+            stmt.setNull(parameter, java.sql.Types.BINARY);
+        } else {
+            stmt.setBytes(parameter, value);
+        }
+    }
+
     public static void setIntOrNull(final int parameter, final PreparedStatement stmt, final int value) throws SQLException {
         if (value == -1) {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);

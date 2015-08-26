@@ -527,15 +527,38 @@ public final class ListLsubCache {
      * @throws MessagingException If a messaging error occurs
      */
     public static ListLsubEntry getCachedLISTEntry(String fullName, int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+        return getCachedLISTEntry(fullName, accountId, imapFolder, session, false);
+    }
+
+    /**
+     * Gets cached LIST entry for specified full name.
+     *
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param imapFolder The IMAP
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @param reinitSpecialUseIfLoaded <code>true</code> to re-initialize SPECIAL-USE folders in case cache is already loaded; otherwise <code>false</code>
+     * @return The cached LIST entry
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry getCachedLISTEntry(String fullName, int accountId, IMAPFolder imapFolder, Session session, boolean reinitSpecialUseIfLoaded) throws OXException, MessagingException {
         ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             ListLsubEntry entry = collection.getList(fullName);
             if (seemsValid(entry)) {
+                if (reinitSpecialUseIfLoaded) {
+                    collection.reinitSpecialUseFolders(imapFolder);
+                }
                 return entry;
             }
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
+                if (reinitSpecialUseIfLoaded) {
+                    collection.reinitSpecialUseFolders(imapFolder);
+                }
                 ListLsubEntry entry = collection.getList(fullName);
                 return null == entry ? ListLsubCollection.emptyEntryFor(fullName) : entry;
             }
@@ -544,6 +567,9 @@ public final class ListLsubCache {
              */
             ListLsubEntry entry = collection.getList(fullName);
             if (seemsValid(entry)) {
+                if (reinitSpecialUseIfLoaded) {
+                    collection.reinitSpecialUseFolders(imapFolder);
+                }
                 return entry;
             }
             /*
@@ -675,6 +701,27 @@ public final class ListLsubCache {
     }
 
     /**
+     * Re-Initializes the SPECIAL-USE folders (only if the IMAP store advertises support for <code>"SPECIAL-USE"</code> capability)
+     *
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP store
+     * @param session The session
+     * @throws OXException If re-initialization fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static void reinitSpecialUseFolders(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            if (isAccessible(collection)) {
+                collection.reinitSpecialUseFolders(imapFolder);
+            } else {
+                checkTimeStamp(imapFolder, collection);
+                collection.reinitSpecialUseFolders(imapFolder);
+            }
+        }
+    }
+
+    /**
      * Gets the LIST entries marked with "\Drafts" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
@@ -692,12 +739,7 @@ public final class ListLsubCache {
             return collection.getDraftsEntry();
         }
         synchronized (collection) {
-            if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getDraftsEntry();
-            }
-            /*
-             * Return
-             */
+            checkTimeStamp(imapFolder, collection);
             return collection.getDraftsEntry();
         }
     }
@@ -720,12 +762,7 @@ public final class ListLsubCache {
             return  collection.getJunkEntry();
         }
         synchronized (collection) {
-            if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getJunkEntry();
-            }
-            /*
-             * Return
-             */
+            checkTimeStamp(imapFolder, collection);
             return collection.getJunkEntry();
         }
     }
@@ -748,12 +785,7 @@ public final class ListLsubCache {
             return collection.getSentEntry();
         }
         synchronized (collection) {
-            if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getSentEntry();
-            }
-            /*
-             * Return
-             */
+            checkTimeStamp(imapFolder, collection);
             return collection.getSentEntry();
         }
     }
@@ -776,12 +808,7 @@ public final class ListLsubCache {
             return collection.getTrashEntry();
         }
         synchronized (collection) {
-            if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getTrashEntry();
-            }
-            /*
-             * Return
-             */
+            checkTimeStamp(imapFolder, collection);
             return collection.getTrashEntry();
         }
     }

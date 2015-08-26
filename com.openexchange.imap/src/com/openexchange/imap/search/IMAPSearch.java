@@ -56,7 +56,6 @@ import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import javax.mail.search.SearchTerm;
@@ -74,7 +73,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
@@ -257,9 +255,7 @@ public final class IMAPSearch {
                     /*
                      * The BYE response is always untagged, and indicates that the server is about to close the connection.
                      */
-                    Store store = imapFolder.getStore();
-                    ((IMAPStore) store).setAllowUnsafeConnectedCheck(false);
-                    throw new StoreClosedException(store, protocolException.getMessage());
+                    throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
                 }
                 final Throwable cause = protocolException.getCause();
                 if (cause instanceof StoreClosedException) {

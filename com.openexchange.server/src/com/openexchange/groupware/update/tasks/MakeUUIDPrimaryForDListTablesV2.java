@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,41 @@
  *
  */
 
-package com.openexchange.mobilepush.events.apn;
+package com.openexchange.groupware.update.tasks;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link IOSAPNCertificateProvider}
+ * {@link MakeUUIDPrimaryForDListTablesV2}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface IOSAPNCertificateProvider {
+public class MakeUUIDPrimaryForDListTablesV2 extends MakeUUIDPrimaryForDListTables {
 
-    /**
-     * Gets the APN access containing the push certificate.
-     *
-     * @return The APN access
-     */
-    APNAccess getAccess();
-
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        super.perform(params);
+        
+        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        try {
+            DBUtils.startTransaction(connection);
+            Tools.modifyColumns(connection, TABLE, new Column("cid", "INT4 NOT NULL"));
+            connection.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(connection);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(connection);
+            Database.backNoTimeout(params.getContextId(), true, connection);
+        }
+    }
 }

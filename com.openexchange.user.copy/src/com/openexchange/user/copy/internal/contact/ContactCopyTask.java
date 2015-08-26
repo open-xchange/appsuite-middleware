@@ -51,9 +51,9 @@ package com.openexchange.user.copy.internal.contact;
 
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
+import static com.openexchange.user.copy.internal.CopyTools.setBinaryOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setIntOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseGetter;
 import com.openexchange.groupware.contact.helpers.ContactDatabaseSetter;
@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -83,7 +84,6 @@ import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
 import com.openexchange.user.copy.internal.folder.FolderCopyTask;
 import com.openexchange.user.copy.internal.user.UserCopyTask;
-
 
 /**
  * {@link ContactCopyTask}
@@ -96,35 +96,34 @@ public class ContactCopyTask implements CopyUserTaskService {
         "SELECT " +
             "intfield01, intfield02, intfield03, intfield04, field01, " +
             "field02, field03, field04 " +
-        "FROM " +
+            "FROM " +
             "prg_dlist " +
-        "WHERE " +
+            "WHERE " +
             "cid = ? " +
-        "AND " +
+            "AND " +
             "intfield01 IN (#IDS#)";
 
     private static final String SELECT_IMAGE =
         "SELECT " +
             "image1, changing_date, mime_type " +
-        "FROM " +
+            "FROM " +
             "prg_contacts_image " +
-        "WHERE " +
+            "WHERE " +
             "cid = ? AND intfield01 = ?";
 
     private static final String INSERT_IMAGE =
         "INSERT INTO " +
             "prg_contacts_image " +
             "(intfield01, image1, changing_date, mime_type, cid) " +
-        "VALUES " +
+            "VALUES " +
             "(?, ?, ?, ?, ?)";
 
     private static final String INSERT_DLIST =
         "INSERT INTO " +
             "prg_dlist " +
-            "(intfield01, intfield02, intfield03, intfield04, field01, field02, field03, field04, cid) " +
-        "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+            "(intfield01, intfield02, intfield03, intfield04, field01, field02, field03, field04, cid, uuid) " +
+            "VALUES " +
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public ContactCopyTask() {
         super();
@@ -217,6 +216,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                         setStringOrNull(i++, stmt, entry.getFirstname());
                         setStringOrNull(i++, stmt, entry.getEmailaddress());
                         stmt.setInt(i++, cid);
+                        setBinaryOrNull(i++, stmt, UUIDs.toByteArray(UUID.randomUUID()));
 
                         stmt.addBatch();
                     }
@@ -465,8 +465,7 @@ public class ContactCopyTask implements CopyUserTaskService {
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
     @Override
-    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
-    }
+    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {}
 
     private String buildSelectContactsSql(final List<ContactField> contactFields, final List<Integer> folderIds) {
         final StringBuilder sb = new StringBuilder("SELECT ");

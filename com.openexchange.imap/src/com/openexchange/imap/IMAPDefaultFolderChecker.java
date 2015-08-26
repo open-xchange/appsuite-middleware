@@ -278,7 +278,7 @@ public class IMAPDefaultFolderChecker {
                         IMAPFolder inboxFolder;
                         {
                             IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session);
+                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, true);
                             if (entry.exists()) {
                                 inboxFolder = tmp;
                             } else {
@@ -391,22 +391,34 @@ public class IMAPDefaultFolderChecker {
      * @param checkedIndexes The checked indexes so far
      * @param cache The mail session cache
      * @param modified The <i>modified</i> boolean
+     * @return <code>Boolean.TRUE</code> if successfully handled, <code>Boolean.FALSE</code> if such an entry does not exist, or <code>null</code> if not handled at all
+     * @throws OXException If operation fails
      */
-    protected void handleMarkedEntries(Collection<ListLsubEntry> entries, int index, String[] names, String[] fullNames, TIntObjectMap<String> checkedIndexes, MailSessionCache cache, BoolReference modified) {
-        if (null != entries && !entries.isEmpty()) {
-            ListLsubEntry entry;
-            if (entries.size() == 1) {
-                entry = entries.iterator().next();
-            } else {
-                entry = (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
-            }
-            setDefaultMailFolder(index, entry.getFullName(), cache);
-            checkedIndexes.put(index, entry.getFullName());
-            if (!entry.isSubscribed()) {
-                IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
-                modified.setValue(true);
+    protected Boolean handleMarkedEntries(Collection<ListLsubEntry> entries, int index, String[] names, String[] fullNames, TIntObjectMap<String> checkedIndexes, MailSessionCache cache, BoolReference modified) throws OXException {
+        if (null != entries) {
+            int size = entries.size();
+            if (size > 0) {
+                // Determine the SPECIAL-USE entry to use
+                ListLsubEntry entry = size == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
+
+                // Check entry
+                ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session);
+                if (!cached.exists()) {
+                    LOG.warn("{} SPECIAL-USE marked folder \"{}\" does not exist. Skipping... (user={}, context={})", SPECIAL_USES[index], entry.getFullName(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    return Boolean.FALSE;
+                }
+
+                // Set as default folder
+                setDefaultMailFolder(index, entry.getFullName(), cache);
+                checkedIndexes.put(index, entry.getFullName());
+                if (!entry.isSubscribed()) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, entry.getFullName(), true);
+                    modified.setValue(true);
+                }
+                return Boolean.TRUE;
             }
         }
+        return null;
     }
 
     /**
@@ -467,7 +479,8 @@ public class IMAPDefaultFolderChecker {
         TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
         boolean added = false;
         for (int index = 0; index < names.length; index++) {
-            if (!checkedIndexes.containsKey(index)) {
+            String preCheckedFullName = checkedIndexes.get(index);
+            if (null == preCheckedFullName) {
                 String checkedFullName = null;
 
                 // Determine the checked full name
@@ -503,6 +516,9 @@ public class IMAPDefaultFolderChecker {
 
                 // Set the checked full name
                 setDefaultMailFolder(index, checkedFullName, cache);
+            } else {
+                // For safety reason set pre-checked full name
+                setDefaultMailFolder(index, preCheckedFullName, cache);
             }
         }
 

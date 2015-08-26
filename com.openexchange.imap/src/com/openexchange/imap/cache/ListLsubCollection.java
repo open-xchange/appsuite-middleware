@@ -275,6 +275,68 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Re-Initializes the SPECIAL-USE folders (only if the IMAP store advertises support for <code>"SPECIAL-USE"</code> capability)
+     *
+     * @param imapStore The IMAP store
+     * @throws OXException If re-initialization fails
+     */
+    public void reinitSpecialUseFolders(final IMAPStore imapStore) throws OXException {
+        try {
+            reinitSpecialUseFolders((IMAPFolder) imapStore.getFolder("INBOX"), imapStore);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Re-Initializes the SPECIAL-USE folders (only if the IMAP store advertises support for <code>"SPECIAL-USE"</code> capability)
+     *
+     * @param imapFolder The IMAP store
+     * @throws OXException If re-initialization fails
+     */
+    public void reinitSpecialUseFolders(final IMAPFolder imapFolder) throws OXException {
+        reinitSpecialUseFolders(imapFolder, (IMAPStore) imapFolder.getStore());
+    }
+
+    private void reinitSpecialUseFolders(final IMAPFolder imapFolder, final IMAPStore imapStore) throws OXException {
+        try {
+            draftsEntries.clear();
+            junkEntries.clear();
+            sentEntries.clear();
+            trashEntries.clear();
+            if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
+                /*
+                 * Perform LIST (SPECIAL-USE) "" "*"
+                 */
+                imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                    @Override
+                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                        doListSpecialUse(protocol, true);
+                        return null;
+                    }
+
+                });
+            } else {
+                /*
+                 * Perform LIST "" "*"
+                 */
+                imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+                    @Override
+                    public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                        doListSpecialUse(protocol, false);
+                        return null;
+                    }
+
+                });
+            }
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
      * Re-initializes this collection.
      *
      * @param imapStore The IMAP store
@@ -358,6 +420,10 @@ final class ListLsubCollection implements Serializable {
         if (clearMaps) {
             listMap.clear();
             lsubMap.clear();
+            draftsEntries.clear();
+            junkEntries.clear();
+            sentEntries.clear();
+            trashEntries.clear();
         }
         final boolean debug = LOG.isDebugEnabled();
         final long st = debug ? System.currentTimeMillis() : 0L;
@@ -405,7 +471,7 @@ final class ListLsubCollection implements Serializable {
 
                 @Override
                 public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doListSpecialUse(protocol);
+                    doListSpecialUse(protocol, true);
                     return null;
                 }
 
@@ -755,42 +821,39 @@ final class ListLsubCollection implements Serializable {
     private static final String ATTRIBUTE_SENT = "\\sent";
     private static final String ATTRIBUTE_TRASH = "\\trash";
 
+    private static final String[] ATTRIBUTES_SPECIAL_USE = { ATTRIBUTE_DRAFTS, ATTRIBUTE_JUNK, ATTRIBUTE_SENT, ATTRIBUTE_TRASH };
+
     /**
-     * Lists special folders via <code>LIST (SPECIAL-USE) "" "*"</code>.
+     * Performs a LIST/LSUB command with specified IMAP protocol.
      *
-     * @param protocol The associated IMAP protocol
+     * @param protocol The IMAP protocol
+     * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
      */
-    protected void doListSpecialUse(final IMAPProtocol protocol) throws ProtocolException {
-        /*
-         * Perform command
-         */
-        final String command = "LIST";
-        final Response[] r;
-        {
-            final String sCmd = new StringBuilder(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
-            r = performCommand(protocol, sCmd);
-            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
-        }
-        final Response response = r[r.length - 1];
+    protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecualUse) throws ProtocolException {
+        String command = "LIST";
+        Response[] r = performCommand(protocol, new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString());
+        Response response = r[r.length - 1];
         if (response.isOK()) {
             for (int i = 0, len = r.length - 1; i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
                     continue;
                 }
-                final IMAPResponse ir = (IMAPResponse) r[i];
+                IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(command)) {
-                    final ListLsubEntryImpl entryImpl = parseListResponse(ir, lsubMap);
-                    final Set<String> attrs = entryImpl.getAttributes();
-                    if (null != attrs && !attrs.isEmpty()) {
-                        if (attrs.contains(ATTRIBUTE_DRAFTS)) {
-                            this.draftsEntries.put(entryImpl.getFullName(), entryImpl);
-                        } else if (attrs.contains(ATTRIBUTE_JUNK)) {
-                            this.junkEntries.put(entryImpl.getFullName(), entryImpl);
-                        } else if (attrs.contains(ATTRIBUTE_SENT)) {
-                            this.sentEntries.put(entryImpl.getFullName(), entryImpl);
-                        } else if (attrs.contains(ATTRIBUTE_TRASH)) {
-                            this.trashEntries.put(entryImpl.getFullName(), entryImpl);
+                    ListLsubEntryImpl entryImpl = parseListResponse(ir, lsubMap, ATTRIBUTES_SPECIAL_USE);
+                    if (null != entryImpl) {
+                        Set<String> attrs = entryImpl.getAttributes();
+                        if (null != attrs && !attrs.isEmpty()) {
+                            if (attrs.contains(ATTRIBUTE_DRAFTS)) {
+                                this.draftsEntries.put(entryImpl.getFullName(), entryImpl);
+                            } else if (attrs.contains(ATTRIBUTE_JUNK)) {
+                                this.junkEntries.put(entryImpl.getFullName(), entryImpl);
+                            } else if (attrs.contains(ATTRIBUTE_SENT)) {
+                                this.sentEntries.put(entryImpl.getFullName(), entryImpl);
+                            } else if (attrs.contains(ATTRIBUTE_TRASH)) {
+                                this.trashEntries.put(entryImpl.getFullName(), entryImpl);
+                            }
                         }
                     }
                     r[i] = null;
@@ -1647,7 +1710,11 @@ final class ListLsubCollection implements Serializable {
         POS_MAP.put("\\hasnochildren", 6);
     }
 
-    private ListLsubEntryImpl parseListResponse(final IMAPResponse listResponse, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+    private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
+        return parseListResponse(listResponse, lsubMap, null);
+    }
+
+    private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes) {
         /*
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          */
@@ -1664,8 +1731,13 @@ final class ListLsubCollection implements Serializable {
             /*
              * Non-empty attribute list
              */
+            if ((s.length <= 0) && (null != requiredAttributes)) {
+                // Cannot contain any required attribute
+                return null;
+            }
+
             attributes = new HashSet<String>(s.length);
-            for (int i = 0; i < s.length; i++) {
+            for (int i = s.length; i-- > 0;) {
                 String attr = Strings.asciiLowerCase(s[i]);
                 switch (POS_MAP.get(attr)) {
                 case 1:
@@ -1694,6 +1766,25 @@ final class ListLsubCollection implements Serializable {
             }
         } else {
             attributes = Collections.emptySet();
+            if (null != requiredAttributes) {
+                // Cannot contain any required attribute
+                return null;
+            }
+        }
+        /*
+         * Check against required attributes
+         */
+        if (null != requiredAttributes) {
+            boolean containsAny = false;
+            for (String requiredAttribute : requiredAttributes) {
+                if (attributes.contains(requiredAttribute)) {
+                    containsAny = true;
+                    break;
+                }
+            }
+            if (!containsAny) {
+                return null;
+            }
         }
         /*
          * Read separator character

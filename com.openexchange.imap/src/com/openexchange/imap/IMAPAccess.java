@@ -425,7 +425,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
-                    } else if (imapStore.isConnectedUnsafe()) {
+                    } else if (imapStore.isConnected()) {
                         imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
@@ -1044,11 +1044,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isConnected() {
+        /*-
+         *
         if (!connected) {
             return false;
         }
-        IMAPStore imapStore = this.imapStore;
-        return (connected = ((imapStore != null) && imapStore.isConnectedUnsafe()));
+        return (connected = ((imapStore != null) && imapStore.isConnected()));
+         */
+        return connected;
     }
 
     @Override
