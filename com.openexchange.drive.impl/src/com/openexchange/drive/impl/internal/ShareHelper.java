@@ -114,7 +114,7 @@ public class ShareHelper {
         /*
          * convert & return appropriate drive share
          */
-        return new DefaultDriveShareInfo(createdShare.getFirstInfo(), target);
+        return new DefaultDriveShareInfo(createdShare.getShareInfo(), target);
     }
     /**
      * Gets all shares for a specific target.

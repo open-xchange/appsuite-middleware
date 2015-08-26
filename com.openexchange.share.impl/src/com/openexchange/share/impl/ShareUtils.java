@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -184,12 +185,12 @@ public class ShareUtils {
      *
      * @param sharingUser The sharing user
      * @param recipient The recipient description
-     * @param targets
+     * @param target The share target
      * @return The guest user
      */
-    public UserImpl prepareGuestUser(int contextId, User sharingUser, ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
+    public UserImpl prepareGuestUser(int contextId, User sharingUser, ShareRecipient recipient, ShareTarget target) throws OXException {
         if (AnonymousRecipient.class.isInstance(recipient)) {
-            return prepareGuestUser(sharingUser, (AnonymousRecipient) recipient, targets.get(0));
+            return prepareGuestUser(sharingUser, (AnonymousRecipient) recipient, target);
         } else if (GuestRecipient.class.isInstance(recipient)) {
             return prepareGuestUser(contextId, sharingUser, (GuestRecipient) recipient);
         } else {
@@ -361,20 +362,16 @@ public class ShareUtils {
     }
 
     /**
-     * Gets permission bits suitable for a guest user being allowed to access all supplied share targets. Besides the concrete module
+     * Gets permission bits suitable for a guest user being allowed to access the supplied share target. Besides the concrete module
      * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
      * access.
      *
      * @param recipient The share recipient
-     * @param targets The share targets
+     * @param target The share target
      * @return The permission bits
      */
-    public int getRequiredPermissionBits(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
-        Set<Integer> modules = new HashSet<Integer>(targets.size());
-        for (ShareTarget target : targets) {
-            modules.add(target.getModule());
-        }
-        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(recipient), modules);
+    public int getRequiredPermissionBits(ShareRecipient recipient, ShareTarget target) throws OXException {
+        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(recipient), Collections.singleton(target.getModule()));
     }
 
     /**

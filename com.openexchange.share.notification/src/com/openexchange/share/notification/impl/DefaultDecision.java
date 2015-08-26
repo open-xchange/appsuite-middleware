@@ -83,10 +83,6 @@ public class DefaultDecision implements NotifyDecision {
 
     @Override
     public boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException {
-        if (share.size() == 0) {
-            return false;
-        }
-
         if (share.isInternal()) {
             boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
             if (!notifyInternalUsers) {
@@ -104,14 +100,10 @@ public class DefaultDecision implements NotifyDecision {
                 return true;
             }
 
-            boolean onlyPublics = true;
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
-            for (ShareTarget target : share.getTargets()) {
-                TargetProxy proxy = moduleSupport.load(target, session);
-                onlyPublics &= proxy.isPublic();
-            }
-
-            if (onlyPublics) {
+            ShareTarget target = share.getShareTarget();
+            TargetProxy proxy = moduleSupport.load(target, session);
+            if (proxy.isPublic()) {
                 return false;
             }
         }

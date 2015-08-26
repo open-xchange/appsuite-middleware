@@ -49,15 +49,10 @@
 
 package com.openexchange.share.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -71,25 +66,12 @@ public class CreatedShareImpl implements CreatedShare {
 
     private final ShareRecipient recipient;
 
-    private final GuestInfo guestInfo;
+    private final ShareInfo shareInfo;
 
-    private final List<ShareInfo> shareInfos;
-
-    public CreatedShareImpl(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos) {
+    public CreatedShareImpl(ShareRecipient recipient, ShareInfo shareInfo) {
         super();
         this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-    }
-
-    /**
-     * Gets the number of share targets.
-     *
-     * @return The number
-     */
-    @Override
-    public int size() {
-        return shareInfos.size();
+        this.shareInfo = shareInfo;
     }
 
     /**
@@ -99,7 +81,7 @@ public class CreatedShareImpl implements CreatedShare {
      */
     @Override
     public GuestInfo getGuestInfo() {
-        return guestInfo;
+        return shareInfo.getGuest();
     }
 
     /**
@@ -112,103 +94,14 @@ public class CreatedShareImpl implements CreatedShare {
         return recipient;
     }
 
-    /**
-     * Gets whether this share has a single or multiple targets.
-     *
-     * @return <code>true</code> a single target is contained. The
-     * result is equivalent to <code>createdShare.size() == 1</code>.
-     */
     @Override
-    public boolean hasSingleTarget() {
-        return shareInfos.size() == 1;
+    public ShareTarget getShareTarget() {
+        return shareInfo.getShare().getTarget();
     }
 
-    /**
-     * Gets the first of all share targets. If this is a single-target
-     * share, that target is returned.
-     *
-     * @return The first target.
-     */
     @Override
-    public ShareTarget getFirstTarget() {
-        return shareInfos.get(0).getShare().getTarget();
-    }
-
-    /**
-     * Gets an iterable of all contained targets.
-     *
-     * @return The iterable
-     */
-    @Override
-    public Iterable<ShareTarget> getTargets() {
-        List<ShareTarget> targets = new ArrayList<>(shareInfos.size());
-        for (ShareInfo info : shareInfos) {
-            targets.add(info.getShare().getTarget());
-        }
-        return targets;
-    }
-
-    /**
-     * Gets the share info of the first contained share. If this is a single-target
-     * share, the single share info instance is returned.
-     *
-     * @return The first share info
-     */
-    @Override
-    public ShareInfo getFirstInfo() {
-        return shareInfos.get(0);
-    }
-
-    /**
-     * Gets an iterable of all contained share infos.
-     *
-     * @return The iterable
-     */
-    @Override
-    public Iterable<ShareInfo> getInfos() {
-        return Collections.unmodifiableList(shareInfos);
-    }
-
-    /**
-     * Gets the token for this share. If the only a single target is contained, the
-     * absolute token addressing this target is returned. Otherwise only the guest
-     * users base token is returned. If the share recipient is an internal entity
-     * (i.e. a user or group), <code>null</code> is returned.
-     *
-     * @return The token
-     */
-    @Override
-    public String getToken() {
-        if (recipient.isInternal()) {
-            return null;
-        }
-
-        if (hasSingleTarget()) {
-            return getFirstInfo().getToken();
-        }
-
-        return guestInfo.getBaseToken();
-    }
-
-    /**
-     * Gets the URL to this share. If the recipient is a guest and this share has a single target,
-     * the URL points to that target using the absolute share token. If the recipient is a guest
-     * and this share has multiple targets, the URL is constructed with the guest users base token.
-     * If the recipient is an internal user or group, the URL points to the first target, ignoring
-     * whether this share has multiple targets or not. The latter behavior is subject to change in
-     * the future.
-     *
-     * @param hostData The host data
-     * @return The URL
-     */
-    @Override
-    public String getUrl(HostData hostData) {
-        if (recipient.isInternal()) {
-            // TODO: no handling for multi-target shares yet
-            return ShareLinks.generateInternal(hostData, getFirstTarget());
-        }
-
-        return ShareLinks.generateExternal(hostData, getToken());
+    public ShareInfo getShareInfo() {
+        return shareInfo;
     }
 
     /**
