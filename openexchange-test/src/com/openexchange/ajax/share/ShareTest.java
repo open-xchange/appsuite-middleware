@@ -1115,9 +1115,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         objectPermission.setEntity(guestPermission.getEntity());
         objectPermission.setGroup(guestPermission.isGroupPermission());
         objectPermission.setRecipient(guestPermission.getRecipient());
-        if (guestPermission.canDeleteAllObjects()) {
-            objectPermission.setPermissions(FileStorageObjectPermission.DELETE);
-        } else if (guestPermission.canWriteAllObjects()) {
+        if (guestPermission.canWriteAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.WRITE);
         } else if (guestPermission.canReadAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.READ);
