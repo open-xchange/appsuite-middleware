@@ -109,7 +109,7 @@ public class ListFilestore extends FilestoreAbstraction {
         }
         //doOutput(new String[] { "3r", "35l", "7r", "8r", "7r", "7r", "7r" },
         doOutput(new String[] { "r", "l", "r", "r", "r", "r", "r" },
-                 new String[] { "id", "path", "size", "reserved", "used", "maxctx", "curctx" }, data);
+                 new String[] { "id", "path", "size", "reserved", "used", "max-entities", "cur-entities" }, data);
     }
 
     private void precsvinfos(final Filestore[] filestores) throws InvalidDataException {
@@ -120,8 +120,8 @@ public class ListFilestore extends FilestoreAbstraction {
         columns.add("size");
         columns.add("reserved");
         columns.add("used");
-        columns.add("maxcontexts");
-        columns.add("currentcontexts");
+        columns.add("maxentities");
+        columns.add("currententities");
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Filestore filestore : filestores) {
