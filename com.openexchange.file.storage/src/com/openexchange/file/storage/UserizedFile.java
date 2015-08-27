@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,54 @@
  *
  */
 
-package com.openexchange.share.servlet.handler;
+package com.openexchange.file.storage;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
 
 /**
- * {@link ShareHandler}
+ * A {@link File} is usually requested in the name of a certain user. Thus the contained
+ * information is potentially a user-centric view of that file and not globally valid. In
+ * some situations it can become necessary to access parts of the contained information
+ * from a non-user-centric perspective. This interface is meant to provide access to these
+ * parts.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareHandler {
+public interface UserizedFile extends File {
 
     /**
-     * Gets the ranking for this handler.
-     * <p>
-     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
-     * appropriate handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
+     * If this file is contained in a virtual folder of the user in question, it's global
+     * ID might differ from the user-centric one. This method returns the original (i.e.
+     * globally valid) ID. The user-centric ID is returned by {@link #getId()}.
      *
-     * @return The ranking
+     * @return The original file ID; may be the same as {@link #getId()}, if the user-centric
+     * ID is non-virtual.
      */
-    int getRanking();
+    String getOriginalId();
 
     /**
-     * Handles the given share.
-     * <p>
-     * If this handler feels responsible for the given share <code>{@link ShareHandlerReply#ACCEPT}</code> is returned; otherwise <code>{@link ShareHandlerReply#NEUTRAL}</code> to let the share be handled by the next handler in chain.
-     * <p>
-     * In case this handler wants to abort further handling of the share, <code>{@link ShareHandlerReply#DENY}</code> is returned.
+     * Sets the original file ID if the one set via {@link #setId(String)} is virtual.
      *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param request The associated HTTP request
-     * @param response The associated HTTP response
-     * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
-     * @throws OXException If the attempt to resolve given share fails
+     * @param id The original ID; not <code>null</code>
      */
-    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    void setOriginalId(String id);
+
+    /**
+     * If this file is contained in a virtual folder of the user in question, the folder
+     * ID returned via {@link #getFolderId()} is the one of the virtual folder, but not the
+     * one of the original folder where the file is physically located. This method returns
+     * the original (i.e. physical) folder ID.
+     *
+     * @return The original folder ID; may be the same as {@link #getFolderId()}, if the user-
+     * centric folder ID is non-virtual.
+     */
+    String getOriginalFolderId();
+
+    /**
+     * Sets the original folder ID if the one set via {@link #setFolderId(String)} is virtual.
+     *
+     * @param id The original ID; not <code>null</code>
+     */
+    void setOriginalFolderId(String id);
 
 }

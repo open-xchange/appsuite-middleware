@@ -62,6 +62,7 @@ import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -100,7 +101,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
     }
 
     @Override
-    public ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         AuthenticationMode authMode = share.getGuest().getAuthentication();
         switch (authMode) {
             case ANONYMOUS:
@@ -119,7 +120,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
         }
     }
 
-    private ShareHandlerReply redirectToLoginPage(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private ShareHandlerReply redirectToLoginPage(GuestShare share, PersonalizedShareTarget personalizedTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
         try {
             GuestInfo guestInfo = share.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
@@ -129,7 +130,12 @@ public class WebUIShareHandler extends AbstractShareHandler {
 
             StringBuilder message = new StringBuilder();
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
-            TargetProxy proxy = moduleSupport.loadAsAdmin(target, guestInfo.getContextID());
+            ShareTarget target = null;
+            TargetProxy proxy = null;
+            if (personalizedTarget != null) {
+                target = share.resolveTarget(personalizedTarget);
+                proxy = moduleSupport.loadAsAdmin(target, guestInfo.getContextID());
+            }
             if (null == proxy) {
                 displayName = displayName(share);
                 if (Strings.isEmpty(displayName)) {
@@ -149,8 +155,8 @@ public class WebUIShareHandler extends AbstractShareHandler {
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getEmailAddress());
             }
-            if (target != null) {
-                location.target(target);
+            if (personalizedTarget != null) {
+                location.target(personalizedTarget);
             }
 
             response.sendRedirect(location.build());

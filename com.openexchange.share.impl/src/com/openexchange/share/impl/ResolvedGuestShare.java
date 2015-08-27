@@ -50,7 +50,10 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
@@ -58,6 +61,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -72,24 +76,11 @@ import com.openexchange.share.groupware.ModuleSupport;
  */
 public class ResolvedGuestShare implements GuestShare {
 
-    protected final List<ShareTarget> targets;
     protected final DefaultGuestInfo guestInfo;
     protected final ServiceLookup services;
     protected final Date expiryDate;
     protected final Map<String, Object> meta;
-
-    /**
-     * Initializes a new {@link ResolvedGuestShare}.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param shares The shares
-     * @throws OXException
-     */
-    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares) throws OXException {
-        this(services, contextID, guestUser, shares, false);
-    }
+    protected final Map<PersonalizedShareTarget, ShareTarget> targetMap;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}, performing optional personalizations of the share targets for the session's user
@@ -99,10 +90,10 @@ public class ResolvedGuestShare implements GuestShare {
      * @param contextID The context ID
      * @param guestUser The guest user
      * @param shares The shares
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
+     * @param personalizedTargets The list of personalized (for the guest user) share targets. Must be in the same order as <code>shares</code>.
      * @throws OXException
      */
-    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, boolean adjustTargets) throws OXException {
+    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, List<PersonalizedShareTarget> personalizedTargets) throws OXException {
         super();
         this.services = services;
         if (ShareTool.isAnonymousGuest(guestUser)) {
@@ -117,17 +108,18 @@ public class ResolvedGuestShare implements GuestShare {
             expiryDate = null;
             meta = null;
         }
-        ModuleSupport moduleSupport = adjustTargets ? services.getService(ModuleSupport.class) : null;;
-        this.targets = new ArrayList<ShareTarget>(shares.size());
-        for (Share share : shares) {
+        this.targetMap = new HashMap<>(shares.size() * 2);
+        services.getService(ModuleSupport.class);
+        Iterator<Share> sit = shares.iterator();
+        Iterator<PersonalizedShareTarget> pit = personalizedTargets.iterator();
+        while (sit.hasNext()) {
+            Share share = sit.next();
+            PersonalizedShareTarget personalizedTarget = pit.next();
             if (share.getGuest() != guestUser.getId()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
             }
-            if (null == moduleSupport) {
-                targets.add(share.getTarget());
-            } else {
-                targets.add(moduleSupport.adjustTarget(share.getTarget(), contextID, guestUser.getId(), guestUser.isGuest()));
-            }
+
+            targetMap.put(personalizedTarget, share.getTarget());
         }
     }
 
@@ -138,22 +130,19 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public List<ShareTarget> getTargets() {
-        return targets;
-    }
-
-    @Override
-    public String getToken(ShareTarget target) {
-        return guestInfo.getBaseToken() + '/' + target.getPath();
+        return new ArrayList<>(targetMap.values());
     }
 
     @Override
     public int getCommonModule() {
+        Collection<ShareTarget> targets = targetMap.values();
         if (null == targets || 0 == targets.size()) {
             return 0;
         } else {
-            int module = targets.get(0).getModule();
-            for (int i = 1; i < targets.size(); i++) {
-                if (module != targets.get(i).getModule()) {
+            Iterator<ShareTarget> it = targets.iterator();
+            int module = it.next().getModule();
+            while (it.hasNext()) {
+                if (module != it.next().getModule()) {
                     return 0;
                 }
             }
@@ -163,15 +152,18 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public String getCommonFolder() {
+        Collection<ShareTarget> targets = targetMap.values();
         if (null == targets || 0 == targets.size()) {
             return null;
         } else {
-            String folder = targets.get(0).getFolder();
+            Iterator<ShareTarget> it = targets.iterator();
+            String folder = it.next().getFolder();
             if (null == folder) {
                 return null;
             }
-            for (int i = 1; i < targets.size(); i++) {
-                if (false == folder.equals(targets.get(i).getFolder())) {
+
+            while (it.hasNext()) {
+                if (false == folder.equals(it.next().getFolder())) {
                     return null;
                 }
             }
@@ -180,9 +172,9 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public ShareTarget resolveTarget(String path) {
-        if (null != targets && 0 < targets.size() && null != path) {
-            for (ShareTarget target : targets) {
+    public PersonalizedShareTarget resolvePersonalizedTarget(String path) {
+        if (null != targetMap && 0 < targetMap.size() && null != path) {
+            for (PersonalizedShareTarget target : targetMap.keySet()) {
                 if (path.equals(target.getPath())) {
                     return target;
                 }
@@ -192,13 +184,18 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
+    public ShareTarget resolveTarget(PersonalizedShareTarget personalizedTarget) {
+        return targetMap.get(personalizedTarget);
+    }
+
+    @Override
     public boolean isMultiTarget() {
-        return null != targets && 1 < targets.size();
+        return null != targetMap && 1 < targetMap.size();
     }
 
     @Override
     public ShareTarget getSingleTarget() {
-        return null != targets && 1 == targets.size() ? targets.get(0) : null;
+        return null != targetMap && 1 == targetMap.size() ? targetMap.values().iterator().next() : null;
     }
 
     @Override
@@ -213,7 +210,7 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public String toString() {
-        return "ResolvedGuestShare [contextID=" + guestInfo.getContextID() + ", guestUser=" + guestInfo.getGuestID() + ", targets=" + targets + "]";
+        return "ResolvedGuestShare [contextID=" + guestInfo.getContextID() + ", guestUser=" + guestInfo.getGuestID() + ", targets=" + targetMap.values() + "]";
     }
 
 }

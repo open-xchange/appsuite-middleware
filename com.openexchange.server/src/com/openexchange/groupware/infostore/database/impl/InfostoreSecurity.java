@@ -76,6 +76,17 @@ public interface InfostoreSecurity {
     /**
      * Gets the effective infostore permissions for a specific document.
      *
+     * @param context The context
+     * @param user The user
+     * @param userPermissions The user permission bits
+     * @param id The identifier of the document to get the permissions for
+     * @return The effective permissions
+     */
+    EffectiveInfostorePermission getInfostorePermission(Context context, User user, UserPermissionBits userPermissions, int id) throws OXException;
+
+    /**
+     * Gets the effective infostore permissions for a specific document.
+     *
      * @param session The user's session
      * @param document The document to get the permissions for
      * @return The effective permissions

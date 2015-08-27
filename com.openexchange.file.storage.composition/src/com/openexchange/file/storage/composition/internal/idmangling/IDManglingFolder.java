@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.composition.internal.idmangling;
 
 import java.util.Date;
 import java.util.List;
@@ -124,7 +124,7 @@ public class IDManglingFolder implements TypeAware {
      *
      * @param delegate The delegate
      */
-    public IDManglingFolder(FileStorageFolder delegate, String id, String parentId) {
+    IDManglingFolder(FileStorageFolder delegate, String id, String parentId) {
         super();
         this.delegate = delegate;
         this.id = id;

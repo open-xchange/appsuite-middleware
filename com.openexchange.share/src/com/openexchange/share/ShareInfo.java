@@ -74,13 +74,6 @@ public interface ShareInfo {
     GuestInfo getGuest();
 
     /**
-     * Gets the (absolute) token for the share target, i.e. the base token plus the target path.
-     *
-     * @return The absolute token
-     */
-    String getToken();
-
-    /**
      * Gets the (base) share URL to access the share as guest user and jump to the underlying target directly.
      *
      * @param hostData The host data of the current HTTP request to determine protocol, hostname and servlet prefix

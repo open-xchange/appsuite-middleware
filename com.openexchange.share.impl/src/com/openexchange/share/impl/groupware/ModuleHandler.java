@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
 
@@ -103,16 +104,15 @@ public interface ModuleHandler {
     void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
 
     /**
-     * Optionally adjusts a share target to be used by a specific user. This might be required if the target identifiers are different
-     * depending on the user who accesses the share target, especially if the user is a guest or not.
+     * Optionally personalizes a share target to be used by a specific user. This might be required if the target identifiers are different
+     * depending on the user who accesses the share target.
      *
      * @param target The share target to adjust
      * @param contextID The identifier of the context the user is located in
      * @param userID The identifier of the user to adjust the share target for
-     * @param isGuest <code>true</code> if the user identifier refers to a guest user, <code>false</code>, otherwise
-     * @return The adjusted target, or the supplied target if no adjustments were necessary
+     * @return The personalized target
      */
-    ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
+    PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException;
 
     /**
      * Gets a value indicating whether a share target is visible for the session's user or not, i.e. if the user has sufficient

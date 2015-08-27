@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-11 14:32+0100\n"
+"PO-Revision-Date: 2015-08-27 15:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1890,41 +1890,43 @@ msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr "Löschvorgang verweigert für die \"%1$s\"-Ressource: %2$s"
 
 #. Missing configuration for %1$s account "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+#. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+#. E.g. 'Missing configuration for boxcom account "3".'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
 msgid "Missing configuration for %1$s account \"%2$s\"."
 msgstr "Fehlende Konfiguration für den %1$s-Account \"%2$s\"."
 
 #. The provided %1$s resource does not exist: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "Die angegebene %1$s-Ressource ist nicht vorhanden: %2$s"
 
 #. The file %1$s doesn't have any content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The file %1$s doesn't have any content."
 msgstr "Die Datei %1$s hat keinen Inhalt."
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "The associated %2$s account does no more exist"
 msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr ""
 "Für den Account \"%1$s\" werden keine individuellen Benutzerberechtigungen "
 "unterstützt."
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
 "Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für den Account \"%2$s"
 "\" nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
@@ -1932,7 +1934,7 @@ msgstr ""
 "\"%2$s\" nicht unterstützt."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
@@ -2757,6 +2759,11 @@ msgid "Data cannot be stored into the database because it is too big"
 msgstr ""
 "Die Daten können nicht in der Datenbank gespeichert werden, da sie zu "
 "umfangreich sind"
+
+#. The request sent by the client was syntactically incorrect
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+msgid "The request sent by the client was syntactically incorrect"
+msgstr "Die vom Client gesendete Anfrage ist syntaktisch falsch"
 
 #. *
 #. * File not found: %1$s
@@ -5292,6 +5299,11 @@ msgstr ""
 "Die Anfrage \"%1$s\" enthält zu viele Muster. Bitte kürzen Sie die Anfrage "
 "und versuchen Sie es erneut."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
+#, fuzzy
+msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr "Das Muster \"%1$s\" wurde während der Suche ignoriert."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "Der Account %1$d wurde nicht gefunden."
@@ -6919,6 +6931,16 @@ msgid ""
 msgstr ""
 "Aufgrund eingeschränkter Nutzungsmöglichkeiten des Benutzers \"%1$s\" können "
 "die Berechtigungsänderungen nicht angewendet werden."
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+#, fuzzy
+msgid ""
+"Concurrent write attempt. Please await the previous save operation to "
+"terminate."
+msgstr ""
+"Gleichzeitiger Schreibversuch. Bitte warten Sie, bis der vorherige "
+"Speichervorgang abgeschlossen wurde."
 
 #. A document's description
 #. Task attribute name

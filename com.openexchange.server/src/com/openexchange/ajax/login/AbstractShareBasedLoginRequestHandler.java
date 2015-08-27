@@ -93,9 +93,9 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -161,7 +161,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
         String targetPath = httpRequest.getParameter("target");
-        final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
+        final PersonalizedShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolvePersonalizedTarget(targetPath);
 
         final LoginConfiguration conf = this.conf.getLoginConfig(share);
         LoginClosure loginClosure = new LoginClosure() {

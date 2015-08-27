@@ -78,11 +78,6 @@ public class DefaultDriveShareInfo implements DriveShareInfo {
     }
 
     @Override
-    public String getToken() {
-        return shareInfo.getToken();
-    }
-
-    @Override
     public String getShareURL(HostData hostData) {
         return shareInfo.getShareURL(hostData);
     }

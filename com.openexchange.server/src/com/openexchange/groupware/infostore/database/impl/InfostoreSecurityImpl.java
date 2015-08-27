@@ -153,6 +153,27 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
+    public EffectiveInfostorePermission getInfostorePermission(Context context, User user, UserPermissionBits userPermissions, int id) throws OXException {
+        List<DocumentMetadata> documents = getFolderIdAndCreatorForDocuments(new int[] { id }, context);
+        if (documents == null || documents.size() <= 0 || documents.get(0) == null) {
+            throw InfostoreExceptionCodes.NOT_EXIST.create();
+        }
+
+        DocumentMetadata document = documents.iterator().next();
+        Connection connection = null;
+        try {
+            connection = getReadConnection(context);
+            OXFolderAccess folderAccess = new OXFolderAccess(connection, context);
+            FolderObject folder = folderAccess.getFolderObject((int) document.getFolderId());
+            EffectivePermission isperm = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+            EffectiveObjectPermission effectiveObjectPermission = getEffectiveObjectPermission(context, user, userPermissions, document, connection);
+            return new EffectiveInfostorePermission(isperm, effectiveObjectPermission, document, user, getFolderOwner(folder));
+        } finally {
+            releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public EffectiveInfostorePermission getInfostorePermission(ServerSession session, DocumentMetadata document) throws OXException {
         Connection connection = null;
         try {
@@ -306,6 +327,14 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             return EffectiveObjectPermissions.convert(FolderObject.INFOSTORE, (int) document.getFolderId(), document.getId(), objectPermission, session.getUserPermissionBits());
         }
         return EffectiveObjectPermissions.load(session, FolderObject.INFOSTORE, (int) document.getFolderId(), document.getId(), con);
+    }
+
+    private static EffectiveObjectPermission getEffectiveObjectPermission(Context context, User user, UserPermissionBits permissionBits, DocumentMetadata document, Connection con) throws OXException {
+        ObjectPermission objectPermission = EffectiveObjectPermissions.find(user, document.getObjectPermissions());
+        if (objectPermission != null) {
+            return EffectiveObjectPermissions.convert(FolderObject.INFOSTORE, (int) document.getFolderId(), document.getId(), objectPermission, permissionBits);
+        }
+        return EffectiveObjectPermissions.load(context, user, permissionBits, FolderObject.INFOSTORE, (int) document.getFolderId(), document.getId(), con);
     }
 
 }

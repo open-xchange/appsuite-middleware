@@ -279,6 +279,8 @@ public class AJAXRequestData {
         copy.servletRequestUri = servletRequestUri;
         copy.userAgent = userAgent;
         copy.serverPort = serverPort;
+        copy.prefix = prefix;
+
         /*
          * Not sure about following members, therefore leave to null
          */

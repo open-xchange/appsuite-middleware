@@ -54,6 +54,7 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -71,6 +72,7 @@ public class InternalGroupShareInfo implements ShareInfo {
     private final int contextID;
     private final Group group;
     private final Share share;
+    private final PersonalizedShareTarget personalizedTarget;
 
     /**
      * Initializes a new {@link InternalGroupShareInfo}.
@@ -78,12 +80,14 @@ public class InternalGroupShareInfo implements ShareInfo {
      * @param contextID The context identifier
      * @param group The group
      * @param share The share
+     * @param personalizedTarget The personalized target to generate the share link
      */
-    public InternalGroupShareInfo(int contextID, Group group, Share share) {
+    public InternalGroupShareInfo(int contextID, Group group, Share share, PersonalizedShareTarget personalizedTarget) {
         super();
         this.contextID = contextID;
         this.group = group;
         this.share = share;
+        this.personalizedTarget = personalizedTarget;
     }
 
     @Override
@@ -156,13 +160,8 @@ public class InternalGroupShareInfo implements ShareInfo {
     }
 
     @Override
-    public String getToken() {
-        return null;
-    }
-
-    @Override
     public String getShareURL(HostData hostData) {
-        return ShareLinks.generateInternal(hostData, share.getTarget());
+        return ShareLinks.generateInternal(hostData, personalizedTarget);
     }
 
 }

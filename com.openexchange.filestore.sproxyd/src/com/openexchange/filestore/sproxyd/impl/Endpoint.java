@@ -50,6 +50,7 @@
 package com.openexchange.filestore.sproxyd.impl;
 
 import java.util.UUID;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * Represents a sproxyd endpoint.
@@ -95,7 +96,7 @@ public class Endpoint {
      * @return The URL; always without trailing slash
      */
     public String getObjectUrl(UUID id) {
-        return getFullUrl() + id.toString();
+        return getFullUrl() + UUIDs.getUnformattedString(id);
     }
 
     /**

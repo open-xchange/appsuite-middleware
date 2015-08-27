@@ -63,12 +63,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.user.UserService;
 
 /**
@@ -80,8 +82,7 @@ import com.openexchange.user.UserService;
 public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
 
     /**
-     * Creates a list of extended share info objects for the supplied shares. The underlying share targets are used in their original from
-     * (i.e. not personalized for the guest user).
+     * Creates a list of extended share info objects for the supplied shares.
      *
      * @param services A service lookup reference
      * @param contextID The context ID
@@ -89,19 +90,6 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @return The share infos
      */
     public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-        return createShareInfos(services, contextID, shares, false);
-    }
-
-    /**
-     * Creates a list of extended share info objects for the supplied shares.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param shares The shares
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
-     * @return The share infos
-     */
-    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptyList();
         }
@@ -121,14 +109,18 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
         /*
          * build & return share infos
          */
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
         for (Share share : shares) {
-            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share, adjustTargets));
+            User user = guestUsers.get(I(share.getGuest()));
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), contextID, user.getId());
+            shareInfos.add(new DefaultShareInfo(services, contextID, user, share, personalizedTarget));
         }
         return shareInfos;
     }
 
     private final Share share;
+    private final PersonalizedShareTarget personalizedTarget;
 
     /**
      * Initializes a new {@link DefaultShareInfo}.
@@ -137,16 +129,12 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param contextID The context ID
      * @param guestUser The guest user
      * @param share The share
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
      * @throws OXException
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share, boolean adjustTargets) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share), adjustTargets);
+    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share, PersonalizedShareTarget personalizedTarget) throws OXException {
+        super(services, contextID, guestUser, Collections.singletonList(share), Collections.singletonList(personalizedTarget));
         this.share = share;
-        if (adjustTargets) {
-            // take over adjusted target
-            share.setTarget(super.getSingleTarget());
-        }
+        this.personalizedTarget = personalizedTarget;
     }
 
     @Override
@@ -155,18 +143,13 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     }
 
     @Override
-    public String getToken() {
-        return super.getToken(share.getTarget());
-    }
-
-    @Override
     public String getShareURL(HostData hostData) {
         ShareTarget target = getSingleTarget();
         if (target == null) {
-            return ShareLinks.generateExternal(hostData, guestInfo.getBaseToken());
+            return ShareLinks.generateExternal(hostData, super.getGuest().getBaseToken(), null);
         }
 
-        return ShareLinks.generateExternal(hostData, getToken());
+        return ShareLinks.generateExternal(hostData, super.getGuest().getBaseToken(), personalizedTarget);
     }
 
 }

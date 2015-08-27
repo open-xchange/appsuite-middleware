@@ -83,6 +83,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
@@ -140,7 +141,7 @@ public class ICalHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    protected boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return null != target &&
             (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
             (acceptsICal(request) || indicatesICalClient(request));
@@ -148,7 +149,7 @@ public class ICalHandler extends HttpAuthShareHandler {
 
     @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
-        ShareTarget target = resolvedShare.getTarget();
+        PersonalizedShareTarget target = resolvedShare.getTarget();
         /*
          * prepare iCal export
          */
@@ -184,7 +185,7 @@ public class ICalHandler extends HttpAuthShareHandler {
      * @param share The resolved share
      * @throws OXException
      */
-    private static void writeCalendar(ICalEmitter iCalEmitter, ICalSession iCalSession, ResolvedShare share, ShareTarget target) throws OXException {
+    private static void writeCalendar(ICalEmitter iCalEmitter, ICalSession iCalSession, ResolvedShare share, PersonalizedShareTarget target) throws OXException {
         AppointmentSqlFactoryService factory = Services.getService(AppointmentSqlFactoryService.class);
         CalendarCollectionService calendarCollection = Services.getService(CalendarCollectionService.class);
         ArrayList<ConversionError> conversionErrors = new ArrayList<ConversionError>();
@@ -220,7 +221,7 @@ public class ICalHandler extends HttpAuthShareHandler {
      * @param share The resolved share
      * @throws OXException
      */
-    private static void writeTasks(ICalEmitter iCalEmitter, ICalSession iCalSession, ResolvedShare share, ShareTarget target) throws OXException {
+    private static void writeTasks(ICalEmitter iCalEmitter, ICalSession iCalSession, ResolvedShare share, PersonalizedShareTarget target) throws OXException {
         TasksSQLInterface taskInterface = new TasksSQLImpl(share.getSession());
         ArrayList<ConversionError> conversionErrors = new ArrayList<ConversionError>();
         ArrayList<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
@@ -314,7 +315,7 @@ public class ICalHandler extends HttpAuthShareHandler {
      * @param share The share to extract the name for
      * @return The display name, or <code>null</code> if name extraction fails
      */
-    private static String extractName(ResolvedShare share, ShareTarget target) {
+    private static String extractName(ResolvedShare share, PersonalizedShareTarget target) {
         try {
             UserizedFolder folder = Services.getService(FolderService.class).getFolder(
                 FolderStorage.REAL_TREE_ID, target.getFolder(), share.getSession(), null);

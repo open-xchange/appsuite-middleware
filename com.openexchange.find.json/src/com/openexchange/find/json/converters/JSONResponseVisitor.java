@@ -101,6 +101,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
     // ------------------------------------------------------------------------------------------------- //
 
     private final ServerSession session;
+    private final AJAXRequestData requestData;
     private final List<OXException> errors;
     private final JSONArray json;
     private final ResultConverterRegistry converterRegistry;
@@ -109,13 +110,15 @@ public class JSONResponseVisitor implements DocumentVisitor {
 
     /**
      * @param session The session; never <code>null</code>.
+     * @param requestData The request data; never <code>null</code>.
      * @param converterRegistry The converter registry; never <code>null</code>.
      * @param queryResult The query result; never <code>null</code>.
      */
-    public JSONResponseVisitor(ServerSession session, ResultConverterRegistry converterRegistry, QueryResult queryResult) {
+    public JSONResponseVisitor(ServerSession session, AJAXRequestData requestData, ResultConverterRegistry converterRegistry, QueryResult queryResult) {
         super();
         this.converterRegistry = converterRegistry;
         this.session = session;
+        this.requestData = requestData;
         this.queryResult = queryResult;
         errors = new LinkedList<OXException>();
         json = new JSONArray();
@@ -176,7 +179,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter converter = converterRegistry.getConverter("infostore");
             if (null != converter) {
-                AJAXRequestData requestData = new AJAXRequestData();
+                AJAXRequestData requestData = this.requestData.copyOf();
                 if (timeZone != null) {
                     requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
@@ -196,7 +199,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter converter = converterRegistry.getConverter("task");
             if (null != converter) {
-                AJAXRequestData requestData = new AJAXRequestData();
+                AJAXRequestData requestData = this.requestData.copyOf();
                 if (timeZone != null) {
                     requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
@@ -216,7 +219,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter converter = converterRegistry.getConverter("contact");
             if (null != converter) {
-                AJAXRequestData requestData = new AJAXRequestData();
+                AJAXRequestData requestData = this.requestData.copyOf();
                 if (timeZone != null) {
                     requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }
@@ -236,7 +239,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
             if (calendarConverter != null) {
-                AJAXRequestData requestData = new AJAXRequestData();
+                AJAXRequestData requestData = this.requestData.copyOf();
                 if (timeZone != null) {
                     requestData.putParameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID());
                 }

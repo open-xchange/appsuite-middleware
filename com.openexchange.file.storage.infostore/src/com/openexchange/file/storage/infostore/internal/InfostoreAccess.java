@@ -52,6 +52,7 @@ package com.openexchange.file.storage.infostore.internal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 
@@ -94,6 +95,15 @@ public abstract class InfostoreAccess {
 
     protected static long FOLDERID(final String folderId) {
         return Long.parseLong(folderId);
+    }
+
+    protected static int VERSION(final String version) {
+        int iVersion = InfostoreFacade.CURRENT_VERSION;
+        if (version != FileStorageFileAccess.CURRENT_VERSION) {
+            iVersion = Integer.parseInt(version);
+        }
+
+        return iVersion;
     }
 
 }

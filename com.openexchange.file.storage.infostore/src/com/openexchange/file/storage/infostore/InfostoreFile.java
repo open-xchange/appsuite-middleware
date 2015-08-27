@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 
@@ -66,13 +66,13 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFile extends AbstractFile implements File {
+public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     private final DocumentMetadata document;
 
     /**
      * Initializes a new {@link InfostoreFile}.
-     * 
+     *
      * @param documentMetadata The underlying document metadata.
      */
     public InfostoreFile(final DocumentMetadata documentMetadata) {
@@ -333,6 +333,26 @@ public class InfostoreFile extends AbstractFile implements File {
     @Override
     public void setShareable(boolean shareable) {
         document.setShareable(shareable);
+    }
+
+    @Override
+    public String getOriginalId() {
+        return Integer.toString(document.getOriginalId());
+    }
+
+    @Override
+    public void setOriginalId(String id) {
+        document.setOriginalId(Integer.parseInt(id));
+    }
+
+    @Override
+    public String getOriginalFolderId() {
+        return Long.toString(document.getOriginalFolderId());
+    }
+
+    @Override
+    public void setOriginalFolderId(String id) {
+        document.setOriginalFolderId(Long.parseLong(id));
     }
 
 }

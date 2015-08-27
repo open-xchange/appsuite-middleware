@@ -204,7 +204,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 alias = originalAlias;
             } else {
                 if (SHUTDOWN_REQUESTED.get()) {
-                    // 500 - Internal Server Error
+                    // 503 - Service Unavailable
                     response.setStatus(shutDownStatus);
                     return;
                 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.importexport.actions.importer;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -57,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.json.ImportRequest;
@@ -95,17 +93,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractImportAction.class);
                 logger.error("JSON error", e1);
             }
-            AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
-            int num = 0;
-            for (ImportResult res : importResult) {
-                if (res.getWarnings() != null && res.getWarnings().size() > 0) {
-                    num += res.getWarnings().size();
-                }
-            }
-            if (num > 0) {
-                result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
-            }
-            return result;
+            return new AJAXRequestResult(jsonWriter.getObject());
         } finally {
             final AJAXRequestData ajaxRequestData = req.getRequest();
             if (null != ajaxRequestData) {
@@ -117,5 +105,4 @@ public abstract class AbstractImportAction implements AJAXActionService {
             }
         }
     }
-
 }
