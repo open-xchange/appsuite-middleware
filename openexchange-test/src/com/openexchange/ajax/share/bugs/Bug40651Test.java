@@ -105,7 +105,6 @@ public class Bug40651Test extends ShareTest {
         expectedId.setFolderId("10");
         PropDocument expectedDoc = AbstractFindTest.findByProperty(searchResults, "id", expectedId.toUniqueID());
         Assert.assertNotNull("Found no document with ID " + expectedId.toUniqueID(), expectedDoc);
-        System.out.println(expectedDoc.getProps());
     }
 
     public void testShareFolderLinkAndSearchForContainedItemAsGuest() throws Exception {
@@ -125,7 +124,6 @@ public class Bug40651Test extends ShareTest {
         List<PropDocument> searchResults = AbstractFindTest.query(guestClient, Module.DRIVE, activeFacets);
         PropDocument expectedDoc = AbstractFindTest.findByProperty(searchResults, "id", file.getId());
         Assert.assertNotNull("Found no document with ID " + file.getId(), expectedDoc);
-        System.out.println(expectedDoc.getProps());
     }
 
 }
