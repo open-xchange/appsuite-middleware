@@ -243,7 +243,14 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An unexpected OAuth problem occurred: %1$s
      */
-    OAUTH_PROBLEM_UNEXPECTED("An unexpected OAuth problem occurred: %1$s", CATEGORY_ERROR, 38, null);
+    OAUTH_PROBLEM_UNEXPECTED("An unexpected OAuth problem occurred: %1$s", CATEGORY_ERROR, 38, null),
+
+    /**
+     * The OAuth provider refused to permit this Consumer to access the protected resources.
+     */
+    OAUTH_PROBLEM_ACCESS_DENIED("The OAuth provider refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 39, null),
+
+    ;
 
     private final Category category;
     private final int number;
