@@ -792,9 +792,6 @@ public final class InternalList {
         //Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
 
-        //Add primary key to dlist tables
-        list.add(new MakeUUIDPrimaryForDListTablesV2());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
