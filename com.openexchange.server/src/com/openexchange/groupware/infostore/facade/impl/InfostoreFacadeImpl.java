@@ -130,7 +130,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
-import com.openexchange.groupware.infostore.validation.InvalidWindowsFilenameCharsValidator;
 import com.openexchange.groupware.infostore.validation.ObjectPermissionValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
@@ -2475,7 +2474,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      */
     private ValidationChain getValidationChain() {
         return new ValidationChain(
-            new InvalidWindowsFilenameCharsValidator(),
             new InvalidCharactersValidator(),
             new FilenamesMayNotContainSlashesValidator(),
             new ObjectPermissionValidator(this)

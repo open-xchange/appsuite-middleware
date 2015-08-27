@@ -62,6 +62,6 @@ public class NewInfostoreResponse extends AbstractAJAXResponse {
     }
 
     public String getID() {
-        return getResponse().getData() != null ? getResponse().getData().toString() : null;
+        return getResponse().getData().toString();
     }
 }
