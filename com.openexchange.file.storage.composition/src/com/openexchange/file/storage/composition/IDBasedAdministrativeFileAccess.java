@@ -128,4 +128,53 @@ public interface IDBasedAdministrativeFileAccess {
      */
     void removeDocuments(List<String> ids) throws OXException;
 
+    /**
+     * Checks whether a certain version of a certain file exists. If you need to know if a file exists at all,
+     * you can pass {@link FileStorageFileAccess#CURRENT_VERSION} as version.<br>
+     * <br>
+     * Always check if a file is supported with {@link IDBasedAdministrativeFileAccess#supports(String)}. Otherwise
+     * {@link FileStorageExceptionCodes#ADMIN_FILE_ACCESS_NOT_AVAILABLE} can be thrown, if the file is not supported.
+     *
+     * @param id The file identifier
+     * @param version The file version
+     * @throws OXException If a storage error occurs
+     */
+    boolean exists(String id, String version) throws OXException;
+
+    /**
+     * Checks whether a user can read a certain file.<br>
+     * <br>
+     * Always check if a file is supported with {@link IDBasedAdministrativeFileAccess#supports(String)}. Otherwise
+     * {@link FileStorageExceptionCodes#ADMIN_FILE_ACCESS_NOT_AVAILABLE} can be thrown, if the file is not supported.
+     *
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canRead(String id, int userId) throws OXException;
+
+    /**
+     * Checks whether an entity can write a certain file.<br>
+     * <br>
+     * Always check if a file is supported with {@link IDBasedAdministrativeFileAccess#supports(String)}. Otherwise
+     * {@link FileStorageExceptionCodes#ADMIN_FILE_ACCESS_NOT_AVAILABLE} can be thrown, if the file is not supported.
+     *
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canWrite(String id, int userId) throws OXException;
+
+    /**
+     * Checks whether an entity can delete a certain file.<br>
+     * <br>
+     * Always check if a file is supported with {@link IDBasedAdministrativeFileAccess#supports(String)}. Otherwise
+     * {@link FileStorageExceptionCodes#ADMIN_FILE_ACCESS_NOT_AVAILABLE} can be thrown, if the file is not supported.
+     *
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canDelete(String id, int userId) throws OXException;
+
 }

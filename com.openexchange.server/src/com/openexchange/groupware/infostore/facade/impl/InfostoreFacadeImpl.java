@@ -165,6 +165,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -251,6 +252,36 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             throw e;
         }
+    }
+
+    @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        Metadata[] metadata = new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.VERSION_LITERAL };
+        InfostoreIterator searchIterator = null;
+        try {
+            searchIterator = InfostoreIterator.versions(id, metadata, Metadata.VERSION_LITERAL, InfostoreFacade.ASC, this, context);
+            if (version == InfostoreFacade.CURRENT_VERSION) {
+                return searchIterator.hasNext();
+            }
+
+            while (searchIterator.hasNext()) {
+                if (searchIterator.next().getVersion() == version) {
+                    return true;
+                }
+            }
+
+            return false;
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        UserPermissionService userPermissionService = ServerServiceRegistry.getServize(UserPermissionService.class, true);
+        UserPermissionBits permissionBits = userPermissionService.getUserPermissionBits(user.getId(), context);
+        EffectiveInfostorePermission effectivePermission = security.getInfostorePermission(context, user, permissionBits, id);
+        return permission.appliesTo(effectivePermission);
     }
 
     @Override

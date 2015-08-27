@@ -64,9 +64,12 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -87,7 +90,7 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
         try {
-            DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), context);
+            DocumentMetadata documentMetadata = getInfostore(folderId).getDocumentMetadata(ID(id), VERSION(version), context);
             if (null != folderId && documentMetadata.getFolderId() > 0 && !folderId.equals(Long.toString(documentMetadata.getFolderId()))) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
             }
@@ -132,6 +135,29 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
         for (Entry<String, List<IDTuple>> entry : idsByFolder.entrySet()) {
             getInfostore(entry.getKey()).removeDocuments(entry.getValue(), context);
         }
+    }
+
+    @Override
+    public boolean exists(String folderId, String id, String version) throws OXException {
+        return getInfostore(folderId).exists(ID(id), VERSION(version), context);
+    }
+
+    @Override
+    public boolean canRead(String folderId, String id, int userId) throws OXException {
+        User user = Services.getService(UserService.class).getUser(userId, context);
+        return getInfostore(folderId).hasDocumentAccess(ID(id), InfostoreFacade.AccessPermission.READ, user, context);
+    }
+
+    @Override
+    public boolean canWrite(String folderId, String id, int userId) throws OXException {
+        User user = Services.getService(UserService.class).getUser(userId, context);
+        return getInfostore(folderId).hasDocumentAccess(ID(id), InfostoreFacade.AccessPermission.WRITE, user, context);
+    }
+
+    @Override
+    public boolean canDelete(String folderId, String id, int userId) throws OXException {
+        User user = Services.getService(UserService.class).getUser(userId, context);
+        return getInfostore(folderId).hasDocumentAccess(ID(id), InfostoreFacade.AccessPermission.DELETE, user, context);
     }
 
 }

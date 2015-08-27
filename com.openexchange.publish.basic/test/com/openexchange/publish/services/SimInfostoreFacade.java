@@ -63,6 +63,7 @@ import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -348,6 +349,16 @@ public class SimInfostoreFacade implements InfostoreFacade {
     public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        return false;
     }
 
 }
