@@ -189,7 +189,7 @@ if [ ${1:-0} -eq 2 ]; then
     TMPFILE=$(mktemp)
     while read LINE; do
         case "$LINE" in
-            \#*|*:crypt:*)
+            \#*|*:crypt:*|*:bcrypt:*)
                 # ignore commented and already converted lines
                 echo $LINE
                 ;;

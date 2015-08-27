@@ -9,6 +9,7 @@
 * 2015-08-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities.
+ - Fix for bug 40731: Check schema prior to listing contexts (or any other schema-incompatible operation)
 
 * 2015-08-26 - ioannis.chouklis@open-xchange.com
 
