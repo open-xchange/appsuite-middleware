@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
@@ -260,11 +261,15 @@ public class DefaultNotificationService implements ShareNotificationService {
             UserService userService = serviceLookup.getService(UserService.class);
             GuestInfo guestInfo = guestShare.getGuest();
             String mailAddress = guestInfo.getEmailAddress();
+            String displayName = guestInfo.getDisplayName();
+            if (null == displayName) {
+                displayName = mailAddress;
+            }
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
             String baseToken = guestShare.getGuest().getBaseToken();
 
             ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
-                .setTransportInfo(new InternetAddress(mailAddress, true))
+                .setTransportInfo(new QuotedInternetAddress(mailAddress, displayName, "UTF-8"))
                 .setContextID(guestInfo.getContextID())
                 .setGuestID(guestInfo.getGuestID())
                 .setLocale(guest.getLocale())
