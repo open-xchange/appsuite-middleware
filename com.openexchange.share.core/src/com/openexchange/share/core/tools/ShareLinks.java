@@ -60,7 +60,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.core.ShareConstants;
 
 
@@ -78,29 +78,34 @@ public class ShareLinks {
      * <code>com.openexchange.share.guestHostname</code>.
      *
      * @param hostData The host data
-     * @param shareToken The share token, either as base token or in absolute format
+     * @param guestToken The guests base token
+     * @param target The personalized share target
      * @return The share link
      */
-    public static String generateExternal(HostData hostData, String shareToken) {
+    public static String generateExternal(HostData hostData, String guestToken, PersonalizedShareTarget target) {
         URIBuilder builder = prepare(hostData);
-        String guestHostname = getGuestHostname(shareToken);
+        String guestHostname = getGuestHostname(guestToken);
         if (false == Strings.isEmpty(guestHostname)) {
             builder.setHost(guestHostname);
         } else {
             getLogger(ShareLinks.class).warn("No hostname for guests is configured. Falling back to current host \"{}\" for share link " +
                 "generation. Please configure \"com.openexchange.share.guestHostname\" to make this warning disappear.", builder.getHost());
         }
-        return builder.setPath(serverPath(hostData, '/' + shareToken)).toString();
+        String targetPath = "";
+        if (target != null) {
+            targetPath = "/" + target.getPath();
+        }
+        return builder.setPath(serverPath(hostData, "/" + guestToken + targetPath)).toString();
     }
 
     /**
      * Generates a share link for an internal user with a concrete target to jump to.
      *
      * @param hostData The host data
-     * @param target The share target
+     * @param target The personalized share target according to the user for who the link is generated
      * @return The link
      */
-    public static String generateInternal(HostData hostData, ShareTarget target) {
+    public static String generateInternal(HostData hostData, PersonalizedShareTarget target) {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();

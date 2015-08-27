@@ -58,9 +58,11 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 
@@ -142,6 +144,7 @@ public class TokenCollection {
     public List<Share> loadShares(StorageParameters parameters) throws OXException {
         List<Share> shares = new ArrayList<Share>();
         ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*
          * gather all shares for guest users with base token only
          */
@@ -152,11 +155,17 @@ public class TokenCollection {
          * pick specific shares for guest users with base tokens and paths
          */
         for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
-            List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, entry.getKey().getUserID(), parameters);
+            int guestID = entry.getKey().getUserID();
+            List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, guestID, parameters);
+            Map<PersonalizedShareTarget, Share> personalizedTargets = new HashMap<>(sharesForGuest.size() * 2);
+            for (Share share : sharesForGuest) {
+                personalizedTargets.put(moduleSupport.personalizeTarget(share.getTarget(), contextID, guestID), share);
+            }
+
             for (String path : entry.getValue()) {
-                for (Share share : sharesForGuest) {
-                    if (null != share.getTarget() && path.equals(share.getTarget().getPath())) {
-                        shares.add(share);
+                for (PersonalizedShareTarget personalizedTarget : personalizedTargets.keySet()) {
+                    if (path.equals(personalizedTarget.getPath())) {
+                        shares.add(personalizedTargets.get(personalizedTarget));
                         break;
                     }
                 }

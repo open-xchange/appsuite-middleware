@@ -58,6 +58,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -108,7 +109,7 @@ public class ShareServlet extends AbstractShareServlet {
             request.getSession(true);
 
             // Extract share from path info
-            ShareTarget target;
+            PersonalizedShareTarget target;
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
@@ -126,7 +127,7 @@ public class ShareServlet extends AbstractShareServlet {
 
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
                 if (1 < paths.length) {
-                    target = share.resolveTarget(paths[1]);
+                    target = share.resolvePersonalizedTarget(paths[1]);
                     if (null == target) {
                         //TODO: fallback to share without target?
                         LOG.debug("Share target '{}' not found in share '{}' at '{}'", paths[1], paths[0], pathInfo);
@@ -173,7 +174,7 @@ public class ShareServlet extends AbstractShareServlet {
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
      */
-    private boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private boolean handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
             ShareHandlerReply reply = handler.handle(share, target, request, response);
             if (ShareHandlerReply.NEUTRAL != reply) {

@@ -69,13 +69,6 @@ public interface GuestShare {
     GuestInfo getGuest();
 
     /**
-     * Gets the (absolute) token for one of the guest share's targets, i.e. the base token plus the target path.
-     *
-     * @return The token
-     */
-    String getToken(ShareTarget target);
-
-    /**
      * Gets a list of all share targets the guest has access to.
      *
      * @return The share targets
@@ -97,12 +90,20 @@ public interface GuestShare {
     String getCommonFolder();
 
     /**
-     * Resolves a contained share target based on the supplied relative path info.
+     * Resolves a contained personalized share target based on the supplied relative path info.
      *
      * @param path The share-relative path to the target
      * @return The target, or <code>null</code> if not found
      */
-    ShareTarget resolveTarget(String path);
+    PersonalizedShareTarget resolvePersonalizedTarget(String path);
+
+    /**
+     * Resolves the passed personalized target to the according generic target.
+     *
+     * @param personalizedTarget The personalized target
+     * @return The generic target
+     */
+    ShareTarget resolveTarget(PersonalizedShareTarget personalizedTarget);
 
     /**
      * Gets a value indicating whether this guest share holds more than one share target or not.

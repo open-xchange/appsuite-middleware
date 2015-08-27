@@ -66,6 +66,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -164,7 +165,17 @@ public class PermissionResolver {
      * @return The share, or <code>null</code> if not found
      */
     public ShareInfo getShare(File file, int guestID) {
-        return getShare(FolderObject.INFOSTORE, file.getFolderId(), file.getId(), guestID);
+        String folderId;
+        String fileId;
+        if (file instanceof UserizedFile) {
+            UserizedFile uFile = (UserizedFile) file;
+            fileId = uFile.getOriginalId();
+            folderId = uFile.getOriginalFolderId();
+        } else {
+            fileId = file.getId();
+            folderId = file.getFolderId();
+        }
+        return getShare(FolderObject.INFOSTORE, folderId, fileId, guestID);
     }
 
     /**

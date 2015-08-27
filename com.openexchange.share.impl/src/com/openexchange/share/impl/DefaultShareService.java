@@ -93,6 +93,7 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
@@ -163,19 +164,12 @@ public class DefaultShareService implements ShareService {
         shareToken.verifyGuest(contextID, guest);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
-        return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, true);
-    }
-
-    @Override
-    public ShareInfo getShare(Session session, String token, String path) throws OXException {
-        List<ShareInfo> shareInfos = getShares(session, token);
-        for (ShareInfo shareInfo : shareInfos) {
-            ShareTarget target = shareInfo.getShare().getTarget();
-            if (null != target && path.equals(target.getPath())) {
-                return shareInfo;
-            }
+        List<PersonalizedShareTarget> personalizedTargets = new ArrayList<>(shares.size());
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        for (Share share : shares) {
+            personalizedTargets.add(moduleSupport.personalizeTarget(share.getTarget(), contextID, guest.getId()));
         }
-        return null;
+        return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, personalizedTargets);
     }
 
     @Override
@@ -185,7 +179,8 @@ public class DefaultShareService implements ShareService {
         }
         GuestShare share = resolveToken(token);
         GuestInfo guest = resolveGuest(token);
-        ShareTarget target = share.resolveTarget(path);
+        PersonalizedShareTarget personalizedTarget = share.resolvePersonalizedTarget(path);
+        ShareTarget target = share.resolveTarget(personalizedTarget);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(share.getGuest().getContextID(), target.getModule(), target.getFolder(), target.getItem(), StorageParameters.NO_PARAMETERS);
         for (Share s : shares) {
             if (s.getCreatedBy() != guest.getCreatedBy() || s.getGuest() != guest.getGuestID() || !share.getGuest().equals(guest)) {
@@ -331,7 +326,10 @@ public class DefaultShareService implements ShareService {
             Share updatedShare = updateShare(connectionHelper, session, share, clientTimestamp);
             User guest = services.getService(UserService.class).getUser(connectionHelper.getConnection(), share.getGuest(), utils.getContext(session));
             connectionHelper.commit();
-            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, false);
+
+            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), session.getContextId(), session.getUserId());
+            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, personalizedTarget);
         } finally {
             connectionHelper.finish();
         }
@@ -353,7 +351,10 @@ public class DefaultShareService implements ShareService {
             if (guestUserUpdated) {
                 utils.requireService(UserService.class).invalidateUser(context, guest.getId());
             }
-            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, false);
+
+            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), session.getContextId(), session.getUserId());
+            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, personalizedTarget);
         } finally {
             connectionHelper.finish();
         }
@@ -677,7 +678,7 @@ public class DefaultShareService implements ShareService {
             /*
              * implicitly adjust share targets if the session's user is the guest himself
              */
-            return createShareInfos(services, contextID, shares, true);
+            return createShareInfos(services, contextID, shares);
         }
         /*
          * filter share targets not accessible for the session's user before returning results
@@ -687,7 +688,7 @@ public class DefaultShareService implements ShareService {
         if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
             shares = removeInaccessible(session, shares);
         }
-        return createShareInfos(services, contextID, shares, false);
+        return createShareInfos(services, contextID, shares);
     }
 
     /**
@@ -951,6 +952,7 @@ public class DefaultShareService implements ShareService {
      */
     private ShareInfo prepareShare(ConnectionHelper connectionHelper, User sharingUser, ShareRecipient recipient, ShareTarget target, Map<String, Object> meta) throws OXException {
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         ShareInfo shareInfo;
         if (RecipientType.GROUP.equals(recipient.getType())) {
             /*
@@ -958,7 +960,15 @@ public class DefaultShareService implements ShareService {
              */
             Group group = services.getService(GroupService.class).getGroup(context, ((InternalRecipient) recipient).getEntity());
             Share share = utils.prepareShare(context.getContextId(), sharingUser, group.getIdentifier(), target, null);
-            shareInfo = new InternalGroupShareInfo(context.getContextId(), group, share);
+            int[] members = group.getMember();
+            PersonalizedShareTarget personalizedTarget;
+            if (members.length > 0) {
+                personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), context.getContextId(), members[0]);
+            } else {
+                // TODO: probably wrong, but what else could we do here?
+                personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), context.getContextId(), sharingUser.getId());
+            }
+            shareInfo = new InternalGroupShareInfo(context.getContextId(), group, share, personalizedTarget);
         } else {
             /*
              * prepare guest or internal user shares for other recipient types
@@ -967,11 +977,12 @@ public class DefaultShareService implements ShareService {
             User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
             Date expiry = RecipientType.ANONYMOUS.equals(recipient.getType()) ? ((AnonymousRecipient) recipient).getExpiryDate() : null;
             Share share = utils.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, expiry);
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), context.getContextId(), guestUser.getId());
             if (false == guestUser.isGuest()) {
-                shareInfo = new InternalUserShareInfo(context.getContextId(), guestUser, share);
+                shareInfo = new InternalUserShareInfo(context.getContextId(), guestUser, share, personalizedTarget);
             } else {
                 share.setMeta(meta);
-                shareInfo = new DefaultShareInfo(services, context.getContextId(), guestUser, share, false);
+                shareInfo = new DefaultShareInfo(services, context.getContextId(), guestUser, share, personalizedTarget);
             }
         }
         return shareInfo;

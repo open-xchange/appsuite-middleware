@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tx.ConnectionHolder;
@@ -156,16 +158,8 @@ public class FileStorageHandler implements ModuleHandler {
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
-        IDBasedFileAccess fileAccess = getFileAccess(session);
-        try {
-            fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-            return true;
-        } catch (OXException e) {
-            if ("IFO-0400".equals(e.getErrorCode())) { // InfostoreExceptionCodes.NO_READ_PERMISSION
-                return false;
-            }
-            throw e;
-        }
+        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
+        return getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), session.getUserId());
     }
 
     @Override
@@ -174,16 +168,14 @@ public class FileStorageHandler implements ModuleHandler {
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
-        IDBasedFileAccess fileAccess = getFileAccess(session);
-        try {
-            File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
+        IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
+        if (administrativeFileAccess.canRead(fileID.toUniqueID(), session.getUserId())) {
+            File file = administrativeFileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
             return file.isShareable();
-        } catch (OXException e) {
-            if ("IFO-0400".equals(e.getErrorCode())) { // InfostoreExceptionCodes.NO_READ_PERMISSION
-                return false;
-            }
-            throw e;
         }
+
+        return false;
     }
 
     @Override
@@ -192,7 +184,8 @@ public class FileStorageHandler implements ModuleHandler {
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
-        return getFileAccess(session).exists(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
+        return getAdministrativeFileAccess(context).exists(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
     }
 
     @Override
@@ -247,30 +240,10 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException {
-        if (null != target && false == target.isFolder()) {
-            /*
-             * access the folder of file targets based on guest flag
-             */
-            String sharedFilesFolder = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-            if (isGuest) {
-                if (false == sharedFilesFolder.equals(target.getFolder())) {
-                    /*
-                     * adjust file target to point to the virtual shared files folder
-                     */
-                    FileID fileID = new FileID(target.getItem());
-                    fileID.setFolderId(sharedFilesFolder);
-                    String adjustedItem = fileID.toUniqueID();
-                    return new AdjustedShareTarget(target, sharedFilesFolder, adjustedItem);
-                }
-            } else if (AdjustedShareTarget.class.isInstance(target) ) {
-                /*
-                 * re-adjust file target to the original folder for non-guests
-                 */
-                return ((AdjustedShareTarget) target).getOriginalTarget();
-            }
-        }
-        return target;
+    public PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException {
+        FileID fileID = new FileID(target.getItem());
+        fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        return new PersonalizedShareTarget(target.getModule(), target.getFolder(), fileID.toUniqueID());
     }
 
     private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {

@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.PersonalizedShareTarget;
 
 /**
  * {@link ShareHandler}
@@ -88,6 +88,6 @@ public interface ShareHandler {
      * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
      * @throws OXException If the attempt to resolve given share fails
      */
-    ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }
