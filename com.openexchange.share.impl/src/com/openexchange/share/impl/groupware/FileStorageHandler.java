@@ -243,7 +243,9 @@ public class FileStorageHandler implements ModuleHandler {
     public PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException {
         FileID fileID = new FileID(target.getItem());
         fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        return new PersonalizedShareTarget(target.getModule(), target.getFolder(), fileID.toUniqueID());
+        FolderID folderID = new FolderID(target.getFolder());
+        folderID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        return new PersonalizedShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());
     }
 
     private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {

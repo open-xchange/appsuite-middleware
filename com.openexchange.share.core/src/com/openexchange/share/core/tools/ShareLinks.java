@@ -111,7 +111,7 @@ public class ShareLinks {
         String item = target.getItem();
         StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
         if (Strings.isNotEmpty(item)) {
-            fragment.append("&item=").append(item);
+            fragment.append("&id=").append(item);
         }
 
         return prepare(hostData)

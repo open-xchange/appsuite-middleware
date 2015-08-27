@@ -61,12 +61,13 @@ import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 
 /**
- * Share links are broken - a link like https://ox.example.com/appsuite/ui#!&app=io.ox/files&folder=10&item=1234/9876
+ * Share links are broken - a link like https://ox.example.com/appsuite/ui#!&app=io.ox/files&folder=10&id=1234/9876
  * was generated. The item parameter is broken in terms of the included folder ID, "10/9876" would be the correct value.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -85,15 +86,16 @@ public class Bug40527Test extends ShareTest {
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
             File file = insertSharedFile(folder.getObjectID(), randomUID(), sharePermission);
             String invitationLink = discoverInvitationLink(client, shareClient.getValues().getDefaultAddress());
-            Assert.assertNotNull(invitationLink);
+            Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
-            Assert.assertTrue(folderMatcher.find());
+            Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
             Assert.assertEquals("10", folderMatcher.group(1));
-            Matcher fileMatcher = Pattern.compile("item=([0-9]+/[0-9]+)").matcher(fragmentParams);
-            Assert.assertTrue(fileMatcher.find());
-            Assert.assertEquals("10/" + file.getId(), folderMatcher.group(1));
-            System.out.println(fragmentParams);
+            Matcher fileMatcher = Pattern.compile("id=([0-9]+/[0-9]+)").matcher(fragmentParams);
+            Assert.assertTrue("ID param missing in fragment", fileMatcher.find());
+            FileID fileID = new FileID(file.getId());
+            fileID.setFolderId("10");
+            Assert.assertEquals(fileID.toUniqueID(), fileMatcher.group(1));
         } finally {
             shareClient.logout();
         }
@@ -108,15 +110,16 @@ public class Bug40527Test extends ShareTest {
             updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
             String invitationLink = discoverInvitationLink(client, shareClient.getValues().getDefaultAddress());
-            Assert.assertNotNull(invitationLink);
+            Assert.assertNotNull("Invitation link not found", invitationLink);
             String fragmentParams = new URI(invitationLink).getRawFragment();
             Matcher folderMatcher = Pattern.compile("folder=([0-9]+)").matcher(fragmentParams);
-            Assert.assertTrue(folderMatcher.find());
+            Assert.assertTrue("Folder param missing in fragment", folderMatcher.find());
             Assert.assertEquals("10", folderMatcher.group(1));
-            Matcher fileMatcher = Pattern.compile("item=([0-9]+/[0-9]+)").matcher(fragmentParams);
-            Assert.assertTrue(fileMatcher.find());
-            Assert.assertEquals("10/" + file.getId(), folderMatcher.group(1));
-            System.out.println(fragmentParams);
+            Matcher fileMatcher = Pattern.compile("id=([0-9]+/[0-9]+)").matcher(fragmentParams);
+            Assert.assertTrue("ID param missing in fragment", fileMatcher.find());
+            FileID fileID = new FileID(file.getId());
+            fileID.setFolderId("10");
+            Assert.assertEquals(fileID.toUniqueID(), fileMatcher.group(1));
         } finally {
             shareClient.logout();
         }
