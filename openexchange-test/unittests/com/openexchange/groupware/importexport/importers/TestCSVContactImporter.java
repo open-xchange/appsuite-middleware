@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.importexport.importers;
+package com.openexchange.groupware.importexport.importers;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
+import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 

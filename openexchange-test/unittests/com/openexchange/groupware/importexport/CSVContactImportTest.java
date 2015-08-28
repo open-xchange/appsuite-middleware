@@ -59,15 +59,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.TestCSVContactImporter;
+import junit.framework.JUnit4TestAdapter;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>

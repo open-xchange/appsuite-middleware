@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -66,12 +65,13 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
 import com.openexchange.importexport.exporters.CSVContactExporter;
 import com.openexchange.importexport.exporters.Exporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.importexport.importers.TestCSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
+import junit.framework.JUnit4TestAdapter;
 
 
 public class CSVContactExportTest extends AbstractContactTest {
