@@ -126,7 +126,6 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         private final int time2live;
         private final AtomicReference<File> tmpDirReference;
         private final FileFilter defaultPrefixFilter;
-        private final Map<String, File> existentFiles;
         private Set<String> pFiles;
 
         /**
@@ -138,7 +137,6 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             pFiles = processing;
             this.time2live = time2live;
             this.tmpDirReference = tmpDirReference;
-            existentFiles = new HashMap<String, File>(256, 0.9f);
             defaultPrefixFilter = new FileFilter() {
 
                 @Override
@@ -153,8 +151,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         public void run() {
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
-                Map<String, File> existentFiles = this.existentFiles;
-                existentFiles.clear();
+                Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
                 File directory = tmpDirReference.get();
                 if (!directory.canRead()) {
                     logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
