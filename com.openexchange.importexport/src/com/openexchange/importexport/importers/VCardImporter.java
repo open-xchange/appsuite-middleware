@@ -63,7 +63,6 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
@@ -126,8 +125,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
             // check format of folder
             if (fo.getModule() == FolderObject.CONTACT) {
-                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                        session.getContext()).hasContact()) {
+                if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()).hasContact()) {
                     return false;
                 }
             } else {
@@ -136,8 +134,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             // check read access to folder
             EffectivePermission perm;
             try {
-                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance()
-                        .getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                perm = fo.getEffectiveUserPermission(session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
             } catch (final OXException e) {
                 throw ImportExportExceptionCodes.NO_DATABASE_CONNECTION.create(e);
             } catch (final RuntimeException e) {
@@ -155,8 +152,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
     Logger myLog = LoggerFactory.getLogger("MyLog");
 
     @Override
-    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is,
-            final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
+    public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
 
         int contactFolderId = -1;
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
@@ -198,17 +194,14 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                 if (limit <= 0 || count <= limit) {
                     try (VCardImport vCardImport = importVCards.next()) {
                         if (vCardImport.getWarnings() != null && vCardImport.getWarnings().size() > 0) {
-                            List<ConversionWarning> warnings = new ArrayList<ConversionWarning>(vCardImport.getWarnings().size());
-                            for (OXException oxe : vCardImport.getWarnings()) {
-                                warnings.add(new ConversionWarning(count, oxe));
-                            }
-                            importResult.addWarnings(warnings);
+                            // just take the first warning and add it as exception (even when it is a warning and there might be more)
+                            // TODO correct and consistent handling of 'warnings' and 'exceptions' for all ContactImporter
+                            importResult.setException(vCardImport.getWarnings().get(0));
                         }
                         Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
                         importResult.setDate(new Date());
                         try {
-                            //myLog.debug(Streams.stream2string(vCardImport.getVCard().getStream(), "UTF-8"));
                             super.createContact(session, contactObj, Integer.toString(contactFolderId), vCardImport.getVCard());
                             count++;
                         } catch (final OXException oxEx) {
