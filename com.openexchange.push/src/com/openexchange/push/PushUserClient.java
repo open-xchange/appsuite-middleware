@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,80 +47,112 @@
  *
  */
 
-package com.openexchange.push.console;
-
-import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.cli.OutputHelper;
-import com.openexchange.push.mbean.PushMBean;
-
+package com.openexchange.push;
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link PushUserClient} - The push user client.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
+public class PushUserClient implements Comparable<PushUserClient> {
 
-    public static void main(String[] args) {
-        new ListPushUsers().execute(args);
+    private final PushUser pushUser;
+    private final String client;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link PushUserClient}.
+     *
+     * @param pushUser The associated push user
+     * @param client The identifier of the associated client
+     */
+    public PushUserClient(PushUser pushUser, String client) {
+        super();
+        this.pushUser = pushUser;
+        this.client = client;
+
+        int prime = 31;
+        int result = prime * 1 + ((client == null) ? 0 : client.hashCode());
+        result = prime * result + ((pushUser == null) ? 0 : pushUser.hashCode());
+        hash = result;
     }
 
     /**
-     * Initializes a new {@link ListPushUsers}.
+     * Gets the push user
+     *
+     * @return The push user
      */
-    public ListPushUsers() {
-        super();
+    public PushUser getPushUser() {
+        return pushUser;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return pushUser.getUserId();
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return pushUser.getContextId();
+    }
+
+    /**
+     * Gets the client
+     *
+     * @return The client
+     */
+    public String getClient() {
+        return client;
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+    public int compareTo(PushUserClient o) {
+        return pushUser.compareTo(o.pushUser);
     }
 
     @Override
-    protected void addOptions(Options options) {
-        // Nothing
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
-
-        List<List<String>> data = pushMBean.listPushUsers();
-        if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
-        } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-
-        return null;
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // Nothing
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
+        if (!(obj instanceof PushUserClient)) {
+            return false;
+        }
+        PushUserClient other = (PushUserClient) obj;
+        if (pushUser == null) {
+            if (other.pushUser != null) {
+                return false;
+            }
+        } else if (!pushUser.equals(other.pushUser)) {
+            return false;
+        }
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
         return true;
     }
 
     @Override
-    protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
-    }
-
-    @Override
-    protected String getName() {
-        return "listpushusers";
+    public String toString() {
+        return new StringBuilder(48).append("[userId=").append(pushUser.getUserId()).append(", contextId=").append(pushUser.getContextId()).append(", client=").append(client).append(']').toString();
     }
 
 }

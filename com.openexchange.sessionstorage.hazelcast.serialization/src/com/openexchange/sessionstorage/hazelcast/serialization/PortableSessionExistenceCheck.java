@@ -47,80 +47,88 @@
  *
  */
 
-package com.openexchange.push.console;
+package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.cli.OutputHelper;
-import com.openexchange.push.mbean.PushMBean;
-
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link PortableSessionExistenceCheck}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
+public class PortableSessionExistenceCheck extends AbstractCustomPortable implements Callable<Boolean> {
 
-    public static void main(String[] args) {
-        new ListPushUsers().execute(args);
-    }
+    private static final AtomicReference<SessiondService> SERVICE_REFERENCE = new AtomicReference<SessiondService>();
 
     /**
-     * Initializes a new {@link ListPushUsers}.
+     * Sets the service reference
+     *
+     * @param service The service reference or <code>null</code>
      */
-    public ListPushUsers() {
+    public static void setSessiondServiceReference(SessiondService service) {
+        SERVICE_REFERENCE.set(service);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    /** The unique portable class ID of the {@link PortableSessionExistenceCheck} */
+    public static final int CLASS_ID = 400;
+
+    private static final String FIELD_ID = "id";
+
+    private String id;
+
+    /**
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     */
+    public PortableSessionExistenceCheck() {
         super();
     }
 
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+    /**
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     *
+     * @param id The associated session identifier
+     */
+    public PortableSessionExistenceCheck(String id) {
+        super();
+        this.id = id;
     }
 
     @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
-
-        List<List<String>> data = pushMBean.listPushUsers();
-        if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
-        } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
+    public Boolean call() throws Exception {
+        SessiondService service = SERVICE_REFERENCE.get();
+        if (null == service) {
+            return Boolean.FALSE;
         }
 
-        return null;
+        if (service instanceof SessiondServiceExtended) {
+            return Boolean.valueOf(((SessiondServiceExtended) service).getSession(id, false) != null);
+        }
+
+        return Boolean.valueOf(service.getSession(id) != null);
     }
 
     @Override
-    protected void checkOptions(CommandLine cmd) {
-        // Nothing
+    public int getClassId() {
+        return CLASS_ID;
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(FIELD_ID, id);
     }
 
     @Override
-    protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
-    }
-
-    @Override
-    protected String getName() {
-        return "listpushusers";
+    public void readPortable(PortableReader reader) throws IOException {
+        this.id = reader.readUTF(FIELD_ID);
     }
 
 }

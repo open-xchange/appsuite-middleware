@@ -86,7 +86,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushManagerService.class);
 
     private static enum StopResult {
-        NONE, RECONNECTED, STOPPED;
+        NONE, RECONNECTED, RECONNECTED_AS_PERMANENT, STOPPED;
     }
 
     private static volatile ImapIdlePushManagerService instance;
@@ -129,7 +129,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.accountId = accountId;
         this.clusterLock = clusterLock;
         this.services = services;
-        listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512);
+        listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512, 0.9f, 1);
     }
 
     @Override
@@ -305,6 +305,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         case RECONNECTED:
             LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
             return true;
+        case RECONNECTED_AS_PERMANENT:
+            LOGGER.info("Reconnected as permanent IMAP-IDLE listener for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
+            return true;
         case STOPPED:
             LOGGER.info("Stopped IMAP-IDLE listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID());
             return true;
@@ -338,7 +341,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
                 boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
                 boolean reconnected = listener.cancel(tryRecon);
-                return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
+                if (!reconnected) {
+                    return StopResult.STOPPED;
+                }
+
+                ImapIdlePushListener newListener = listeners.get(key);
+                return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
         }
@@ -395,6 +403,16 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             for (Session session : sessions) {
                 if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
                     return injectAnotherListenerUsing(session, false).injectedPushListener;
+                }
+            }
+
+            // Look-up remote sessions, too, if possible
+            if (sessiondService instanceof SessiondServiceExtended) {
+                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
+                for (Session session : sessions) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                        return injectAnotherListenerUsing(session, false).injectedPushListener;
+                    }
                 }
             }
 

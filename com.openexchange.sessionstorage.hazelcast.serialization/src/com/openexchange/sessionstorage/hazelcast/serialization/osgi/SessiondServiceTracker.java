@@ -47,80 +47,46 @@
  *
  */
 
-package com.openexchange.push.console;
+package com.openexchange.sessionstorage.hazelcast.serialization.osgi;
 
-import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.cli.OutputHelper;
-import com.openexchange.push.mbean.PushMBean;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp;
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link SessiondServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
+class SessiondServiceTracker implements ServiceTrackerCustomizer<SessiondService, SessiondService> {
 
-    public static void main(String[] args) {
-        new ListPushUsers().execute(args);
-    }
+    private final BundleContext context;
 
-    /**
-     * Initializes a new {@link ListPushUsers}.
-     */
-    public ListPushUsers() {
-        super();
+    SessiondServiceTracker(BundleContext context) {
+        this.context = context;
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+    public void removedService(ServiceReference<SessiondService> reference, SessiondService service) {
+        PortableSessionRemoteLookUp.setSessiondServiceReference(null);
+        PortableSessionExistenceCheck.setSessiondServiceReference(null);
+        context.ungetService(reference);
     }
 
     @Override
-    protected void addOptions(Options options) {
-        // Nothing
+    public void modifiedService(ServiceReference<SessiondService> reference, SessiondService service) {
+        // Ignore
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
-
-        List<List<String>> data = pushMBean.listPushUsers();
-        if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
-        } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
-        }
-
-        return null;
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // Nothing
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
-    }
-
-    @Override
-    protected String getName() {
-        return "listpushusers";
+    public SessiondService addingService(ServiceReference<SessiondService> reference) {
+        SessiondService service = context.getService(reference);
+        PortableSessionExistenceCheck.setSessiondServiceReference(service);
+        PortableSessionRemoteLookUp.setSessiondServiceReference(service);
+        return service;
     }
 
 }

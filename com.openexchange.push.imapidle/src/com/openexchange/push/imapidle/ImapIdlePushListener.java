@@ -81,6 +81,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -201,8 +202,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final AtomicBoolean canceled;
     private final boolean permanent;
     private volatile IMAPFolder imapFolderInUse;
-    private volatile long lastLockRefreshNanos;
     private volatile Map<String, Object> additionalProps;
+    private volatile long lastLockRefreshNanos;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -217,8 +218,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.delayNanos = TimeUnit.MILLISECONDS.toNanos(delay <= 0 ? 5000L : delay);
         this.services = services;
         this.pushMode = pushMode;
-        lastLockRefreshNanos = System.nanoTime();
         additionalProps = null;
+        lastLockRefreshNanos = System.nanoTime();
     }
 
     private boolean isUserValid() {
@@ -484,7 +485,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @throws InterruptedException If idle'ing thread has been interrupted
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
-    private boolean doImapIdleTimeoutAware(final IMAPFolder imapFolder) throws InterruptedException, MessagingException {
+    private boolean doImapIdleTimeoutAware(IMAPFolder imapFolder) throws InterruptedException, MessagingException {
         Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
         try {
             f.get(TIMEOUT_THRESHOLD_NANOS, TimeUnit.NANOSECONDS);
@@ -619,6 +620,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         if ("DBP".equals(e.getPrefix())) {
             throw e;
+        }
+        if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+            Throwable cause = null == e.getCause() ? e : e.getCause();
+            throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
         }
     }
 

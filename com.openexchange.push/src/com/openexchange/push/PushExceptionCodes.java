@@ -97,7 +97,11 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Starting a permanent push listener is not supported.
      */
-    PERMANENT_NOT_SUPPORTED("Starting a permanent push listener is not supported.", Category.CATEGORY_CONFIGURATION, 9, null)
+    PERMANENT_NOT_SUPPORTED("Starting a permanent push listener is not supported.", Category.CATEGORY_CONFIGURATION, 9, null),
+    /**
+     * Authentication error.
+     */
+    AUTHENTICATION_ERROR("Authentication error.", Category.CATEGORY_PERMISSION_DENIED, 10, null)
     ;
 
     /** The exception code prefix */

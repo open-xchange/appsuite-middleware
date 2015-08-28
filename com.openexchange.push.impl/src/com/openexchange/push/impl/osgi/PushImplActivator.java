@@ -80,14 +80,17 @@ import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwnerFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropAllPermanentListenerCallableFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallableFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallableFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
 import com.openexchange.push.impl.mbean.PushMBeanImpl;
 import com.openexchange.push.mbean.PushMBean;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -109,7 +112,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class };
     }
 
     @Override
@@ -133,6 +136,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
+            trackService(HazelcastInstance.class);
 
             // Track management service & register MBean
             {
@@ -174,12 +178,15 @@ public final class PushImplActivator extends HousekeepingActivator  {
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
 
+            // Register portables
+            registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
+            registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableOwnerFactory());
+            registerService(CustomPortableFactory.class, new PortableDropAllPermanentListenerCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableStartPermanentListenerCallableFactory());
+
             if (pushManagerRegistry.isPermanentPushAllowed()) {
-                // Register portable
-                registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
-                registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
-                registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
-                registerService(CustomPortableFactory.class, new PortableOwnerFactory());
 
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
@@ -190,7 +197,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
                 } else {
-                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
                 }
             }
 
