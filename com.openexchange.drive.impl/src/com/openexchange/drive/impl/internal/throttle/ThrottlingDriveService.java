@@ -69,11 +69,8 @@ import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
-import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -185,17 +182,6 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
         return delegate.addShare(session, target, recipient, meta);
-    }
-
-    @Override
-    public void updateFile(DriveSession session, String path, FileVersion fileVersion, File metadata, UpdateParameters parameters) throws OXException {
-        delegate.updateFile(session, path, fileVersion, metadata, parameters);
-
-    }
-
-    @Override
-    public void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, FileStorageFolder metadata, UpdateParameters parameters) throws OXException {
-        delegate.updateDirectory(session, directoryVersion, metadata, parameters);
     }
 
     private void enterSyncOperation() throws OXException {

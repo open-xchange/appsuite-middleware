@@ -49,10 +49,6 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,16 +57,7 @@ import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.json.JsonDirectoryVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFileStorageFolder;
-import com.openexchange.file.storage.DefaultFileStorageGuestPermission;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.TimeZones;
-import com.openexchange.share.core.tools.ShareTool;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -94,14 +81,14 @@ public class UpdateFolderAction extends AbstractDriveAction {
         if (Strings.isEmpty(checksum)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
         }
+
         JSONObject json = (JSONObject) requestData.requireData();
-        DefaultFileStorageFolder metadata = new DefaultFileStorageFolder();
         UpdateParameters parameters = new UpdateParameters();
+        JSONObject jsonFolder;
         try {
-            JSONObject jsonFolder = json.getJSONObject("folder");
-            JSONArray jsonPermissions = jsonFolder.optJSONArray("permissions");
-            if (null != jsonPermissions) {
-                metadata.setPermissions(parsePermission(jsonPermissions, TimeZones.UTC));
+            jsonFolder = json.getJSONObject("folder");
+            if (null == jsonFolder) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
             }
             JSONObject jsonNotification = json.optJSONObject("notification");
             if (null != jsonNotification) {
@@ -114,76 +101,12 @@ public class UpdateFolderAction extends AbstractDriveAction {
         /*
          * update the directory, return empty result in case of success
          */
-        getDriveService().updateDirectory(session, new JsonDirectoryVersion(checksum, path), metadata, parameters);
+        getDriveService().getUtility().updateDirectory(session, new JsonDirectoryVersion(checksum, path), jsonFolder, parameters);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
         if (null != result.getWarnings()) {
             result.addWarnings(parameters.getWarnings());
         }
         return result;
-    }
-
-    /**
-     * Parses the permissions from the supplied JSON array.
-     *
-     * @param jsonPermissions The JSON permissions
-     * @param timeZone The timezone to consider
-     * @return The parsed permissions
-     */
-    private static List<FileStoragePermission> parsePermission(JSONArray jsonPermissions, TimeZone timeZone) throws OXException, JSONException {
-        List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>();
-        for (int i = 0; i < jsonPermissions.length(); i++) {
-            permissions.add(parsePermission(jsonPermissions.getJSONObject(i), timeZone));
-        }
-        return permissions;
-    }
-
-    /**
-     * Parses a single permission from JSON.
-     *
-     * @param jsonObject The JSON object to parse
-     * @param timeZone The timezone to use
-     * @return The parsed permission
-     */
-    private static FileStoragePermission parsePermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
-        DefaultFileStoragePermission permission;
-        /*
-         * check for external guest permissions
-         */
-        RecipientType type = Enums.parse(RecipientType.class, jsonObject.optString("type"), null);
-        if (null != type && (RecipientType.ANONYMOUS == type || RecipientType.GUEST == type)) {
-            /*
-             * parse as guest permission entity
-             */
-            DefaultFileStorageGuestPermission guestPermission = new DefaultFileStorageGuestPermission();
-            guestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
-            permission = guestPermission;
-        } else {
-            /*
-             * parse as already known permission entity
-             */
-            permission = DefaultFileStoragePermission.newInstance();
-            if (false == jsonObject.has("entity")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entity");
-            }
-            permission.setEntity(jsonObject.getInt("entity"));
-            if (false == jsonObject.has("group")) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("group");
-            }
-            permission.setGroup(jsonObject.getBoolean("group"));
-        }
-        /*
-         * apply common properties
-         */
-        if (false == jsonObject.hasAndNotNull("bits")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("bits");
-        }
-        int[] permissionBits = Permissions.parsePermissionBits(jsonObject.getInt("bits"));
-        permission.setFolderPermission(permissionBits[0]);
-        permission.setReadPermission(permissionBits[1]);
-        permission.setWritePermission(permissionBits[2]);
-        permission.setDeletePermission(permissionBits[3]);
-        permission.setAdmin(permissionBits[4] > 0 ? true : false);
-        return permission;
     }
 
 }

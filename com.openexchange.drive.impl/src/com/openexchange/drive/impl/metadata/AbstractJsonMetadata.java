@@ -61,9 +61,7 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.java.Strings;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.core.tools.ShareTool;
 
 /**
  * {@link AbstractJsonMetadata}
@@ -93,26 +91,26 @@ public abstract class AbstractJsonMetadata  {
      * @param group <code>true</code> if the entity points to a group, <code>false</code>, otherwise
      * @return The JSON object
      */
-    protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
-        jsonObject.put("entity", entity);
-        if (group) {
-            Group resolvedGroup = session.getPermissionResolver().getGroup(entity);
-            jsonObject.put("display_name", resolvedGroup.getDisplayName());
-            jsonObject.put("type", "group");
-        } else {
-            User user = session.getPermissionResolver().getUser(entity);
-            jsonObject.put("display_name", user.getDisplayName());
-            if (false == Strings.isEmpty(user.getMail())) {
-                jsonObject.put("email_address", user.getMail());
-            }
-            if (user.isGuest()) {
-                jsonObject.put("type", ShareTool.isAnonymousGuest(user) ? "anonymous" : "guest");
-            } else {
-                jsonObject.put("type", "user");
-            }
-        }
-        return jsonObject;
-    }
+//    protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
+//        jsonObject.put("entity", entity);
+//        if (group) {
+//            Group resolvedGroup = session.getPermissionResolver().getGroup(entity);
+//            jsonObject.put("display_name", resolvedGroup.getDisplayName());
+//            jsonObject.put("type", "group");
+//        } else {
+//            User user = session.getPermissionResolver().getUser(entity);
+//            jsonObject.put("display_name", user.getDisplayName());
+//            if (false == Strings.isEmpty(user.getMail())) {
+//                jsonObject.put("email_address", user.getMail());
+//            }
+//            if (user.isGuest()) {
+//                jsonObject.put("type", ShareTool.isAnonymousGuest(user) ? "anonymous" : "guest");
+//            } else {
+//                jsonObject.put("type", "user");
+//            }
+//        }
+//        return jsonObject;
+//    }
 
     protected void addGroupInfo(JSONObject jsonObject, Group group) throws JSONException {
         if (null != group) {

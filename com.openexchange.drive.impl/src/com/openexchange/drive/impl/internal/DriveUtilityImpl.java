@@ -59,23 +59,35 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveUtility;
+import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
+import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
+import com.openexchange.drive.impl.metadata.DirectoryMetadataParser;
+import com.openexchange.drive.impl.metadata.FileMetadataParser;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.drive.impl.metadata.JsonFileMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Reference;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.Entities;
 
 /**
  * {@link DriveUtilityImpl}
@@ -184,6 +196,133 @@ public class DriveUtilityImpl implements DriveUtility {
         });
     }
 
+    @Override
+    public JSONObject getFileMetadata(DriveSession session, final String path, final FileVersion fileVersion) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        return syncSession.getStorage().wrapInTransaction(new StorageOperation<JSONObject>() {
+
+            @Override
+            public JSONObject call() throws OXException {
+                try {
+                    return getFileMetadata(syncSession, path, fileVersion);
+                } catch (JSONException e) {
+                    throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public JSONObject getDirectoryMetadata(DriveSession session, final DirectoryVersion directoryVersion) throws OXException {
+        final SyncSession syncSession = new SyncSession(session);
+        return syncSession.getStorage().wrapInTransaction(new StorageOperation<JSONObject>() {
+
+            @Override
+            public JSONObject call() throws OXException {
+                try {
+                    return getDirectoryMetadata(syncSession, directoryVersion);
+                } catch (JSONException e) {
+                    throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException {
+        List<Field> fields = new ArrayList<Field>();
+        final File metadata = FileMetadataParser.parse(jsonObject, fields);
+        if (fields.isEmpty()) {
+            return;
+        }
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
+
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original file
+                 */
+                List<Field> fields = new ArrayList<Field>();
+                fields.addAll(DriveConstants.FILE_FIELDS);
+                fields.add(Field.OBJECT_PERMISSIONS);
+                File file = syncSession.getStorage().getFileByName(path, fileVersion.getName(), fields, true);
+                if (null == file || false == ChecksumProvider.matches(syncSession, file, fileVersion.getChecksum())) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                }
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                List<Field> updatedFields = Collections.singletonList(Field.OBJECT_PERMISSIONS);
+                DefaultFile updatedFile = new DefaultFile(file);
+                updatedFile.setObjectPermissions(metadata.getObjectPermissions());
+                String fileID = syncSession.getStorage().getFileAccess().saveFileMetadata(updatedFile, file.getSequenceNumber(), updatedFields);
+                /*
+                 * re-get updated file to determine added permissions as needed
+                 */
+                if (notify) {
+                    File reloadedFile = syncSession.getStorage().getFileAccess().getFileMetadata(fileID, FileStorageFileAccess.CURRENT_VERSION);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFile.getFolderId(), reloadedFile.getId()));
+                    return ShareHelper.getAddedPermissions(file, reloadedFile);
+                }
+                return null;
+            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
+        }
+    }
+
+    @Override
+    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException {
+        final FileStorageFolder folder = DirectoryMetadataParser.parse(jsonObject);
+        final SyncSession syncSession = new SyncSession(session);
+        final boolean notify = null != parameters.getNotificationTransport();
+        final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
+        Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
+
+            @Override
+            public Entities call() throws OXException {
+                /*
+                 * get the original directory version
+                 */
+                FileStorageFolder originalFolder = syncSession.getStorage().getFolder(directoryVersion.getPath());
+                ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, syncSession);
+                String folderID = serverVersion.getDirectoryChecksum().getFolderID().toString();
+                /*
+                 * apply new metadata (permissions only at the moment) & save
+                 */
+                DefaultFileStorageFolder updatedFolder = new DefaultFileStorageFolder();
+                updatedFolder.setPermissions(folder.getPermissions());
+                folderID = syncSession.getStorage().getFolderAccess().updateFolder(folderID, updatedFolder);
+                /*
+                 * re-get updated folder to determine added permissions as needed
+                 */
+                if (notify) {
+                    FileStorageFolder reloadedFolder = syncSession.getStorage().getFolderAccess().getFolder(folderID);
+                    targetReference.setValue(new ShareTarget(DriveConstants.FILES_MODULE, reloadedFolder.getId()));
+                    return ShareHelper.getAddedPermissions(originalFolder, reloadedFolder);
+                }
+                return null;
+            }
+        });
+        /*
+         * send notifications if needed
+         */
+        if (notify && null != entities && 0 < entities.size()) {
+            ShareHelper shareHelper = new ShareHelper(syncSession);
+            parameters.addWarnings(shareHelper.sendNotifications(
+                targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
+        }
+    }
+
     private JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
         List<Field> fields = new ArrayList<File.Field>();
@@ -221,6 +360,25 @@ public class DriveUtilityImpl implements DriveUtility {
             jsonArray.put(jsonObject);
         }
         return jsonArray;
+    }
+
+    private JSONObject getFileMetadata(SyncSession session, String path, FileVersion fileVersion) throws OXException, JSONException {
+        File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
+        if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
+            throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+        }
+        JSONObject jsonObject = new JsonFileMetadata(session, session.getStorage().getFile(file.getId())).build();
+        jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
+        jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+        return jsonObject;
+    }
+
+    private JSONObject getDirectoryMetadata(SyncSession session, DirectoryVersion directoryVersion) throws OXException, JSONException {
+        ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, session);
+        FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
+        JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
+        jsonObject.put("checksum", serverVersion.getChecksum());
+        return jsonObject;
     }
 
 }

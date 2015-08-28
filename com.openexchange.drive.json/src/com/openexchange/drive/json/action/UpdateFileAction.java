@@ -55,11 +55,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -89,10 +86,13 @@ public class UpdateFileAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
         }
         JSONObject json = (JSONObject) requestData.requireData();
-        File metadata;
+        JSONObject jsonFile;
         UpdateParameters parameters = new UpdateParameters();
         try {
-            metadata = Services.getService(FileMetadataParserService.class, true).parse(json.getJSONObject("file"));
+            jsonFile = json.getJSONObject("file");
+            if (null == jsonFile) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("file");
+            }
             JSONObject jsonNotification = json.optJSONObject("notification");
             if (null != jsonNotification) {
                 parameters.setNotificationTransport(getShareParser().parseNotificationTransport(jsonNotification));
@@ -104,7 +104,7 @@ public class UpdateFileAction extends AbstractDriveAction {
         /*
          * update the file, return empty result in case of success
          */
-        getDriveService().updateFile(session, path, new JsonFileVersion(checksum, name), metadata, parameters);
+        getDriveService().getUtility().updateFile(session, path, new JsonFileVersion(checksum, name), jsonFile, parameters);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
         if (null != result.getWarnings()) {
             result.addWarnings(parameters.getWarnings());

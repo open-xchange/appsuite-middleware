@@ -56,8 +56,6 @@ import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -216,26 +214,5 @@ public interface DriveService {
      * @return The created share
      */
     DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
-
-    /**
-     * Updates metadata of a file. This currently only includes adjusting the file's object permissions.
-     *
-     * @param session The session
-     * @param path The path to the file's parent folder, relative to the root folder
-     * @param fileVersion The file version of the file to update
-     * @param metadata The updated metadata
-     * @param parameters Additional parameters for the update
-     */
-    void updateFile(DriveSession session, String path, FileVersion fileVersion, File metadata, UpdateParameters parameters) throws OXException;
-
-    /**
-     * Updates metadata of a directory. This currently only includes adjusting the directory's permissions.
-     *
-     * @param session The session
-     * @param directoryVersion The directory version of the directory to update
-     * @param metadata The updated metadata
-     * @param parameters Additional parameters for the update
-     */
-    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, FileStorageFolder metadata, UpdateParameters parameters) throws OXException;
 
 }

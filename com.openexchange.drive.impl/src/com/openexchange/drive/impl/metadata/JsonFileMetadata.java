@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -105,8 +106,8 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         jsonObject.put("name", file.getFileName());
         jsonObject.put("created", file.getCreated().getTime());
         jsonObject.put("modified", file.getLastModified().getTime());
-        jsonObject.put("created_by", putEntity(new JSONObject(), file.getCreatedBy(), false));
-        jsonObject.put("modified_by", putEntity(new JSONObject(), file.getModifiedBy(), false));
+        jsonObject.put("created_by", file.getCreatedBy());
+        jsonObject.put("modified_by", file.getModifiedBy());
         jsonObject.putOpt("preview", session.getLinkGenerator().getFilePreviewLink(file));
         jsonObject.putOpt("thumbnail", session.getLinkGenerator().getFileThumbnailLink(file));
         for (FileStorageCapability capability : specialCapabilities) {
@@ -147,6 +148,25 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
     }
 
     /**
+     * Builds the JSON representation for a single file's metadata.
+     *
+     * @param file The file to get the JSON metadata for
+     * @return The JSON file metadata
+     */
+    public JSONObject build() throws JSONException, OXException {
+        FileStorageCapability[] possibleCapabilities = new FileStorageCapability[] {
+            FileStorageCapability.OBJECT_PERMISSIONS, FileStorageCapability.LOCKS, FileStorageCapability.FILE_VERSIONS
+        };
+        List<FileStorageCapability> specialCapabilities = new ArrayList<FileStorageCapability>();
+        for (FileStorageCapability possibleCapability : possibleCapabilities) {
+            if (session.getStorage().supports(session.getStorage().getRootFolderID(), possibleCapabilities)) {
+                specialCapabilities.add(possibleCapability);
+            }
+        }
+        return build(specialCapabilities.toArray(new FileStorageCapability[specialCapabilities.size()]));
+    }
+
+    /**
      * Gets the JSON representation for a file's versions. Version <code>"0"</code> id ignored implicitly, as the ajax action "versions"
      * action does.
      *
@@ -182,8 +202,8 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         jsonObject.put("file_size", file.getFileSize());
         jsonObject.put("created", file.getCreated().getTime());
         jsonObject.put("modified", file.getLastModified().getTime());
-        jsonObject.put("created_by", putEntity(new JSONObject(), file.getCreatedBy(), false));
-        jsonObject.put("modified_by", putEntity(new JSONObject(), file.getModifiedBy(), false));
+        jsonObject.put("created_by", file.getCreatedBy());
+        jsonObject.put("modified_by", file.getModifiedBy());
         jsonObject.put("version", file.getVersion());
         jsonObject.put("version_comment", file.getVersionComment());
         return jsonObject;
@@ -247,8 +267,9 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
 
     private JSONObject getJSONObjectPermission(FileStorageObjectPermission permission) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("group", permission.isGroup());
         jsonObject.put("bits", permission.getPermissions());
-        putEntity(jsonObject, permission.getEntity(), permission.isGroup());
         return jsonObject;
     }
 
