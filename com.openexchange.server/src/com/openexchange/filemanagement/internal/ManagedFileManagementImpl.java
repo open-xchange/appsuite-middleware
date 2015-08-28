@@ -156,6 +156,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 Map<String, File> existentFiles = this.existentFiles;
                 existentFiles.clear();
                 File directory = tmpDirReference.get();
+                if (!directory.canRead()) {
+                    logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
+                    return;
+                }
                 for (File tmpFile : directory.listFiles(defaultPrefixFilter)) {
                     existentFiles.put(tmpFile.getName(), tmpFile);
                 }
@@ -388,7 +392,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
                     // Put it in processing set so it won't get deleted by the task
                     processing.add(tmpFile.getName());
-                    
+
                     tmpFile.deleteOnExit();
                     OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
                     try {
