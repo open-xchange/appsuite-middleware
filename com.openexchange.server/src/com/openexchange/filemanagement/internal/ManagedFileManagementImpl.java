@@ -49,6 +49,7 @@
 
 package com.openexchange.filemanagement.internal;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -63,11 +64,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -78,7 +80,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileFilter;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.ConcurrentSet;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -126,22 +127,22 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         private final int time2live;
         private final AtomicReference<File> tmpDirReference;
         private final FileFilter defaultPrefixFilter;
-        private Set<String> pFiles;
+        private final Lock tLock;
 
         /**
          * Initializes a new {@link FileManagementTask}.
          */
-        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, Set<String> processing, int time2live, AtomicReference<File> tmpDirReference, final String prefix, org.slf4j.Logger logger) {
+        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, Lock creationLock, int time2live, AtomicReference<File> tmpDirReference, final String defaultPrefix, org.slf4j.Logger logger) {
             super();
             tfiles = files;
-            pFiles = processing;
+            tLock = creationLock;
             this.time2live = time2live;
             this.tmpDirReference = tmpDirReference;
             defaultPrefixFilter = new FileFilter() {
 
                 @Override
                 public boolean accept(File pathname) {
-                    return pathname.isFile() && pathname.getName().startsWith(prefix);
+                    return pathname.isFile() && pathname.getName().startsWith(defaultPrefix);
                 }
             };
             this.logger = logger;
@@ -149,6 +150,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         @Override
         public void run() {
+            tLock.lock();
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
                 Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
@@ -188,15 +190,15 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 for (Map.Entry<String, File> entry : existentFiles.entrySet()) {
                     String name = entry.getKey();
                     File orphaned = entry.getValue();
-                    if (!pFiles.contains(name)) {
-                        if (!orphaned.delete()) {
-                            logger.warn("Temporary file could not be deleted: {}", name);
-                        }
-                        logger.debug("Removed orphaned managed file {}", name);
+                    if (!orphaned.delete()) {
+                        logger.warn("Temporary file could not be deleted: {}", name);
                     }
+                    logger.debug("Removed orphaned managed file {}", name);
                 }
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 logger.error("", t);
+            } finally {
+                tLock.unlock();
             }
         }
     }
@@ -206,6 +208,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
      */
 
     private static final String PREFIX = "open-xchange-managedfile-" + com.openexchange.exception.OXException.getServerId() + "-";
+    private static final String PREFIX_WO_EVICT = "open-xchange-newfile-" + com.openexchange.exception.OXException.getServerId() + "-";
 
     private static final String SUFFIX = ".tmp";
 
@@ -213,7 +216,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     private final TimerService timer;
     private final DispatcherPrefixService dispatcherPrefixService;
     private final ConcurrentMap<String, ManagedFileImpl> files;
-    private final Set<String> processing;
+    private final Lock creationLock;
     private final PropertyListener propertyListener;
     private final AtomicReference<File> tmpDirReference;
     private final AtomicReference<ScheduledTimerTask> timerTaskReference;
@@ -227,7 +230,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         this.timer = timer;
         this.dispatcherPrefixService = dispatcherPrefixService;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
-        processing = new ConcurrentSet<String>();
+        creationLock = new ReentrantLock();
 
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
         this.tmpDirReference = tmpDirReference;
@@ -236,7 +239,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         tmpDirReference.set(getTmpDirByPath(path));
 
         // Register timer task
-        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, processing, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
+        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, creationLock, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
         timerTaskReference = new AtomicReference<ScheduledTimerTask>(timerTask);
     }
 
@@ -275,35 +278,46 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public File newTempFile() throws OXException {
-        return newTempFile(PREFIX, SUFFIX);
+        // Set another prefix to exclude from auto-eviction
+        return newTempFile(PREFIX_WO_EVICT, SUFFIX);
     }
 
     @Override
-    public File newTempFile(final String prefix, final String suffix) throws OXException {
-        File tmpFile = null;
-        File directory = null;
-        do {
-            directory = tmpDirReference.get();
-            try {
-                if (null == tmpFile) {
-                    tmpFile = File.createTempFile(prefix, suffix, directory);
-                    tmpFile.deleteOnExit();
-                } else {
-                    final File tmp = File.createTempFile(prefix, suffix, directory);
-                    if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+    public File newTempFile(String prefix, String suffix) throws OXException {
+        String prfx = prefix;
+        if (PREFIX.equals(prfx)) {
+            prfx = PREFIX_WO_EVICT;
+        }
+
+        creationLock.lock();
+        try {
+            File tmpFile = null;
+            File directory = null;
+            do {
+                directory = tmpDirReference.get();
+                try {
+                    if (null == tmpFile) {
+                        tmpFile = File.createTempFile(prfx, suffix, directory);
+                        tmpFile.deleteOnExit();
+                    } else {
+                        final File tmp = File.createTempFile(prfx, suffix, directory);
+                        if (!tmpFile.delete()) {
+                            LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                        }
+                        tmpFile = tmp;
+                        tmpFile.deleteOnExit();
                     }
-                    tmpFile = tmp;
-                    tmpFile.deleteOnExit();
+                } catch (final IOException e) {
+                    if (tmpFile != null && !tmpFile.delete()) {
+                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
+                    }
+                    throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
                 }
-            } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete()) {
-                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
-                }
-                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-            }
-        } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
-        return tmpFile;
+            } while (!tmpDirReference.compareAndSet(directory, directory));// Directory changed in the meantime
+            return tmpFile;
+        } finally {
+            creationLock.unlock();
+        }
     }
 
     @Override
@@ -377,72 +391,95 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (null == inputStream) {
             throw new IllegalArgumentException("Missing input stream.");
         }
-        ManagedFileImpl mf = null;
-        File tmpFile = null;
-        File directory = null;
-        String id = identifier;
-        do {
-            directory = tmpDirReference.get();
-            try {
-                if (null == tmpFile) {
-                    // Flush input stream's content via output stream to newly created file
-                    tmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
 
-                    // Put it in processing set so it won't get deleted by the task
-                    processing.add(tmpFile.getName());
+        creationLock.lock();
+        try {
+            ManagedFileImpl mf = null;
+            File tmpFile = null;
+            File directory = null;
+            String id = identifier;
+            do {
+                directory = tmpDirReference.get();
+                boolean errorDuringFileCreation = true;
+                try {
+                    if (null == tmpFile) {
+                        // Create new file
+                        tmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
+                        tmpFile.deleteOnExit();
 
-                    tmpFile.deleteOnExit();
-                    OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
-                    try {
-                        int blen = 65536;
-                        byte[] buf = new byte[blen];
-                        for (int read; (read = inputStream.read(buf, 0, blen)) > 0;) {
-                            out.write(buf, 0, read);
+                        // Flush input stream's content via output stream to newly created file
+                        OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile, false));
+                        try {
+                            int blen = 65536;
+                            byte[] buf = new byte[blen];
+                            for (int read; (read = inputStream.read(buf, 0, blen)) > 0;) {
+                                out.write(buf, 0, read);
+                            }
+                            out.flush();
+                        } finally {
+                            Streams.close(out);
                         }
-                        out.flush();
-                    } finally {
-                        Streams.close(out);
-                    }
-                } else {
-                    // Copy content of previous file to newly created file
-                    File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
-                    copyFile(tmpFile, tmp);
-                    if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
-                    }
-                    tmpFile = tmp;
-                    tmpFile.deleteOnExit();
-                }
-            } catch (IOException e) {
-                if (tmpFile != null && !tmpFile.delete()) {
-                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
-                }
-                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-            } finally {
-                if (closeStream) {
-                    Streams.close(inputStream);
-                }
-            }
-            if (com.openexchange.java.Strings.isEmpty(id)) {
-                id = UUID.randomUUID().toString();
-            }
-            mf = new ManagedFileImpl(this, id, tmpFile, optTtl, dispatcherPrefixService.getPrefix());
-            mf.setFileName(tmpFile.getName());
-            mf.setSize(tmpFile.length());
-        } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
-        files.put(mf.getID(), mf);
+                    } else {
+                        // Create new file
+                        File newTmpFile = File.createTempFile(PREFIX, null == optExtension ? SUFFIX : optExtension, directory);
+                        newTmpFile.deleteOnExit();
 
-        if (distribute) {
-            DistributedFileManagement distributed = getDistributed();
-            if (distributed != null && !distributed.exists(id)) {
-                distributed.register(id);
+                        // Copy content of previous file to newly created file
+                        boolean errorDuringCopy = true;
+                        try {
+                            copyFile(tmpFile, newTmpFile);
+                            errorDuringCopy = false;
+                        } finally {
+                            if (errorDuringCopy && !newTmpFile.delete()) {
+                                LOG.warn("Temporary file could not be deleted: {}", newTmpFile.getPath());
+                            }
+                        }
+
+                        // Delete the old file
+                        if (!tmpFile.delete()) {
+                            LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                        }
+                        tmpFile = newTmpFile;
+                    }
+
+                    // Unset error marker
+                    errorDuringFileCreation = false;
+                } catch (IOException e) {
+                    throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+                } catch (RuntimeException e) {
+                    throw ManagedFileExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } finally {
+                    if (closeStream) {
+                        Streams.close(inputStream);
+                    }
+                    if (errorDuringFileCreation && null != tmpFile) {
+                        if (!tmpFile.delete()) {
+                            LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
+                        }
+                    }
+                }
+
+                // Create ManagedFileImpl instance
+                if (isEmpty(id)) {
+                    id = UUID.randomUUID().toString();
+                }
+                mf = new ManagedFileImpl(this, id, tmpFile, optTtl, dispatcherPrefixService.getPrefix());
+                mf.setFileName(tmpFile.getName());
+                mf.setSize(tmpFile.length());
+            } while (!tmpDirReference.compareAndSet(directory, directory));// Directory changed in the meantime
+            // Put into map
+            files.put(mf.getID(), mf);
+            // Check whether supposed to be distributed
+            if (distribute) {
+                DistributedFileManagement distributed = getDistributed();
+                if (distributed != null && !distributed.exists(id)) {
+                    distributed.register(id);
+                }
             }
+            return mf;
+        } finally {
+            creationLock.unlock();
         }
-
-        // Remove it from processing map
-        processing.remove(tmpFile.getName());
-
-        return mf;
     }
 
     @Override
@@ -653,7 +690,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     void startUp() {
         if (stopTimerTask()) {
-            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, processing, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
+            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, creationLock, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
         }
     }
 
