@@ -913,7 +913,8 @@ public final class MailMessageParser {
         SMIMESigned smimeSigned = null;
         try {
             if (isMultipartSigned(lcct, contentType)) {
-                smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
+                Multipart multipart = MimeMessageUtility.getMultipartContentFrom(((MimeRawSource) mailPart).getPart(), lcct);
+                smimeSigned = new SMIMESigned((MimeMultipart) multipart);
             } else if (isSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
             }
