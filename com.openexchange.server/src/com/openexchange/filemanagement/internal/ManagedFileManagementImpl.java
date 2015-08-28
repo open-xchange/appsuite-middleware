@@ -188,8 +188,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
 
                 // Check for orphaned files belonging to this JVM instance
-                for (String name : existentFiles.keySet()) {
-                    File orphaned = existentFiles.get(name);
+                for (Map.Entry<String, File> entry : existentFiles.entrySet()) {
+                    String name = entry.getKey();
+                    File orphaned = entry.getValue();
                     if (!pFiles.contains(name)) {
                         if (!orphaned.delete()) {
                             logger.warn("Temporary file could not be deleted: {}", name);
