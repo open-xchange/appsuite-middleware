@@ -109,6 +109,11 @@ public class DeleteRegisteredPushUser extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
+        checkOptions(cmd, options);
+    }
+
+    @Override
+    protected void checkOptions(CommandLine cmd, Options options) {
         if (!cmd.hasOption('c')) {
             System.out.println("You must provide a context identifier.");
             if (null != options) {
