@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -141,12 +142,12 @@ public class TokenParser {
         if (sharePath == null) {
             return share.getTargets();
         } else {
-            ShareTarget target = share.resolveTarget(sharePath);
-            if (target == null) {
+            PersonalizedShareTarget personalizedTarget = share.resolvePersonalizedTarget(sharePath);
+            if (personalizedTarget == null) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
 
-            return Collections.singletonList(target);
+            return Collections.singletonList(share.resolveTarget(personalizedTarget));
         }
     }
 

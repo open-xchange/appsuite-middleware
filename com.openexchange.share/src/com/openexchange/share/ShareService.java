@@ -95,20 +95,6 @@ public interface ShareService {
     GuestInfo getGuestInfo(Session session, int guestID) throws OXException;
 
     /**
-     * Resolves the supplied token and path to a single share. If the session's user is the guest user behind the base token himself, the
-     * share target is adjusted implicitly for the guest user's point of view. Otherwise, the share target is kept in its original form
-     * (i.e. not personalized for the guest user).
-     *
-     * @param session The session
-     * @param token The token to resolve
-     * @param path The path to the share target
-     * @return The share info, or <code>null</code> if no valid share could be looked up
-     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
-     * is thrown.
-     */
-    ShareInfo getShare(Session session, String token, String path) throws OXException;
-
-    /**
      * Resolves the supplied token and path to a single share.
      *
      * @param token The token to resolve

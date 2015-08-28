@@ -51,7 +51,6 @@ package com.openexchange.share.core;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.share.CreatedShare;
@@ -61,7 +60,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * Class for results of {@link CreatePerformer#perform()}.
+ * Result object for created shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -70,13 +69,13 @@ public class CreatedSharesImpl implements CreatedShares {
 
     private final Map<ShareRecipient, CreatedShareImpl> shares;
 
-    public CreatedSharesImpl(Map<ShareRecipient, List<ShareInfo>> createdShares) {
+    public CreatedSharesImpl(Map<ShareRecipient, ShareInfo> createdShares) {
         super();
         shares = new LinkedHashMap<>();
-        for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
+        for (Entry<ShareRecipient, ShareInfo> entry : createdShares.entrySet()) {
             ShareRecipient recipient = entry.getKey();
-            List<ShareInfo> shareInfos = entry.getValue();
-            shares.put(recipient, new CreatedShareImpl(recipient, shareInfos.get(0).getGuest(), shareInfos));
+            ShareInfo shareInfo = entry.getValue();
+            shares.put(recipient, new CreatedShareImpl(recipient, shareInfo));
         }
     }
 

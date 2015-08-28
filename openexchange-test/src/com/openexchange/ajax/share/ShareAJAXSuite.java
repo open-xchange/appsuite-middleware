@@ -52,6 +52,7 @@ package com.openexchange.ajax.share;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.share.bugs.Bug40369Test;
+import com.openexchange.ajax.share.bugs.Bug40527Test;
 import com.openexchange.ajax.share.bugs.Bug40548Test;
 import com.openexchange.ajax.share.bugs.Bug40561Test;
 import com.openexchange.ajax.share.bugs.Bug40627Test;
@@ -134,6 +135,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(Bug40548Test.class);
         tests.addTestSuite(Bug40627Test.class);
         tests.addTestSuite(Bug40561Test.class);
+        tests.addTestSuite(Bug40527Test.class);
         return tests;
     }
 

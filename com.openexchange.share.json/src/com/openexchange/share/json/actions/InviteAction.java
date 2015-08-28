@@ -100,8 +100,8 @@ public class InviteAction extends AbstractShareAction {
             /*
              * create the shares, notify recipients via mail
              */
-            ShareInfo shareInfo = getShareService().addShare(session, target, recipient, meta).getFirstInfo();
-            CreatedSharesImpl createdShares = new CreatedSharesImpl(Collections.singletonMap(recipient, Collections.singletonList(shareInfo)));
+            ShareInfo shareInfo = getShareService().addShare(session, target, recipient, meta).getShareInfo();
+            CreatedSharesImpl createdShares = new CreatedSharesImpl(Collections.singletonMap(recipient, shareInfo));
             List<OXException> warnings = getNotificationService().sendShareCreatedNotifications(
                 Transport.MAIL, createdShares, message, session, requestData.getHostData());
             /*

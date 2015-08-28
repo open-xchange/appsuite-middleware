@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.CreatedShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -77,6 +78,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ShareHelper}
@@ -114,7 +116,7 @@ public class ShareHelper {
         /*
          * convert & return appropriate drive share
          */
-        return new DefaultDriveShareInfo(createdShare.getFirstInfo(), target);
+        return new DefaultDriveShareInfo(createdShare.getShareInfo(), target);
     }
     /**
      * Gets all shares for a specific target.
@@ -127,13 +129,16 @@ public class ShareHelper {
          * map drive target to plain share target & lookup shares
          */
         ShareTarget shareTarget = getShareTarget(target);
-        List<ShareInfo> shareInfos = getShareService().getShares(session.getServerSession(), getShareModule(), shareTarget.getFolder(), shareTarget.getItem());
+        ServerSession serverSession = session.getServerSession();
+        List<ShareInfo> shareInfos = getShareService().getShares(serverSession, getShareModule(), shareTarget.getFolder(), shareTarget.getItem());
         /*
          * convert & return appropriate drive share
          */
         List<DriveShareInfo> driveShareInfos = new ArrayList<DriveShareInfo>(shareInfos.size());
+        ModuleSupport moduleSupport = DriveServiceLookup.getService(ModuleSupport.class);
         for (ShareInfo shareInfo : shareInfos) {
-            DriveShareTarget driveTarget = new DriveShareTarget(shareTarget, target.getPath(), target.getName(), target.getChecksum());
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(shareTarget, serverSession.getContextId(), serverSession.getUserId());
+            DriveShareTarget driveTarget = new DriveShareTarget(shareTarget, personalizedTarget.getPath(), target.getName(), target.getChecksum());
             driveShareInfos.add(new DefaultDriveShareInfo(shareInfo, driveTarget));
         }
         return driveShareInfos;

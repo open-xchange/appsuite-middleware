@@ -107,4 +107,45 @@ public interface AdministrativeFileStorageFileAccess {
      */
     void removeDocuments(List<IDTuple> ids) throws OXException;
 
+    /**
+     * Checks whether a certain version of a certain file exists. If you need to know if a file exists at all,
+     * you can pass {@link FileStorageFileAccess#CURRENT_VERSION} as version.
+     *
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param version The file version
+     * @throws OXException If a storage error occurs
+     */
+    boolean exists(String folderId, String id, String version) throws OXException;
+
+    /**
+     * Checks whether an entity can read a certain file.
+     *
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canRead(String folderId, String id, int userId) throws OXException;
+
+    /**
+     * Checks whether an entity can write a certain file.
+     *
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canWrite(String folderId, String id, int userId) throws OXException;
+
+    /**
+     * Checks whether an entity can delete a certain file.
+     *
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @throws OXException If one of the files doesn't exist or an error occurs
+     */
+    boolean canDelete(String folderId, String id, int userId) throws OXException;
+
 }

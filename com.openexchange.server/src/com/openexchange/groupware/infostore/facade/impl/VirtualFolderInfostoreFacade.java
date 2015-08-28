@@ -63,6 +63,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
@@ -366,6 +367,16 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     @Override
     public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
         virtualFolder();
+    }
+
+    @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        return false;
     }
 
 }

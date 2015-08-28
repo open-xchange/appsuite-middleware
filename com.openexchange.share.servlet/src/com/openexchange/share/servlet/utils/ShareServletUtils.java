@@ -78,6 +78,7 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -117,7 +118,7 @@ public final class ShareServletUtils {
         return config;
     }
 
-    public static boolean createSessionAndRedirect(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
+    public static boolean createSessionAndRedirect(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
         Session session = null;
         try {
             /*

@@ -117,6 +117,11 @@ public final class OAuthConstants {
      */
 
     /**
+     * The URL parameter added to call-back URL providing an error description.
+     */
+    public static final String URLPARAM_ERROR = "error";
+
+    /**
      * The URL parameter added to call-back URL providing the OAuth token according to specification.
      */
     public static final String URLPARAM_OAUTH_TOKEN = "oauth_token";
@@ -270,6 +275,11 @@ public final class OAuthConstants {
      * The User refused to permit this Consumer to access Protected Resources.
      */
     public static final String OAUTH_PROBLEM_PERMISSION_DENIED = "permission_denied";
+
+    /**
+     * The OAuth provider refused to permit this Consumer to access Protected Resources.
+     */
+    public static final String OAUTH_PROBLEM_ACCESS_DENIED = "access_denied";
 
     /**
      * The User (in most cases it's just user's IP) is temporarily unacceptable to the Service Provider. For example, the Service Provider

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,54 @@
  *
  */
 
-package com.openexchange.share.servlet.handler;
+package com.openexchange.file.storage.composition.internal.idmangling;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
+
 
 /**
- * {@link ShareHandler}
+ * {@link IDManglingUserizedFile}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareHandler {
+public class IDManglingUserizedFile extends IDManglingFile implements UserizedFile {
+
+    private String originalId;
+    private String originalFolder;
 
     /**
-     * Gets the ranking for this handler.
-     * <p>
-     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
-     * appropriate handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
-     *
-     * @return The ranking
+     * Initializes a new {@link IDManglingUserizedFile}.
+     * @param file
+     * @param service
+     * @param account
      */
-    int getRanking();
+    IDManglingUserizedFile(UserizedFile file, String service, String account) {
+        super(file, service, account);
+        originalId = new FileID(service, account, file.getOriginalFolderId(), file.getOriginalId()).toUniqueID();
+        originalFolder = new FolderID(service, account, file.getOriginalFolderId()).toUniqueID();
+    }
 
-    /**
-     * Handles the given share.
-     * <p>
-     * If this handler feels responsible for the given share <code>{@link ShareHandlerReply#ACCEPT}</code> is returned; otherwise <code>{@link ShareHandlerReply#NEUTRAL}</code> to let the share be handled by the next handler in chain.
-     * <p>
-     * In case this handler wants to abort further handling of the share, <code>{@link ShareHandlerReply#DENY}</code> is returned.
-     *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param request The associated HTTP request
-     * @param response The associated HTTP response
-     * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
-     * @throws OXException If the attempt to resolve given share fails
-     */
-    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    @Override
+    public String getOriginalId() {
+        return originalId;
+    }
+
+    @Override
+    public void setOriginalId(String id) {
+        throw new IllegalStateException("IDs are only read only with this class");
+    }
+
+    @Override
+    public String getOriginalFolderId() {
+        return originalFolder;
+    }
+
+    @Override
+    public void setOriginalFolderId(String id) {
+        throw new IllegalStateException("IDs are only read only with this class");
+    }
 
 }

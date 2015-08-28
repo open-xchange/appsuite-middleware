@@ -108,15 +108,6 @@ public class ShareTarget implements Cloneable, Serializable {
     }
 
     /**
-     * @param targetPath
-     * @return
-     */
-    public static ShareTarget fromPath(String targetPath) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
      * Gets the groupware module of the share's target folder.
      *
      * @return The module
@@ -197,15 +188,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setOwnedBy(int ownedBy) {
         this.ownedBy = ownedBy;
-    }
-
-    /**
-     * Gets the relative path of this target to address it uniquely within an underlying share.
-     *
-     * @return The share-relative path to the target
-     */
-    public String getPath() {
-        return String.format("%08x", Integer.valueOf(hashCode()));
     }
 
     @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.find.basic.drive;
 
-import static com.openexchange.find.basic.drive.Utils.documentMetadata2File;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +58,9 @@ import java.util.List;
 import java.util.Set;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchRequest;
@@ -129,8 +131,7 @@ public class InfostoreSearcher {
                 it = searchEngine.search(session, infostoreTerm, I2i(folderIDs), fields, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, start, start + size);
                 List<Document> results = new ArrayList<Document>(100);
                 while (it.hasNext()) {
-                    DocumentMetadata doc = it.next();
-                    results.add(new FileDocument(documentMetadata2File(doc)));
+                    results.add(new FileDocument(new FindInfostoreFile(it.next())));
                 }
 
                 return results;
@@ -156,8 +157,7 @@ public class InfostoreSearcher {
                 try {
                     it = searchEngine.search(session, infostoreTerm, I2i(subList), extendedFields, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, 0, limitPerChunk);
                     while (it.hasNext()) {
-                        final DocumentMetadata doc = it.next();
-                        results.add(new FileDocument(documentMetadata2File(doc)));
+                        results.add(new FileDocument(new FindInfostoreFile(it.next())));
                     }
                 } finally {
                     SearchIterators.close(it);
@@ -194,6 +194,71 @@ public class InfostoreSearcher {
             toIndex = start + size;
         }
         return results.subList(start, toIndex);
+    }
+
+    private static final class FindInfostoreFile extends InfostoreFile {
+
+
+        private final String fileId;
+
+        private final String folderId;
+
+        private final String originalFileId;
+
+        private final String originalFolderId;
+
+        /**
+         * Initializes a new {@link FindInfostoreFile}.
+         * @param document
+         */
+        public FindInfostoreFile(DocumentMetadata document) {
+            super(document);
+            fileId = new FileID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, Long.toString(document.getFolderId()), Integer.toString(document.getId())).toUniqueID();
+            folderId = new FolderID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, Long.toString(document.getFolderId())).toUniqueID();
+            originalFileId = new FileID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, Long.toString(document.getOriginalFolderId()), Integer.toString(document.getOriginalId())).toUniqueID();
+            originalFolderId = new FolderID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, Long.toString(document.getOriginalFolderId())).toUniqueID();
+        }
+
+        @Override
+        public String getId() {
+            return fileId;
+        }
+
+        @Override
+        public String getFolderId() {
+            return folderId;
+        }
+
+        @Override
+        public String getOriginalId() {
+            return originalFileId;
+        }
+
+        @Override
+        public String getOriginalFolderId() {
+            return originalFolderId;
+        }
+
+        @Override
+        public void setId(String id) {
+            throw new UnsupportedOperationException("IDs are read only for search results!");
+        }
+
+        @Override
+        public void setFolderId(String folderId) {
+            throw new UnsupportedOperationException("IDs are read only for search results!");
+        }
+
+        @Override
+        public void setOriginalId(String id) {
+            throw new UnsupportedOperationException("IDs are read only for search results!");
+        }
+
+        @Override
+        public void setOriginalFolderId(String id) {
+            throw new UnsupportedOperationException("IDs are read only for search results!");
+        }
+
     }
 
 }

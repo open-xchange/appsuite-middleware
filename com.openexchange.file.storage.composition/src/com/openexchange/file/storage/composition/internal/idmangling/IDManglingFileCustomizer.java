@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.composition.internal.idmangling;
 
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
@@ -95,6 +96,10 @@ public class IDManglingFileCustomizer implements Customizer<File> {
     }
 
     public static File fixIDs(final File file, final String service, final String account) {
+        if (file instanceof UserizedFile) {
+            return new IDManglingUserizedFile((UserizedFile) file, service, account);
+        }
+
         return new IDManglingFile(file, service, account);
     }
 

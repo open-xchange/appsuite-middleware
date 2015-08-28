@@ -49,49 +49,90 @@
 
 package com.openexchange.share;
 
-import com.openexchange.share.recipient.ShareRecipient;
-
 /**
- * {@link CreatedShare}
+ * {@link PersonalizedShareTarget}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface CreatedShare {
+public class PersonalizedShareTarget {
+
+    private int module;
+    private String folder;
+    private String item;
 
     /**
-     * Gets the guest information of the according recipient.
+     * Initializes a new {@link PersonalizedShareTarget}.
      *
-     * @return The guest info
+     * @param module The groupware module of the share's target folder
+     * @param folder The identifier of the share's folder
+     * @param item The identifier of the share's item or <code>null</code>
      */
-    GuestInfo getGuestInfo();
+    public PersonalizedShareTarget(int module, String folder, String item) {
+        super();
+        this.module = module;
+        this.folder = folder;
+        this.item = item;
+    }
+
+    public int getModule() {
+        return module;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public String getItem() {
+        return item;
+    }
 
     /**
-     * Gets the {@link ShareRecipient}.
+     * Gets the relative path of this target to address it uniquely within an underlying share.
      *
-     * @return The recipient
+     * @return The share-relative path to the target
      */
-    ShareRecipient getShareRecipient();
+    public String getPath() {
+        return String.format("%08x", Integer.valueOf(hashCode()));
+    }
 
-    /**
-     * Gets the share target.
-     *
-     * @return The share target.
-     */
-    ShareTarget getShareTarget();
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+        result = prime * result + ((item == null) ? 0 : item.hashCode());
+        result = prime * result + module;
+        return result;
+    }
 
-    /**
-     * Gets the share info.
-     *
-     * @return The share info
-     */
-    ShareInfo getShareInfo();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PersonalizedShareTarget other = (PersonalizedShareTarget) obj;
+        if (folder == null) {
+            if (other.folder != null)
+                return false;
+        } else if (!folder.equals(other.folder))
+            return false;
+        if (item == null) {
+            if (other.item != null)
+                return false;
+        } else if (!item.equals(other.item))
+            return false;
+        if (module != other.module)
+            return false;
+        return true;
+    }
 
-    /**
-     * Gets whether this share is internal, meaning that the recipient is either a user or a group.
-     *
-     * @return <code>true</code> if the share is internal
-     */
-    boolean isInternal();
+    @Override
+    public String toString() {
+        return "PersonalizedShareTarget [module=" + module + ", folder=" + folder + ", item=" + item + "]";
+    }
 
 }

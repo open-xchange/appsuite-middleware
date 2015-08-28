@@ -187,19 +187,43 @@ public interface DocumentMetadata extends Serializable {
     void setObjectPermissions(List<ObjectPermission> objectPermissions);
 
     /**
-     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of
      * the requesting user.
-     * 
+     *
      * @return <code>true</code> if the file is shareable, <code>false</code>, otherwise
      */
     boolean isShareable();
-    
+
     /**
-     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of
      * the requesting user.
-     * 
+     *
      * @param shareable <code>true</code> if the file is shareable, <code>false</code>, otherwise
      */
     void setShareable(boolean shareable);
-    
+
+    /**
+     * Gets the original file ID, if the ID returned via {@link #getId()} is virtual.
+     *
+     * @return The original ID or delegates to {@link #getId()};
+     */
+    int getOriginalId();
+
+    /**
+     * Sets the original file ID, if the ID set via {@link #setId(int)} is virtual.
+     */
+    void setOriginalId(int id);
+
+    /**
+     * Gets the original folder ID, if the ID returned via {@link #getFolderId()} is virtual.
+     *
+     * @return The original ID or delegates to {@link #getFolderId()};
+     */
+    long getOriginalFolderId();
+
+    /**
+     * Sets the original folder ID, if the ID set via {@link #setFolderId(long)} is virtual.
+     */
+    void setOriginalFolderId(long id);
+
 }

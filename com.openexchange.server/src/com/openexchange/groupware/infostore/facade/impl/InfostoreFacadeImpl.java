@@ -165,6 +165,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -254,6 +255,36 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        Metadata[] metadata = new Metadata[] { Metadata.FOLDER_ID_LITERAL, Metadata.ID_LITERAL, Metadata.VERSION_LITERAL };
+        InfostoreIterator searchIterator = null;
+        try {
+            searchIterator = InfostoreIterator.versions(id, metadata, Metadata.VERSION_LITERAL, InfostoreFacade.ASC, this, context);
+            if (version == InfostoreFacade.CURRENT_VERSION) {
+                return searchIterator.hasNext();
+            }
+
+            while (searchIterator.hasNext()) {
+                if (searchIterator.next().getVersion() == version) {
+                    return true;
+                }
+            }
+
+            return false;
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        UserPermissionService userPermissionService = ServerServiceRegistry.getServize(UserPermissionService.class, true);
+        UserPermissionBits permissionBits = userPermissionService.getUserPermissionBits(user.getId(), context);
+        EffectiveInfostorePermission effectivePermission = security.getInfostorePermission(context, user, permissionBits, id);
+        return permission.appliesTo(effectivePermission);
+    }
+
+    @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException {
         Context context = session.getContext();
         /*
@@ -271,6 +302,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * adjust parent folder if required
          */
         if (false == permission.canReadObjectInFolder()) {
+            document.setOriginalFolderId(document.getFolderId());
             document.setFolderId(getSharedFilesFolderID(session));
         }
         /*
@@ -358,6 +390,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * adjust parent folder if required, add further metadata
          */
         if (false == permission.canReadObjectInFolder()) {
+            metadata.setOriginalFolderId(metadata.getFolderId());
             metadata.setFolderId(getSharedFilesFolderID(session));
         }
         metadata.setShareable(permission.canShareObject());
@@ -428,23 +461,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public void touch(final int id, final ServerSession session) throws OXException {
-        try {
-            final Context context = session.getContext();
-            final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, context);
-            final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
-            Metadata[] modifiedColums = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL };
-            long sequenceNumber = oldDocument.getSequenceNumber();
+        final Context context = session.getContext();
+        final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, context);
+        final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
+        Metadata[] modifiedColums = new Metadata[] { Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL };
+        long sequenceNumber = oldDocument.getSequenceNumber();
 
-            document.setLastModified(new Date());
-            document.setModifiedBy(session.getUserId());
-            perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
-            perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
-        } catch (final OXException x) {
-            throw x;
-        } catch (final Exception e) {
-            // FIXME Client
-            LOG.error("", e);
-        }
+        document.setLastModified(new Date());
+        document.setModifiedBy(session.getUserId());
+        perform(new UpdateDocumentAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
+        perform(new UpdateVersionAction(this, QUERIES, context, document, oldDocument, modifiedColums, sequenceNumber, session), true);
     }
 
     @Override
@@ -778,7 +804,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Collections.addAll(sanitizedColumns, modifiedColumns);
         if (sanitizedColumns.contains(Metadata.FOLDER_ID_LITERAL)) {
             long folderId = document.getFolderId();
-            if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+            if (folderId == getSharedFilesFolderID(session)) {
                 document.setFolderId(infoPerm.getObject().getFolderId());
                 sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
                 modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
@@ -1641,6 +1667,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
                 @Override
                 public DocumentMetadata handle(DocumentMetadata document) {
+                    document.setOriginalFolderId(document.getFolderId());
                     document.setFolderId(sharedFilesFolderID);
                     return document;
                 }
@@ -1796,7 +1823,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
                 if (false == infoPerm.canReadObjectInFolder()) {
-                    document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+                    document.setOriginalFolderId(document.getFolderId());
+                    document.setFolderId(getSharedFilesFolderID(session));
                 }
                 document.setShareable(infoPerm.canShareObject());
                 return document;
@@ -1875,6 +1903,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         /*
                          * adjust parent folder id to match requested identifier
                          */
+                        document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(getSharedFilesFolderID(session));
                         document.setShareable(infostorePermission.canShareObject());
                     }
@@ -1884,6 +1913,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      */
                     Long requestedFolderID = idsToFolders.get(I(document.getId()));
                     if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
+                        document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(requestedFolderID.longValue());
                     }
                     document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
@@ -1922,11 +1952,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         InfostoreIterator modIter = null;
         InfostoreIterator delIter = null;
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        if (folderId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+        final int sharedFilesFolderID = getSharedFilesFolderID(session);
+        if (folderId == sharedFilesFolderID) {
             DocumentCustomizer customizer = new DocumentCustomizer() {
                 @Override
                 public DocumentMetadata handle(DocumentMetadata document) {
-                    document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+                    document.setOriginalFolderId(document.getFolderId());
+                    document.setFolderId(sharedFilesFolderID);
                     return document;
                 }
             };
@@ -2245,6 +2277,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     if (null != objectPermissions) {
                         ObjectPermission matchingPermission = EffectiveObjectPermissions.find(session.getUser(), objectPermissions);
                         if (null != matchingPermission && matchingPermission.canRead()) {
+                            document.setOriginalFolderId(document.getFolderId());
                             document.setFolderId(sharedFilesFolderID);
                             document.setShareable(hasSharedFolderAccess && matchingPermission.canWrite());
                         } else {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.file.storage.composition.internal.idmangling;
 
 import java.util.Date;
 import java.util.List;
@@ -77,7 +77,7 @@ public class IDManglingFile implements File {
      * @param service The service identifier
      * @param account The account identifier
      */
-    public IDManglingFile(final File file, final String service, final String account) {
+    IDManglingFile(final File file, final String service, final String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
         this.file = file;
@@ -372,7 +372,7 @@ public class IDManglingFile implements File {
     public void setShareable(boolean shareable) {
         file.setShareable(shareable);
     }
-    
+
     @Override
     public String toString() {
         return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + ", name=" + file.getFileName() + "]";

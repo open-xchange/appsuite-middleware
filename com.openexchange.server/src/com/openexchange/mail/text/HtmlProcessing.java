@@ -356,7 +356,7 @@ public final class HtmlProcessing {
         if (null == bodyElements || bodyElements.isEmpty()) {
             // No body
             outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
-            outputDocument.insert(source.length() - 1, "</div>");
+            outputDocument.insert(source.length(), "</div>");
         } else {
             for (Element bodyElement : bodyElements) {
                 Segment content = bodyElement.getContent();
