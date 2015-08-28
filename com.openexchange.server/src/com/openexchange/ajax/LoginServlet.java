@@ -86,6 +86,8 @@ import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.login.RampUp;
 import com.openexchange.ajax.login.RedeemToken;
+import com.openexchange.ajax.login.ShareLoginConfiguration;
+import com.openexchange.ajax.login.ShareLoginConfiguration.ShareLoginProperty;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -162,6 +164,11 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /**
+     * The default error page template
+     */
+    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+
+    /**
      * <code>"open-xchange-session-"</code>
      */
     public static final String SESSION_PREFIX = "open-xchange-session-".intern();
@@ -174,7 +181,7 @@ public class LoginServlet extends AJAXServlet {
     /**
      * <code>"open-xchange-share-"</code>
      */
-    public static final String SHARE_PREFIX = "open-xchange-share-".intern();
+    private static final String SHARE_PREFIX = "open-xchange-share-".intern();
 
     /**
      * <code>"open-xchange-public-session-"</code>
@@ -213,6 +220,9 @@ public class LoginServlet extends AJAXServlet {
     /** The login configuration reference */
     static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
 
+    /** The login configuration reference */
+    static final AtomicReference<ShareLoginConfiguration> shareConfReference = new AtomicReference<ShareLoginConfiguration>();
+
     /**
      * Gets the login configuration.
      *
@@ -220,6 +230,29 @@ public class LoginServlet extends AJAXServlet {
      */
     public static LoginConfiguration getLoginConfiguration() {
         return confReference.get();
+    }
+
+    /**
+     * Gets the share login configuration.
+     *
+     * @return The share login configuration or <code>null</code> if not yet initialized
+     */
+    public static ShareLoginConfiguration getShareLoginConfiguration() {
+        return shareConfReference.get();
+    }
+
+    /**
+     * Gets the login configuration suitable for the supplied session.
+     *
+     * @param session The session to get the login configuration for
+     * @return The login configuration
+     */
+    public static LoginConfiguration getLoginConfiguration(Session session) {
+        LoginConfiguration defaultLoginConfig = getLoginConfiguration();
+        if (null != session && Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            return getShareLoginConfiguration().getLoginConfig(defaultLoginConfig);
+        }
+        return defaultLoginConfig;
     }
 
     /**
@@ -234,6 +267,19 @@ public class LoginServlet extends AJAXServlet {
      */
     public static String getPublicSessionCookieName(final HttpServletRequest req) {
         return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
+    }
+
+    /**
+     * Gets the name of the share cookie for specified HTTP request.
+     * <pre>
+     * "open-xchange-share-" + &lt;hash(req.userAgent)&gt;
+     * </pre>
+     *
+     * @param request The HTTP request
+     * @return The name of the public session cookie
+     */
+    public static String getShareCookieName(HttpServletRequest request) {
+        return new StringBuilder(SHARE_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(request)).toString();
     }
 
     // --------------------------------------------------------------------------------------- //
@@ -286,7 +332,7 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
-                        final LoginConfiguration conf = confReference.get();
+                        final LoginConfiguration conf = getLoginConfiguration(session);
                         SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         String[] additionalsForHash;
                         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
@@ -307,7 +353,7 @@ public class LoginServlet extends AJAXServlet {
 
                         LoginPerformer.getInstance().doLogout(sessionId);
                         // Drop relevant cookies
-                        SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                        SessionUtility.removeOXCookies(session, req, resp);
                         SessionUtility.removeJSESSIONID(req, resp);
                     }
                 } catch (final OXException e) {
@@ -375,7 +421,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session, req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -530,7 +576,7 @@ public class LoginServlet extends AJAXServlet {
                 LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
-                    SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                    SessionUtility.removeOXCookies(session, req, resp);
                 }
                 try {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
@@ -624,18 +670,20 @@ public class LoginServlet extends AJAXServlet {
         final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
         LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled);
         confReference.set(conf);
+        ShareLoginConfiguration shareConf = initShareLoginConfig(config);
+        shareConfReference.set(shareConf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS, new Tokens(conf));
         handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
         final Set<LoginRampUpService> rampUpServices = RAMP_UP_REF.get();
-        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, rampUpServices));
+        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, shareConf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
         handlerMap.put("hasAutologin", new HasAutoLogin(conf));
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
-        handlerMap.put(ACTION_GUEST, new GuestLogin(conf, rampUpServices));
-        handlerMap.put(ACTION_ANONYMOUS, new AnonymousLogin(conf, rampUpServices));
+        handlerMap.put(ACTION_GUEST, new GuestLogin(shareConf, rampUpServices));
+        handlerMap.put(ACTION_ANONYMOUS, new AnonymousLogin(shareConf, rampUpServices));
     }
 
     public LoginRequestHandler addRequestHandler(String action, LoginRequestHandler handler) {
@@ -687,20 +735,15 @@ public class LoginServlet extends AJAXServlet {
      * Writes or rewrites a cookie
      */
     private void doCookieReWrite(final HttpServletRequest req, final HttpServletResponse resp, final CookieType type) throws OXException, JSONException, IOException {
-        final LoginConfiguration conf = confReference.get();
-        if (!conf.isSessiondAutoLogin() && CookieType.SESSION == type) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
-        }
         final SessiondService sessiond = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiond) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-
         final String sessionId = req.getParameter(PARAMETER_SESSION);
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        SessionResult<ServerSession> result = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
+        SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiond);
         if (Reply.STOP == result.getReply()) {
             return;
         }
@@ -708,6 +751,10 @@ public class LoginServlet extends AJAXServlet {
         if (null == session) {
             // Should not occur
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
+        final LoginConfiguration conf = getLoginConfiguration(session);
+        if (!conf.isSessiondAutoLogin() && CookieType.SESSION == type) {
+            throw AjaxExceptionCodes.DISABLED_ACTION.create("store");
         }
         try {
             SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
@@ -765,7 +812,8 @@ public class LoginServlet extends AJAXServlet {
 
     private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
         Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
-        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), confReference.get());
+        LoginConfiguration loginConfig = getLoginConfiguration(result.getSession());
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), loginConfig);
         return servletCookie;
     }
 
@@ -810,8 +858,8 @@ public class LoginServlet extends AJAXServlet {
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
      */
-    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
-        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, confReference.get()));
+    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) throws OXException {
+        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session)));
     }
 
     /**
@@ -824,11 +872,28 @@ public class LoginServlet extends AJAXServlet {
      * @param hash The hash string used for composing cookie name
      * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
      * @param serverName The HTTP request's server name
+     * @param conf The login configuration
      */
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+    }
+
+    /**
+     * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     * @throws OXException
+     */
+    public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName) throws OXException {
+        writeSecretCookie(req, resp, session, hash, secure, serverName, getLoginConfiguration(session));
     }
 
     /**
@@ -841,7 +906,22 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      * @return <code>true</code> if successfully added to HTTP servlet response; otherwise <code>false</code>
      */
-    public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
+        return writePublicSessionCookie(req, resp, session, secure, serverName, getLoginConfiguration(session));
+    }
+
+    /**
+     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
+     *
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @param session The session providing the public session cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     * @param conf The login configuration
+     * @return <code>true</code> if successfully added to HTTP servlet response; otherwise <code>false</code>
+     */
+    private static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req), altId), secure, serverName, conf));
@@ -896,5 +976,26 @@ public class LoginServlet extends AJAXServlet {
         return LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
     }
 
-    public static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    /**
+     * Initializes a share login configuration based on the initialization parameters found in the supplied servlet config reference.
+     *
+     * @param config The servlet configuration to use for initialization
+     * @return The initialized share login configuration
+     */
+    private static ShareLoginConfiguration initShareLoginConfig(ServletConfig config) {
+        String shareAutoLoginValue = config.getInitParameter(ShareLoginProperty.AUTO_LOGIN.getPropertyName());
+        Boolean shareAutoLogin = Strings.isEmpty(shareAutoLoginValue) ? null : Boolean.valueOf(shareAutoLoginValue);
+        String shareClientName = config.getInitParameter(ShareLoginProperty.CLIENT_NAME.getPropertyName());
+        String  shareClientVersion = config.getInitParameter(ShareLoginProperty.CLIENT_VERSION.getPropertyName());
+        String shareCookieTTLValue = config.getInitParameter(ShareLoginProperty.COOKIE_TTL.getPropertyName());
+        Integer shareCookieTTL;
+        if (String.valueOf(-1).equals(shareCookieTTLValue)) {
+            shareCookieTTL = Integer.valueOf(-1);
+        } else {
+            shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
+        }
+        boolean shareTransientSessions = Boolean.valueOf(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
+        return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
+    }
+
 }

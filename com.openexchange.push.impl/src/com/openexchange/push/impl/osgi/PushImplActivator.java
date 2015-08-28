@@ -80,8 +80,10 @@ import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwnerFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropAllPermanentListenerCallableFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallableFactory;
 import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallableFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -181,6 +183,8 @@ public final class PushImplActivator extends HousekeepingActivator  {
             registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
             registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
             registerService(CustomPortableFactory.class, new PortableOwnerFactory());
+            registerService(CustomPortableFactory.class, new PortableDropAllPermanentListenerCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableStartPermanentListenerCallableFactory());
 
             if (pushManagerRegistry.isPermanentPushAllowed()) {
 

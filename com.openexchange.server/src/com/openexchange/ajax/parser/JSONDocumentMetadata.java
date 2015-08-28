@@ -566,4 +566,24 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         }
     }
 
+    @Override
+    public int getOriginalId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setOriginalId(int id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getOriginalFolderId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setOriginalFolderId(long id) {
+        throw new UnsupportedOperationException();
+    }
+
 }

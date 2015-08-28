@@ -171,7 +171,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The scheduled timer task to clean-up maps.
      */
     private static volatile ScheduledTimerTask cleanUpTimerTask;
-    
+
     private static Boolean checkConnectivityIfPolled;
     private static boolean checkConnectivityIfPolled() {
         Boolean b = checkConnectivityIfPolled;
@@ -1060,9 +1060,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     public boolean isConnected() {
         /*-
          *
-         if (!connected) {
-             return false;
-         }
+        if (!connected) {
+            return false;
+        }
         return (connected = ((imapStore != null) && imapStore.isConnected()));
          */
         return connected;

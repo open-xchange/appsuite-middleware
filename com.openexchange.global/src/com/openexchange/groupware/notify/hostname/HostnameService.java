@@ -82,4 +82,17 @@ public interface HostnameService {
      */
     String getHostname(int userId, int contextId);
 
+    /**
+     * Returns the host name part used in generated links to internal objects for guest user accounts; meaning the replacement for
+     * &quot;[hostname]&quot; in URL template defined by property &quot;object_link&quot; in properties file
+     * &quot;notification.properties&quot;. Additionally this service may be used for the host name when generating direct links into
+     * the UI.
+     *
+     * @param userId The user ID or a value less than/equal to zero if not available
+     * @param contextId The context ID or a value less than/equal to zero if not available
+     * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not
+     *         be resolved or any error occurred).
+     */
+    String getGuestHostname(int userId, int contextId);
+
 }

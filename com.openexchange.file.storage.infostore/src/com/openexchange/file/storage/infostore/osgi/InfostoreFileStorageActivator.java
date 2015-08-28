@@ -60,6 +60,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -72,7 +73,7 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class };
+            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class, UserService.class };
     }
 
     @Override

@@ -215,8 +215,8 @@ public class ContactCopyTask implements CopyUserTaskService {
                         setStringOrNull(i++, stmt, entry.getLastname());
                         setStringOrNull(i++, stmt, entry.getFirstname());
                         setStringOrNull(i++, stmt, entry.getEmailaddress());
-                        setBinaryOrNull(i++, stmt, UUIDs.toByteArray(UUID.randomUUID()));
                         stmt.setInt(i++, cid);
+                        setBinaryOrNull(i++, stmt, UUIDs.toByteArray(UUID.randomUUID()));
 
                         stmt.addBatch();
                     }
@@ -374,6 +374,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                      */
                     contact.setNumberOfImages(numberOfImages);
                 }
+                DBUtils.closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

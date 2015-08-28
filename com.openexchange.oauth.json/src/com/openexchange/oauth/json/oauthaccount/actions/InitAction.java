@@ -284,6 +284,15 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
          */
         final Map<String, Object> oauthState = new HashMap<String, Object>();
+        if (interaction instanceof Parameterizable) {
+            final Parameterizable params = (Parameterizable) interaction;
+            for (final String key : params.getParamterNames()) {
+                final Object value = params.getParameter(key);
+                if (null != value) {
+                    oauthState.put(key, value);
+                }
+            }
+        }
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
         oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
@@ -331,7 +340,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         {
             final HostnameService hostnameService = Services.getService(HostnameService.class);
             if (null != hostnameService) {
-                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                if (session.getUser().isGuest()) {
+                    hostName = hostnameService.getGuestHostname(session.getUserId(), session.getContextId());
+                } else {
+                    hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                }
             }
         }
         /*

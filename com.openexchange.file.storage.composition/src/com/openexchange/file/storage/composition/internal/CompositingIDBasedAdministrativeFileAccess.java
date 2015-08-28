@@ -156,6 +156,34 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
         }
     }
 
+    @Override
+    public boolean exists(String id, String version) throws OXException {
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        return fileAccess.exists(fileID.getFolderId(), fileID.getFileId(), version);
+    }
+
+    @Override
+    public boolean canRead(String id, int userId) throws OXException {
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        return fileAccess.canRead(fileID.getFolderId(), fileID.getFileId(), userId);
+    }
+
+    @Override
+    public boolean canWrite(String id, int userId) throws OXException {
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        return fileAccess.canWrite(fileID.getFolderId(), fileID.getFileId(), userId);
+    }
+
+    @Override
+    public boolean canDelete(String id, int userId) throws OXException {
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        return fileAccess.canDelete(fileID.getFolderId(), fileID.getFileId(), userId);
+    }
+
     private static FileID toFileID(String id) {
         return new FileID(id);
     }

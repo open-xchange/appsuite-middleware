@@ -51,8 +51,8 @@ package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.containsForeignPermissions;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
-import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
-import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withRelativeID;
+import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFolder.withUniqueID;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -255,6 +255,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
         FolderID folderID = new FolderID(folderId);
+        if (FileStorageFolder.ROOT_FULLNAME.equals(folderID.getFolderId())) {
+            throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
+        }
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
@@ -433,6 +436,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         rootFolder.setHoldsFolders(true);
         rootFolder.setExists(true);
         DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+        permission.setAdmin(false);
+        permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
         permission.setEntity(userID);
         rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
         rootFolder.setOwnPermission(permission);

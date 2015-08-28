@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -189,7 +189,7 @@ if [ ${1:-0} -eq 2 ]; then
     TMPFILE=$(mktemp)
     while read LINE; do
         case "$LINE" in
-            \#*|*:crypt:*)
+            \#*|*:crypt:*|*:bcrypt:*)
                 # ignore commented and already converted lines
                 echo $LINE
                 ;;
@@ -242,6 +242,12 @@ fi
 %doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
+* Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-12 (2671)
 * Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>

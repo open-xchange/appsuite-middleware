@@ -131,6 +131,7 @@ public class QuotaTest extends ShareTest {
             getLinkRequest = new GetLinkRequest(new ShareTarget(FolderObject.INFOSTORE, String.valueOf(folder.getObjectID())));
             getLinkRequest.setFailOnError(false);
             getLinkResponse = client.execute(getLinkRequest);
+            assertTrue("No errors in response", getLinkResponse.hasError());
             OXException e = getLinkResponse.getException();
             assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
         }
@@ -160,6 +161,7 @@ public class QuotaTest extends ShareTest {
             request = new UpdateRequest(EnumAPI.OX_NEW, folder);
             request.setFailOnError(false);
             updateResponse = client.execute(request);
+            assertTrue("No errors in response", updateResponse.hasError());
             OXException e = updateResponse.getException();
             assertTrue("Unexpected exception: " + e, QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.equals(e));
         }

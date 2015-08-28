@@ -13,6 +13,10 @@ com.openexchange.hostname.ldap.query_filter = (&(objectClass=oxAccount)(oxContex
 # (required)
 com.openexchange.hostname.ldap.result_attribute = oxDomain
 
+# Specify what attribute in the resulting object contains the guest hostname 
+# value (required)
+com.openexchange.hostname.ldap.guest_result_attribute = oxGuestDomain
+
 # Specify the search scope here (required, must be one of: sub, base, one)
 com.openexchange.hostname.ldap.scope = sub
 

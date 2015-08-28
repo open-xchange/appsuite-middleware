@@ -57,6 +57,20 @@ package com.openexchange.mail.config;
  */
 public class IPRange {
 
+    /**
+     * Parses specified string to an IP range.
+     *
+     * @param string The string to parse
+     * @return The resulting IP range or <code>null</code> if passed string is empty
+     * @throws IllegalArgumentException If parsing fails
+     */
+    public static IPRange parseRange(final String string) {
+        final com.openexchange.sessiond.impl.IPRange parsed = com.openexchange.sessiond.impl.IPRange.parseRange(string);
+        return null == parsed ? null : new IPRange(parsed);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
     private final com.openexchange.sessiond.impl.IPRange delegate;
 
     /**
@@ -80,17 +94,6 @@ public class IPRange {
     @Override
     public String toString() {
         return delegate.toString();
-    }
-
-    /**
-     * Parses specified string to an IP range.
-     *
-     * @param string The string to parse
-     * @return The resulting IP range or <code>null</code> if passed string is empty
-     */
-    public static IPRange parseRange(final String string) {
-        final com.openexchange.sessiond.impl.IPRange parsed = com.openexchange.sessiond.impl.IPRange.parseRange(string);
-        return null == parsed ? null : new IPRange(parsed);
     }
 
 }

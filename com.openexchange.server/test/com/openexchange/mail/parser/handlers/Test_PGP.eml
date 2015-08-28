@@ -1,0 +1,97 @@
+Return-Path: <foo@bar.tld>
+X-Original-To: foo@bar.tld
+Delivered-To: foo@bar.tld
+Received: from mx1.open-xchange.com (mx1.bar.tld [127.0.0.1])
+	by dovecot.bar.tld (Postfix) with ESMTPS id 8E337B94A6
+	for <foo@bar.tld>; Tue,  9 Jun 2015 14:39:39 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+	by mx1.bar.tld (Postfix) with ESMTP id 7FEF6D0246
+	for <ntsapanidis@bar.tld>; Tue,  9 Jun 2015 14:39:39 +0200 (CEST)
+Received: from [127.0.0.1] (helo=mx1.bar.tld)
+	by localhost with ESMTP (eXpurgate 4.0.7)
+	(envelope-from <foo@bar.tld>)
+	id 5576de8b-0ddd-7f000001272a-7f000001d356-1
+	for <foo@bar.tld>; Tue, 09 Jun 2015 14:39:39 +0200
+Received: from mail-wi0-f173.tld (mail-wi0-f173.tld [209.85.212.173])
+	(using TLSv1 with cipher ECDHE-RSA-AES128-SHA (128/128 bits))
+	(Client CN "smtp.tld.de", Issuer "Google Internet Authority G2" (not verified))
+	by mx1.tld.de (Postfix) with ESMTPS id 521BCD00AC
+	for <foo@bar.tld>; Tue,  9 Jun 2015 14:39:38 +0200 (CEST)
+Received: by wiwd19 with SMTP id d19so16781105wiw.0
+        for <foo@bar.tld>; Tue, 09 Jun 2015 05:39:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20120113;
+        h=from:content-type:subject:date:message-id:to:mime-version;
+        bh=hV+rHk9IRnT3i8w7tpuFOSTUfb89uOxenPRbsqbR2Jk=;
+        b=d6qsYDHRMUGF7jEYmA18b7voubjz2BevZcHMcilrEb+5FsfrEwhzkHo688nHBHaIsQ
+         /K2LaWapLspzdn9c27W2Coc4HGo7/GPLZX9JRr4jZsXFdCLx0oMNVp+E7etVl4HT5Ez2
+         qy13biP9aXEk6CAb14cgKxROykgVRAK6f52V7nIS7DsLWdCYyFJIV27bXAjC4z0qgxB1
+         dOKEJyXdak/0FeJzQIEi9H+GIo+PMo0XoTx0hygbxCIFfJpEGfh5HeBeoRKZyOCylMsT
+         EgAK/2+3aSnQ0MJBRiIGsyYu4hRzgryMhWrQf2eB4C7WOr5UORLBXdHuY442PhSSJiiq
+         I5dw==
+X-Received: by 10.194.134.9 with SMTP id pg9mr42785640wjb.5.1433853578515;
+        Tue, 09 Jun 2015 05:39:38 -0700 (PDT)
+Received: from [192.168.1.110] (ip.tld.de. [127.0.0.1])
+        by mx.tld with ESMTPSA id s10sm9255830wjy.35.2015.06.09.05.39.36
+        for <foo@bar.tld>
+        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
+        Tue, 09 Jun 2015 05:39:37 -0700 (PDT)
+From: Foo Bar <foo.bar@tld.de>
+X-Google-Original-From: Foo Bar <foo.bar@tld.de>
+X-Pgp-Agent: GPGMail 2.5b6
+Content-Type: multipart/signed; boundary="Apple-Mail=_09367EBE-7B4E-4234-AC50-86578941FF91"; protocol="application/pgp-signature"; micalg=pgp-sha512
+Subject: Test PGP
+Date: Tue, 9 Jun 2015 14:39:25 +0200
+Message-Id: <8B78C5AE-9FB9-4358-9772-51AFA5082D69@tld.de>
+To: foo@bar.tld
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2098\))
+X-Mailer: Apple Mail (2.2098)
+X-purgate-ID: 151428::1433853579-00000DDD-EAC8C1FC/0/0
+X-purgate-type: clean
+X-purgate-size: 1369
+X-purgate-Ad: Categorized by eleven eXpurgate (R) http://www.eleven.de
+X-purgate: This mail is considered clean (visit http://www.eleven.de for further information)
+X-purgate: clean
+
+
+--Apple-Mail=_09367EBE-7B4E-4234-AC50-86578941FF91
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+tewagrseg
+are
+g
+serg
+seg
+ser
+gser
+g
+
+--Apple-Mail=_09367EBE-7B4E-4234-AC50-86578941FF91
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename=signature.asc
+Content-Type: application/pgp-signature;
+	name=signature.asc
+Content-Description: Message signed with OpenPGP using GPGMail
+
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - https://gpgtools.org
+
+iQIcBAEBCgAGBQJVdt6GAAoJEAc1o7zUhkvd6QoP/jSTagjG5cPlRIBOyIS+GGx5
+cHgq2NH40FH1VmdPZH6wbg21IuibX+wad6F0zDucoM0l/rKUpB3yBpqeL31cypV6
+SyPpG2X7fos3nMMsCuSA6fNhMo3jChMT6liGpoSxRSH+yckGbaG7YlRDy8bdX7rJ
+cHCD1MDkp4H2i6cLPsjmU6inushqZOwtn6qeOFkdI9Me1hSaYT9Xv437LPngxdE0
+CwyxdMlbEbfwMA2ytU1wdtH12vf1xSfemRNxky7k0kCwzjktvQ89BnwqJ7Bh5Fdo
+7vyTijI2i5+u50rL56C+CVNUXov9/jtymHLaCzxmPJ/ulxYX7kjGw0jQdyZaJf4e
+rsHf+XpBok+Xm+1Ix5I/okjxSgMrJU9a1Qj3kTC2pSfw3VG38H3pwq1IHFnedWWW
+phZcQinCjNrBsMFqv8NysALNH2iagEz5X/Y8/EphH7SsclxFxpZCFlk/0WXbisTh
+0s/m3xJE9N+iPK4wvMtVO1HyQWiMtNMV9VdEYUq/AWnmj2xw8Ze00GeE0osz1zhn
+pjllChfjqwgW4rKKDz3obqRab50vdTp+uSJplpx7fJnZ62EaHhaaGGD5DcjlNLEr
+CzcuxV/EzDsdW6PdyRxE9EKaWwZqTXVSi3D63lyRAPt74UKYniAD8Rr44wMm/XFx
+CkRoR0NFVzLNrfXHzeyh
+=WhqW
+-----END PGP SIGNATURE-----
+
+--Apple-Mail=_09367EBE-7B4E-4234-AC50-86578941FF91--

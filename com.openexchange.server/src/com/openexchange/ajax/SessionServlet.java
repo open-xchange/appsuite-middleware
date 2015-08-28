@@ -237,7 +237,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 String sessionId = SessionUtility.getSessionId(req);
                 SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
                 if (null != result.getSession()) {
-                    SessionUtility.removeOXCookies(result.getSession().getHash(), req, resp);
+                    SessionUtility.removeOXCookies(result.getSession(), req, resp);
                 }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);

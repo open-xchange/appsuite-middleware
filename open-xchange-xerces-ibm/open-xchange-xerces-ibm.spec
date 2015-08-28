@@ -1,26 +1,26 @@
 
-Name:           open-xchange-xerces-ibm
-BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
+Name:          open-xchange-xerces-ibm
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:  ant
+BuildRequires: ant
 %else
-BuildRequires:  ant-nodeps
+BuildRequires: ant-nodeps
 %endif
-BuildRequires:  java-devel >= 1.7.0
-Version:        @OXVERSION@
-%define         ox_release 1
-Release:        %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Xerces Compat for IBM Java
-AutoReqProv:    no
-Requires:       java-ibm >= 1.7.0
-Provides:       open-xchange-xerces
-Conflicts:      open-xchange-xerces-sun
+BuildRequires: java-devel >= 1.7.0
+Version:       @OXVERSION@
+%define        ox_release 2
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Xerces Compat for IBM Java
+AutoReqProv:   no
+Requires:      java-ibm >= 1.7.0
+Provides:      open-xchange-xerces
+Conflicts:     open-xchange-xerces-sun
 
 %description
 Xerces compatibility for OX installations on IBM JVM.
@@ -50,6 +50,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
+* Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-12 (2671)
 * Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>

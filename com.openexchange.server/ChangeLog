@@ -1,3 +1,108 @@
+* 2015-08-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40725: Provide a personal part in E-Mail address to bypass "TO_NO_BRKTS_HTML_IMG" spam rule
+
+* 2015-08-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40548: Allow a separate hostname for guest users
+
+* 2015-08-26 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40596: Disabled "DELETE" object permission
+
+* 2015-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities.
+ - Fix for bug 40731: Check schema prior to listing contexts (or any other schema-incompatible operation)
+
+* 2015-08-26 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 40622: Avoid the ClassCastException by providing the correct type when searching in distribution lists with the LdapContactStorage
+ - Fix for bug 40660: Set the filename of the temp managed file
+
+* 2015-08-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38603: Do store a copy in standard sent folder if message has been partially sent
+
+* 2015-08-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40627: Anonymize extended permission entities
+
+* 2015-08-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40534: Avoid inheriting virtual "all guests" permission on folder creation
+ - Fix for bug 40655: Advertise client parameter when in authenticated state
+ - Fix for bug 40518: Fixed type in liquibase changeset
+ - Fix for bug 40653: Added null guard to debug logging
+ - Fix for bug 40638: Added null guard when serving an action=path request
+ - Fix for bug 40640: Also check start/end date content
+
+* 2015-08-24 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 40639: Ensure that the content map of the entry is not 'null'
+
+* 2015-08-21 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 40645: Check for S/MIME protocol for signed multipart messages, when validating SMIME signature
+
+* 2015-08-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40636: Don't continue with auto-login if guest user can't be resolved
+
+* 2015-08-21 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 40513: Keep track of temporary files that are still processing and prevent deleting those until they are done
+ - Fix for bug 40516: Fall-back value for version number in case Google Drive returns an empty map (aligned according to the rest method calls)
+
+* 2015-08-21 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 40471: Ensure UTF-8 encoding is used when writing / reading VCards
+
+* 2015-08-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38266: Introduced property to specify such IP ranges for which the send rate limit shall not be applied
+ - Fix for bug 40588: Gracefully handle concurrent write attempts of the same version for a document
+
+* 2015-08-20 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 40508: Add "edit_password" capability to capability set for non-anonymous guests
+
+* 2015-08-19 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 40452: Ensure title is checked when checking recurring task for duplicates
+
+* 2015-08-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38404: Creator of series is losing his confirmation status, if change exceptions are created.
+ - Fix for bug 40378: Unable to create delete exceptions on first try.
+
+* 2015-08-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table + Return proper SQL CREATE statement
+ - Fix for bug 40439: Introduced a special "ShutDownRuntimeException" that gets thrown if services are attempted being obtained during shut-down
+ - Fix for bug 40514: Optionally get a file's revisions
+
+* 2015-08-18 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 38068: Fold references header in custom headers supplied by OX7 UI
+
+* 2015-08-18 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40468: Don't signal admin flag for virtual file storage root folders
+
+* 2015-08-17 - jan.bauerdick@openx-change.com
+
+ - Fix for bug 40411: Use correct exit code
+
+* 2015-08-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40410: Auto-select new non-conflicting file name
+ - Fix for bug 40437: Fixed re-authorize action
+
+* 2015-08-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 40443: Added dependency to open-xchange-system package to util-linux or which so the tool which is installed and available.
+
 * 2015-08-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 40395: Leave subscription status untouched when doing cascading permission changes
@@ -106,6 +211,7 @@
 
 * 2015-07-29 - martin.herfurth@open-xchange.com
 
+ - Fix for bug 40433: Fixed bad UpdateTask/CreateTableTask
  - Fix for bug 39571: Avoid double booking of resources.
 
 * 2015-07-28 - thorben.betten@open-xchange.com

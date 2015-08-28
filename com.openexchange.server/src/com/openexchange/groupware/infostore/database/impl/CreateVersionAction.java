@@ -52,10 +52,13 @@ package com.openexchange.groupware.infostore.database.impl;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
 import java.util.List;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.session.Session;
 
 public class CreateVersionAction extends AbstractDocumentListAction {
@@ -96,8 +99,23 @@ public class CreateVersionAction extends AbstractDocumentListAction {
     public void perform() throws OXException {
         assureExistence();
 
-        final InfostoreQueryCatalog queryCatalog = getQueryCatalog();
-        doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), getDocuments());
+        List<DocumentMetadata> documents = getDocuments();
+        try {
+            InfostoreQueryCatalog queryCatalog = getQueryCatalog();
+            doUpdates(queryCatalog.getVersionInsert(), queryCatalog.getWritableVersionFields(), documents);
+        } catch (OXException e) {
+            if (!DBPoolingExceptionCodes.SQL_ERROR.equals(e) || !(e.getCause() instanceof SQLException)) {
+                throw e;
+            }
+
+            SQLException sqle = (SQLException) e.getCause();
+            if (Databases.isPrimaryKeyConflictInMySQL(sqle)) {
+                DocumentMetadata document = documents.get(0);
+                throw InfostoreExceptionCodes.CONCURRENT_VERSION_CREATION.create(sqle, Integer.valueOf(document.getVersion()), Integer.valueOf(document.getId()));
+            }
+
+            throw e;
+        }
     }
 
     @Override

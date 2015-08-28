@@ -78,6 +78,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
@@ -128,6 +129,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -184,6 +186,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -191,6 +194,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.user.UserService;
+import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
  * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
@@ -1919,15 +1923,45 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
         }
         /*
-         * Set account information
+         * Set account information & filter null elements
          */
-        List<MailMessage> l = new LinkedList<MailMessage>();
-        for (MailMessage mail : mails) {
-            if (mail != null) {
-                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                    mail.setAccountId(accountId);
+        {
+            List<MailMessage> l = null;
+            int j = 0;
+
+            boolean b = true;
+            while (b && j < mails.length) {
+                MailMessage mail = mails[j];
+                if (mail == null) {
+                    l = new ArrayList<MailMessage>(mails.length);
+                    if (j > 0) {
+                        for (int k = 0; k < j; k++) {
+                            l.add(mails[k]);
+                        }
+                    }
+                    b = false;
+                } else {
+                    if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                        mail.setAccountId(accountId);
+                    }
+                    j++;
                 }
-                l.add(mail);
+            }
+
+            if (null != l && j < mails.length) {
+                while (j < mails.length) {
+                    MailMessage mail = mails[j];
+                    if (mail != null) {
+                        if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                            mail.setAccountId(accountId);
+                        }
+                        l.add(mail);
+                    }
+                    j++;
+                }
+
+                mails = l.toArray(new MailMessage[l.size()]);
+                l = null; // Help GC
             }
         }
         /*
@@ -1947,7 +1981,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (OXException e) {
             LOG.error("", e);
         }
-        return new SearchIteratorDelegator<MailMessage>(l);
+        return new ArrayIterator<MailMessage>(mails);
     }
 
     private static boolean onlyNull(MailMessage[] mails) {
@@ -2748,6 +2782,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
+    private static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
+        for (IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void sendFormMail(ComposedMailMessage composedMail, int groupId, int accountId) throws OXException {
         /*
@@ -2810,7 +2853,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                    transport.sendMailMessage(composedMail, ComposeType.NEW);
+                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     transport.sendMailMessage(composedMail, ComposeType.NEW);
@@ -2848,25 +2893,53 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Send mail
              */
-            long startTransport;
             MailMessage sentMail;
-            startTransport = System.currentTimeMillis();
-            MailProperties properties = MailProperties.getInstance();
-            if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                int rateLimit = properties.getRateLimit();
-                rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
-                sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                setRateLimitTime(rateLimit);
-            } else {
-                sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+            OXException oxError = null;
+            Collection<InternetAddress> validRecipients = null;
+            long startTransport = System.currentTimeMillis();
+            try {
+                MailProperties properties = MailProperties.getInstance();
+                if (isWhitelistedFromRateLimit(session.getLocalIp(), properties.getDisabledRateLimitRanges())) {
+                    sentMail = transport.sendMailMessage(composedMail, ComposeType.NEW);
+                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+                    int rateLimit = properties.getRateLimit();
+                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                    setRateLimitTime(rateLimit);
+                } else {
+                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                }
+                mailSent = true;
+            } catch (OXException e) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                    throw e;
+                }
+
+                MailMessage ma = (MailMessage) e.getArgument("sent_message");
+                if (null == ma) {
+                    throw e;
+                }
+
+                sentMail = ma;
+                oxError = e;
+                mailSent = true;
+                if (e.getCause() instanceof SMTPSendFailedException) {
+                    SMTPSendFailedException sendFailed = (SMTPSendFailedException) e.getCause();
+                    Address[] validSentAddrs = sendFailed.getValidSentAddresses();
+                    if (validSentAddrs != null && validSentAddrs.length > 0) {
+                        validRecipients = new ArrayList<InternetAddress>(validSentAddrs.length);
+                        for (Address validAddr : validSentAddrs) {
+                            validRecipients.add((InternetAddress) validAddr);
+                        }
+                    }
+                }
             }
-            mailSent = true;
             /*
              * Email successfully sent, trigger data retention
              */
             DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
             if (null != retentionService) {
-                triggerDataRetention(transport, startTransport, sentMail, retentionService);
+                triggerDataRetention(transport, startTransport, sentMail, validRecipients, retentionService);
             }
             /*
              * Check for a reply/forward
@@ -2932,7 +3005,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
                 return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
             }
-            return append2SentFolder(sentMail).toString();
+            String mailPath = append2SentFolder(sentMail).toString();
+            if (null != oxError) {
+                throw oxError;
+            }
+            return mailPath;
         } catch (OXException e) {
             if (!mailSent) {
                 throw e;
@@ -2953,7 +3030,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
     }
 
-    private void triggerDataRetention(final MailTransport transport, final long startTransport, final MailMessage sentMail, final DataRetentionService retentionService) {
+    private void triggerDataRetention(final MailTransport transport, final long startTransport, final MailMessage sentMail, final Collection<InternetAddress> recipients, final DataRetentionService retentionService) {
         /*
          * Create runnable task
          */
@@ -2966,15 +3043,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 try {
                     RetentionData retentionData = retentionService.newInstance();
                     retentionData.setStartTime(new Date(startTransport));
-                    retentionData.setIdentifier(transport.getTransportConfig().getLogin());
+                    String login = transport.getTransportConfig().getLogin();
+                    retentionData.setIdentifier(login);
                     retentionData.setIPAddress(session.getLocalIp());
                     retentionData.setSenderAddress(IDNA.toIDN(sentMail.getFrom()[0].getAddress()));
-                    Set<InternetAddress> recipients = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
-                    recipients.addAll(Arrays.asList(sentMail.getCc()));
-                    recipients.addAll(Arrays.asList(sentMail.getBcc()));
-                    int size = recipients.size();
+
+                    Set<InternetAddress> recipientz;
+                    if (null == recipients) {
+                        recipientz = new HashSet<InternetAddress>(Arrays.asList(sentMail.getTo()));
+                        recipientz.addAll(Arrays.asList(sentMail.getCc()));
+                        recipientz.addAll(Arrays.asList(sentMail.getBcc()));
+                    } else {
+                        recipientz = new HashSet<InternetAddress>(recipients);
+                    }
+
+                    int size = recipientz.size();
                     String[] recipientsArr = new String[size];
-                    Iterator<InternetAddress> it = recipients.iterator();
+                    Iterator<InternetAddress> it = recipientz.iterator();
                     for (int i = 0; i < size; i++) {
                         recipientsArr[i] = IDNA.toIDN(it.next().getAddress());
                     }

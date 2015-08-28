@@ -59,6 +59,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -87,17 +88,60 @@ public interface InfostoreFacade extends TransactionAware {
     /** Descending sort order */
     static final int DESC = -1;
 
+    /** Permission for documents; either due to folder or object permissions **/
+    static enum AccessPermission {
+        READ {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canReadObject();
+            }
+        },
+        WRITE {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canWriteObject();
+            }
+        },
+        DELETE {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canDeleteObject();
+            }
+        },
+        ;
+
+        /**
+         * Checks if this permission applies to the passed effective infostore permission.
+         *
+         * @param effectivePermission The effective permission
+         * @return <code>true</code> if the permission applies
+         */
+        public abstract boolean appliesTo(EffectiveInfostorePermission effectivePermission);
+    }
+
+    /**
+     * Checks if denoted document exists and the sessions user can read it.
+     *
+     * @param id The identifier
+     * @param version The version
+     * @param session The session
+     * @return <code>true</code> if it exists and is visible; otherwise <code>false</code>
+     * @throws OXException If checking for existence fails
+     * @see #CURRENT_VERSION
+     */
+    boolean exists(int id, int version, ServerSession session) throws OXException;
+
     /**
      * Checks if denoted document exists.
      *
      * @param id The identifier
      * @param version The version
-     * @param session The session
+     * @param context The context
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws OXException If checking for existence fails
      * @see #CURRENT_VERSION
      */
-    boolean exists(int id, int version, ServerSession session) throws OXException;
+    boolean exists(int id, int version, Context context) throws OXException;
 
     /**
      * Gets the denoted document's meta data information.
@@ -543,4 +587,16 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If operation fails
      */
     IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
+
+    /**
+     * Checks whether a user has a certain access permission for a certain file.
+     *
+     * @param id The ID of the document
+     * @param permission The permission
+     * @param user The user
+     * @param context The context
+     * @throws OXException If operation fails
+     */
+    boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException;
+
 }

@@ -105,7 +105,7 @@ public class GetLinkAction extends AbstractShareAction {
                 if (null == shareInfo) {
                     AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
                     CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
-                    shareInfo = createdShare.getFirstInfo();
+                    shareInfo = createdShare.getShareInfo();
                     isNew = true;
                 }
             } catch (OXException e) {

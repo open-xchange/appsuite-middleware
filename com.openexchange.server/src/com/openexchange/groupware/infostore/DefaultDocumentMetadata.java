@@ -69,6 +69,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected Date creationDate;
     protected int modifiedBy;
     protected long folderId;
+    protected long originalFolderId = -1;
     protected String title;
     protected int version;
     protected String content;
@@ -76,6 +77,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected String fileMIMEType;
     protected String fileName;
     protected int id;
+    protected int originalId = -1;
     protected int createdBy;
     protected String description;
     protected String url;
@@ -145,6 +147,20 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     }
 
     @Override
+    public long getOriginalFolderId() {
+        if (originalFolderId < 0) {
+            return getFolderId();
+        }
+
+        return originalFolderId;
+    }
+
+    @Override
+    public void setOriginalFolderId(long id) {
+        originalFolderId = id;
+    }
+
+    @Override
     public String getTitle() {
         return title;
     }
@@ -211,6 +227,19 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public int getOriginalId() {
+        if (originalId < 0) {
+            return getId();
+        }
+        return originalId;
+    }
+
+    @Override
+    public void setOriginalId(int id) {
+        originalId = id;
     }
 
     @Override

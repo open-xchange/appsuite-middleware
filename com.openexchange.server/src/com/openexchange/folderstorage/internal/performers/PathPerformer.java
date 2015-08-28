@@ -221,7 +221,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
             UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
             path.add(userizedFolder);
-            while (!FolderStorage.ROOT_ID.equals(userizedFolder.getParentID())) {
+            while (!FolderStorage.ROOT_ID.equals(userizedFolder.getParentID()) && null != userizedFolder.getParentID()) {
                 final FolderStorage fs = getOpenedStorage(userizedFolder.getParentID(), treeId, storageParameters, openedStorages);
                 folder = fs.getFolder(treeId, userizedFolder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);

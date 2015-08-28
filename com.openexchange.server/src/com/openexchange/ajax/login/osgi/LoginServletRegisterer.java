@@ -69,8 +69,10 @@ import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.ShareLoginConfiguration.ShareLoginProperty;
 import com.openexchange.ajax.login.session.CookieRefresher;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.InitProperty;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.ConfigurationProperty;
@@ -169,6 +171,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.DISABLE_TRIM_LOGIN);
             addProperty(params, ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID);
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
+            /*
+             * add properties for share login configuration
+             */
+            for (ShareLoginProperty property : ShareLoginProperty.values()) {
+                addProperty(params, property);
+            }
             try {
                 LOG.info("Registering login servlet.");
                 String alias = prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
@@ -200,9 +208,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
     }
 
-    private void addProperty(final Dictionary<String, String> params, final com.openexchange.login.ConfigurationProperty property) {
-        final String propertyName = property.getPropertyName();
-        final String value = configService.getProperty(propertyName, property.getDefaultValue());
+    private void addProperty(Dictionary<String, String> params, InitProperty property) {
+        String propertyName = property.getPropertyName();
+        String value = configService.getProperty(propertyName, property.getDefaultValue());
         if (null != value) {
             params.put(propertyName, value.trim());
         }

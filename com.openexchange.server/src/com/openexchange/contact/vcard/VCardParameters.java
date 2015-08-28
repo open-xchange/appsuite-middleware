@@ -227,4 +227,19 @@ public interface VCardParameters {
      */
     VCardParameters setRemoveImageFromKeptVCard(boolean removeImageFromKeptVCard);
 
+    /**
+     * Gets a value whether to enforce the VCard should be use the UTF-8 charset for reading and writing the VCard.
+     *
+     * @return <code>true</code> if UTF-8 should be enforced,
+     *         <code>false</code>, otherwise Java default charset is used
+     */
+    boolean isEnforceUtf8();
+
+    /**
+     * Gets a value whether to enforce the VCard should be use the UTF-8 charset for reading and writing the VCard.
+     *
+     * @param enforceUtf8
+     */
+    void setEnforceUtf8(boolean enforceUtf8);
+
 }

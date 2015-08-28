@@ -85,10 +85,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "allVisible", description = "Get all visible folder of a certain module (since v6.18.2) ", parameters = {
+@Action(method = RequestMethod.GET, name = "allVisible", description = "Get all visible folder of a certain module (since v6.18.2) ", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "tree", description = "The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "content_type", description = "The desired content type (either numbers or strings; e.g. \"tasks\", \"calendar\", \"contacts\", \"mail\")"),
+    @Parameter(name = "content_type", description = "The desired content type (either numbers or strings; e.g. \"tasks\", \"calendar\", \"contacts\", \"mail\", \"infostore\")"),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for folders are defined in Common folder data and Detailed folder data.")
 }, requestBody = "None",
 responseDescription = "Response with timestamp: A JSON object containing three fields: \"private\", \"public\", and \"shared\". Each field is a JSON array with data for all folders. Each folder is itself described by an array.")

@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.ObjectPermission;
@@ -495,6 +496,16 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
+            public void setOriginalId(int id) {
+                // nothing to do
+            }
+
+            @Override
+            public void setOriginalFolderId(long id) {
+                // nothing to do
+            }
+
+            @Override
             public boolean isCurrentVersion() {
                 return file.isCurrentVersion();
             }
@@ -657,8 +668,59 @@ public class FileMetadata implements DocumentMetadata {
             public void setShareable(boolean shareable) {
                 file.setShareable(shareable);
             }
+
+            @Override
+            public int getOriginalId() {
+                if (file instanceof UserizedFile) {
+                    return Integer.parseInt(((UserizedFile) file).getOriginalId());
+                }
+
+                return getId();
+            }
+
+            @Override
+            public long getOriginalFolderId() {
+                if (file instanceof UserizedFile) {
+                    return Long.parseLong(((UserizedFile) file).getOriginalFolderId());
+                }
+
+                return getFolderId();
+            }
+
         };
         return metaData;
+    }
+
+    @Override
+    public int getOriginalId() {
+        if (file instanceof UserizedFile) {
+            return Integer.parseInt(((UserizedFile) file).getOriginalId());
+        }
+
+        return getId();
+    }
+
+    @Override
+    public void setOriginalId(int id) {
+        if (file instanceof UserizedFile) {
+            ((UserizedFile) file).setOriginalId(Integer.toString(id));
+        }
+    }
+
+    @Override
+    public long getOriginalFolderId() {
+        if (file instanceof UserizedFile) {
+            return Long.parseLong(((UserizedFile) file).getOriginalFolderId());
+        }
+
+        return getFolderId();
+    }
+
+    @Override
+    public void setOriginalFolderId(long id) {
+        if (file instanceof UserizedFile) {
+            ((UserizedFile) file).setOriginalFolderId(Long.toString(id));
+        }
     }
 
 }

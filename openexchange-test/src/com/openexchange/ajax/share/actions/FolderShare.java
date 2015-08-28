@@ -53,9 +53,12 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.Parser;
+import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * {@link FolderShare}
@@ -83,6 +86,25 @@ public class FolderShare extends FolderObject {
                     break;
             }
         }
+        return folderShare;
+    }
+
+    /**
+     * Parses a {@link FolderShare}.
+     *
+     * @param jsonObject The json object from a <code>folder/get</code> response
+     * @param timeZone The client timezone
+     */
+    public static FolderShare parse(JSONObject jsonObject, TimeZone timeZone) throws JSONException, OXException {
+        FolderShare folderShare = new FolderShare();
+        if (jsonObject.has(FolderFields.FOLDER_ID)) {
+            String tmp = jsonObject.getString(FolderFields.FOLDER_ID);
+            if (tmp.startsWith(FolderObject.SHARED_PREFIX)) {
+                jsonObject.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+            }
+        }
+        new FolderParser().parse(folderShare, jsonObject);
+        folderShare.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonObject.optJSONArray("com.openexchange.share.extendedPermissions"), timeZone);
         return folderShare;
     }
 

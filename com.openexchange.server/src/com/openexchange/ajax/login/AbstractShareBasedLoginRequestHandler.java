@@ -50,12 +50,13 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
-import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
+import static com.openexchange.ajax.LoginServlet.getShareCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -92,11 +93,12 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Cookies;
 
 
 /**
@@ -108,7 +110,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLoginRequestHandler {
 
     /** The login configuration */
-    protected final LoginConfiguration conf;
+    protected final ShareLoginConfiguration conf;
 
     /**
      * Initializes a new {@link AbstractShareBasedLoginRequestHandler}.
@@ -116,7 +118,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @param conf The login configuration
      * @param rampUpServices The ramp-up services
      */
-    protected AbstractShareBasedLoginRequestHandler(LoginConfiguration conf, Set<LoginRampUpService> rampUpServices) {
+    protected AbstractShareBasedLoginRequestHandler(ShareLoginConfiguration conf, Set<LoginRampUpService> rampUpServices) {
         super(rampUpServices);
         this.conf = conf;
     }
@@ -159,9 +161,9 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
         String targetPath = httpRequest.getParameter("target");
-        final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
+        final PersonalizedShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolvePersonalizedTarget(targetPath);
 
-        final LoginConfiguration conf = this.conf;
+        final LoginConfiguration conf = this.conf.getLoginConfig(share);
         LoginClosure loginClosure = new LoginClosure() {
 
             @Override
@@ -296,14 +298,22 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
                 /*
-                 * set secret, share and public session cookies
+                 * set secret & share cookies
                  */
-                String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseClient(request, false, loginConfig.getDefaultClient()));
-                response.addCookie(configureCookie(new Cookie(SHARE_PREFIX + hash, share.getGuest().getBaseToken()), request, loginConfig));
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-                String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null != altId) {
-                    response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
+                if (loginConfig.isSessiondAutoLogin()) {
+                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+                }
+                /*
+                 * set public session cookie if not yet present
+                 */
+                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+                Cookie cookie = cookies.get(getPublicSessionCookieName(request));
+                if (null == cookie) {
+                    String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+                    if (null != altId) {
+                        response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
+                    }
                 }
             }
         };

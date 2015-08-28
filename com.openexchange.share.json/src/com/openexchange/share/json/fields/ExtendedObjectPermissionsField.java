@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -138,7 +139,7 @@ public class ExtendedObjectPermissionsField implements AdditionalFileField {
                     }
                 }
                 return jsonArray;
-            } catch (JSONException e) {
+            } catch (JSONException | OXException e) {
                 org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).error("Error serializing extended permissions", e);
             }
         }

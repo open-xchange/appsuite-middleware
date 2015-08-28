@@ -283,6 +283,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts and remembers a new shared folder containing the supplied guest permissions.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param parent The ID of the parent folder
+     * @param name The folders name
+     * @param permissions The permissions to add
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertSharedFolder(EnumAPI api, int module, int parent, String name, OCLPermission[] permissions) throws Exception {
+        FolderObject sharedFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId(), permissions);
+        sharedFolder.setParentFolderID(parent);
+        return insertFolder(api, sharedFolder);
+    }
+
+    /**
      * Inserts and remembers a new private folder.
      *
      * @param api The folder tree to use
@@ -415,11 +432,25 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
+        return insertSharedFile(folderID, filename, null == permission ? null : Collections.singletonList(permission), data);
+    }
+
+    /**
+     * Inserts and remembers a new shared file with random content.
+     *
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected File insertSharedFile(int folderID, String filename, List<FileStorageObjectPermission> permissions, byte[] data) throws Exception {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
-        if (null != permission) {
-            metadata.setObjectPermissions(Collections.<FileStorageObjectPermission>singletonList(permission));
+        if (null != permissions) {
+            metadata.setObjectPermissions(permissions);
         }
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         newRequest.setNotifyPermissionEntities(Transport.MAIL);
@@ -1084,9 +1115,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         objectPermission.setEntity(guestPermission.getEntity());
         objectPermission.setGroup(guestPermission.isGroupPermission());
         objectPermission.setRecipient(guestPermission.getRecipient());
-        if (guestPermission.canDeleteAllObjects()) {
-            objectPermission.setPermissions(FileStorageObjectPermission.DELETE);
-        } else if (guestPermission.canWriteAllObjects()) {
+        if (guestPermission.canWriteAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.WRITE);
         } else if (guestPermission.canReadAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.READ);

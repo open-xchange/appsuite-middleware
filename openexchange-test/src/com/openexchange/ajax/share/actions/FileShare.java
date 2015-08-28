@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -87,6 +88,30 @@ public class FileShare extends DefaultFile {
                     Object converted = FileMetadataFieldParser.convert(field, orig);
                     field.doSwitch(fileFieldSet, fileShare, converted);
                     break;
+            }
+        }
+        return fileShare;
+    }
+
+    /**
+     * Parses a {@link FileShare}.
+     *
+     * @param jsonObject The json object from an <code>infostore/get</code> response
+     * @param timeZone The client timezone
+     */
+    public static FileShare parse(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
+        FileShare fileShare = new FileShare();
+        FileFieldSet fileFieldSet = new FileFieldSet();
+        for (String key : jsonObject.keySet()) {
+            if ("com.openexchange.share.extendedObjectPermissions".equals(key)) {
+                fileShare.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonObject.optJSONArray(key), timeZone);
+            } else {
+                Field field = File.Field.get(key);
+                if (null != field) {
+                    Object orig = jsonObject.get(key);
+                    Object converted = FileMetadataFieldParser.convert(field, orig);
+                    field.doSwitch(fileFieldSet, fileShare, converted);
+                }
             }
         }
         return fileShare;

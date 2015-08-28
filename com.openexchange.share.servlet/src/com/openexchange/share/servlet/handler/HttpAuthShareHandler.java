@@ -53,14 +53,14 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.ShareLoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 
 
@@ -98,7 +98,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
-    protected abstract boolean handles(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    protected abstract boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Handles the given resolved share.
@@ -110,7 +110,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException;
 
     @Override
-    public ShareHandlerReply handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (false == handles(share, target, request, response)) {
             return ShareHandlerReply.NEUTRAL;
         }

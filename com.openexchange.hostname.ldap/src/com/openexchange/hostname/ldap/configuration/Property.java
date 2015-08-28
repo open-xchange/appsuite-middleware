@@ -54,6 +54,7 @@ public enum Property implements PropertyInterface {
     search_base(String.class, Required.TRUE, "com.openexchange.hostname.ldap.search_base"),
     query_filter(String.class, Required.TRUE, "com.openexchange.hostname.ldap.query_filter"),
     result_attribute(String.class, Required.TRUE, "com.openexchange.hostname.ldap.result_attribute"),
+    guest_result_attribute(String.class, Required.TRUE, "com.openexchange.hostname.ldap.guest_result_attribute"),
     scope(SearchScope.class, Required.TRUE, "com.openexchange.hostname.ldap.scope"),
     bind(Boolean.class, Required.TRUE, "com.openexchange.hostname.ldap.bind"),
     bind_dn(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(bind, Boolean.TRUE)}), "com.openexchange.hostname.ldap.bind_dn"),

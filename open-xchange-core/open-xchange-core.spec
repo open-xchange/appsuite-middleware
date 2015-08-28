@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -851,21 +851,30 @@ if [ \( -e /opt/open-xchange/etc/file-logging.properties \) -a \( ! \( -e /opt/o
     </appender>
 </configuration>
 EOF
-    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-    rm -f /opt/open-xchange/etc/logback.xml.new
+    if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+        cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new
+    fi
+    
     MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         TMPFILE=$(mktemp)
+        
         /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+            rm -f /opt/open-xchange/etc/logback.xml.new
+        fi
+        
+        rm -f $TMPFILE
     fi
 fi
-rm -f /opt/open-xchange/etc/file-logging.properties
+[ -e /opt/open-xchange/etc/file-logging.properties ] && rm -f /opt/open-xchange/etc/file-logging.properties
+
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
 <configuration>
@@ -874,20 +883,29 @@ if [ -e /opt/open-xchange/etc/log4j.xml ]; then
     </appender>
 </configuration>
 EOF
-    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+        cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new
+    fi
+
     MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         TMPFILE=$(mktemp)
+
         /opt/open-xchange/sbin/extractLog4JModifications -i /opt/open-xchange/etc/log4j.xml | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+            rm -f /opt/open-xchange/etc/logback.xml.new
+        fi
+
+        rm -f $TMPFILE
     fi
+    rm -f /opt/open-xchange/etc/log4j.xml
 fi
-rm -f /opt/open-xchange/etc/log4j.xml
 
 # SoftwareChange_Request-1773
 ox_add_property com.openexchange.hazelcast.network.symmetricEncryption false /opt/open-xchange/etc/hazelcast.properties
@@ -964,8 +982,10 @@ cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.
     <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator"/>
 </configuration>
 EOF
-cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-rm -f /opt/open-xchange/etc/logback.xml.new
+if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+    cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
+fi
 
 # SoftwareChange_Request-1990
 ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
@@ -1210,6 +1230,22 @@ ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xcha
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
+# SoftwareChange_Request-2672
+ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2665
+ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
+
+# SoftwareChange_Request-2662
+ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
+
+# SoftwareChange_Request-2652
+ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1250,6 +1286,12 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
+* Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-12 (2671)
 * Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-17 (2666)
 * Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>

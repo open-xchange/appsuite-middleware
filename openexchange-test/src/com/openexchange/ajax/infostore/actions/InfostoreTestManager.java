@@ -154,6 +154,21 @@ public class InfostoreTestManager {
         createdEntities.add(data);
     }
 
+    public String copyAction(String id, String folderId, File data) throws OXException, IOException, JSONException {
+        CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
+        copyRequest.setFailOnError(getFailOnError());
+        CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
+        lastResponse = copyResponse;
+        return copyResponse.getID();
+    }
+
+    public Object getConfigAction(String name) throws OXException, IOException, JSONException {
+        GetInfostoreConfigRequest req = new GetInfostoreConfigRequest(name);
+        req.setFailOnError(getFailOnError());
+        AbstractAJAXResponse resp = getClient().execute(req);
+        return resp.getResponse().getData();
+    }
+
     public void updateAction(File data, Field[] fields, Date timestamp) throws OXException, IOException, JSONException {
         UpdateInfostoreRequest updateRequest = new UpdateInfostoreRequest(data, fields, timestamp);
         updateRequest.setFailOnError(getFailOnError());

@@ -84,7 +84,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryName() };
+        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryTable() };
     }
 
     @Override
@@ -156,7 +156,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     public String[] requiredTables() {
-        return new String[] { "snippetAttachment" };
+        return NO_TABLES;
     }
 
     @Override

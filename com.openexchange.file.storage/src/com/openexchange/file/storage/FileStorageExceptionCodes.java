@@ -247,7 +247,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Versioning not supported by '%1$s' file storage.
      */
-    VERSIONING_NOT_SUPPORTED("Versioning not supported by '%1$s%' file storage.", Category.CATEGORY_ERROR, 46, null),
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by '%1$s' file storage.", Category.CATEGORY_ERROR, 46, null),
     /**
      * The %1$s URL does not denote a file: %2$s
      */

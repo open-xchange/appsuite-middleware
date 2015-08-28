@@ -711,6 +711,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             capabilities.add(getCapability("guest"));
             capabilities.remove(getCapability("share_links"));
             capabilities.remove(getCapability("invite_guests"));
+            if (!Strings.isEmpty(user.getMail())) {
+                capabilities.add(getCapability("edit_password"));
+            }
         }
     }
 
@@ -899,12 +902,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     /**
-     * Gets the capabilities tree showing which capability comes from which source
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The capabilities tree
-     * @throws OXException If capabilities tree cannot be returned
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {

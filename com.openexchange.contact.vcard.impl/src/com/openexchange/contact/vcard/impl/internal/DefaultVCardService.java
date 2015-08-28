@@ -69,6 +69,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
 import ezvcard.Ezvcard.WriterChainText;
+import ezvcard.util.IOUtils;
 import ezvcard.VCard;
 
 /**
@@ -168,7 +169,11 @@ public class DefaultVCardService implements VCardService {
         WriterChainText writerChain = Ezvcard.write(vCards);
         applyOptions(getParametersOrDefault(parameters), writerChain);
         try {
-            writerChain.go(fileHolder.asOutputStream());
+            if(parameters.isEnforceUtf8()) {
+                writerChain.go(IOUtils.utf8Writer(fileHolder.asOutputStream()));
+            } else {
+                writerChain.go(fileHolder.asOutputStream());
+            }
             return fileHolder;
         } catch (IOException e) {
             Streams.close(fileHolder);

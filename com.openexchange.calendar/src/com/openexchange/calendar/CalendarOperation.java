@@ -441,7 +441,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean includePrivateAppointmentsOfSharedFolderOwner = false;;
 
-    private static CalendarCollection recColl = new CalendarCollection();
+    private static final CalendarCollection recColl = new CalendarCollection();
 
     final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder) throws SQLException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
@@ -679,12 +679,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsShownAs() && recColl.check(I(cdao.getShownAs()), I(edao.getShownAs())) && recColl.getFieldName(Appointment.SHOWN_AS) != null) {
             ucols[uc++] = Appointment.SHOWN_AS;
         }
-        if (cdao.containsStartDate() && recColl.check(
+        if (cdao.containsStartDate() && cdao.getStartDate() != null && recColl.check(
             Long.valueOf(cdao.getStartDate().getTime()),
             Long.valueOf(edao.getStartDate().getTime())) && recColl.getFieldName(CalendarObject.START_DATE) != null) {
             ucols[uc++] = CalendarObject.START_DATE;
         }
-        if (cdao.containsEndDate() && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
+        if (cdao.containsEndDate() && cdao.getEndDate() != null && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
             ucols[uc++] = CalendarObject.END_DATE;
         }
         if (cdao.containsLocation() && recColl.check(cdao.getLocation(), edao.getLocation()) && recColl.getFieldName(Appointment.LOCATION) != null) {
@@ -989,7 +989,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         simpleDataCheck(cdao, edao, uid);
         fillUserParticipants(cdao);
-        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        if (isInsert) {
+            recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        }
         return isInsert;
     }
 
@@ -1839,6 +1841,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.changeRecurrenceString(cdao);
             }
             cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+            correctStartAndEndDate(cdao);
             cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
@@ -1848,6 +1851,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return CalendarCollectionService.RECURRING_EXCEPTION_DELETE;
         }
         return CalendarCollectionService.RECURRING_NO_ACTION;
+    }
+
+    private void correctStartAndEndDate(CalendarDataObject cdao) throws OXException {
+        RecurringResultsInterface results = recColl.calculateFirstRecurring(cdao);
+        RecurringResultInterface result = results.getRecurringResult(0);
+        if (cdao.getStartDate().getTime() != result.getStart()) {
+            cdao.setStartDate(new Date(result.getStart()));
+        }
+        if (cdao.getEndDate().getTime() != result.getEnd()) {
+            cdao.setEndDate(new Date(result.getEnd()));
+        }
     }
 
     private void calculateEndDateForNoType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
@@ -1995,7 +2009,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-            //checkAndRemoveRecurrenceFields(cdao);
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
             cdao.setRecurrence(edao.getRecurrence());
             /*
              * Return specified recurring action unchanged

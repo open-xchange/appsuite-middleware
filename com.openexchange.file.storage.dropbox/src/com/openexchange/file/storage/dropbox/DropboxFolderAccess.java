@@ -149,10 +149,12 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, path);
             }
             List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
-            for (Entry childEntry : entry.contents) {
-                if (childEntry.isDir && false == childEntry.isDeleted) {
-                    Entry ce = dropboxAPI.metadata(childEntry.path, 0, null, true, null);
-                    list.add(new DropboxFolder(ce, userId, accountDisplayName));
+            if (entry.contents != null) {
+                for (Entry childEntry : entry.contents) {
+                    if (childEntry.isDir && false == childEntry.isDeleted) {
+                        Entry ce = dropboxAPI.metadata(childEntry.path, 0, null, true, null);
+                        list.add(new DropboxFolder(ce, userId, accountDisplayName));
+                    }
                 }
             }
             return list.toArray(new FileStorageFolder[0]);
@@ -300,9 +302,9 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         /*
-         * quota_info/normal   The user's used quota outside of shared folders (bytes).
-         * quota_info/shared   The user's used quota in shared folders (bytes).
-         * quota_info/quota    The user's total quota allocation (bytes).
+         * quota_info/normal The user's used quota outside of shared folders (bytes).
+         * quota_info/shared The user's used quota in shared folders (bytes).
+         * quota_info/quota The user's total quota allocation (bytes).
          */
         try {
             Account accountInfo = dropboxAPI.accountInfo();

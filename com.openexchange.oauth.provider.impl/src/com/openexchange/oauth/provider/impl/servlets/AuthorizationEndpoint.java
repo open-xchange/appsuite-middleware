@@ -145,6 +145,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Tools.disableCaching(response);
+        applyFrameOptions(response);
         if (!Tools.considerSecure(request)) {
             response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
             response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -201,6 +202,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Tools.disableCaching(response);
+        applyFrameOptions(response);
         if (!Tools.considerSecure(request)) {
             response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
             response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -926,6 +928,16 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         return scope;
+    }
+
+    /**
+     * Sets the response header <code>X-Frame-Options</code> to <code>SAMEORIGIN</code> to avoid
+     * clickjacking attacks ({@link http://tools.ietf.org/html/draft-ietf-oauth-v2-23#section-10.13}).
+     *
+     * @param response The servlet response
+     */
+    private static void applyFrameOptions(HttpServletResponse response) {
+        response.setHeader(HttpHeaders.X_FRAME_OPTIONS, "SAMEORIGIN");
     }
 
     /**

@@ -1520,12 +1520,34 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number) throws StorageException {
+        int contextId = ctx.getId().intValue();
+
+        // Find file storage for user if a valid quota is specified
+        Long maxQuota = usrdata.getMaxQuota();
+        if (maxQuota != null) {
+            long quota_max_temp = maxQuota.longValue();
+            if (quota_max_temp != -1) {
+                // A valid quota is specified - ensure an appropriate file storage is set
+                Integer fsId = usrdata.getFilestoreId();
+                if (fsId == null || fsId.intValue() <= 0) {
+                    // Auto-select next suitable file storage
+                    OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+                    int fileStorageToPrefer = oxutil.getFilestoreIdFromContext(contextId);
+                    Filestore filestoreForUser = oxutil.findFilestoreForUser(fileStorageToPrefer);
+                    usrdata.setFilestoreId(filestoreForUser.getId());
+                } else {
+                    if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
+                        throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
+                    }
+                }
+            }
+        }
+
         PreparedStatement ps = null;
         final String LOGINSHELL = "/bin/bash";
 
         try {
             ps = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
-            int contextId = ctx.getId().intValue();
             ps.setInt(1, contextId);
             final ResultSet rs = ps.executeQuery();
             int admin_id = 0;
@@ -1666,7 +1688,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 {
-                    Long maxQuota = usrdata.getMaxQuota();
                     if (null != maxQuota) {
                         long quota_max_temp = maxQuota.longValue();
                         if (quota_max_temp != -1) {

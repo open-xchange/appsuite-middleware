@@ -94,14 +94,18 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoLogin.class);
 
     private final LoginConfiguration conf;
+    private final ShareLoginConfiguration shareConf;
 
     /**
      * Initializes a new {@link AutoLogin}.
      *
+     * @param conf A reference to the login configuration
+     * @param shareConf A reference to the share login configuration
      */
-    public AutoLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+    public AutoLogin(LoginConfiguration conf, ShareLoginConfiguration shareConf, Set<LoginRampUpService> rampUp) {
         super(rampUp);
         this.conf = conf;
+        this.shareConf = shareConf;
     }
 
     @Override
@@ -111,22 +115,22 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         Response response = new Response();
         Session session = null;
         try {
-            if (!conf.isSessiondAutoLogin()) {
-                // Auto-login disabled per configuration.
-                // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                if (doAutoLogin(req, resp)) {
-                    if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
-                        return;
-                    }
-                    throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
-                }
-                return;
-            }
             /*
              * try guest auto-login first
              */
-            LoginResult loginResult = AutoLoginTools.tryGuestAutologin(conf, req, resp);
+            LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
+                if (false == conf.isSessiondAutoLogin()) {
+                    // Auto-login disabled per configuration.
+                    // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                            return;
+                        }
+                        throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
+                    }
+                    return;
+                }
                 /*
                  * try auto-login for regular user
                  */
@@ -205,7 +209,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             /*-
              * Ensure appropriate public-session-cookie is set
              */
-            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), conf);
+            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {

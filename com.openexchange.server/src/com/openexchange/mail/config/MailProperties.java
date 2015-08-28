@@ -55,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -196,6 +198,8 @@ public final class MailProperties implements IMailProperties {
 
     private int defaultArchiveDays;
 
+    private List<IPRange> ranges;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -203,6 +207,7 @@ public final class MailProperties implements IMailProperties {
         super();
         loaded = new AtomicBoolean();
         defaultSeparator = '/';
+        ranges = Collections.emptyList();
     }
 
     /**
@@ -290,6 +295,7 @@ public final class MailProperties implements IMailProperties {
         accountBlacklistRanges = null;
         enforceSecureConnection = false;
         defaultArchiveDays = 90;
+        ranges = Collections.emptyList();
     }
 
     private void loadProperties0() throws OXException {
@@ -602,10 +608,36 @@ public final class MailProperties implements IMailProperties {
                 logBuilder.append("\tSent Rate limit: ").append(rateLimit).append('\n');
             } catch (final NumberFormatException e) {
                 rateLimit = 0;
-                logBuilder.append("\tSent Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
+                logBuilder.append("\tSend Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
                     rateLimit).append('\n');
 
             }
+        }
+
+        {
+            List<IPRange> ranges = new LinkedList<IPRange>();
+            String tmp = configuration.getProperty("com.openexchange.mail.rateLimitDisabledRange", "").trim();
+            if (false == Strings.isEmpty(tmp)) {
+                for (String range : Strings.splitByComma(tmp)) {
+                    if (null == range) {
+                        LOG.warn("Invalid IP range value: 'null'");
+                    } else {
+                        try {
+                            IPRange parsedRange = IPRange.parseRange(range.trim());
+                            if (null == parsedRange) {
+                                LOG.warn("Invalid IP range value: '{}'", range);
+                            } else {
+                                ranges.add(parsedRange);
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Invalid IP range value: '{}'", range, e);
+                        }
+                    }
+
+                }
+            }
+            this.ranges = ranges;
+            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges.isEmpty() ? "<none>" : ranges.toString()).append('\n');
         }
 
         {
@@ -1040,6 +1072,15 @@ public final class MailProperties implements IMailProperties {
      */
     public int getDefaultArchiveDays() {
         return defaultArchiveDays;
+    }
+
+    /**
+     * Gets the IP ranges for which a rate limit must not be applied
+     *
+     * @return The IP ranges
+     */
+    public Collection<IPRange> getDisabledRateLimitRanges() {
+        return ranges;
     }
 
 }

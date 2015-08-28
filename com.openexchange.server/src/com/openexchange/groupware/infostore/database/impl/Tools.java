@@ -114,7 +114,14 @@ public class Tools {
                     possibleWildcards.add(stringBuilder.toString());
                     continue;
                 }
-                int index = filename.lastIndexOf('.');
+                int index = 0;
+                //see Bug 40142
+                if (filename.endsWith(".pgp")) {
+                    index = filename.substring(0, filename.length() - 4).lastIndexOf('.');
+                }
+                else {
+                    index = filename.lastIndexOf('.');
+                }
                 if (0 >= index) {
                     index = filename.length();
                 }

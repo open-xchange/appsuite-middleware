@@ -309,7 +309,17 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setFax_other(tmp);
         }
 
-        Integer itg = soapUser.getFolderTree();
+        Integer itg = soapUser.getFilestoreId();
+        if (itg != null) {
+            user.setFilestoreId(itg);
+        }
+
+        tmp = soapUser.getFilestoreName();
+        if (tmp != null) {
+            user.setFilestore_name(tmp);
+        }
+
+        itg = soapUser.getFolderTree();
         if (itg != null) {
             user.setFolderTree(itg);
         }
@@ -437,6 +447,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         tmp = soapUser.getMaritalStatus();
         if (tmp != null) {
             user.setMarital_status(tmp);
+        }
+
+        Long lng = soapUser.getMaxQuota();
+        if (null != lng) {
+            user.setMaxQuota(lng);
         }
 
         tmp = soapUser.getMiddleName();
@@ -721,6 +736,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setUrl(tmp);
         }
 
+        lng = soapUser.getUsedQuota();
+        if (null != lng) {
+            user.setUsedQuota(lng);
+        }
+
         tmp = soapUser.getUserfield01();
         if (tmp != null) {
             user.setUserfield01(tmp);
@@ -886,6 +906,8 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setFaxBusiness(user.getFax_business());
         soapUser.setFaxHome(user.getFax_home());
         soapUser.setFaxOther(user.getFax_other());
+        soapUser.setFilestoreId(user.getFilestoreId());
+        soapUser.setFilestoreName(user.getFilestore_name());
         soapUser.setFolderTree(user.getFolderTree());
         soapUser.setGivenName(user.getGiven_name());
         soapUser.setGuiPreferencesForSoap(map2Soap(user.getGuiPreferences()));
@@ -908,6 +930,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setMailenabled(user.getMailenabled());
         soapUser.setManagerName(user.getManager_name());
         soapUser.setMaritalStatus(user.getMarital_status());
+        soapUser.setMaxQuota(user.getMaxQuota());
         soapUser.setMiddleName(user.getMiddle_name());
         soapUser.setName(user.getName());
         soapUser.setNickname(user.getNickname());
@@ -960,6 +983,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setUploadFileSizeLimit(user.getUploadFileSizeLimit());
         soapUser.setUploadFileSizeLimitPerFile(user.getUploadFileSizeLimitPerFile());
         soapUser.setUrl(user.getUrl());
+        soapUser.setUsedQuota(user.getUsedQuota());
         soapUser.setUserAttributes(mapmap2Soap(user.getUserAttributes()));
         soapUser.setUserfield01(user.getUserfield01());
         soapUser.setUserfield02(user.getUserfield02());

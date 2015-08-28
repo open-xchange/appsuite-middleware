@@ -74,14 +74,17 @@ import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareAuthenticated;
-import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -98,16 +101,16 @@ public class PasswordResetServlet extends AbstractShareServlet {
     private static final long serialVersionUID = -598655895873570676L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
-    private final ShareLoginConfiguration loginConfig;
+    private final byte[] hashSalt;
 
     /**
      * Initializes a new {@link PasswordResetServlet}.
      *
-     * @param loginConfig
+     * @param hashSalt The hash salt to use
      */
-    public PasswordResetServlet(ShareLoginConfiguration loginConfig) {
+    public PasswordResetServlet(byte[] hashSalt) {
         super();
-        this.loginConfig = loginConfig;
+        this.hashSalt = hashSalt;
     }
 
     @Override
@@ -164,7 +167,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
                  */
                 ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
-                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, hash, Tools.createHostData(request, contextID, guestID));
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, hash, Tools.createHostData(request, contextID, guestID, storageUser.isGuest()));
 
                 /*
                  * Redirect after notification was sent.
@@ -248,7 +251,12 @@ public class PasswordResetServlet extends AbstractShareServlet {
             if (confirm.equals(hash)) {
                 Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
                 User updatedGuest = updatePassword(guestID, context, newPassword);
-                if (!ShareServletUtils.createSessionAndRedirect(guestShare, guestShare.getSingleTarget(), request, response, loginMethod(updatedGuest, context))) {
+                ShareTarget target = guestShare.getSingleTarget();
+                PersonalizedShareTarget personalizedTarget = null;
+                if (target != null) {
+                    personalizedTarget = ShareServiceLookup.getService(ModuleSupport.class).personalizeTarget(target, contextID, guestID);
+                }
+                if (!ShareServletUtils.createSessionAndRedirect(guestShare, personalizedTarget, request, response, loginMethod(updatedGuest, context))) {
                     sendInternalError(translator, response);
                 }
             } else {
@@ -303,7 +311,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         md.reset();
         md.update(toHash.getBytes("UTF-8"));
-        md.update(loginConfig.getCookieHashSalt());
+        md.update(hashSalt);
         byte[] hash = md.digest();
         // URL safe encoding without padding. Don't use plain base64 here!
         return BaseEncoding.base64Url().omitPadding().encode(hash);

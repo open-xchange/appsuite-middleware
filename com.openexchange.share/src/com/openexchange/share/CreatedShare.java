@@ -49,7 +49,6 @@
 
 package com.openexchange.share;
 
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -59,13 +58,6 @@ import com.openexchange.share.recipient.ShareRecipient;
  * @since v7.8.0
  */
 public interface CreatedShare {
-
-    /**
-     * Gets the number of share targets.
-     *
-     * @return The number
-     */
-    int size();
 
     /**
      * Gets the guest information of the according recipient.
@@ -82,65 +74,18 @@ public interface CreatedShare {
     ShareRecipient getShareRecipient();
 
     /**
-     * Gets whether this share has a single or multiple targets.
+     * Gets the share target.
      *
-     * @return <code>true</code> a single target is contained. The
-     * result is equivalent to <code>createdShare.size() == 1</code>.
+     * @return The share target.
      */
-    boolean hasSingleTarget();
+    ShareTarget getShareTarget();
 
     /**
-     * Gets the first of all share targets. If this is a single-target
-     * share, that target is returned.
+     * Gets the share info.
      *
-     * @return The first target.
+     * @return The share info
      */
-    ShareTarget getFirstTarget();
-
-    /**
-     * Gets an iterable of all contained targets.
-     *
-     * @return The iterable
-     */
-    Iterable<ShareTarget> getTargets();
-
-    /**
-     * Gets the share info of the first contained share. If this is a single-target
-     * share, the single share info instance is returned.
-     *
-     * @return The first share info
-     */
-    ShareInfo getFirstInfo();
-
-    /**
-     * Gets an iterable of all contained share infos.
-     *
-     * @return The iterable
-     */
-    Iterable<ShareInfo> getInfos();
-
-    /**
-     * Gets the token for this share. If the only a single target is contained, the
-     * absolute token addressing this target is returned. Otherwise only the guest
-     * users base token is returned. If the share recipient is an internal entity
-     * (i.e. a user or group), <code>null</code> is returned.
-     *
-     * @return The token
-     */
-    String getToken();
-
-    /**
-     * Gets the URL to this share. If the recipient is a guest and this share has a single target,
-     * the URL points to that target using the absolute share token. If the recipient is a guest
-     * and this share has multiple targets, the URL is constructed with the guest users base token.
-     * If the recipient is an internal user or group, the URL points to the first target, ignoring
-     * whether this share has multiple targets or not. The latter behavior is subject to change in
-     * the future.
-     *
-     * @param hostData The host data
-     * @return The URL
-     */
-    String getUrl(HostData hostData);
+    ShareInfo getShareInfo();
 
     /**
      * Gets whether this share is internal, meaning that the recipient is either a user or a group.

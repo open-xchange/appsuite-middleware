@@ -104,14 +104,16 @@ class FilestoreContextBlock {
     // -----------------------------------------------------------------------------------------------------------------
 
     public final int writeDBPoolID;
+    public final String schema;
     public final int filestoreID;
 
     public final Map<Integer, FilestoreInfo> contextFilestores = new HashMap<Integer, FilestoreInfo>();
     public final Map<Integer, Map<Integer, FilestoreInfo>> userFilestores = new HashMap<Integer, Map<Integer, FilestoreInfo>>();
 
-    public FilestoreContextBlock(int writeDBPoolID, int filestoreID) {
+    public FilestoreContextBlock(int writeDBPoolID, String schema, int filestoreID) {
         super();
         this.writeDBPoolID = writeDBPoolID;
+        this.schema = schema;
         this.filestoreID = filestoreID;
     }
 

@@ -63,8 +63,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -120,19 +122,17 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return retval.toArray(new Context[retval.size()]);
     }
 
-    private static final String SQL = "SELECT cid,used FROM filestore_usage WHERE user=0";
-
     private Collection<Context> loadUsage(int poolId, String schema, Map<Integer, Context> contexts) throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getPool().getConnection(poolId, schema);
-        } catch (PoolException e) {
-            throw new StorageException(e);
+        if (OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(poolId, schema)) {
+            throw new StorageException(new DatabaseUpdateException("Database with pool-id " + poolId + " and schema \"" + schema + "\" needs update. Please run \"runupdate\" for that database."));
         }
+
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL);
+            con = cache.getPool().getConnection(poolId, schema);
+            stmt = con.prepareStatement("SELECT cid,used FROM filestore_usage WHERE user=0");
             rs = stmt.executeQuery();
             while (rs.next()) {
                 Context context = contexts.get(I(rs.getInt(1)));
@@ -141,6 +141,8 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
                     context.setAverage_size(L(averageSize));
                 }
             }
+        } catch (PoolException e) {
+            throw new StorageException(e);
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {

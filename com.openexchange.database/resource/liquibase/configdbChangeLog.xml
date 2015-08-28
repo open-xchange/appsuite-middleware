@@ -182,7 +182,7 @@
             ALTER TABLE context ADD UNIQUE KEY `context_name_unique` (name)
         </sql>
         <rollback>
-            <dropIndex indexName="context_name_unique" tableName="context_server2db_pool"/>
+            <dropIndex indexName="context_name_unique" tableName="context"/>
         </rollback>
     </changeSet>
 

@@ -132,12 +132,12 @@ public class SessionHandlerTest {
 
             @Override
             public long getSessionContainerTimeout() {
-                return 100l;
+                return 1000l;
             }
 
             @Override
             public long getLongTermSessionContainerTimeout() {
-                return 1000l;
+                return 10000l;
             }
 
             @Override
@@ -207,7 +207,7 @@ public class SessionHandlerTest {
     public void testSessionRotation() throws Exception {
         SessionImpl session = addSession();
         Assert.assertNotNull(SessionHandler.getSession(session.getSessionID(), false));
-        Thread.sleep(SessionHandler.config.getNumberOfSessionContainers() * SessionHandler.config.getLifeTime() + SessionHandler.config.getNumberOfLongTermSessionContainers() * SessionHandler.config.getLongLifeTime() + 200);
+        Thread.sleep(SessionHandler.config.getNumberOfSessionContainers() * SessionHandler.config.getLifeTime() + SessionHandler.config.getNumberOfLongTermSessionContainers() * SessionHandler.config.getLongLifeTime() + 2000);
         Assert.assertNull(SessionHandler.getSession(session.getSessionID(), false));
     }
 
@@ -217,7 +217,7 @@ public class SessionHandlerTest {
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
         SessionImpl s2 = addSession(v2);
-        SessionImpl s3 = addSession();
+        addSession();
         Assert.assertEquals(3, SessionHandler.getSessions().size());
         List<String> sessions = SessionHandler.findLocalSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
         Assert.assertEquals(1, sessions.size());
@@ -234,7 +234,7 @@ public class SessionHandlerTest {
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
         SessionImpl s2 = addSession(v2);
-        SessionImpl s3 = addSession();
+        addSession();
         Assert.assertEquals(3, SessionHandler.getSessions().size());
         List<String> sessions = SessionHandler.removeLocalSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
         Assert.assertEquals(1, sessions.size());
@@ -253,7 +253,7 @@ public class SessionHandlerTest {
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
         SessionImpl s2 = addSession(v2);
-        SessionImpl s3 = addSession();
+        addSession();
         Assert.assertEquals(3, SessionHandler.getSessions().size());
         List<String> sessions = SessionHandler.findRemoteSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
         Assert.assertEquals(1, sessions.size());
@@ -265,7 +265,7 @@ public class SessionHandlerTest {
     }
 
     private static SessionImpl addSession() throws OXException {
-        return addSession(null);
+        return addSession((String[]) null);
     }
 
     private static SessionImpl addSession(final String... props) throws OXException {

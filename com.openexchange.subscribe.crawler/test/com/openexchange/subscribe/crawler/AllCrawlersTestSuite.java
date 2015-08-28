@@ -66,7 +66,6 @@ public class AllCrawlersTestSuite{
         final TestSuite testSuite = new TestSuite();
         testSuite.addTestSuite(GMXTest.class);
         testSuite.addTestSuite(WebDeTest.class);
-        testSuite.addTestSuite(TOnlineDETEst.class);
         return testSuite;
     }
 }

@@ -52,6 +52,7 @@ package com.openexchange.share.groupware;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
 
 
@@ -119,10 +120,9 @@ public interface ModuleSupport {
      * @param target The share target to adjust
      * @param contextID The identifier of the context the user is located in
      * @param userID The identifier of the user to adjust the share target for
-     * @param isGuest <code>true</code> if the user identifier refers to a guest user, <code>false</code>, otherwise
      * @return The adjusted target, or the supplied target if no adjustments were necessary
      */
-    ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException;
+    PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException;
 
     /**
      * Resolves the module id to module name

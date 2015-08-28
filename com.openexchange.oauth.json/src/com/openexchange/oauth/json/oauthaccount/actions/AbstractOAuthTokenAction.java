@@ -90,9 +90,15 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         /*
          * Check for reported oauth problems
          */
-        String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
-        if(!Strings.isEmpty(oauth_problem)) {
-            throw fromOauthProblem(oauth_problem, request, service);
+        {
+            String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
+            if(!Strings.isEmpty(oauth_problem)) {
+                throw fromOauthProblem(oauth_problem, request, service);
+            }
+            oauth_problem = request.getParameter(OAuthConstants.URLPARAM_ERROR);
+            if(!Strings.isEmpty(oauth_problem)) {
+                throw fromOauthProblem(oauth_problem, request, service);
+            }
         }
 
         String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
@@ -203,6 +209,9 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         if (OAUTH_PROBLEM_PERMISSION_DENIED.equals(oauth_problem)) {
             return OAuthExceptionCodes.OAUTH_PROBLEM_PERMISSION_DENIED.create();
+        }
+        if (OAUTH_PROBLEM_ACCESS_DENIED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_ACCESS_DENIED.create();
         }
         if (OAUTH_PROBLEM_PERMISSION_UNKNOWN.equals(oauth_problem)) {
             return OAuthExceptionCodes.OAUTH_PROBLEM_PERMISSION_UNKNOWN.create();

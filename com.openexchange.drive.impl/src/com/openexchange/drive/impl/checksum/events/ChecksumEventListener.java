@@ -56,8 +56,8 @@ import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.DriveUtils;
-import com.openexchange.drive.impl.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.composition.FileID;

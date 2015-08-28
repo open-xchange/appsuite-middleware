@@ -523,7 +523,7 @@ public final class ListLsubCache {
             throw MimeMailException.handleMessagingException(e);
         }
     }
-    
+
     /**
      * Gets the pretty-printed cache content
      *

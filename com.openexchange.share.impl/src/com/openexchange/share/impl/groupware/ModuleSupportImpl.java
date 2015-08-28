@@ -62,6 +62,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -169,6 +170,7 @@ public class ModuleSupportImpl implements ModuleSupport {
         if (null == target) {
             return false;
         }
+
         if (target.isFolder()) {
             if (null != Module.getForFolderConstant(target.getModule())) {
                 try {
@@ -186,7 +188,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 return true;
             }
         } else {
-            return handlers.get(target.getModule()).isVisible(target, session);
+            return handlers.get(target.getModule()).exists(target, session);
         }
     }
 
@@ -196,7 +198,6 @@ public class ModuleSupportImpl implements ModuleSupport {
             return null;
         }
         Context context = services.getService(ContextService.class).getContext(contextID);
-        target = adjustTarget(target, contextID, context.getMailadmin(), false);
 
         if (Module.getForFolderConstant(target.getModule()) == null) {
             return new VirtualTargetProxy(target);
@@ -219,18 +220,22 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException {
+    public PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException {
         if (null == target) {
-            return target;
+            return null;
         }
-        /*
-         * adjust target via module handler as required
-         */
-        ModuleHandler handler = handlers.opt(target.getModule());
-        if (null != handler) {
-            return handler.adjustTarget(target, contextID, userID, isGuest);
+
+        if (!target.isFolder()) {
+            /*
+             * adjust target via module handler as required
+             */
+            ModuleHandler handler = handlers.opt(target.getModule());
+            if (null != handler) {
+                return handler.personalizeTarget(target, contextID, userID);
+            }
         }
-        return target;
+
+        return new PersonalizedShareTarget(target.getModule(), target.getFolder(), target.getItem());
     }
 
 
