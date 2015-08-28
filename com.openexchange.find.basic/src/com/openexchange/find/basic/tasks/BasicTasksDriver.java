@@ -57,6 +57,7 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.api2.TasksSQLInterface;
@@ -85,6 +86,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -129,8 +131,16 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
-        return ALL_FOLDER_TYPES;
+    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return ALL_FOLDER_TYPES;
+        }
+
+        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+        types.add(FolderType.PRIVATE);
+        types.add(FolderType.PUBLIC);
+        return types;
     }
 
     @Override

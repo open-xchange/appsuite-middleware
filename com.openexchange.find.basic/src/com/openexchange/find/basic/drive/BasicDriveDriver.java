@@ -54,6 +54,7 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +73,7 @@ import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -89,7 +91,9 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonConstants;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
@@ -101,6 +105,12 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceExceptionCode;
@@ -116,6 +126,12 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.6.0
  */
 public class BasicDriveDriver extends AbstractModuleSearchDriver {
+
+    private static final Set<FolderType> FOLDER_TYPES = EnumSet.noneOf(FolderType.class);
+    static {
+        FOLDER_TYPES.add(FolderType.SHARED);
+        FOLDER_TYPES.add(FolderType.PUBLIC);
+    }
 
     private static final List<Field> DEFAULT_FIELDS = new ArrayList<Field>(10);
     static {
@@ -138,31 +154,39 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
-        return FOLDER_TYPE_NOT_SUPPORTED;
+    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return ALL_FOLDER_TYPES;
+        }
+
+        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+        types.add(FolderType.PRIVATE);
+        types.add(FolderType.PUBLIC);
+        return types;
     }
 
     @Override
     public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
-        final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
+        IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
 
-        final IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
+        IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
         if (null == folderAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
         }
 
         // Create file access
-        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        final IDBasedFolderAccess folderAccess = folderAccessFactory.createAccess(session);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        IDBasedFolderAccess folderAccess = folderAccessFactory.createAccess(session);
 
         // Folder identifier
-        final String folderId = searchRequest.getFolderId();
+        String folderId = searchRequest.getFolderId();
 
         // Fields
-        final int start = searchRequest.getStart();
+        int start = searchRequest.getStart();
         List<Field> fields = DEFAULT_FIELDS;
         int[] columns = searchRequest.getColumns().getIntColumns();
         if (columns.length > 0) {
@@ -179,15 +203,12 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
 
             // Search...
-            final List<String> folderIds = new LinkedList<String>();
-            if (folderId != null) {
-                findSubfolders(folderId, folderAccess, folderIds);
-            }
+            List<String> folderIds = determineFolderIDs(searchRequest, session, folderAccess);
 
             SearchIterator<File> it = null;
             try {
                 it = fileAccess.search(folderIds, term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-                final List<Document> results = new LinkedList<Document>();
+                List<Document> results = new LinkedList<Document>();
                 while (it.hasNext()) {
                     results.add(new FileDocument(it.next()));
                 }
@@ -228,12 +249,54 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
     }
 
+    private List<String> determineFolderIDs(SearchRequest searchRequest, ServerSession session, IDBasedFolderAccess folderAccess) throws OXException {
+        List<String> folderIDs;
+        FolderType folderType = searchRequest.getFolderType();
+        String requestFolderId = searchRequest.getFolderId();
+        if (requestFolderId == null) {
+            if (folderType == null) {
+                folderIDs = Collections.emptyList();
+            } else {
+                switch (folderType) {
+                    // Probably no other file storage despite infostore will ever implement folder types.
+                    // For performance reasons we therefore limit the folder-lookup to infostore folders.
+
+                    case PUBLIC:
+                    {
+                        folderIDs = findSubfolders(Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID), folderAccess);
+                        break;
+                    }
+
+                    case SHARED:
+                    {
+                        folderIDs = findSubfolders(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), folderAccess);
+                        break;
+                    }
+
+                    default:
+                    {
+                        FolderService folderService = Services.getFolderService();
+                        FolderServiceDecorator decorator = new FolderServiceDecorator();
+                        decorator.put("altNames", Boolean.TRUE.toString());
+                        decorator.setLocale(session.getUser().getLocale());
+                        UserizedFolder privateInfostoreFolder = folderService.getDefaultFolder(session.getUser(), "1", InfostoreContentType.getInstance(), session, decorator);
+                        folderIDs = findSubfolders(privateInfostoreFolder.getID(), folderAccess);
+                        break;
+                    }
+                }
+            }
+        } else {
+            folderIDs = findSubfolders(requestFolderId, folderAccess);
+        }
+
+        return folderIDs;
+    }
+
     private List<File> iterativeSearch(final IDBasedFileAccess fileAccess, final IDBasedFolderAccess folderAccess, final String startingId, final String pattern, final List<Field> fields, final int start, final int end)
     {
         try {
             //get all Folders
-            final List<String> folders = new ArrayList<String>();
-            findSubfolders(startingId, folderAccess, folders);
+            final List<String> folders = findSubfolders(startingId, folderAccess);
             folders.size();
             //search in all folders
             final List<File> files = new ArrayList<File>(30);
@@ -253,26 +316,30 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     /**
-     * Return all folders that are below given folder, including that folder itself.
+     * Return all visible and readable folders that are below given folder, including that folder itself.
      *
      * @return
      * @throws OXException
      */
-    private void findSubfolders(final String folderId, final IDBasedFolderAccess folderAccess, final List<String> result) throws OXException {
-        if (folderId == null) {
-            return;
+    private List<String> findSubfolders(String folderId, IDBasedFolderAccess folderAccess) throws OXException {
+        List<String> folderIds = new LinkedList<>();
+        FileStorageFolder folder = folderAccess.getFolder(folderId);
+        findSubfoldersRecursive(folder, folderAccess, folderIds);
+        return folderIds;
+    }
+
+    private void findSubfoldersRecursive(FileStorageFolder folder, IDBasedFolderAccess folderAccess, List<String> folderIds) throws OXException {
+        FileStoragePermission permission = folder.getOwnPermission();
+        if (permission == null || permission.getReadPermission() >= FileStoragePermission.READ_OWN_OBJECTS) {
+            folderIds.add(folder.getId());
         }
 
-        final FileStorageFolder[] fileStorageFolderIds = folderAccess.getSubfolders(folderId, true);
-        if (fileStorageFolderIds == null || fileStorageFolderIds.length == 0) {
-            result.add(folderId);
-        } else {
-            result.add(folderId);
-            for (final FileStorageFolder f : fileStorageFolderIds) {
-                findSubfolders(f.getId(), folderAccess, result);
+        FileStorageFolder[] fileStorageFolderIds = folderAccess.getSubfolders(folder.getId(), true);
+        if (fileStorageFolderIds != null && fileStorageFolderIds.length > 0) {
+            for (FileStorageFolder f : fileStorageFolderIds) {
+                findSubfoldersRecursive(f, folderAccess, folderIds);
             }
         }
-        return;
     }
 
     /**
@@ -383,26 +450,24 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
         // The auto-complete prefix
-        final String prefix = autocompleteRequest.getPrefix();
+        String prefix = autocompleteRequest.getPrefix();
 
-        // List of supported facets
-        final List<Facet> facets = new LinkedList<Facet>();
+        List<Facet> facets = new LinkedList<Facet>();
 
-        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (!Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        boolean supportsSearchByTerm = supportsSearchByTerm(session, autocompleteRequest);
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
                 prefixTokens = Collections.singletonList(prefix);
             }
 
-            // Add simple facets
             facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
                 .withSimpleDisplayItem(prefix)
                 .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
                 .build());
 
-            // Add filename/type/content facets if search by term is supported
-            if (supportsSearchByTerm(session, autocompleteRequest)) {
+            if (supportsSearchByTerm) {
                 facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
                     .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
                     .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
@@ -411,41 +476,84 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                     .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
                     .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
                     .build());
-                facets.add(newSimpleBuilder(DriveFacetType.FILE_CONTENT)
-                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_CONTENT, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_FILE_CONTENT, prefixTokens))
-                    .build());
             }
         }
-        // Add static file type facet
-        {
-            final String fieldFileType = Constants.FIELD_FILE_TYPE;
-            final DefaultFacet fileTypeFacet = Facets.newExclusiveBuilder(DriveFacetType.FILE_TYPE)
-                .addValue(FacetValue.newBuilder(FileType.AUDIO.getIdentifier())
-                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_AUDIO)
-                    .withFilter(Filter.of(fieldFileType, FileType.AUDIO.getIdentifier()))
-                    .build())
-                .addValue(FacetValue.newBuilder(FileType.DOCUMENTS.getIdentifier())
-                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS)
-                    .withFilter(Filter.of(fieldFileType, FileType.DOCUMENTS.getIdentifier()))
-                    .build())
-                .addValue(FacetValue.newBuilder(FileType.IMAGES.getIdentifier())
-                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_IMAGES)
-                    .withFilter(Filter.of(fieldFileType, FileType.IMAGES.getIdentifier()))
-                    .build())
-                .addValue(FacetValue.newBuilder(FileType.OTHER.getIdentifier())
-                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_OTHER)
-                    .withFilter(Filter.of(fieldFileType, FileType.OTHER.getIdentifier()))
-                    .build())
-                .addValue(FacetValue.newBuilder(FileType.VIDEO.getIdentifier())
-                    .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_VIDEO)
-                    .withFilter(Filter.of(fieldFileType, FileType.VIDEO.getIdentifier()))
-                    .build())
-                .build();
-            facets.add(fileTypeFacet);
+
+        addFileTypeFacet(facets);
+
+        if (supportsSearchByTerm) {
+            addFileSizeFacet(facets);
+            addDateFacet(facets);
         }
 
         return new AutocompleteResult(facets);
+    }
+
+    private void addFileTypeFacet(List<Facet> facets) {
+        String fieldFileType = Constants.FIELD_FILE_TYPE;
+        DefaultFacet fileTypeFacet = Facets.newExclusiveBuilder(DriveFacetType.FILE_TYPE)
+            .addValue(FacetValue.newBuilder(FileType.AUDIO.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_AUDIO)
+                .withFilter(Filter.of(fieldFileType, FileType.AUDIO.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.DOCUMENTS.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS)
+                .withFilter(Filter.of(fieldFileType, FileType.DOCUMENTS.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.IMAGES.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_IMAGES)
+                .withFilter(Filter.of(fieldFileType, FileType.IMAGES.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.OTHER.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_OTHER)
+                .withFilter(Filter.of(fieldFileType, FileType.OTHER.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.VIDEO.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_VIDEO)
+                .withFilter(Filter.of(fieldFileType, FileType.VIDEO.getIdentifier()))
+                .build())
+            .build();
+        facets.add(fileTypeFacet);
+    }
+
+    private void addFileSizeFacet(List<Facet> facets) {
+        String fieldFileSize = Constants.FIELD_FILE_SIZE;
+        facets.add(Facets.newExclusiveBuilder(DriveFacetType.FILE_SIZE)
+            .addValue(FacetValue.newBuilder(FileSize.MB1.getSize())
+                .withSimpleDisplayItem(FileSize.MB1.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB1.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.MB10.getSize())
+                .withSimpleDisplayItem(FileSize.MB10.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB10.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.MB100.getSize())
+                .withSimpleDisplayItem(FileSize.MB100.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB100.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.GB1.getSize())
+                .withSimpleDisplayItem(FileSize.GB1.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.GB1.getSize()))
+                .build())
+            .build());
+    }
+
+    private void addDateFacet(List<Facet> facets) {
+        String fieldDate = CommonConstants.FIELD_DATE;
+        facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
+                .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_WEEK))
+                .build())
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
+                .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_MONTH))
+                .build())
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
+                .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
+                .build())
+            .build());
     }
 
     @Override
