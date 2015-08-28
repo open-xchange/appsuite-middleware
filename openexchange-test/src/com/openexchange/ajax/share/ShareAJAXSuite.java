@@ -56,6 +56,7 @@ import com.openexchange.ajax.share.bugs.Bug40527Test;
 import com.openexchange.ajax.share.bugs.Bug40548Test;
 import com.openexchange.ajax.share.bugs.Bug40561Test;
 import com.openexchange.ajax.share.bugs.Bug40627Test;
+import com.openexchange.ajax.share.bugs.Bug40722Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
@@ -136,6 +137,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(Bug40627Test.class);
         tests.addTestSuite(Bug40561Test.class);
         tests.addTestSuite(Bug40527Test.class);
+        tests.addTestSuite(Bug40722Test.class);
         return tests;
     }
 

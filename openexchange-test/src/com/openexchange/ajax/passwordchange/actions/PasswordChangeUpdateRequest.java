@@ -97,7 +97,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	@Override
     public Object getBody() throws JSONException {
 		final JSONObject retval = new JSONObject();
-		retval.put("new_password", newPassword);
+		retval.put("new_password", null == newPassword ? JSONObject.NULL : newPassword);
 		retval.put("old_password", oldPassword);
 		return retval;
 	}

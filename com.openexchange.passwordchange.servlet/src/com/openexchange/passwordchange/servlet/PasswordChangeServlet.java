@@ -191,6 +191,20 @@ public final class PasswordChangeServlet extends SessionServlet {
         final Response response = new Response();
         final Session session = getSessionObject(req);
         try {
+            /*
+             * get context & user
+             */
+            ContextService contextService = services.getService(ContextService.class);
+            if (contextService == null) {
+                throw ServiceExceptionCode.absentService(ContextService.class);
+            }
+            UserService userService = services.getService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
+            Context context = contextService.getContext(session.getContextId());
+            User user = userService.getUser(session.getUserId(), context);
+
             // Construct JSON object from request's body data and check mandatory fields
             String oldPw;
             String newPw;
@@ -198,30 +212,19 @@ public final class PasswordChangeServlet extends SessionServlet {
                 JSONObject jBody = new JSONObject(getBody(req));
                 String paramOldPw = "old_password";
                 String paramNewPw = "new_password";
-                if (!jBody.has(paramNewPw) || jBody.isNull(paramNewPw)) {
+                if (!jBody.has(paramNewPw) || jBody.isNull(paramNewPw) && false == user.isGuest()) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramNewPw);
                 }
                 if (!jBody.has(paramOldPw) || jBody.isNull(paramOldPw)) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramOldPw);
                 }
 
-                newPw = jBody.getString(paramNewPw);
+                newPw = jBody.isNull(paramNewPw) ? null : jBody.getString(paramNewPw);
                 oldPw = jBody.getString(paramOldPw);
             }
 
             // Perform password change
-            ContextService contextService = services.getService(ContextService.class);
-            if (contextService == null) {
-                throw ServiceExceptionCode.absentService(ContextService.class);
-            }
 
-            UserService userService = services.getService(UserService.class);
-            if (null == userService) {
-                throw ServiceExceptionCode.absentService(UserService.class);
-            }
-
-            Context context = contextService.getContext(session.getContextId());
-            User user = userService.getUser(session.getUserId(), context);
 
             if (user.isGuest()) {
                 BasicPasswordChangeService passwordChangeService = services.getService(BasicPasswordChangeService.class);
