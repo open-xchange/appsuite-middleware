@@ -67,6 +67,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
@@ -297,6 +298,39 @@ public abstract class ContextAbstraction extends UserAbstraction {
         doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
     }
 
+    protected void sysoutOutput(Quota[] quotas) throws InvalidDataException {
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (Quota quota : quotas) {
+            ArrayList<String> curData = new ArrayList<String>(2);
+
+            {
+                String module = quota.getModule();
+                if (null != module) {
+                    curData.add(module);
+                } else {
+                    curData.addAll(null);
+                }
+            }
+
+            {
+                long limit = quota.getLimit();
+                curData.add(Long.toString(limit));
+            }
+
+            data.add(curData);
+        }
+
+        ArrayList<String> alignment = new ArrayList<String>();
+        alignment.add("r");
+        alignment.add("l");
+
+        ArrayList<String> columnnames = new ArrayList<String>();
+        columnnames.add("module");
+        columnnames.add("qlimit");
+
+        doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
+    }
+
     protected void precsvinfos(final Context[] ctxs, final AdminParser parser) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
@@ -321,6 +355,35 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 }
 
             }, true));
+        }
+
+        doCSVOutput(columns, data);
+    }
+
+    protected void precsvinfos(Quota[] quotas) throws InvalidDataException {
+        ArrayList<String> columns = new ArrayList<String>();
+        columns.add("module");
+        columns.add("limit");
+
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (Quota quota : quotas) {
+            ArrayList<String> curData = new ArrayList<String>(2);
+
+            {
+                String module = quota.getModule();
+                if (null != module) {
+                    curData.add(module);
+                } else {
+                    curData.addAll(null);
+                }
+            }
+
+            {
+                long limit = quota.getLimit();
+                curData.add(Long.toString(limit));
+            }
+
+            data.add(curData);
         }
 
         doCSVOutput(columns, data);

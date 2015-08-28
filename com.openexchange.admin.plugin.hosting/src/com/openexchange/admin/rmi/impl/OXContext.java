@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -114,6 +115,34 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         super(context);
         this.pool = new OXAdminPoolDBPoolExtension();
         LOGGER.debug("Class loaded: {}", this.getClass().getName());
+    }
+
+    @Override
+    public Quota[] listQuotas(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        new BasicAuthenticator(context).doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (final NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+
+            OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.listQuotas(ctx);
+        } catch (StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
     }
 
     @Override
@@ -716,7 +745,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         // END OF CACHE
     }
-    
+
     @Override
     public Context getOwnData(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
@@ -727,9 +756,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 LOGGER.error("One of the given arguments for getData is null", e1);
                 throw e1;
             }
-            
+
             new BasicAuthenticator(context).doAuthentication(auth, ctx);
-            
+
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getData(new Context[] { ctx })[0];
         } catch (final StorageException e) {

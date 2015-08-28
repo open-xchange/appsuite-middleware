@@ -56,6 +56,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -444,7 +445,7 @@ public interface OXContextInterface extends Remote {
      *
      * Change storage data informations - Change filestore infos for context. Normally NO need to change!
      *
-     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID
      * or name for identifying the context itself the object should only contain those field which need to be changed.
      * @param auth
      * @throws RemoteException
@@ -486,7 +487,21 @@ public interface OXContextInterface extends Remote {
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
-     * Changes specified context's capabilities.
+     * Gets the configured quotas in given context.
+     *
+     * @param ctx The context
+     * @param auth The credentials
+     * @return The configured quota
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Quota[] listQuotas(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
+     * Changes specified context's quota for a certain module.
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param module The module to apply quota to
@@ -600,7 +615,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines the user ID of the admin user for a given context
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. This context will be used for determining the userId of the admin.
      * @param auth Credentials for authenticating against the server.
      * @return The userId of the admin user
@@ -613,7 +628,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
@@ -622,7 +637,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not

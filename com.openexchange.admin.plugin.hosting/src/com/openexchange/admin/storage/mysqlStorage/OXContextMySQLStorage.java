@@ -92,6 +92,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -2120,8 +2121,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
+    public Quota[] listQuotas(Context ctx) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+
+            String[] moduleIds = AmountQuotas.getQuotaModuleIDs(con, contextId);
+            int length = moduleIds.length;
+            if (length == 0) {
+                return new Quota[0];
+            }
+
+            Quota[] retval = new Quota[length];
+            for (int i = length; i-- > 0;) {
+                String module = moduleIds[i];
+                Long qlimit = AmountQuotas.getQuotaFromDB(con, contextId, module);
+                retval[i] = new Quota(qlimit.longValue(), module);
+            }
+
+            return retval;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (OXException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void changeQuota(final Context ctx, final List<String> modules, final long quota, final Credentials auth) throws StorageException {
-        final int contextId = ctx.getId().intValue();
+        int contextId = ctx.getId().intValue();
 
         // SQL resources
         Connection con = null;
@@ -2135,10 +2174,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             AmountQuotas.setLimit(contextId, modules, quota, con);
             con.commit(); // COMMIT
             rollback = false;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } catch (OXException e) {
@@ -2151,10 +2190,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (autocommit) {
                 autocommit(con);
             }
-            try {
-                cache.pushConnectionForContext(contextId, con);
-            } catch (PoolException e) {
-                LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                }
             }
         }
     }

@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -182,6 +183,15 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract void change(final Context ctx) throws StorageException;
+
+    /**
+     * Gets the configured quotas in given context.
+     *
+     * @param ctx The context
+     * @return The configured quota
+     * @throws StorageException If quotas cannot be returned
+     */
+    public abstract Quota[] listQuotas(Context ctx) throws StorageException;
 
     /**
      * Changes specified context's quota.
