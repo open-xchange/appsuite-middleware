@@ -47,53 +47,78 @@
  *
  */
 
-package com.openexchange.importexport.importers;
+package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
-import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.java.Streams;
+import java.io.Serializable;
 
 /**
- * {@link TestCSVContactImporter}
+ * {@link Quota} - A quota limit representation for a certain module.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class TestCSVContactImporter extends CSVContactImporter {
+public class Quota implements Serializable {
+
+    private static final long serialVersionUID = -1371977751244817135L;
+
+    private long limit;
+    private String module;
+
+    /**
+     * Initializes a new {@link Quota}.
+     */
+    public Quota() {
+        super();
+    }
 
 
-    public TestCSVContactImporter() throws Exception {
-        super(null);
-        final ConfigurationService conf = ImportExportServices.getConfigurationService();
-        final String path = conf.getProperty("com.openexchange.import.mapper.path");
-        final File dir = new File(path);
-        if (!dir.exists()) {
-            throw new IllegalStateException("Denoted file path does not exists: " + path);
-        }
-        if (!dir.isDirectory()) {
-            throw new IllegalStateException("Denoted file path is not a directory: " + path);
-        }
-        final File[] files = dir.listFiles();
+    /**
+     * Initializes a new {@link Quota}.
+     *
+     * @param limit The limit
+     * @param module The module identifier
+     */
+    public Quota(long limit, String module) {
+        super();
+        this.limit = limit;
+        this.module = module;
+    }
 
-        for (final File file : files) {
-            if (!file.getName().endsWith(".properties")) {
-                continue;
-            }
-            final Properties props = new Properties();
-            final InputStream in = new BufferedInputStream(new FileInputStream(file), 65536);
-            try {
-                props.load(in);
-            } finally {
-                Streams.close(in);
-            }
-            final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props, file.getName());
-            addFieldMapper(mapper);
-        }
+
+    /**
+     * Gets the limit
+     *
+     * @return The limit
+     */
+    public long getLimit() {
+        return limit;
+    }
+
+    /**
+     * Sets the limit
+     *
+     * @param limit The limit to set
+     */
+    public void setLimit(long limit) {
+        this.limit = limit;
+    }
+
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
+    public String getModule() {
+        return module;
+    }
+
+    /**
+     * Sets the module
+     *
+     * @param module The module to set
+     */
+    public void setModule(String module) {
+        this.module = module;
     }
 
 }

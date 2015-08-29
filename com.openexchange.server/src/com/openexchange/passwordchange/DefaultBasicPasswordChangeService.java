@@ -54,6 +54,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
+import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -86,11 +88,20 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
         }
         User user = userService.getUser(event.getSession().getUserId(), ctx);
         UserImpl updatedUser = new UserImpl(user);
-        String encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
-        updatedUser.setUserPassword(encodedPassword);
+
+        if (Strings.isEmpty(event.getNewPassword())) {
+            updatedUser.setUserPassword(null);
+            updatedUser.setPasswordMech("");
+        } else {
+            if (Strings.isEmpty(user.getPasswordMech())) {
+                updatedUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+                updatedUser.setUserPassword(getEncodedPassword(PasswordMech.BCRYPT.getIdentifier(), event.getNewPassword()));
+            } else {
+                updatedUser.setUserPassword(getEncodedPassword(user.getPasswordMech(), event.getNewPassword()));
+            }
+        }
 
         userService.updateUser(updatedUser, ctx);
-
         userService.invalidateUser(ctx, event.getSession().getUserId());
 
         if (updatedUser.isGuest()) {

@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,7 +210,16 @@ public class AmountQuotas {
         }
     }
 
-    private static Long getQuotaFromDB(Connection connection, int contextId, String moduleID) throws OXException {
+    /**
+     * Gets the amount limit for specified module from database for given context.
+     *
+     * @param connection The connection to use
+     * @param contextId The context identifier
+     * @param moduleID The module identifier
+     * @return The amount limit or <code>null</code> if no such quota is available in database
+     * @throws OXException If retrieval from database fails
+     */
+    public static Long getQuotaFromDB(Connection connection, int contextId, String moduleID) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -225,6 +235,42 @@ public class AmountQuotas {
                 return null;
             }
             return Long.valueOf(retval <= 0 ? Quota.UNLIMITED : retval);
+        } catch (final SQLException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Gets the available quota module identifiers from database
+     *
+     * @param connection The connection to use
+     * @param contextId The context identifier
+     * @return The available quota module identifiers or an empty array
+     * @throws OXException If quota module identifiers cannot be fetched from database
+     */
+    public static String[] getQuotaModuleIDs(Connection connection, int contextId) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT module FROM quota_context WHERE cid=?");
+            stmt.setLong(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new String[0];
+            }
+
+            List<String> modules = new ArrayList<String>(8);
+            do {
+                String module = rs.getString(1);
+                if (!rs.wasNull()) {
+                    modules.add(module);
+                }
+            } while (rs.next());
+            return modules.toArray(new String[modules.size()]);
         } catch (final SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

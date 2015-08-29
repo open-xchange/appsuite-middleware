@@ -101,7 +101,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
     @Override
     public void commit() throws SQLException {
         checkForAlreadyClosed();
-        if (write && !assign.isToConfigDB() && state.isUsedForUpdate()) {
+        if (write && state.isUsedForUpdate()) {
             if (!delegate.getAutoCommit()) {
                 // For performance reasons we increase the replication counter within a possibly active transaction.
                 monitor.increaseInCurrentTransaction(assign, delegate, state);

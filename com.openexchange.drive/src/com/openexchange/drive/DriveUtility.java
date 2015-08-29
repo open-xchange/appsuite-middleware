@@ -127,4 +127,44 @@ public interface DriveUtility {
      */
     JSONObject getSharesMetadata(DriveSession session) throws OXException;
 
+    /**
+     * Gets metadata for a specific file. The JSON format of the metadata is the same as used inside the <code>.drive-meta</code> files.
+     *
+     * @param session The drive session
+     * @param path The path to the file's parent folder, relative to the root folder
+     * @param fileVersion The file version of the file to get
+     * @return The metadata of the requested file as a JSON object
+     */
+    JSONObject getFileMetadata(DriveSession session, String path, FileVersion fileVersion) throws OXException;
+
+    /**
+     * Gets metadata for a specific directory. The JSON format of the metadata is the same as used inside the <code>.drive-meta</code> files.
+     *
+     * @param session The drive session
+     * @param directoryVersion The directory version of the directory to get
+     * @return The metadata of the requested directory as a JSON object
+     */
+    JSONObject getDirectoryMetadata(DriveSession session, DirectoryVersion directoryVersion) throws OXException;
+
+    /**
+     * Updates metadata of a file. This currently only includes adjusting the file's object permissions.
+     *
+     * @param session The session
+     * @param path The path to the file's parent folder, relative to the root folder
+     * @param fileVersion The file version of the file to update
+     * @param jsonObject The updated metadata
+     * @param parameters Additional parameters for the update
+     */
+    void updateFile(DriveSession session, String path, FileVersion fileVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException;
+
+    /**
+     * Updates metadata of a directory. This currently only includes adjusting the directory's permissions.
+     *
+     * @param session The session
+     * @param directoryVersion The directory version of the directory to update
+     * @param jsonObject The updated metadata
+     * @param parameters Additional parameters for the update
+     */
+    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException;
+
 }

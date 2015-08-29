@@ -374,6 +374,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                      */
                     contact.setNumberOfImages(numberOfImages);
                 }
+                DBUtils.closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

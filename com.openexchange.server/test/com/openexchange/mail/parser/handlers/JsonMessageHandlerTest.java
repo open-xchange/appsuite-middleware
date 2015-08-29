@@ -515,20 +515,17 @@ public class JsonMessageHandlerTest extends TestCase {
 
             JSONArray jAttachments = jMail.getJSONArray("attachments");
             assertNotNull(jAttachments);
-            assertEquals("Unexpected number of attachments", 3, jAttachments.length());
+            assertEquals("Unexpected number of attachments", 2, jAttachments.length());
 
             final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
             assertNotNull(jAttachment1);
             final JSONObject jAttachment2 = jAttachments.getJSONObject(1);
             assertNotNull(jAttachment2);
-            final JSONObject jAttachment3 = jAttachments.getJSONObject(2);
-            assertNotNull(jAttachment3);
 
             System.out.println("------- Debug Output ------");
             System.out.println(jMail.toString(2));
             assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
             assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/pdf"));
-            assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pkcs7-signature"));
 
             assertTrue("Unexpected message body", jAttachment1.getString("content").indexOf("da muss ein vermutlich") > 0);
         } catch (Exception e) {

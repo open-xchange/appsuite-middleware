@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,44 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link DriveActionFactory}
+ * {@link GetFileAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    public DriveActionFactory() {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(24, 0.9f, 1);
-        actions.put("syncfolders", new SyncFoldersAction());
-        actions.put("syncfiles", new SyncFilesAction());
-        actions.put("upload", new UploadAction());
-        actions.put("download", new DownloadAction());
-        actions.put("listen", new ListenAction());
-        actions.put("quota", new QuotaAction());
-        actions.put("settings", new SettingsAction());
-        actions.put("subscribe", new SubscribeAction());
-        actions.put("unsubscribe", new UnsubscribeAction());
-        actions.put("updateToken", new UpdateTokenAction());
-        actions.put("fileMetadata", new FileMetadataAction());
-        actions.put("directoryMetadata", new DirectoryMetadataAction());
-        actions.put("jump", new JumpAction());
-        actions.put("subfolders", new SubfoldersAction());
-        actions.put("getLink", new GetLinkAction());
-        actions.put("updateLink", new UpdateLinkAction());
-        actions.put("deleteLink", new DeleteLinkAction());
-        actions.put("sendLink", new SendLinkAction());
-        actions.put("updateFile", new UpdateFileAction());
-        actions.put("updateFolder", new UpdateFolderAction());
-        actions.put("getFile", new GetFileAction());
-        actions.put("getFolder", new GetFolderAction());
-        actions.put("shares", new SharesAction());
-    }
+public class GetFileAction extends AbstractDriveAction {
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * parse parameters
+         */
+        String path = requestData.getParameter("path");
+        if (Strings.isEmpty(path)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+        }
+        String name = requestData.getParameter("name");
+        if (Strings.isEmpty(name)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
+        }
+        String checksum = requestData.getParameter("checksum");
+        if (Strings.isEmpty(checksum)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+        }
+        /*
+         * get file metadata & return appropriate JSON result
+         */
+        JSONObject metadata = getDriveService().getUtility().getFileMetadata(session, path, new JsonFileVersion(checksum, name));
+        return new AJAXRequestResult(metadata, "json");
     }
 
 }

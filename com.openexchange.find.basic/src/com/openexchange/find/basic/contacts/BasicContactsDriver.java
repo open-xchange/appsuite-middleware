@@ -55,6 +55,7 @@ import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,6 +87,7 @@ import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -137,8 +139,16 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
-        return ALL_FOLDER_TYPES;
+    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return ALL_FOLDER_TYPES;
+        }
+
+        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+        types.add(FolderType.PRIVATE);
+        types.add(FolderType.PUBLIC);
+        return types;
     }
 
     @Override

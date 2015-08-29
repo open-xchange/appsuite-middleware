@@ -89,6 +89,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String LEVEL_CONFLICTING_FILENAME_MSG = "The file name \"%1$s\" is conflicting with an equally named directory at \"%2$s\".";
     public static final String LEVEL_CONFLICTING_PATH_MSG = "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\".";
     public static final String NOT_SYNCHRONIZABLE_DIRECTORY_MSG = "The directory \"%1$s\" is not synchronizable. Please select another directory.";
+    public static final String METDATA_PARSE_ERROR_MSG = "The supplied metadata could not be parsed: \"%1$s\"";
 
     /**
      * Prevent instantiation.

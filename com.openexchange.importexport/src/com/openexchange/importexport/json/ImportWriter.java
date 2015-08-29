@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * This writer's main objective is to wrap ImportResults into JSON, which then
- * is fed to the AJAX GUI of the OX.
+ * is fed to the AJAX GUI of the OX. TODO remove JSONWriter
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a>
@@ -77,29 +77,29 @@ public class ImportWriter extends DataWriter {
 
     private final ServerSession session;
 
-    /**
-     * Initializes a new {@link ImportWriter}
-     */
-    public ImportWriter(final ServerSession session) {
-        this(new OXJSONWriter(), session);
-    }
+	/**
+	 * Initializes a new {@link ImportWriter}
+	 */
+	public ImportWriter(final ServerSession session) {
+		this(new OXJSONWriter(), session);
+	}
 
-    /**
-     * Initializes a new {@link ImportWriter}
-     *
-     * @param jsonwriter
-     *            The JSON writer to write to
-     */
-    public ImportWriter(final OXJSONWriter jsonwriter, final ServerSession session) {
-        super(null, jsonwriter);
-        this.session = session;
-    }
+	/**
+	 * Initializes a new {@link ImportWriter}
+	 *
+	 * @param jsonwriter
+	 *            The JSON writer to write to
+	 */
+	public ImportWriter(final OXJSONWriter jsonwriter, final ServerSession session) {
+		super(null, jsonwriter);
+		this.session = session;
+	}
 
-    public void writeObject(final ImportResult importResult) throws JSONException {
-	    final Locale locale = session.getUser().getLocale();
+	public void writeObject(final ImportResult importResult) throws JSONException {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
+            final Locale locale = session.getUser().getLocale();
             ResponseWriter.addException(jsonObject, exception, locale);
 
             jsonwriter.object();
@@ -129,61 +129,37 @@ public class ImportWriter extends DataWriter {
             jsonwriter.endObject();
         } else {
     		jsonwriter.object();
-//
-            writeParameter("id", importResult.getObjectId());
-            writeParameter("last_modified", importResult.getDate());
-            writeParameter("folder_id", importResult.getFolder());
-
-            addWarnings(importResult, locale);
+    		writeParameter("id", importResult.getObjectId());
+    		writeParameter("last_modified", importResult.getDate());
+    		writeParameter("folder_id", importResult.getFolder());
     		jsonwriter.endObject();
         }
    }
 
-    /**
-     * @param importResult
-     * @param locale
-     * @throws JSONException
-     */
-    private void addWarnings(final ImportResult importResult, final Locale locale) throws JSONException {
-        List<ConversionWarning> warnings = importResult.getWarnings();
-        if (warnings != null && warnings.size() > 0) {
-            jsonwriter.key("warnings");
-            jsonwriter.array();
-            for (final ConversionWarning warning : warnings) {
-                jsonwriter.object();
-                final JSONObject jsonWarning = new JSONObject();
-                ResponseWriter.addWarning(jsonWarning, warning, locale);
-                writeDepth1(jsonWarning.getJSONObject("warnings"));
-                jsonwriter.endObject();
-            }
-            jsonwriter.endArray();
-        }
-    }
-
     private void writeDepth1(final JSONObject json) throws JSONException {
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
-        final int len = entrySet.size();
-        final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
-        for (int i = 0; i < len; i++) {
-            final Map.Entry<String, Object> e = iter.next();
-            jsonwriter.key(e.getKey()).value(e.getValue());
-        }
+		final int len = entrySet.size();
+		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
+		for (int i = 0; i < len; i++) {
+			final Map.Entry<String, Object> e = iter.next();
+			jsonwriter.key(e.getKey()).value(e.getValue());
+		}
     }
 
     @Override
-    public String toString() {
-        return getObject().toString();
-    }
+	public String toString() {
+		return getObject().toString();
+	}
 
-    public Object getObject() {
-        return ((OXJSONWriter) jsonwriter).getObject();
-    }
+	public Object getObject() {
+		return ((OXJSONWriter) jsonwriter).getObject();
+	}
 
-    public void writeObjects(final List<ImportResult> importResult) throws JSONException {
-        jsonwriter.array();
-        for (int a = 0; a < importResult.size(); a++) {
-            writeObject(importResult.get(a));
-        }
-        jsonwriter.endArray();
-    }
+	public void writeObjects(final List<ImportResult> importResult) throws JSONException {
+		jsonwriter.array();
+		for (int a = 0; a < importResult.size(); a++) {
+			writeObject(importResult.get(a));
+		}
+		jsonwriter.endArray();
+	}
 }

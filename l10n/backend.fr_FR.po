@@ -5643,7 +5643,7 @@ msgstr "Éléments envoyés"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:169
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
-msgstr "Pourriel"
+msgstr "Spam"
 
 #. The internationalized name for the archive mail folder
 #. The name for trash folder

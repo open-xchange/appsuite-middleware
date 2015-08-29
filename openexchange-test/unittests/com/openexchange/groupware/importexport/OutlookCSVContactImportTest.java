@@ -61,14 +61,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.TestCSVContactImporter;
+import junit.framework.JUnit4TestAdapter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = "Last Name,E-mail Address,Birthday\n";

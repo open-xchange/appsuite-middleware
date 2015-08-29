@@ -236,7 +236,8 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
     private JSONObject getJSONPermission(FileStoragePermission permission) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("bits", createPermissionBits(permission));
-        putEntity(jsonObject, permission.getEntity(), permission.isGroup());
+        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("group", permission.isGroup());
         return jsonObject;
     }
 

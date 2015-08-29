@@ -44,6 +44,7 @@ import com.openexchange.admin.soap.context.dataobjects.Database;
 import com.openexchange.admin.soap.context.dataobjects.Entry;
 import com.openexchange.admin.soap.context.dataobjects.Filestore;
 import com.openexchange.admin.soap.context.dataobjects.Group;
+import com.openexchange.admin.soap.context.dataobjects.Quota;
 import com.openexchange.admin.soap.context.dataobjects.SOAPMapEntry;
 import com.openexchange.admin.soap.context.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.context.dataobjects.SOAPStringMapMap;
@@ -76,6 +77,46 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             throw new RemoteException_Exception("Missing " + OXContextInterface.class.getName() + " instance.");
         }
         return contextInterface;
+    }
+
+    @Override
+    public List<Quota> listQuota(Context ctx, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        try {
+            com.openexchange.admin.rmi.dataobjects.Quota[] quotas = contextInterface.listQuotas(soap2Context(ctx), soap2Credentials(auth));
+
+            List<Quota> retval = new ArrayList<Quota>(quotas.length);
+            for (com.openexchange.admin.rmi.dataobjects.Quota quota : quotas) {
+                retval.add(quota2Soap(quota));
+            }
+            return retval;
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
+            com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NoSuchContextException e) {
+            com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
+            faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
+            faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidDataException e) {
+            com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
+            com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NumberFormatException e) {
+            throw new InvalidDataException_Exception("Invalid quota value.", e);
+        }
     }
 
     @Override
@@ -1018,6 +1059,20 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             credentials.setPassword(password);
         }
         return credentials;
+    }
+
+    private static com.openexchange.admin.rmi.dataobjects.Quota soap2Quota(final Quota soapQuota) {
+        if (null == soapQuota) {
+            return null;
+        }
+        final com.openexchange.admin.rmi.dataobjects.Quota quota = new com.openexchange.admin.rmi.dataobjects.Quota();
+        final String m = soapQuota.getModule();
+        if (null != m) {
+            quota.setModule(m);
+        }
+        final long limit = soapQuota.getLimit();
+        quota.setLimit(limit);
+        return quota;
     }
 
     private static com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy soap2SchemaSelectStrategy(SchemaSelectStrategy schemaSelectStrategy) throws InvalidDataException_Exception {
@@ -2157,6 +2212,16 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
+    }
+
+    private static Quota quota2Soap(final com.openexchange.admin.rmi.dataobjects.Quota quota) {
+        if (null == quota) {
+            return null;
+        }
+        final Quota soapQuota = new Quota();
+        soapQuota.setModule(quota.getModule());
+        soapQuota.setLimit(quota.getLimit());
+        return soapQuota;
     }
 
     private static Context context2Soap(final com.openexchange.admin.rmi.dataobjects.Context context) {

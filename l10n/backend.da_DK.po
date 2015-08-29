@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-06 14:06+0200\n"
+"PO-Revision-Date: 2015-08-24 08:53+0200\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
 "Language-Team: Danish <da@bureau-cornavin.com>\n"
 "Language: da\n"
@@ -7713,7 +7713,7 @@ msgstr "Postmappe kan ikke oprettes/omdøbes. Tomt mappenavn."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
-msgstr "Ugyldigt mappenavn. Undgå venligst følgende karakterer: %2$s"
+msgstr "Ugyldigt mappenavn. Undgå venligst følgende tegn: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
 msgid "A folder named \"%1$s\" already exists."
@@ -8262,7 +8262,7 @@ msgstr "Du har ikke de nødvendige rettigheder, til at ændre ressourcer."
 #. The provided resource identifier \"%1$s\" contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:84
 msgid "The provided resource identifier \"%1$s\" contains invalid characters."
-msgstr "Det givet ressource id »%1$s« indeholder ugyldige karaktere."
+msgstr "Det givne ressource-id, »%1$s«, indeholder ugyldige tegn."
 
 #. The provided E-Mail address \"%1$s\" for resource is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:87
@@ -8445,8 +8445,8 @@ msgid ""
 "The specified folder name exceeds the limit of %2$d characters. Please "
 "shorten the name and try again."
 msgstr ""
-"Det givne mappenavn overstiger længden på %2$d karaktere. Forkort venligst "
-"navnet og prøv igen."
+"Det givne mappenavn er længere end loftet på %2$d tegn. Forkort det venligst "
+"og prøv igen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
@@ -9406,19 +9406,19 @@ msgstr "XING-bruger er allerede direkte forbundet."
 #. The comment size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:101
 msgid "The comment size exceeds the maximum allowed number of 600 characters."
-msgstr "Kommentaren er længere end de tilladte 600 karaktere."
+msgstr "Kommentaren er længere end de tilladte 600 tegn."
 
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:104
 msgid ""
 "The status message size exceeds the maximum allowed number of 420 characters."
-msgstr "Statusbeskeden er længere end de tilladte 420 karaktere."
+msgstr "Statusbeskeden er længere end de tilladte 420 tegn."
 
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:107
 msgid ""
 "The text message size exceeds the maximum allowed number of 140 characters."
-msgstr "Størrelsen på tekstbeskeden overskrider de tilladte 140 karaktere."
+msgstr "Størrelsen på tekstbeskeden overskrider loftet på 140 tegn."
 
 #. The mandatory parameter \"%1$s\ is missing in the request body.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
