@@ -129,7 +129,6 @@ public class OsgiOXConsistency extends Consistency {
     protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
         int[] ids = FileStorages.getFileStorage2EntitiesResolver().getIdsOfContextsUsing(filestoreId);
         return loadContexts(ids);
-        // TODO: don't collect contexts for single users
     }
 
     private Map<Context, List<User>> getUsersForFilestore(final int filestoreId) throws OXException {
@@ -147,7 +146,6 @@ public class OsgiOXConsistency extends Consistency {
 
         // Convert to entities
         List<Entity> entities = new ArrayList<Entity>(ctxs.size() + users.size());
-        //List<Entity> entities = new ArrayList<Entity>(ctxs.size());
         for (Context ctx : ctxs) {
             entities.add(new EntityImpl(ctx));
         }

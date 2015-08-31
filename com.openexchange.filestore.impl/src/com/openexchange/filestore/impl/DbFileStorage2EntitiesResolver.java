@@ -210,50 +210,16 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
 
         TIntSet usingContexts = new TIntHashSet(256);
-
-        int[] contextIds;
         {
             Connection configDBCon = databaseService.getReadOnly();
             try {
-                contextIds = getAllContextIds(configDBCon);
                 addContextsUsing(fileStorageId, usingContexts, configDBCon);
             } finally {
                 databaseService.backReadOnly(configDBCon);
             }
         }
 
-        TIntSet processed = new TIntHashSet(256);
-        for (int contextId : contextIds) {
-            if (processed.add(contextId)) {
-                Connection schemaCon = databaseService.getReadOnly(contextId);
-                try {
-                    addContextsWithUsersUsing(fileStorageId, usingContexts, schemaCon);
-                } finally {
-                    databaseService.backReadOnly(contextId, schemaCon);
-                }
-
-                processed.addAll(databaseService.getContextsInSameSchema(contextId));
-            }
-        }
-
         return usingContexts.toArray();
-    }
-
-    private void addContextsWithUsersUsing(int fileStorageId, TIntSet usingContexts, Connection schemaCon) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = schemaCon.prepareStatement("SELECT DISTINCT cid FROM user WHERE filestore_id=?");
-            stmt.setInt(1, fileStorageId);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                usingContexts.add(rs.getInt(1));
-            }
-        } catch (SQLException e) {
-            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
     }
 
     /**
@@ -475,7 +441,7 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int ctxId = rs.getInt(1);
-                List<Integer> list = users.containsKey(ctxId)? users.get(ctxId) : new ArrayList<Integer>();
+                List<Integer> list = users.containsKey(ctxId) ? users.get(ctxId) : new ArrayList<Integer>();
                 list.add(rs.getInt(2));
                 users.put(ctxId, list);
             }
