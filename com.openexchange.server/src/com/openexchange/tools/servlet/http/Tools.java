@@ -76,6 +76,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
@@ -681,9 +682,31 @@ public final class Tools {
      * @return The host data
      */
     public static HostData createHostData(HttpServletRequest request, int contextId, int userId, boolean isGuest) {
-        String hostname = determineHostname(request, contextId, userId, isGuest);
-        String servletPrefix = determineServletPrefix();
-        return new HostDataImpl(considerSecure(request), hostname, request.getServerPort(), request.getSession(true).getId(), servletPrefix);
+        String host = determineHostname(request, contextId, userId, isGuest);
+        int port = request.getServerPort();
+        String dispatcherPrefix = determineServletPrefix();
+        boolean secure = considerSecure(request);
+        HttpSession httpSession = request.getSession(false);
+        String httpSessionID = null != httpSession ? httpSession.getId() : null;
+        String route = extractRoute(httpSessionID);
+        return new HostDataImpl(secure, host, port, httpSessionID, route, dispatcherPrefix);
+    }
+
+    /**
+     * Extracts a request's backend "route" based on the supplied HTTP session ID, falling back to this server's default backend route as
+     * configured via <code>com.openexchange.server.backendRoute</code>.
+     *
+     * @param httpSessionID The request's HTTP session ID, or <code>null</code> if unknown
+     * @return The route, e.g. <code>OX1</code>
+     */
+    public static String extractRoute(String httpSessionID) {
+        if (null != httpSessionID) {
+            int index = httpSessionID.indexOf('.');
+            if (0 < index && index < httpSessionID.length() - 1) {
+                return httpSessionID.substring(index + 1);
+            }
+        }
+        return determineBackendRoute();
     }
 
     /**
@@ -855,6 +878,20 @@ public final class Tools {
             }, DispatcherPrefixService.DEFAULT_PREFIX);
         } catch (ServiceException e) {
             return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+    }
+
+    private static String determineBackendRoute() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(Tools.class, SystemNameService.class, new ServiceUser<SystemNameService, String>() {
+
+                @Override
+                public String call(SystemNameService service) throws Exception {
+                    return service.getSystemName();
+                }
+            }, "OX1");
+        } catch (ServiceException e) {
+            return "OX1";
         }
     }
 

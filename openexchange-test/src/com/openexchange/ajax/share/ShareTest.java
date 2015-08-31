@@ -119,6 +119,7 @@ import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ShareTest}
@@ -204,18 +205,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
             @Override
             public String getRoute() {
-                try {
-                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
-                    for (Cookie cookie : cookies) {
-                        if ("JSESSIONID".equals(cookie.getName())) {
-                            return cookie.getValue();
-                        }
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-
-                return "1234567890.OX1";
+                return Tools.extractRoute(getHTTPSession());
             }
 
             @Override
@@ -226,6 +216,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
             @Override
             public boolean isSecure() {
                 return "https".equalsIgnoreCase(client.getProtocol());
+            }
+
+            @Override
+            public String getHTTPSession() {
+                try {
+                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
+                    for (Cookie cookie : cookies) {
+                        if ("JSESSIONID".equals(cookie.getName())) {
+                            return cookie.getValue();
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+                return null;
             }
         };
     }

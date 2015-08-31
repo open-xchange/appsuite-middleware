@@ -69,7 +69,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -95,9 +96,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
 
-    private static final int DELAY = 10000;
-
-    private static final int INITIAL_DELAY = 1000;
+    private static final int DELAY = 120000;
 
     private class FileManagementPropertyListener implements PropertyListener {
 
@@ -127,15 +126,15 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         private final int time2live;
         private final AtomicReference<File> tmpDirReference;
         private final FileFilter defaultPrefixFilter;
-        private final Lock tLock;
+        private final Lock exclusiveCreationLock;
 
         /**
          * Initializes a new {@link FileManagementTask}.
          */
-        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, Lock creationLock, int time2live, AtomicReference<File> tmpDirReference, final String defaultPrefix, org.slf4j.Logger logger) {
+        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, Lock exclusiveCreationLock, int time2live, AtomicReference<File> tmpDirReference, final String defaultPrefix, org.slf4j.Logger logger) {
             super();
             tfiles = files;
-            tLock = creationLock;
+            this.exclusiveCreationLock = exclusiveCreationLock;
             this.time2live = time2live;
             this.tmpDirReference = tmpDirReference;
             defaultPrefixFilter = new FileFilter() {
@@ -150,7 +149,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         @Override
         public void run() {
-            tLock.lock();
+            exclusiveCreationLock.lock();
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
                 Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
@@ -198,7 +197,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             } catch (Exception t) {
                 logger.error("", t);
             } finally {
-                tLock.unlock();
+                exclusiveCreationLock.unlock();
             }
         }
     }
@@ -216,7 +215,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     private final TimerService timer;
     private final DispatcherPrefixService dispatcherPrefixService;
     private final ConcurrentMap<String, ManagedFileImpl> files;
-    private final Lock creationLock;
+    private final ReadWriteLock creationRwLock;
     private final PropertyListener propertyListener;
     private final AtomicReference<File> tmpDirReference;
     private final AtomicReference<ScheduledTimerTask> timerTaskReference;
@@ -230,7 +229,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         this.timer = timer;
         this.dispatcherPrefixService = dispatcherPrefixService;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
-        creationLock = new ReentrantLock();
+        creationRwLock = new ReentrantReadWriteLock();
 
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
         this.tmpDirReference = tmpDirReference;
@@ -239,7 +238,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         tmpDirReference.set(getTmpDirByPath(path));
 
         // Register timer task
-        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, creationLock, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
+        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, creationRwLock.writeLock(), TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), DELAY, DELAY);
         timerTaskReference = new AtomicReference<ScheduledTimerTask>(timerTask);
     }
 
@@ -289,6 +288,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             prfx = PREFIX_WO_EVICT;
         }
 
+        Lock creationLock = creationRwLock.readLock();
         creationLock.lock();
         try {
             File tmpFile = null;
@@ -392,6 +392,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             throw new IllegalArgumentException("Missing input stream.");
         }
 
+        Lock creationLock = creationRwLock.readLock();
         creationLock.lock();
         try {
             ManagedFileImpl mf = null;
@@ -690,7 +691,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     void startUp() {
         if (stopTimerTask()) {
-            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, creationLock, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
+            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, creationRwLock.writeLock(), TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), DELAY, DELAY));
         }
     }
 

@@ -264,7 +264,7 @@ public final class ImageUtility {
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
         boolean optImageHostSet = false;
         final String prefix;
-        final String route;
+        final String httpSessionID;
         String publicSessionId = null;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
@@ -286,7 +286,7 @@ public final class ImageUtility {
                         optImageHostSet = true;
                     }
                 }
-                route = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION);
+                httpSessionID = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION);
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred
@@ -327,7 +327,7 @@ public final class ImageUtility {
                         optImageHostSet = true;
                     }
                 }
-                route = hostData.getRoute();
+                httpSessionID = null != hostData.getHTTPSession() ? hostData.getHTTPSession() : "0123456789." + hostData.getRoute();
             }
         }
         /*
@@ -341,13 +341,13 @@ public final class ImageUtility {
             sb.append(alias);
         }
         if (optImageHostSet) {
-            if (null != route) {
-                sb.append(";jsessionid=").append(route);
+            if (null != httpSessionID) {
+                sb.append(";jsessionid=").append(httpSessionID);
             }
         } else if (addRoute ) {
             final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
-            if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
-                sb.append(";jsessionid=").append(route);
+            if ((null == noRoute || !noRoute.booleanValue()) && null != httpSessionID) {
+                sb.append(";jsessionid=").append(httpSessionID);
             }
         }
         boolean first = true;

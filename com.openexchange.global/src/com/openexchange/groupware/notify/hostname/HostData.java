@@ -59,9 +59,18 @@ package com.openexchange.groupware.notify.hostname;
 public interface HostData {
 
     /**
-     * Gets the route: : &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     * Gets the HTTP session ID (including the backend "route" suffix) as set in the underlying HTTP servlet request, e.g.
+     * &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;.
      *
-     * @return The route
+     * @return The session ID, or <code>null</code> if none was assigned
+     */
+    String getHTTPSession();
+
+    /**
+     * Gets the request's "route" based on the assigned HTTP session ID or this server's default backend route as configured via
+     * <code>com.openexchange.server.backendRoute</code>.
+     *
+     * @return The backend route, e.g. <code>OX1</code>
      */
     String getRoute();
 

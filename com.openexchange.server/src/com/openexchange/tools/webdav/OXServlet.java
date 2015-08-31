@@ -62,6 +62,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import com.google.common.net.HttpHeaders;
@@ -204,7 +205,8 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getHttpSessionID() {
-            return req.getSession(true).getId();
+            HttpSession session = req.getSession(false);
+            return null != session ? session.getId() : null;
         }
 
         @Override
