@@ -224,7 +224,7 @@ public class OAuthMailNotificationService {
             .setScheme("https")
             .setHost(URLHelper.getHostname(request))
             .setPath(uiWebPath)
-            .setFragment("&app=io.ox/settings&folder=virtual/settings/external/apps")
+            .setFragment("!&app=io.ox/settings&folder=virtual/settings/external/apps")
             .build();
         return settingsURI.toString();
     }
