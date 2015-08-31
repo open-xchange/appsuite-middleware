@@ -52,12 +52,10 @@ package com.openexchange.mail.json.writer;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.TimeZone;
-import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,7 +89,6 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.sun.mail.util.QPDecoderStream;
 
 /**
  * {@link MessageWriter} - Writes {@link MailMessage} instances as JSON strings
@@ -217,9 +214,9 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
-        MailPath mailPath;
         String fullName = mail.getFolder();
         String mailId = mail.getMailId();
+        MailPath mailPath;
         if (fullName != null && mailId != null) {
             mailPath = new MailPath(getAccountIdFor(accountId, mail), fullName, mailId);
         } else if (mail.getMsgref() != null) {
@@ -256,7 +253,7 @@ public final class MessageWriter {
                     if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                         throw e;
                     }
-                    
+
                     try {
                         backup = new ThresholdFileHolder();
                         mail.writeTo(backup.asOutputStream());

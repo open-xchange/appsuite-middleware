@@ -230,6 +230,7 @@ public final class IMAPConversationWorker {
              * Sort messages by thread reference
              */
             final MailFields usedFields = new MailFields(mailFields);
+            IMAPMessageStorage.prepareMailFieldsForVirtualFolder(usedFields, fullName);
             usedFields.add(MailField.THREAD_LEVEL);
             usedFields.add(MailField.RECEIVED_DATE);
             usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
@@ -859,6 +860,7 @@ public final class IMAPConversationWorker {
              * Fetch messages
              */
             final MailFields usedFields = new MailFields();
+            IMAPMessageStorage.prepareMailFieldsForVirtualFolder(usedFields, fullName);
             // Add desired fields
             usedFields.addAll(mailFields);
             usedFields.add(MailField.THREAD_LEVEL);
