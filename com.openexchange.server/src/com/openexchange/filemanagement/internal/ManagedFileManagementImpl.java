@@ -192,8 +192,6 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     File orphaned = entry.getValue();
                     if (!orphaned.delete()) {
                         logger.warn("Temporary file could not be deleted: {}", name);
-                    } else {
-                        System.err.println("DELETED " + orphaned.getName());
                     }
                     logger.debug("Removed orphaned managed file {}", name);
                 }
