@@ -115,7 +115,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Get the appender's instance
-     * 
+     *
      * @return the appender's instance
      */
     public static LogstashSocketAppender getInstance() {
@@ -131,9 +131,10 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see ch.qos.logback.core.AppenderBase#start()
      */
+    @Override
     public void start() {
         REF.set(this);
 
@@ -209,7 +210,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see ch.qos.logback.core.AppenderBase#stop()
      */
     @Override
@@ -228,7 +229,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see ch.qos.logback.core.net.SocketConnector.ExceptionHandler#connectionFailed(ch.qos.logback.core.net.SocketConnector,
      * java.lang.Exception)
      */
@@ -239,7 +240,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Handle connection exceptions
-     * 
+     *
      * @param ex The exception to handle
      */
     private void handleConnectionException(Exception ex) {
@@ -264,7 +265,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Runnable#run()
      */
     @Override
@@ -296,7 +297,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Dispatch the events to the remote host
-     * 
+     *
      * @throws InterruptedException
      * @throws IOException
      */
@@ -324,7 +325,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see ch.qos.logback.core.AppenderBase#append(java.lang.Object)
      */
     @Override
@@ -346,7 +347,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Creates a new {@link SocketConnector}.
      * <p>
      * The default implementation creates an instance of {@link DefaultSocketConnector}. A subclass may override to provide a different {@link SocketConnector} implementation.
-     * 
+     *
      * @param address target remote address
      * @param port target remote port
      * @param initialDelay delay before the first connection attempt
@@ -372,7 +373,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * The default implementation creates a (bounded) {@link ArrayBlockingQueue} for positive queue sizes. Otherwise it creates a {@link SynchronousQueue}.
      * <p>
      * This method is exposed primarily to support instrumentation for unit testing.
-     * 
+     *
      * @param queueSize size of the queue
      * @return
      */
@@ -382,7 +383,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Create a {@link SocketConnector}
-     * 
+     *
      * @param address The address of the host
      * @param port The port
      * @param initialDelay The initial delay
@@ -400,7 +401,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Activate the {@SocketConnector} by submitting it to the executor service. If successful, a connector task will be returned.
-     * 
+     *
      * @param connector The SocketConnector
      * @return A connector task
      * @throws OXException
@@ -418,7 +419,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Get a socket from the connector task.
-     * 
+     *
      * @return A socket
      * @throws ExecutionException
      * @throws InterruptedException
@@ -433,7 +434,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Clean up queue and log if necessary
-     * 
+     *
      * @throws InterruptedException
      * @throws IOException
      */
@@ -455,7 +456,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Flush queue
-     * 
+     *
      * @param The amount of elements to flush from the queue
      * @throws IOException
      */
@@ -475,7 +476,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Write the current timestamp by using the {@link LogstashFormatter.LOGSTASH_TIMEFORMAT}
-     * 
+     *
      * @return A formatted timestamp
      */
     private String writeCurrentTimestamp() {
@@ -530,7 +531,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
     /**
      * The <b>eventDelayLimit</b> takes a non-negative integer representing the number of milliseconds to allow the appender to block if the
      * underlying BlockingQueue is full. Once this limit is reached, the event is dropped.
-     * 
+     *
      * @param eventDelayLimit the event delay limit
      */
     public void setEventDelayLimit(Duration eventDelayLimit) {
@@ -548,7 +549,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      * Sets the timeout that controls how long we'll wait for the remote peer to accept our connection attempt.
      * <p>
      * This property is configurable primarily to support instrumentation for unit testing.
-     * 
+     *
      * @param acceptConnectionTimeout timeout value in milliseconds
      */
     void setAcceptConnectionTimeout(int acceptConnectionTimeout) {
@@ -604,7 +605,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Log INFO helper
-     * 
+     *
      * @param message The message
      * @param t The exception(s)
      */
@@ -614,7 +615,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Log WARN helper
-     * 
+     *
      * @param message The message
      * @param t The exception(s)
      */
@@ -624,7 +625,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Log ERROR helper
-     * 
+     *
      * @param message The message
      * @param t The exception(s)
      */
@@ -634,7 +635,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
 
     /**
      * Log the specified message and the specified exception(s) stacktrace with the specified level to System.err
-     * 
+     *
      * @param level The logging level
      * @param message The message
      * @param t The exception(s)
