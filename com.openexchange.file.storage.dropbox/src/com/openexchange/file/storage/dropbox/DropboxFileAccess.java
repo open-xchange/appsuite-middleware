@@ -668,7 +668,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws DropboxException
      */
     private List<File> searchInPath(String folderPath, String pattern, boolean recursive) throws OXException, DropboxException {
-        if (Strings.isEmpty(pattern)) {
+        if (Strings.isEmpty(pattern) || "*".equals(pattern)) {
             List<File> files = new LinkedList<File>();
             gatherAllFiles(folderPath, files);
             return files;
