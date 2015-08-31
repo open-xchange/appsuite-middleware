@@ -181,7 +181,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             logger.debug("Removed expired managed file {}", fname);
                         } else {
                             // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
-                            existentFiles.remove(cur.getFileName());
+                            existentFiles.remove(cur.getFilePlain().getName());
                         }
                     }
                 }
@@ -192,6 +192,8 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     File orphaned = entry.getValue();
                     if (!orphaned.delete()) {
                         logger.warn("Temporary file could not be deleted: {}", name);
+                    } else {
+                        System.err.println("DELETED " + orphaned.getName());
                     }
                     logger.debug("Removed orphaned managed file {}", name);
                 }
