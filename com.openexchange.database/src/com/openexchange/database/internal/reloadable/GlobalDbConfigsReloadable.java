@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.internal.GlobalDatabaseServiceImpl;
@@ -74,20 +75,16 @@ public class GlobalDbConfigsReloadable implements Reloadable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDbConfigsReloadable.class);
 
     private static final String[] PROPERTIES = new String[] { "complete yaml file" };
-    private final GlobalDatabaseServiceImpl globalDatabaseServiceImpl;
 
-    private final DBMigrationExecutorService migrationService;
+    private static final AtomicReference<GlobalDatabaseServiceImpl> GLOBAL_DB_REF = new AtomicReference<>();
+
+    private static final AtomicReference<DBMigrationExecutorService> DB_MIGRATION_EXECUTOR_REF = new AtomicReference<>();
 
     /**
      * Initializes a new {@link GenericReloadable}.
-     *
-     * @param globalDatabaseService
-     * @param migrationService
      */
-    public GlobalDbConfigsReloadable(GlobalDatabaseServiceImpl globalDatabaseServiceImpl, DBMigrationExecutorService migrationService) {
+    public GlobalDbConfigsReloadable() {
         super();
-        this.globalDatabaseServiceImpl = globalDatabaseServiceImpl;
-        this.migrationService = migrationService;
     }
 
     /**
@@ -95,10 +92,24 @@ public class GlobalDbConfigsReloadable implements Reloadable {
      */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Map<String, GlobalDbConfig> loadGlobalDbConfigs = this.globalDatabaseServiceImpl.loadGlobalDbConfigs(configService);
+        if (GLOBAL_DB_REF.get() == null) {
+            LOG.error("Cannot reload " + GlobalDbInit.CONFIGFILE + ". GlobalDatabaseServiceImpl not available.");
+            return;
+        }
+        if (DB_MIGRATION_EXECUTOR_REF.get() == null) {
+            LOG.error("Cannot reload " + GlobalDbInit.CONFIGFILE + ". DBMigrationExecutorService not available.");
+            return;
+        }
 
-            List<DBMigrationState> scheduleMigrations = this.globalDatabaseServiceImpl.scheduleMigrations(migrationService, loadGlobalDbConfigs);
+        try {
+            Map<String, GlobalDbConfig> loadGlobalDbConfigs = GLOBAL_DB_REF.get().loadGlobalDbConfigs(configService);
+            if (loadGlobalDbConfigs.isEmpty()) {
+                LOG.info("Global database configuration is empty. No task for an update to schedule but will set empty configuration for further processing.");
+                GLOBAL_DB_REF.get().setGlobalDbConfigs(loadGlobalDbConfigs);
+                return;
+            }
+
+            List<DBMigrationState> scheduleMigrations = GLOBAL_DB_REF.get().scheduleMigrations(DB_MIGRATION_EXECUTOR_REF.get(), loadGlobalDbConfigs);
             for (DBMigrationState state : scheduleMigrations) {
                 try {
                     state.awaitCompletion();
@@ -111,7 +122,7 @@ public class GlobalDbConfigsReloadable implements Reloadable {
                     throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(e);
                 }
             }
-            this.globalDatabaseServiceImpl.setGlobalDbConfigs(loadGlobalDbConfigs);
+            GLOBAL_DB_REF.get().setGlobalDbConfigs(loadGlobalDbConfigs);
         } catch (OXException e) {
             LOG.error("Unable to reload global database configuration from globaldb.yml. Please review your changes and reload again!", e);
         }
@@ -125,5 +136,13 @@ public class GlobalDbConfigsReloadable implements Reloadable {
         Map<String, String[]> map = new HashMap<String, String[]>(1);
         map.put(GlobalDbInit.CONFIGFILE, PROPERTIES);
         return map;
+    }
+
+    public static void setGlobalDatabaseServiceRef(GlobalDatabaseServiceImpl lGlobalDatabaseServiceRef) {
+        GLOBAL_DB_REF.set(lGlobalDatabaseServiceRef);
+    }
+
+    public static void setGlobalDatabaseServiceRef(DBMigrationExecutorService lDBMigrationExecutorService) {
+        DB_MIGRATION_EXECUTOR_REF.set(lDBMigrationExecutorService);
     }
 }

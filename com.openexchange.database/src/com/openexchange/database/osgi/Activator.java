@@ -63,6 +63,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.internal.CreateReplicationTable;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
+import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.timer.TimerService;
@@ -97,6 +98,7 @@ public class Activator implements BundleActivator {
             tracker.open();
         }
         reloadableRegistration = context.registerService(Reloadable.class, GenericReloadable.getInstance(), null);
+        context.registerService(Reloadable.class, new GlobalDbConfigsReloadable(), null);
     }
 
     @Override

@@ -219,6 +219,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final DisplayMode displayMode;
     private final int accountId;
     private final MailPath mailPath;
+    private final MailPath originalMailPath;
     private final JSONObject jsonObject;
     private JSONArray attachmentsArr;
     private JSONArray nestedMsgsArr;
@@ -325,6 +326,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
             }
+            MailPath originalMailPath = null;
             if (null != mail) {
                 /*
                  * Add missing fields
@@ -345,19 +347,26 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
+
+                String originalId = null;
                 if (mail.containsOriginalId()) {
-                    String originalId = mail.getOriginalId();
+                    originalId = mail.getOriginalId();
                     if (null != originalId) {
                         jsonObject.put(ORIGINAL_ID, originalId);
                     }
                 }
+                String originalFolder = null;
                 if (mail.containsOriginalFolder()) {
-                    String originalFolder = mail.getOriginalFolder();
+                    originalFolder = mail.getOriginalFolder();
                     if (null != originalFolder) {
                         jsonObject.put(ORIGINAL_FOLDER_ID, originalFolder);
                     }
                 }
+                if (null != originalId && null != originalFolder) {
+                    originalMailPath = new MailPath(null == mailPath ? mail.getAccountId() : mailPath.getAccountId(), originalFolder, originalId);
+                }
             }
+            this.originalMailPath = originalMailPath;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
@@ -813,7 +822,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 String content = jAttachment.optString(CONTENT, "null");
                                 if (!"null".equals(content) && null != mailPath) {
                                     // Append to first one
-                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
                                     content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
@@ -857,7 +866,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             String content = jAttachment.optString(CONTENT, "null");
                             if (!"null".equals(content) && null != mailPath) {
                                 // Append to first one
-                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
+                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
                                 content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
@@ -1116,6 +1125,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 contentType.getCharsetParameter(),
                 session,
                 mailPath,
+                originalMailPath,
                 usm,
                 modified,
                 displayMode,
@@ -1265,6 +1275,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.tokenFolder = tokenFolder;
                 msgHandler.tokenMailId = tokenMailId;
                 msgHandler.exactLength = exactLength;
+                // msgHandler.originalMailPath = originalMailPath;
                 msgHandler.currentNestingLevel = currentNestingLevel + 1;
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
@@ -1327,9 +1338,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
-            jsonObject.put(
-                MailJSONField.RECEIVED_DATE.getKey(),
-                receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
+            jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1339,9 +1348,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
-            jsonObject.put(
-                MailJSONField.SENT_DATE.getKey(),
-                sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
+            jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1520,7 +1527,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(ID, id);
-            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode, embedded, maxContentSize);
+            HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, originalMailPath, usm, modified, displayMode, embedded, maxContentSize);
             final String content = sanitizeResult.getContent();
 
             jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());

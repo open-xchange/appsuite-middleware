@@ -55,7 +55,8 @@ import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -119,13 +120,9 @@ public class ResourceIDField implements AdditionalFileField {
      * @return The realtime identifier, or <code>null</code> if no identifier can be extracted from the passed file reference
      */
     private static String getRealtimeID(File file) {
-        if (null != file && null != file.getId()) {
-            FileID fileID = new FileID(file.getId());
-            if (FileID.INFOSTORE_SERVICE_ID.equals(fileID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(fileID.getAccountId())) {
-                return fileID.getFileId();
-            } else {
-                return fileID.toUniqueID();
-            }
+        if (null != file && UserizedFile.class.isInstance(file)) {
+            String originalID = ((UserizedFile) file).getOriginalId();
+            return Strings.isEmpty(originalID) ? file.getId() : originalID;
         }
         return null;
     }

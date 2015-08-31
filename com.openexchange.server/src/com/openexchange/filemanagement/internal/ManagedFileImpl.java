@@ -202,6 +202,15 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
         return file;
     }
 
+    /**
+     * Gets the file reference w/o touching last-accessed time stamp
+     *
+     * @return The file
+     */
+    public File getFilePlain() {
+        return file;
+    }
+
     @Override
     public long getLastAccess() {
         return lastAccessed;

@@ -58,7 +58,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
@@ -158,7 +157,8 @@ public final class Initialization {
         }
         // Global database service
         globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, configurationService, configDatabaseService, configViewFactory);
-        GenericReloadable.getInstance().addReloadable(new GlobalDbConfigsReloadable(globalDatabaseService, migrationService));
+        GlobalDbConfigsReloadable.setGlobalDatabaseServiceRef(globalDatabaseService);
+        GlobalDbConfigsReloadable.setGlobalDatabaseServiceRef(migrationService);
         // Schedule pending migrations
         if (null != migrationService) {
             configDatabaseService.scheduleMigrations(migrationService);

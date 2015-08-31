@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +62,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -98,11 +101,12 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
     }
 
     public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException{
-        if (fields == null) {
-            fields = Field.values();
-        }
         FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
-        return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
+        if (fields == null) {
+            return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
+        }
+
+        return writer.writeSpecific(new TestFriendlyInfostoreRequest("UTC"), data, fields, null);
     }
 
     public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {

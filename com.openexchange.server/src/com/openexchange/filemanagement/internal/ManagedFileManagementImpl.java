@@ -181,7 +181,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             logger.debug("Removed expired managed file {}", fname);
                         } else {
                             // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
-                            existentFiles.remove(cur.getFileName());
+                            existentFiles.remove(cur.getFilePlain().getName());
                         }
                     }
                 }
