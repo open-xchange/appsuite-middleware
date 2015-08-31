@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileFieldHandler;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -101,24 +102,48 @@ public class FileMetadataWriter {
          * serialize regular fields
          */
         final JsonFieldHandler handler = new JsonFieldHandler(request);
-        JSONObject jsonObject = File.Field.inject(new AbstractFileFieldHandler() {
-
-            @Override
-            public Object handle(Field field, Object... args) {
-                JSONObject jsonObject = get(0, JSONObject.class, args);
-                try {
-                    jsonObject.put(field.getName(), handler.handle(field, file));
-                } catch (JSONException e) {
-                    LOG.error("Error writing field: {}", field.getName(), e);
-                }
-                return jsonObject;
-            }
-        }, new JSONObject());
+        JSONObject jsonObject = File.Field.inject(getJsonHandler(file, handler), new JSONObject());
         /*
          * render additional fields if available
          */
         if (null != fieldCollector) {
             List<AdditionalFileField> additionalFields = fieldCollector.getFields();
+            for (AdditionalFileField additionalField : additionalFields) {
+                try {
+                    Object value = additionalField.getValue(file, request.getSession());
+                    jsonObject.put(additionalField.getColumnName(), additionalField.renderJSON(request.getRequestData(), value));
+                } catch (JSONException e) {
+                    LOG.error("Error writing field: {}", additionalField.getColumnName(), e);
+                }
+            }
+        }
+        return jsonObject;
+    }
+
+    /**
+     * Serializes a single file with a specific field set.
+     *
+     * @param request The underlying infostore request
+     * @param file The file to write
+     * @param fields The basic file fields to write
+     * @param additionalFields The column IDs of additional file fields to write; may be <code>null</code>
+     * @return A JSON object holding the serialized file
+     */
+    public JSONObject writeSpecific(final AJAXInfostoreRequest request, final File file, final Field[] fields, final int[] additionalColumns) {
+        /*
+         * serialize regular fields
+         */
+        JSONObject jsonObject = new JSONObject();
+        FileFieldHandler jsonHandler = getJsonHandler(file, new JsonFieldHandler(request));
+        for (Field field : fields) {
+            field.handle(jsonHandler, jsonObject);
+        }
+
+        /*
+         * render additional fields if available
+         */
+        if (null != fieldCollector && additionalColumns != null && additionalColumns.length > 0) {
+            List<AdditionalFileField> additionalFields = fieldCollector.getFields(additionalColumns);
             for (AdditionalFileField additionalField : additionalFields) {
                 try {
                     Object value = additionalField.getValue(file, request.getSession());
@@ -218,6 +243,21 @@ public class FileMetadataWriter {
             array.put(field.handle(handler, f));
         }
         return array;
+    }
+
+    private static FileFieldHandler getJsonHandler(final File file, final JsonFieldHandler fieldHandler) {
+        return new AbstractFileFieldHandler() {
+            @Override
+            public Object handle(Field field, Object... args) {
+                JSONObject jsonObject = get(0, JSONObject.class, args);
+                try {
+                    jsonObject.put(field.getName(), fieldHandler.handle(field, file));
+                } catch (JSONException e) {
+                    LOG.error("Error writing field: {}", field.getName(), e);
+                }
+                return jsonObject;
+            }
+        };
     }
 
 }
