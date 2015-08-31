@@ -167,6 +167,48 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
+    public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
+        // The auto-complete prefix
+        String prefix = autocompleteRequest.getPrefix();
+
+        List<Facet> facets = new LinkedList<Facet>();
+
+        boolean supportsSearchByTerm = supportsSearchByTerm(session, autocompleteRequest);
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
+                .build());
+
+            if (supportsSearchByTerm) {
+                facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
+                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
+                    .build());
+                facets.add(newSimpleBuilder(DriveFacetType.FILE_DESCRIPTION)
+                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
+                    .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
+                    .build());
+            }
+        }
+
+        addFileTypeFacet(facets);
+
+        if (supportsSearchByTerm) {
+            addFileSizeFacet(facets);
+            addDateFacet(facets);
+        }
+
+        return new AutocompleteResult(facets);
+    }
+
+    @Override
     public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
@@ -224,15 +266,9 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         final List<String> queries = searchRequest.getQueries();
         final String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
         List<File> files = new LinkedList<File>();
-        final SearchIterator<File> it = null;
         try {
             files = iterativeSearch(fileAccess, folderAccess, folderId, pattern, fields, start, start + searchRequest.getSize());
-            //            it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-            //            while (it.hasNext()) {
-            //                files.add(it.next());
-            //            }
         } finally {
-            SearchIterators.close(it);
             fileAccess.finish();
             folderAccess.finish();
         }
@@ -292,27 +328,25 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return folderIDs;
     }
 
-    private List<File> iterativeSearch(final IDBasedFileAccess fileAccess, final IDBasedFolderAccess folderAccess, final String startingId, final String pattern, final List<Field> fields, final int start, final int end)
-    {
-        try {
-            //get all Folders
-            final List<String> folders = findSubfolders(startingId, folderAccess);
-            folders.size();
-            //search in all folders
-            final List<File> files = new ArrayList<File>(30);
-            SearchIterator<File> it = null;
-            for (final String folderId : folders)
-            {
-                it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, end);
+    private List<File> iterativeSearch(final IDBasedFileAccess fileAccess, final IDBasedFolderAccess folderAccess, final String startingId, final String pattern, final List<Field> fields, final int start, final int end) throws OXException {
+        List<File> files = new ArrayList<File>(30);
+        if (startingId == null) {
+            SearchIterator<File> it = fileAccess.search(pattern, fields, FileStorageFileAccess.ALL_FOLDERS, File.Field.TITLE, SortDirection.DEFAULT, start, end);
+            while (it.hasNext()) {
+                files.add(it.next());
+            }
+        } else {
+            List<String> folders = findSubfolders(startingId, folderAccess);
+            for (String folderId : folders) {
+                SearchIterator<File> it = fileAccess.search(pattern, fields, folderId, File.Field.TITLE, SortDirection.DEFAULT, start, end);
                 while (it.hasNext()) {
                     files.add(it.next());
                 }
             }
             Collections.sort(files, SortDirection.DEFAULT.comparatorBy(File.Field.TITLE));
-            return files;
-        } catch (final OXException e) {
-            return Collections.emptyList();
         }
+
+        return files;
     }
 
     /**
@@ -445,48 +479,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             patterns.add(Strings.wildcardToRegex(wildcardPattern));
         }
         return patterns;
-    }
-
-    @Override
-    public AutocompleteResult doAutocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
-        // The auto-complete prefix
-        String prefix = autocompleteRequest.getPrefix();
-
-        List<Facet> facets = new LinkedList<Facet>();
-
-        boolean supportsSearchByTerm = supportsSearchByTerm(session, autocompleteRequest);
-        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
-            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
-            if (prefixTokens.isEmpty()) {
-                prefixTokens = Collections.singletonList(prefix);
-            }
-
-            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                .withSimpleDisplayItem(prefix)
-                .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
-                .build());
-
-            if (supportsSearchByTerm) {
-                facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
-                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
-                    .build());
-                facets.add(newSimpleBuilder(DriveFacetType.FILE_DESCRIPTION)
-                    .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_DESC, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_FILE_DESC, prefixTokens))
-                    .build());
-            }
-        }
-
-        addFileTypeFacet(facets);
-
-        if (supportsSearchByTerm) {
-            addFileSizeFacet(facets);
-            addDateFacet(facets);
-        }
-
-        return new AutocompleteResult(facets);
     }
 
     private void addFileTypeFacet(List<Facet> facets) {
