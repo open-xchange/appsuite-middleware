@@ -162,7 +162,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      * @see {@link AbstractModuleSearchDriver#ALL_FOLDER_TYPES} and {@link AbstractModuleSearchDriver#FOLDER_TYPE_NOT_SUPPORTED}
      * for convenience.
      */
-    protected abstract Set<FolderType> getSupportedFolderTypes(ServerSession session);
+    protected abstract Set<FolderType> getSupportedFolderTypes(ServerSession session) throws OXException;
 
     protected LinkedList<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
         if (facets.isEmpty() || active.isEmpty()) {

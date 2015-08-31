@@ -75,6 +75,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -113,7 +114,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
@@ -154,16 +154,21 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
-        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-        if (userPermissionBits.hasFullSharedFolderAccess()) {
-            return ALL_FOLDER_TYPES;
+    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) throws OXException {
+        List<FileStorageAccount> accounts = getFileStorageAccounts(session);
+        if (accounts.size() == 1 && FileID.INFOSTORE_SERVICE_ID.equals(accounts.get(0).getFileStorageService().getId())) {
+            UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+            if (userPermissionBits.hasFullSharedFolderAccess()) {
+                return ALL_FOLDER_TYPES;
+            }
+
+            Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+            types.add(FolderType.PRIVATE);
+            types.add(FolderType.PUBLIC);
+            return types;
         }
 
-        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
-        types.add(FolderType.PRIVATE);
-        types.add(FolderType.PUBLIC);
-        return types;
+        return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
     @Override
@@ -211,14 +216,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public SearchResult doSearch(final SearchRequest searchRequest, final ServerSession session) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
-        if (null == fileAccessFactory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
-        }
-
         IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
-        if (null == folderAccessFactory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
-        }
 
         // Create file access
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
@@ -562,9 +560,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      */
     private static boolean supportsSearchByTerm(final ServerSession session, final AbstractFindRequest findRequest) throws OXException {
         final IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
-        if (null == fileAccessFactory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
-        }
         final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         try {
             return supportsSearchByTerm(session, fileAccess, findRequest);
@@ -593,9 +588,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
          * check capability of all available storages, otherwise
          */
         final FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
-        if (null == registry) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
-        }
         for (final FileStorageService service : registry.getAllServices()) {
             // Determine accounts
             final List<FileStorageAccount> accounts = AccountAware.class.isInstance(service) ? ((AccountAware) service).getAccounts(session) : service.getAccountManager().getAccounts(session);
@@ -629,6 +621,23 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
         }
         return true;
+    }
+
+    /**
+     * Determines all file storage accounts of the session user.
+     *
+     * @param session The session
+     * @return The list of accounts
+     */
+    private static List<FileStorageAccount> getFileStorageAccounts(ServerSession session) throws OXException {
+        FileStorageServiceRegistry registry = Services.getFileStorageServiceRegistry();
+        List<FileStorageService> services = registry.getAllServices();
+        List<FileStorageAccount> accounts = new ArrayList<>(services.size());
+        for (FileStorageService service : services) {
+            List<FileStorageAccount> serviceAccounts = AccountAware.class.isInstance(service) ? ((AccountAware) service).getAccounts(session) : service.getAccountManager().getAccounts(session);
+            accounts.addAll(serviceAccounts);
+        }
+        return accounts;
     }
 
 }
