@@ -1053,7 +1053,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
         guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
@@ -1061,7 +1061,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
         guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
