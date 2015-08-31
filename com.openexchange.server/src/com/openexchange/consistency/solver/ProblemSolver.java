@@ -50,8 +50,8 @@
 package com.openexchange.consistency.solver;
 
 import java.util.Set;
+import com.openexchange.consistency.Entity;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link ProblemSolver}
@@ -63,11 +63,11 @@ public interface ProblemSolver {
 
     /**
      *
-     * @param ctx
+     * @param entity
      * @param problems
      * @throws OXException
      */
-    public void solve(Context ctx, Set<String> problems) throws OXException;
+    public void solve(Entity entity, Set<String> problems) throws OXException;
 
     /**
      *

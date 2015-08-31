@@ -51,11 +51,12 @@ package com.openexchange.consistency.solver;
 
 import java.util.List;
 import java.util.Set;
+import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 
 /**
@@ -76,46 +77,48 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
     }
 
     @Override
-    public void solve(final Context ctx, final Set<String> problems) {
-        /*
-         * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-         */
-        for (final String old_identifier : problems) {
-            try {
-                int fsOwner = database.getDocumentHolderFor(old_identifier, ctx);
-                if (fsOwner > 0) {
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, ctx.getContextId());
-                    String identifier = createDummyFile(storage);
-                    database.startTransaction();
-                    int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
-                    database.commit();
-                    if (changed == 1) {
-                        LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, ctx.getContextId(), identifier);
+    public void solve(final Entity entity, final Set<String> problems) {
+        if (entity.equals(EntityType.Context)) {
+            /*
+             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
+             */
+            for (final String old_identifier : problems) {
+                try {
+                    int fsOwner = database.getDocumentHolderFor(old_identifier, entity.getContext());
+                    if (fsOwner > 0) {
+                        QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, entity.getContext().getContextId());
+                        String identifier = createDummyFile(storage);
+                        database.startTransaction();
+                        int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", entity.getContext());
+                        database.commit();
+                        if (changed == 1) {
+                            LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, entity.getContext().getContextId(), identifier);
+                        }
+                    } else {
+                        LOG.warn("No document holder found for identifier {} in context {}", old_identifier, entity.getContext().getContextId());
                     }
-                } else {
-                    LOG.warn("No document holder found for identifier {} in context {}", old_identifier, ctx.getContextId());
-                }
-            } catch (final OXException e) {
-                LOG.error("", e);
-                try {
-                    database.rollback();
-                    return;
-                } catch (final OXException e1) {
-                    LOG.debug("", e1);
-                }
-            } catch (final RuntimeException e) {
-                LOG.error("", e);
-                try {
-                    database.rollback();
-                    return;
-                } catch (final OXException e1) {
-                    LOG.debug("", e1);
-                }
-            } finally {
-                try {
-                    database.finish();
                 } catch (final OXException e) {
-                    LOG.debug("", e);
+                    LOG.error("", e);
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (final OXException e1) {
+                        LOG.debug("", e1);
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.error("", e);
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (final OXException e1) {
+                        LOG.debug("", e1);
+                    }
+                } finally {
+                    try {
+                        database.finish();
+                    } catch (final OXException e) {
+                        LOG.debug("", e);
+                    }
                 }
             }
         }

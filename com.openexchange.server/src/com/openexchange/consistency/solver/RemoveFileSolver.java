@@ -51,8 +51,8 @@ package com.openexchange.consistency.solver;
 
 import java.util.List;
 import java.util.Set;
+import com.openexchange.consistency.Entity;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.filestore.FileStorage;
 
 /**
@@ -73,7 +73,7 @@ public class RemoveFileSolver implements ProblemSolver {
     }
 
     @Override
-    public void solve(final Context ctx, final Set<String> problems) {
+    public void solve(final Entity entity, final Set<String> problems) {
         try {
             for (final String identifier : problems) {
                 for (FileStorage storage : storages) {
