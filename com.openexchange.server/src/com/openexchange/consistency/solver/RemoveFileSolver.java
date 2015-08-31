@@ -49,7 +49,6 @@
 
 package com.openexchange.consistency.solver;
 
-import java.util.List;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
 import com.openexchange.exception.OXException;
@@ -65,33 +64,29 @@ public class RemoveFileSolver implements ProblemSolver {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveFileSolver.class);
 
-    private final List<FileStorage> storages;
+    private final FileStorage storage;
 
-    public RemoveFileSolver(final List<FileStorage> storages) {
+    public RemoveFileSolver(final FileStorage storage) {
         super();
-        this.storages = storages;
+        this.storage = storage;
     }
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
         try {
             for (final String identifier : problems) {
-                for (FileStorage storage : storages) {
-                    try {
-                        if (storage.deleteFile(identifier)) {
-                            LOG.info("Deleted identifier: {}", identifier);
-                        }
-                    } catch (Exception e) {
-                        // Ignore
+                try {
+                    if (storage.deleteFile(identifier)) {
+                        LOG.info("Deleted identifier: {}", identifier);
                     }
+                } catch (Exception e) {
+                    // Ignore
                 }
             }
             /*
              * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
              */
-            for (FileStorage storage : storages) {
-                storage.recreateStateFile();
-            }
+            storage.recreateStateFile();
         } catch (final OXException e) {
             LOG.error("", e);
         }

@@ -49,7 +49,6 @@
 
 package com.openexchange.consistency.solver;
 
-import java.util.List;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
 import com.openexchange.consistency.Entity.EntityType;
@@ -71,8 +70,8 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
 
     private final DatabaseImpl database;
 
-    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final List<FileStorage> storages) {
-        super(storages);
+    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final FileStorage storage) {
+        super(storage);
         this.database = database;
     }
 

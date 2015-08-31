@@ -93,6 +93,16 @@ public interface FileStorage2EntitiesResolver {
     List<FileStorage> getFileStoragesUsedBy(int contextId, boolean quotaAware) throws OXException;
 
     /**
+     * Gets the file storage that is used by the given context.
+     *
+     * @param contextId The context identifier
+     * @param quotaAware Whether returned <code>FileStorage</code> instances are supposed to be quota-aware or not
+     * @return The used file storage
+     * @throws OXException If file storages cannot be returned
+     */
+    FileStorage getFileStorageUsedBy(int contextId, boolean quotaAware) throws OXException;
+
+    /**
      * Gets the identifiers of all users that use the denoted file storage.
      *
      * @param fileStorageId The file storage identifier
@@ -102,14 +112,14 @@ public interface FileStorage2EntitiesResolver {
     Map<Integer, List<Integer>> getIdsOfUsersUsing(int fileStorageId) throws OXException;
 
     /**
-     * Gets those file storages that are used by the given user.
+     * Gets the file storage that is used by the given user.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param quotaAware Whether returned <code>FileStorage</code> instances are supposed to be quota-aware or not
-     * @return The used file storages
+     * @return The used file storage
      * @throws OXException If file storages cannot be returned
      */
-    List<FileStorage> getFileStoragesUsedBy(int contextId, int userId, boolean quotaAware) throws OXException;
+    FileStorage getFileStorageUsedBy(int contextId, int userId, boolean quotaAware) throws OXException;
 
 }

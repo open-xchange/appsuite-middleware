@@ -162,6 +162,23 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
     // --------------------------------------------------------------------------------------------------------------------------
 
     @Override
+    public FileStorage getFileStorageUsedBy(int contextId, boolean quotaAware) throws OXException {
+        // Get appropriate service
+        QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
+
+        if (quotaAware) {
+            // Add the one used by context itself
+            return qfsService.getQuotaFileStorage(contextId);
+        } else {
+            // Get raw service to obtain non-quota-aware instances
+            FileStorageService fsService = FileStorages.getFileStorageService();
+
+            // Add the one used by context itself
+            return fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId).getUri());
+        }
+    }
+
+    @Override
     public int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
 
@@ -394,34 +411,23 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
      * @see com.openexchange.filestore.FileStorage2UsersResolver#getFileStoragesUsedBy(int, int, boolean)
      */
     @Override
-    public List<FileStorage> getFileStoragesUsedBy(int contextId, int userId, boolean quotaAware) throws OXException {
+    public FileStorage getFileStorageUsedBy(int contextId, int userId, boolean quotaAware) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
         QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
+        Connection schemaCon = databaseService.getReadOnly(contextId);
+        try {
+            FsInfo fsInfo = retrieveFileStoragesFromUser(contextId, userId, schemaCon);
 
-        // Only one file storage per user
-        List<FileStorage> fileStorages = new ArrayList<FileStorage>(1);
-        {
-            Connection schemaCon = databaseService.getReadOnly(contextId);
-            try {
-                Set<FsInfo> infos = retrieveFileStoragesFromUser(contextId, userId, schemaCon);
-
-                if (quotaAware) {
-                    for (FsInfo fsInfo : infos) {
-                        fileStorages.add(qfsService.getQuotaFileStorage(fsInfo.owner, contextId));
-                    }
-                } else {
-                    FileStorageService fsService = FileStorages.getFileStorageService();
-                    for (FsInfo fsInfo : infos) {
-                        fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId).getUri()));
-                    }
-                }
-
-            } finally {
-                databaseService.backReadOnly(schemaCon);
+            if (quotaAware) {
+                return qfsService.getQuotaFileStorage(fsInfo.owner, contextId);
+            } else {
+                FileStorageService fsService = FileStorages.getFileStorageService();
+                return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId).getUri());
             }
-        }
 
-        return fileStorages;
+        } finally {
+            databaseService.backReadOnly(schemaCon);
+        }
     }
 
     /**
@@ -457,11 +463,11 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @param schemaCon The schma connection
-     * @return The file storage information
+     * @param schemaCon The schema connection
+     * @return The file storage information for the specified user
      * @throws OXException
      */
-    private Set<FsInfo> retrieveFileStoragesFromUser(int contextId, int userId, Connection schemaCon) throws OXException {
+    private FsInfo retrieveFileStoragesFromUser(int contextId, int userId, Connection schemaCon) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -469,16 +475,8 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                return Collections.emptySet();
-            }
 
-            // Create sorted set
-            Set<FsInfo> infos = new TreeSet<FsInfo>();
-            do {
-                infos.add(new FsInfo(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
-            } while (rs.next());
-            return infos;
+            return (rs.next()) ? new FsInfo(rs.getInt(1), rs.getInt(2), rs.getInt(3)) : new FsInfo(-1, -1, -1);
         } catch (SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {

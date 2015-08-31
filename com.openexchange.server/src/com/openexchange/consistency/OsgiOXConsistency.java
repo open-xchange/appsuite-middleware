@@ -102,27 +102,27 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<FileStorage> getFileStorages(Entity entity) throws OXException {
+    protected FileStorage getFileStorage(Entity entity) throws OXException {
         switch (entity.getType()) {
             case Context:
-                return getFileStorages(entity.getContext());
+                return getFileStorage(entity.getContext());
             case User:
-                return getFileStorages(entity.getContext(), entity.getUser());
+                return getFileStorage(entity.getContext(), entity.getUser());
             default:
                 throw new IllegalArgumentException("Unknown entity type: " + entity.getType());
         }
     }
 
     @Override
-    protected List<FileStorage> getFileStorages(final Context ctx) throws OXException {
+    protected FileStorage getFileStorage(final Context ctx) throws OXException {
         FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
-        return resolver.getFileStoragesUsedBy(ctx.getContextId(), true);
+        return resolver.getFileStorageUsedBy(ctx.getContextId(), true);
     }
 
     @Override
-    protected List<FileStorage> getFileStorages(Context context, User user) throws OXException {
+    protected FileStorage getFileStorage(Context context, User user) throws OXException {
         FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
-        return resolver.getFileStoragesUsedBy(context.getContextId(), user.getId(), true);
+        return resolver.getFileStorageUsedBy(context.getContextId(), user.getId(), true);
     }
 
     @Override

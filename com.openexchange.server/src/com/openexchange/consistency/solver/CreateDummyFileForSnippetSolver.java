@@ -72,8 +72,8 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippetSolver.class);
 
-    public CreateDummyFileForSnippetSolver(final List<FileStorage> storages) {
-        super(storages);
+    public CreateDummyFileForSnippetSolver(final FileStorage storage) {
+        super(storage);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
                     }
                     // Partly recoverable
                     if (DBUtils.tableExists(con, "snippetAttachment")) {
-                        final String identifier = createDummyFile(storages.get(0));
+                        final String identifier = createDummyFile(storage);
                         stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
                         int pos = 0;
                         stmt.setString(++pos, identifier);

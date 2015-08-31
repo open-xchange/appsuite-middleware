@@ -121,7 +121,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
+            checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -197,7 +197,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
+            checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -399,7 +399,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Entity entity : entities) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(entity));
+            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(toMBeanEntity(entity), recorder.getProblems());
         }
         return retval;
@@ -421,7 +421,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Entity entity : entities) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(entity));
+            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(toMBeanEntity(entity), recorder.getProblems());
         }
         return retval;
@@ -434,7 +434,7 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             final List<Context> repairMe = new ArrayList<Context>();
             repairMe.add(getContext(contextId));
-            repair(repairMe, resolverPolicy);
+            repair(toEntities(repairMe), resolverPolicy);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -451,7 +451,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public void repairFilesInFilestore(final int filestoreId, final String resolverPolicy) throws MBeanException {
         try {
-            repair(getContextsForFilestore(filestoreId), resolverPolicy);
+            repair(toEntities(getContextsForFilestore(filestoreId)), resolverPolicy);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -468,7 +468,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public void repairFilesInDatabase(final int databaseId, final String resolverPolicy) throws MBeanException {
         try {
-            repair(getContextsForDatabase(databaseId), resolverPolicy);
+            repair(toEntities(getContextsForDatabase(databaseId)), resolverPolicy);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -485,7 +485,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public void repairAllFiles(final String resolverPolicy) throws MBeanException {
         try {
-            repair(getAllContexts(), resolverPolicy);
+            repair(toEntities(getAllContexts()), resolverPolicy);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -499,14 +499,16 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    private void repair(final List<Context> contexts, final String policy) throws OXException {
+    private void repair(final List<Entity> entities, final String policy) throws OXException {
         final DatabaseImpl database = getDatabase();
         final AttachmentBase attachments = getAttachments();
-        for (final Context ctx : contexts) {
-            List<FileStorage> storages = getFileStorages(ctx);
+        for (final Entity entity : entities) {
+            FileStorage storage = getFileStorage(entity);
 
-            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storages, this, ctx);
-            checkOneEntity(new EntityImpl(ctx), resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storages);
+            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, entity.getContext());
+            checkOneEntity(entity, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
+
+            //TODO: Repair for a single user
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -522,9 +524,13 @@ public abstract class Consistency implements ConsistencyMBean {
             if (quotaAware) {
                 filesToIgnore = Collections.emptySet();
             } else {
-                filesToIgnore = getPreviewCacheFileStoreLocationsperContext(ctx);
+                if (entity.getType().equals(EntityType.Context)) {
+                    filesToIgnore = getPreviewCacheFileStoreLocationsperContext(entity.getContext());
+                } else {
+                    filesToIgnore = Collections.emptySet();
+                }
             }
-            recalculateUsage(storages, filesToIgnore);
+            recalculateUsage(storage, filesToIgnore);
         }
     }
 
@@ -561,39 +567,32 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneEntity(final Entity entity, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> fileStorages) throws OXException {
-        if (entity.getType().equals(EntityType.User) && fileStorages.size() > 1) {
-            throw new IllegalArgumentException("The amount of file storages exceed the expected amount of 1 for the user entity");
-        }
-
+    private void checkOneEntity(final Entity entity, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage fileStorage) throws OXException {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
 
-        List<FileStorage> storages = new ArrayList<FileStorage>(fileStorages.size());
-        for (FileStorage stor : fileStorages) {
-            try {
-                stor.recreateStateFile();
-                storages.add(stor);
-            } catch (OXException e) {
-                if (!FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
-                    throw e;
-                }
-                // Does not (yet) exist
-                Object[] logArgs = e.getLogArgs();
-                LOG.info("Cannot check files in filestore for entity {} since associated filestore does not (yet) exist: {}", entity, null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
+        try {
+            fileStorage.recreateStateFile();
+        } catch (OXException e) {
+            if (!FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
+                throw e;
             }
+            // Does not (yet) exist
+            Object[] logArgs = e.getLogArgs();
+            LOG.info("Cannot check files in filestore for entity {} since associated filestore does not (yet) exist: {}", entity, null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
         }
-        if (storages.isEmpty()) {
-            return;
-        }
+        //FIXME: return if the file storage is empty
+        /*
+         * if (storages.isEmpty()) {
+         * return;
+         * }
+         */
 
         // Get files residing in file storages
         LOG.info("Listing all files in filestores");
         SortedSet<String> filestoreset = new TreeSet<String>();
-        for (FileStorage stor : storages) {
-            filestoreset.addAll(stor.getFileList());
-        }
+        filestoreset = fileStorage.getFileList();
         LOG.info("Found {} files in the filestore for this entity {}", filestoreset.size(), entity);
 
         try {
@@ -716,16 +715,14 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void recalculateUsage(final List<FileStorage> storages, final Set<String> filesToIgnore) {
-        for (FileStorage storage : storages) {
-            try {
-                if (storage instanceof QuotaFileStorage) {
-                    output("Recalculating usage...");
-                    ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
-                }
-            } catch (final OXException e) {
-                erroroutput(e);
+    private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
+        try {
+            if (storage instanceof QuotaFileStorage) {
+                output("Recalculating usage...");
+                ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
             }
+        } catch (final OXException e) {
+            erroroutput(e);
         }
     }
 
@@ -743,11 +740,11 @@ public abstract class Consistency implements ConsistencyMBean {
 
     protected abstract AttachmentBase getAttachments();
 
-    protected abstract List<FileStorage> getFileStorages(Context ctx) throws OXException;
+    protected abstract FileStorage getFileStorage(Context ctx) throws OXException;
 
-    protected abstract List<FileStorage> getFileStorages(Context ctx, User usr) throws OXException;
+    protected abstract FileStorage getFileStorage(Context ctx, User usr) throws OXException;
 
-    protected abstract List<FileStorage> getFileStorages(Entity entity) throws OXException;
+    protected abstract FileStorage getFileStorage(Entity entity) throws OXException;
 
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
 
@@ -779,7 +776,7 @@ public abstract class Consistency implements ConsistencyMBean {
             this.vCardSolver = vCardSolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> storages, final Consistency consistency, final Context context) throws OXException {
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage storage, final Consistency consistency, final Context context) throws OXException {
             final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
@@ -796,7 +793,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 final String action = tuple[1];
                 if ("missing_file_for_infoitem".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storages);
+                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storage);
                     } else if ("delete".equals(action)) {
                         dbsolver = new DeleteInfoitemSolver(database);
                     } else {
@@ -804,7 +801,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_file_for_attachment".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, storages);
+                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, storage);
                     } else if ("delete".equals(action)) {
                         attachmentsolver = new DeleteAttachmentSolver(attach);
                     } else {
@@ -812,7 +809,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_file_for_snippet".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        snippetsolver = new CreateDummyFileForSnippetSolver(storages);
+                        snippetsolver = new CreateDummyFileForSnippetSolver(storage);
                     } else if ("delete".equals(action)) {
                         snippetsolver = new DeleteSnippetSolver();
                     } else {
@@ -827,9 +824,9 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_entry_for_file".equals(condition)) {
                     if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitemSolver(database, storages, consistency.getAdmin(context));
+                        filesolver = new CreateInfoitemSolver(database, storage, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
-                        filesolver = new RemoveFileSolver(storages);
+                        filesolver = new RemoveFileSolver(storage);
                     } else {
                         filesolver = new DoNothingSolver();
                     }

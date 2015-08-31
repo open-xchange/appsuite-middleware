@@ -85,14 +85,15 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     private final DatabaseImpl database;
 
-    private final List<FileStorage> storages;
+    private FileStorage storage;
 
     private final User admin;
 
-    public CreateInfoitemSolver(final DatabaseImpl database, final List<FileStorage> storages, final User admin) {
+
+    public CreateInfoitemSolver(final DatabaseImpl database, final FileStorage storage, final User admin) {
         super();
         this.database = database;
-        this.storages = storages;
+        this.storage = storage;
         this.admin = admin;
     }
 
