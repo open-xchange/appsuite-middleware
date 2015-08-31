@@ -66,6 +66,7 @@ import java.util.TreeSet;
 import javax.management.MBeanException;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.consistency.solver.CreateDummyFileForAttachmentSolver;
 import com.openexchange.consistency.solver.CreateDummyFileForInfoitemSolver;
@@ -120,7 +121,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
+            checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -136,10 +137,10 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws MBeanException {
+    public Map<MBeanEntity, List<String>> listMissingFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
             LOG.info("Listing missing files in filestore {}", filestoreId);
-            return listMissing(getContextsForFilestore(filestoreId));
+            return listMissing(getEntitiesForFilestore(filestoreId));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -154,10 +155,10 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws MBeanException {
+    public Map<MBeanEntity, List<String>> listMissingFilesInDatabase(final int databaseId) throws MBeanException {
         try {
             LOG.info("List missing files in database {}", databaseId);
-            return listMissing(getContextsForDatabase(databaseId));
+            return listMissing(toEntities(getContextsForDatabase(databaseId)));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -172,10 +173,10 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listAllMissingFiles() throws MBeanException {
+    public Map<MBeanEntity, List<String>> listAllMissingFiles() throws MBeanException {
         try {
             LOG.info("List all missing files");
-            return listMissing(getAllContexts());
+            return listMissing(toEntities(getAllContexts()));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -196,7 +197,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
+            checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -212,7 +213,7 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
+    public Map<MBeanEntity, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
             LOG.info("List all unassigned files in filestore {}", filestoreId);
             return listUnassigned(getContextsForFilestore(filestoreId));
@@ -230,7 +231,7 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
+    public Map<MBeanEntity, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
         try {
             LOG.info("List all unassigned files in database {}", databaseId);
             return listUnassigned(getContextsForDatabase(databaseId));
@@ -248,7 +249,7 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     @Override
-    public Map<Integer, List<String>> listAllUnassignedFiles() throws MBeanException {
+    public Map<MBeanEntity, List<String>> listAllUnassignedFiles() throws MBeanException {
         try {
             LOG.info("List all unassigned files");
             return listUnassigned(getAllContexts());
@@ -393,24 +394,36 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    private Map<Integer, List<String>> listMissing(final List<Context> contexts) throws OXException {
-        final Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
+    private Map<MBeanEntity, List<String>> listMissing(final List<Entity> entities) throws OXException {
+        final Map<MBeanEntity, List<String>> retval = new HashMap<MBeanEntity, List<String>>();
         final DoNothingSolver doNothing = new DoNothingSolver();
-        for (final Context ctx : contexts) {
+        for (final Entity entity : entities) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
-            retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
+            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(entity));
+            retval.put(toMBeanEntity(entity), recorder.getProblems());
         }
         return retval;
     }
 
-    private Map<Integer, List<String>> listUnassigned(final List<Context> contexts) throws OXException {
-        final Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
+    private MBeanEntity toMBeanEntity(Entity entity) {
+        switch (entity.getType()) {
+            case Context:
+                return new MBeanEntity(entity.getContext().getContextId());
+            case User:
+                return new MBeanEntity(entity.getContext().getContextId(), entity.getUser().getId());
+            default:
+                throw new IllegalArgumentException("Unknown entity type: " + entity.getType());
+        }
+    }
+
+    private Map<MBeanEntity, List<String>> listUnassigned(final List<Context> contexts) throws OXException {
+        final Map<MBeanEntity, List<String>> retval = new HashMap<MBeanEntity, List<String>>();
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
-            retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
+            Entity entity = new EntityImpl(ctx);
+            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
+            retval.put(toMBeanEntity(entity), recorder.getProblems());
         }
         return retval;
     }
@@ -494,7 +507,7 @@ public abstract class Consistency implements ConsistencyMBean {
             List<FileStorage> storages = getFileStorages(ctx);
 
             final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storages, this, ctx);
-            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storages);
+            checkOneEntity(new EntityImpl(ctx), resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storages);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -549,11 +562,14 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> fileStorages) throws OXException {
+    private void checkOneEntity(final Entity entity, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> fileStorages) throws OXException {
+        if (entity.getType().equals(EntityType.User) && fileStorages.size() > 1) {
+            throw new IllegalArgumentException("The amount of file storages exceed the expected amount of 1 for the user entity");
+        }
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
+        LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
 
         List<FileStorage> storages = new ArrayList<FileStorage>(fileStorages.size());
         for (FileStorage stor : fileStorages) {
@@ -566,7 +582,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 }
                 // Does not (yet) exist
                 Object[] logArgs = e.getLogArgs();
-                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
+                LOG.info("Cannot check files in filestore for entity {} since associated filestore does not (yet) exist: {}", entity, null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
             }
         }
         if (storages.isEmpty()) {
@@ -579,71 +595,73 @@ public abstract class Consistency implements ConsistencyMBean {
         for (FileStorage stor : storages) {
             filestoreset.addAll(stor.getFileList());
         }
-        LOG.info("Found {} files in the filestore for this context", filestoreset.size());
-
-        // Get the referenced ones
-        SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
-        LOG.info("Found {} attachments", attachmentset.size());
-
-        SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
-        LOG.info("Found {} snippets", snippetset.size());
-
-        SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(ctx);
-        LOG.info("Found {} previews", previewset.size());
-
-        SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(ctx);
-        LOG.info("Found {} vCards", vcardset.size());
+        LOG.info("Found {} files in the filestore for this entity {}", filestoreset.size(), entity);
 
         try {
             LOG.info("Loading all infostore filestore locations");
-            SortedSet<String> dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
+            SortedSet<String> dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
             LOG.info("Found {} infostore filepaths", dbfileset.size());
-
-            final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
-            joineddbfileset.addAll(attachmentset);
-            joineddbfileset.addAll(snippetset);
-            joineddbfileset.addAll(previewset);
-            joineddbfileset.addAll(vcardset);
-
-            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
             // Build the difference set of the database set, so that the final
             // dbfileset contains all the members that aren't in the filestoreset
             if (diffset(dbfileset, filestoreset, "database list", "filestore list")) {
                 // implement the solver for dbfiles here
-                dbSolver.solve(ctx, dbfileset);
+                dbSolver.solve(entity, dbfileset);
             }
 
-            // Build the difference set of the attachment database set, so that the
-            // final attachmentset contains all the members that aren't in the
-            // filestoreset
-            if (diffset(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
-                // implement the solver for deleted dbfiles here
-                attachmentSolver.solve(ctx, attachmentset);
-            }
+            if (entity.getType().equals(EntityType.Context)) {
+                // Get the referenced ones
+                SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
+                LOG.info("Found {} attachments", attachmentset.size());
 
-            // Build the difference set of the attachment database set, so that the
-            // final attachmentset contains all the members that aren't in the
-            // filestoreset
-            if (diffset(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
-                // implement the solver for deleted dbfiles here
-                snippetSolver.solve(ctx, snippetset);
-            }
+                SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(entity.getContext());
+                LOG.info("Found {} snippets", snippetset.size());
 
-            if (diffset(previewset, filestoreset, "database list of cached previews", "filestore list")) {
-                previewSolver.solve(ctx, previewset);
-            }
+                SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(entity.getContext());
+                LOG.info("Found {} previews", previewset.size());
 
-            if (diffset(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
-                vCardSolver.solve(ctx, vcardset);
-            }
+                SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(entity.getContext());
+                LOG.info("Found {} vCards", vcardset.size());
 
-            // Build the difference set of the filestore set, so that the final
-            // filestoreset contains all the members that aren't in the dbfileset or
-            // the dbdelfileset
-            if (diffset(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
-                // implement the solver for the filestore here
-                fileSolver.solve(ctx, filestoreset);
+                final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
+                joineddbfileset.addAll(attachmentset);
+                joineddbfileset.addAll(snippetset);
+                joineddbfileset.addAll(previewset);
+                joineddbfileset.addAll(vcardset);
+
+                LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
+
+                // Build the difference set of the attachment database set, so that the
+                // final attachmentset contains all the members that aren't in the
+                // filestoreset
+                if (diffset(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
+                    // implement the solver for deleted dbfiles here
+                    attachmentSolver.solve(entity, attachmentset);
+                }
+
+                // Build the difference set of the attachment database set, so that the
+                // final attachmentset contains all the members that aren't in the
+                // filestoreset
+                if (diffset(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
+                    // implement the solver for deleted dbfiles here
+                    snippetSolver.solve(entity, snippetset);
+                }
+
+                if (diffset(previewset, filestoreset, "database list of cached previews", "filestore list")) {
+                    previewSolver.solve(entity, previewset);
+                }
+
+                if (diffset(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
+                    vCardSolver.solve(entity, vcardset);
+                }
+
+                // Build the difference set of the filestore set, so that the final
+                // filestoreset contains all the members that aren't in the dbfileset or
+                // the dbdelfileset
+                if (diffset(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
+                    // implement the solver for the filestore here
+                    fileSolver.solve(entity, filestoreset);
+                }
             }
         } catch (final OXException e) {
             erroroutput(e);
@@ -706,6 +724,14 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    private List<Entity> toEntities(List<Context> contexts) {
+        List<Entity> entities = new ArrayList<Entity>(contexts.size());
+        for (Context ctx : contexts) {
+            entities.add(new EntityImpl(ctx));
+        }
+        return entities;
+    }
+
     protected abstract Context getContext(int contextId) throws OXException;
 
     protected abstract DatabaseImpl getDatabase();
@@ -714,7 +740,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
     protected abstract List<FileStorage> getFileStorages(Context ctx) throws OXException;
 
+    protected abstract List<FileStorage> getFileStorages(Context ctx, User usr) throws OXException;
+
+    protected abstract List<FileStorage> getFileStorages(Entity entity) throws OXException;
+
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
+
+    protected abstract List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException;
 
     protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException;
 
