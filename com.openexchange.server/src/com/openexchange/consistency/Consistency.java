@@ -598,8 +598,15 @@ public abstract class Consistency implements ConsistencyMBean {
         LOG.info("Found {} files in the filestore for this entity {}", filestoreset.size(), entity);
 
         try {
+            boolean isContext = entity.getType().equals(EntityType.Context);
+
             LOG.info("Loading all infostore filestore locations");
-            SortedSet<String> dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
+            SortedSet<String> dbfileset;
+            if (isContext) {
+                dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
+            } else {
+                dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+            }
             LOG.info("Found {} infostore filepaths", dbfileset.size());
 
             // Build the difference set of the database set, so that the final
@@ -608,8 +615,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 // implement the solver for dbfiles here
                 dbSolver.solve(entity, dbfileset);
             }
-
-            if (entity.getType().equals(EntityType.Context)) {
+            if (isContext) {
                 // Get the referenced ones
                 SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
                 LOG.info("Found {} attachments", attachmentset.size());

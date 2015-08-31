@@ -71,6 +71,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -87,8 +89,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.FileStorages;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
@@ -206,17 +206,17 @@ public class DatabaseImpl extends DBService {
         super(provider);
 
         switch (FETCH) {
-        case PREFETCH:
-            fetchMode = new PrefetchMode();
-            break;
-        case CLOSE_LATER:
-            fetchMode = new CloseLaterMode();
-            break;
-        case CLOSE_IMMEDIATELY:
-            fetchMode = new CloseImmediatelyMode();
-            break;
-        default:
-            fetchMode = new PrefetchMode();
+            case PREFETCH:
+                fetchMode = new PrefetchMode();
+                break;
+            case CLOSE_LATER:
+                fetchMode = new CloseLaterMode();
+                break;
+            case CLOSE_IMMEDIATELY:
+                fetchMode = new CloseImmediatelyMode();
+                break;
+            default:
+                fetchMode = new PrefetchMode();
         }
     }
 
@@ -777,6 +777,60 @@ public class DatabaseImpl extends DBService {
         }
     }
 
+    /**
+     * Get the document file store locations for the specified user in the specified context
+     * 
+     * @param ctx The context
+     * @param usr The user
+     * @return A sorted set of all document file store locations for the specified user in the specified context
+     * @throws OXException
+     */
+    public SortedSet<String> getDocumentFileStoreLocationsPerUser(Context ctx, User usr) throws OXException {
+        Connection connection = getReadConnection(ctx);
+        try {
+            return getDocumentFileStoreLocationsPerUser(ctx, usr, connection);
+        } finally {
+            releaseReadConnection(ctx, connection);
+        }
+    }
+
+    /**
+     * Get the document file store locations for the specified user in the specified context
+     * 
+     * @param ctx The context
+     * @param usr The user
+     * @param connection A read-only database connection for the specified context
+     * @return A sorted set of all document file store locations for the specified user in the specified context
+     * @throws OXException
+     */
+    private SortedSet<String> getDocumentFileStoreLocationsPerUser(Context ctx, User usr, Connection connection) throws OXException {
+        int contextId = ctx.getContextId();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            SortedSet<String> fileStorageLocations = new TreeSet<String>();
+            stmt = connection.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from=?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, FolderObject.INFOSTORE);
+            stmt.setInt(4, usr.getId());
+            result = stmt.executeQuery();
+            while (result.next()) {
+                fileStorageLocations.add(result.getString(1));
+            }
+            close(stmt, result);
+            result = null;
+            stmt = null;
+
+            return fileStorageLocations;
+        } catch (final SQLException e) {
+            LOG.error("", e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            close(stmt, result);
+        }
+    }
+
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1147,7 +1201,6 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-
             // Remove the files. No rolling back from this point onward
 
             final List<String> files = new ArrayList<String>(versions.size());
@@ -1170,16 +1223,16 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-          //FIXME
-//            final EventClient ec = new EventClient(session);
-//
-//            for (final DocumentMetadata m : documents) {
-//                try {
-//                    ec.delete(m);
-//                } catch (final Exception e) {
-//                    LOG.error("", e);
-//                }
-//            }
+            //FIXME
+            //            final EventClient ec = new EventClient(session);
+            //
+            //            for (final DocumentMetadata m : documents) {
+            //                try {
+            //                    ec.delete(m);
+            //                } catch (final Exception e) {
+            //                    LOG.error("", e);
+            //                }
+            //            }
 
         } catch (final OXException x) {
             throw x;
@@ -1198,7 +1251,6 @@ public class DatabaseImpl extends DBService {
 
             final List<String> files = new LinkedList<String>();
             holder = new PreparedStatementHolder(this.getWriteConnection(session.getContext()));
-
 
             for (final FolderObject folder : foldersWithPrivateItems) {
                 clearFolder(folder, session, files, holder);
@@ -1222,7 +1274,7 @@ public class DatabaseImpl extends DBService {
         } catch (final OXException x) {
             throw x;
         } finally {
-            if(holder != null) {
+            if (holder != null) {
                 holder.close();
                 releaseWriteConnection(session.getContext(), holder.getConnection());
             }
@@ -1251,7 +1303,7 @@ public class DatabaseImpl extends DBService {
         final List<String> parentDeletes = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
         final String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
         final Integer contextId = Autoboxing.I(session.getContextId());
-        for(final DocumentMetadata documentMetadata : parents) {
+        for (final DocumentMetadata documentMetadata : parents) {
             final Integer id = Autoboxing.I(documentMetadata.getId());
             holder.execute(allChildrenDelete, id, contextId);
             for (final String parentDelete : parentDeletes) {
@@ -1259,16 +1311,15 @@ public class DatabaseImpl extends DBService {
             }
         }
 
-
-      //FIXME
-//        final EventClient ec = new EventClient(session);
-//        for (final DocumentMetadata documentMetadata : parents) {
-//            try {
-//                ec.delete(documentMetadata);
-//            } catch (final OXException e) {
-//                LOG.error("", e);
-//            }
-//        }
+        //FIXME
+        //        final EventClient ec = new EventClient(session);
+        //        for (final DocumentMetadata documentMetadata : parents) {
+        //            try {
+        //                ec.delete(documentMetadata);
+        //            } catch (final OXException e) {
+        //                LOG.error("", e);
+        //            }
+        //        }
     }
 
     private void discoverAllFiles(final DocumentMetadata documentMetadata, final ServerSession session, final List<String> files) throws OXException {
@@ -1339,98 +1390,98 @@ public class DatabaseImpl extends DBService {
         final int[] retval = new int[columns.length];
         for (int i = 0; i < columns.length; i++) {
             Metadata2DBSwitch: switch (columns[i].getId()) {
-            default:
-                break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED:
-                if (versionPriorityHigh) {
+                default:
+                    break Metadata2DBSwitch;
+                case Metadata.LAST_MODIFIED:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_last_modified;
+                    } else {
+                        retval[i] = INFOSTORE_last_modified;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.LAST_MODIFIED_UTC:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_last_modified;
+                    } else {
+                        retval[i] = INFOSTORE_last_modified;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.CREATION_DATE:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_creating_date;
+                    } else {
+                        retval[i] = INFOSTORE_creating_date;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.MODIFIED_BY:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_changed_by;
+                    } else {
+                        retval[i] = INFOSTORE_changed_by;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.CREATED_BY:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_created_by;
+                    } else {
+                        retval[i] = INFOSTORE_created_by;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.FOLDER_ID:
+                    retval[i] = INFOSTORE_folder_id;
+                    break Metadata2DBSwitch;
+                case Metadata.VERSION:
+                    if (versionPriorityHigh) {
+                        retval[i] = INFOSTORE_DOCUMENT_version_number;
+                    } else {
+                        retval[i] = INFOSTORE_version;
+                    }
+                    break Metadata2DBSwitch;
+                case Metadata.TITLE:
+                    retval[i] = INFOSTORE_DOCUMENT_title;
+                    break Metadata2DBSwitch;
+                case Metadata.FILENAME:
+                    retval[i] = INFOSTORE_DOCUMENT_filename;
+                    break Metadata2DBSwitch;
+                case Metadata.SEQUENCE_NUMBER:
                     retval[i] = INFOSTORE_DOCUMENT_last_modified;
-                } else {
-                    retval[i] = INFOSTORE_last_modified;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED_UTC:
-                if (versionPriorityHigh) {
-                    retval[i] = INFOSTORE_DOCUMENT_last_modified;
-                } else {
-                    retval[i] = INFOSTORE_last_modified;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.CREATION_DATE:
-                if (versionPriorityHigh) {
-                    retval[i] = INFOSTORE_DOCUMENT_creating_date;
-                } else {
-                    retval[i] = INFOSTORE_creating_date;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.MODIFIED_BY:
-                if (versionPriorityHigh) {
-                    retval[i] = INFOSTORE_DOCUMENT_changed_by;
-                } else {
-                    retval[i] = INFOSTORE_changed_by;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.CREATED_BY:
-                if (versionPriorityHigh) {
-                    retval[i] = INFOSTORE_DOCUMENT_created_by;
-                } else {
-                    retval[i] = INFOSTORE_created_by;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.FOLDER_ID:
-                retval[i] = INFOSTORE_folder_id;
-                break Metadata2DBSwitch;
-            case Metadata.VERSION:
-                if (versionPriorityHigh) {
-                    retval[i] = INFOSTORE_DOCUMENT_version_number;
-                } else {
+                    break Metadata2DBSwitch;
+                case Metadata.ID:
+                    retval[i] = INFOSTORE_id;
+                    break Metadata2DBSwitch;
+                case Metadata.COLOR_LABEL:
+                    retval[i] = INFOSTORE_color_label;
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_SIZE:
+                    retval[i] = INFOSTORE_DOCUMENT_file_size;
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_MIMETYPE:
+                    retval[i] = INFOSTORE_DOCUMENT_file_mimetype;
+                    break Metadata2DBSwitch;
+                case Metadata.DESCRIPTION:
+                    retval[i] = INFOSTORE_DOCUMENT_description;
+                    break Metadata2DBSwitch;
+                case Metadata.LOCKED_UNTIL:
+                    retval[i] = INFOSTORE_locked_until;
+                    break Metadata2DBSwitch;
+                case Metadata.URL:
+                    retval[i] = INFOSTORE_DOCUMENT_url;
+                    break Metadata2DBSwitch;
+                case Metadata.CATEGORIES:
+                    retval[i] = INFOSTORE_DOCUMENT_categories;
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_MD5SUM:
+                    retval[i] = INFOSTORE_DOCUMENT_file_md5sum;
+                    break Metadata2DBSwitch;
+                case Metadata.VERSION_COMMENT:
+                    retval[i] = INFOSTORE_DOCUMENT_file_version_comment;
+                    break Metadata2DBSwitch;
+                case Metadata.CURRENT_VERSION:
                     retval[i] = INFOSTORE_version;
-                }
-                break Metadata2DBSwitch;
-            case Metadata.TITLE:
-                retval[i] = INFOSTORE_DOCUMENT_title;
-                break Metadata2DBSwitch;
-            case Metadata.FILENAME:
-                retval[i] = INFOSTORE_DOCUMENT_filename;
-                break Metadata2DBSwitch;
-            case Metadata.SEQUENCE_NUMBER:
-                retval[i] = INFOSTORE_DOCUMENT_last_modified;
-                break Metadata2DBSwitch;
-            case Metadata.ID:
-                retval[i] = INFOSTORE_id;
-                break Metadata2DBSwitch;
-            case Metadata.COLOR_LABEL:
-                retval[i] = INFOSTORE_color_label;
-                break Metadata2DBSwitch;
-            case Metadata.FILE_SIZE:
-                retval[i] = INFOSTORE_DOCUMENT_file_size;
-                break Metadata2DBSwitch;
-            case Metadata.FILE_MIMETYPE:
-                retval[i] = INFOSTORE_DOCUMENT_file_mimetype;
-                break Metadata2DBSwitch;
-            case Metadata.DESCRIPTION:
-                retval[i] = INFOSTORE_DOCUMENT_description;
-                break Metadata2DBSwitch;
-            case Metadata.LOCKED_UNTIL:
-                retval[i] = INFOSTORE_locked_until;
-                break Metadata2DBSwitch;
-            case Metadata.URL:
-                retval[i] = INFOSTORE_DOCUMENT_url;
-                break Metadata2DBSwitch;
-            case Metadata.CATEGORIES:
-                retval[i] = INFOSTORE_DOCUMENT_categories;
-                break Metadata2DBSwitch;
-            case Metadata.FILE_MD5SUM:
-                retval[i] = INFOSTORE_DOCUMENT_file_md5sum;
-                break Metadata2DBSwitch;
-            case Metadata.VERSION_COMMENT:
-                retval[i] = INFOSTORE_DOCUMENT_file_version_comment;
-                break Metadata2DBSwitch;
-            case Metadata.CURRENT_VERSION:
-                retval[i] = INFOSTORE_version;
-                break Metadata2DBSwitch;
-            case Metadata.FILESTORE_LOCATION:
-                retval[i] = INFOSTORE_DOCUMENT_file_store_location;
-                break Metadata2DBSwitch;
+                    break Metadata2DBSwitch;
+                case Metadata.FILESTORE_LOCATION:
+                    retval[i] = INFOSTORE_DOCUMENT_file_store_location;
+                    break Metadata2DBSwitch;
 
             }
         }
@@ -1442,89 +1493,89 @@ public class DatabaseImpl extends DBService {
         int versionNumber = -1;
         for (int i = 0; i < columns.length; i++) {
             setObjectColumns: switch (columns[i]) {
-            default:
-                break setObjectColumns;
-            case INFOSTORE_cid:
-                break setObjectColumns;
-            case INFOSTORE_id:
-                dmi.setId(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_folder_id:
-                dmi.setFolderId(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_version:
-                currentVersion = result.getInt(i + 1);
-                break setObjectColumns;
-            case INFOSTORE_locked_until:
-                dmi.setLockedUntil(new Date(result.getLong(i + 1)));
-                if (result.wasNull()) {
-                    dmi.setLockedUntil(null);
-                }
-                break setObjectColumns;
-            case INFOSTORE_creating_date:
-                dmi.setCreationDate(new Date(result.getLong(i + 1)));
-                break setObjectColumns;
-            case INFOSTORE_last_modified:
-                dmi.setLastModified(new Date(result.getLong(i + 1)));
-                break setObjectColumns;
-            case INFOSTORE_created_by:
-                dmi.setCreatedBy(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_changed_by:
-                dmi.setModifiedBy(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_color_label:
-                dmi.setColorLabel(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_cid:
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_infostore_id:
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_version_number:
-                versionNumber = result.getInt(i + 1);
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_creating_date:
-                dmi.setCreationDate(new Date(result.getLong(i + 1)));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_last_modified:
-                dmi.setLastModified(new Date(result.getLong(i + 1)));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_created_by:
-                dmi.setCreatedBy(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_changed_by:
-                dmi.setModifiedBy(result.getInt(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_title:
-                dmi.setTitle(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_url:
-                dmi.setURL(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_description:
-                dmi.setDescription(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_categories:
-                dmi.setCategories(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_filename:
-                dmi.setFileName(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_file_store_location:
-                dmi.setFilestoreLocation(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_file_size:
-                dmi.setFileSize(result.getLong(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_file_mimetype:
-                dmi.setFileMIMEType(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_file_md5sum:
-                dmi.setFileMD5Sum(result.getString(i + 1));
-                break setObjectColumns;
-            case INFOSTORE_DOCUMENT_file_version_comment:
-                dmi.setVersionComment(result.getString(i + 1));
-                break setObjectColumns;
+                default:
+                    break setObjectColumns;
+                case INFOSTORE_cid:
+                    break setObjectColumns;
+                case INFOSTORE_id:
+                    dmi.setId(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_folder_id:
+                    dmi.setFolderId(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_version:
+                    currentVersion = result.getInt(i + 1);
+                    break setObjectColumns;
+                case INFOSTORE_locked_until:
+                    dmi.setLockedUntil(new Date(result.getLong(i + 1)));
+                    if (result.wasNull()) {
+                        dmi.setLockedUntil(null);
+                    }
+                    break setObjectColumns;
+                case INFOSTORE_creating_date:
+                    dmi.setCreationDate(new Date(result.getLong(i + 1)));
+                    break setObjectColumns;
+                case INFOSTORE_last_modified:
+                    dmi.setLastModified(new Date(result.getLong(i + 1)));
+                    break setObjectColumns;
+                case INFOSTORE_created_by:
+                    dmi.setCreatedBy(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_changed_by:
+                    dmi.setModifiedBy(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_color_label:
+                    dmi.setColorLabel(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_cid:
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_infostore_id:
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_version_number:
+                    versionNumber = result.getInt(i + 1);
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_creating_date:
+                    dmi.setCreationDate(new Date(result.getLong(i + 1)));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_last_modified:
+                    dmi.setLastModified(new Date(result.getLong(i + 1)));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_created_by:
+                    dmi.setCreatedBy(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_changed_by:
+                    dmi.setModifiedBy(result.getInt(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_title:
+                    dmi.setTitle(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_url:
+                    dmi.setURL(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_description:
+                    dmi.setDescription(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_categories:
+                    dmi.setCategories(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_filename:
+                    dmi.setFileName(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_file_store_location:
+                    dmi.setFilestoreLocation(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_file_size:
+                    dmi.setFileSize(result.getLong(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_file_mimetype:
+                    dmi.setFileMIMEType(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_file_md5sum:
+                    dmi.setFileMD5Sum(result.getString(i + 1));
+                    break setObjectColumns;
+                case INFOSTORE_DOCUMENT_file_version_comment:
+                    dmi.setVersionComment(result.getString(i + 1));
+                    break setObjectColumns;
             }
         }
         if ((currentVersion != -1) && (versionNumber != -1)) {
