@@ -581,13 +581,9 @@ public abstract class Consistency implements ConsistencyMBean {
             // Does not (yet) exist
             Object[] logArgs = e.getLogArgs();
             LOG.info("Cannot check files in filestore for entity {} since associated filestore does not (yet) exist: {}", entity, null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
+            
+            return;
         }
-        //FIXME: return if the file storage is empty
-        /*
-         * if (storages.isEmpty()) {
-         * return;
-         * }
-         */
 
         // Get files residing in file storages
         LOG.info("Listing all files in filestores");
