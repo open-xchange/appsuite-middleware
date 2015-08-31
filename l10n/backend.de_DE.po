@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-27 15:01+0100\n"
+"PO-Revision-Date: 2015-08-31 14:26+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -919,6 +919,14 @@ msgstr "Die LDAP-Suche für den Benutzer enthält zu viele Treffer."
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr "Die LDAP-Suche für das Benutzerobjekt  \"%s\" ergab keinen Treffer."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
+msgid ""
+"The LDAP search in distribution lists for specific attributes is not "
+"supported."
+msgstr ""
+"Die LDAP-Suche nach bestimmten Attributen in Verteilerlisten wird nicht "
+"unterstützt."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
 msgstr "Angezeigter Name"
@@ -1702,6 +1710,11 @@ msgid ""
 msgstr ""
 "Das Verzeichnis \"%1$s\" kann nicht synchronisiert werden. Bitte wählen Sie "
 "ein anderes Verzeichnis."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:92
+msgid "The supplied metadata could not be parsed: \"%1$s\""
+msgstr ""
+"Die bereitgestellten Metadaten konnten nicht analysiert werden: \"%1$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -4825,7 +4838,6 @@ msgid "Attachments"
 msgstr "Anlagen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
-#, fuzzy
 msgid "Label"
 msgstr "Kennzeichen"
 
@@ -5300,7 +5312,6 @@ msgstr ""
 "und versuchen Sie es erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
-#, fuzzy
 msgid "The pattern \"%1$s\" has been ignored during search."
 msgstr "Das Muster \"%1$s\" wurde während der Suche ignoriert."
 
@@ -6934,7 +6945,6 @@ msgstr ""
 
 #. Concurrent write attempt. Please await the previous save operation to terminate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
-#, fuzzy
 msgid ""
 "Concurrent write attempt. Please await the previous save operation to "
 "terminate."
