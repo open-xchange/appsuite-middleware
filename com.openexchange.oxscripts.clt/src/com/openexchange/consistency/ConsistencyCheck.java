@@ -441,7 +441,7 @@ public class ConsistencyCheck {
 
         private void listMissing() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
 
-            Map<Integer, List<String>> result = null;
+            Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
                 if (SOURCE_DATABASE.equals(source)) {
@@ -449,8 +449,8 @@ public class ConsistencyCheck {
                 } else if (SOURCE_FILESTORE.equals(source)) {
                     result = consistency.listMissingFilesInFilestore(sourceId);
                 } else if (SOURCE_CONTEXT.equals(source)) {
-                    result = new HashMap<Integer, List<String>>();
-                    result.put(Integer.valueOf(sourceId), consistency.listMissingFilesInContext(sourceId));
+                    result = new HashMap<MBeanEntity, List<String>>();
+                    result.put(new MBeanEntity(Integer.valueOf(sourceId)), consistency.listMissingFilesInContext(sourceId));
                 } else if (SOURCE_ALL.equals(source)) {
                     result = consistency.listAllMissingFiles();
                 }
@@ -508,7 +508,7 @@ public class ConsistencyCheck {
                  * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
                  * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
                  * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
-                 *
+                 * 
                  * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
                  * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
                  * zero indicates an infinite timeout. The default value is zero (no timeout).
@@ -546,7 +546,7 @@ public class ConsistencyCheck {
 
         private void listUnassigned() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
 
-            Map<Integer, List<String>> result = null;
+            Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
                 if (SOURCE_DATABASE.equals(source)) {
@@ -554,8 +554,8 @@ public class ConsistencyCheck {
                 } else if (SOURCE_FILESTORE.equals(source)) {
                     result = consistency.listUnassignedFilesInFilestore(sourceId);
                 } else if (SOURCE_CONTEXT.equals(source)) {
-                    result = new HashMap<Integer, List<String>>();
-                    result.put(Integer.valueOf(sourceId), consistency.listUnassignedFilesInContext(sourceId));
+                    result = new HashMap<MBeanEntity, List<String>>();
+                    //result.put(new EntityImpl(sourceId), consistency.listUnassignedFilesInContext(sourceId));
                 } else if (SOURCE_ALL.equals(source)) {
                     result = consistency.listAllUnassignedFiles();
                 }
@@ -566,13 +566,14 @@ public class ConsistencyCheck {
             print(result);
         }
 
-        private void print(final Map<Integer, List<String>> result) {
+        private void print(final Map<MBeanEntity, List<String>> result) {
             if (null == result) {
                 return;
             }
-            for (final Map.Entry<Integer, List<String>> entry : result.entrySet()) {
-                final int ctxId = entry.getKey().intValue();
+            for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
+                final int ctxId = entry.getKey().getContextId();
                 final List<String> brokenFiles = entry.getValue();
+                
                 System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
                 for (final String brokenFile : brokenFiles) {
                     System.out.println("\t" + brokenFile);
