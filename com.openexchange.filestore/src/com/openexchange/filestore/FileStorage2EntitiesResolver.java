@@ -50,15 +50,17 @@
 package com.openexchange.filestore;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorage2ContextsResolver} - Resolves a certain file storage to those contexts that either itself or at least one of context's users use that file storage.
+ * {@link FileStorage2EntitiesResolver} - Resolves a certain file storage to those contexts or users that either itself or at least one of context's users use that file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.0
  */
-public interface FileStorage2ContextsResolver {
+public interface FileStorage2EntitiesResolver {
 
     /**
      * Gets the identifiers of all contexts that either itself or at least of its users uses the denoted file storage.
@@ -89,5 +91,25 @@ public interface FileStorage2ContextsResolver {
      * @throws OXException If file storages cannot be returned
      */
     List<FileStorage> getFileStoragesUsedBy(int contextId, boolean quotaAware) throws OXException;
+
+    /**
+     * Gets the identifiers of all users that use the denoted file storage.
+     *
+     * @param fileStorageId The file storage identifier
+     * @return The identifiers of all users
+     * @throws OXException If identifiers cannot be returned
+     */
+    Map<Integer, List<Integer>> getIdsOfUsersUsing(int fileStorageId) throws OXException;
+
+    /**
+     * Gets those file storages that are used by the given user.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param quotaAware Whether returned <code>FileStorage</code> instances are supposed to be quota-aware or not
+     * @return The used file storages
+     * @throws OXException If file storages cannot be returned
+     */
+    List<FileStorage> getFileStoragesUsedBy(int contextId, int userId, boolean quotaAware) throws OXException;
 
 }

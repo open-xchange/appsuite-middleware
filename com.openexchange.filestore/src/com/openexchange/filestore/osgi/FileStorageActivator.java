@@ -55,7 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.filestore.FileStorage2ContextsResolver;
+import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -71,7 +71,7 @@ public class FileStorageActivator implements BundleActivator {
 
     private volatile ServiceTracker<FileStorageService, FileStorageService> fsTracker;
     private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
-    private volatile ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker;
+    private volatile ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -89,7 +89,7 @@ public class FileStorageActivator implements BundleActivator {
             ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new QFSTrackerCustomizer(context));
             this.qfsTracker = qfsTracker;
 
-            ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker = new ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver>(context, FileStorage2ContextsResolver.class, new ResolverTrackerCustomizer(context));
+            ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = new ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver>(context, FileStorage2EntitiesResolver.class, new ResolverTrackerCustomizer(context));
             this.resolverTracker = resolverTracker;
 
             fsTracker.open();
@@ -117,7 +117,7 @@ public class FileStorageActivator implements BundleActivator {
                 this.qfsTracker = null;
             }
 
-            ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker = this.resolverTracker;
+            ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = this.resolverTracker;
             if (null != resolverTracker) {
                 resolverTracker.close();
                 this.resolverTracker = null;
@@ -187,7 +187,7 @@ public class FileStorageActivator implements BundleActivator {
 
     }
 
-    private static class ResolverTrackerCustomizer implements ServiceTrackerCustomizer<FileStorage2ContextsResolver, FileStorage2ContextsResolver> {
+    private static class ResolverTrackerCustomizer implements ServiceTrackerCustomizer<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> {
 
         private final BundleContext context;
 
@@ -196,21 +196,21 @@ public class FileStorageActivator implements BundleActivator {
         }
 
         @Override
-        public FileStorage2ContextsResolver addingService(ServiceReference<FileStorage2ContextsResolver> reference) {
-            FileStorage2ContextsResolver service = context.getService(reference);
-            FileStorages.setFileStorage2ContextsResolver(service);
+        public FileStorage2EntitiesResolver addingService(ServiceReference<FileStorage2EntitiesResolver> reference) {
+            FileStorage2EntitiesResolver service = context.getService(reference);
+            FileStorages.setFileStorage2EntitiesResolver(service);
             return service;
         }
 
         @Override
-        public void modifiedService(ServiceReference<FileStorage2ContextsResolver> reference, FileStorage2ContextsResolver service) {
+        public void modifiedService(ServiceReference<FileStorage2EntitiesResolver> reference, FileStorage2EntitiesResolver service) {
             // Nothing to do here
 
         }
 
         @Override
-        public void removedService(ServiceReference<FileStorage2ContextsResolver> reference, FileStorage2ContextsResolver service) {
-            FileStorages.setFileStorage2ContextsResolver(null);
+        public void removedService(ServiceReference<FileStorage2EntitiesResolver> reference, FileStorage2EntitiesResolver service) {
+            FileStorages.setFileStorage2EntitiesResolver(null);
             context.ungetService(reference);
         }
 
