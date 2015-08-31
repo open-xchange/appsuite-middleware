@@ -82,6 +82,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -270,53 +271,58 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @return The extracted host data
      */
     private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
+        /*
+         * get host data from reuest context or session parameter
+         */
         com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
-        if (requestContext != null) {
+        if (null != requestContext) {
             return requestContext.getHostData();
         }
-
-        /*
-         * try session parameter as alternative
-         */
-        HostData hostData = (HostData)session.getParameter(HostnameService.PARAM_HOST_DATA);
-        if (null == hostData) {
-            /*
-             * build up hostdata from request
-             */
-            final boolean secure = requestData.isSecure();
-            final String route = requestData.getRoute();
-            final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
-            final String host = determineHost(requestData, session);
-            final String prefix = Services.getService(DispatcherPrefixService.class).getPrefix();
-            hostData = new HostData() {
-
-                @Override
-                public boolean isSecure() {
-                    return secure;
-                }
-
-                @Override
-                public String getRoute() {
-                    return route;
-                }
-
-                @Override
-                public int getPort() {
-                    return port;
-                }
-
-                @Override
-                public String getHost() {
-                    return host;
-                }
-
-                @Override
-                public String getDispatcherPrefix() {
-                    return prefix;
-                }
-            };
+        HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+        if (null != hostData) {
+            return hostData;
         }
-        return hostData;
+        /*
+         * build up hostdata from request as fallback
+         */
+        final boolean secure = requestData.isSecure();
+        final String httpSessionID = requestData.getRoute();
+        final String route = Tools.extractRoute(httpSessionID);
+        final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
+        final String host = determineHost(requestData, session);
+        final String prefix = Services.getService(DispatcherPrefixService.class).getPrefix();
+        return new HostData() {
+
+            @Override
+            public String getHTTPSession() {
+                return httpSessionID;
+            }
+
+            @Override
+            public boolean isSecure() {
+                return secure;
+            }
+
+            @Override
+            public String getRoute() {
+                return route;
+            }
+
+            @Override
+            public int getPort() {
+                return port;
+            }
+
+            @Override
+            public String getHost() {
+                return host;
+            }
+
+            @Override
+            public String getDispatcherPrefix() {
+                return prefix;
+            }
+        };
     }
 
     private static String determineHost(AJAXRequestData requestData, ServerSession session) {

@@ -1490,7 +1490,9 @@ public class AJAXRequestData {
         if (hostData == null) {
             synchronized (this) {
                 if (hostData == null && hostname != null && route != null && prefix != null) {
-                    hostData = new HostDataImpl(secure, hostname, serverPort, route, prefix);
+                    String httpSesssionID = this.route;
+                    String route = Tools.extractRoute(httpSesssionID);
+                    hostData = new HostDataImpl(secure, hostname, serverPort, httpSesssionID, route, prefix);
                 }
             }
         }

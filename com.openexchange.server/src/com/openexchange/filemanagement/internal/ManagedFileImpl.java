@@ -140,7 +140,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
         }
         final StringBuilder sb = new StringBuilder(64);
         final String prefix;
-        final String route;
+        final String httpSessionID;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
             if (hostData == null) {
@@ -148,7 +148,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                  * Compose relative URL
                  */
                 prefix = "";
-                route = null;
+                httpSessionID = null;
             } else {
                 /*
                  * Compose absolute URL
@@ -161,15 +161,15 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                 }
                 prefix = sb.toString();
                 sb.setLength(0);
-                route = hostData.getRoute();
+                httpSessionID = null != hostData.getHTTPSession() ? hostData.getHTTPSession() : "0123456789." + hostData.getRoute();
             }
         }
         /*
          * Compose URL parameters
          */
         sb.append(prefix).append(dispatcherPrefix).append("file");
-        if (null != route) {
-            sb.append(";jsessionid=").append(route);
+        if (null != httpSessionID) {
+            sb.append(";jsessionid=").append(httpSessionID);
         }
         sb.append('?').append("id=").append(id);
         sb.append('&').append("session=").append(session.getSessionID());

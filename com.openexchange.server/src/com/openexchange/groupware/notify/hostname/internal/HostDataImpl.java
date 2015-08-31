@@ -58,23 +58,26 @@ import com.openexchange.groupware.notify.hostname.HostData;
  */
 public final class HostDataImpl implements HostData {
 
+    private String httpSessionID;
     private String host;
-
     private String route;
-
     private int port;
-
     private boolean secure;
-
     private final String dispatcherPrefix;
 
-    public HostDataImpl(boolean secure, String host, int port, String route, String dispatcherPrefix) {
+    public HostDataImpl(boolean secure, String host, int port, String httpSessionID, String route, String dispatcherPrefix) {
         super();
         this.secure = secure;
         this.host = host;
         this.port = port;
+        this.httpSessionID = httpSessionID;
         this.route = route;
         this.dispatcherPrefix = dispatcherPrefix;
+    }
+
+    @Override
+    public String getHTTPSession() {
+        return httpSessionID;
     }
 
     @Override
@@ -100,6 +103,15 @@ public final class HostDataImpl implements HostData {
     @Override
     public String getDispatcherPrefix() {
         return dispatcherPrefix;
+    }
+
+    /**
+     * Sets the HTTP session ID.
+     *
+     * @param httpSessionID The HTTP session ID to set
+     */
+    public void setHTTPSession(String httpSessionID) {
+        this.httpSessionID = httpSessionID;
     }
 
     /**

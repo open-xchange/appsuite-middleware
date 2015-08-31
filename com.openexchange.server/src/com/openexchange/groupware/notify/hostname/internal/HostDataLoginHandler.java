@@ -57,6 +57,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Adds the host data to every session.
@@ -84,7 +85,8 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
             request.isSecure(),
             determineHost(login, session.getContextId(), session.getUserId()),
             request.getServerPort(),
-            determineHttpSessionId(request.getHttpSessionID()),
+            request.getHttpSessionID(),
+            Tools.extractRoute(request.getHttpSessionID()),
             dispatcherPrefixService.getPrefix());
         session.setParameter(HostnameService.PARAM_HOST_DATA, hostData);
     }
@@ -106,7 +108,7 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
         return host;
     }
 
-    private String determineHttpSessionId(String httpSessionId) {
+    private String determineRoute(String httpSessionId) {
         final String retval;
         if (null == httpSessionId) {
             retval = "0123456789." + systemNameService.getSystemName();
