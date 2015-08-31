@@ -1541,7 +1541,7 @@ public class DatabaseImpl extends DBService {
     }
 
     protected List<FileStorage> getFileStorages(final Context ctx) throws OXException {
-        return FileStorages.getFileStorage2ContextsResolver().getFileStoragesUsedBy(ctx.getContextId(), true);
+        return FileStorages.getFileStorage2EntitiesResolver().getFileStoragesUsedBy(ctx.getContextId(), true);
     }
 
     protected FileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
