@@ -95,15 +95,20 @@ public class Bug40561Test extends ShareTest {
         file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(guestPermission));
         file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
 
+        String sharedFolderID = "10";
+        FileID tmp = new FileID(file.getId());
+        tmp.setFolderId(sharedFolderID);
+        String sharedFileID = tmp.toUniqueID();
+
         GuestClient guestClient = resolveShare(discoverInvitationLink(client, guestEmailAddress));
-        guestClient.checkFileAccessible("10", "10/" + new FileID(file.getId()).getFileId(), guestPermission);
+        guestClient.checkFileAccessible(sharedFolderID, sharedFileID, guestPermission);
 
         List<Facet> facets = AbstractFindTest.autocomplete(guestClient, Module.DRIVE, "tests");
         List<ActiveFacet> activeFacets = new ArrayList<>(2);
-        activeFacets.add(AbstractFindTest.createActiveFolderFacet("10"));
+        activeFacets.add(AbstractFindTest.createActiveFolderFacet(sharedFolderID));
         activeFacets.add(AbstractFindTest.createActiveFacet((SimpleFacet) AbstractFindTest.findByType(DriveFacetType.FILE_NAME, facets)));
         List<PropDocument> searchResults = AbstractFindTest.query(guestClient, Module.DRIVE, activeFacets);
-        Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "title", file.getTitle()));
+        Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
     }
 
     public void testShareFileInternallyAndSearchForIt() throws Exception {
@@ -112,13 +117,18 @@ public class Bug40561Test extends ShareTest {
             FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, client.getValues().getPrivateInfostoreFolder());
             DefaultFileStorageObjectPermission sharePermission = new DefaultFileStorageObjectPermission(shareClient.getValues().getUserId(), false, FileStorageObjectPermission.READ);
             File file = insertSharedFile(folder.getObjectID(), "Tests.zip", sharePermission);
-            
+
+            String sharedFolderID = "10";
+            FileID tmp = new FileID(file.getId());
+            tmp.setFolderId(sharedFolderID);
+            String sharedFileID = tmp.toUniqueID();
+
             List<Facet> facets = AbstractFindTest.autocomplete(shareClient, Module.DRIVE, "tests");
             List<ActiveFacet> activeFacets = new ArrayList<>(2);
-            activeFacets.add(AbstractFindTest.createActiveFolderFacet("10"));
+            activeFacets.add(AbstractFindTest.createActiveFolderFacet(sharedFolderID));
             activeFacets.add(AbstractFindTest.createActiveFacet((SimpleFacet) AbstractFindTest.findByType(CommonFacetType.GLOBAL, facets)));
             List<PropDocument> searchResults = AbstractFindTest.query(shareClient, Module.DRIVE, activeFacets);
-            Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "title", file.getTitle()));
+            Assert.assertNotNull(AbstractFindTest.findByProperty(searchResults, "id", sharedFileID));
         } finally {
             shareClient.logout();
         }
