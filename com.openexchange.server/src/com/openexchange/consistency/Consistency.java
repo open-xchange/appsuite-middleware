@@ -216,7 +216,7 @@ public abstract class Consistency implements ConsistencyMBean {
     public Map<MBeanEntity, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
             LOG.info("List all unassigned files in filestore {}", filestoreId);
-            return listUnassigned(getContextsForFilestore(filestoreId));
+            return listUnassigned(getEntitiesForFilestore(filestoreId));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -234,7 +234,7 @@ public abstract class Consistency implements ConsistencyMBean {
     public Map<MBeanEntity, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
         try {
             LOG.info("List all unassigned files in database {}", databaseId);
-            return listUnassigned(getContextsForDatabase(databaseId));
+            return listUnassigned(toEntities(getContextsForDatabase(databaseId)));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -252,7 +252,7 @@ public abstract class Consistency implements ConsistencyMBean {
     public Map<MBeanEntity, List<String>> listAllUnassignedFiles() throws MBeanException {
         try {
             LOG.info("List all unassigned files");
-            return listUnassigned(getAllContexts());
+            return listUnassigned(toEntities(getAllContexts()));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -416,13 +416,12 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    private Map<MBeanEntity, List<String>> listUnassigned(final List<Context> contexts) throws OXException {
+    private Map<MBeanEntity, List<String>> listUnassigned(final List<Entity> entities) throws OXException {
         final Map<MBeanEntity, List<String>> retval = new HashMap<MBeanEntity, List<String>>();
         final DoNothingSolver doNothing = new DoNothingSolver();
-        for (final Context ctx : contexts) {
+        for (final Entity entity : entities) {
             final RecordSolver recorder = new RecordSolver();
-            Entity entity = new EntityImpl(ctx);
-            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
+            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(entity));
             retval.put(toMBeanEntity(entity), recorder.getProblems());
         }
         return retval;

@@ -129,6 +129,7 @@ public class OsgiOXConsistency extends Consistency {
     protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
         int[] ids = FileStorages.getFileStorage2EntitiesResolver().getIdsOfContextsUsing(filestoreId);
         return loadContexts(ids);
+        // TODO: don't collect contexts for single users
     }
 
     private Map<Context, List<User>> getUsersForFilestore(final int filestoreId) throws OXException {
@@ -163,11 +164,8 @@ public class OsgiOXConsistency extends Consistency {
     protected List<Context> getContextsForDatabase(final int databaseId) throws OXException {
         final DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final int[] contextIds = configDB.listContexts(databaseId);
-        final List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);
-        for (int i = 0; i < contextIds.length; i++) {
-            ctxIds.add(com.openexchange.java.Autoboxing.I(contextIds[i]));
-        }
-        return loadContexts(ctxIds);
+
+        return loadContexts(contextIds);
     }
 
     @Override
