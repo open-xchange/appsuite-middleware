@@ -191,7 +191,6 @@ public class OsgiOXConsistency extends Consistency {
         ContextStorage ctxstor = ContextStorage.getInstance();
         List<Context> contexts = new ArrayList<Context>(list.length);
         for (int id : list) {
-            System.out.println("Loading context: " + id);
             contexts.add(ctxstor.getContext(id));
         }
         return contexts;

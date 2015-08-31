@@ -62,6 +62,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import com.openexchange.consistency.Entity.EntityType;
 
 /**
  * CommandLineClient to run the consistency tool.
@@ -571,14 +572,20 @@ public class ConsistencyCheck {
                 return;
             }
             for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
-                final int ctxId = entry.getKey().getContextId();
                 final List<String> brokenFiles = entry.getValue();
-                
-                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
+
+                MBeanEntity entity = entry.getKey();
+
+                String message = "I found " + brokenFiles.size() + " problem(s) in context '" + entity.getContextId() + "'";
+                if (entity.getType().equals(EntityType.User)) {
+                    message += " for user '" + entity.getUserId() + "'";
+                }
+
+                System.out.println(message);
                 for (final String brokenFile : brokenFiles) {
                     System.out.println("\t" + brokenFile);
                 }
-                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
+                System.out.println(message);
             }
         }
     }
