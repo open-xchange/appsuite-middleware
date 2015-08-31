@@ -145,20 +145,20 @@ public class ConsistencyTest extends TestCase {
 
     public void testListMissingFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  missing = consistency.listMissingFilesInFilestore(1);
-        assertContexts(missing, MISSING, ctx, ctx2);
+        final Map<MBeanEntity, List<String>>  missing = consistency.listMissingFilesInFilestore(1);
+        assertContextEntities(missing, MISSING, ctx, ctx2);
     }
 
     public void testListMissingFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  missing = consistency.listMissingFilesInDatabase(1);
-        assertContexts(missing, MISSING, ctx, ctx3);
+        final Map<MBeanEntity, List<String>>  missing = consistency.listMissingFilesInDatabase(1);
+        assertContextEntities(missing, MISSING, ctx, ctx3);
     }
 
     public void testListAllMissingFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  missing = consistency.listAllMissingFiles();
-        assertContexts(missing, MISSING, ctx, ctx2, ctx3);
+        final Map<MBeanEntity, List<String>>  missing = consistency.listAllMissingFiles();
+        assertContextEntities(missing, MISSING, ctx, ctx2, ctx3);
     }
 
     public void testListUnassignedFilesInContext() throws MBeanException {
@@ -176,20 +176,20 @@ public class ConsistencyTest extends TestCase {
 
     public void testListUnassignedFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  unassigned = consistency.listUnassignedFilesInFilestore(1);
-        assertContexts(unassigned, UNASSIGNED, ctx, ctx2);
+        final Map<MBeanEntity, List<String>>  unassigned = consistency.listUnassignedFilesInFilestore(1);
+        assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2);
     }
 
     public void testListUnassignedFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  unassigned = consistency.listUnassignedFilesInDatabase(1);
-        assertContexts(unassigned, UNASSIGNED, ctx, ctx3);
+        final Map<MBeanEntity, List<String>>  unassigned = consistency.listUnassignedFilesInDatabase(1);
+        assertContextEntities(unassigned, UNASSIGNED, ctx, ctx3);
     }
 
     public void testListAllUnassignedFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<Integer, List<String>>  unassigned = consistency.listAllUnassignedFiles();
-        assertContexts(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
+        final Map<MBeanEntity, List<String>>  unassigned = consistency.listAllUnassignedFiles();
+        assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
     }
 
     public void testCreateDummyFilesForInfoitems() throws MBeanException, OXException {
@@ -301,12 +301,12 @@ public class ConsistencyTest extends TestCase {
         assertTrue(unassigned.isEmpty());
     }
 
-    protected void assertContexts(final Map<Integer, List<String>> missing,final Set<String> expect, final Context... testContexts) {
+    protected void assertContextEntities(final Map<MBeanEntity, List<String>> missing,final Set<String> expect, final Context... testContexts) {
         assertNotNull(missing);
-        final Set<Integer> contextIds = new HashSet<Integer>(missing.keySet());
-        assertEquals(contextIds.toString(), testContexts.length, contextIds.size());
+        final Set<MBeanEntity> entities = new HashSet<MBeanEntity>(missing.keySet());
+        assertEquals(entities.toString(), testContexts.length, entities.size());
         for(final Context context : testContexts) {
-            final List<String> ids = missing.get(I(context.getContextId()));
+            final List<String> ids = missing.get(context);
             assertNotNull(ids);
 
             final Set<String> expected = new HashSet<String>(expect);
@@ -315,10 +315,10 @@ public class ConsistencyTest extends TestCase {
             expected.removeAll(ids);
             assertTrue(ids.toString(), expected.isEmpty());
 
-            contextIds.remove(I(context.getContextId()));
+            entities.remove(context);
         }
 
-        assertTrue(contextIds.toString(), contextIds.isEmpty());
+        assertTrue(entities.toString(), entities.isEmpty());
 
     }
 
@@ -488,6 +488,31 @@ public class ConsistencyTest extends TestCase {
             storage.setContext(ctx);
             FileStorage retval = storage;
             return Arrays.asList(retval);
+        }
+
+        @Override
+        protected List<FileStorage> getFileStorages(Context ctx, User usr) throws OXException {
+            storage.setContext(ctx);
+            FileStorage retval = storage;
+            return Arrays.asList(retval);
+        }
+
+        @Override
+        protected List<FileStorage> getFileStorages(Entity entity) throws OXException {
+            storage.setContext(entity.getContext());
+            FileStorage retval = storage;
+            return Arrays.asList(retval);
+        }
+
+        @Override
+        protected List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException {
+            final List<Entity> retval = new ArrayList<Entity>();
+            for(final Context context : contexts.values()){
+                if(context.getFilestoreId() == filestoreId) {
+                    retval.add(new EntityImpl(context));
+                }
+            }
+            return retval;
         }
     }
 
