@@ -484,24 +484,24 @@ public class ConsistencyTest extends TestCase {
         }
 
         @Override
-        protected List<FileStorage> getFileStorages(final Context ctx) {
+        protected FileStorage getFileStorage(final Context ctx) {
             storage.setContext(ctx);
             FileStorage retval = storage;
-            return Arrays.asList(retval);
+            return retval;
         }
 
         @Override
-        protected List<FileStorage> getFileStorages(Context ctx, User usr) throws OXException {
+        protected FileStorage getFileStorage(Context ctx, User usr) throws OXException {
             storage.setContext(ctx);
             FileStorage retval = storage;
-            return Arrays.asList(retval);
+            return retval;
         }
 
         @Override
-        protected List<FileStorage> getFileStorages(Entity entity) throws OXException {
+        protected FileStorage getFileStorage(Entity entity) throws OXException {
             storage.setContext(entity.getContext());
             FileStorage retval = storage;
-            return Arrays.asList(retval);
+            return retval;
         }
 
         @Override
