@@ -681,36 +681,39 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Verifies that a permission change is valid in terms of anonymous guest users. I.e.:
+     * Verifies that a permission change is valid in terms of anonymous and invited guest users. I.e.:
      * <ul>
      *  <li>every folder can carry at most one anonymous guest permission</li>
      *  <li>anonymous guest permissions must be read-only</li>
      *  <li>existing anonymous guests must not be added as permission entities (only new ones are allowed)</li>
+     *  <li>invited guest permissions must be read-only depending on the folder module</li>
      * </ul>
      *
      * @param comparedPermissions The compared permissions
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkAnonymousPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
+    protected void checkGuestPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
+        /*
+         * check added guest permissions
+         */
         if (comparedPermissions.hasAddedGuests()) {
             Permission addedAnonymousPermission = null;
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
-            for (Integer addedGuest : addedGuests) {
-                GuestInfo guestInfo = comparedPermissions.getGuestInfo(addedGuest);
+            for (Integer guestID : addedGuests) {
+                /*
+                 * check guest permission
+                 */
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
+                Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
+                checkGuestPermission(folder, guestPermission, guestInfo);
                 if (isAnonymous(guestInfo)) {
                     /*
-                     * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
+                     * allow only one anonymous permission
                      */
                     if (null == addedAnonymousPermission) {
-                        addedAnonymousPermission = comparedPermissions.getAddedGuestPermission(addedGuest);
+                        addedAnonymousPermission = guestPermission;
                     } else {
-                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-                            Permissions.createPermissionBits(addedAnonymousPermission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
-                    }
-                    checkReadOnly(folder, addedAnonymousPermission);
-                    if (isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
-                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-                            Permissions.createPermissionBits(addedAnonymousPermission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
+                        throw invalidPermissions(folder, guestPermission);
                     }
                 }
             }
@@ -718,19 +721,25 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
              * check for an already existing anonymous permission if a new one should be added
              */
             if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-                    Permissions.createPermissionBits(addedAnonymousPermission), addedAnonymousPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+                throw invalidPermissions(folder, addedAnonymousPermission);
             }
         }
-
+        /*
+         * check modified guest permissions
+         */
         if (comparedPermissions.hasModifiedGuests()) {
-            for (Integer guest : comparedPermissions.getModifiedGuests()) {
-                if (isAnonymous(comparedPermissions.getGuestInfo(guest))) {
-                    checkReadOnly(folder, comparedPermissions.getModifiedGuestPermission(guest));
-                }
+            for (Integer guestID : comparedPermissions.getModifiedGuests()) {
+                /*
+                 * check guest permission
+                 */
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
+                Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
+                checkGuestPermission(folder, guestPermission, guestInfo);
             }
         }
-
+        /*
+         * check new guest permissions
+         */
         if (comparedPermissions.hasNewGuests()) {
             GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
@@ -742,17 +751,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     if (null == newAnonymousPermission) {
                         newAnonymousPermission = guestPermission;
                     } else {
-                        throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-                            Permissions.createPermissionBits(guestPermission), guestPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+                        throw invalidPermissions(folder, guestPermission);
                     }
+                } else if (isReadOnlySharing(folder)) {
+                    /*
+                     * allow only "read-only" permissions for invited guests in non-infostore folders
+                     */
+                    checkReadOnly(folder, guestPermission);
                 }
             }
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
             if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
-                    Permissions.createPermissionBits(newAnonymousPermission), newAnonymousPermission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+                throw invalidPermissions(folder, newAnonymousPermission);
             }
         }
     }
@@ -779,8 +791,52 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return false;
     }
 
-    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
-        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
+    /**
+     * Checks if a specific guest permission is allowed for a folder or not.
+     *
+     * @param folder The folder where the permission should be applied to
+     * @param permission The guest permission
+     * @param guestInfo The guest information for the added permission
+     * @throws OXException
+     */
+    private static void checkGuestPermission(Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
+        if (isAnonymous(guestInfo)) {
+            /*
+             * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
+             */
+            checkReadOnly(folder, permission);
+            if (isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
+                throw invalidPermissions(folder, permission);
+            }
+        } else if (isReadOnlySharing(folder)) {
+            /*
+             * allow only "read-only" permissions for invited guests in non-infostore folders
+             */
+            checkReadOnly(folder, permission);
+        }
+    }
+
+    /**
+     * Gets a value indicating whether a folder's content type enforces "read-only" sharing for guests or not.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if the folder may be shared "read-only" for guest users only, <code>false</code>, otherwise
+     */
+    private static boolean isReadOnlySharing(Folder folder) {
+        ContentType contentType = folder.getContentType();
+        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType);
+    }
+
+    /**
+     * Creates a new {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} instance for the supplied folder and permission.
+     *
+     * @param folder The folder to create the invalid permission excpetion for
+     * @param permission The folder to create the invalid permission excpetion for
+     * @return A suitable invalid permission exception
+     */
+    private static OXException invalidPermissions(Folder folder, Permission permission) {
+        return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(
+            Permissions.createPermissionBits(permission), permission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
     }
 
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {
@@ -788,8 +844,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
         boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
         if (writeFolder || writeItems || deleteItems) {
-            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(p), p.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+            throw invalidPermissions(folder, p);
         }
+    }
+
+    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
+        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
     }
 
     private static boolean isAnonymous(GuestInfo guestInfo) {
