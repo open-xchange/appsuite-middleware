@@ -855,12 +855,12 @@ EOF
         cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
         rm -f /opt/open-xchange/etc/logback.xml.new
     fi
-    
+
     MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         TMPFILE=$(mktemp)
-        
+
         /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
         [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
@@ -869,7 +869,7 @@ EOF
             cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
             rm -f /opt/open-xchange/etc/logback.xml.new
         fi
-        
+
         rm -f $TMPFILE
     fi
 fi
@@ -1246,7 +1246,7 @@ ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/et
 ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
 ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
 
-PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties hazelcast.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640

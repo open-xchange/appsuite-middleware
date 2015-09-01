@@ -1,3 +1,7 @@
+* 2015-09-01 - marcus.klein@open-xchange.com
+
+ - Fix for bug 39554: Set permissions of hazelcast.properties so that only root and user open-xchange can read/edit this file containing passwords.
+
 * 2015-08-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 40790: Prefer original ID/folder information when rendering a mail's JSON representation
