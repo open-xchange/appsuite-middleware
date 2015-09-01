@@ -1738,7 +1738,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * add object permissions if requested or needed to evaluate "shareable" flag
          */
-        if (addObjectPermissions || addShareable && sharedFilesFolderID == folderId) {
+        if (addObjectPermissions) {
             timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
         }
         if (addLocked) {
@@ -1753,17 +1753,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
                 @Override
                 public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (false == hasSharedFolderAccess) {
+                    if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
                         /*
-                         * no permissions to share
+                         * no permissions to share or re-share
                          */
                         document.setShareable(false);
-                    } else if (sharedFilesFolderID == folderId) {
-                        /*
-                         * set "shareable" flag based on object permissions
-                         */
-                        ObjectPermission matchingPermission = EffectiveObjectPermissions.find(user, document.getObjectPermissions());
-                        document.setShareable(null != matchingPermission && matchingPermission.canWrite());
                     } else {
                         /*
                          * set "shareable" flag based on folder permissions
