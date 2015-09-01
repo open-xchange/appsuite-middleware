@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-12 13:44+0300\n"
+"PO-Revision-Date: 2015-09-01 17:03+0300\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -61,76 +61,24 @@ msgstr "Nevar atrast atjaunojamo pieslēguma informāciju subjektam %1$s"
 msgid "No Kerberos delegation ticket found in session."
 msgstr "Sesijai nav atrasta Kerberos deliģēšanas biļete."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:103
-msgid "/servlet/dav/caldav"
-msgstr "/servlet/dav/caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
-msgid "/servlet/dav/dev/null"
-msgstr "/servlet/dav/dev/null"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:145
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "caldav"
-msgstr "caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "modules"
-msgstr "modules"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "module"
-msgstr "module"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:181
-msgid "modules/caldav/active"
-msgstr "modules/caldav/active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:186
-msgid "io.ox/caldav//active"
-msgstr "io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:191
-msgid "modules/caldav/active > io.ox/caldav//active"
-msgstr "modules/caldav/active > io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:198
-msgid "modules/caldav/url"
-msgstr "modules/caldav/url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:203
-msgid "io.ox/caldav//url"
-msgstr "io.ox/caldav//url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:208
-msgid "modules/caldav/url > io.ox/caldav//url"
-msgstr "modules/caldav/url > io.ox/caldav//url"
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your calendars and appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/OAuthStrings.java:61
 msgid "Synchronize your calendars and appointments."
 msgstr "Jūsu kalendāru un mītiņu sinhronizēšana."
-
-#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-#. registerService(TargetService.class, new ModifyThroughDependant(), props);
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
-msgid "calendar"
-msgstr "calendar"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
 msgid "Read all your appointments."
 msgstr "Visu jūsu mītiņu lasīšana."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
 msgid "Create, modify and delete appointments."
 msgstr "Mītiņu izveidošana, izmainīšana un dzēšana."
 
@@ -926,27 +874,10 @@ msgstr ""
 "Jūs esat saņēmis šo e-astu jo šis mītiņš satur jūsu pārvaldībā esošo resursu "
 "%1$s."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:88
-msgid "starting bundle: \"com.openexchange.carddav\""
-msgstr "sāknē funkcionalitāti: \"com.openexchange.carddav\""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:135
-msgid "/servlet/dav/carddav"
-msgstr "/servlet/dav/carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:101
-msgid "carddav"
-msgstr "carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:121
-msgid "stopping bundle: \"com.openexchange.carddav\""
-msgstr "aptur funkcionalitāti: \"com.openexchange.carddav\""
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Jūsu adrešu grāmatu un kontaktu informācijas sinhronizēšana."
 
@@ -969,6 +900,14 @@ msgstr "Lietotāja LDAP meklēšanas rezultāti satur pārāk daudz ierakstu."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr "Lietotāja objekta \"%s\" LDAP meklēšanai nav rezultātu."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
+msgid ""
+"The LDAP search in distribution lists for specific attributes is not "
+"supported."
+msgstr ""
+"LDAP meklēšana izplatīšanas sarakstos pēc īpašiem atribūtiem netiek "
+"atbalstīta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -1424,37 +1363,17 @@ msgstr ""
 msgid "Unable to access the file store."
 msgstr "Nevar piekļut failu glabātuvei."
 
-#.
-#. * register ajax module
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:88
-msgid "contacts"
-msgstr "contacts"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "identifier"
-msgstr "identifikators"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-msgid "com.openexchange.contact.json"
-msgstr "com.openexchange.contact.json"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "com.openexchange.contact"
-msgstr "com.openexchange.contact"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
 msgstr "Lasīt visu jūsu kontaktpersonu informāciju."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete contacts."
 msgstr "Izveidot, modificēt un dzēs kontaktpersonu informāciju."
 
@@ -1757,6 +1676,10 @@ msgid ""
 msgstr ""
 "Direktorija \"%1$s\" nav sinhronizējama. Lūdzu norādiet citu direktoriju."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:92
+msgid "The supplied metadata could not be parsed: \"%1$s\""
+msgstr "Norādītie metadati nevar tikt apstrādāti: \"%1$s\""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1937,44 +1860,46 @@ msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr "Dzēšana atteikta \"%1$s\" resursam: %2$s"
 
 #. Missing configuration for %1$s account "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+#. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+#. E.g. 'Missing configuration for boxcom account "3".'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
 msgid "Missing configuration for %1$s account \"%2$s\"."
 msgstr "Iztrūkstoša konfigurācija %1$s kontam \"%2$s\"."
 
 #. The provided %1$s resource does not exist: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "Norādītais %1$s resurss neeksistē: %2$s"
 
 #. The file %1$s doesn't have any content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The file %1$s doesn't have any content."
 msgstr "Failam %1$s nav satura."
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "The associated %2$s account does no more exist"
 msgstr "Saistītais %2$s konts vairs neeksistē"
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Konts \"%1$s\" neatbalsta individuālas tiesības."
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "Faila \"%1$s\" piezīmju saglabāšana kontam \"%2$s\" netiek atbalstīta."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
 "Kategoriju pievienošana failam \"%1$s\" kontam \"%2$s\" netiek atbalstīta."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
@@ -2785,6 +2710,11 @@ msgstr "Kļūda pie datu lasīšanas/rakstīšanas datubāzē."
 msgid "Data cannot be stored into the database because it is too big"
 msgstr "Dati nevar tikt saglabāti datubāzē jo tā ir pārāk liela"
 
+#. The request sent by the client was syntactically incorrect
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+msgid "The request sent by the client was syntactically incorrect"
+msgstr "Klienta nosūtītais pieprasījums ir sintaktiski nepareizs"
+
 #. *
 #. * File not found: %1$s
 #.
@@ -2855,12 +2785,12 @@ msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr "Iztrūkstoša sesijas Kerberos biļete. Lūdzu mēģiniet vēlreiz."
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
 msgid "A Guard error occurred: %1$s"
 msgstr "Drošās ziņapmaiņas kļūda: %1$s"
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid ""
 "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
@@ -2868,27 +2798,27 @@ msgstr ""
 "paziņojums: %2$s"
 
 #. Invalid Guard URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
 msgid "The provided Guard URL: %1$s is invalid"
 msgstr "Norādītais drošās ziņapmaiņas saites URL: %1$s ir nepareizs"
 
 #. The Guard resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Norādītais drošās ziņapmaiņas resurss neeksistē: %1$s"
 
 #. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
 msgid "An I/O error occurred: %1$s"
 msgstr "Datu apmaiņas I/O kļūda: %1$s"
 
 #. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "Authentication failed: %1$s"
 msgstr "Autorizācijas kļūda: %1$s"
 
 #. The Guard resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
 msgstr "Drošās ziņapmaiņas resurss neeksistē"
 
@@ -4417,75 +4347,6 @@ msgstr "Neparedzēta kļūda: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Nepareizs ID. Iztrūkstošs resursa identifikators."
 
-#. XMPP
-#. * The client has sent a message that is malformed or cannot be processed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
-msgid ""
-"The client has sent a message that is malformed or cannot be processed: %1$s"
-msgstr ""
-"Klienta atsūtītais ziņojums ir nepareizi saformēts vai nevar tikt "
-"apstrādāts: %1$s"
-
-#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
-msgid ""
-"The server could not process the stanza because of a misconfiguration or an "
-"otherwise-undefined internal server error: %1$s"
-msgstr ""
-"Dati nevar tikt apstrādāti nepareizas servera konfigurācijas vai kādas "
-"neatpazītas iekšējas kļūdas dēļ: %1$s"
-
-#. * The recipient you tried to reach is currently unavailable
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-msgid "The recipient you tried to reach is currently unavailable: %1$s"
-msgstr "Saņēmējs, ar kuru vēlaties sazināties, īslaicīgi nav pieejams: %1$s"
-
-#. * Your session is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
-msgid "Your session is invalid."
-msgstr "Jūsu sesija nav derīga."
-
-#. * You are no member of the GroupDispatcher: %1$s. Please join first.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:95
-msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
-msgstr ""
-"Jūs neesiet GroupDispatcher loceklis: %1$s. Lūdzu vispirms pievienojieties."
-
-#. * The request didn't yield any response.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:98
-msgid "The request didn't yield any response."
-msgstr "Pieprasījumam nav atbildes."
-
-#. * The GroupDispatcher %1$s was already disposed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
-msgid "The GroupDispatcher %1$s was already disposed."
-msgstr "Grupu dispečera %1$s ir jau deaktivizēts."
-
-#. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
-msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
-msgstr "Grupu dispečera %1$s kļūda, apstrādājot teicienu %2$s uz %3$s."
-
-#. * Joining the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
-msgid "Joining the GroupDispatcher %1$s failed."
-msgstr "Kļūda pieslēdzoties pie grupu dispečera %1$s."
-
-#. * Leaving the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
-msgid "Leaving the GroupDispatcher %1$s failed."
-msgstr "Kļūda atslēdzoties no grupu dispečera %1$s."
-
-#. * ResponseChannel timed out while simulating synchronous behaviour.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
-msgid "ResponseChannel timed out while simulating synchronous behaviour."
-msgstr "Atbildes kanāla noilgums sinhronās apstrādes simulācijas laikā."
-
-#. * You are already a member of the GroupDispatcher %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
-msgid "You are already a member of the GroupDispatcher %1$s"
-msgstr "Jūs jau esat grupu dispečera %1$s dalībnieku sarakstā"
-
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -4546,14 +4407,10 @@ msgstr "Lietotājs ir deaktivēts"
 msgid "Password expired"
 msgstr "Paroles derīguma termiņs ir beidzies"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:84
-msgid "config"
-msgstr "config"
-
 #. Application 'xyz' requires following permissions:
 #. - Read and change your settings.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/OAuthScopeDescription.java:9
 msgid "Read and change your settings."
 msgstr "Lasīt un izmainīt iestatījumus."
 
@@ -5249,6 +5106,10 @@ msgid ""
 msgstr ""
 "Vaicājums \"%1$s\" satur pārāk daudz struktūru. Lūdzu vienkāršojiet to un "
 "mēģiniet vēlreiz."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
+msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr "Struktūra \"%1$s\" meklēšanas laikā ir ignorēta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -6851,6 +6712,15 @@ msgstr ""
 "Saskaņā ar lietotāja \"%1$s\" ierobežojumiem, tiesību izmaiņas nevar tikt "
 "piemērotas."
 
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid ""
+"Concurrent write attempt. Please await the previous save operation to "
+"terminate."
+msgstr ""
+"Vienlaicīgas rakstīšana mēģinājums. Lūdzu uzgaidiet kamēr iepriekšējā "
+"saglabāšanas operācija ir pabeigta."
+
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
@@ -7153,21 +7023,17 @@ msgstr "Modulim %1$d nav reģistrēts mērķa serviss."
 msgid "Required  value \"identifier\" was not supplied."
 msgstr "Obligātā vērtība \"identifikators\" nav norādīta."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
-msgid "reminder"
-msgstr "atgādinājums"
-
 #. Application 'xyz' requires following permissions:
 #. - Read reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:9
 msgid "Read reminders for appointments and tasks."
 msgstr "Lasīt mītiņu un uzdevumu atgādinājumus."
 
 #. Application 'xyz' requires following permissions:
 #. - Set or change reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:14
 msgid "Set or change reminders for appointments and tasks."
 msgstr "Iestatīt vai izmainīt mītiņu un uzdevumu atgādinājumus."
 
@@ -8714,45 +8580,77 @@ msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s ir koplietojis ar jums %2$d mapes."
 
 #. detailed body
-#. * $username ($user_email) has shared file "$filename" with you.
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
-msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums failu \"%3$s\"."
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums failu \"%3$s\". Lai to skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared $number_of_files files with you.
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
-msgid "%1$s (%2$s) has shared %3$s files with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s failus."
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums %3$s failus. Lai tos skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared image "$filename" with you.
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
-msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums attēlu \"%3$s\"."
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums attēlu \"%3$s\". Lai to skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared $number_of_images iamges with you.
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
-msgid "%1$s (%2$s) has shared %3$s images with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s attēlus."
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums %3$s attēlus. Lai tos skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared item "$filename" with you.
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
-msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums vienību \"%3$s\"."
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums vienumu \"%3$s\". Lai to skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared $number items with you.
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
-msgid "%1$s (%2$s) has shared %3$s items with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s vienības."
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums %3$s vienumus. Lai tos skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared folder $folder with you.
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
-msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums mapi \"%3$s\"."
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums mapi \"%3$s\". Lai to skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
-#. * $username ($user_email) has shared folder $number folders with you.
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
-msgid "%1$s (%2$s) has shared %3$ folders with you."
-msgstr "%1$s (%2$s) ir koplietojis ar jums %3$ mapes."
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) ir koplietojis ar jums %3$s mapes. Lai tos skatītu, lūdzu "
+"piespiediet zemāk redzamo taustiņu."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -8808,65 +8706,54 @@ msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
 msgstr ""
 "%1$s (%2$s) ir koplietojis ar jums %3$d mapes un atstājis jums ziņojumu:"
 
-#. please click
-#. * Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
-msgid "Please click the button below to view it."
-msgstr "Lai skatītu, lūdzu piespiediet zemāk redzamo taustiņu."
-
-#. * Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
-msgid "Please click the button below to view them."
-msgstr "Lai skatītu, lūdzu piespiediet zemāk redzamo taustiņu."
-
 #. button with label
-#. * View photo
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
 msgid "View image"
 msgstr "Skatīt attēlu"
 
-#. * View photos
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
 msgid "View images"
 msgstr "Skatīt attēlus"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
 msgid "View file"
 msgstr "Skatīt failu"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
 msgid "View files"
 msgstr "Skatīt failus"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
 msgid "View folder"
 msgstr "Skatīt mapi"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
 msgid "View folders"
 msgstr "Skatīt mapes"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
 msgid "View item"
 msgstr "Skatīt vienību"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
 msgid "View items"
 msgstr "Skatīt vienības"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
 msgid "The link will expire on %1$s"
 msgstr "Saite ir derīga līdz %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr ""
@@ -8879,16 +8766,16 @@ msgstr ""
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - vai aizmirsāt paroli?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid "Hello,"
 msgstr "Sveicināti,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -8897,12 +8784,12 @@ msgstr ""
 "iestatīt jaunu paroli šeit:"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "Set password"
 msgstr "Iestatīt paroli"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -8912,12 +8799,12 @@ msgstr ""
 "iestatījis jaunu paroli."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
 msgid "This is an automated message, please do not reply."
 msgstr "Šis ir automātiski izveidots paziņojums. Lūdzu neatbildiet uz to."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
 msgid "unknown"
 msgstr "nezināms"
 
@@ -9191,21 +9078,17 @@ msgstr ""
 msgid "You already have such a subscription."
 msgstr "Jums jau ir šāds abonements."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
-msgid "tasks"
-msgstr "uzdevumi"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your tasks."
 msgstr "Lasīt visus jūsu uzdevumus."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete tasks."
 msgstr "Izveidot, modificēt un dzēst uzdevumus."
 
@@ -11554,6 +11437,152 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "/servlet/dav/caldav"
+#~ msgstr "/servlet/dav/caldav"
+
+#~ msgid "/servlet/dav/dev/null"
+#~ msgstr "/servlet/dav/dev/null"
+
+#~ msgid "caldav"
+#~ msgstr "caldav"
+
+#~ msgid "modules"
+#~ msgstr "modules"
+
+#~ msgid "module"
+#~ msgstr "module"
+
+#~ msgid "modules/caldav/active"
+#~ msgstr "modules/caldav/active"
+
+#~ msgid "io.ox/caldav//active"
+#~ msgstr "io.ox/caldav//active"
+
+#~ msgid "modules/caldav/active > io.ox/caldav//active"
+#~ msgstr "modules/caldav/active > io.ox/caldav//active"
+
+#~ msgid "modules/caldav/url"
+#~ msgstr "modules/caldav/url"
+
+#~ msgid "io.ox/caldav//url"
+#~ msgstr "io.ox/caldav//url"
+
+#~ msgid "modules/caldav/url > io.ox/caldav//url"
+#~ msgstr "modules/caldav/url > io.ox/caldav//url"
+
+#~ msgid "calendar"
+#~ msgstr "calendar"
+
+#~ msgid "starting bundle: \"com.openexchange.carddav\""
+#~ msgstr "sāknē funkcionalitāti: \"com.openexchange.carddav\""
+
+#~ msgid "/servlet/dav/carddav"
+#~ msgstr "/servlet/dav/carddav"
+
+#~ msgid "carddav"
+#~ msgstr "carddav"
+
+#~ msgid "stopping bundle: \"com.openexchange.carddav\""
+#~ msgstr "aptur funkcionalitāti: \"com.openexchange.carddav\""
+
+#~ msgid "contacts"
+#~ msgstr "contacts"
+
+#~ msgid "identifier"
+#~ msgstr "identifikators"
+
+#~ msgid "com.openexchange.contact.json"
+#~ msgstr "com.openexchange.contact.json"
+
+#~ msgid "com.openexchange.contact"
+#~ msgstr "com.openexchange.contact"
+
+#~ msgid ""
+#~ "The client has sent a message that is malformed or cannot be processed: "
+#~ "%1$s"
+#~ msgstr ""
+#~ "Klienta atsūtītais ziņojums ir nepareizi saformēts vai nevar tikt "
+#~ "apstrādāts: %1$s"
+
+#~ msgid ""
+#~ "The server could not process the stanza because of a misconfiguration or "
+#~ "an otherwise-undefined internal server error: %1$s"
+#~ msgstr ""
+#~ "Dati nevar tikt apstrādāti nepareizas servera konfigurācijas vai kādas "
+#~ "neatpazītas iekšējas kļūdas dēļ: %1$s"
+
+#~ msgid "The recipient you tried to reach is currently unavailable: %1$s"
+#~ msgstr "Saņēmējs, ar kuru vēlaties sazināties, īslaicīgi nav pieejams: %1$s"
+
+#~ msgid "Your session is invalid."
+#~ msgstr "Jūsu sesija nav derīga."
+
+#~ msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
+#~ msgstr ""
+#~ "Jūs neesiet GroupDispatcher loceklis: %1$s. Lūdzu vispirms "
+#~ "pievienojieties."
+
+#~ msgid "The request didn't yield any response."
+#~ msgstr "Pieprasījumam nav atbildes."
+
+#~ msgid "The GroupDispatcher %1$s was already disposed."
+#~ msgstr "Grupu dispečera %1$s ir jau deaktivizēts."
+
+#~ msgid ""
+#~ "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
+#~ msgstr "Grupu dispečera %1$s kļūda, apstrādājot teicienu %2$s uz %3$s."
+
+#~ msgid "Joining the GroupDispatcher %1$s failed."
+#~ msgstr "Kļūda pieslēdzoties pie grupu dispečera %1$s."
+
+#~ msgid "Leaving the GroupDispatcher %1$s failed."
+#~ msgstr "Kļūda atslēdzoties no grupu dispečera %1$s."
+
+#~ msgid "ResponseChannel timed out while simulating synchronous behaviour."
+#~ msgstr "Atbildes kanāla noilgums sinhronās apstrādes simulācijas laikā."
+
+#~ msgid "You are already a member of the GroupDispatcher %1$s"
+#~ msgstr "Jūs jau esat grupu dispečera %1$s dalībnieku sarakstā"
+
+#~ msgid "config"
+#~ msgstr "config"
+
+#~ msgid "reminder"
+#~ msgstr "atgādinājums"
+
+#~ msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums failu \"%3$s\"."
+
+#~ msgid "%1$s (%2$s) has shared %3$s files with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s failus."
+
+#~ msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums attēlu \"%3$s\"."
+
+#~ msgid "%1$s (%2$s) has shared %3$s images with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s attēlus."
+
+#~ msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums vienību \"%3$s\"."
+
+#~ msgid "%1$s (%2$s) has shared %3$s items with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums %3$s vienības."
+
+#~ msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums mapi \"%3$s\"."
+
+#~ msgid "%1$s (%2$s) has shared %3$ folders with you."
+#~ msgstr "%1$s (%2$s) ir koplietojis ar jums %3$ mapes."
+
+#~ msgid "Please click the button below to view it."
+#~ msgstr "Lai skatītu, lūdzu piespiediet zemāk redzamo taustiņu."
+
+#~ msgid "Please click the button below to view them."
+#~ msgstr "Lai skatītu, lūdzu piespiediet zemāk redzamo taustiņu."
+
+#~ msgid "tasks"
+#~ msgstr "uzdevumi"
 
 #~ msgid "Invalid presence status."
 #~ msgstr "Nepareizs klātbūtnes statuss."
