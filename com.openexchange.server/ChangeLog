@@ -3,6 +3,7 @@
  - Fix for bug 39554: Set permissions of hazelcast.properties so that only root and user open-xchange can read/edit this file containing passwords.
  - Fix for bug 39997: Removed open-xchange-meta-backend-appsuite meta package because it did not make sense anymore.
  - Fix for bug 40647: Delete configuration files for RPM not with dpkg-maintscript-helper but with rm.
+ - Fix for bug 40719: Replaced dependency to mysql-client with a dependency to virtual-mysql-client which is provided by mysql-client and mariadb-client.
 
 * 2015-08-31 - thorben.betten@open-xchange.com
 
