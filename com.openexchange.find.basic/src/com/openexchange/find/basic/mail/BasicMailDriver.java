@@ -103,6 +103,7 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.common.Comparison;
+import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
@@ -209,6 +210,17 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
         return FOLDER_TYPE_NOT_SUPPORTED;
+    }
+
+    @Override
+    protected List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        List<FacetType> types = new ArrayList<>(5);
+        types.add(CommonFacetType.GLOBAL);
+        types.add(CommonFacetType.DATE);
+        for (FacetType type : MailFacetType.values()) {
+            types.add(type);
+        }
+        return types;
     }
 
     @Override
