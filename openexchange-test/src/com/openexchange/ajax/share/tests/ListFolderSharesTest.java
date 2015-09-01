@@ -79,11 +79,13 @@ public class ListFolderSharesTest extends ShareTest {
     }
 
     public void testListSharedFoldersToAnonymous() throws Exception {
-        testListSharedFolders(randomGuestPermission(RecipientType.ANONYMOUS));
+        int module = randomModule();
+        testListSharedFolders(randomGuestPermission(RecipientType.ANONYMOUS, module), module);
     }
 
     public void testListSharedFoldersToGuest() throws Exception {
-        testListSharedFolders(randomGuestPermission(RecipientType.GUEST));
+        int module = randomModule();
+        testListSharedFolders(randomGuestPermission(RecipientType.GUEST, module), module);
     }
 
     public void testListSharedFoldersToGroup() throws Exception {
@@ -91,7 +93,7 @@ public class ListFolderSharesTest extends ShareTest {
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         permission.setGroupPermission(true);
-        testListSharedFolders(permission);
+        testListSharedFolders(permission, randomModule());
     }
 
     public void testListSharedFoldersToUser() throws Exception {
@@ -101,14 +103,13 @@ public class ListFolderSharesTest extends ShareTest {
         OCLPermission permission = new OCLPermission(userId, 0);
         permission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        testListSharedFolders(permission);
+        testListSharedFolders(permission, randomModule());
     }
 
-    private void testListSharedFolders(OCLPermission permission) throws Exception {
+    private void testListSharedFolders(OCLPermission permission, int module) throws Exception {
         /*
          * create shared folder
          */
-        int module = randomModule();
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), permission);
         /*
          * check permissions
@@ -134,7 +135,7 @@ public class ListFolderSharesTest extends ShareTest {
          * create public folder
          */
         int module = randomModule();
-        OCLGuestPermission guestPermission = randomGuestPermission();
+        OCLGuestPermission guestPermission = randomGuestPermission(module);
         FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, module);
         folder.addPermission(guestPermission);
         folder = updateFolder(EnumAPI.OX_NEW, folder);
@@ -169,7 +170,7 @@ public class ListFolderSharesTest extends ShareTest {
          * create public folder
          */
         int module = randomModule();
-        OCLGuestPermission guestPermission = randomGuestPermission();
+        OCLGuestPermission guestPermission = randomGuestPermission(module);
         FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, module);
         FolderObject subfolder = folder.clone();
         subfolder.setParentFolderID(folder.getObjectID());

@@ -92,7 +92,8 @@ public class Bug40627Test extends ShareTest {
         /*
          * create shared folder
          */
-        OCLGuestPermission guestPermission = randomGuestPermission();
+        int module = randomModule();
+        OCLGuestPermission guestPermission = randomGuestPermission(module);
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
         permissions.add(guestPermission);
         OCLPermission groupPermission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
@@ -107,7 +108,6 @@ public class Bug40627Test extends ShareTest {
         userPermission.setAllPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         permissions.add(userPermission);
-        int module = randomModule();
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), randomUID(), permissions.toArray(new OCLPermission[permissions.size()]));
         /*
          * check permissions

@@ -60,9 +60,9 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
@@ -87,7 +87,8 @@ public class AddGuestPermissionTest extends ShareTest {
     }
 
     public void testUpdateSharedFolderRandomly() throws Exception {
-        testUpdateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
+        int module = randomModule();
+        testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderExtensively() throws Exception {
@@ -128,7 +129,7 @@ public class AddGuestPermissionTest extends ShareTest {
 
     public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
         int module = randomModule();
-        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission());
+        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {

@@ -76,7 +76,7 @@ public class GuestPasswordTest extends ShareTest {
     }
 
     public void testUpdatePasswordForNamedGuest() throws Exception {
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
          * create folder shared to guest user
          */
