@@ -117,6 +117,10 @@ public class AssignmentImpl implements Serializable, Assignment {
         return schema;
     }
 
+    public boolean isToConfigDB() {
+        return Constants.CONFIGDB_WRITE_ID == writePoolId;
+    }
+
     /**
      * Returns true if the transaction counter has been initialized
      * @return

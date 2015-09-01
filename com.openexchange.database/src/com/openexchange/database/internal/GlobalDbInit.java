@@ -133,7 +133,15 @@ public class GlobalDbInit {
              * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
              * replication monitor
              */
-            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment());
+            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment()) {
+
+                private static final long serialVersionUID = -6801059792528227771L;
+
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
+            };
             Connection connection = null;
             try {
                 connection = monitor.checkFallback(pools, firstAssignment, true, true, true);
@@ -195,7 +203,7 @@ public class GlobalDbInit {
             Integer poolID = entry.getKey();
             GlobalDbConfig dbConfig = configsByPool.get(poolID);
             if (null == dbConfig) {
-                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier " + poolID + " found.");
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier "+ poolID +" found.");
             }
             for (String group : entry.getValue()) {
                 if (null != dbConfigs.put(group, dbConfig)) {
