@@ -2,7 +2,7 @@ Source: open-xchange-meta
 Section: web
 Priority: optional
 Maintainer: Carsten Hoeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
@@ -33,12 +33,6 @@ Package: open-xchange-meta-singleserver
 Architecture: all
 Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 Description: The Open-Xchange Meta package for OX on a single server
-
-# not used atm
-#Package: open-xchange-meta-plesk
-#Architecture: all
-#Depends: ${oxcommon}, ${all-lang}, open-xchange-spamhandler-default, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui
-#Description: The Open-Xchange Meta package for OX into Plesk integration
 
 Package: open-xchange-meta-admin
 Architecture: all
@@ -97,9 +91,3 @@ Architecture: all
 Provides: open-xchange-meta-backend
 Depends: ${ox6-common}
 Description: The Open-Xchange Meta package for OX6 backend packages
-
-Package: open-xchange-meta-backend-appsuite
-Architecture: all
-Provides: open-xchange-meta-backend
-Depends: ${oxcommon}
-Description: The Open-Xchange Meta package for OX App Suite backend packages

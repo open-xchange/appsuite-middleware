@@ -1,6 +1,7 @@
 * 2015-09-01 - marcus.klein@open-xchange.com
 
  - Fix for bug 39554: Set permissions of hazelcast.properties so that only root and user open-xchange can read/edit this file containing passwords.
+ - Fix for bug 39997: Removed open-xchange-meta-backend-appsuite meta package because it did not make sense anymore.
 
 * 2015-08-31 - thorben.betten@open-xchange.com
 
