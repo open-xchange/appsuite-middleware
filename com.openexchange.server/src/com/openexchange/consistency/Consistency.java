@@ -82,7 +82,7 @@ import com.openexchange.consistency.solver.ProblemSolver;
 import com.openexchange.consistency.solver.RecordSolver;
 import com.openexchange.consistency.solver.RemoveFileSolver;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -311,6 +311,8 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List inconsistent configdb");
         }
 
+        DatabaseService databaseService = null;
+
         Connection confCon = null;
         Connection poolCon = null;
         PreparedStatement stmt = null;
@@ -318,9 +320,12 @@ public abstract class Consistency implements ConsistencyMBean {
         List<String> ret = new ArrayList<String>();
 
         HashMap<String, List<Integer>> schemaMap = new HashMap<String, List<Integer>>();
+
         try {
+            databaseService = ConsistencyServiceLookup.getService(DatabaseService.class);
+
             final Map<String, Integer> schemaPoolMap = Tools.getAllSchemata(LOG);
-            confCon = Database.get(false);
+            confCon = databaseService.getReadOnly();
             stmt = confCon.prepareStatement("SELECT db_schema,cid FROM context_server2db_pool");
             rs = stmt.executeQuery();
             while (rs.next()) {
@@ -339,7 +344,7 @@ public abstract class Consistency implements ConsistencyMBean {
             for (final String schema : schemaMap.keySet()) {
                 List<Integer> ctxs = schemaMap.get(schema);
                 Integer poolid = schemaPoolMap.get(schema);
-                poolCon = Database.get(poolid.intValue(), schema);
+                poolCon = databaseService.get(poolid.intValue(), schema);
                 String contextids = "";
                 for (final Integer c : ctxs) {
                     contextids += c + ",";
@@ -366,7 +371,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 }
                 DBUtils.closeSQLStuff(rs, stmt);
                 stmt = null;
-                Database.back(poolid.intValue(), poolCon);
+                databaseService.back(poolid.intValue(), poolCon);
                 poolCon = null;
             }
             if (ret.size() == 0 && repair) {
@@ -385,11 +390,13 @@ public abstract class Consistency implements ConsistencyMBean {
             throw new MBeanException(wrapMe, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            if (null != confCon) {
-                Database.back(false, confCon);
-            }
-            if (null != poolCon) {
-                Database.back(false, poolCon);
+            if (databaseService != null) {
+                if (null != confCon) {
+                    databaseService.backReadOnly(confCon);
+                }
+                if (null != poolCon) {
+                    databaseService.backReadOnly(poolCon);
+                }
             }
         }
     }
@@ -581,7 +588,7 @@ public abstract class Consistency implements ConsistencyMBean {
             // Does not (yet) exist
             Object[] logArgs = e.getLogArgs();
             LOG.info("Cannot check files in filestore for entity {} since associated filestore does not (yet) exist: {}", entity, null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
-            
+
             return;
         }
 
@@ -688,8 +695,9 @@ public abstract class Consistency implements ConsistencyMBean {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class);
         try {
-            con = Database.get(ctx, false);
+            con = databaseService.getReadOnly(ctx);
             if (DBUtils.tableExists(con, "snippet")) {
                 stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
                 stmt.setInt(1, ctx.getContextId());
@@ -705,7 +713,7 @@ public abstract class Consistency implements ConsistencyMBean {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (null != con) {
-                Database.back(ctx, false, con);
+                databaseService.backReadOnly(ctx, con);
             }
         }
         return retval;
