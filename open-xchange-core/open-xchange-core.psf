@@ -97,7 +97,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.logback.configuration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.logback.core.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.logback.classic.extensions"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.logback.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.mail.autoconfig.json"/>

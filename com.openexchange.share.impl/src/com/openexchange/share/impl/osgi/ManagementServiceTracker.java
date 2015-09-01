@@ -58,8 +58,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.ShareMBeanImpl;
 import com.openexchange.share.impl.mbean.ShareMBean;
-import com.openexchange.share.impl.mbean.ShareMBeanImpl;
 
 
 /**

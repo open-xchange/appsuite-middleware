@@ -105,6 +105,15 @@ public class DefaultGuestInfo implements GuestInfo {
         this.linkTarget = linkTarget;
     }
 
+    /**
+     * Gets the guest user.
+     *
+     * @return The guest user
+     */
+    public User getUser() {
+        return guestUser;
+    }
+
     @Override
     public AuthenticationMode getAuthentication() {
         return ShareTool.getAuthenticationMode(guestUser);
@@ -181,6 +190,11 @@ public class DefaultGuestInfo implements GuestInfo {
     }
 
     @Override
+    public ShareTarget getLinkTarget() {
+        return linkTarget;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -214,11 +228,6 @@ public class DefaultGuestInfo implements GuestInfo {
     public String toString() {
         return "DefaultGuestInfo [guestID=" + getGuestID() + ", baseToken=" + getBaseToken() + ", eMailAddress=" + getEmailAddress()
             + ", contextID=" + contextID + "]";
-    }
-
-    @Override
-    public ShareTarget getLinkTarget() {
-        return linkTarget;
     }
 
 }

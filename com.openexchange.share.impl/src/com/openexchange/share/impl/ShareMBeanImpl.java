@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl.mbean;
+package com.openexchange.share.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +61,7 @@ import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
  * {@link ShareMBeanImpl}
@@ -91,14 +91,14 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public String listShare(String token) throws OXException {
+    public String listShares(String token) throws OXException {
         String path = null;
         if (Strings.isNotEmpty(token) && token.contains("/")) {
             String[] split = token.split("/");
             path = split[1];
             token = split[0];
         }
-        return formatForCLT(shareService.getShare(token, path));
+        return formatForCLT(shareService.getShares(token, path));
     }
 
     @Override

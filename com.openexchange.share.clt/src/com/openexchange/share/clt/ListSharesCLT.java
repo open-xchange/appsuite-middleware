@@ -151,7 +151,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
                 if (isShareURL(token)) {
                     token = extractTokenFromURL(token);
                 }
-                result = mbean.listShare(token);
+                result = mbean.listShares(token);
             } else {
                 if (null != userId && !userId.isEmpty()) {
                     result = mbean.listShares(Integer.parseInt(contextId), Integer.parseInt(userId));
