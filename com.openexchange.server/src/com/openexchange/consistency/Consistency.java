@@ -322,7 +322,7 @@ public abstract class Consistency implements ConsistencyMBean {
         HashMap<String, List<Integer>> schemaMap = new HashMap<String, List<Integer>>();
 
         try {
-            databaseService = ConsistencyServiceLookup.getService(DatabaseService.class);
+            databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
 
             final Map<String, Integer> schemaPoolMap = Tools.getAllSchemata(LOG);
             confCon = databaseService.getReadOnly();
@@ -695,7 +695,7 @@ public abstract class Consistency implements ConsistencyMBean {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class);
+        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
         try {
             con = databaseService.getReadOnly(ctx);
             if (DBUtils.tableExists(con, "snippet")) {
