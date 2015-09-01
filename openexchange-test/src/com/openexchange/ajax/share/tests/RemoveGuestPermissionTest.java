@@ -81,7 +81,8 @@ public class RemoveGuestPermissionTest extends ShareTest {
     }
 
     public void testUpdateSharedFolderRandomly() throws Exception {
-        testUpdateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
+        int module = randomModule();
+        testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderExtensively() throws Exception {

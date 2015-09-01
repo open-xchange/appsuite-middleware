@@ -98,7 +98,7 @@ public class NotifyFolderSharesTest extends ShareTest {
     }
 
     private void testNotifyGuest(int module, int parent) throws Exception {
-        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST);
+        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST, module);
         String emailAddress = ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress();
         testNotify(module, parent, guestPermission, emailAddress);
     }
