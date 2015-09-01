@@ -50,7 +50,7 @@
           <fieldset>
             <div class="pure-control-group">
               <label for="user_login">${usernameLabel?html}:</label>
-              <input id="user_login" name="login" type="text">
+              <input id="user_login" name="login" type="text" autofocus>
             </div>
             <div class="pure-control-group">
               <label for="user_password">${passwordLabel?html}:</label>
@@ -58,8 +58,8 @@
             </div>
           </fieldset>
           <div class="pure-controls">
-            <button class="pure-button" type="submit" name="access_denied" value="true">${cancelLabel?html}</button>
             <button class="pure-button pure-button-primary" type="submit" name="sign_in" value="true">${loginLabel?html}</button>
+            <button class="pure-button" type="submit" name="access_denied" value="true">${cancelLabel?html}</button>
           </div>
 
           <input name="client_id" type="hidden" value="${clientId}">

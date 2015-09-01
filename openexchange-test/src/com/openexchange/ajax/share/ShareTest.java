@@ -119,6 +119,7 @@ import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ShareTest}
@@ -204,18 +205,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
             @Override
             public String getRoute() {
-                try {
-                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
-                    for (Cookie cookie : cookies) {
-                        if ("JSESSIONID".equals(cookie.getName())) {
-                            return cookie.getValue();
-                        }
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-
-                return "1234567890.OX1";
+                return Tools.extractRoute(getHTTPSession());
             }
 
             @Override
@@ -226,6 +216,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
             @Override
             public boolean isSecure() {
                 return "https".equalsIgnoreCase(client.getProtocol());
+            }
+
+            @Override
+            public String getHTTPSession() {
+                try {
+                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
+                    for (Cookie cookie : cookies) {
+                        if ("JSESSIONID".equals(cookie.getName())) {
+                            return cookie.getValue();
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+                return null;
             }
         };
     }
@@ -1048,7 +1053,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
         guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }
@@ -1056,7 +1061,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
         guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
         return guestPermission;
     }

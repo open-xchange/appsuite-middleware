@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.Normalizer;
@@ -103,6 +102,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.image.DroppingImageHandler;
+import com.openexchange.html.internal.image.ImageProcessor;
+import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
@@ -117,8 +119,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
-import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
@@ -172,102 +172,18 @@ public final class HtmlServiceImpl implements HtmlService {
         htmlCodec = new HTMLEntityCodec();
     }
 
-    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     @Override
     public String replaceImages(final String content, final String sessionId) {
         if (null == content) {
             return null;
         }
-        try {
-            final Matcher imgMatcher = IMG_PATTERN.matcher(content);
-            if (imgMatcher.find()) {
-                /*
-                 * Check presence of ProxyRegistry
-                 */
-                final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
-                if (null == proxyRegistry) {
-                    LOG.warn("Missing ProxyRegistry service. Replacing image URL skipped.");
-                    return content;
-                }
-                /*
-                 * Start replacing
-                 */
-                final StringBuilder sb = new StringBuilder(content.length());
-                int lastMatch = 0;
-                do {
-                    sb.append(content.substring(lastMatch, imgMatcher.start()));
-                    final String imgTag = imgMatcher.group();
-                    replaceSrcAttribute(imgTag, sessionId, sb, proxyRegistry);
-                    lastMatch = imgMatcher.end();
-                } while (imgMatcher.find());
-                sb.append(content.substring(lastMatch));
-                return sb.toString();
-            }
-
-        } catch (final Exception e) {
-            LOG.error("", e);
+        ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
+        if (null == proxyRegistry) {
+            LOG.warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+            return content;
         }
-        return content;
-    }
-
-    private static final Pattern SRC_PATTERN = Pattern.compile(
-        "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    private static String replaceSrcAttribute(final String imgTag, final String sessionId, final StringBuilder sb, final ProxyRegistry proxyRegistry) {
-        final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
-        int lastMatch = 0;
-        if (srcMatcher.find()) {
-            /*
-             * 'src' attribute found
-             */
-            sb.append(imgTag.substring(lastMatch, srcMatcher.start()));
-            try {
-                /*
-                 * Extract URL
-                 */
-                int group = 1;
-                String urlStr = srcMatcher.group(group);
-                if (urlStr == null) {
-                    urlStr = srcMatcher.group(++group);
-                    if (urlStr == null) {
-                        urlStr = srcMatcher.group(++group);
-                    }
-                }
-                /*
-                 * Check for an inline image
-                 */
-                if (urlStr.toLowerCase(Locale.ENGLISH).startsWith("cid", 0)) {
-                    sb.append(srcMatcher.group());
-                } else {
-                    /*
-                     * Add proxy registration
-                     */
-                    final URL imageUrl = new URL(urlStr);
-                    final URI uri = proxyRegistry.register(new ProxyRegistration(
-                        imageUrl,
-                        sessionId,
-                        ImageContentTypeRestriction.getInstance()));
-                    /*
-                     * Compose replacement
-                     */
-                    sb.append("src=\"").append(uri.toString()).append('"');
-                }
-            } catch (final MalformedURLException e) {
-                LOG.debug("Invalid URL found in \"img\" tag: {}. Keeping original content.", imgTag, e);
-                sb.append(srcMatcher.group());
-            } catch (final OXException e) {
-                LOG.warn("Proxy registration failed for \"img\" tag: {}", imgTag, e);
-                sb.append(srcMatcher.group());
-            } catch (final Exception e) {
-                LOG.warn("URL replacement failed for \"img\" tag: {}", imgTag, e);
-                sb.append(srcMatcher.group());
-            }
-            lastMatch = srcMatcher.end();
-        }
-        sb.append(imgTag.substring(lastMatch));
-        return sb.toString();
+        ProxyRegistryImageHandler handler = new ProxyRegistryImageHandler(sessionId, proxyRegistry);
+        return ImageProcessor.getInstance().replaceImages(content, handler);
     }
 
     @Override
@@ -624,11 +540,24 @@ public final class HtmlServiceImpl implements HtmlService {
                 FilterJerichoHandler handler = getHandlerFor(html.length(), optConfigName);
                 handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
 
+                // Drop external images using regular expression
+                if (dropExternalImages) {
+                    DroppingImageHandler imageHandler = new DroppingImageHandler();
+                    html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
+                    if (null != modified) {
+                        modified[0] |= imageHandler.isModified();
+                    }
+                }
+
                 // Parse the HTML content
                 JerichoParser.getInstance().parse(html, handler, maxContentSize <= 0);
+
+                // Check if modified by handler
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
+
+                // Get HTML content
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
@@ -1215,7 +1144,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Convert to absolute URIs
          */
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
-        m = IMG_PATTERN.matcher(html);
+        m = ImageProcessor.getInstance().getImgPattern().matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
         final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
         if (m.find()) {

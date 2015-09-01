@@ -304,11 +304,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == permission.canReadObjectInFolder()) {
             document.setOriginalFolderId(document.getFolderId());
             document.setFolderId(getSharedFilesFolderID(session));
+            /*
+             * Re-sharing of files is not allowed.
+             */
+            document.setShareable(false);
+        } else {
+            document.setShareable(permission.canShareObject());
         }
         /*
          * add further metadata and return
          */
-        document.setShareable(permission.canShareObject());
         return numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null);
     }
 
@@ -392,8 +397,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == permission.canReadObjectInFolder()) {
             metadata.setOriginalFolderId(metadata.getFolderId());
             metadata.setFolderId(getSharedFilesFolderID(session));
+            /*
+             * Re-sharing of files is not allowed.
+             */
+            metadata.setShareable(false);
+        } else {
+            metadata.setShareable(permission.canShareObject());
         }
-        metadata.setShareable(permission.canShareObject());
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
          * check client E-Tag if supplied
@@ -794,8 +804,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Check permissions
         Context context = session.getContext();
+        int sharedFilesFolderID = getSharedFilesFolderID(session);
         EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, document.getId());
-        if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && false == infoPerm.canShareObject()) {
+        if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && (document.getFolderId() == sharedFilesFolderID || false == infoPerm.canShareObject())) {
             throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
         }
 
@@ -804,7 +815,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Collections.addAll(sanitizedColumns, modifiedColumns);
         if (sanitizedColumns.contains(Metadata.FOLDER_ID_LITERAL)) {
             long folderId = document.getFolderId();
-            if (folderId == getSharedFilesFolderID(session)) {
+            if (folderId == sharedFilesFolderID) {
                 document.setFolderId(infoPerm.getObject().getFolderId());
                 sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
                 modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
@@ -1825,8 +1836,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (false == infoPerm.canReadObjectInFolder()) {
                     document.setOriginalFolderId(document.getFolderId());
                     document.setFolderId(getSharedFilesFolderID(session));
+                    /*
+                     * Re-sharing of files is not allowed.
+                     */
+                    document.setShareable(false);
+                } else {
+                    document.setShareable(infoPerm.canShareObject());
                 }
-                document.setShareable(infoPerm.canShareObject());
                 return document;
             }
         });
@@ -1905,7 +1921,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                          */
                         document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(getSharedFilesFolderID(session));
-                        document.setShareable(infostorePermission.canShareObject());
+                        /*
+                         * Re-sharing of files is not allowed.
+                         */
+                        document.setShareable(false);
                     }
                 } else {
                     /*
@@ -1915,8 +1934,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
                         document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(requestedFolderID.longValue());
+                        /*
+                         * Re-sharing of files is not allowed.
+                         */
+                        document.setShareable(false);
+                    } else {
+                        document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
                     }
-                    document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
                 }
                 return document;
             }
@@ -2279,7 +2303,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         if (null != matchingPermission && matchingPermission.canRead()) {
                             document.setOriginalFolderId(document.getFolderId());
                             document.setFolderId(sharedFilesFolderID);
-                            document.setShareable(hasSharedFolderAccess && matchingPermission.canWrite());
+                            /*
+                             * Re-sharing of files is not allowed.
+                             */
+                            document.setShareable(false);
                         } else {
                             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                         }

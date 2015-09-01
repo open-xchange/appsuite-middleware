@@ -94,3 +94,10 @@ CREATE TABLE context2push_registration (
     cid INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE replicationMonitor (
+    cid int(10) unsigned NOT NULL,
+    transaction bigint(20) NOT NULL,
+    PRIMARY KEY (cid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+INSERT INTO replicationMonitor (cid,transaction) VALUES (0,0);

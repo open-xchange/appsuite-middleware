@@ -1,3 +1,9 @@
+* 2015-08-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40790: Prefer original ID/folder information when rendering a mail's JSON representation
+ - Fix for bug 40699: Upgraded to Hazelcast v3.5.2 containing a fix for issue #5754 ( https://github.com/hazelcast/hazelcast/pull/5754 )
+ - Fix for bug 40799: Orderly drop external images
+
 * 2015-08-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40722: Allow removal of a previously assigned guest password

@@ -113,6 +113,7 @@ import com.openexchange.imap.sort.IMAPSort.ImapSortResult;
 import com.openexchange.imap.util.AppendEmptyMessageTracer;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.imap.util.ImmutableReference;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -149,6 +150,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.SearchTerm;
@@ -279,6 +281,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
+    private static volatile ImmutableReference<String> allMessagesFolder;
+    /** The full name for the virtual "all messages" folder */
+    public static String allMessagesFolder() {
+        ImmutableReference<String> fa = allMessagesFolder;
+        if (null == fa) {
+            synchronized (IMAPMessageStorage.class) {
+                fa = allMessagesFolder;
+                if (null == fa) {
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return null;
+                    }
+
+                    String fn = service.getProperty("com.openexchange.find.basic.mail.allMessagesFolder", "").trim();
+                    fa = new ImmutableReference<String>(fn.length() <= 0 ? null : fn);
+                    allMessagesFolder = fa;
+                }
+            }
+        }
+        return fa.getValue();
+    }
+
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -295,6 +319,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return null;
             }
         });
+    }
+
+    /**
+     * Gets the prepared mail fields in case full name denotes the special "all messages" folder.
+     *
+     * @param mailFields The requested mail fields by client
+     * @param fullName The full name
+     * @return The prepared mail fields
+     */
+    static MailFields prepareMailFieldsForVirtualFolder(MailField[] mailFields, String fullName) {
+        MailFields fields = new MailFields(mailFields);
+        prepareMailFieldsForVirtualFolder(fields, fullName);
+        return fields;
+    }
+
+    /**
+     * Gets the prepared mail fields in case full name denotes the special "all messages" folder.
+     *
+     * @param mailFields The current mail fields
+     * @param fullName The full name
+     * @return The prepared mail fields
+     */
+    static void prepareMailFieldsForVirtualFolder(MailFields mailFields, String fullName) {
+        if (null == fullName || !fullName.equals(allMessagesFolder())) {
+            return;
+        }
+
+        mailFields.add(MailField.ORIGINAL_FOLDER_ID);
+        mailFields.add(MailField.ORIGINAL_ID);
     }
 
     private static final int _5MB = 5242880; /* 5MB */
@@ -651,6 +704,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private MailMessage[] getMessagesInternal(final String fullName, final long[] uids, final MailField[] mailFields, final String[] headerNames) throws OXException {
         final MailFields fieldSet = new MailFields(mailFields);
+        prepareMailFieldsForVirtualFolder(fieldSet, fullName);
         /*
          * Check for field FULL
          */
@@ -1342,6 +1396,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     };
 
+    private static final FetchProfile FETCH_PROFILE_GET_FOR_VIRTUAL = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(FetchProfile.Item.FLAGS);
+            add(FetchProfile.Item.CONTENT_INFO);
+            add(FetchProfile.Item.SIZE);
+            add(IMAPFolder.FetchProfileItem.HEADERS);
+            add(MimeStorageUtility.ORIGINAL_MAILBOX);
+            add(MimeStorageUtility.ORIGINAL_UID);
+        }
+    };
+
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
         if (msgUID < 0) {
@@ -1369,7 +1437,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return null;
                 }
                 // Force to pre-load envelope data
-                imapFolder.fetch(new Message[] { msg }, FETCH_PROFILE_GET);
+                imapFolder.fetch(new Message[] { msg }, null != fullName && fullName.equals(allMessagesFolder()) ? FETCH_PROFILE_GET_FOR_VIRTUAL : FETCH_PROFILE_GET);
                 long duration = System.currentTimeMillis() - start;
 
                 if (duration > 1000L) {
@@ -1428,6 +1496,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             MailMessage mail;
             try {
                 long size = msg.getSize();
+                Long origUid = (Long) msg.getItem("X-REAL-UID");
+                String origFolder = (String) msg.getItem("X-MAILBOX");
                 if (size > _5MB && isComplex(msg.getBodystructure())) {
                     int blkSize = imapStore.getFetchBlockSize();
                     try {
@@ -1449,6 +1519,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     mail = MimeMessageConverter.convertMessage(msg, false);
                 }
                 mail.setFolder(fullName);
+                if (null != origUid) {
+                    mail.setOriginalId(origUid.toString());
+                }
+                if (null != origFolder) {
+                    mail.setOriginalFolder(origFolder);
+                }
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final OXException e) {
@@ -1572,6 +1648,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
             MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
+            prepareMailFieldsForVirtualFolder(effectiveFields, fullName);
             MailMessage[] mailMessages;
             if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
                 try {
@@ -2123,6 +2200,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Ensure mail ID is contained in requested fields
                  */
                 final MailFields fieldSet = new MailFields(mailFields);
+                IMAPMessageStorage.prepareMailFieldsForVirtualFolder(fieldSet, fullName);
                 final MailField[] fields = fieldSet.toArray();
                 /*
                  * Get ( & fetch) new messages

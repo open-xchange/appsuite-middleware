@@ -86,6 +86,7 @@ import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
+import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
 import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
 
 /**
@@ -132,6 +133,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(ListFolderSharesTest.class);
         tests.addTestSuite(NotifyFolderSharesTest.class);
         tests.addTestSuite(NotifyFileSharesTest.class);
+        tests.addTestSuite(SharedFilesFolderTest.class);
         tests.addTestSuite(Bug40369Test.class);
         tests.addTestSuite(Bug40548Test.class);
         tests.addTestSuite(Bug40627Test.class);
