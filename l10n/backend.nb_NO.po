@@ -27,8 +27,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2015-02-24 11:13+0000\n"
-"Last-Translator: Anonymous Pootle User\n"
+"PO-Revision-Date: 2015-05-03 14:37+0000\n"
+"Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1424776402.000000\n"
+"X-POOTLE-MTIME: 1430663849.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -138,11 +138,11 @@ msgstr "Hver %1$s dag"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:65
 msgid "Every week on %1$s"
-msgstr "Hver uke på %1$s"
+msgstr "%1$s hver uke"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:67
 msgid "Every %1$s weeks on %2$s"
-msgstr "Hver %1$s uke på %2$s"
+msgstr " %2$ser hver %1$s. uke"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:69
 msgid "On %1$s. day every %2$s. month"
@@ -342,7 +342,7 @@ msgstr "Til %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
 msgid "No end"
-msgstr "Ingen ende"
+msgstr "ingen ende"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
@@ -569,15 +569,15 @@ msgstr "%1$s har bedt %2$s om å endre hendelsen:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:160
 msgid "You have been invited to an event by %1$s:"
-msgstr "Du er invitert til en begivenhet av %1$s:"
+msgstr "Du er invitert til en avtale av %1$s:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:162
 msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
-msgstr "Du er invitert til en begivenhet organisert av %1$s på vegne av %2$s"
+msgstr "Du er invitert til en avtale organisert av %1$s på vegne av %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:164
 msgid "%1$s is organizing an event on your behalf."
-msgstr "%1$s organiserer en begivenhet på dine vegne."
+msgstr "%1$s organiserer en avtale på dine vegne."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:166
 msgid "%1$s created a recurrence exception. Original date: %2$s:"
@@ -1373,12 +1373,12 @@ msgstr "Følgende felt er for langt: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.crypto/src/com/openexchange/crypto/CryptoExceptionMessage.java:68
 msgid "The provided password seems to be wrong or something bad happened."
-msgstr "et angitte passordet synes å være galt eller noe galt skjedde."
+msgstr "En feil oppstod. Det angitte passordet er kanskje galt?"
 
 #. The server is unable to connect to the configuration database.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:63
 msgid "Cannot get connection to config DB."
-msgstr "Får ikke tilkobling til config DB."
+msgstr "Får ikke kontakt med konfigurasjonsdatabasen."
 
 #. It was not possible to determine the database server for a specific OX server and a context.
 #. %1$d is replaced with the context identifier.
@@ -1404,7 +1404,7 @@ msgstr "Null returneres til tilkoblingskøen."
 #. %1$s is replaced with some SQL command.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:79
 msgid "Problem with executing SQL: %1$s"
-msgstr "Problem med å utføre SQL: %1$s"
+msgstr "Problem under kjøring av spørring: %1$s"
 
 #. %1$d is replaced with the database pool identifier.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:82
@@ -1425,8 +1425,8 @@ msgid ""
 "there was a previous message about this object not having been returned to "
 "the pool, the object was just in use too long."
 msgstr ""
-"Objekt %1$s  tilhører ikke dette utvalget. Objektet fjernes. Hvis det var en "
-"tidligere melding om at dette objektet ikke har blitt returnert til "
+"Objekt %1$s tilhører ikke dette utvalget. Objektet vil bli fjernet. Hvis det "
+"kom en tidligere melding om at dette objektet ikke har blitt returnert til "
 "utvalget, var objektet i bruk for lenge."
 
 #. A property defining the server name was not found in the configuration properties files.
@@ -1447,7 +1447,7 @@ msgstr "Tilkobling brukt for %1$d millisekunder."
 #. %1$d is replaced with the number of statements that have not been closed before returning the connection.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
 msgid "%1$d statements are not closed."
-msgstr "%1$d uttalelser er ikke lukket."
+msgstr "%1$d spørringer er ikke avsluttet."
 
 #. %1$s is replaced with the URL parameter string that is not parseable.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
@@ -3542,7 +3542,7 @@ msgstr "Finner ikke følgende felt %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:93
 msgid "Could not translate a single column title. Is this a valid CSV file?"
-msgstr "Kan ikke oversette en enkeltkolonne tittel. Er dette en gyldig CSV-fil?"
+msgstr "En kolonnetittel kunne ikke oversettes. Er dette en gyldig CSV-fil?"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:95
 msgid ""
@@ -6692,12 +6692,12 @@ msgstr "Hver %1$s dag"
 #. Each week on %1$s; e.g. "Each week on Monday"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:814
 msgid "Each week on %1$s"
-msgstr "Hver uke på %1$s"
+msgstr "%1$ser hver uke"
 
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:817
 msgid "Each %1$s weeks on %2$s"
-msgstr "Hver %1$s uke på %2$s"
+msgstr "%2$ser hver %1$s. uke"
 
 #. On %1$s day every month; e.g. "On 1st day every month"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:820
@@ -7046,7 +7046,7 @@ msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
 msgstr ""
-"Det angitte passordet er ulovlig og kan ikke lagres. Gyldige tegn er: %1$s"
+"Det angitte passordet er ugyldig og kan ikke lagres. Gyldige tegn er: %1$s"
 
 #. *
 #. * The current password is incorrect. Please enter your correct current password and try again.
