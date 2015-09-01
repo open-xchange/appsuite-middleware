@@ -55,6 +55,7 @@ import com.openexchange.ajax.share.bugs.Bug40369Test;
 import com.openexchange.ajax.share.bugs.Bug40527Test;
 import com.openexchange.ajax.share.bugs.Bug40548Test;
 import com.openexchange.ajax.share.bugs.Bug40561Test;
+import com.openexchange.ajax.share.bugs.Bug40596Test;
 import com.openexchange.ajax.share.bugs.Bug40627Test;
 import com.openexchange.ajax.share.bugs.Bug40722Test;
 import com.openexchange.ajax.share.bugs.Bug40826Test;
@@ -137,6 +138,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(SharedFilesFolderTest.class);
         tests.addTestSuite(Bug40369Test.class);
         tests.addTestSuite(Bug40548Test.class);
+        tests.addTestSuite(Bug40596Test.class);
         tests.addTestSuite(Bug40627Test.class);
         tests.addTestSuite(Bug40561Test.class);
         tests.addTestSuite(Bug40527Test.class);
