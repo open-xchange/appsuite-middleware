@@ -5,6 +5,10 @@
  - Fix for bug 40647: Delete configuration files for RPM not with dpkg-maintscript-helper but with rm.
  - Fix for bug 40719: Replaced dependency to mysql-client with a dependency to virtual-mysql-client which is provided by mysql-client and mariadb-client.
 
+* 2015-09-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40808: Orderly release acquired connection & apply proper connection state
+
 * 2015-08-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 40790: Prefer original ID/folder information when rendering a mail's JSON representation
