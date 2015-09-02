@@ -47,69 +47,55 @@
  *
  */
 
-package com.openexchange.find.json.converters;
+package com.openexchange.ajax.share.bugs;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
+import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link Bug40826Test}
+ *
+ * As an appsuite user, can create a guest share with WRiTE permissions in calendar/contacts module
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractJSONConverter implements ResultConverter {
+public class Bug40826Test extends ShareTest {
 
-    private final StringTranslator translator;
-
-    protected AbstractJSONConverter(final StringTranslator translator) {
-        super();
-        this.translator = translator;
+    /**
+     * Initializes a new {@link Bug40826Test}.
+     *
+     * @param name The test name
+     */
+    public Bug40826Test(String name) {
+        super(name);
     }
 
-    @Override
-    public String getOutputFormat() {
-        return "json";
+    public void testShareCalendarToAuthor() throws Exception {
+        testShareToAuthor(FolderObject.CALENDAR);
     }
 
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+    public void testShareTasksToAuthor() throws Exception {
+        testShareToAuthor(FolderObject.TASK);
     }
 
-    protected JSONArray convertFacets(ServerSession session, List<Facet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (Facet facet : facets) {
-            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, session);
-            facet.accept(facetVisitor);
-            result.put(facetVisitor.getResult());
-        }
-
-        return result;
-    }
-
-    protected JSONArray convertActiveFacets(ServerSession session, List<ActiveFacet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (ActiveFacet facet : facets) {
-            JSONObject jFacet = new JSONObject();
-            jFacet.put("facet", facet.getType().getId());
-            jFacet.put("value", facet.getValueId());
-            Filter filter = facet.getFilter();
-            if (filter == Filter.NO_FILTER) {
-                jFacet.put("filter", JSONObject.NULL);
-            } else {
-                jFacet.put("filter", JSONFacetVisitor.convertFilter(filter));
-            }
-            result.put(jFacet);
-        }
-
-        return result;
+    private void testShareToAuthor(int module) throws Exception {
+        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest");
+        /*
+         * try and create folder shared to guest user
+         */
+        FolderObject folder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId(), guestPermission);
+        folder.setParentFolderID(getDefaultFolder(module));
+        InsertRequest insertRequest = new InsertRequest(randomFolderAPI(), folder, client.getValues().getTimeZone());
+        insertRequest.setFailOnError(false);
+        InsertResponse insertResponse = client.execute(insertRequest);
+        assertNotNull(insertResponse);
+        assertTrue("No error in response", insertResponse.hasError());
+        assertNotNull("No error in response", insertResponse.getException());
+        assertEquals("Unexpected error", "FLD-1039", insertResponse.getException().getErrorCode());
     }
 
 }

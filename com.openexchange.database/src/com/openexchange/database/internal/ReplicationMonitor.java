@@ -227,6 +227,7 @@ public class ReplicationMonitor {
     }
 
     public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, ConnectionState state) {
+        // Determine pool identifier
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
@@ -255,6 +256,8 @@ public class ReplicationMonitor {
         } else {
             poolId = assign.getReadPoolId();
         }
+
+        // Get associated pool
         final ConnectionPool pool;
         try {
             pool = pools.getPool(poolId);
@@ -262,6 +265,17 @@ public class ReplicationMonitor {
             LOG.error("", e);
             return;
         }
+
+        // Apply state
+        if (con instanceof StateAware) {
+            StateAware stateAware = (StateAware) con;
+            ConnectionState connectionState = stateAware.getConnectionState();
+            connectionState.setUpdateCommitted(state.isUpdateCommitted());
+            connectionState.setUsedAsRead(state.isUsedAsRead());
+            connectionState.setUsedForUpdate(state.isUsedForUpdate());
+        }
+
+        // Return connection
         if (noTimeout) {
             pool.backWithoutTimeout(con);
         } else {

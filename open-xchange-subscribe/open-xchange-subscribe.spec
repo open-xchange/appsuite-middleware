@@ -88,13 +88,6 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
     fi
 
-    #SoftwareChange_Request-1099
-    # obsoleted by SoftwareChange_Request-1710
-    # pfile=/opt/open-xchange/etc/crawler.properties
-    # if ! ox_exists_property com.openexchange.subscribe.crawler.gmx.com $pfile; then
-    #     ox_set_property com.openexchange.subscribe.crawler.gmx.com true $pfile
-    # fi
-
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
     FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
@@ -165,15 +158,14 @@ if [ ${1:-0} -eq 2 ]; then
             ox_remove_property $prop $pfile
         fi
     done
-    
+
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
     # SoftwareChange_Request-2670
-    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/t-online.yml 7.8.0~ -- "$@"
+    rm -f /opt/open-xchange/etc/crawlers/t-online.yml
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
-    
 fi
 
 %clean

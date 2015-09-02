@@ -143,17 +143,29 @@ public class GlobalDbInit {
                 }
             };
             Connection connection = null;
+            boolean modified = false;
+
+            boolean rollback = false;
             try {
                 connection = monitor.checkFallback(pools, firstAssignment, true, true, true);
-                connection.setAutoCommit(false);
-                prepare(connection, dbConfig.getSchema());
-                connection.commit();
+                connection.setAutoCommit(false); // BEGIN
+                rollback = true;
+                modified = prepare(connection, dbConfig.getSchema());
+                connection.commit(); // COMMIT
+                rollback = false;
             } catch (SQLException e) {
-                DBUtils.rollback(connection);
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
+                if (rollback) {
+                    DBUtils.rollback(connection);
+                }
                 DBUtils.autocommit(connection);
-                DBUtils.close(connection);
+
+                if (null != connection) {
+                    ConnectionState connectionState = new ConnectionState(!modified);
+                    connectionState.setUsedForUpdate(modified);
+                    monitor.backAndIncrementTransaction(pools, firstAssignment, connection, true, true, connectionState);
+                }
             }
         }
     }
