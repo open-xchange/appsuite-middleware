@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,22 @@
  *
  */
 
-package com.openexchange.find.json.converters;
-
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.database.internal;
 
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link StateAware}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public abstract class AbstractJSONConverter implements ResultConverter {
+public interface StateAware {
 
-    private final StringTranslator translator;
-
-    protected AbstractJSONConverter(final StringTranslator translator) {
-        super();
-        this.translator = translator;
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    protected JSONArray convertFacets(ServerSession session, List<Facet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (Facet facet : facets) {
-            JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, session);
-            facet.accept(facetVisitor);
-            result.put(facetVisitor.getResult());
-        }
-
-        return result;
-    }
-
-    protected JSONArray convertActiveFacets(ServerSession session, List<ActiveFacet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (ActiveFacet facet : facets) {
-            JSONObject jFacet = new JSONObject();
-            jFacet.put("facet", facet.getType().getId());
-            jFacet.put("value", facet.getValueId());
-            Filter filter = facet.getFilter();
-            if (filter == Filter.NO_FILTER) {
-                jFacet.put("filter", JSONObject.NULL);
-            } else {
-                jFacet.put("filter", JSONFacetVisitor.convertFilter(filter));
-            }
-            result.put(jFacet);
-        }
-
-        return result;
-    }
+    /**
+     * Gets the associated connection state
+     *
+     * @return The connection state
+     */
+    ConnectionState getConnectionState();
 
 }
