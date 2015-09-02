@@ -311,7 +311,8 @@ public class ConsistencyTest extends TestCase {
         final Set<MBeanEntity> entities = new HashSet<MBeanEntity>(missing.keySet());
         assertEquals(entities.toString(), testContexts.length, entities.size());
         for (final Context context : testContexts) {
-            final List<String> ids = missing.get(context);
+            MBeanEntity entity = new MBeanEntity(context.getContextId());
+            final List<String> ids = missing.get(entity);
             assertNotNull(ids);
 
             final Set<String> expected = new HashSet<String>(expect);
@@ -320,13 +321,13 @@ public class ConsistencyTest extends TestCase {
             expected.removeAll(ids);
             assertTrue(ids.toString(), expected.isEmpty());
 
-            entities.remove(context);
+            entities.remove(entity);
         }
 
         assertTrue(entities.toString(), entities.isEmpty());
 
     }
-
+    
     private ConsistencyMBean getConsistencyTool() {
         return new TestConsistency(database, attachments, storage, contexts);
     }

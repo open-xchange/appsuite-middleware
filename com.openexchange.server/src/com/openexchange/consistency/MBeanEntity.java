@@ -126,4 +126,49 @@ public class MBeanEntity implements Serializable {
         builder.append("MBeanEntity [contextId=").append(contextId).append(", userId=").append(userId).append(", type=").append(type).append("]");
         return builder.toString();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + userId;
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        MBeanEntity other = (MBeanEntity) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
+    }
+
 }
