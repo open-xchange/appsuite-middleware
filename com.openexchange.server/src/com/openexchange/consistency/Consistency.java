@@ -98,13 +98,14 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author Dennis Sieben
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
  */
 public abstract class Consistency implements ConsistencyMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
     /**
-     * Initializes a new {@link Consistency}.
+     * Initialises a new {@link Consistency}.
      */
     protected Consistency() {
         super();
@@ -397,6 +398,13 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    /**
+     * Returns a map with all missing entries for the specified entity objects
+     * 
+     * @param entities the entity objects
+     * @return a map with all missing entries for the specified entity objects
+     * @throws OXException
+     */
     private Map<MBeanEntity, List<String>> listMissing(final List<Entity> entities) throws OXException {
         final Map<MBeanEntity, List<String>> retval = new HashMap<MBeanEntity, List<String>>();
         final DoNothingSolver doNothing = new DoNothingSolver();
@@ -408,6 +416,12 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
+    /**
+     * Converts an Entity objects to an MBeanEntity objects
+     * 
+     * @param entity The entity object to convert
+     * @return the MBeanEntity
+     */
     private MBeanEntity toMBeanEntity(Entity entity) {
         switch (entity.getType()) {
             case Context:
@@ -419,6 +433,13 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    /**
+     * Returns a map with all unassigned entries for the specified entity objects
+     * 
+     * @param entities the entity objects
+     * @return a map with all unassigned entries for the specified entity objects
+     * @throws OXException
+     */
     private Map<MBeanEntity, List<String>> listUnassigned(final List<Entity> entities) throws OXException {
         final Map<MBeanEntity, List<String>> retval = new HashMap<MBeanEntity, List<String>>();
         final DoNothingSolver doNothing = new DoNothingSolver();
@@ -502,6 +523,13 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    /**
+     * Repairs the specified entity objects with the specified policy
+     * 
+     * @param entities The entity objects to repair
+     * @param policy The policy to use
+     * @throws OXException
+     */
     private void repair(final List<Entity> entities, final String policy) throws OXException {
         final DatabaseImpl database = getDatabase();
         final AttachmentBase attachments = getAttachments();
@@ -539,14 +567,29 @@ public abstract class Consistency implements ConsistencyMBean {
 
     // Taken from original consistency tool //
 
+    /**
+     * Logs a message with log level INFO
+     * 
+     * @param text the message to log
+     */
     private void output(final String text) {
         LOG.info(text);
     }
 
+    /**
+     * Logs a message with log level ERROR
+     * 
+     * @param text the message to log
+     */
     private void erroroutput(final Exception e) {
         LOG.error("", e);
     }
 
+    /**
+     * Logs the specified set with log level INFO
+     * 
+     * @param set the set to log
+     */
     private void outputSet(final SortedSet<String> set) {
         final Iterator<String> itstr = set.iterator();
         final StringBuilder sb = new StringBuilder();
@@ -570,6 +613,21 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
+    /**
+     * Performs a consistency check on the specified {@link Entity} object
+     * 
+     * @param entity the entity
+     * @param dbSolver The database solver
+     * @param attachmentSolver The attachment solver
+     * @param snippetSolver The snippet solver
+     * @param previewSolver The preview cache solver
+     * @param fileSolver The file solver
+     * @param vCardSolver The vcard solver
+     * @param database The database to use
+     * @param attach The attachment base
+     * @param fileStorage The file storage for that entity
+     * @throws OXException
+     */
     private void checkOneEntity(final Entity entity, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage fileStorage) throws OXException {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
@@ -671,6 +729,12 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    /**
+     * Recalculates the usage of the specified {@link FileStorage} and ignores the specified files
+     * 
+     * @param storage The {@link FileStorage}
+     * @param filesToIgnore The files to ignore
+     */
     private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
@@ -682,6 +746,12 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
+    /**
+     * Converts the list with the specified contexts into entity objects
+     * 
+     * @param contexts the list with contexts
+     * @return a list with entity objects
+     */
     private List<Entity> toEntities(List<Context> contexts) {
         List<Entity> entities = new ArrayList<Entity>(contexts.size());
         for (Context ctx : contexts) {
@@ -690,34 +760,131 @@ public abstract class Consistency implements ConsistencyMBean {
         return entities;
     }
 
+    /**
+     * Get the {@link Context} for the specified context identifier from the {@link ContextStore}
+     * 
+     * @param contextId The context identifier
+     * @return The {@link Context}
+     * @throws OXException if the {@link Context} cannot be returned
+     */
     protected abstract Context getContext(int contextId) throws OXException;
 
+    /**
+     * Get the DatabaseImpl
+     * 
+     * @return the DatabaseImpl
+     */
     protected abstract DatabaseImpl getDatabase();
 
+    /**
+     * Gets the {@link AttachmentBase} instance
+     * 
+     * @return the {@link AttachmentBase} instance
+     */
     protected abstract AttachmentBase getAttachments();
 
+    /**
+     * Gets the {@link FileStorage} for the specified {@link Context}
+     * 
+     * @param ctx The {@link Context} for which the {@link FileStorage} shall be returned
+     * @return the {@link FileStorage} for the specified {@link Context}
+     * @throws OXException if the {@link FileStorage} cannot be returned
+     */
     protected abstract FileStorage getFileStorage(Context ctx) throws OXException;
 
+    /**
+     * Gets the {@link FileStorage} for the specified {@link User} in the specified {@link Context}
+     * 
+     * @param ctx The {@link Context}
+     * @param usr The {@link User}
+     * @return the {@link FileStorage} for the specified {@link User} in the specified {@link Context}
+     * @throws OXException if the {@link FileStorage} cannot be returned
+     */
     protected abstract FileStorage getFileStorage(Context ctx, User usr) throws OXException;
 
+    /**
+     * Gets the {@link FileStorage} for the specified {@link Entity}
+     * 
+     * @param entity The {@link Entity} for which the {@link FileStorage} shall be returned
+     * @return the {@link FileStorage} for the specified {@link Entity}
+     * @throws OXException if the {@link FileStorage} cannot be returned
+     */
     protected abstract FileStorage getFileStorage(Entity entity) throws OXException;
 
+    /**
+     * Gets a {@link List} with {@link Context}s that are using the {@link FileStorage} with the specified filestore identifier
+     * 
+     * @param filestoreId the filestore identifier
+     * @return the {@link List} with {@link Context}s that are using the {@link FileStorage} with the specified filestore identifier
+     * @throws OXException If the {@link Context}s cannot be returned
+     */
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
 
+    /**
+     * Gets a {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
+     * 
+     * @param filestoreId the filestore identifier
+     * @return the {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
+     * @throws OXException If the {@link Context}s cannot be returned
+     */
     protected abstract List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException;
 
+    /**
+     * Gets a {@link List} with {@link Context}s that are using database with the specified database identifier
+     * 
+     * @param databaseId the database identifier
+     * @return the {@link List} with {@link Context}s that are using the database with the specified database identifier
+     * @throws OXException If the {@link Context}s cannot be returned
+     */
     protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException;
 
+    /**
+     * Gets a {@link List} with all {@link Context}s
+     * 
+     * @return a {@link List} with all {@link Context}s
+     * @throws OXException If the {@link Context}s cannot be returned
+     */
     protected abstract List<Context> getAllContexts() throws OXException;
 
+    /**
+     * Gets a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
+     * 
+     * @param ctx the {@link Context}
+     * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
+     * @throws OXException if the snippet file store locations cannot be returned
+     */
     protected abstract SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException;
 
+    /**
+     * Gets a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
+     * 
+     * @param ctx the {@link Context}
+     * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
+     * @throws OXException if the vcard file store locations cannot be returned
+     */
     protected abstract SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException;
 
+    /**
+     * Gets a {@link SortedSet} with all preview cache file store locations for the specified {@link Context}
+     * 
+     * @param ctx the {@link Context}
+     * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
+     * @throws OXException if the preview cache file store locations cannot be returned
+     */
     protected abstract SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException;
 
+    /**
+     * Gets the admin {@link User} of the specified {@link Context}
+     * 
+     * @param ctx the {@link Context}
+     * @return the admin {@link User} of the specified {@link Context}
+     * @throws OXException if the admin {@link User} cannot be returned
+     */
     protected abstract User getAdmin(Context ctx) throws OXException;
 
+    /**
+     * {@link ResolverPolicy}
+     */
     private static final class ResolverPolicy {
 
         final ProblemSolver dbsolver;

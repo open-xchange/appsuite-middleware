@@ -86,11 +86,15 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * Provides the integration of the consistency tool in the OSGi OX.
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
  */
 public class OsgiOXConsistency extends Consistency {
 
     private DatabaseImpl database;
 
+    /**
+     * Initialises a new {@link OsgiOXConsistency}.
+     */
     public OsgiOXConsistency() {
         super();
     }
@@ -144,11 +148,6 @@ public class OsgiOXConsistency extends Consistency {
         return loadContexts(ids);
     }
 
-    private Map<Context, List<User>> getUsersForFilestore(final int filestoreId) throws OXException {
-        Map<Integer, List<Integer>> users = FileStorages.getFileStorage2EntitiesResolver().getIdsOfUsersUsing(filestoreId);
-        return loadUsers(users);
-    }
-
     @Override
     protected List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException {
         // Get all contexts that use the specified filestore
@@ -187,56 +186,9 @@ public class OsgiOXConsistency extends Consistency {
         return loadContexts(list);
     }
 
-    private List<Context> loadContexts(List<Integer> list) throws OXException {
-        ContextStorage ctxstor = ContextStorage.getInstance();
-        List<Context> contexts = new ArrayList<Context>(list.size());
-        for (int id : list) {
-            contexts.add(ctxstor.getContext(id));
-        }
-        return contexts;
-    }
-
-    private List<Context> loadContexts(int[] list) throws OXException {
-        ContextStorage ctxstor = ContextStorage.getInstance();
-        List<Context> contexts = new ArrayList<Context>(list.length);
-        for (int id : list) {
-            contexts.add(ctxstor.getContext(id));
-        }
-        return contexts;
-    }
-
-    private Map<Context, List<User>> loadUsers(Map<Integer, List<Integer>> users) throws OXException {
-        ContextStorage ctxStor = ContextStorage.getInstance();
-        UserStorage usrStor = UserStorage.getInstance();
-
-        Map<Context, List<User>> usr = new HashMap<Context, List<User>>();
-        for (Integer ctxId : users.keySet()) {
-            Context context = ctxStor.getContext(ctxId);
-            User[] usrArray = usrStor.getUser(context, toArray(users.get(ctxId)));
-            List<User> usrList = new ArrayList<User>(usrArray.length);
-            Collections.addAll(usrList, usrArray);
-            usr.put(context, usrList);
-        }
-
-        return usr;
-    }
-
-    private int[] toArray(List<Integer> list) {
-        int[] integers = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            integers[i] = list.get(i).intValue();
-        }
-        return integers;
-    }
-
     @Override
     protected User getAdmin(final Context ctx) throws OXException {
         return UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
-    }
-
-    private interface Filter {
-
-        public boolean accepts(Context ctx);
     }
 
     @Override
@@ -284,6 +236,87 @@ public class OsgiOXConsistency extends Consistency {
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
         return new TreeSet<String>(refIds);
+    }
+
+    /**
+     * Returns a list with {@link Context} objects loaded from the {@link ContextStorage} using the specified context identifiers
+     * 
+     * @param list a list with context identifiers
+     * @return a list with {@link Context} objects loaded from the {@link ContextStorage}
+     * @throws OXException
+     */
+    private List<Context> loadContexts(List<Integer> list) throws OXException {
+        ContextStorage ctxstor = ContextStorage.getInstance();
+        List<Context> contexts = new ArrayList<Context>(list.size());
+        for (int id : list) {
+            contexts.add(ctxstor.getContext(id));
+        }
+        return contexts;
+    }
+
+    /**
+     * Returns a list with {@link Context} objects loaded from the {@link ContextStorage} using the specified context identifiers
+     * 
+     * @param list a list with context identifiers
+     * @return a list with {@link Context} objects loaded from the {@link ContextStorage}
+     * @throws OXException
+     */
+    private List<Context> loadContexts(int[] list) throws OXException {
+        ContextStorage ctxstor = ContextStorage.getInstance();
+        List<Context> contexts = new ArrayList<Context>(list.length);
+        for (int id : list) {
+            contexts.add(ctxstor.getContext(id));
+        }
+        return contexts;
+    }
+
+    /**
+     * Returns a map with {@link Context} and {@link User} objects loaded from the {@link ContextStorage} and {@link UserStorage} using the specified context and user identifiers
+     * 
+     * @param list a list with context and user identifiers
+     * @return a list with {@link Context} and {@link User} objects loaded from the {@link ContextStorage} and {@link UserStorage}
+     * @throws OXException
+     */
+    private Map<Context, List<User>> loadUsers(Map<Integer, List<Integer>> users) throws OXException {
+        ContextStorage ctxStor = ContextStorage.getInstance();
+        UserStorage usrStor = UserStorage.getInstance();
+
+        Map<Context, List<User>> usr = new HashMap<Context, List<User>>();
+        for (Integer ctxId : users.keySet()) {
+            Context context = ctxStor.getContext(ctxId);
+            User[] usrArray = usrStor.getUser(context, toArray(users.get(ctxId)));
+            List<User> usrList = new ArrayList<User>(usrArray.length);
+            Collections.addAll(usrList, usrArray);
+            usr.put(context, usrList);
+        }
+
+        return usr;
+    }
+
+    /**
+     * Returns a map with {@link Context} and {@link User} objects that are using the file storage with the specified identifier
+     * 
+     * @param filestoreId the file storage identifier
+     * @return a map with {@link Context} and {@link User} objects that are using the file storage with the specified identifier
+     * @throws OXException
+     */
+    private Map<Context, List<User>> getUsersForFilestore(final int filestoreId) throws OXException {
+        Map<Integer, List<Integer>> users = FileStorages.getFileStorage2EntitiesResolver().getIdsOfUsersUsing(filestoreId);
+        return loadUsers(users);
+    }
+
+    /**
+     * Converts the specified list of integers to an array of integers
+     * 
+     * @param list the list of integers
+     * @return an array of integers
+     */
+    private int[] toArray(List<Integer> list) {
+        int[] integers = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            integers[i] = list.get(i).intValue();
+        }
+        return integers;
     }
 
 }
