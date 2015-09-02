@@ -88,7 +88,7 @@ public class WrappingFilter implements Filter {
     private List<String> knownProxies;
     private String protocolHeader;
     private boolean isConsiderXForwards = false;
-    private String echoHeader;
+    private String echoHeaderName;
     private String contentSecurityPolicy = null;
 
     @Override
@@ -98,7 +98,7 @@ public class WrappingFilter implements Filter {
         this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
-        this.echoHeader = config.getEchoHeader();
+        this.echoHeaderName = config.getEchoHeader();
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
 
         // register listener for changed known proxies configuration
@@ -119,9 +119,9 @@ public class WrappingFilter implements Filter {
         HttpServletResponseWrapper httpResponseWrapper = null;
 
         // Inspect echoHeader and when present copy it to Response
-        String echoHeaderValue = httpRequest.getHeader(echoHeader);
+        String echoHeaderValue = httpRequest.getHeader(echoHeaderName);
         if (echoHeaderValue != null) {
-            httpResponse.setHeader(echoHeader, echoHeaderValue);
+            httpResponse.setHeader(echoHeaderName, echoHeaderValue);
         }
 
         // Set Content-Security-Policy header
@@ -155,7 +155,7 @@ public class WrappingFilter implements Filter {
         } else {
             httpRequestWrapper = new HttpServletRequestWrapper(httpRequest);
         }
-        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse);
+        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
 
         // Set LogProperties
         {
