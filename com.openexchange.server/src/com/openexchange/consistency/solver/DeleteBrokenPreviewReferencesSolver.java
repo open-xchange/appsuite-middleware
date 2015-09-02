@@ -67,7 +67,7 @@ public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
 
     @Override
     public void solve(Entity entity, Set<String> problems) throws OXException {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             if (problems.size() > 0) {
                 ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
                 metadataStore.removeByRefId(entity.getContext().getContextId(), problems);

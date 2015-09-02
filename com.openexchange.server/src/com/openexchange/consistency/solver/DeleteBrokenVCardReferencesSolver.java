@@ -68,7 +68,7 @@ public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
 
     @Override
     public void solve(Entity entity, Set<String> problems) throws OXException {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
             if (vCardStorageMetadataStore == null) {
                 LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");

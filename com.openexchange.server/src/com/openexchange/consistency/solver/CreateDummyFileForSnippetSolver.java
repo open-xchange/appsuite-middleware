@@ -78,7 +78,7 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             /*
              * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
              */

@@ -99,7 +99,7 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             final DocumentMetadata document = new DocumentMetadataImpl();
             document.setDescription(description);
             document.setTitle(title);

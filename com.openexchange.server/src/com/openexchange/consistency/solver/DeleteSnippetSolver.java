@@ -72,7 +72,7 @@ public class DeleteSnippetSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             // Now we go through the set an delete each superfluous entry:
             for (Iterator<String> it = problems.iterator(); it.hasNext();) {
                 String old_identifier = it.next();

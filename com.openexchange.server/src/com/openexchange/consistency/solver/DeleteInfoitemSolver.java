@@ -74,7 +74,7 @@ public class DeleteInfoitemSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.equals(EntityType.Context)) {
+        if (entity.getType().equals(EntityType.Context)) {
             // Now we go through the set an delete each superfluous entry:
             for (final String identifier : problems) {
                 try {
