@@ -539,8 +539,6 @@ public abstract class Consistency implements ConsistencyMBean {
             final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, entity.getContext());
             checkOneEntity(entity, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
 
-            //TODO: Repair for a single user
-
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
              * these files affect the contexts quota or not.
