@@ -75,6 +75,9 @@ public final class CommonStrings implements LocalizableStrings {
     // Search for items by their creation date
     public static final String DATE = "Date";
 
+    // Search within a certain account of a module
+    public static final String ACCOUNT = "Account";
+
     // ------------------------- i18n strings for folder types ------------------------------------- //
 
     public static final String FOLDER_TYPE_PRIVATE = "Private";
@@ -83,7 +86,7 @@ public final class CommonStrings implements LocalizableStrings {
 
     public static final String FOLDER_TYPE_SHARED = "Shared";
 
- // ------------------------- i18n strings for facet values -------------------------------------- //
+    // ------------------------- i18n strings for facet values -------------------------------------- //
 
     // Search mails from last week
     public static final String LAST_WEEK = "last week";

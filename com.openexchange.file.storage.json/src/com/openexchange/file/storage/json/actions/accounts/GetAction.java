@@ -56,6 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -88,8 +90,10 @@ public class GetAction extends AbstractFileStorageAccountAction {
         final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
 
         final String id = request.getParameter(FileStorageAccountConstants.ID);
-        final FileStorageAccount account = registry.getFileStorageService(fsServiceId).getAccountManager().getAccount(id, session);
-        return new AJAXRequestResult(writer.write(account));
+        FileStorageService fsService = registry.getFileStorageService(fsServiceId);
+        final FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
+        FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
+        return new AJAXRequestResult(writer.write(account, rootFolder));
     }
 
 }

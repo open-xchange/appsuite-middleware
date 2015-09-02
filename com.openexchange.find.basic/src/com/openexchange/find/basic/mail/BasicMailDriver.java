@@ -207,7 +207,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
         return FOLDER_TYPE_NOT_SUPPORTED;
     }
 

@@ -108,8 +108,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        // Nothing to do
-        return null;
+        return getFolderAccess().getRootFolder();
     }
 
     @Override

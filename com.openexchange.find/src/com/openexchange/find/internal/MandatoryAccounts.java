@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,62 @@
  *
  */
 
-package com.openexchange.find.spi;
+package com.openexchange.find.internal;
 
-import java.io.Serializable;
-import com.openexchange.find.common.CommonFacetType;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.internal.SearchDriverManager.CachedConfig;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * Encapsulates some configuration settings for clients. A {@link SearchConfiguration}
- * is specific per {@link ModuleSearchDriver} implementation and may additionally
- * depend on the requesting user resp. its session.
+ * {@link MandatoryAccounts}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @since v7.8.0
  */
-public class SearchConfiguration implements Serializable {
+public class MandatoryAccounts extends FindSetting {
 
-    private static final long serialVersionUID = 1009264293278859341L;
+    private final SearchDriverManager driverManager;
 
-    private boolean requiresFolder = false;
-
-    private boolean requiresAccount = false;
-
-    public SearchConfiguration() {
+    public MandatoryAccounts(final SearchDriverManager driverManager) {
         super();
+        this.driverManager = driverManager;
     }
 
-    /**
-     * Sets that the user-specific search driver requires a set
-     * {@link CommonFacetType#FOLDER} facet on search requests.
-     */
-    public SearchConfiguration setRequiresFolder() {
-        requiresFolder  = true;
-        return this;
+    @Override
+    public String[] getPath() {
+        return new String[] { "search", "mandatory", "account" };
     }
 
-    /**
-     * Returns if the user-specific search driver requires a set
-     * {@link CommonFacetType#FOLDER} facet on search requests.
-     *
-     * @return <code>true</code>, if the folder facet is mandatory.
-     */
-    public boolean requiresFolder() {
-        return requiresFolder;
-    }
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-    public SearchConfiguration setRequiresAccount() {
-        requiresAccount  = true;
-        return this;
-    }
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
 
-    public boolean requiresAccount() {
-        return requiresAccount;
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                ServerSessionAdapter serverSession = new ServerSessionAdapter(session, ctx, user, userConfig);
+                List<CachedConfig> configs = driverManager.getConfigurations(serverSession);
+                setting.setEmptyMultiValue();
+                for (CachedConfig config : configs) {
+                    if (config.getSearchConfig().requiresAccount()) {
+                        setting.addMultiValue(config.getModule().getIdentifier());
+                    }
+                }
+            }
+        };
     }
 
 }
