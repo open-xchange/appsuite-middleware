@@ -49,7 +49,6 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,7 +63,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
-import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
@@ -81,14 +79,12 @@ import com.openexchange.consistency.solver.DoNothingSolver;
 import com.openexchange.consistency.solver.ProblemSolver;
 import com.openexchange.consistency.solver.RecordSolver;
 import com.openexchange.consistency.solver.RemoveFileSolver;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
@@ -532,7 +528,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 filesToIgnore = Collections.emptySet();
             } else {
                 if (entity.getType().equals(EntityType.Context)) {
-                    filesToIgnore = getPreviewCacheFileStoreLocationsperContext(entity.getContext());
+                    filesToIgnore = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
                 } else {
                     filesToIgnore = Collections.emptySet();
                 }
@@ -621,13 +617,13 @@ public abstract class Consistency implements ConsistencyMBean {
                 SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
                 LOG.info("Found {} attachments", attachmentset.size());
 
-                SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(entity.getContext());
+                SortedSet<String> snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
                 LOG.info("Found {} snippets", snippetset.size());
 
-                SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(entity.getContext());
+                SortedSet<String> previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
                 LOG.info("Found {} previews", previewset.size());
 
-                SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(entity.getContext());
+                SortedSet<String> vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
                 LOG.info("Found {} vCards", vcardset.size());
 
                 final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
@@ -675,50 +671,6 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    private SortedSet<String> getVCardFileStoreLocationsperContext(Context ctx) throws OXException {
-        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
-        if (vCardStorageMetadataStore != null) {
-            Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId());
-            return new TreeSet<String>(loadRefIds);
-        }
-        return new TreeSet<String>();
-    }
-
-    private SortedSet<String> getPreviewCacheFileStoreLocationsperContext(Context ctx) throws OXException {
-        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-        Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
-        return new TreeSet<String>(refIds);
-    }
-
-    private SortedSet<String> getSnippetFileStoreLocationsperContext(Context ctx) throws OXException {
-        final SortedSet<String> retval = new TreeSet<String>();
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
-        try {
-            con = databaseService.getReadOnly(ctx);
-            if (DBUtils.tableExists(con, "snippet")) {
-                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
-                stmt.setInt(1, ctx.getContextId());
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    retval.add(rs.getString(1));
-                }
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = null;
-            }
-        } catch (final SQLException e) {
-            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            if (null != con) {
-                databaseService.backReadOnly(ctx, con);
-            }
-        }
-        return retval;
-    }
-
     private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
@@ -757,6 +709,12 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract List<Context> getContextsForDatabase(int datbaseId) throws OXException;
 
     protected abstract List<Context> getAllContexts() throws OXException;
+
+    protected abstract SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException;
+
+    protected abstract SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException;
+
+    protected abstract SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException;
 
     protected abstract User getAdmin(Context ctx) throws OXException;
 

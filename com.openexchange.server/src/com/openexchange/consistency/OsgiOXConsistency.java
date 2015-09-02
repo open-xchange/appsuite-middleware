@@ -49,10 +49,21 @@
 
 package com.openexchange.consistency;
 
+import static com.openexchange.tools.sql.DBUtils.getStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
+import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -60,6 +71,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -67,6 +79,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.sql.DBUtils;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
@@ -225,4 +238,52 @@ public class OsgiOXConsistency extends Consistency {
 
         public boolean accepts(Context ctx);
     }
+
+    @Override
+    protected SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
+        final SortedSet<String> retval = new TreeSet<String>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+        try {
+            con = databaseService.getReadOnly(ctx);
+            if (DBUtils.tableExists(con, "snippet")) {
+                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
+                stmt.setInt(1, ctx.getContextId());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    retval.add(rs.getString(1));
+                }
+                DBUtils.closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
+        } catch (final SQLException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                databaseService.backReadOnly(ctx, con);
+            }
+        }
+        return retval;
+    }
+
+    @Override
+    protected SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
+        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
+        if (vCardStorageMetadataStore != null) {
+            Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId());
+            return new TreeSet<String>(loadRefIds);
+        }
+        return new TreeSet<String>();
+    }
+
+    @Override
+    protected SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
+        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+        Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
+        return new TreeSet<String>(refIds);
+    }
+
 }

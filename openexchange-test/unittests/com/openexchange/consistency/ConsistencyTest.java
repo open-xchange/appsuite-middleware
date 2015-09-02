@@ -57,6 +57,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.management.MBeanException;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
@@ -92,6 +94,7 @@ public class ConsistencyTest extends TestCase {
     private int id = 20;
 
     private static final HashSet<String> MISSING = new HashSet<String>() {
+
         private static final long serialVersionUID = -795039863003179912L;
         {
             add("00/01/01");
@@ -101,6 +104,7 @@ public class ConsistencyTest extends TestCase {
     };
 
     private static final HashSet<String> UNASSIGNED = new HashSet<String>() {
+
         private static final long serialVersionUID = 7050405041645511451L;
         {
             add("00/04/04");
@@ -138,26 +142,26 @@ public class ConsistencyTest extends TestCase {
 
         final Set<String> expected = new HashSet<String>(MISSING);
 
-        assertEquals(missing.toString(), expected.size() , missing.size());
+        assertEquals(missing.toString(), expected.size(), missing.size());
         expected.removeAll(missing);
         assertTrue(missing.toString(), expected.isEmpty());
     }
 
     public void testListMissingFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  missing = consistency.listMissingFilesInFilestore(1);
+        final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInFilestore(1);
         assertContextEntities(missing, MISSING, ctx, ctx2);
     }
 
     public void testListMissingFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  missing = consistency.listMissingFilesInDatabase(1);
+        final Map<MBeanEntity, List<String>> missing = consistency.listMissingFilesInDatabase(1);
         assertContextEntities(missing, MISSING, ctx, ctx3);
     }
 
     public void testListAllMissingFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  missing = consistency.listAllMissingFiles();
+        final Map<MBeanEntity, List<String>> missing = consistency.listAllMissingFiles();
         assertContextEntities(missing, MISSING, ctx, ctx2, ctx3);
     }
 
@@ -168,7 +172,7 @@ public class ConsistencyTest extends TestCase {
 
         final Set<String> expected = new HashSet<String>(UNASSIGNED);
 
-        assertEquals(unassigned.toString(), expected.size() , unassigned.size());
+        assertEquals(unassigned.toString(), expected.size(), unassigned.size());
         expected.removeAll(unassigned);
         assertTrue(unassigned.toString(), expected.isEmpty());
 
@@ -176,19 +180,19 @@ public class ConsistencyTest extends TestCase {
 
     public void testListUnassignedFilesInFilestore() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  unassigned = consistency.listUnassignedFilesInFilestore(1);
+        final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInFilestore(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2);
     }
 
     public void testListUnassignedFilesInDatabase() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  unassigned = consistency.listUnassignedFilesInDatabase(1);
+        final Map<MBeanEntity, List<String>> unassigned = consistency.listUnassignedFilesInDatabase(1);
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx3);
     }
 
     public void testListAllUnassignedFiles() throws MBeanException {
         final ConsistencyMBean consistency = getConsistencyTool();
-        final Map<MBeanEntity, List<String>>  unassigned = consistency.listAllUnassignedFiles();
+        final Map<MBeanEntity, List<String>> unassigned = consistency.listAllUnassignedFiles();
         assertContextEntities(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
     }
 
@@ -200,13 +204,15 @@ public class ConsistencyTest extends TestCase {
         final List<DocumentMetadata> changes = database.getChanges(ctx);
         assertEquals(2, changes.size());
         storage.setContext(ctx);
-        for(final DocumentMetadata version : changes) {
+        for (final DocumentMetadata version : changes) {
             assertEquals("\nCaution! The file has changed", version.getDescription());
             assertEquals("text/plain", version.getFileMIMEType());
             //try {
-                assertNotNull(storage.getFile(version.getFilestoreLocation()));
-            /*} catch (final OXException e) {
-                fail(e.toString());*/
+            assertNotNull(storage.getFile(version.getFilestoreLocation()));
+            /*
+             * } catch (final OXException e) {
+             * fail(e.toString());
+             */
             //}
         }
     }
@@ -219,13 +225,13 @@ public class ConsistencyTest extends TestCase {
         final List<AttachmentMetadata> changes = attachments.getChanges(ctx);
         assertEquals(1, changes.size());
 
-        for(final AttachmentMetadata attachment : changes) {
+        for (final AttachmentMetadata attachment : changes) {
             assertEquals("\nCaution! The file has changed", attachment.getComment());
             assertEquals("text/plain", attachment.getFileMIMEType());
             //try {
-                assertNotNull(storage.getFile(attachment.getFileId()));
+            assertNotNull(storage.getFile(attachment.getFileId()));
             //} catch (final OXException e) {
-              //  fail(e.toString());
+            //  fail(e.toString());
             //}
         }
 
@@ -240,7 +246,7 @@ public class ConsistencyTest extends TestCase {
         assertEquals(2, deletions.size());
 
         final Set<String> missing = new HashSet<String>(MISSING);
-        for(final DocumentMetadata document : deletions) {
+        for (final DocumentMetadata document : deletions) {
             assertTrue(missing.remove(document.getFilestoreLocation()));
         }
         assertEquals(1, missing.size());
@@ -256,7 +262,7 @@ public class ConsistencyTest extends TestCase {
         assertEquals(1, deletions.size());
 
         final Set<String> missing = new HashSet<String>(MISSING);
-        for(final AttachmentMetadata document : deletions) {
+        for (final AttachmentMetadata document : deletions) {
             assertTrue(missing.remove(document.getFileId()));
         }
         assertEquals(2, missing.size());
@@ -271,10 +277,10 @@ public class ConsistencyTest extends TestCase {
         assertEquals(UNASSIGNED.size(), created.size());
 
         final Set<String> unassigned = new HashSet<String>(UNASSIGNED);
-        for(final DocumentMetadata document : created) {
+        for (final DocumentMetadata document : created) {
             final String location = document.getFilestoreLocation();
             assertTrue(unassigned.remove(location));
-            if(location != null) {
+            if (location != null) {
                 final String description = "This file needs attention";
                 final String title = "Restoredfile";
                 final String fileName = "Restoredfile";
@@ -291,7 +297,6 @@ public class ConsistencyTest extends TestCase {
         storage.forgetDeleted(ctx);
         consistency.repairFilesInContext(1, "missing_entry_for_file : delete");
 
-
         final List<String> deleted = storage.getDeleted(ctx);
 
         assertEquals(UNASSIGNED.size(), deleted.size());
@@ -301,17 +306,17 @@ public class ConsistencyTest extends TestCase {
         assertTrue(unassigned.isEmpty());
     }
 
-    protected void assertContextEntities(final Map<MBeanEntity, List<String>> missing,final Set<String> expect, final Context... testContexts) {
+    protected void assertContextEntities(final Map<MBeanEntity, List<String>> missing, final Set<String> expect, final Context... testContexts) {
         assertNotNull(missing);
         final Set<MBeanEntity> entities = new HashSet<MBeanEntity>(missing.keySet());
         assertEquals(entities.toString(), testContexts.length, entities.size());
-        for(final Context context : testContexts) {
+        for (final Context context : testContexts) {
             final List<String> ids = missing.get(context);
             assertNotNull(ids);
 
             final Set<String> expected = new HashSet<String>(expect);
 
-            assertEquals(ids.toString(), expected.size() , ids.size());
+            assertEquals(ids.toString(), expected.size(), ids.size());
             expected.removeAll(ids);
             assertTrue(ids.toString(), expected.isEmpty());
 
@@ -343,8 +348,6 @@ public class ConsistencyTest extends TestCase {
         final String unassignedEntry = "00/04/04";
         createFilestoreEntry(context, unassignedEntry, "unassigned");
     }
-
-
 
     private void simulateWholeAttachment(final Context context) {
         final String attachmentEntry = "00/00/01";
@@ -391,7 +394,7 @@ public class ConsistencyTest extends TestCase {
     }
 
     private void createFilestoreEntry(final Context context, final String filestoreId, final String content) {
-        storage.put(context,filestoreId, content.getBytes(com.openexchange.java.Charsets.UTF_8));
+        storage.put(context, filestoreId, content.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     private void createAttachment(final Context context, final String filestorePath) {
@@ -406,14 +409,13 @@ public class ConsistencyTest extends TestCase {
     }
 
     private int createInfostoreDocument(final Context context) {
-        final int istoreId  = id++;
+        final int istoreId = id++;
 
         final DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setId(istoreId);
         dm.setVersion(0);
 
-        database.put(context,dm);
-
+        database.put(context, dm);
 
         return istoreId;
     }
@@ -424,7 +426,7 @@ public class ConsistencyTest extends TestCase {
         dm.setFilestoreLocation(filestoreLocation);
         dm.setVersion(database.getNextVersionNumber(context, dmId));
 
-        database.put(context,dm);
+        database.put(context, dm);
     }
 
     private static final class TestConsistency extends Consistency {
@@ -460,8 +462,8 @@ public class ConsistencyTest extends TestCase {
         @Override
         protected List<Context> getContextsForFilestore(final int filestoreId) {
             final List<Context> retval = new ArrayList<Context>();
-            for(final Context context : contexts.values()){
-                if(context.getFilestoreId() == filestoreId) {
+            for (final Context context : contexts.values()) {
+                if (context.getFilestoreId() == filestoreId) {
                     retval.add(context);
                 }
             }
@@ -507,12 +509,27 @@ public class ConsistencyTest extends TestCase {
         @Override
         protected List<Entity> getEntitiesForFilestore(int filestoreId) throws OXException {
             final List<Entity> retval = new ArrayList<Entity>();
-            for(final Context context : contexts.values()){
-                if(context.getFilestoreId() == filestoreId) {
+            for (final Context context : contexts.values()) {
+                if (context.getFilestoreId() == filestoreId) {
                     retval.add(new EntityImpl(context));
                 }
             }
             return retval;
+        }
+
+        @Override
+        protected SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException {
+            return new TreeSet<String>();
+        }
+
+        @Override
+        protected SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException {
+            return new TreeSet<String>();
+        }
+
+        @Override
+        protected SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
+            return new TreeSet<String>();
         }
     }
 
