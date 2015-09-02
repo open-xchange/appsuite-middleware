@@ -201,7 +201,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Locked...
                 boolean unlock = true;
                 try {
-                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, services);
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, supportsPermanentListeners(), services);
                     ImapIdlePushListener current = listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener);
                     if (null == current) {
                         listener.start();
@@ -270,7 +270,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Locked...
                 boolean unlock = true;
                 try {
-                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, services);
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, supportsPermanentListeners(), services);
                     if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                         listener.start();
                         unlock = false;
@@ -439,7 +439,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * @throws OXException If operation fails
      */
     public InjectedImapIdlePushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
-        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, newSession, permanent, services);
+        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, newSession, permanent, supportsPermanentListeners(), services);
         // Replace old/existing one
         ImapIdlePushListener prev = listeners.put(SimpleKey.valueOf(newSession), listener);
         return new InjectedImapIdlePushListener(listener, prev);

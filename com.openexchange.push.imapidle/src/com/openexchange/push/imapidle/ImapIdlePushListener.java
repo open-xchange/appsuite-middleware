@@ -201,6 +201,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final PushMode pushMode;
     private final AtomicBoolean canceled;
     private final boolean permanent;
+    private final boolean supportsPermanentListeners;
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
     private volatile long lastLockRefreshNanos;
@@ -208,10 +209,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      */
-    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, ServiceLookup services) {
+    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, boolean supportsPermanentListeners, ServiceLookup services) {
         super();
         canceled = new AtomicBoolean();
         this.permanent = permanent;
+        this.supportsPermanentListeners = supportsPermanentListeners;
         this.fullName = fullName;
         this.accountId = accountId;
         this.session = session;
@@ -657,7 +659,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     private void setEventProperties(long uidNext, int totalCount, Map<String, Object> props, IMAPFolder imapFolder) {
-        if (false == permanent) {
+        if (false == supportsPermanentListeners) {
             return;
         }
 
