@@ -52,11 +52,8 @@ package com.openexchange.find.json.converters;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.Filter;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -89,24 +86,6 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             JSONFacetVisitor facetVisitor = new JSONFacetVisitor(translator, session);
             facet.accept(facetVisitor);
             result.put(facetVisitor.getResult());
-        }
-
-        return result;
-    }
-
-    protected JSONArray convertActiveFacets(ServerSession session, List<ActiveFacet> facets) throws JSONException {
-        JSONArray result = new JSONArray(facets.size());
-        for (ActiveFacet facet : facets) {
-            JSONObject jFacet = new JSONObject();
-            jFacet.put("facet", facet.getType().getId());
-            jFacet.put("value", facet.getValueId());
-            Filter filter = facet.getFilter();
-            if (filter == Filter.NO_FILTER) {
-                jFacet.put("filter", JSONObject.NULL);
-            } else {
-                jFacet.put("filter", JSONFacetVisitor.convertFilter(filter));
-            }
-            result.put(jFacet);
         }
 
         return result;
