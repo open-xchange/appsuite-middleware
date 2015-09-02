@@ -577,7 +577,6 @@ public class ConsistencyCheck {
                 for (final String brokenFile : brokenFiles) {
                     System.out.println("\t" + brokenFile);
                 }
-                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
             }
         }
     }
