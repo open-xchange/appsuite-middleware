@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,37 @@
  *
  */
 
-package com.openexchange.push.impl.osgi;
+package com.openexchange.push.soap.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-import com.openexchange.push.impl.credstorage.osgi.CredStorageActivator;
-import com.openexchange.push.soap.osgi.PushSoapActivator;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.push.soap.PushSoapInterfacePortType;
+import com.openexchange.push.soap.PushSoapInterfacePortTypeImpl;
 
 
 /**
- * {@link MainBundleActivator}
+ * {@link PushSoapActivator} - The activator for <i>com.openexchange.push.soap</i> bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class MainBundleActivator extends CompositeBundleActivator {
+public class PushSoapActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link MainBundleActivator}.
+     * Initializes a new {@link PushSoapActivator}.
      */
-    public MainBundleActivator() {
+    public PushSoapActivator() {
         super();
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new PushImplActivator(), new PushSoapActivator(), new CredStorageActivator() };
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { Authenticator.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(PushSoapInterfacePortType.class, new PushSoapInterfacePortTypeImpl(this));
     }
 
 }
