@@ -101,6 +101,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.version.Version;
@@ -142,6 +143,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(Remote.class, new OXContextInterfaceTracker(context)).open();
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
+        track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
 
         // Plugin interfaces

@@ -1,3 +1,7 @@
+* 2015-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40858: Consider all context-associated file storage URIs when deleting a context
+
 * 2015-09-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39819: Explicitly specify encoding when serializing CalDAV resource body
