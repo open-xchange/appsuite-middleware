@@ -50,9 +50,14 @@
 package com.openexchange.consistency;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.MBeanException;
@@ -62,7 +67,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import com.openexchange.consistency.Entity.EntityType;
 
 /**
  * CommandLineClient to run the consistency tool.
@@ -569,23 +573,100 @@ public class ConsistencyCheck {
 
         private void print(final Map<MBeanEntity, List<String>> result) {
             if (null == result) {
+                System.out.println("No problems found.");
                 return;
             }
+
+            String formatter;
+            StringBuilder dashBuilder;
+            {
+                // Find the widest string of the keys
+                int widestEntityString;
+                List<String> entities = compileListOfEntities(result.keySet());
+                widestEntityString = fetchWidestString(entities);
+
+                // Find the widest string of the values
+                int widestHashString;
+                List<String> flattenedList = flattenList(result.values());
+                widestHashString = fetchWidestString(flattenedList);
+
+                // Compare both and get the widest
+                int widestString = (widestEntityString > widestHashString) ? widestEntityString : widestHashString;
+
+                formatter = "| %-" + widestString + "s   |%n";
+
+                dashBuilder = new StringBuilder();
+                for (int i = 0; i < widestString; i++) {
+                    dashBuilder.append("-");
+                }
+                dashBuilder.append("--+");
+            }
+
             for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
                 final List<String> brokenFiles = entry.getValue();
-
                 MBeanEntity entity = entry.getKey();
 
-                String message = "I found " + brokenFiles.size() + " problem(s) in context '" + entity.getContextId() + "'";
-                if (entity.getType().equals(EntityType.User)) {
-                    message += " for user '" + entity.getUserId() + "'";
+                System.out.format("+--" + dashBuilder.toString() + "%n");
+                System.out.format(formatter, entity.toString());
+                System.out.format("+--" + dashBuilder.toString() + "%n");
+
+                for (final String brokenFile : brokenFiles) {
+                    System.out.format(formatter, brokenFile);
                 }
 
-                System.out.println(message);
-                for (final String brokenFile : brokenFiles) {
-                    System.out.println("\t" + brokenFile);
+                if (!brokenFiles.isEmpty()) {
+                    System.out.format("+--" + dashBuilder.toString() + "%n");
                 }
+                System.out.format(formatter, brokenFiles.size() + " problem(s) found");
+                System.out.format("+--" + dashBuilder.toString() + "%n%n");
             }
+        }
+
+        /**
+         * @param keySet
+         * @return
+         */
+        private List<String> compileListOfEntities(Set<MBeanEntity> keySet) {
+            List<String> entities = new ArrayList<String>(keySet.size());
+            for (MBeanEntity entity : keySet) {
+                entities.add(entity.toString());
+            }
+            return entities;
+        }
+
+        /**
+         * Flattens the specified list
+         * 
+         * @param values A Collection with List of strings
+         * @return the flattened collection
+         */
+        private List<String> flattenList(Collection<List<String>> values) {
+            Iterator<List<String>> iterator = values.iterator();
+            List<String> flattenedList = new ArrayList<String>();
+            while (iterator.hasNext()) {
+                flattenedList.addAll(iterator.next());
+            }
+            return flattenedList;
+        }
+
+        /**
+         * Sort the results and fetch the length of the widest string
+         * 
+         * @param results The strings to sort
+         * @return The length of the widest string
+         */
+        private int fetchWidestString(List<String> results) {
+            int widestURL = 5;
+            Object[] a = results.toArray();
+            ListIterator<String> i = results.listIterator();
+            for (int j = 0; j < a.length; j++) {
+                String p = i.next();
+                if (widestURL < p.length()) {
+                    widestURL = p.length();
+                }
+                i.set((String) a[j]);
+            }
+            return widestURL;
         }
     }
 }

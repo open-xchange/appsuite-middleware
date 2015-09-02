@@ -123,7 +123,11 @@ public class MBeanEntity implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MBeanEntity [contextId=").append(contextId).append(", userId=").append(userId).append(", type=").append(type).append("]");
+        builder.append(getType()).append(": { ContextID: '").append(getContextId()).append("'");
+        if (getType().equals(EntityType.User)) {
+            builder.append(", UserID: '").append(getUserId()).append("'");
+        }
+        builder.append("}");
         return builder.toString();
     }
 
