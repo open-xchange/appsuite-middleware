@@ -733,8 +733,6 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
-        httpResponse.reset();
-
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }
@@ -768,7 +766,6 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
-        httpResponse.reset();
         httpResponse.setContentType(null);
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
@@ -788,7 +785,6 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
-        httpResponse.reset();
         httpResponse.setContentType("text/html; charset=UTF-8");
         httpResponse.setHeader("Content-Disposition", "inline");
         httpResponse.setStatus(statusCode);
