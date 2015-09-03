@@ -48,151 +48,333 @@
  */
 package com.openexchange.admin.taskmanagement;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 public class TaskManager {
 
-    private final AdminCache cache;
+    /** The logger */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
 
-    private final PropertyHandler prop;
+    private static final TaskManager INSTANCE = new TaskManager();
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
-
-    private final Hashtable<Integer, ExtendedFutureTask<?>> jobs = new Hashtable<Integer, ExtendedFutureTask<?>>();
-
-    private final ExecutorService executor;
-
-    private int lastID = 0;
-
-    private int runningjobs = 0;
-
-    private final ArrayList<Integer> finishedJobs = new ArrayList<Integer>();
-
-    private static class JobManagerSingletonHolder {
-        private static final TaskManager instance = new TaskManager();
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static TaskManager getInstance() {
+        return INSTANCE;
     }
 
-    // TODO: Find out how to invoke super with generic types
+    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static class IncrementingCallable<V> implements Callable<V> {
+
+        private final Callable<V> delegate;
+        private final AtomicInteger runningjobs;
+
+        /**
+         * Initializes a new {@link IncrementingCallable}.
+         */
+        IncrementingCallable(Callable<V> delegate, AtomicInteger runningjobs) {
+            super();
+            this.runningjobs = runningjobs;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public V call() throws Exception {
+            runningjobs.incrementAndGet();
+            return delegate.call();
+        }
+    }
+
     private class Extended<V> extends ExtendedFutureTask<V> {
-        public Extended(final Callable callable, final String typeofjob, final String furtherinformation, final int id, final int cid) { super(callable, typeofjob, furtherinformation, id, cid); }
+
+        private final AtomicReference<Long> completionStamp;
+
+        /**
+         * Initializes a new {@link Extended}.
+         */
+        Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid) {
+            super(new IncrementingCallable<V>(callable, runningjobs), typeofjob, furtherinformation, id, cid);
+            completionStamp = new AtomicReference<Long>(null);
+        }
+
         @Override
         protected void done() {
-            TaskManager.this.runningjobs--;
-            log.debug("Removing job number {}", this.id);
-            finishedJobs.add(this.id);
+            TaskManager.this.runningjobs.decrementAndGet();
+            Integer id = Integer.valueOf(this.id);
+            LOGGER.debug("Removing job number {}", id);
+            completionStamp.set(Long.valueOf(System.currentTimeMillis()));
+            finishedJobs.offer(id);
+        }
+
+        /**
+         * Gets the completion stamp.
+         *
+         * @return The completion stamp or <code>null</code>
+         */
+        public Long completionStmap() {
+            return completionStamp.get();
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private final AdminCache cache;
+    private final PropertyHandler prop;
+    private final ConcurrentMap<Integer, Extended<?>> jobs;
+    private final ExecutorService executor;
+    private final AtomicInteger lastID;
+    final AtomicInteger runningjobs;
+    final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
+    private final ScheduledTimerTask timerTask;
+
+    /**
+     * Prevent instantiation. Use {@link #getInstance()} instead.
+     */
+    private TaskManager() {
+        super();
+        lastID = new AtomicInteger(0);
+        runningjobs = new AtomicInteger(0);
+        jobs = new ConcurrentHashMap<Integer, Extended<?>>(16, 0.9F, 1);
+        this.cache = ClientAdminThread.cache;
+        this.prop = this.cache.getProperties();
+        final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
+        LOGGER.info("AdminJobExecutor: running {} jobs parallel", Integer.valueOf(threadCount));
+        this.executor = Executors.newFixedThreadPool(threadCount);
+
+        TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
+        Runnable cleaner = new Runnable() {
+
+            @Override
+            public void run() {
+                cleanUp();
+            }
+        };
+        timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Adds a job to this task manager.
+     *
+     * @param <V> the result type of method <tt>call</tt>
+     * @param jobcall The <code>Callable</code> to schedule with a new job
+     * @param typeofjob The job type
+     * @param furtherinformation Arbitrary information
+     * @param cid The associated context identifier
+     * @return The job identifier
+     */
+    public <V> int addJob(Callable<V> jobcall, String typeofjob, String furtherinformation, int cid) {
+        // Get next job identifier
+        int jobId = lastID.incrementAndGet();
+
+        // Instantiate & schedule job
+        Extended<V> job = new Extended<V>(jobcall, typeofjob, furtherinformation, jobId, cid);
+        this.jobs.put(Integer.valueOf(jobId), job);
+        LOGGER.debug("Adding job number {}", Integer.valueOf(jobId));
+        this.executor.execute(job);
+
+        // Return job identifier
+        return jobId;
+    }
+
+    /**
+     * Checks if there are currently running jobs.
+     *
+     * @return <code>true</code> if there are currently running jobs; otherwise <code>false</code>
+     */
+    public boolean jobsRunning() {
+        return (runningjobs.get() > 0);
+    }
+
+    /**
+     * Shuts-down this task manager.
+     */
+    public void shutdown() {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            timerTask.cancel(true);
+        }
+        this.executor.shutdown();
+    }
+
+    /**
+     * Gets the task associated with specified identifier
+     *
+     * @param jid The task identifier
+     * @return The task or <code>null</code>
+     */
+    public ExtendedFutureTask<?> getTask(int jid) {
+        try {
+            return getTask(jid, null);
+        } catch (TaskManagerException e) {
+            // Cannot occur
+            throw new IllegalStateException("TaskManagerException although no context identifier specified", e);
         }
     }
 
     /**
-     * This is a singleton so constructor is private use getInstance instead
+     * Gets the task associated with specified identifier
+     *
+     * @param jid The task identifier
+     * @param cid The context identifier or <code>null</code>
+     * @return The task or <code>null</code>
+     * @throws TaskManagerException If task does not belong to given context identifier (if specified)
      */
-    private TaskManager() {
-        this.cache = ClientAdminThread.cache;
-        this.prop = this.cache.getProperties();
-        final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
-        log.info("AdminJobExecutor: running {} jobs parallel", threadCount);
-        this.executor = Executors.newFixedThreadPool(threadCount);
+    public ExtendedFutureTask<?> getTask(int jid, Integer cid) throws TaskManagerException {
+        ExtendedFutureTask<?> job = jobs.get(Integer.valueOf(jid));
+        if (null == job) {
+            return null;
+        }
+
+        if (null != cid && job.cid != cid.intValue()) {
+            throw new TaskManagerException("The job with the id " + jid + " does not belong to context id " + cid);
+        }
+
+        return job;
     }
 
-    public static TaskManager getInstance() {
-        return JobManagerSingletonHolder.instance;
-    }
-
-    public int addJob(final Callable<?> jobcall, final String typeofjob, final String furtherinformation, final int cid) {
-        final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID, cid);
-        this.jobs.put(this.lastID, job);
-        log.debug("Adding job number {}", this.lastID);
-        runningjobs++;
-        this.executor.execute(job);
-        return lastID;
-    }
-
-    public boolean jobsRunning() {
-        return (runningjobs > 0);
-    }
-
-    public void shutdown() {
-        this.executor.shutdown();
-    }
-
-    public ExtendedFutureTask<?> getTask(final int jid) throws TaskManagerException {
-        return getTask(jid, null);
-    }
-
-    public ExtendedFutureTask<?> getTask(final int jid, final Integer cid) throws TaskManagerException {
-        synchronized (this.jobs) {
-            final ExtendedFutureTask<?> job = this.jobs.get(Integer.valueOf(jid));
-            if (null == job) {
-                return null;
-            }
-            if (null != cid && job.cid != cid.intValue()) {
-                throw new TaskManagerException("The job with the id " + jid + " does not belong to context id " + cid);
-            }
-            return job;
+    /**
+     * Deletes specified job.
+     *
+     * @param id The job identifier
+     */
+    public void deleteJob(int id) {
+        try {
+            deleteJob(id, null);
+        } catch (TaskManagerException e) {
+            // Cannot occur
+            throw new IllegalStateException("TaskManagerException although no context identifier specified", e);
         }
     }
 
+    /**
+     * Deletes the specified job associated with given context (if specified).
+     *
+     * @param id The job identifier
+     * @param cid The context identifier or <code>null</code>
+     * @throws TaskManagerException If the task to delete does not belong to given context identifier
+     */
+    public void deleteJob(int id, Integer cid) throws TaskManagerException {
+        Integer jobId = Integer.valueOf(id);
+        ExtendedFutureTask<?> job = jobs.get(jobId);
+        if (null == job) {
+            // No such job
+            return;
+        }
+
+        if (null != cid && job.cid != cid.intValue()) {
+            throw new TaskManagerException("The job with the id " + id + " does not belong to context id " + cid);
+        }
+
+        if (job.isRunning()) {
+            throw new TaskManagerException("The job with the id " + id + " is currently running and cannot be deleted");
+        }
+        this.jobs.remove(jobId, job);
+    }
+
+    /**
+     * Flushes this task manager.
+     */
+    public void flush() {
+        try {
+            flush(null);
+        } catch (TaskManagerException e) {
+            // Cannot occur
+            throw new IllegalStateException("TaskManagerException although no context identifier specified", e);
+        }
+    }
+
+    /**
+     * Flushes this task manager affecting tasks belonging to specified context (if specified).
+     *
+     * @param cid The context identifier or <code>null</code>
+     * @throws TaskManagerException If a finished task does not belong to given context
+     */
+    public void flush(final Integer cid) throws TaskManagerException {
+        for (Integer jobid; (jobid = finishedJobs.poll()) != null;) {
+            deleteJob(jobid.intValue(), cid);
+        }
+    }
+
+    /**
+     * Flushes this task manager affecting tasks older than 1 hour.
+     */
+    void cleanUp() {
+        Thread currentThread = Thread.currentThread();
+        for (Iterator<Integer> iter = finishedJobs.iterator(); !currentThread.isInterrupted() && iter.hasNext();) {
+            Integer jobId = iter.next();
+            Extended<?> job = jobs.get(jobId);
+            if (null == job) {
+                // No such job
+                iter.remove();
+            } else {
+                Long completionStmap = job.completionStmap();
+                if (null != completionStmap && (System.currentTimeMillis() - completionStmap.longValue()) > MAX_TASK_IDLE_MILLIS) {
+                    iter.remove();
+                    if (jobs.remove(jobId, job)) {
+                        LOGGER.info("Cleaned-up timed out job {}.", jobId);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the pretty-printed job list
+     *
+     * @return The pretty-printed job list
+     */
     public String getJobList() {
         return getJobList(null);
     }
 
-    public String getJobList(final Integer cid) {
-        final StringBuffer buf = new StringBuffer();
-        final Enumeration<Integer> jids = this.jobs.keys();
-
-        final String TFORMAT = "%-5s %-20s %-10s %-40s \n";
-        final String VFORMAT = "%-5s %-20s %-10s %-40s \n";
-        if (jids.hasMoreElements()) {
-            buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
-        } else {
-            buf.append("Currently no jobs queued");
+    /**
+     * Gets the pretty-printed list for jobs belonging to specified context (if not <code>null</code>).
+     *
+     * @param cid The context identifier or <code>null</code>
+     * @return The pretty-printed job list
+     */
+    public String getJobList(Integer cid) {
+        Iterator<Integer> jids = jobs.keySet().iterator();
+        if (!jids.hasNext()) {
+            return "Currently no jobs queued";
         }
-        while (jids.hasMoreElements()) {
-            final Integer id = jids.nextElement();
+
+        StringBuffer buf = new StringBuffer(256);
+        String TFORMAT = "%-5s %-20s %-10s %-40s \n";
+        String VFORMAT = "%-5s %-20s %-10s %-40s \n";
+        buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
+
+        while (jids.hasNext()) {
+            final Integer id = jids.next();
             final ExtendedFutureTask<?> job = this.jobs.get(id);
-            if( null != cid && job.cid != cid ) {
-                continue;
+            if (null == cid || job.cid == cid.intValue() ) {
+                buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
             }
-            buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
         }
         return buf.toString();
-    }
-
-    public void deleteJob(int id) throws TaskManagerException {
-        deleteJob(id, null);
-    }
-
-    public void deleteJob(int id, final Integer cid) throws TaskManagerException {
-        final ExtendedFutureTask<?> job = this.jobs.get(id);
-        if( null != cid && job.cid != cid ) {
-            throw new TaskManagerException("The job with the id " + id + " does not belong to context id " + cid);
-        }
-        if (!job.isRunning()) {
-            this.jobs.remove(id);
-        } else {
-            throw new TaskManagerException("The job with the id " + id + " is currently running and cannot be deleted");
-        }
-    }
-
-    public void flush() throws TaskManagerException {
-        flush(null);
-    }
-
-    public void flush(final Integer cid) throws TaskManagerException {
-        while(!finishedJobs.isEmpty()) {
-            final Integer jobid = finishedJobs.get(0);
-            deleteJob(jobid, cid);
-            finishedJobs.remove(0);
-        }
     }
 
     private String formatStatus(final ExtendedFutureTask<?> job) {
