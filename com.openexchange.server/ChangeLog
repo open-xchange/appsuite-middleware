@@ -24,6 +24,10 @@
 
  - Fix for bug 39819: Explicitly specify encoding when serializing CalDAV resource body
 
+* 2015-09-02 - marc.arens@open-xchange.com
+
+ - Fix for bug 39854: Keep com.openexchange.servlet.echoHeaderName even when calling HttpServletResponse#reset
+
 * 2015-09-01 - marcus.klein@open-xchange.com
 
  - Fix for bug 39554: Set permissions of hazelcast.properties so that only root and user open-xchange can read/edit this file containing passwords.
