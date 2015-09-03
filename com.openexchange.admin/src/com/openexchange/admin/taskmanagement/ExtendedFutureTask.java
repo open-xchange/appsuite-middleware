@@ -53,7 +53,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 /**
- * A FutureTask extented by Progress
+ * A FutureTask extended by Progress
  *
  * @author d7
  *
@@ -71,7 +71,16 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
 
     protected final int cid;
 
-    public ExtendedFutureTask(final Callable<V> callable, final String typeofjob, final String furtherinformation, final int id, final int cid) {
+    /**
+     * Initializes a new {@link ExtendedFutureTask}.
+     *
+     * @param callable The callable
+     * @param typeofjob The job type
+     * @param furtherinformation Arbitrary information
+     * @param id The job identifier
+     * @param cid The context identifier
+     */
+    public ExtendedFutureTask(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid) {
         super(callable);
         this.callable = callable;
         this.typeofjob = typeofjob;
@@ -99,6 +108,8 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
             try {
                 get();
             } catch (final InterruptedException e) {
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
                 return true;
             } catch (final ExecutionException e) {
                 return true;
@@ -115,12 +126,10 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
      */
     public int getProgressPercentage() throws NoSuchMethodException {
         if (this.callable instanceof ProgressCallable) {
-            final ProgressCallable<?> progcall = (ProgressCallable<?>) this.callable;
-            return progcall.getProgressPercentage();
-        } else {
-            throw new NoSuchMethodException();
+            return ((ProgressCallable<?>) this.callable).getProgressPercentage();
         }
 
+        throw new NoSuchMethodException();
     }
 
     public final String getFurtherinformation() {
