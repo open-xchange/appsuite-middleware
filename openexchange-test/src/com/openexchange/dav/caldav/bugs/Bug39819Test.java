@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * {@link Bug39819Test}
  *
- * Deleted Umlaut ü from appointment description
+ * Deleted Umlaut \u00fc from appointment description
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
