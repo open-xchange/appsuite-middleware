@@ -3133,6 +3133,10 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
 
     private void addMissingRecurrenceInformation(CalendarDataObject cdao, CalendarDataObject edao) {
+        cdao.setRecurringStart(edao.getRecurringStart());
+        if (edao.getTimezone() != null) {
+            cdao.setTimezone(edao.getTimezone()); // Use original TimeZone information for calculation purposes.
+        }
         if (!cdao.containsRecurrenceType() && edao.containsRecurrenceType()) {
             cdao.setRecurrenceType(edao.getRecurrenceType());
         }

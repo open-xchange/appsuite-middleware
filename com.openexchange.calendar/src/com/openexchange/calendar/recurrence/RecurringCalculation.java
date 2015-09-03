@@ -599,8 +599,7 @@ public class RecurringCalculation {
                 range = calc.getTimeInMillis();
                 if (range >= sst && normalized_start_of_series <= end_of_series) {
                     final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
-                    if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count)
-                    && (!recColl.isException(range, changeExceptions, deleteExceptions))) {
+                    if (((!boundaries) || (end_of_occurrence > range_start && range < range_end) || pos == ds_count) && (!recColl.isException(range, changeExceptions, deleteExceptions))) {
                         //if (!isException(range, change_exceptions, delete_exceptions)) {
 						if (exceeds ? ((recColl.normalizeLong(range) + Constants.MILLI_DAY) > end_of_series)
 								: (recColl.normalizeLong(range) > end_of_series)) {
