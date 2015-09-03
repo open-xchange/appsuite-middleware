@@ -1,6 +1,7 @@
 * 2015-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 40859: Orderly deal with individual user file storages containing no files
+ - Fix for bug 40885: Extended push delete listener to drop remaining permanent listeners on user/context deletion
 
 * 2015-09-02 - thorben.betten@open-xchange.com
 

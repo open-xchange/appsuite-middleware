@@ -534,6 +534,51 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /**
+     * Unregisters all permanent listeners for specified push user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> on successful unregistration; otherwise <code>false</code>
+     * @throws OXException If unregistration fails
+     */
+    public boolean unregisterAllPermanentListenersFor(int userId, int contextId) throws OXException {
+        synchronized (this) {
+            DeleteResult deleteResult = PushDbUtils.deleteAllPushRegistrations(userId, contextId);
+            if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+                CredentialStorage credentialStorage = optCredentialStorage();
+                if (null != credentialStorage) {
+                    try {
+                        credentialStorage.deleteCredentials(userId, contextId);
+                        LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
+                    } catch (Exception e) {
+                        LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                    }
+                }
+
+            }
+
+            PushUser pushUser = new PushUser(userId, contextId);
+            for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                PushManagerService pushManager = pushManagersIterator.next();
+                if (pushManager instanceof PushManagerExtendedService) {
+                    try {
+                        // Stop listener for specified push user
+                        boolean stopped = stopPermanentListenerFor(pushUser, (PushManagerExtendedService) pushManager, true);
+                        if (stopped) {
+                            LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
+                        }
+                    } catch (OXException e) {
+                        LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
+                    } catch (RuntimeException e) {
+                        LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
+                    }
+                }
+            }
+            return (DeleteResult.NOT_DELETED != deleteResult);
+        }
+    }
+
+    /**
      * Stops the permanent listener for specified push users
      *
      * @param pushUsers The push users
@@ -547,7 +592,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         try {
-                            // Stop listener for session
+                            // Stop listener for specified push user
                             boolean stopped = stopPermanentListenerFor(pushUser, (PushManagerExtendedService) pushManager, true);
                             if (stopped) {
                                 LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
