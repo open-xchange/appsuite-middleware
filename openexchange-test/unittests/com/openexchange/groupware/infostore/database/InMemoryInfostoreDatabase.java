@@ -64,6 +64,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.ldap.User;
@@ -177,7 +178,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     @Override
     public int[] saveDocumentMetadata(final String identifier, final DocumentMetadata document, final User user, final Context ctx) {
         document.setFilestoreLocation(identifier);
-        creations.get(ctx).add(document);
+        creations.get(ctx).add(new DocumentMetadataImpl(document));
         return new int[] { 1, 1, 1 };
     }
 
@@ -343,7 +344,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
             for (final DocumentMetadata metadata : versions) {
                 final String location = metadata.getFilestoreLocation();
                 if (location != null && location.equals(fileIdentifier)) {
-                    return metadata.getId();
+                    return metadata.getCreatedBy();
                 }
             }
         }

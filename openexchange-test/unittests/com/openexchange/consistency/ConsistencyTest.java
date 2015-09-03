@@ -63,6 +63,7 @@ import javax.management.MBeanException;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.InMemoryAttachmentBase;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
@@ -84,6 +86,7 @@ public class ConsistencyTest extends TestCase {
     private final InMemoryInfostoreDatabase database = new InMemoryInfostoreDatabase();
     private InMemoryFileStorage storage = null;
     private final InMemoryAttachmentBase attachments = new InMemoryAttachmentBase();
+    private SimQuotaFileStorageService quotaFileStorageService = null;
 
     private ContextImpl ctx = null;
     private ContextImpl ctx2 = null;
@@ -107,14 +110,22 @@ public class ConsistencyTest extends TestCase {
 
         private static final long serialVersionUID = 7050405041645511451L;
         {
-            add("00/04/04");
+            add("00/00/02"); //Broken whole entry
+            add("00/00/03"); //Broken whole entry
+            add("00/01/02"); //Broken current version in infostore
+            add("00/02/03"); //Broken older version in inforstore
+            add("00/04/04"); //Filestore entry with no DB entry
         }
     };
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
         storage = new InMemoryFileStorage();
+        quotaFileStorageService = new SimQuotaFileStorageService(storage);
+        FileStorages.setQuotaFileStorageService(quotaFileStorageService);
+
         ctx = new ContextImpl(1);
         ctx.setFilestoreId(1);
 
@@ -327,7 +338,7 @@ public class ConsistencyTest extends TestCase {
         assertTrue(entities.toString(), entities.isEmpty());
 
     }
-    
+
     private ConsistencyMBean getConsistencyTool() {
         return new TestConsistency(database, attachments, storage, contexts);
     }
@@ -335,7 +346,6 @@ public class ConsistencyTest extends TestCase {
     // Simulation //
 
     protected void simulateBrokenContext(final Context context) {
-
         simulateBrokenOlderVersionInInfostore(context);
         simulateBrokenCurrentVersionInInfostore(context);
         simulateWholeInfostoreEntry(context);
@@ -415,6 +425,7 @@ public class ConsistencyTest extends TestCase {
         final DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setId(istoreId);
         dm.setVersion(0);
+        dm.setCreatedBy(1);
 
         database.put(context, dm);
 
@@ -426,6 +437,7 @@ public class ConsistencyTest extends TestCase {
         dm.setId(dmId);
         dm.setFilestoreLocation(filestoreLocation);
         dm.setVersion(database.getNextVersionNumber(context, dmId));
+        dm.setCreatedBy(1);
 
         database.put(context, dm);
     }
@@ -483,7 +495,9 @@ public class ConsistencyTest extends TestCase {
 
         @Override
         protected User getAdmin(final Context ctx) {
-            return null;
+            UserImpl usr = new UserImpl();
+            usr.setId(1);
+            return usr;
         }
 
         @Override
