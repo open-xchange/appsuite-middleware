@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
@@ -62,8 +63,9 @@ public interface PostProcessTask {
     /**
      * Performs the post-process task.
      *
+     * @param executionError The optional execution error that occurred or <code>null</code>
      * @throws StorageException If task fails
      */
-    void perform() throws StorageException;
+    void perform(ExecutionException executionError) throws StorageException;
 
 }

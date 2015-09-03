@@ -589,11 +589,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             int userId = user.getId().intValue();
             PreparedStatement prep = null;
             try {
-                String filestoreName = user.getFilestore_name();
-                if (null == filestoreName) {
-                    filestoreName = FileStorages.getNameForUser(userId, contextId);
-                }
-
                 boolean changed = false;
                 if (filestoreId >= 0) {
                     prep = con.prepareStatement("UPDATE user SET filestore_id = ? WHERE cid = ? AND id = ? AND filestore_id <> ?");
@@ -622,12 +617,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     }
                 }
 
-                {
+                if (filestoreId > 0) {
+                    String filestoreName = user.getFilestore_name();
+                    if (null == filestoreName) {
+                        filestoreName = FileStorages.getNameForUser(userId, contextId);
+                    }
+
                     prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=? and (filestore_name IS NULL OR filestore_name != ?)");
                     prep.setString(1, filestoreName);
                     prep.setInt(2, contextId);
                     prep.setInt(3, userId);
                     prep.setString(4, filestoreName);
+                    changed |= prep.executeUpdate() > 0;
+                    Databases.closeSQLStuff(prep);
+                } else {
+                    prep = con.prepareStatement("UPDATE user SET filestore_name = ? where cid=? and id=?");
+                    prep.setNull(1, Types.VARCHAR);
+                    prep.setInt(2, contextId);
+                    prep.setInt(3, userId);
                     changed |= prep.executeUpdate() > 0;
                     Databases.closeSQLStuff(prep);
                 }

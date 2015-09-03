@@ -67,7 +67,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.FileStorages;
 
 /**
  * {@link User2ContextFilestoreDataMover} - The implementation to move files from a user's storage to context's storage.
@@ -118,12 +117,14 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
 
             // Copy each file from source to destination
             Set<String> srcFiles = srcStorage.getFileList();
-            Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+            if (false == srcFiles.isEmpty()) {
+                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
 
-            // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-            propagateNewLocations(prevFileName2newFileName);
+                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                propagateNewLocations(prevFileName2newFileName);
 
-            srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+            }
         } catch (OXException e) {
             throw new StorageException(e);
         } catch (SQLException e) {
@@ -133,7 +134,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
         // Apply changes to context & clear caches
         try {
             user.setFilestoreId(Integer.valueOf(0));
-            user.setFilestore_name(FileStorages.getNameForContext(contextId));
+            user.setFilestore_name(null);
             user.setFilestoreOwner(Integer.valueOf(0));
             user.setMaxQuota(Long.valueOf(0));
 
