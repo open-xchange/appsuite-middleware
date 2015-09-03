@@ -577,7 +577,7 @@ public class ConsistencyCheck {
                     result = consistency.listUnassignedFilesInFilestore(sourceId);
                 } else if (SOURCE_CONTEXT.equals(source)) {
                     result = new HashMap<MBeanEntity, List<String>>();
-                    //result.put(new EntityImpl(sourceId), consistency.listUnassignedFilesInContext(sourceId));
+                    result.put(new MBeanEntity(sourceId), consistency.listUnassignedFilesInContext(sourceId));
                 } else if (SOURCE_ALL.equals(source)) {
                     result = consistency.listAllUnassignedFiles();
                 }
