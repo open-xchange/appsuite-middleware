@@ -51,7 +51,6 @@ package com.openexchange.find.json.actions;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -103,7 +102,7 @@ public class AutocompleteAction extends AbstractFindAction {
 
         // Do the auto-complete
         AutocompleteResult result = searchService.autocomplete(
-            new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0, check),
+            new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0),
             request.requireModule(),
             request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());
