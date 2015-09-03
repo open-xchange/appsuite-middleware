@@ -338,7 +338,8 @@ ox_exists_property() {
     test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_exists_property: $propfile does not exist"
 
-    grep -E "^$prop *[:=]" $propfile >/dev/null || return 1
+    local escaped=$(sed 's/[]\.|$(){}?+*^[]/\\&/g' <<< "$prop")
+    grep -E "^$escaped *[:=]" $propfile >/dev/null || return 1
 }
 
 # savely find key/val in keys and values containing all kind of ugly chars

@@ -1,3 +1,7 @@
+* 2015-09-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38635: Property to add will now be escaped before searching for it as part of a regular expression.
+
 * 2015-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 40859: Orderly deal with individual user file storages containing no files
