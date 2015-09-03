@@ -38,7 +38,7 @@ public class CapabilitiesRESTService {
 
     /**
      * <pre>
-     * PUT /preliminary/capabilities/v1/all/{context}/{user}
+     * GET /preliminary/capabilities/v1/all/{context}/{user}
      * &lt;JSON-content&gt;
      * </pre>
      */
