@@ -11,7 +11,7 @@
         <antcall target="download_check_and_add_jar">
             <param name="jar.url" value="${logback.jar.url}" />
         </antcall>
-        <delete dir="${tmp_dir}" quiet="true"/>
+        <delete dir="${tmp_dir}" verbose="true"/>
     </target>
 
     <target name="download_check_and_add_jar" depends="already_downloaded_test" unless="jar.found">
@@ -64,13 +64,29 @@
 
     <target name="remove_other_versions">
         <basename property="jar.filename" file="${jar.url}" />
-        <script language="javascript">
-            var before = new String(project.getProperty("jar.filename"));
-            project.setProperty("prefix", before.replace(/\d\.\d\.\d\.jar$/g,"*"));
-        </script>
-        <delete>
+        <loadresource property="java-commons.delete.prefix">
+          <propertyresource name="jar.filename"/>
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="\d\.\d\.\d\.jar$" replace="*"/>
+            </tokenfilter>
+          </filterchain>
+        </loadresource>
+
+        <fail message="Property &quot;java-commons.delete.prefix&quot; needs to be set to a value">
+            <condition>
+                <or>
+                    <equals arg1="${java-commons.delete.prefix}" arg2=""/>
+                    <not>
+                        <isset property="java-commons.delete.prefix"/>
+                    </not>
+               </or>
+           </condition>
+        </fail>
+
+        <delete verbose="true">
             <fileset dir="jars">
-                <include name="**/${prefix}" />
+                <include name="**/${java-commons.delete.prefix}" />
             </fileset>
         </delete>
     </target>
