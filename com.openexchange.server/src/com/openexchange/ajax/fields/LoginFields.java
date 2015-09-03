@@ -92,6 +92,8 @@ public class LoginFields {
 
     public static final String LANGUAGE_PARAM = "language";
 
+    public static final String STORE_LANGUAGE = "storeLanguage";
+
     private LoginFields() {
         super();
     }

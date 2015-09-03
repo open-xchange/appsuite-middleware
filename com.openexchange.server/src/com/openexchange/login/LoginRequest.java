@@ -128,4 +128,6 @@ public interface LoginRequest {
 
     String getLanguage();
 
+    boolean isStoreLanguage();
+
 }

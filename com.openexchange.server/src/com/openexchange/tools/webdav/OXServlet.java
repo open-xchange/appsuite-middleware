@@ -223,6 +223,11 @@ public abstract class OXServlet extends WebDavServlet {
         public String getLanguage() {
             return LoginTools.parseLanguage(req);
         }
+
+        @Override
+        public boolean isStoreLanguage() {
+            return LoginTools.parseStoreLanguage(req);
+        }
     }
 
     /**

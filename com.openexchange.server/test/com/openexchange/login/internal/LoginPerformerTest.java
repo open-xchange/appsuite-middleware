@@ -196,6 +196,11 @@ public class LoginPerformerTest {
             public String getLanguage() {
                 return null;
             }
+
+            @Override
+            public boolean isStoreLanguage() {
+                return false;
+            }
         };
     }
 
