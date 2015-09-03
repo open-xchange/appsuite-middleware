@@ -56,7 +56,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CreateDummyFileForInfostoreItemSolver}
@@ -70,9 +72,19 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
 
     private final DatabaseImpl database;
 
-    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final FileStorage storage) {
+    private User admin;
+
+    /**
+     * Initialises a new {@link CreateDummyFileForInfoitemSolver}.
+     * 
+     * @param database The database
+     * @param storage
+     * @param admin
+     */
+    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final FileStorage storage, User admin) {
         super(storage);
         this.database = database;
+        this.admin = admin;
     }
 
     @Override
@@ -83,18 +95,21 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
              */
             for (final String old_identifier : problems) {
                 try {
-                    int fsOwner = database.getDocumentHolderFor(old_identifier, entity.getContext());
-                    if (fsOwner > 0) {
-                        QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, entity.getContext().getContextId());
-                        String identifier = createDummyFile(storage);
-                        database.startTransaction();
-                        int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", entity.getContext());
-                        database.commit();
-                        if (changed == 1) {
-                            LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, entity.getContext().getContextId(), identifier);
-                        }
-                    } else {
-                        LOG.warn("No document holder found for identifier {} in context {}", old_identifier, entity.getContext().getContextId());
+                    Context context = entity.getContext();
+                    int fsOwner = database.getDocumentHolderFor(old_identifier, context);
+
+                    if (fsOwner < 0) {
+                        LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", old_identifier, context.getContextId());
+                        fsOwner = admin.getId();
+                    }
+
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId());
+                    String identifier = createDummyFile(storage);
+                    database.startTransaction();
+                    int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", context);
+                    database.commit();
+                    if (changed == 1) {
+                        LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, context.getContextId(), identifier);
                     }
                 } catch (final OXException e) {
                     LOG.error("", e);

@@ -920,7 +920,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 final String action = tuple[1];
                 if ("missing_file_for_infoitem".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storage);
+                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storage, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
                         dbsolver = new DeleteInfoitemSolver(database);
                     } else {
