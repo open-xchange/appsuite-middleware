@@ -54,9 +54,13 @@ import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
@@ -64,6 +68,7 @@ import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
+import com.openexchange.capabilities.rest.CapabilitiesRESTService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -94,6 +99,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
         SERVICES.set(this);
 
         PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);
@@ -184,6 +190,38 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 // Nothing
             }
 
+        });
+
+        track(ResultConverter.class, new ServiceTrackerCustomizer<ResultConverter, ResultConverter>() {
+
+            private volatile ServiceRegistration<CapabilitiesRESTService> restRegistration;
+
+            @Override
+            public ResultConverter addingService(ServiceReference<ResultConverter> reference) {
+                ResultConverter resultConverter = context.getService(reference);
+                if ("capability".equals(resultConverter.getInputFormat()) && "json".equals(resultConverter.getOutputFormat())) {
+                    restRegistration = context.registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(capService, resultConverter), null);
+                    return resultConverter;
+                }
+
+                context.ungetService(reference);
+                return null;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ResultConverter> reference, ResultConverter service) {
+                // Nothing
+            }
+
+            @Override
+            public void removedService(ServiceReference<ResultConverter> reference, ResultConverter service) {
+                ServiceRegistration<CapabilitiesRESTService> restRegistration = this.restRegistration;
+                if (null != restRegistration) {
+                    this.restRegistration = null;
+                    restRegistration.unregister();
+                }
+                context.ungetService(reference);
+            }
         });
 
         /*
