@@ -169,7 +169,7 @@ public class TaskManager {
 
             @Override
             public void run() {
-                flush();
+                cleanUp();
             }
         };
         timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
@@ -321,7 +321,7 @@ public class TaskManager {
     /**
      * Flushes this task manager affecting tasks older than 1 hour.
      */
-    void cleanUp() throws TaskManagerException {
+    void cleanUp() {
         Thread currentThread = Thread.currentThread();
         for (Iterator<Integer> iter = finishedJobs.iterator(); !currentThread.isInterrupted() && iter.hasNext();) {
             Integer jobId = iter.next();
