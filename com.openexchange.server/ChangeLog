@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 * 2015-09-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 38635: Property to add will now be escaped before searching for it as part of a regular expression.
+=======
+* 2015-09-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 40841: provide credentials for JMX authentication as expected by the authenticator
+>>>>>>> Fix for bug 40841: provide credentials for JMX authentication as expected by the authenticator
 
 * 2015-09-03 - thorben.betten@open-xchange.com
 
