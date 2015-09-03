@@ -2520,6 +2520,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw e;
                 }
                 final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                if (mailIDs.length == 0) {
+                    // If no subfolders exist in the mail account, loading the default folders fails.
+                    // Therefore we need to return early here.
+                    return treeMap;
+                }
+
                 final String publicFolderPath = getPublicMailFolderPath();
                 for (final SortableId sortableId : mailIDs) {
                     /*

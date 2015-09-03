@@ -77,7 +77,8 @@ public class CreateWithGuestPermissionTest extends ShareTest {
     }
 
     public void testCreateSharedFolderRandomly() throws Exception {
-        testCreateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
+        int module = randomModule();
+        testCreateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
     public void notTestCreateSharedFolderExtensively() throws Exception {

@@ -63,7 +63,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
@@ -107,7 +106,6 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -119,7 +117,6 @@ import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ShareTest}
@@ -185,54 +182,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
             deleteFilesSilently(client, filesToDelete.values());
         }
         super.tearDown();
-    }
-
-    /**
-     * Gets a host data based on the AJAX clients values.
-     */
-    protected HostData getRequestContext() {
-        return new HostData() {
-
-            @Override
-            public String getHost() {
-                return client.getHostname();
-            }
-
-            @Override
-            public String getDispatcherPrefix() {
-                return "/ajax/";
-            }
-
-            @Override
-            public String getRoute() {
-                return Tools.extractRoute(getHTTPSession());
-            }
-
-            @Override
-            public int getPort() {
-                return 80;
-            }
-
-            @Override
-            public boolean isSecure() {
-                return "https".equalsIgnoreCase(client.getProtocol());
-            }
-
-            @Override
-            public String getHTTPSession() {
-                try {
-                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
-                    for (Cookie cookie : cookies) {
-                        if ("JSESSIONID".equals(cookie.getName())) {
-                            return cookie.getValue();
-                        }
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-                return null;
-            }
-        };
     }
 
     /**
@@ -1161,14 +1110,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return TESTED_FOLDER_APIS[random.nextInt(TESTED_FOLDER_APIS.length)];
     }
 
-    protected static OCLGuestPermission randomGuestPermission() {
-        return TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
-    }
-
-    protected static OCLGuestPermission randomGuestPermission(RecipientType type) {
+    protected static OCLGuestPermission randomGuestPermission(int module) {
         OCLGuestPermission permission;
         do {
             permission = TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
+        } while (false == isReadOnly(permission) && isReadOnlySharing(module));
+        return permission;
+    }
+
+    protected static OCLGuestPermission randomGuestPermission(RecipientType type, int module) {
+        OCLGuestPermission permission;
+        do {
+            permission = randomGuestPermission(module);
         } while (false == type.equals(permission.getRecipient().getType()));
         return permission;
     }
@@ -1183,6 +1136,36 @@ public abstract class ShareTest extends AbstractAJAXSession {
             permission = TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
         } while (false == type.equals(permission.getRecipient().getType()));
         return permission;
+    }
+
+    /**
+     * Gets a value indicating whether a specific module enforces "read-only" sharing for guests or not.
+     *
+     * @param module The folder module to check
+     * @return <code>true</code> if the module may be used for "read-only" sharing to guest users only, <code>false</code>, otherwise
+     */
+    protected static boolean isReadOnlySharing(int module) {
+        return FolderObject.CALENDAR == module || FolderObject.TASK == module;
+    }
+
+    /**
+     * Gets a value indicating whether a specific permission is "read-only" or not.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if the permission is considered "read-only", false, otherwise
+     */
+    protected static boolean isReadOnly(OCLPermission permission) {
+        return false == (permission.canWriteOwnObjects() || permission.canCreateObjects() || permission.canDeleteOwnObjects());
+    }
+
+    /**
+     * Gets a value indicating whether a specific permission is "read-only" or not.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if the permission is considered "read-only", false, otherwise
+     */
+    protected static boolean isReadOnly(FileStorageObjectPermission permission) {
+        return false == (permission.canDelete() || permission.canWrite());
     }
 
     /**

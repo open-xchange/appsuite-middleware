@@ -260,7 +260,22 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
                     LOG.debug("No changes detected in {}, skipping update.", exceptionToSave);
                 } else {
-                    getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+                    try {
+                        getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+                    } catch (OXException e) {
+                        if ("OX-0001".equals(e.getErrorCode())) {
+                            StringBuilder stringBuilder = new StringBuilder("Exception when saving exception: ").append(e.getMessage()).append("\r\n")
+                                .append("appointmentToSave: ").append(appointmentToSave).append("\r\n")
+                                .append("originalAppointment: ").append(originalAppointment).append("\r\n")
+                                .append("exceptionToSave: ").append(exceptionToSave).append("\r\n")
+                                .append("originalException: ").append(originalException).append("\r\n")
+                                .append("originalExceptions: ").append(Arrays.toString(originalExceptions)).append("\r\n")
+                                .append("parsedICal:\r\n").append(parsedICal).append("\r\n")
+                            ;
+                            LOG.warn(stringBuilder.toString());
+                        }
+                        throw e;
+                    }
                     if (null != exceptionToSave.getLastModified()) {
                         clientLastModified = exceptionToSave.getLastModified();
                     }
@@ -429,11 +444,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
+    String parsedICal;
+
     private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
         try {
-            if (LOG.isTraceEnabled()) {
+            if (LOG.isTraceEnabled() || 1 == 1) {
                 byte[] iCal = Streams.stream2bytes(body);
-                LOG.trace(new String(iCal, Charsets.UTF_8));
+                parsedICal = new String(iCal, Charsets.UTF_8);
+                LOG.trace(parsedICal);
                 body = Streams.newByteArrayInputStream(iCal);
             }
             return factory.getIcalParser().parseAppointments(

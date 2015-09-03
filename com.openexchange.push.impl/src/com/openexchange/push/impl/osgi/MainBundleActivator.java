@@ -52,6 +52,7 @@ package com.openexchange.push.impl.osgi;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
 import com.openexchange.push.impl.credstorage.osgi.CredStorageActivator;
+import com.openexchange.push.soap.osgi.PushSoapActivator;
 
 
 /**
@@ -71,7 +72,7 @@ public class MainBundleActivator extends CompositeBundleActivator {
 
     @Override
     protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new PushImplActivator(), new CredStorageActivator() };
+        return new BundleActivator[] { new PushImplActivator(), new PushSoapActivator(), new CredStorageActivator() };
     }
 
 }

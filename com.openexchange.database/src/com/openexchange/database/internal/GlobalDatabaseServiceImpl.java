@@ -179,7 +179,15 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
              * replication monitor
              */
             final AssignmentImpl assignment = dbConfig.getAssignment();
-            final AssignmentImpl firstAssignment = new AssignmentImpl(assignment);
+            final AssignmentImpl firstAssignment = new AssignmentImpl(assignment) {
+
+                private static final long serialVersionUID = -6801059791528227771L;
+
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
+            };
             DBMigrationConnectionProvider connectionProvider = new DBMigrationConnectionProvider() {
 
                 @Override

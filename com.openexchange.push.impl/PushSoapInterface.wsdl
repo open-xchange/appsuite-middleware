@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ox="http://soap.push.openexchange.com" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://soap.push.openexchange.com">
+    <wsdl:types>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://soap.push.openexchange.com">
+            <xs:element name="PushSoapInterfaceException">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="PushSoapInterfaceException" nillable="true" type="ox:Exception"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="Exception">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="listPushUsers">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="admin" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listPushUsersResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ox:PushUserInfo"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="PushUserInfo">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="permanent" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="pushUser" nillable="true" type="ox:PushUser"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="PushUser">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="contextId" type="xs:int"/>
+                    <xs:element minOccurs="0" name="userId" type="xs:int"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="unregisterPermanentListenerFor">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="userId" type="xs:int"/>
+                        <xs:element minOccurs="0" name="contextId" type="xs:int"/>
+                        <xs:element minOccurs="0" name="client" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="admin" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="unregisterPermanentListenerForResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listRegisteredPushUsers">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="admin" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listRegisteredPushUsersResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ox:PushUserClient"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="PushUserClient">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="client" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="0" name="pushUser" nillable="true" type="ox:PushUser"/>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="unregisterPermanentListenerForRequest">
+        <wsdl:part name="parameters" element="ox:unregisterPermanentListenerFor"/>
+    </wsdl:message>
+    <wsdl:message name="unregisterPermanentListenerForResponse">
+        <wsdl:part name="parameters" element="ox:unregisterPermanentListenerForResponse"/>
+    </wsdl:message>
+    <wsdl:message name="PushSoapInterfaceException">
+        <wsdl:part name="parameters" element="ox:PushSoapInterfaceException"/>
+    </wsdl:message>
+    <wsdl:message name="listPushUsersRequest">
+        <wsdl:part name="parameters" element="ox:listPushUsers"/>
+    </wsdl:message>
+    <wsdl:message name="listPushUsersResponse">
+        <wsdl:part name="parameters" element="ox:listPushUsersResponse"/>
+    </wsdl:message>
+    <wsdl:message name="listRegisteredPushUsersRequest">
+        <wsdl:part name="parameters" element="ox:listRegisteredPushUsers"/>
+    </wsdl:message>
+    <wsdl:message name="listRegisteredPushUsersResponse">
+        <wsdl:part name="parameters" element="ox:listRegisteredPushUsersResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="PushSoapInterfacePortType">
+        <wsdl:operation name="unregisterPermanentListenerFor">
+            <wsdl:input message="ox:unregisterPermanentListenerForRequest" wsaw:Action="urn:unregisterPermanentListenerFor"/>
+            <wsdl:output message="ox:unregisterPermanentListenerForResponse" wsaw:Action="urn:unregisterPermanentListenerForResponse"/>
+            <wsdl:fault message="ox:PushSoapInterfaceException" name="PushSoapInterfaceException" wsaw:Action="urn:unregisterPermanentListenerForPushSoapInterfaceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="listPushUsers">
+            <wsdl:input message="ox:listPushUsersRequest" wsaw:Action="urn:listPushUsers"/>
+            <wsdl:output message="ox:listPushUsersResponse" wsaw:Action="urn:listPushUsersResponse"/>
+            <wsdl:fault message="ox:PushSoapInterfaceException" name="PushSoapInterfaceException" wsaw:Action="urn:listPushUsersPushSoapInterfaceException"/>
+        </wsdl:operation>
+        <wsdl:operation name="listRegisteredPushUsers">
+            <wsdl:input message="ox:listRegisteredPushUsersRequest" wsaw:Action="urn:listRegisteredPushUsers"/>
+            <wsdl:output message="ox:listRegisteredPushUsersResponse" wsaw:Action="urn:listRegisteredPushUsersResponse"/>
+            <wsdl:fault message="ox:PushSoapInterfaceException" name="PushSoapInterfaceException" wsaw:Action="urn:listRegisteredPushUsersPushSoapInterfaceException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="PushSoapInterfaceSoap11Binding" type="ox:PushSoapInterfacePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="jaxb"/>
+        <wsdl:operation name="unregisterPermanentListenerFor">
+            <soap:operation soapAction="urn:unregisterPermanentListenerFor" style="jaxb"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listPushUsers">
+            <soap:operation soapAction="urn:listPushUsers" style="jaxb"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listRegisteredPushUsers">
+            <soap:operation soapAction="urn:listRegisteredPushUsers" style="jaxb"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="PushSoapInterfaceSoap12Binding" type="ox:PushSoapInterfacePortType">
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="jaxb"/>
+        <wsdl:operation name="unregisterPermanentListenerFor">
+            <soap12:operation soapAction="urn:unregisterPermanentListenerFor" style="jaxb"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap12:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listPushUsers">
+            <soap12:operation soapAction="urn:listPushUsers" style="jaxb"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap12:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listRegisteredPushUsers">
+            <soap12:operation soapAction="urn:listRegisteredPushUsers" style="jaxb"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="PushSoapInterfaceException">
+                <soap12:fault use="literal" name="PushSoapInterfaceException"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="PushSoapInterfaceHttpBinding" type="ox:PushSoapInterfacePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="unregisterPermanentListenerFor">
+            <http:operation location="unregisterPermanentListenerFor"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="listPushUsers">
+            <http:operation location="listPushUsers"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="listRegisteredPushUsers">
+            <http:operation location="listRegisteredPushUsers"/>
+            <wsdl:input>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="application/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="PushSoapInterface">
+        <wsdl:port name="PushSoapInterfaceHttpSoap11Endpoint" binding="ox:PushSoapInterfaceSoap11Binding">
+            <soap:address location="http://localhost:8080/axis2/services/PushSoapInterface"/>
+        </wsdl:port>
+        <wsdl:port name="PushSoapInterfaceHttpSoap12Endpoint" binding="ox:PushSoapInterfaceSoap12Binding">
+            <soap12:address location="http://localhost:8080/axis2/services/PushSoapInterface"/>
+        </wsdl:port>
+        <wsdl:port name="PushSoapInterfaceHttpEndpoint" binding="ox:PushSoapInterfaceHttpBinding">
+            <http:address location="http://localhost:8080/axis2/services/PushSoapInterface"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

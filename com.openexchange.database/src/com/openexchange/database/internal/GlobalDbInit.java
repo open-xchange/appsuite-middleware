@@ -133,19 +133,39 @@ public class GlobalDbInit {
              * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
              * replication monitor
              */
-            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment());
+            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment()) {
+
+                private static final long serialVersionUID = -6801059792528227771L;
+
+                @Override
+                public boolean isToConfigDB() {
+                    return true;
+                }
+            };
             Connection connection = null;
+            boolean modified = false;
+
+            boolean rollback = false;
             try {
                 connection = monitor.checkFallback(pools, firstAssignment, true, true, true);
-                connection.setAutoCommit(false);
-                prepare(connection, dbConfig.getSchema());
-                connection.commit();
+                connection.setAutoCommit(false); // BEGIN
+                rollback = true;
+                modified = prepare(connection, dbConfig.getSchema());
+                connection.commit(); // COMMIT
+                rollback = false;
             } catch (SQLException e) {
-                DBUtils.rollback(connection);
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
+                if (rollback) {
+                    DBUtils.rollback(connection);
+                }
                 DBUtils.autocommit(connection);
-                DBUtils.close(connection);
+
+                if (null != connection) {
+                    ConnectionState connectionState = new ConnectionState(!modified);
+                    connectionState.setUsedForUpdate(modified);
+                    monitor.backAndIncrementTransaction(pools, firstAssignment, connection, true, true, connectionState);
+                }
             }
         }
     }
@@ -195,7 +215,7 @@ public class GlobalDbInit {
             Integer poolID = entry.getKey();
             GlobalDbConfig dbConfig = configsByPool.get(poolID);
             if (null == dbConfig) {
-                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier " + poolID + " found.");
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier "+ poolID +" found.");
             }
             for (String group : entry.getValue()) {
                 if (null != dbConfigs.put(group, dbConfig)) {

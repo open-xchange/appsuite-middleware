@@ -103,9 +103,9 @@ public final class PasswordResetServletTest extends ShareTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        OCLGuestPermission lGuestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
-         * \u00b0 create folder shared to guest user
+         * create folder shared to guest user
          */
         int module = randomModule();
         EnumAPI api = randomFolderAPI();

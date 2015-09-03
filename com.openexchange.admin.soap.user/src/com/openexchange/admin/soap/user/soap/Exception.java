@@ -42,6 +42,7 @@ import com.openexchange.admin.soap.user.io.IOException;
 @XmlSeeAlso({
     InvalidDataException.class,
     NoSuchContextException.class,
+    NoSuchFilestoreException.class,
     StorageException.class,
     NoSuchUserException.class,
     DuplicateExtensionException.class,

@@ -89,9 +89,9 @@ public class GuestAutologinTest extends ShareTest {
         /*
          * create folder shared to guest user
          */
-        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST);
-        ShareRecipient recipient = guestPermission.getRecipient();
         int module = randomModule();
+        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST, module);
+        ShareRecipient recipient = guestPermission.getRecipient();
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), guestPermission);
         /*
          * check permissions
@@ -136,9 +136,9 @@ public class GuestAutologinTest extends ShareTest {
         /*
          * create folder shared to guest user
          */
-        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST);
-        ShareRecipient recipient = guestPermission.getRecipient();
         int module = randomModule();
+        OCLGuestPermission guestPermission = randomGuestPermission(RecipientType.GUEST, module);
+        ShareRecipient recipient = guestPermission.getRecipient();
         FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, module, getDefaultFolder(module), guestPermission);
         /*
          * check permissions

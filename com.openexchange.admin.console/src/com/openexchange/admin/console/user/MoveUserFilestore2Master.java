@@ -85,13 +85,18 @@ public class MoveUserFilestore2Master extends UserFilestoreAbstraction {
             // get rmi ref
             OXUserInterface oxusr = getUserInterface();
 
+            // Get master file storage identifier
+            Integer masterStorageId;
             if (null == masterUser) {
                 masterUser = oxusr.getContextAdmin(ctx, auth);
+                masterStorageId = masterUser.getFilestoreId();
+            } else {
+                masterStorageId = oxusr.getData(ctx, masterUser, auth).getFilestoreId();
             }
 
             int jobId = oxusr.moveFromUserFilestoreToMaster(ctx, usr, masterUser, auth);
 
-            displayMovedMessage(successtext, null, "to master filestore " + masterUser.getFilestoreId() + " scheduled as job " + jobId, parser);
+            displayMovedMessage(successtext, null, "to master filestore " + masterStorageId + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id

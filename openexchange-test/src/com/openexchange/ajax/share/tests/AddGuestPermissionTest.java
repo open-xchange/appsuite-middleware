@@ -54,21 +54,15 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
-import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link AddGuestPermissionTest}
@@ -87,7 +81,8 @@ public class AddGuestPermissionTest extends ShareTest {
     }
 
     public void testUpdateSharedFolderRandomly() throws Exception {
-        testUpdateSharedFolder(randomFolderAPI(), randomModule(), randomGuestPermission());
+        int module = randomModule();
+        testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderExtensively() throws Exception {
@@ -104,22 +99,6 @@ public class AddGuestPermissionTest extends ShareTest {
         testUpdateSharedFile(randomFolderAPI(), randomGuestObjectPermission());
     }
 
-    public void testBug40596() throws Exception {
-        File file = insertFile(client.getValues().getPrivateInfostoreFolder());
-        remember(file);
-        OCLGuestPermission guestPermission = createNamedGuestPermission("testbug40596@example.com", "Bug 40596", "secret");
-        DefaultFileStorageGuestObjectPermission objectPermission = (DefaultFileStorageGuestObjectPermission) asObjectPermission(guestPermission);
-        objectPermission.setPermissions(FileStorageGuestObjectPermission.DELETE);
-        file.setObjectPermissions(Collections.<FileStorageObjectPermission> singletonList(objectPermission));
-        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, new Field[] { Field.OBJECT_PERMISSIONS }, file.getLastModified());
-        updateInfostoreRequest.setNotifyPermissionEntities(Transport.MAIL);
-        updateInfostoreRequest.setFailOnError(false);
-        UpdateInfostoreResponse updateInfostoreResponse = getClient().execute(updateInfostoreRequest);
-        assertTrue(updateInfostoreResponse.hasError());
-        OXException e = updateInfostoreResponse.getException();
-        assertTrue(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.equals(e));
-    }
-
     public void noTestUpdateSharedFileExtensively() throws Exception {
         for (FileStorageGuestObjectPermission guestPermission : TESTED_OBJECT_PERMISSIONS) {
             testUpdateSharedFile(randomFolderAPI(), guestPermission);
@@ -128,7 +107,7 @@ public class AddGuestPermissionTest extends ShareTest {
 
     public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
         int module = randomModule();
-        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission());
+        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module));
     }
 
     public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {

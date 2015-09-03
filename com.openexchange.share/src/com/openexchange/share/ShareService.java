@@ -95,16 +95,6 @@ public interface ShareService {
     GuestInfo getGuestInfo(Session session, int guestID) throws OXException;
 
     /**
-     * Resolves the supplied token and path to a single share.
-     *
-     * @param token The token to resolve
-     * @param path The path to the share target
-     * @return The share
-     * @throws OXException On error
-     */
-    List<ShareInfo> getShare(String token, String path) throws OXException;
-
-    /**
      * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
      * <p/>
      * <b>Remarks:</b>
@@ -198,25 +188,6 @@ public interface ShareService {
     void deleteTargets(Session session, List<ShareTarget> targets, boolean includeItems) throws OXException;
 
     /**
-     * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
-     * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
-     * removed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
-     * of those for the caller</li>
-     * <li>Since the referenced share targets are are updated accordingly, depending permissions checks are performed, especially
-     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
-     * permissions are not sufficient</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param tokens The tokens to delete the shares for
-     */
-    void deleteShares(Session session, List<String> tokens) throws OXException;
-
-    /**
      * Deletes a share.
      * <p/>
      * <b>Remarks:</b>
@@ -275,23 +246,6 @@ public interface ShareService {
      * @return A share info representing the updated share
      */
     ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException;
-
-    /**
-     * Gets all shares that were created by the supplied session's user.
-     *
-     * @param session The session
-     * @return The shares, or an empty list if there are none.
-     */
-    List<ShareInfo> getAllShares(Session session) throws OXException;
-
-    /**
-     * Gets all shares that were created for the specified module by the supplied session's user.
-     *
-     * @param session The session
-     * @param module The module
-     * @return The shares, or an empty list if there are none.
-     */
-    List<ShareInfo> getAllShares(Session session, String module) throws OXException;
 
     /**
      * Gets all shares for a specific target.

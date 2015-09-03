@@ -189,17 +189,14 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
     private Object getTaskResults(final int id, final Integer cid) throws InterruptedException, ExecutionException, InvalidDataException, TaskManagerException {
         if (id < 0) {
-            throw new InvalidDataException("Task must be a value >= 0");
+            throw new InvalidDataException("Task identifier must be a value >= 0");
         }
-        final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id, cid);
-        if (null != task) {
-            if (task.isDone()) {
-                return task.get();
-            } else {
-                return null;
-            }
-        } else {
-            throw new InvalidDataException("No such Task ID");
+
+        ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id, cid);
+        if (null == task) {
+            throw new InvalidDataException("No such task for identifier " + id);
         }
+
+        return task.isDone() ? task.get() : null;
     }
 }

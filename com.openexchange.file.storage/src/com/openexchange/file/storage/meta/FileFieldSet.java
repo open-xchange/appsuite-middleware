@@ -218,7 +218,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object shareable(Object... args) {
-        md(args).setShareable(true);
+        md(args).setShareable(bool(1, args));
         return null;
     }
 

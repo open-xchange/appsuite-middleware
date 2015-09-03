@@ -173,42 +173,11 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<ShareInfo> getShare(String token, String path) throws OXException {
-        if (Strings.isEmpty(token) || Strings.isEmpty(path)) {
-            return null;
-        }
-        GuestShare share = resolveToken(token);
-        GuestInfo guest = resolveGuest(token);
-        PersonalizedShareTarget personalizedTarget = share.resolvePersonalizedTarget(path);
-        ShareTarget target = share.resolveTarget(personalizedTarget);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(share.getGuest().getContextID(), target.getModule(), target.getFolder(), target.getItem(), StorageParameters.NO_PARAMETERS);
-        for (Share s : shares) {
-            if (s.getCreatedBy() != guest.getCreatedBy() || s.getGuest() != guest.getGuestID() || !share.getGuest().equals(guest)) {
-                shares.remove(s);
-            }
-        }
-        return createShareInfos(services, guest.getContextID(), shares);
-    }
-
-    @Override
     public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
         int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         shares = removeInaccessible(session, shares);
-        return createShareInfos(services, session.getContextId(), shares);
-    }
-
-    @Override
-    public List<ShareInfo> getAllShares(Session session) throws OXException {
-        return getAllShares(session, null);
-    }
-
-    @Override
-    public List<ShareInfo> getAllShares(Session session, String module) throws OXException {
-        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
-        shares = removeExpired(session.getContextId(), shares);
         return createShareInfos(services, session.getContextId(), shares);
     }
 
@@ -411,11 +380,6 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public void deleteShares(Session session, List<String> tokens) throws OXException {
-        removeShares(session, session.getContextId(), tokens);
-    }
-
-    @Override
     public void deleteShare(Session session, Share share, Date clientTimestamp) throws OXException {
         if (null == share.getTarget() || 0 >= share.getGuest()) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("not enough information to delete share");
@@ -448,7 +412,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public GuestInfo resolveGuest(String token) throws OXException {
+    public DefaultGuestInfo resolveGuest(String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
         int contextID = shareToken.getContextID();
         User guestUser;
@@ -486,12 +450,38 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
+     * Resolves the a share token to the referenced shares.
+     *
+     * @param token The token to resolve
+     * @param path The path to a specific share target, or <code>null</code> to resolve all accessible shares
+     * @return The shares
+     */
+    public List<ShareInfo> getShares(String token, String path) throws OXException {
+        DefaultGuestInfo guest = resolveGuest(token);
+        if (null == guest) {
+            return null;
+        }
+        int contextID = guest.getContextID();
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getGuestID(), StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(contextID, shares);
+        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        for (Share share : shares) {
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), contextID, guest.getGuestID());
+            if (null == path || path.equals(personalizedTarget.getPath())) {
+                shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), share, personalizedTarget));
+            }
+        }
+        return shareInfos;
+    }
+
+    /**
      * Gets all shares created in a specific context.
      *
      * @param contextID The context identifier
      * @return The shares, or an empty list if there are none
      */
-    public List<ShareInfo> getAllShares(int contextID) throws OXException {
+    List<ShareInfo> getAllShares(int contextID) throws OXException {
         return createShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
     }
 
@@ -502,7 +492,7 @@ public class DefaultShareService implements ShareService {
      * @param userID The user identifier
      * @return The shares, or an empty list if there are none
      */
-    public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
+    List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
         return createShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
     }
 
@@ -517,7 +507,7 @@ public class DefaultShareService implements ShareService {
      * @param contextID The context identifier
      * @return The number of affected shares
      */
-    public int removeShares(int contextID) throws OXException {
+    int removeShares(int contextID) throws OXException {
         List<Share> shares;
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
@@ -556,7 +546,7 @@ public class DefaultShareService implements ShareService {
      * @param userID The identifier of the user to delete the shares for
      * @return The number of affected shares
      */
-    public int removeShares(int contextID, int userID) throws OXException {
+    int removeShares(int contextID, int userID) throws OXException {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         List<Share> shares = shareStorage.loadSharesCreatedBy(contextID, userID, -1, connectionHelper.getParameters());
@@ -599,7 +589,7 @@ public class DefaultShareService implements ShareService {
      * @param tokens The tokens to delete the shares for
      * @return The number of affected shares
      */
-    public int removeShares(List<String> tokens) throws OXException {
+    int removeShares(List<String> tokens) throws OXException {
         /*
          * order tokens by context
          */
@@ -623,7 +613,7 @@ public class DefaultShareService implements ShareService {
         return affectedShares;
     }
 
-    public int removeShares(List<String> tokens, int contextID) throws OXException {
+    int removeShares(List<String> tokens, int contextID) throws OXException {
         for (String token : tokens) {
             if (contextID != new ShareToken(token).getContextID()) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
@@ -659,36 +649,6 @@ public class DefaultShareService implements ShareService {
         if (null != affectedGuests && 0 < affectedGuests.length) {
             scheduleGuestCleanup(contextID, affectedGuests);
         }
-    }
-
-    private List<ShareInfo> getShares(Session session, String token) throws OXException {
-        /*
-         * resolve share token & get associated guest user
-         */
-        ShareToken shareToken = new ShareToken(token);
-        int contextID = session.getContextId();
-        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        shareToken.verifyGuest(contextID, guest);
-        /*
-         * get shares for guest and filter results as needed
-         */
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
-        shares = removeExpired(contextID, shares);
-        if (guest.getId() == session.getUserId()) {
-            /*
-             * implicitly adjust share targets if the session's user is the guest himself
-             */
-            return createShareInfos(services, contextID, shares);
-        }
-        /*
-         * filter share targets not accessible for the session's user before returning results
-         */
-
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken, getLinkTarget(contextID, guest));
-        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
-            shares = removeInaccessible(session, shares);
-        }
-        return createShareInfos(services, contextID, shares);
     }
 
     /**

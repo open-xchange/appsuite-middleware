@@ -57,6 +57,7 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ParallelGuestSessionsTest}
@@ -74,14 +75,14 @@ public class ParallelGuestSessionsTest extends ShareTest {
         super(name);
     }
 
-    public void testParallelGuestSessions() throws Exception {
-        for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
-            testParallelGuestSessions(randomFolderAPI(), randomModule(), guestPermission);
-        }
+    public void testParallelInvitedGuestSessions() throws Exception {
+        int module = randomModule();
+        testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.GUEST, module));
     }
 
-    private void testParallelGuestSessions(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
-        testParallelGuestSessions(api, module, getDefaultFolder(module), guestPermission);
+    public void testParallelAnonymousGuestSessions() throws Exception {
+        int module = randomModule();
+        testParallelGuestSessions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(RecipientType.ANONYMOUS, module));
     }
 
     private void testParallelGuestSessions(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {

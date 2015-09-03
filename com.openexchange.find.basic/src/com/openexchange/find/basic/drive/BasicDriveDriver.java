@@ -102,6 +102,7 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
@@ -211,6 +212,22 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
 
         return new AutocompleteResult(facets);
+    }
+
+    @Override
+    protected List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+        List<FacetType> types = new ArrayList<>(6);
+        types.add(CommonFacetType.FOLDER);
+        types.add(CommonFacetType.GLOBAL);
+        types.add(DriveFacetType.FILE_TYPE);
+        if (supportsSearchByTerm(session, autocompleteRequest)) {
+            types.add(DriveFacetType.FILE_NAME);
+            types.add(DriveFacetType.FILE_DESCRIPTION);
+            types.add(DriveFacetType.FILE_SIZE);
+            types.add(CommonFacetType.DATE);
+        }
+
+        return types;
     }
 
     @Override

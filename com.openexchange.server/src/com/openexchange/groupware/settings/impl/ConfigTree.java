@@ -324,7 +324,6 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.mail.LineWrapSP3.class,
             com.openexchange.groupware.settings.tree.mail.SendAddressSP3.class,
             com.openexchange.groupware.settings.tree.mail.SpamButtonSP3.class,
-            com.openexchange.groupware.settings.tree.mail.VCardSP3.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.MinimumSearchCharacters.class,
             com.openexchange.groupware.settings.tree.modules.calendar.GUI.class,

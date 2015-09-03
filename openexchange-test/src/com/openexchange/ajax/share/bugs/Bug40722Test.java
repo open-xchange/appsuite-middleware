@@ -78,7 +78,7 @@ public class Bug40722Test extends ShareTest {
     }
 
     public void testRemoveGuestPassword() throws Exception {
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "Test Guest", "secret");
         /*
          * create folder shared to guest user
          */

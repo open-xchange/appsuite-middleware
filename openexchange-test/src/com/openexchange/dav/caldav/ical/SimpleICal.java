@@ -147,9 +147,13 @@ public class SimpleICal {
             return exDates;
         }
 
-	    public void setSummary(String summary) throws ParseException {
-	        this.setProperty("SUMMARY", summary);
-	    }
+        public void setSummary(String summary) throws ParseException {
+            this.setProperty("SUMMARY", summary);
+        }
+
+        public void setLocation(String location) throws ParseException {
+            this.setProperty("LOCATION", location);
+        }
 
         public Date getRecurrenceID() throws ParseException {
             return ICalUtils.parseDate(this.getProperty("RECURRENCE-ID"));

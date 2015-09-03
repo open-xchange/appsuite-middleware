@@ -56,9 +56,12 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -81,6 +84,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -100,9 +104,12 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -133,6 +140,7 @@ import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
 
 /**
  * @author cutmasta
@@ -2700,6 +2708,38 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 }
 
+                com.openexchange.groupware.ldap.User gwUser = null;
+                try {
+                    com.openexchange.groupware.contexts.Context gwCtx = AdminServiceRegistry.getInstance().getService(ContextService.class).getContext(contextId);
+                    gwUser = AdminServiceRegistry.getInstance().getService(UserService.class).getUser(userId, gwCtx);
+                } catch (Exception e) {
+                    log.error("Failed to load groupware user.", e);
+                }
+
+                if (null != gwUser) {
+                    int filestoreId = gwUser.getFilestoreId();
+                    if (filestoreId > 0) {
+                        int owner = gwUser.getFileStorageOwner();
+                        if (owner <= 0 || owner == userId) {
+                            // Delete file storage
+                            QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
+                            QuotaFileStorage quotaFileStorage = qfsService.getQuotaFileStorage(userId, contextId);
+
+                            try {
+                                quotaFileStorage.remove();
+                            } catch (Exception e) {
+                                // Try hard-delete
+                                URI storageURI = quotaFileStorage.getUri();
+                                if ("file".equalsIgnoreCase(storageURI.getScheme())) {
+                                    FileUtils.deleteDirectory(new File(storageURI));
+                                } else {
+                                    throw new StorageException("Can't hard-delete non-local file store at \"" + storageURI + "\"");
+                                }
+                            }
+                        }
+                    }
+                }
+
                 log.debug("Delete user {}({}) from login2user...", user.getId(), ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
                 stmt.setInt(1, contextId);
@@ -2823,6 +2863,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             log.error("Delete contact yielded groupware API error");
             throw new StorageException(e.toString());
+        } catch (final IOException e) {
+            log.error("", e);
+            throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
         }

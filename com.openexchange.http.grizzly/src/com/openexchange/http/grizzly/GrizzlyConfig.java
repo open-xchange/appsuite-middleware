@@ -496,7 +496,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     }
 
     /**
-     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id.
+     * Get the name of the echo header whose value is echoed for each request providing that header when using KippData's mod_id.
      * @return The name of the echo header whose value is echoed for each request providing that header.
      */
     public String getEchoHeader() {
