@@ -52,8 +52,8 @@ package com.openexchange.capabilities.json.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.json.Capability2JSON;
-import com.openexchange.capabilities.json.CapabilityActionFactory;
+import com.openexchange.capabilities.json.actions.CapabilityActionFactory;
+import com.openexchange.capabilities.json.converter.Capability2JSON;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 

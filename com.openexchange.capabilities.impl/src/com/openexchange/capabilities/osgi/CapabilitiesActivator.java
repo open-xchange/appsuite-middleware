@@ -56,11 +56,8 @@ import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
@@ -178,6 +175,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
         registerService(CapabilityService.class, capService);
 
+        registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(capService));
+
         track(Capability.class, new SimpleRegistryListener<Capability>() {
 
             @Override
@@ -190,38 +189,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 // Nothing
             }
 
-        });
-
-        track(ResultConverter.class, new ServiceTrackerCustomizer<ResultConverter, ResultConverter>() {
-
-            private volatile ServiceRegistration<CapabilitiesRESTService> restRegistration;
-
-            @Override
-            public ResultConverter addingService(ServiceReference<ResultConverter> reference) {
-                ResultConverter resultConverter = context.getService(reference);
-                if ("capability".equals(resultConverter.getInputFormat()) && "json".equals(resultConverter.getOutputFormat())) {
-                    restRegistration = context.registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(capService, resultConverter), null);
-                    return resultConverter;
-                }
-
-                context.ungetService(reference);
-                return null;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ResultConverter> reference, ResultConverter service) {
-                // Nothing
-            }
-
-            @Override
-            public void removedService(ServiceReference<ResultConverter> reference, ResultConverter service) {
-                ServiceRegistration<CapabilitiesRESTService> restRegistration = this.restRegistration;
-                if (null != restRegistration) {
-                    this.restRegistration = null;
-                    restRegistration.unregister();
-                }
-                context.ungetService(reference);
-            }
         });
 
         /*

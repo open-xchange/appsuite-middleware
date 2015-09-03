@@ -47,18 +47,16 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.capabilities.json.converter;
 
 import java.util.Collection;
-import java.util.Iterator;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -98,32 +96,13 @@ public class Capability2JSON implements ResultConverter {
         Object resultObject = result.getResultObject();
         try {
             if (Collection.class.isInstance(resultObject)) {
-                result.setResultObject(transform((Collection<Capability>) resultObject), "json");
+                result.setResultObject(CapabilitiesJsonWriter.toJson((Collection<Capability>) resultObject), "json");
             } else {
-                result.setResultObject(transform((Capability) resultObject), "json");
+                result.setResultObject(CapabilitiesJsonWriter.toJson((Capability) resultObject), "json");
             }
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
-    }
-
-    private static final JSONObject EMPTY_JSON = new JSONObject(0);
-
-    private JSONObject transform(Capability resultObject) throws JSONException {
-        final JSONObject object = new JSONObject(3);
-        object.put("id", resultObject.getId());
-        object.put("attributes", EMPTY_JSON);
-        return object;
-    }
-
-    private JSONArray transform(Collection<Capability> resultObjects) throws JSONException {
-        int size = resultObjects.size();
-        JSONArray array = new JSONArray(size);
-        Iterator<Capability> iterator = resultObjects.iterator();
-        for (int i = size; i-- > 0 ;) {
-            array.put(transform(iterator.next()));
-        }
-        return array;
     }
 
 }
