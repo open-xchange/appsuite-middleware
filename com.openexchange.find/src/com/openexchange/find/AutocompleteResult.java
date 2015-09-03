@@ -49,9 +49,7 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
-import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.Facet;
 
 /**
@@ -66,13 +64,10 @@ public class AutocompleteResult implements Serializable {
 
     private List<Facet> facets;
 
-    private List<ActiveFacet> unsupportedFacets;
-
 
     public AutocompleteResult(List<Facet> facets) {
         super();
         this.facets = facets;
-        unsupportedFacets = Collections.emptyList();
     }
 
     /**
@@ -88,23 +83,6 @@ public class AutocompleteResult implements Serializable {
      */
     public void setFacets(List<Facet> facets) {
         this.facets = facets;
-    }
-
-    /**
-     * @return The list of active facets that have been provided by the according auto-complete
-     * request, but cannot be applied on a subsequent query request. May be empty but never
-     * <code>null</code>.
-     */
-    public List<ActiveFacet> getUnsupportedFacets() {
-        return unsupportedFacets;
-    }
-
-    /**
-     * Sets the list of active facets that have been provided by the according auto-complete
-     * request, but cannot be applied on a subsequent query request.
-     */
-    public void setUnsupportedFacets(List<ActiveFacet> unsupportedFacets) {
-        this.unsupportedFacets = unsupportedFacets;
     }
 
     @Override

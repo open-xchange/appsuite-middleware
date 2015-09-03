@@ -1,6 +1,13 @@
+* 2015-09-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38635: Property to add will now be escaped before searching for it as part of a regular expression.
+
 * 2015-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 40859: Orderly deal with individual user file storages containing no files
+ - Fix for bug 40885: Extended push delete listener to drop remaining permanent listeners on user/context deletion
+ - Fix for bug 40860: Drop leftover directory when moving an individual user file storage
+ - Fix for bug 40863: Output value for quota-max/quota-used in MB
 
 * 2015-09-02 - thorben.betten@open-xchange.com
 

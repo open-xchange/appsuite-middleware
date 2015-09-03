@@ -122,6 +122,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     };
 
+    private static final Long MAX_FILESTORE_CAPACITY = new Long("8796093022208");
+
     public OXUtilMySQLStorage() {
         super();
     }
@@ -661,7 +663,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     if (null != maxQuota) {
                         long quota_max_temp = maxQuota.longValue();
                         if (quota_max_temp != -1) {
-                            quota_max_temp *= Math.pow(2, 20);
+                            quota_max_temp = quota_max_temp << 20;
                         }
                         prep = con.prepareStatement("UPDATE user SET quota_max = ? WHERE cid = ? AND id = ?");
                         prep.setLong(1, quota_max_temp);
@@ -701,12 +703,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             final Long store_size = fstore.getSize();
             if (null != store_size && fstore.getSize() != -1) {
-                final Long l_max = new Long("8796093022208");
-                if (store_size > l_max.longValue()) {
+                final Long l_max = MAX_FILESTORE_CAPACITY;
+                if (store_size.doubleValue() > l_max.longValue()) {
                     throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
                 }
-                double store_size_double = store_size;
-                store_size_double *= Math.pow(2, 20);
+                long store_size_double = store_size.longValue();
+                store_size_double = store_size_double << 20;
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET size = ? WHERE id = ?");
                 prep.setLong(1, Math.round(store_size_double));
                 prep.setInt(2, id);
@@ -1174,11 +1176,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public int registerFilestore(final Filestore fstore) throws StorageException {
         Connection con = null;
         long store_size = fstore.getSize();
-        final Long l_max = new Long("8796093022208");
+        final Long l_max = MAX_FILESTORE_CAPACITY;
         if (store_size > l_max.longValue()) {
             throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
         }
-        store_size *= Math.pow(2, 20);
+        store_size = store_size << 20;
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,61 @@
  *
  */
 
-package com.openexchange.find.json.converters;
+package com.openexchange.capabilities.json;
 
+import java.util.Collection;
+import java.util.Iterator;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.AutocompleteResult;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.capabilities.Capability;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link CapabilitiesJsonWriter} - A simple JSON writer for capabilities.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
+public class CapabilitiesJsonWriter {
 
-    public AutocompleteResultJSONConverter(final StringTranslator translator) {
-        super(translator);
+    /**
+     * Initializes a new {@link CapabilitiesJsonWriter}.
+     */
+    private CapabilitiesJsonWriter() {
+        super();
     }
 
-    @Override
-    public String getInputFormat() {
-        return AutocompleteResult.class.getName();
+    private static final JSONObject EMPTY_JSON = new JSONObject(0);
+
+    /**
+     * Converts given capability to its JSON representation.
+     *
+     * @param capability The capability
+     * @return The capability's JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject toJson(Capability capability) throws JSONException {
+        final JSONObject object = new JSONObject(3);
+        object.put("id", capability.getId());
+        object.put("attributes", EMPTY_JSON);
+        return object;
     }
 
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
-        try {
-            JSONObject jsonResult = new JSONObject(2);
-            jsonResult.put("facets", convertFacets(session, autocompleteResult.getFacets()));
-            result.setResultObject(jsonResult, "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+    /**
+     * Converts given capabilities collection to its JSON representation.
+     *
+     * @param capabilities The capabilities collection
+     * @return The JSON representation for the capabilities collection
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONArray toJson(Collection<Capability> capabilities) throws JSONException {
+        int size = capabilities.size();
+        JSONArray array = new JSONArray(size);
+        Iterator<Capability> iterator = capabilities.iterator();
+        for (int i = size; i-- > 0;) {
+            array.put(toJson(iterator.next()));
         }
+        return array;
     }
 
 }

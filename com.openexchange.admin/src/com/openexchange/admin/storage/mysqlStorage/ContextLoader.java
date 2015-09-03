@@ -138,7 +138,7 @@ public class ContextLoader implements Filter<Integer, Context> {
                 long quotaMax = rs.getLong(7);
                 if (quotaMax != -1) {
                     // value is in MB
-                    quotaMax /= Math.pow(2, 20);
+                    quotaMax = quotaMax >> 20;
                     cs.setMaxQuota(L(quotaMax));
                 }
                 final String dbSchema = rs.getString(10);

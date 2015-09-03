@@ -145,7 +145,7 @@ public class OXContextMySQLStorageCommon {
                 cs.setFilestore_name(rs.getString(5)); //filestorename
                 long quota_max = rs.getLong(6); //quota max
                 if (quota_max != -1) {
-                    quota_max /= Math.pow(2, 20);
+                    quota_max = quota_max >> 20;
                     // set quota max also in context setup object
                     cs.setMaxQuota(quota_max);
                 }
@@ -192,7 +192,7 @@ public class OXContextMySQLStorageCommon {
             }
             rs.close();
             prep.close();
-            quota_used /= Math.pow(2, 20);
+            quota_used = quota_used >> 20;
             // set used quota in context setup
             cs.setUsedQuota(quota_used);
 
@@ -597,7 +597,7 @@ public class OXContextMySQLStorageCommon {
             // quota is in MB, but we store in Byte
             long quota_max_temp = ctx.getMaxQuota().longValue();
             if (quota_max_temp != -1) {
-                quota_max_temp *= Math.pow(2, 20);
+                quota_max_temp = quota_max_temp << 20;
             }
             stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();

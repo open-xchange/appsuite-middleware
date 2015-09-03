@@ -134,12 +134,21 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
 
                 // Copy each file from source to destination
                 Set<String> srcFiles = srcStorage.getFileList();
-                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+                if (false == srcFiles.isEmpty()) {
+                    Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
 
-                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                propagateNewLocations(prevFileName2newFileName);
+                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                    propagateNewLocations(prevFileName2newFileName);
 
-                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                }
+
+                if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                    File fsDirectory = new File(srcFullUri);
+                    if (fsDirectory.exists()) {
+                        FileUtils.deleteDirectory(fsDirectory);
+                    }
+                }
             } catch (OXException e) {
                 throw new StorageException(e);
             } catch (SQLException e) {

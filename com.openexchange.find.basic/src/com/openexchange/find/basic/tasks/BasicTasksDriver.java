@@ -70,12 +70,10 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
-import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleDisplayItem;
@@ -142,16 +140,6 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         Set<FolderType> types = EnumSet.noneOf(FolderType.class);
         types.add(FolderType.PRIVATE);
         types.add(FolderType.PUBLIC);
-        return types;
-    }
-
-    @Override
-    protected List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        List<FacetType> types = new ArrayList<>(7);
-        types.add(CommonFacetType.GLOBAL);
-        for (FacetType type : TasksFacetType.values()) {
-            types.add(type);
-        }
         return types;
     }
 

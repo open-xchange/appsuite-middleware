@@ -50,11 +50,13 @@
 package com.openexchange.admin.tools.filestore;
 
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -67,6 +69,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorage;
 
 /**
  * {@link User2ContextFilestoreDataMover} - The implementation to move files from a user's storage to context's storage.
@@ -112,7 +115,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             }
 
             // Grab associated quota-aware file storages
-            FileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
+            QuotaFileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
             FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, -1, contextId);
 
             // Copy each file from source to destination
@@ -124,6 +127,13 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                 propagateNewLocations(prevFileName2newFileName);
 
                 srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+            }
+
+            if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                File fsDirectory = new File(srcStorage.getUri());
+                if (fsDirectory.exists()) {
+                    FileUtils.deleteDirectory(fsDirectory);
+                }
             }
         } catch (OXException e) {
             throw new StorageException(e);

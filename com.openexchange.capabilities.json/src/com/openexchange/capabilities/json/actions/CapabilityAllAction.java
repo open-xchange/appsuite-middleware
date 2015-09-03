@@ -47,45 +47,54 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.capabilities.json.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CapabilityActionFactory}
+ * {@link CapabilityAllAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CapabilityActionFactory implements AJAXActionServiceFactory {
+@DispatcherNotes(noSession = true)
+public class CapabilityAllAction implements AJAXActionService {
 
-    private final Map<String, AJAXActionService> actions;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link CapabilityActionFactory}.
+     * Initializes a new {@link CapabilityAllAction}.
      *
      * @param services The service look-up
+     * @param capabilityFilter2 The bundle context
      */
-    public CapabilityActionFactory(ServiceLookup services) {
+    public CapabilityAllAction(final ServiceLookup services) {
         super();
-        actions = new HashMap<String, AJAXActionService>(2);
-        actions.put("get", new CapabilityGetAction(services));
-        actions.put("all", new CapabilityAllAction(services));
+        this.services = services;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Get capabilities
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities;
+        if (session == null || session.isAnonymous()) {
+            capabilities = capabilityService.getCapabilities(-1, -1, true, true);
+        } else {
+            capabilities = capabilityService.getCapabilities(session, true);
+        }
+        return null == capabilities ? new AJAXRequestResult() : new AJAXRequestResult(capabilities.asSet(), "capability");
     }
 
 }

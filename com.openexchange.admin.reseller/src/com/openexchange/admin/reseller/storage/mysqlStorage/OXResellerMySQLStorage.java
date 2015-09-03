@@ -955,7 +955,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 // set to null to prevent double pushback in finally
                 oxcon = null;
             }
-            if ((qused /= Math.pow(2, 20)) >= maxvalue) {
+            qused = qused >> 20;
+            if (qused >= maxvalue) {
                 throw new OXResellerException(Code.MAXIMUM_OVERALL_CONTEXT_QUOTA, String.valueOf(maxvalue));
             }
         } catch (final SQLException e) {

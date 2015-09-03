@@ -78,9 +78,7 @@ import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.calendar.CalendarStrings;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
-import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.util.DisplayItems;
@@ -150,16 +148,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         Set<FolderType> types = EnumSet.noneOf(FolderType.class);
         types.add(FolderType.PRIVATE);
         types.add(FolderType.PUBLIC);
-        return types;
-    }
-
-    @Override
-    protected List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        List<FacetType> types = new ArrayList<>(9);
-        types.add(CommonFacetType.GLOBAL);
-        for (FacetType type : CalendarFacetType.values()) {
-            types.add(type);
-        }
         return types;
     }
 
