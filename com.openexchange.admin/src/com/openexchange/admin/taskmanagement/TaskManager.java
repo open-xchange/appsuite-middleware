@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -81,6 +82,8 @@ public class TaskManager {
     public static TaskManager getInstance() {
         return INSTANCE;
     }
+
+    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -107,11 +110,14 @@ public class TaskManager {
 
     private class Extended<V> extends ExtendedFutureTask<V> {
 
+        private final AtomicReference<Long> completionStamp;
+
         /**
          * Initializes a new {@link Extended}.
          */
         Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid) {
             super(new IncrementingCallable<V>(callable, runningjobs), typeofjob, furtherinformation, id, cid);
+            completionStamp = new AtomicReference<Long>(null);
         }
 
         @Override
@@ -119,7 +125,17 @@ public class TaskManager {
             TaskManager.this.runningjobs.decrementAndGet();
             Integer id = Integer.valueOf(this.id);
             LOGGER.debug("Removing job number {}", id);
+            completionStamp.set(Long.valueOf(System.currentTimeMillis()));
             finishedJobs.offer(id);
+        }
+
+        /**
+         * Gets the completion stamp.
+         *
+         * @return The completion stamp or <code>null</code>
+         */
+        public Long completionStmap() {
+            return completionStamp.get();
         }
     }
 
@@ -127,7 +143,7 @@ public class TaskManager {
 
     private final AdminCache cache;
     private final PropertyHandler prop;
-    private final ConcurrentMap<Integer, ExtendedFutureTask<?>> jobs;
+    private final ConcurrentMap<Integer, Extended<?>> jobs;
     private final ExecutorService executor;
     private final AtomicInteger lastID;
     final AtomicInteger runningjobs;
@@ -141,7 +157,7 @@ public class TaskManager {
         super();
         lastID = new AtomicInteger(0);
         runningjobs = new AtomicInteger(0);
-        jobs = new ConcurrentHashMap<Integer, ExtendedFutureTask<?>>(16, 0.9F, 1);
+        jobs = new ConcurrentHashMap<Integer, Extended<?>>(16, 0.9F, 1);
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
@@ -156,7 +172,7 @@ public class TaskManager {
                 flush();
             }
         };
-        timerTask = timerService.scheduleWithFixedDelay(cleaner, 1L, 1L, TimeUnit.HOURS);
+        timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
     }
 
     /**
@@ -297,9 +313,31 @@ public class TaskManager {
      * @throws TaskManagerException If a finished task does not belong to given context
      */
     public void flush(final Integer cid) throws TaskManagerException {
-        Thread currentThread = Thread.currentThread();
-        for (Integer jobid; !currentThread.isInterrupted() && (jobid = finishedJobs.poll()) != null;) {
+        for (Integer jobid; (jobid = finishedJobs.poll()) != null;) {
             deleteJob(jobid.intValue(), cid);
+        }
+    }
+
+    /**
+     * Flushes this task manager affecting tasks older than 1 hour.
+     */
+    void cleanUp() throws TaskManagerException {
+        Thread currentThread = Thread.currentThread();
+        for (Iterator<Integer> iter = finishedJobs.iterator(); !currentThread.isInterrupted() && iter.hasNext();) {
+            Integer jobId = iter.next();
+            Extended<?> job = jobs.get(jobId);
+            if (null == job) {
+                // No such job
+                iter.remove();
+            } else {
+                Long completionStmap = job.completionStmap();
+                if (null != completionStmap && (System.currentTimeMillis() - completionStmap.longValue()) > MAX_TASK_IDLE_MILLIS) {
+                    iter.remove();
+                    if (jobs.remove(jobId, job)) {
+                        LOGGER.info("Cleaned-up timed out job {}.", jobId);
+                    }
+                }
+            }
         }
     }
 
