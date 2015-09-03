@@ -28,6 +28,7 @@ Requires:      util-linux
 %else
 Requires:      which
 %endif
+Requires:      sed
 
 %description
 system integration specific infrastructure

@@ -1,6 +1,11 @@
 * 2015-09-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 38635: Property to add will now be escaped before searching for it as part of a regular expression.
+ - Fix for bug 33564: Added bzip2 dependency to open-xchange-admin package because oxsysreport CLT uses bzip2.
+
+* 2015-09-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 40841: provide credentials for JMX authentication as expected by the authenticator
 
 * 2015-09-03 - thorben.betten@open-xchange.com
 
@@ -8,6 +13,7 @@
  - Fix for bug 40885: Extended push delete listener to drop remaining permanent listeners on user/context deletion
  - Fix for bug 40860: Drop leftover directory when moving an individual user file storage
  - Fix for bug 40863: Output value for quota-max/quota-used in MB
+ - Fix for bug 40855: Check database/file storage existence prior to performing consistency check
 
 * 2015-09-02 - thorben.betten@open-xchange.com
 
