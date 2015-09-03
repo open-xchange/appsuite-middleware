@@ -258,7 +258,6 @@ public class ConsistencyCheck {
 
         try {
             config.run();
-            System.out.println("Done");
         } catch (final Exception x) {
             x.printStackTrace();
             System.exit(1);
@@ -445,20 +444,26 @@ public class ConsistencyCheck {
         }
 
         private void listMissing() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
-
             Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
+
+                System.out.print("Fetching a list for ");
                 if (SOURCE_DATABASE.equals(source)) {
+                    System.out.print("all mising files in database with the identifier '" + sourceId + "'...");
                     result = consistency.listMissingFilesInDatabase(sourceId);
                 } else if (SOURCE_FILESTORE.equals(source)) {
+                    System.out.print("all mising files in filestore with the identifier '" + sourceId + "'...");
                     result = consistency.listMissingFilesInFilestore(sourceId);
                 } else if (SOURCE_CONTEXT.equals(source)) {
+                    System.out.print("all mising files in context with the identifier '" + sourceId + "'...");
                     result = new HashMap<MBeanEntity, List<String>>();
                     result.put(new MBeanEntity(Integer.valueOf(sourceId)), consistency.listMissingFilesInContext(sourceId));
                 } else if (SOURCE_ALL.equals(source)) {
+                    System.out.print("all mising files...");
                     result = consistency.listAllMissingFiles();
                 }
+                System.out.println(" OK.");
             } finally {
                 disconnect();
             }
@@ -473,15 +478,23 @@ public class ConsistencyCheck {
             }
             try {
                 connect();
+
+                System.out.print("Repairing ");
+                String policyString = getPolicyString();
                 if (SOURCE_DATABASE.equals(source)) {
-                    consistency.repairFilesInDatabase(sourceId, getPolicyString());
+                    System.out.print("all files with policy '" + policyString + "' in the database with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInDatabase(sourceId, policyString);
                 } else if (SOURCE_FILESTORE.equals(source)) {
-                    consistency.repairFilesInFilestore(sourceId, getPolicyString());
+                    System.out.print("all files with policy '" + policyString + "' in the filestore with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInFilestore(sourceId, policyString);
                 } else if (SOURCE_CONTEXT.equals(source)) {
-                    consistency.repairFilesInContext(sourceId, getPolicyString());
+                    System.out.print("all files with policy '" + policyString + "' in the context with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInContext(sourceId, policyString);
                 } else if (SOURCE_ALL.equals(source)) {
-                    consistency.repairAllFiles(getPolicyString());
+                    System.out.print("all files with policy '" + policyString + "'... ");
+                    consistency.repairAllFiles(policyString);
                 }
+                System.out.println(" OK.");
             } finally {
                 disconnect();
             }
@@ -497,13 +510,15 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
+            System.out.print("Closing connection... ");
             if (null != jmxConnector) {
                 try {
                     jmxConnector.close();
                 } catch (final Exception e) {
-                    // Ignore
+                    System.out.println(" Error while closing connection: '" + e.getMessage() + '.');
                 }
             }
+            System.out.println("OK.");
         }
 
         private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
@@ -521,12 +536,14 @@ public class ConsistencyCheck {
                 System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeoutMillis));
             }
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
+            System.out.print("Connecting to '" + url + "'... ");
             jmxConnector = JMXConnectorFactory.connect(url, null);
 
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
             ObjectName name = MBeanNamer.getName();
 
             consistency = new MBeanConsistency(mbsc, name);
+            System.out.println("OK.");
         }
 
         private void checkAndRepairConfigDB(final boolean repair) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
