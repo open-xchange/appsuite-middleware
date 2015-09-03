@@ -67,6 +67,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
@@ -300,9 +301,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
             // Post-copy
             postDoCopy(thrown);
 
-            if (successful) {
-                executePostProcessTasks();
-            }
+            executePostProcessTasks(null == thrown ? null : new ExecutionException(thrown));
         }
     }
 
@@ -339,6 +338,9 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws SQLException If an SQL error occurs
      */
     protected void propagateNewLocations(Map<String, String> prevFileName2newFileName) throws OXException, SQLException {
+        if (prevFileName2newFileName.isEmpty()) {
+            return;
+        }
         int contextId = ctx.getId().intValue();
         Connection con = Database.getNoTimeout(contextId, true);
         try {
@@ -353,11 +355,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
     /**
      * Executes the post-process tasks.
      *
+     * @param executionError The optional execution error that occurred or <code>null</code>
      * @throws StorageException If processing the tasks fails
      */
-    protected void executePostProcessTasks() throws StorageException {
+    protected void executePostProcessTasks(ExecutionException executionError) throws StorageException {
         for (PostProcessTask task; (task = postProcessTasks.poll()) != null;) {
-            task.perform();
+            task.perform(executionError);
         }
     }
 

@@ -399,16 +399,20 @@ public class LocalFileStorage extends DefaultFileStorage {
             // Skip
             return;
         }
-        if (file.isDirectory()) {
-            for (final File subfile : file.listFiles()) {
-                if (file.equals(storage)) {
-                    listRecursively(allIds, "", subfile);
-                } else {
-                    listRecursively(allIds, prefix + file.getName(), subfile);
+
+        if (file.isFile()) {
+            allIds.add(prefix + file.getName());
+        } else {
+            File[] files = file.listFiles(); // <-- Returns null if this abstract pathname does not denote a directory, or if an I/O error occurs.
+            if (files != null) {
+                for (File subfile : files) {
+                    if (file.equals(storage)) {
+                        listRecursively(allIds, "", subfile);
+                    } else {
+                        listRecursively(allIds, prefix + file.getName(), subfile);
+                    }
                 }
             }
-        } else {
-            allIds.add(prefix + file.getName());
         }
     }
 

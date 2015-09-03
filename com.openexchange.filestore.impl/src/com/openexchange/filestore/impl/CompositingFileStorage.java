@@ -75,7 +75,7 @@ public class CompositingFileStorage implements FileStorage {
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
-        PreparedName prepared = prepareName(identifier);
+        ImmutablePreparedName prepared = prepareName(identifier);
         return prepared.fs.deleteFile(prepared.name);
     }
 
@@ -85,7 +85,7 @@ public class CompositingFileStorage implements FileStorage {
         Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
 
         for (String name : identifiers) {
-            PreparedName preparedName = prepareName(name);
+            ImmutablePreparedName preparedName = prepareName(name);
 
             List<String> list = partitions.get(preparedName.fs);
             if(list == null) {
@@ -119,28 +119,38 @@ public class CompositingFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
-        PreparedName prepared = prepareName(name);
+        ImmutablePreparedName prepared = prepareName(name);
         return prepared.fs.getFile(prepared.name);
     }
 
     @Override
     public SortedSet<String> getFileList() throws OXException {
+        // Get the ones from standard file storage
         SortedSet<String> fileList = standardFS.getFileList();
-        for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
+
+        // Add the ones from prefixed file storages
+        StringBuilder pathBuilder = null;
+        for (Map.Entry<String, FileStorage> entry : prefixedStores.entrySet()) {
             String prefix = entry.getKey();
             FileStorage fileStorage = entry.getValue();
 
             SortedSet<String> files = fileStorage.getFileList();
             for (String file : files) {
-                fileList.add(prefix+"/"+file);
+                if (null == pathBuilder) {
+                    pathBuilder = new StringBuilder(64);
+                } else {
+                    pathBuilder.setLength(0);
+                }
+                fileList.add(pathBuilder.append(prefix).append('/').append(file).toString());
             }
         }
+
         return fileList;
     }
 
     @Override
     public long getFileSize(String name) throws OXException {
-        PreparedName preparedName = prepareName(name);
+        ImmutablePreparedName preparedName = prepareName(name);
         return preparedName.fs.getFileSize(preparedName.name);
     }
 
@@ -152,7 +162,7 @@ public class CompositingFileStorage implements FileStorage {
     @Override
     public void recreateStateFile() throws OXException {
         standardFS.recreateStateFile();
-        for(FileStorage fs: prefixedStores.values()) {
+        for (FileStorage fs : prefixedStores.values()) {
             fs.recreateStateFile();
         }
     }
@@ -160,7 +170,7 @@ public class CompositingFileStorage implements FileStorage {
     @Override
     public void remove() throws OXException {
         standardFS.remove();
-        for(FileStorage fs: prefixedStores.values()) {
+        for (FileStorage fs : prefixedStores.values()) {
             fs.remove();
         }
     }
@@ -175,18 +185,18 @@ public class CompositingFileStorage implements FileStorage {
 
     protected String saveNewFileInPrefixedSto(String prefix, InputStream file) throws OXException {
         FileStorage fileStorage = prefixedStores.get(prefix);
-        return prefix + "/" + fileStorage.saveNewFile(file);
+        return new StringBuilder(prefix).append('/').append(fileStorage.saveNewFile(file)).toString();
     }
 
     @Override
     public boolean stateFileIsCorrect() throws OXException {
         boolean stateFileIsCorrect = standardFS.stateFileIsCorrect();
-        if(!stateFileIsCorrect) {
+        if (!stateFileIsCorrect) {
             return false;
         }
-        for(FileStorage fs: prefixedStores.values()) {
+        for (FileStorage fs : prefixedStores.values()) {
             boolean isCorrect = fs.stateFileIsCorrect();
-            if(!isCorrect) {
+            if (!isCorrect) {
                 return false;
             }
         }
@@ -195,19 +205,19 @@ public class CompositingFileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        PreparedName prepared = prepareName(name);
+        ImmutablePreparedName prepared = prepareName(name);
         return prepared.fs.appendToFile(file, prepared.name, offset);
     }
 
     @Override
     public void setFileLength(long length, String name) throws OXException {
-        PreparedName prepared = prepareName(name);
+        ImmutablePreparedName prepared = prepareName(name);
         prepared.fs.setFileLength(length, prepared.name);
     }
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        PreparedName prepared = prepareName(name);
+        ImmutablePreparedName prepared = prepareName(name);
         return prepared.fs.getFile(prepared.name, offset, length);
     }
 
@@ -219,10 +229,10 @@ public class CompositingFileStorage implements FileStorage {
         prefixedStores.put(prefix, fs);
     }
 
-    protected PreparedName prepareName(String canonicalName) {
+    protected ImmutablePreparedName prepareName(String canonicalName) {
         int idx = canonicalName.indexOf('/');
         if (idx < 0) {
-            return new PreparedName(standardFS, canonicalName, null);
+            return new ImmutablePreparedName(standardFS, canonicalName, null);
         }
 
         String prefix = canonicalName.substring(0, idx);
@@ -230,19 +240,19 @@ public class CompositingFileStorage implements FileStorage {
 
         FileStorage fileStorage = prefixedStores.get(prefix);
         if (fileStorage != null) {
-            return new PreparedName(fileStorage, rest, prefix);
+            return new ImmutablePreparedName(fileStorage, rest, prefix);
         }
 
-        return new PreparedName(standardFS, canonicalName, null);
+        return new ImmutablePreparedName(standardFS, canonicalName, null);
     }
 
-    protected static final class PreparedName {
+    protected static final class ImmutablePreparedName {
 
-        public FileStorage fs;
-        public String name;
-        public String prefix;
+        final FileStorage fs;
+        final String name;
+        final String prefix;
 
-        public PreparedName(FileStorage fs, String name, String prefix) {
+        ImmutablePreparedName(FileStorage fs, String name, String prefix) {
             super();
             this.fs = fs;
             this.name = name;
