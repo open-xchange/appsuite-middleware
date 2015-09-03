@@ -77,12 +77,12 @@ public class HashingFileStorage extends DefaultFileStorage {
     @Override
     public SortedSet<String> getFileList() throws OXException {
         final SortedSet<String> files = new TreeSet<String>();
-        final int beginIndex = storage.getAbsolutePath().length()+1;
+        final int beginIndex = storage.getAbsolutePath().length() + 1;
         visit(new Visitor() {
 
             @Override
-            public void visit(final File f) {
-                if(f.isFile()) {
+            public void visit(File f) {
+                if (f.isFile()) {
                     files.add(f.getAbsolutePath().substring(beginIndex));
                 }
             }
@@ -178,19 +178,19 @@ public class HashingFileStorage extends DefaultFileStorage {
         recurse(storage, visitor);
     }
 
-    protected void recurse(final File f, final Visitor visitor) {
-        if(f.isFile()) {
+    protected void recurse(File f, Visitor visitor) {
+        if (f.isFile()) {
             visitor.visit(f);
             return;
         }
-        final File[] files = f.listFiles();
-        if(files == null) {
-            return;
+
+        File[] files = f.listFiles();
+        if (files != null) {
+            for (final File file : files) {
+                recurse(file, visitor);
+            }
+            visitor.visit(f);
         }
-        for (final File file : files) {
-            recurse(file, visitor);
-        }
-        visitor.visit(f);
     }
 
     private static interface Visitor {

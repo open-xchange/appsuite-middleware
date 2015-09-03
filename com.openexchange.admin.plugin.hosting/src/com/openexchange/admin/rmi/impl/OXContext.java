@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -107,10 +108,16 @@ import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContext.class);
+    /** The logger */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContext.class);
 
     private final OXAdminPoolDBPoolExtension pool;
 
+    /**
+     * Initializes a new {@link OXContext}.
+     *
+     * @param context The associated bundle context
+     */
     public OXContext(final BundleContext context) {
         super(context);
         this.pool = new OXAdminPoolDBPoolExtension();
@@ -1123,8 +1130,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 fsdm.addPostProcessTask(new PostProcessTask() {
 
                     @Override
-                    public void perform() throws StorageException {
-                        oxcox.enable(ctx);
+                    public void perform(ExecutionException executionError) throws StorageException {
+                        if (null == executionError) {
+                            oxcox.enable(ctx);
+                        } else {
+                            LOGGER.warn("An executino error occurred during \"movefilestore\" for context {}. Context will stay disabled.", ctx.getId(), executionError.getCause());
+                        }
                     }
                 });
 

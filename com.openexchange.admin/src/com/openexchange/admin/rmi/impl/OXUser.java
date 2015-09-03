@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
@@ -116,7 +117,8 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
  */
 public class OXUser extends OXCommonImpl implements OXUserInterface {
 
-    private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXUser.class);
+    /** The logger */
+    final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXUser.class);
 
     // ------------------------------------------------------------------------------------------------ //
 
@@ -127,7 +129,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private final BundleContext context;
     private final boolean allowChangingQuotaIfNoFileStorageSet;
 
-    public OXUser(final BundleContext context) throws StorageException {
+    /**
+     * Initializes a new {@link OXUser}.
+     *
+     * @param context The associated bundle context
+     * @throws StorageException If initialization fails
+     */
+    public OXUser(BundleContext context) throws StorageException {
         super();
         this.context = context;
         this.cache = ClientAdminThread.cache;
@@ -404,8 +412,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
-                public void perform() throws StorageException {
-                    oxuser.enableUser(user_id, ctx);
+                public void perform(ExecutionException executionError) throws StorageException {
+                    if (null == executionError) {
+                        oxuser.enableUser(user_id, ctx);
+                    } else {
+                        LOGGER.warn("An executino error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                    }
                 }
             });
 
@@ -529,8 +541,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
-                public void perform() throws StorageException {
-                    oxuser.enableUser(userId, ctx);
+                public void perform(ExecutionException executionError) throws StorageException {
+                    if (null == executionError) {
+                        oxuser.enableUser(userId, ctx);
+                    } else {
+                        LOGGER.warn("An executino error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                    }
                 }
             });
 
@@ -657,8 +673,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
-                public void perform() throws StorageException {
-                    oxuser.enableUser(userId, ctx);
+                public void perform(ExecutionException executionError) throws StorageException {
+                    if (null == executionError) {
+                        oxuser.enableUser(userId, ctx);
+                    } else {
+                        LOGGER.warn("An executino error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                    }
                 }
             });
 
@@ -759,8 +779,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
-                public void perform() throws StorageException {
-                    oxuser.enableUser(user_id, ctx);
+                public void perform(ExecutionException executionError) throws StorageException {
+                    if (null == executionError) {
+                        oxuser.enableUser(user_id, ctx);
+                    } else {
+                        LOGGER.warn("An executino error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                    }
                 }
             });
 
@@ -890,8 +914,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             fsdm.addPostProcessTask(new PostProcessTask() {
 
                 @Override
-                public void perform() throws StorageException {
-                    oxuser.enableUser(userId, ctx);
+                public void perform(ExecutionException executionError) throws StorageException {
+                    if (null == executionError) {
+                        oxuser.enableUser(userId, ctx);
+                    } else {
+                        LOGGER.warn("An executino error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                    }
                 }
             });
 
