@@ -49,9 +49,15 @@
 
 package com.openexchange.consistency;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -65,6 +71,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorage2ContextsResolver;
+import com.openexchange.filestore.FileStorageCodes;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.
@@ -105,6 +112,27 @@ public class OsgiOXConsistency extends Consistency {
 
     @Override
     protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
+        // Check existence
+        {
+            DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+            Connection connection = dbService.getReadOnly();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement("SELECT 1 FROM filestore WHERE id=?");
+                stmt.setInt(1, filestoreId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(filestoreId);
+                }
+            } catch (SQLException e) {
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                dbService.backReadOnly(connection);
+            }
+        }
+
         int[] ids = FileStorages.getFileStorage2ContextsResolver().getIdsOfContextsUsing(filestoreId);
         return loadContexts(ids);
     }
@@ -112,6 +140,27 @@ public class OsgiOXConsistency extends Consistency {
     @Override
     protected List<Context> getContextsForDatabase(final int databaseId) throws OXException {
         final DatabaseService configDB = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+
+        // Check existence
+        {
+            Connection connection = configDB.getReadOnly();
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement("SELECT 1 FROM db_pool WHERE db_pool_id=?");
+                stmt.setInt(1, databaseId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    throw DBPoolingExceptionCodes.NO_DBPOOL.create(databaseId);
+                }
+            } catch (SQLException e) {
+                throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                configDB.backReadOnly(connection);
+            }
+        }
+
         final int[] contextIds = configDB.listContexts(databaseId);
         final List<Integer> ctxIds = new ArrayList<Integer>(contextIds.length);
         for (int i = 0; i < contextIds.length; i++) {
