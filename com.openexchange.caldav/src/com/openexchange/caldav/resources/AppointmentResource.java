@@ -456,7 +456,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (LOG.isTraceEnabled() || 1 == 1) {
                 byte[] iCal = Streams.stream2bytes(body);
                 parsedICal = new String(iCal, Charsets.UTF_8);
-                LOG.info(parsedICal);
+                LOG.trace(parsedICal);
                 body = Streams.newByteArrayInputStream(iCal);
             }
             return factory.getIcalParser().parseAppointments(
