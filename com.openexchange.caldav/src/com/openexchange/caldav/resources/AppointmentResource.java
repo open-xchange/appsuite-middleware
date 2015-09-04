@@ -172,16 +172,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     protected void saveObject(boolean checkPermissions) throws OXException {
         try {
             /*
-             * load original appointment and change exceptions
+             * load original appointment
              */
             Appointment originalAppointment = parent.load(this.object, false);
-            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
-            /*
-             * transform change- to delete-exceptions where user is removed from participants if needed (bug #26293)
-             */
-            if (null != originalExceptions && 0 < originalExceptions.length) {
-                originalExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, originalAppointment, originalExceptions);
-            }
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
                 throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
@@ -208,6 +201,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (null != appointmentToSave.getLastModified()) {
                     clientLastModified = appointmentToSave.getLastModified();
                 }
+            }
+            if (0 == exceptionsToSave.size() && 0 == deleteExceptionsToSave.size()) {
+                return;
+            }
+            /*
+             * load original exceptions, transforming change- to delete-exceptions where user is removed from participants if needed (bug #26293)
+             */
+            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object, false);
+            if (null != originalExceptions && 0 < originalExceptions.length) {
+                originalExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, originalAppointment, originalExceptions);
             }
             /*
              * update change exceptions
@@ -372,14 +375,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * load appointment and change exceptions
              */
             CalendarDataObject appointment = parent.load(object, true);
-            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.getChangeExceptions(object.getObjectID()) : null;
+            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
-             * load change exceptions, transforming them to delete-exceptions where user is removed from participants if needed (bug #26293)
+             * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
              */
             if (null != changeExceptions && 0 < changeExceptions.length) {
-                for (int i = 0; i < changeExceptions.length; i++) {
-                    changeExceptions[i] = parent.load(changeExceptions[i], true);
-                }
                 changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
             }
             /*
@@ -419,16 +419,21 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 cdo.setIgnoreConflicts(true);
                 if (null != this.object) {
                     cdo.setParentFolderID(this.object.getParentFolderID());
-                    cdo.setObjectID(this.object.getObjectID());
                     cdo.removeUid();
                 } else {
                     cdo.setParentFolderID(this.parentFolderID);
                 }
                 if (1 == appointments.size() || looksLikeMaster(cdo)) {
+                    if (null != object) {
+                        cdo.setObjectID(object.getObjectID());
+                    }
                     this.appointmentToSave = cdo;
                     createNewDeleteExceptions(this.object, appointmentToSave);
                 } else {
                     factory.getCalendarUtilities().removeRecurringType(cdo);
+                    if (null != object) {
+                        cdo.setRecurrenceID(object.getObjectID());
+                    }
                     exceptionsToSave.add(cdo);
                 }
             }
