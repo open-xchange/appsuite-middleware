@@ -1231,6 +1231,9 @@ ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xcha
 ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
+#SoftwareChange_Request-2698
+ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties hazelcast.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
