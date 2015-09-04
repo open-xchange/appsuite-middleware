@@ -1,3 +1,7 @@
+* 2015-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38882: Added missing options to CSV import
+
 * 2015-06-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 38605: Extended the "com.openexchange.admin.rmi.OXUserInterface.exists()" method to also accept a display name when performing existence check
