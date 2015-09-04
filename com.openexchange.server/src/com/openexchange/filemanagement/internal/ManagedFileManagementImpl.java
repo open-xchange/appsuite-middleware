@@ -173,7 +173,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         int optTimeToLive = cur.optTimeToLive();
                         long timeElapsed = now - cur.getLastAccess();
                         if (cur.isDeleted() || (timeElapsed > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
-                            File file = cur.getFile();
+                            File file = cur.getFilePlain();
                             String fname = null != file && file.exists() ? file.getName() : "";
                             cur.delete();
                             iter.remove();
