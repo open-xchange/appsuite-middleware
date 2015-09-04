@@ -78,23 +78,13 @@ public class CreateSubfolderTest extends ShareTest {
         super(name);
     }
 
-    protected static final int[] TESTED_MODULES = new int[] {
-        FolderObject.CONTACT, FolderObject.TASK, FolderObject.CALENDAR
-    };
-
-    protected static int randomModule() {
-        return TESTED_MODULES[random.nextInt(TESTED_MODULES.length)];
-    }
-
     public void testCreateSubfolderWithoutAdminFlagRandomly() throws Exception {
-        testCreateSubfolderWithoutAdminFlag(randomFolderAPI(), randomModule());
+        testCreateSubfolderWithoutAdminFlag(randomFolderAPI(), FolderObject.CONTACT);
     }
 
-    public void noTestCreateSubfolderWithoutAdminFlagExtensively() throws Exception {
+    public void testCreateSubfolderWithoutAdminFlagExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (int module : TESTED_MODULES) {
-                testCreateSubfolderWithoutAdminFlag(api, module);
-            }
+            testCreateSubfolderWithoutAdminFlag(api, FolderObject.CONTACT);
         }
     }
 
@@ -102,7 +92,7 @@ public class CreateSubfolderTest extends ShareTest {
         testCreateSubfolderWithAdminFlag(randomFolderAPI(), FolderObject.INFOSTORE);
     }
 
-    public void noTestCreateSubfolderWithAdminFlagExtensively() throws Exception {
+    public void testCreateSubfolderWithAdminFlagExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             testCreateSubfolderWithAdminFlag(api, FolderObject.INFOSTORE);
         }
