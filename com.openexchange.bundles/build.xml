@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="OSGi bundles override" basedir=".">
 
-	<description>
+    <description>
     	Enhances target platform by downloading shared jars from artifactory.open-xchange and removes afterwards the bundle.d file for the OSGi system bundle. It must not be part of the bundle list.
     </description>
 
-	<import file="build-project.xml" />
-	<import file="java-commons.xml" />
+    <import file="build-project.xml" />
+    <import file="java-commons.xml" />
 
 
-	<target name="preDist">
-		<antcall target="download_check_and_add_jars" />
-	</target>
+    <!-- When building locally -->
+    <target name="prepare">
+        <antcall target="download_check_and_add_jars" />
+    </target>
 
-	<target name="postInstall">
-		<delete dir="${destDir}/${bundle.dDir}">
-			<include name="org.eclipse.osgi_*" />
-		</delete>
-	</target>
+    <!-- Before creating tar.gzs for uploading to the obs -->
+    <target name="preDist">
+        <antcall target="download_check_and_add_jars" />
+    </target>
+
+    <target name="postInstall">
+        <delete dir="${destDir}/${bundle.dDir}">
+            <include name="org.eclipse.osgi_*" />
+        </delete>
+    </target>
 
 </project>
