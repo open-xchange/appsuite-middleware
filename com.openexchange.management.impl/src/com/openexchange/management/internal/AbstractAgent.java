@@ -148,14 +148,14 @@ public abstract class AbstractAgent {
         }
 
         @Override
-        public Subject authenticate(final Object credentials) {
-            if (!(credentials instanceof String[])) {
-                if (credentials == null) {
+        public Subject authenticate(final Object lCredentials) {
+            if (!(lCredentials instanceof String[])) {
+                if (lCredentials == null) {
                     throw new SecurityException("Credentials required");
                 }
                 throw new SecurityException("Credentials should be String[]");
             }
-            final String[] creds = (String[]) credentials;
+            final String[] creds = (String[]) lCredentials;
             if (creds.length != 2) {
                 throw new SecurityException("Credentials should have 2 elements");
             }

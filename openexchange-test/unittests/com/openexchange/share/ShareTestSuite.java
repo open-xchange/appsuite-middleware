@@ -67,7 +67,6 @@ public class ShareTestSuite extends TestSuite {
 
     public static Test suite() {
         TestSuite shareSuite = new TestSuite();
-        shareSuite.addTest(new DefaultShareServiceTest());
         return shareSuite;
     }
 

@@ -166,4 +166,9 @@ public class XMPPLoginRequest implements LoginRequest {
         return null;
     }
 
+    @Override
+    public boolean isStoreLanguage() {
+        return false;
+    }
+
 }

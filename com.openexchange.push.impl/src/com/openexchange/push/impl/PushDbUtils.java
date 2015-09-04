@@ -418,6 +418,87 @@ public class PushDbUtils {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> on successful deletion; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public static DeleteResult deleteAllPushRegistrations(int userId, int contextId) throws OXException {
+        DatabaseService service = Services.requireService(DatabaseService.class);
+        Connection con = service.getWritable(contextId);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            boolean[] unmark = new boolean[1];
+            unmark[0] = false;
+
+            boolean deleted = deleteAllPushRegistrations(userId, contextId, unmark, con);
+
+            DeleteResult deleteResult;
+            if (unmark[0]) {
+                unmarkContextForPush(contextId, service);
+                deleteResult = DeleteResult.DELETED_COMPLETELY;
+            } else {
+                deleteResult = (deleted ? DeleteResult.DELETED_COMPLETELY : DeleteResult.NOT_DELETED);
+            }
+
+            con.commit();
+            rollback = false;
+
+            return deleteResult;
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            service.backWritable(contextId, con);
+        }
+    }
+
+    private static boolean deleteAllPushRegistrations(int userId, int contextId, boolean[] unmark, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? FOR UPDATE");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
+            stmt = con.prepareStatement("DELETE FROM registeredPush WHERE cid=? AND user=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            boolean deleted = stmt.executeUpdate() > 0;
+            Databases.closeSQLStuff(stmt);
+
+            if (deleted) {
+                stmt = con.prepareStatement("SELECT COUNT(user) FROM registeredPush WHERE cid=?");
+                stmt.setInt(1, contextId);
+                rs = stmt.executeQuery();
+                rs.next();
+                int count = rs.getInt(1);
+                unmark[0] = count <= 0;
+            }
+
+            return deleted;
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Deletes a push registration associated with the client of specified user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @param clientId The client identifier
      * @return <code>true</code> on successful deletion; otherwise <code>false</code>
      * @throws OXException If operation fails

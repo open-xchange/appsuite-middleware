@@ -47,57 +47,62 @@
  *
  */
 
-package com.openexchange.cli;
+package com.openexchange.capabilities.json.converter;
 
-import java.util.Collections;
-import javax.management.remote.JMXAuthenticator;
-import javax.management.remote.JMXPrincipal;
-import javax.security.auth.Subject;
+import java.util.Collection;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JMXAuthenticatorImpl} - Default implementation of {@link JMXAuthenticator}.
+ * {@link Capability2JSON}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class JMXAuthenticatorImpl implements JMXAuthenticator {
-
-    private final String login;
-    private final String password;
+public class Capability2JSON implements ResultConverter {
 
     /**
-     * Initializes a new {@link JMXAuthenticatorImpl}.
-     *
-     * @param login The login
-     * @param password The password
+     * Initializes a new {@link Capability2JSON}.
      */
-    public JMXAuthenticatorImpl(final String login, final String password) {
+    public Capability2JSON() {
         super();
-        this.login = login;
-        this.password = password;
     }
 
     @Override
-    public Subject authenticate(final Object credentials) {
-        if (!(credentials instanceof String[])) {
-            if (credentials == null) {
-                throw new SecurityException("Credentials required");
+    public String getInputFormat() {
+        return "capability";
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object resultObject = result.getResultObject();
+        try {
+            if (Collection.class.isInstance(resultObject)) {
+                result.setResultObject(CapabilitiesJsonWriter.toJson((Collection<Capability>) resultObject), "json");
+            } else {
+                result.setResultObject(CapabilitiesJsonWriter.toJson((Capability) resultObject), "json");
             }
-            throw new SecurityException("Credentials should be String[]");
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
-        final String[] creds = (String[]) credentials;
-        if (creds.length != 2) {
-            throw new SecurityException("Credentials should have 2 elements");
-        }
-        /*
-         * Perform authentication
-         */
-        final String username = creds[0];
-        final String testPassword = creds[1];
-        if (login.equals(username) && password.equals(testPassword)) {
-            return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
-        }
-        throw new SecurityException("Invalid credentials");
     }
 
 }

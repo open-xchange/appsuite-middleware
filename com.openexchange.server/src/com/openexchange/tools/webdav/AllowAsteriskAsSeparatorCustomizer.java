@@ -155,6 +155,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public String getLanguage() {
                 return loginReq.getLanguage();
             }
+
+            @Override
+            public boolean isStoreLanguage() {
+                return loginReq.isStoreLanguage();
+            }
         };
     }
 }

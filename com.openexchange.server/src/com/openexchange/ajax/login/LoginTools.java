@@ -171,6 +171,11 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.LANGUAGE_PARAM, "");
     }
 
+    public static boolean parseStoreLanguage(HttpServletRequest req) {
+        final String value = req.getParameter(LoginFields.STORE_LANGUAGE);
+        return Boolean.parseBoolean(value);
+    }
+
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
         final String value = req.getParameter(paramName);
         if (null == value) {
@@ -271,6 +276,7 @@ public final class LoginTools {
         b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         b.language(parseLanguage(req));
+        b.storeLanguage(parseStoreLanguage(req));
         return b.build();
     }
 

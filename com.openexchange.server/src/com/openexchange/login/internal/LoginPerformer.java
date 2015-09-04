@@ -173,6 +173,7 @@ public final class LoginPerformer {
                 properties.put("cookies", cookies);
             }
             String userLoginLanguage = request.getLanguage();
+            boolean storeLanguage = request.isStoreLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -213,7 +214,7 @@ public final class LoginPerformer {
                 // Authorize
                 authService.authorizeUser(ctx, user);
             }
-            if (!Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+            if (storeLanguage && !Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
                 UserStorage us = UserStorage.getInstance();
                 UserImpl impl = new UserImpl(user);
                 impl.setPreferredLanguage(userLoginLanguage);

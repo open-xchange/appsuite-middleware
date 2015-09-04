@@ -154,9 +154,12 @@ public class OAuthMailNotificationService {
         template.process(vars, writer);
 
         ComposedMailMessage mail;
+        InternetAddress recipient = new InternetAddress(user.getMail(), userName);
         if (footerImage == null) {
             // no image, no multipart
             mail = transportProvider.getNewComposedMailMessage(session, session.getContext());
+            mail.addRecipient(recipient);
+            mail.addTo(recipient);
             mail.setSubject(subject);
             mail.setHeader("Auto-Submitted", "auto-generated");
             mail.setBodyPart(transportProvider.getNewTextBodyPart(writer.toString()));
@@ -184,6 +187,7 @@ public class OAuthMailNotificationService {
             multipart.addBodyPart(imagePart);
 
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            mimeMessage.addRecipient(javax.mail.internet.MimeMessage.RecipientType.TO, recipient);
             mimeMessage.setSubject(subject, "UTF-8");
             mimeMessage.setHeader("Auto-Submitted", "auto-generated");
             mimeMessage.setContent(multipart);
@@ -191,9 +195,6 @@ public class OAuthMailNotificationService {
             mail = new ContentAwareComposedMailMessage(mimeMessage, contextId);
         }
 
-        InternetAddress recipient = new InternetAddress(user.getMail(), userName);
-        mail.addRecipient(recipient);
-        mail.addTo(recipient);
         return mail;
     }
 

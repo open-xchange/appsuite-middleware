@@ -110,45 +110,13 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
         List<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
         Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes(session));
-        List<FacetType> availableFacetTypes = getSupportedFacetTypes(autocompleteRequest, session);
         if (folderTypeFacet != null) {
             modifiedFacets.add(folderTypeFacet);
-            availableFacetTypes.add(CommonFacetType.FOLDER_TYPE);
         }
 
-        List<Facet> filteredFacets = filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets());
-        List<ActiveFacet> unsupportedFacets = filterUnsupportedFacets(autocompleteRequest.getActiveFacets(), availableFacetTypes);
+        LinkedList<Facet> filteredFacets = filterFacets(modifiedFacets, autocompleteRequest.getActiveFacets());
         autocompleteResult.setFacets(filteredFacets);
-        autocompleteResult.setUnsupportedFacets(unsupportedFacets);
         return autocompleteResult;
-    }
-
-    /**
-     * Gets a mutable list of facet types that are generally available in the context of the
-     * current auto-complete request and session.
-     *
-     * @param autocompleteRequest The auto-complete request
-     * @param session The session
-     * @return The list of types; never <code>null</code>
-     */
-    protected abstract List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
-
-    private List<ActiveFacet> filterUnsupportedFacets(List<ActiveFacet> actives, List<FacetType> available) {
-        LinkedList<ActiveFacet> unsupporteds = new LinkedList<>();
-        for (ActiveFacet active : actives) {
-            boolean unsupported = true;
-            for (FacetType type : available) {
-                if (type.equals(active.getType())) {
-                    unsupported = false;
-                    break;
-                }
-            }
-
-            if (unsupported) {
-                unsupporteds.add(active);
-            }
-        }
-        return unsupporteds;
     }
 
     @Override
@@ -196,7 +164,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
      */
     protected abstract Set<FolderType> getSupportedFolderTypes(ServerSession session) throws OXException;
 
-    private List<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
+    protected LinkedList<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
         if (facets.isEmpty() || active.isEmpty()) {
             return new LinkedList<Facet>(facets);
         }

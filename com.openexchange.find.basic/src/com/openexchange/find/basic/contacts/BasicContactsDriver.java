@@ -80,7 +80,6 @@ import com.openexchange.find.common.FolderType;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
@@ -149,16 +148,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         Set<FolderType> types = EnumSet.noneOf(FolderType.class);
         types.add(FolderType.PRIVATE);
         types.add(FolderType.PUBLIC);
-        return types;
-    }
-
-    @Override
-    protected List<FacetType> getSupportedFacetTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
-        List<FacetType> types = new ArrayList<>(7);
-        types.add(CommonFacetType.GLOBAL);
-        for (FacetType type : ContactsFacetType.values()) {
-            types.add(type);
-        }
         return types;
     }
 

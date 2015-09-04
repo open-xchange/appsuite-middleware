@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.capabilities.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -87,7 +87,7 @@ public class CapabilityGetAction implements AJAXActionService {
         CapabilityService capabilityService = services.getService(CapabilityService.class);
         CapabilitySet capabilities;
         if (session == null || session.isAnonymous()) {
-            capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true);
+            capabilities = capabilityService.getCapabilities(-1, -1, true, true);
         } else {
             capabilities = capabilityService.getCapabilities(session, true);
         }

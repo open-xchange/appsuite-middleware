@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -64,6 +65,7 @@ import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
+import com.openexchange.capabilities.rest.CapabilitiesRESTService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -94,6 +96,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
         SERVICES.set(this);
 
         PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);
@@ -171,6 +174,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
          */
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
         registerService(CapabilityService.class, capService);
+
+        registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(capService));
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
 

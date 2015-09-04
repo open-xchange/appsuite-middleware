@@ -199,7 +199,7 @@ public class JSONFacetVisitor implements FacetVisitor {
         visitor.appendResult(json);
     }
 
-    public static JSONObject convertFilter(Filter filter) throws JSONException {
+    protected JSONObject convertFilter(Filter filter) throws JSONException {
         // Put fields to JSON array
         List<String> fields = filter.getFields();
         JSONArray jFields = new JSONArray(fields.size());

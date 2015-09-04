@@ -78,6 +78,7 @@ public class LoginRequestImpl implements LoginRequest {
         protected String httpSessionID;
         protected boolean tranzient;
         protected String language;
+        protected boolean storeLanguage;
 
         public Builder() {
             super();
@@ -138,6 +139,11 @@ public class LoginRequestImpl implements LoginRequest {
             this.language = language;
             return this;
         }
+
+        public Builder storeLanguage(boolean storeLanguage) {
+            this.storeLanguage = storeLanguage;
+            return this;
+        }
         public LoginRequestImpl build() {
             return new LoginRequestImpl(this);
         }
@@ -156,6 +162,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final String httpSessionID;
     private boolean tranzient;
     private final String language;
+    private boolean storeLanguage;
 
     /**
      * Initializes a new {@link LoginRequestImpl}.
@@ -181,6 +188,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.httpSessionID = builder.httpSessionID;
         this.tranzient = builder.tranzient;
         this.language = builder.language;
+        this.storeLanguage = builder.storeLanguage;
     }
 
     /**
@@ -202,7 +210,7 @@ public class LoginRequestImpl implements LoginRequest {
      * @param serverPort The server port
      * @param httpSessionID The identifier of the associated HTTP session
      */
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, boolean storeLanguage) {
         super();
         this.login = login;
         this.password = password;
@@ -220,6 +228,11 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverPort = serverPort;
         this.httpSessionID = httpSessionID;
         this.language = language;
+        this.storeLanguage = storeLanguage;
+    }
+
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, cookies, secure, serverName, serverPort, httpSessionID, language, false);
     }
 
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
@@ -333,6 +346,11 @@ public class LoginRequestImpl implements LoginRequest {
     @Override
     public String getLanguage() {
         return language;
+    }
+
+    @Override
+    public boolean isStoreLanguage() {
+        return storeLanguage;
     }
 
 }

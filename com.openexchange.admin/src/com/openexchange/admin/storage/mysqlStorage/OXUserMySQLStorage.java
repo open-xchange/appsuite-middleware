@@ -1449,7 +1449,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (maxQuota != null) {
             long quota_max_temp = maxQuota.longValue();
             if (quota_max_temp != -1) {
-                quota_max_temp *= Math.pow(2, 20);
+                quota_max_temp = quota_max_temp << 20;
             }
 
             PreparedStatement prep = null;
@@ -1699,7 +1699,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     if (null != maxQuota) {
                         long quota_max_temp = maxQuota.longValue();
                         if (quota_max_temp != -1) {
-                            quota_max_temp *= Math.pow(2, 20);
+                            quota_max_temp = quota_max_temp << 20;
                         }
                         stmt.setLong(21, quota_max_temp);
                     } else {
@@ -2560,7 +2560,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             }
 
                         } else if (paramtype.equalsIgnoreCase("java.lang.Long")) {
-                            method.invoke(newuser, Long.valueOf(rs.getLong(fieldname)));
+                            long longValue = rs.getLong(fieldname);
+                            if ("MaxQuota".equals(methodnamewithoutset)) {
+                                if (longValue != -1) {
+                                    longValue = longValue >> 20;
+                                }
+                            }
+                            method.invoke(newuser, Long.valueOf(longValue));
                         } else if (paramtype.equalsIgnoreCase("java.util.Date")) {
                             final Date fieldvalue = rs.getTimestamp(fieldname);
                             method.invoke(newuser, fieldvalue);
@@ -2626,7 +2632,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         ps.setInt(2, user_id);
                         result = ps.executeQuery();
                         if (result.next()) {
-                            newuser.setUsedQuota(Long.valueOf(result.getLong(1)));
+                            long usedQuota = result.getLong(1);
+                            usedQuota = usedQuota >> 20;
+                            newuser.setUsedQuota(Long.valueOf(usedQuota));
                         }
                     } finally {
                         Databases.closeSQLStuff(result, ps);
