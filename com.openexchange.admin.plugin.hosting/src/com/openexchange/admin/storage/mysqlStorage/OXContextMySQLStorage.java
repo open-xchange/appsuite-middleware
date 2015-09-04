@@ -94,9 +94,9 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Quota;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -106,8 +106,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
@@ -128,7 +128,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage2ContextsResolver;
+import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -222,7 +222,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // Fetch filestores for associated context
             List<com.openexchange.filestore.QuotaFileStorage> storages;
             {
-                FileStorage2ContextsResolver resolver = FileStorages.getFileStorage2ContextsResolver();
+                FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
                 List<com.openexchange.filestore.FileStorage> fileStorages = resolver.getFileStoragesUsedBy(ctx.getId().intValue(), true);
 
                 storages = new ArrayList<com.openexchange.filestore.QuotaFileStorage>(fileStorages.size());
@@ -473,6 +473,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#enableAll()
      */
     @Override
@@ -1158,7 +1159,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw e;
             } finally {
                 if (null != cacheFinalize) {
-                    try { cacheFinalize.finalize(contextCreated); } catch (Exception x) { /*Ignore*/ }
+                    try {
+                        cacheFinalize.finalize(contextCreated);
+                    } catch (Exception x) { /* Ignore */
+                    }
                 }
 
                 if (automaticStrategyUsed) {

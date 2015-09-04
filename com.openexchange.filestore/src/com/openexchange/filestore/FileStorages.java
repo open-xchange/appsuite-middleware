@@ -70,24 +70,24 @@ public final class FileStorages {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
-    private static final AtomicReference<FileStorage2ContextsResolver> RESOLVER_REF = new AtomicReference<FileStorage2ContextsResolver>();
+    private static final AtomicReference<FileStorage2EntitiesResolver> CONTEXT_RESOLVER_REF = new AtomicReference<FileStorage2EntitiesResolver>();
 
     /**
-     * Sets the "file storage to context" resolver.
+     * Sets the "file storage to entities" resolver.
      *
-     * @param resolver The "file storage to context" resolver
+     * @param resolver The "file storage to entities" resolver
      */
-    public static void setFileStorage2ContextsResolver(FileStorage2ContextsResolver resolver) {
-        RESOLVER_REF.set(resolver);
+    public static void setFileStorage2EntitiesResolver(FileStorage2EntitiesResolver resolver) {
+        CONTEXT_RESOLVER_REF.set(resolver);
     }
 
     /**
-     * Gets the "file storage to context" resolver.
+     * Gets the "file storage to entities" resolver.
      *
-     * @return The "file storage to context" resolver or <code>null</code> if absent
+     * @return The "file storage to entities" resolver or <code>null</code> if absent
      */
-    public static FileStorage2ContextsResolver getFileStorage2ContextsResolver() {
-        return RESOLVER_REF.get();
+    public static FileStorage2EntitiesResolver getFileStorage2EntitiesResolver() {
+        return CONTEXT_RESOLVER_REF.get();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------
@@ -139,9 +139,9 @@ public final class FileStorages {
     /**
      * Gets the context-related appendix for a file storage's base URI.
      * <pre>
-     *   [context-id] + "_ctx_store"
+     * [context-id] + "_ctx_store"
      *
-     *   Example: "1337_ctx_store"
+     * Example: "1337_ctx_store"
      * </pre>
      *
      * @param contextId The context identifier
@@ -154,9 +154,9 @@ public final class FileStorages {
     /**
      * Gets the user-related appendix for a file storage's base URI.
      * <pre>
-     *   [context-id] + "_ctx_" + [user-id] + "_user_store"
+     * [context-id] + "_ctx_" + [user-id] + "_user_store"
      *
-     *   Example: "1337_ctx_17_user_store"
+     * Example: "1337_ctx_17_user_store"
      * </pre>
      *
      * @param userId The user identifier
@@ -172,9 +172,9 @@ public final class FileStorages {
     /**
      * Gets the storage name for given context.
      * <pre>
-     *   [context-id] + "_ctx_store"
+     * [context-id] + "_ctx_store"
      *
-     *   Example: "1337_ctx_store"
+     * Example: "1337_ctx_store"
      * </pre>
      *
      * @param contextId The context identifier
@@ -187,9 +187,9 @@ public final class FileStorages {
     /**
      * Gets the storage name for given user.
      * <pre>
-     *   [context-id] + "_ctx_" + [user-id] + "_user_store"
+     * [context-id] + "_ctx_" + [user-id] + "_user_store"
      *
-     *   Example: "1337_ctx_17_user_store"
+     * Example: "1337_ctx_17_user_store"
      * </pre>
      *
      * @param userId The user identifier
@@ -278,7 +278,7 @@ public final class FileStorages {
     /**
      * Appends given sub-part portion (<code>appendix</code>) to specified path component delimited by a slash <code>'/'</code> character.
      * <pre>
-     *   [path-without-ending-slash] + "/" + [appendix-without-starting-slash]
+     * [path-without-ending-slash] + "/" + [appendix-without-starting-slash]
      * </pre>
      *
      * @param path The path component to append to

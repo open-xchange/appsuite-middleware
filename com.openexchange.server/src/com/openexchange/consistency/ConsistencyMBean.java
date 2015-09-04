@@ -69,21 +69,21 @@ public interface ConsistencyMBean {
     // Missing
     List<String> listMissingFilesInContext(int contextId) throws MBeanException;
 
-    Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws MBeanException;
+    Map<MBeanEntity, List<String>> listMissingFilesInFilestore(int filestoreId) throws MBeanException;
 
-    Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws MBeanException;
+    Map<MBeanEntity, List<String>> listMissingFilesInDatabase(int databaseId) throws MBeanException;
 
-    Map<Integer, List<String>> listAllMissingFiles() throws MBeanException;
+    Map<MBeanEntity, List<String>> listAllMissingFiles() throws MBeanException;
 
     // Unassigned
 
     List<String> listUnassignedFilesInContext(int contextId) throws MBeanException;
 
-    Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws MBeanException;
+    Map<MBeanEntity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws MBeanException;
 
-    Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws MBeanException;
+    Map<MBeanEntity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws MBeanException;
 
-    Map<Integer, List<String>> listAllUnassignedFiles() throws MBeanException;
+    Map<MBeanEntity, List<String>> listAllUnassignedFiles() throws MBeanException;
 
     // Repair
 

@@ -50,10 +50,11 @@
 package com.openexchange.consistency.solver;
 
 import java.util.Set;
+import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link DeleteBrokenVCardReferencesSolver}
@@ -66,15 +67,17 @@ public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenVCardReferencesSolver.class);
 
     @Override
-    public void solve(Context ctx, Set<String> problems) throws OXException {
-        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
-        if (vCardStorageMetadataStore == null) {
-            LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");
-            return;
-        }
-        if (problems.size() > 0) {
-            vCardStorageMetadataStore.removeByRefId(ctx.getContextId(), problems);
-            LOG.info("Deleted {} broken VCard references.", problems.size());
+    public void solve(Entity entity, Set<String> problems) throws OXException {
+        if (entity.getType().equals(EntityType.Context)) {
+            VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
+            if (vCardStorageMetadataStore == null) {
+                LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");
+                return;
+            }
+            if (problems.size() > 0) {
+                vCardStorageMetadataStore.removeByRefId(entity.getContext().getContextId(), problems);
+                LOG.info("Deleted {} broken VCard references.", problems.size());
+            }
         }
     }
 

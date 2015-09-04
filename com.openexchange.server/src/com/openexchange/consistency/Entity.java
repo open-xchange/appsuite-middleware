@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,50 @@
  *
  */
 
-package com.openexchange.filestore;
+package com.openexchange.consistency;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.io.Serializable;
+import org.apache.commons.collections.keyvalue.MultiKey;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link FileStorage2ContextsResolver} - Resolves a certain file storage to those contexts that either itself or at least one of context's users use that file storage.
+ * {@link Entity}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface FileStorage2ContextsResolver {
+public interface Entity extends Serializable {
+
+    public enum EntityType {
+        Context, User;
+    }
 
     /**
-     * Gets the identifiers of all contexts that either itself or at least of its users uses the denoted file storage.
-     *
-     * @param fileStorageId The file storage identifier
-     * @return The identifiers of all contexts
-     * @throws OXException If identifiers cannot be returned
+     * Returns the entity's identifier
+     * 
+     * @return the entity's identifier
      */
-    int[] getIdsOfContextsUsing(int fileStorageId) throws OXException;
+    MultiKey getId();
 
     /**
-     * Gets the identifiers of those file storages that are used by given context. The one used by itself and the ones used by context's users.
-     *
-     * @param contextId The context identifier
-     * @return The identifiers of used file storages
-     * @throws OXException If identifiers cannot be returned
+     * Returns the entity's type
+     * 
+     * @return the entity's type
      */
-    int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException;
+    EntityType getType();
 
     /**
-     * Gets those file storages that are used by given context. The one used by itself and the ones used by context's users.
-     * <p>
-     * The file storage used by context is always the first in return listing.
-     *
-     * @param contextId The context identifier
-     * @param quotaAware Whether returned <code>FileStorage</code> instances are supposed to be quota-aware or not
-     * @return The used file storages with the one used by context at first positions
-     * @throws OXException If file storages cannot be returned
+     * Returns the context of this entity
+     * 
+     * @return the context of this entity
      */
-    List<FileStorage> getFileStoragesUsedBy(int contextId, boolean quotaAware) throws OXException;
+    Context getContext();
+
+    /**
+     * Returns the user of this entity
+     * 
+     * @return the user of this entity
+     */
+    User getUser();
 
 }

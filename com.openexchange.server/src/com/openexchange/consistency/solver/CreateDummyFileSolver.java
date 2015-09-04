@@ -51,7 +51,6 @@ package com.openexchange.consistency.solver;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 
@@ -63,12 +62,12 @@ import com.openexchange.filestore.FileStorage;
  */
 public abstract class CreateDummyFileSolver {
 
-    /** The associated file storages */
-    protected final List<FileStorage> storages;
+    /** The associated file storage */
+    protected final FileStorage storage;
 
-    protected CreateDummyFileSolver(final List<FileStorage> storages) {
+    protected CreateDummyFileSolver(final FileStorage storage) {
         super();
-        this.storages = storages;
+        this.storage = storage;
     }
 
     /**
