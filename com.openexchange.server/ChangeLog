@@ -1,10 +1,11 @@
 * 2015-09-04 - thorben.betten@open-xchange.com
 
- - Fix for bug 40902: Put proper prepared full name as "original_folder_id" field into mail JSON representation
+ - Fix for bug 40902: Put proper prepared full name as "original_folder_id" field into mail JSON representation.
 
 * 2015-09-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 25999: Post installation script now removes unused property com.openexchange.servlet.sessionCleanerInterval from server.properties.
+ - Fix for bug 40912: Place removal of unused property com.openexchange.servlet.sessionCleanerInterval after the necessary bash tools are sourced.
 
 * 2015-09-04 - tobias.friedrich@open-xchange.com
 

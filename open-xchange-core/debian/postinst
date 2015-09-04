@@ -85,9 +85,6 @@ for FILE in ${GWCONFFILES}; do
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
 
-# Fix for bug 25999
-ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
-
 # SoftwareChange_Request-1297
 if [ -e /opt/open-xchange/etc/sessioncache.ccf ]; then
     dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/sessioncache.ccf -- "$@"
@@ -104,6 +101,9 @@ dpkg-maintscript-helper rm_conffile \
     /opt/open-xchange/etc/groupware/TidyMessages.properties 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 
 . /opt/open-xchange/lib/oxfunctions.sh
+
+# Fix for bug 25999
+ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
 
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
