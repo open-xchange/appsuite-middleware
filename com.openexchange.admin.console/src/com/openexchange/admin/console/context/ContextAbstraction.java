@@ -79,21 +79,23 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected static int CONTEXT_INITIAL_CONSTANTS_VALUE = Constants.values().length + AccessCombinations.values().length;
 
-    protected enum ContextConstants implements CSVConstants {
-        contextname(CONTEXT_INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_NAME_LONG, false),
-        quota(CONTEXT_INITIAL_CONSTANTS_VALUE + 1, OPT_QUOTA_LONG, true),
-        lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false),
-        schema(CONTEXT_INITIAL_CONSTANTS_VALUE + 3, SCHEMA_OPT, false),
-        schemaStrategy(CONTEXT_INITIAL_CONSTANTS_VALUE + 4, SCHEMA_STRATEGY_OPT, false);
+    public enum ContextConstants implements CSVConstants {
+        contextname(OPT_NAME_CONTEXT_NAME_LONG, false),
+        quota(OPT_QUOTA_LONG, true),
+        lmapping(OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false),
+        schema(SCHEMA_OPT, false),
+        schemaStrategy(SCHEMA_STRATEGY_OPT, false),
+        destination_store_id(OPT_CONTEXT_DESTINATION_STORE_ID_LONG, false),
+        destination_database_id(OPT_CONTEXT_DESTINATION_DATABASE_ID_LONG, false),
+
+        ;
 
         private final String string;
-
         private final int index;
-
         private boolean required;
 
-        private ContextConstants(final int index, final String string, final boolean required) {
-            this.index = index;
+        private ContextConstants(String string, boolean required) {
+            this.index = CONTEXT_INITIAL_CONSTANTS_VALUE + ordinal();
             this.string = string;
             this.required = required;
         }
@@ -448,7 +450,29 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 try {
                     context.setMaxQuota(Long.valueOf(value));
                 } catch (final NumberFormatException e) {
-                    throw new InvalidDataException("Value in field " + Constants.CONTEXTID.getString() + " is no integer");
+                    throw new InvalidDataException("Value in field " + ContextConstants.quota.getString() + " is no integer");
+                }
+            }
+        });
+        setValue(nextLine, idarray, ContextConstants.destination_database_id, new MethodStringClosure() {
+
+            @Override
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                try {
+                    context.setWriteDatabase(new Database(Integer.parseInt(value)));
+                } catch (final NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_database_id.getString() + " is no integer");
+                }
+            }
+        });
+        setValue(nextLine, idarray, ContextConstants.destination_store_id, new MethodStringClosure() {
+
+            @Override
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                try {
+                    context.setFilestoreId(Integer.valueOf(value));
+                } catch (final NumberFormatException e) {
+                    throw new InvalidDataException("Value in field " + ContextConstants.destination_store_id.getString() + " is no integer");
                 }
             }
         });

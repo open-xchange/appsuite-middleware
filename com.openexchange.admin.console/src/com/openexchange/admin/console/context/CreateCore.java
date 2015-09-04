@@ -159,61 +159,73 @@ public abstract class CreateCore extends ContextAbstraction {
 
     protected void csvparsing(final String filename, final Credentials auth) throws NotBoundException, IOException, InvalidDataException, StorageException, InvalidCredentialsException {
         // First check if we can login with the given credentials. Otherwise there's no need to continue
-        final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME + OXLoginInterface.RMI_NAME);
-        oxlgn.login(auth);
-
-        final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
-        int[] idarray = csvParsingCommon(reader);
-        int linenumber = 2;
-        String[] nextLine;
-        lookupRMI();
-        while ((nextLine = reader.readNext()) != null) {
-            // nextLine[] is an array of values from the line
-            Context context;
-            try {
-                context = getContext(nextLine, idarray);
-                SchemaSelectStrategy schemaSelectStrategy = getSchemaSelectStrategy(nextLine, idarray);
-                try {
-                    applyExtensionValuesFromCSV(nextLine, idarray, context);
-                    final User adminuser = getUser(nextLine, idarray);
-                    final int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
-                    final Context createdCtx;
-                    if (-1 != i) {
-                        // create call
-                        createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth, schemaSelectStrategy);
-                    } else {
-                        final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
-                        if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
-                            // with module access
-                            createdCtx = simpleMainCall(context, adminuser, moduleacess, auth, schemaSelectStrategy);
-                        } else {
-                            // without module access
-                            createdCtx = simpleMainCall(context, adminuser, auth, schemaSelectStrategy);
-                        }
-
-                    }
-                    System.out.println("Context " + createdCtx.getId() + " successfully created");
-                } catch (final OXConsolePluginException e1) {
-                    System.err.println("Failed to create context: " + "Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
-                } catch (final StorageException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                } catch (final RemoteException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                } catch (final InvalidCredentialsException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                } catch (final InvalidDataException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                } catch (final ContextExistsException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                } catch (final ParseException e) {
-                    System.err.println("Failed to create context " + getContextIdOrLine(context, linenumber) + ": " + e);
-                }
-            } catch (ParseException e2) {
-                System.err.println("Failed to create context " + "in line " + linenumber + ": " + e2);
-            }
-            linenumber++;
+        {
+            OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME + OXLoginInterface.RMI_NAME);
+            oxlgn.login(auth);
         }
 
+        CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
+        try {
+            int[] idarray = csvParsingCommon(reader);
+            lookupRMI();
+
+            int lineNumber = 2;
+            for (String[] nextLine; (nextLine = reader.readNext()) != null;) {
+                // nextLine[] is an array of values from the line
+                try {
+                    Context context = getContext(nextLine, idarray);
+                    SchemaSelectStrategy schemaSelectStrategy = getSchemaSelectStrategy(nextLine, idarray);
+                    try {
+                        Context createdCtx;
+                        {
+                            applyExtensionValuesFromCSV(nextLine, idarray, context);
+                            User adminuser = getUser(nextLine, idarray);
+                            int i = idarray[AccessCombinations.ACCESS_COMBI_NAME.getIndex()];
+                            if (i >= 0) {
+                                // create call
+                                createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth, schemaSelectStrategy);
+                            } else {
+                                final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
+                                if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
+                                    // with module access
+                                    createdCtx = simpleMainCall(context, adminuser, moduleacess, auth, schemaSelectStrategy);
+                                } else {
+                                    // without module access
+                                    createdCtx = simpleMainCall(context, adminuser, auth, schemaSelectStrategy);
+                                }
+
+                            }
+                        }
+                        System.out.println("Context " + createdCtx.getId() + " successfully created");
+                    } catch (final OXConsolePluginException e1) {
+                        System.err.println("Failed to create context: Error while processing extension options: " + e1.getClass().getSimpleName() + ": " + e1.getMessage());
+                    } catch (final StorageException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    } catch (final RemoteException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    } catch (final InvalidCredentialsException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    } catch (final InvalidDataException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    } catch (final ContextExistsException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    } catch (final ParseException e) {
+                        System.err.println("Failed to create context " + getContextIdOrLine(context, lineNumber) + ": " + e);
+                    }
+                } catch (ParseException e2) {
+                    System.err.println("Failed to create context in line " + lineNumber + ": " + e2);
+                }
+
+                // Increment line number
+                lineNumber++;
+            }
+        } finally {
+            try {
+                reader.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
     }
 
     protected abstract void lookupRMI() throws MalformedURLException, RemoteException, NotBoundException;
@@ -227,13 +239,22 @@ public abstract class CreateCore extends ContextAbstraction {
         extensionConstantProcessing(this.constantsMap);
     }
 
+    @Override
+    public void checkRequired(final int[] idarray) throws InvalidDataException {
+        super.checkRequired(idarray);
+        for (final ContextConstants value : ContextConstants.values()) {
+            if (value.isRequired()) {
+                if (-1 == idarray[value.getIndex()]) {
+                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
+                }
+            }
+        }
+
+    }
+
     private String getContextIdOrLine(final Context context, final int linenumber) {
         final Integer id = context.getId();
-        if (null != id) {
-            return id.toString();
-        } else {
-            return "in line " + linenumber;
-        }
+        return null == id ? "in line " + linenumber : id.toString();
     }
 
     protected SchemaSelectStrategy parseCheckAndGetSchemaSelectStrategy(AdminParser parser) throws InvalidDataException {
@@ -269,18 +290,5 @@ public abstract class CreateCore extends ContextAbstraction {
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
 
     protected abstract void setFurtherOptions(final AdminParser parser);
-
-    @Override
-    public void checkRequired(final int[] idarray) throws InvalidDataException {
-        super.checkRequired(idarray);
-        for (final ContextConstants value : ContextConstants.values()) {
-            if (value.isRequired()) {
-                if (-1 == idarray[value.getIndex()]) {
-                    throw new InvalidDataException("The required column \"" + value.getString() + "\" is missing");
-                }
-            }
-        }
-
-    }
 
 }
