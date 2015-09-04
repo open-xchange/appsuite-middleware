@@ -93,13 +93,13 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
 
     @Override
     public Context[] filter(Collection<Context> contexts) throws PipesAndFiltersException {
-        Map<Integer, Map<String, Map<Integer, Context>>> readIdMap = new HashMap<Integer, Map<String, Map<Integer, Context>>>();
+        Map<PoolIdTuple, Map<String, Map<Integer, Context>>> poolMap = new HashMap<PoolIdTuple, Map<String, Map<Integer, Context>>>();
         for (Context context : contexts) {
-            Integer readId = context.getReadDatabase().getId();
-            Map<String, Map<Integer, Context>> schemaMap = readIdMap.get(readId);
+            PoolIdTuple tuple = new PoolIdTuple(context.getWriteDatabase().getId(), context.getReadDatabase().getId());
+            Map<String, Map<Integer, Context>> schemaMap = poolMap.get(tuple);
             if (null == schemaMap) {
                 schemaMap = new HashMap<String, Map<Integer, Context>>();
-                readIdMap.put(readId, schemaMap);
+                poolMap.put(tuple, schemaMap);
             }
             String schema = context.getReadDatabase().getScheme();
             Map<Integer, Context> cidMap = schemaMap.get(schema);
@@ -110,10 +110,10 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
             cidMap.put(context.getId(), context);
         }
         List<Context> retval = new ArrayList<Context>();
-        for (Entry<Integer, Map<String, Map<Integer, Context>>> readIdEntry : readIdMap.entrySet()) {
-            for (Entry<String, Map<Integer, Context>> schemaEntry : readIdEntry.getValue().entrySet()) {
+        for (Entry<PoolIdTuple, Map<String, Map<Integer, Context>>> poolEntry : poolMap.entrySet()) {
+            for (Entry<String, Map<Integer, Context>> schemaEntry : poolEntry.getValue().entrySet()) {
                 try {
-                    retval.addAll(loadUsage(readIdEntry.getKey(), schemaEntry.getKey(), schemaEntry.getValue()));
+                    retval.addAll(loadUsage(poolEntry.getKey().getWritePoolId(), poolEntry.getKey().getReadPoolId(), schemaEntry.getKey(), schemaEntry.getValue()));
                 } catch (StorageException e) {
                     throw new PipesAndFiltersException(e);
                 }
@@ -122,16 +122,16 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return retval.toArray(new Context[retval.size()]);
     }
 
-    private Collection<Context> loadUsage(int poolId, String schema, Map<Integer, Context> contexts) throws StorageException {
-        if (OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(poolId, schema)) {
-            throw new StorageException(new DatabaseUpdateException("Database with pool-id " + poolId + " and schema \"" + schema + "\" needs update. Please run \"runupdate\" for that database."));
+    private Collection<Context> loadUsage(int writePoolId, int readPoolId, String schema, Map<Integer, Context> contexts) throws StorageException {
+        if (OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(writePoolId, schema)) {
+            throw new StorageException(new DatabaseUpdateException("Database with pool-id " + writePoolId + " and schema \"" + schema + "\" needs update. Please run \"runupdate\" for that database."));
         }
 
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getPool().getConnection(poolId, schema);
+            con = cache.getPool().getConnection(readPoolId, schema);
             stmt = con.prepareStatement("SELECT cid,used FROM filestore_usage WHERE user=0");
             rs = stmt.executeQuery();
             while (rs.next()) {
@@ -148,7 +148,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.getPool().pushConnection(poolId, con);
+                cache.getPool().pushConnection(readPoolId, con);
             } catch (PoolException e) {
                 LOG.error("", e);
             }
@@ -163,5 +163,48 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
             }
         }
         return contexts.values();
+    }
+
+    private class PoolIdTuple {
+        private final int writePoolId, readPoolId;
+        PoolIdTuple(int writePoolId, int readPoolId) {
+            super();
+            this.writePoolId = writePoolId;
+            this.readPoolId = readPoolId;
+        }
+        public int getWritePoolId() {
+            return writePoolId;
+        }
+        public int getReadPoolId() {
+            return readPoolId;
+        }
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + writePoolId;
+            result = prime * result + readPoolId;
+            return result;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            PoolIdTuple other = (PoolIdTuple) obj;
+            if (writePoolId != other.writePoolId) {
+                return false;
+            }
+            if (readPoolId != other.readPoolId) {
+                return false;
+            }
+            return true;
+        }
     }
 }
