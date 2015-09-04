@@ -117,10 +117,6 @@ public class AdditionalRMITests extends AbstractRMITest {
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        // ensure context is available
-        // FIXME when master-slave setup for configdb is available remove the line below
-        Thread.sleep(2000L);
-        // ----------------------
         user = ui.create(context, user, getCredentials());
     }
 
