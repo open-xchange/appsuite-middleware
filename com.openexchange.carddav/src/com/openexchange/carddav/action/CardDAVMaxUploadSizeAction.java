@@ -73,9 +73,8 @@ public class CardDAVMaxUploadSizeAction extends OXWebdavMaxUploadSizeAction {
      * @param sessionHolder The session holder
      */
     public CardDAVMaxUploadSizeAction(GroupwareCarddavFactory factory, SessionHolder sessionHolder) {
-        super();
+        super(sessionHolder);
         this.factory = factory;
-        setSessionHolder(sessionHolder);
     }
 
     @Override
