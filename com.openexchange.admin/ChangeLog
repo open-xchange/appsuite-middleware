@@ -1,6 +1,7 @@
 * 2015-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 38882: Added missing options to CSV import
+ - Fix for bug 40775: Also user lower-case user name when checking for existing users with such a user name
 
 * 2015-06-30 - thorben.betten@open-xchange.com
 
