@@ -8,7 +8,7 @@
     <div id="signature">
       <p id="signature_text">
         <#if footer_image_src?has_content>
-          <img class="logo" id="signature_image" src="${footer_image_src}" style="display:inline;float:right;">
+          <img id="signature_image" src="${footer_image_src}" alt="${footer_image_alt}" style="display:inline;float:right;">
         </#if>
         <#if footer_text?has_content>
           ${footer_text?html}

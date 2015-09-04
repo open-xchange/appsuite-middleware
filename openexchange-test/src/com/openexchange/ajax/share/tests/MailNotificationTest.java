@@ -59,7 +59,6 @@ import java.util.List;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import org.json.JSONException;
 import org.jsoup.nodes.Document;
 import com.google.common.io.BaseEncoding;
@@ -378,7 +377,7 @@ public class MailNotificationTest extends ShareTest {
         });
 
         Message message = assertAndGetMessage();
-        Document document = message.getHtml();
+        Document document = message.requireHtml();
         String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName());
         String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName());
         String viewItemStringString = NotificationStrings.VIEW_FOLDER;
@@ -416,7 +415,7 @@ public class MailNotificationTest extends ShareTest {
         });
 
         Message message = assertAndGetMessage();
-        Document document = message.getHtml();
+        Document document = message.requireHtml();
         String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, testFile.getFileName());
         String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, testFile.getFileName());
         String viewItemStringString = NotificationStrings.VIEW_FILE;
@@ -446,7 +445,7 @@ public class MailNotificationTest extends ShareTest {
         client.execute(inviteRequest);
 
         Message message = assertAndGetMessage();
-        Document document = message.getHtml();
+        Document document = message.requireHtml();
         assertSubject(message.getMimeMessage(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemString);
@@ -528,9 +527,8 @@ public class MailNotificationTest extends ShareTest {
     }
 
     private void assertSignatureImage(Message message) throws Exception {
-        String src = message.getHtml().getElementById("signature_image").attr("src");
-        MimeMultipart multipart = (MimeMultipart) message.getMimeMessage().getContent();
-        BodyPart image = multipart.getBodyPart("<" + src.substring(4) + ">");
+        String src = message.requireHtml().getElementById("signature_image").attr("src");
+        BodyPart image = message.getBodyPartByContentID("<" + src.substring(4) + ">");
         assertNotNull(image);
         byte[] expectedBytes = BaseEncoding.base64().decode(SIGNATURE_IMAGE);
         byte[] imageBytes = ByteStreams.toByteArray(image.getInputStream());

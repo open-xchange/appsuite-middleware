@@ -167,7 +167,11 @@ public class ServerConfigImpl implements ServerConfig {
             Map<String, Object> footerMap = (Map<String,Object>) mailsMap.get("footer");
             if (footerMap != null) {
                 mailConfig.setFooterImage((String) footerMap.get("image"));
+                mailConfig.setFooterImageAltText(getProductName());
                 mailConfig.setFooterText((String) footerMap.get("text"));
+                // Hidden property. We can document this one if anybody starts asking for it. Until then
+                // we continue to use the MIME structure as image container.
+                mailConfig.setEmbedFooterImage(Boolean.parseBoolean((String) footerMap.get("embed")));
             }
 
             return mailConfig;

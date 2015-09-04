@@ -49,49 +49,35 @@
 
 package com.openexchange.oauth.provider.impl.notification;
 
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeDefaultSession;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.notification.BasicNotificationTemplate;
-import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.notification.FullNameBuilder;
+import com.openexchange.notification.mail.MailData;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
-import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
-import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -121,7 +107,6 @@ public class OAuthMailNotificationService {
 
     private ComposedMailMessage buildNewExternalApplicationMail(ServerSession session, Client client, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, URISyntaxException {
         User user = session.getUser();
-        TemplateService templateService = Services.requireService(TemplateService.class);
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
         String hostname = URLHelper.getHostname(request);
@@ -143,59 +128,16 @@ public class OAuthMailNotificationService {
         vars.put("gotoSettings", translator.translate(NotificationStrings.GO_TO_SETTINGS));
         vars.put("settingsURL", getSettingsUrl(request));
 
-        // style substitutions
-        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
-        BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
-        basicTemplate.applyStyle(vars);
-        FooterImage footerImage = basicTemplate.applyFooter(vars);
-
-        OXTemplate template = templateService.loadTemplate("notify.oauthprovider.accessgranted.html.tmpl");
-        StringWriter writer = new StringWriter();
-        template.process(vars, writer);
-
-        ComposedMailMessage mail;
         InternetAddress recipient = new InternetAddress(user.getMail(), userName);
-        if (footerImage == null) {
-            // no image, no multipart
-            mail = transportProvider.getNewComposedMailMessage(session, session.getContext());
-            mail.addRecipient(recipient);
-            mail.addTo(recipient);
-            mail.setSubject(subject);
-            mail.setHeader("Auto-Submitted", "auto-generated");
-            mail.setBodyPart(transportProvider.getNewTextBodyPart(writer.toString()));
-        } else {
-            MimeBodyPart htmlPart = new MimeBodyPart();
-            ContentType ct = new ContentType();
-            ct.setPrimaryType("text");
-            ct.setSubType("html");
-            ct.setCharsetParameter("UTF-8");
-            String contentType = ct.toString();
-            HtmlService htmlService = Services.requireService(HtmlService.class);
-            String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
-            htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
-            htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
-
-            MimeBodyPart imagePart = new MimeBodyPart();
-            imagePart.setDisposition("inline; filename=\"" + footerImage.getFileName() + "\"");
-            imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType() + "; name=\"" + footerImage.getFileName() + "\"");
-            imagePart.setContentID("<" + footerImage.getContentId() + ">");
-            imagePart.setHeader("X-Attachment-Id", footerImage.getContentId());
-            imagePart.setDataHandler(new DataHandler(new MessageDataSource(footerImage.getData(), footerImage.getContentType())));
-
-            MimeMultipart multipart = new MimeMultipart("related");
-            multipart.addBodyPart(htmlPart);
-            multipart.addBodyPart(imagePart);
-
-            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
-            mimeMessage.addRecipient(javax.mail.internet.MimeMessage.RecipientType.TO, recipient);
-            mimeMessage.setSubject(subject, "UTF-8");
-            mimeMessage.setHeader("Auto-Submitted", "auto-generated");
-            mimeMessage.setContent(multipart);
-            mimeMessage.saveChanges();
-            mail = new ContentAwareComposedMailMessage(mimeMessage, contextId);
-        }
-
-        return mail;
+        MailData mailData = MailData.newBuilder()
+            .setRecipient(recipient)
+            .setSubject(subject)
+            .setHtmlTemplate("notify.oauthprovider.accessgranted.html.tmpl")
+            .setTemplateVars(vars)
+            .setMailConfig(serverConfig.getNotificationMailConfig())
+            .setContext(session.getContext())
+            .build();
+        return Services.requireService(NotificationMailFactory.class).createMail(mailData);
     }
 
     private static String getLogin(Session session, User user) {

@@ -47,70 +47,40 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.notification.mail.impl;
+
 
 /**
- * {@link NotificationMailConfig} - Represents the notification mail config params that are set via our as-config approach and available as part of the
- * {@link ServerConfig}.
+ * Defines common variable names to be used in mail notification templates.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface NotificationMailConfig {
+public class CommonNotificationVariables {
 
     /**
-     * Gets the text color for button labels
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
+     * Variable <code>footer_text</code>
      */
-    String getButtonTextColor();
-
+    public static final String FOOTER_TEXT = "footer_text";
     /**
-     * Gets the background color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
+     * Variable <code>footer_image_src</code>
      */
-    String getButtonBackgroundColor();
-
+    public static final String FOOTER_IMAGE_SRC = "footer_image_src";
     /**
-     * Gets the border color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
+     * Variable <code>footer_image_alt</code>
      */
-    String getButtonBorderColor();
-
+    public static final String FOOTER_IMAGE_ALT = "footer_image_alt";
     /**
-     * Gets the text for mail footers
-     *
-     * @return The footer text or <code>null</code> if none shall be displayed
+     * Variable <code>button_border_color</code>
      */
-    String getFooterText();
-
+    public static final String BUTTON_BORDER_COLOR = "button_border_color";
     /**
-     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
-     *
-     * @return The images file name or <code>null</code> if none shall be displayed
+     * Variable <code>button_background_color</code>
      */
-    String getFooterImage();
-
+    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
     /**
-     * Gets the alternative text of the footer image. This text is shown by email clients
-     * that don't show images at all.
-     *
-     * @return The alternative text; not <code>null</code> if {@link #getFooterImage()} is
-     * also not <code>null</code>.
+     * Variable <code>button_color</code>
      */
-    String getFooterImageAltText();
-
-    /**
-     * Gets whether a potential footer image shall be embedded as data URL (i.e. in the form
-     * of <code>&lt;img src="data:image/png;base64,iVBO...." /&gt;</code> or if it shall be
-     * contained as a separate MIME part and be referenced via its content ID (i.e. <code>
-     * &lt;img src="cid:ce29ee25-eb59-4147-a4ab-aed71224773b" /&gt;</code>.
-     *
-     * @return <code>true</code> if a data URL shall be used, <code>false</code> otherwise.
-     */
-    boolean embedFooterImage();
+    public static final String BUTTON_COLOR = "button_color";
 
 }

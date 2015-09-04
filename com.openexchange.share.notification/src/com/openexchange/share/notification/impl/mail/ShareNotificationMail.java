@@ -47,70 +47,35 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.share.notification.impl.mail;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.notification.mail.MailData;
+import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link NotificationMailConfig} - Represents the notification mail config params that are set via our as-config approach and available as part of the
- * {@link ServerConfig}.
+ * {@link ShareNotificationMail}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface NotificationMailConfig {
+abstract class ShareNotificationMail {
 
-    /**
-     * Gets the text color for button labels
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonTextColor();
+    private final ServiceLookup services;
+    private final MailData mailData;
 
-    /**
-     * Gets the background color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonBackgroundColor();
+    protected ShareNotificationMail(ServiceLookup services, MailData mailData) {
+        super();
+        this.services = services;
+        this.mailData = mailData;
+    }
 
-    /**
-     * Gets the border color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonBorderColor();
-
-    /**
-     * Gets the text for mail footers
-     *
-     * @return The footer text or <code>null</code> if none shall be displayed
-     */
-    String getFooterText();
-
-    /**
-     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
-     *
-     * @return The images file name or <code>null</code> if none shall be displayed
-     */
-    String getFooterImage();
-
-    /**
-     * Gets the alternative text of the footer image. This text is shown by email clients
-     * that don't show images at all.
-     *
-     * @return The alternative text; not <code>null</code> if {@link #getFooterImage()} is
-     * also not <code>null</code>.
-     */
-    String getFooterImageAltText();
-
-    /**
-     * Gets whether a potential footer image shall be embedded as data URL (i.e. in the form
-     * of <code>&lt;img src="data:image/png;base64,iVBO...." /&gt;</code> or if it shall be
-     * contained as a separate MIME part and be referenced via its content ID (i.e. <code>
-     * &lt;img src="cid:ce29ee25-eb59-4147-a4ab-aed71224773b" /&gt;</code>.
-     *
-     * @return <code>true</code> if a data URL shall be used, <code>false</code> otherwise.
-     */
-    boolean embedFooterImage();
+    public ComposedMailMessage compose() throws OXException {
+        NotificationMailFactory notificationMailFactory = services.getService(NotificationMailFactory.class);
+        return notificationMailFactory.createMail(mailData);
+    }
 
 }

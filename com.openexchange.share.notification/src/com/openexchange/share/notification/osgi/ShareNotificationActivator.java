@@ -10,6 +10,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.group.GroupService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareService;
@@ -38,7 +39,8 @@ public class ShareNotificationActivator extends HousekeepingActivator {
             ConfigViewFactory.class,
             TemplateService.class,
             HtmlService.class,
-            ShareService.class
+            ShareService.class,
+            NotificationMailFactory.class
         };
     }
 
@@ -90,6 +92,11 @@ public class ShareNotificationActivator extends HousekeepingActivator {
 
         registerService(ShareNotificationService.class, defaultNotificationService);
         openTrackers();
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
 }

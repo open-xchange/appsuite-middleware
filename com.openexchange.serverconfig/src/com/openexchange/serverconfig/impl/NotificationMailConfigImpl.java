@@ -51,7 +51,6 @@ package com.openexchange.serverconfig.impl;
 
 import com.openexchange.serverconfig.NotificationMailConfig;
 
-
 /**
  * {@link NotificationMailConfigImpl}
  *
@@ -65,12 +64,9 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
     private String buttonBorderColor;
     private String footerText;
     private String footerImage;
+    private String footerImageAltText;
+    private boolean embedFooterImage;
 
-    /**
-     * Gets the text color for button labels
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
     @Override
     public String getButtonTextColor() {
         return buttonTextColor;
@@ -85,11 +81,6 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
         this.buttonTextColor = color;
     }
 
-    /**
-     * Gets the background color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
     @Override
     public String getButtonBackgroundColor() {
         return buttonBackgroundColor;
@@ -104,11 +95,6 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
         this.buttonBackgroundColor = color;
     }
 
-    /**
-     * Gets the border color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
     @Override
     public String getButtonBorderColor() {
         return buttonBorderColor;
@@ -123,11 +109,6 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
         this.buttonBorderColor = color;
     }
 
-    /**
-     * Gets the text for mail footers
-     *
-     * @return The footer text or <code>null</code> if none shall be displayed
-     */
     @Override
     public String getFooterText() {
         return footerText;
@@ -142,11 +123,6 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
         this.footerText = footerText;
     }
 
-    /**
-     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
-     *
-     * @return The images file name or <code>null</code> if none shall be displayed
-     */
     @Override
     public String getFooterImage() {
         return footerImage;
@@ -159,6 +135,36 @@ public class NotificationMailConfigImpl implements NotificationMailConfig {
      */
     public void setFooterImage(String fileName) {
         this.footerImage = fileName;
+    }
+
+    @Override
+    public String getFooterImageAltText() {
+        return footerImageAltText;
+    }
+
+    /**
+     * Sets the alternative text of the footer image. This text must be set, if a footer
+     * image is set.
+     *
+     * @param footerImageAltText The text
+     */
+    public void setFooterImageAltText(String footerImageAltText) {
+        this.footerImageAltText = footerImageAltText;
+    }
+
+    @Override
+    public boolean embedFooterImage() {
+        return embedFooterImage;
+    }
+
+    /**
+     * Sets whether the footer image shall be embedded via data URL or contained in a separate
+     * MIME part and referenced via content ID.
+     *
+     * @param embedFooterImage <code>true</code> to use data URLs
+     */
+    public void setEmbedFooterImage(boolean embedFooterImage) {
+        this.embedFooterImage = embedFooterImage;
     }
 
 }

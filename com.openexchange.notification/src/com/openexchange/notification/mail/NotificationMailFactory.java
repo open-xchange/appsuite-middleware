@@ -47,36 +47,40 @@
  *
  */
 
-package com.openexchange.notification;
+package com.openexchange.notification.mail;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
 /**
- * Defines common variable names to be used in mail notification templates.
+ * {@link NotificationMailFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CommonNotificationVariables {
+public interface NotificationMailFactory {
 
     /**
-     * Variable <code>footer_text</code>
+     * Composes a mail messages from the given mail data. The resulting MIME structure is:
+     * <pre>
+     *  MIME message (1.0)
+     *    - multipart/alternative
+     *      - text/plain
+     *      - [html-part]
+     * </pre>
+     *
+     * The structure of the HTML part depends on the existence of a footer image (configurable
+     * via <code>as-config.yml</code>. If no footer image exists, the part is a simple <code>
+     * text/html</code> body part. Otherwise it is a <code>multipart/related</code> part, with
+     * the primary part being the <code>text/html</code> part and a second part of type <code>
+     * image/[sub-type]</code>, containing the footer image.
+     *
+     * Composed mails will contain the header <code>Auto-Submitted: auto-generated</code>.
+     *
+     * @param mailData The mail data
+     * @return The composed message
+     * @throws OXException
      */
-    public static final String FOOTER_TEXT = "footer_text";
-    /**
-     * Variable <code>footer_image_src</code>
-     */
-    public static final String FOOTER_IMAGE_SRC = "footer_image_src";
-    /**
-     * Variable <code>button_border_color</code>
-     */
-    public static final String BUTTON_BORDER_COLOR = "button_border_color";
-    /**
-     * Variable <code>button_background_color</code>
-     */
-    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
-    /**
-     * Variable <code>button_color</code>
-     */
-    public static final String BUTTON_COLOR = "button_color";
+    ComposedMailMessage createMail(MailData mailData) throws OXException;
 
 }

@@ -47,70 +47,40 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.notification.osgi;
+
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlService;
+import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.templating.TemplateService;
 
 /**
- * {@link NotificationMailConfig} - Represents the notification mail config params that are set via our as-config approach and available as part of the
- * {@link ServerConfig}.
+ * {@link NotificationActivator}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface NotificationMailConfig {
+public class NotificationActivator extends HousekeepingActivator {
 
-    /**
-     * Gets the text color for button labels
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonTextColor();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, TemplateService.class, HtmlService.class };
+    }
 
-    /**
-     * Gets the background color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonBackgroundColor();
+    @Override
+    protected void startBundle() throws Exception {
+        NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
+            getService(ConfigurationService.class),
+            getService(TemplateService.class),
+            getService(HtmlService.class));
+        registerService(NotificationMailFactory.class, notificationMailFactory);
+    }
 
-    /**
-     * Gets the border color for buttons
-     *
-     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
-     */
-    String getButtonBorderColor();
-
-    /**
-     * Gets the text for mail footers
-     *
-     * @return The footer text or <code>null</code> if none shall be displayed
-     */
-    String getFooterText();
-
-    /**
-     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
-     *
-     * @return The images file name or <code>null</code> if none shall be displayed
-     */
-    String getFooterImage();
-
-    /**
-     * Gets the alternative text of the footer image. This text is shown by email clients
-     * that don't show images at all.
-     *
-     * @return The alternative text; not <code>null</code> if {@link #getFooterImage()} is
-     * also not <code>null</code>.
-     */
-    String getFooterImageAltText();
-
-    /**
-     * Gets whether a potential footer image shall be embedded as data URL (i.e. in the form
-     * of <code>&lt;img src="data:image/png;base64,iVBO...." /&gt;</code> or if it shall be
-     * contained as a separate MIME part and be referenced via its content ID (i.e. <code>
-     * &lt;img src="cid:ce29ee25-eb59-4147-a4ab-aed71224773b" /&gt;</code>.
-     *
-     * @return <code>true</code> if a data URL shall be used, <code>false</code> otherwise.
-     */
-    boolean embedFooterImage();
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
 }

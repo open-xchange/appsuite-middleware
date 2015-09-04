@@ -56,7 +56,6 @@ import java.util.Map.Entry;
 import com.openexchange.java.Charsets;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.encoding.URLCoder;
 
 /**
