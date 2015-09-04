@@ -228,6 +228,9 @@ for FILE in ${COCONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
 done
 
+# Fix for bug 25999
+ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-1297
 rm -f /opt/open-xchange/etc/sessioncache.ccf
 
