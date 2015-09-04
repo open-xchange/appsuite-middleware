@@ -239,7 +239,7 @@ public class ConsistencyCheck {
         try {
             config.run();
         } catch (final Exception x) {
-            x.printStackTrace();
+            System.err.println("ERROR\n" + x.getCause().getMessage());
             System.exit(1);
         }
     }
@@ -423,7 +423,7 @@ public class ConsistencyCheck {
             }
         }
 
-        private void listMissing() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
+        private void listMissing() throws MBeanException {
             Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
@@ -444,14 +444,14 @@ public class ConsistencyCheck {
                     result = consistency.listAllMissingFiles();
                 }
                 System.out.println(" OK.");
+
+                print(result);
             } finally {
                 disconnect();
             }
-
-            print(result);
         }
 
-        private void repair() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
+        private void repair() throws MBeanException {
             if (policies.isEmpty()) {
                 System.out.println("Please specify a policy (either \"" + Policy.missing_entry_for_file.name() + "\" or \"" + Policy.missing_file_for_attachment.name() + "\" or \"" + Policy.missing_file_for_infoitem.name() + "\" or \"" + Policy.missing_file_for_vcard.name() + "\").");
                 return;
@@ -490,18 +490,16 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
-            System.out.print("Closing connection... ");
             if (null != jmxConnector) {
                 try {
                     jmxConnector.close();
                 } catch (final Exception e) {
-                    System.out.println(" Error while closing connection: '" + e.getMessage() + '.');
+                    System.err.println(" Error while closing connection: '" + e.getMessage() + '.');
                 }
             }
-            System.out.println("OK.");
         }
 
-        private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
+        private void connect() {
             if (responseTimeoutMillis > 0) {
                 /*
                  * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
@@ -515,12 +513,19 @@ public class ConsistencyCheck {
                  */
                 System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeoutMillis));
             }
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
-            System.out.print("Connecting to '" + url + "'... ");
-            jmxConnector = JMXConnectorFactory.connect(url, null);
+            MBeanServerConnection mbsc = null;
+            ObjectName name = null;
+            try {
+                JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
+                System.out.print("Connecting to '" + url + "'... ");
+                jmxConnector = JMXConnectorFactory.connect(url, null);
 
-            MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-            ObjectName name = MBeanNamer.getName();
+                mbsc = jmxConnector.getMBeanServerConnection();
+                name = MBeanNamer.getName();
+            } catch (Exception e) {
+                System.err.println("ERROR\n" + e.getMessage());
+                System.exit(1);
+            }
 
             consistency = new MBeanConsistency(mbsc, name);
             System.out.println("OK.");
