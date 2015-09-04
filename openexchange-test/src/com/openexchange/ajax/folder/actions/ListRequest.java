@@ -74,6 +74,8 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean failOnError;
 
+    private boolean altNames = false;
+
     public ListRequest(final API api, final String parentFolder, final int[] columns, final boolean ignoreMail, final Modules[] allowedModules, final boolean failOnError) {
         super(api);
         this.parentFolder = parentFolder;
@@ -132,10 +134,17 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         if (null != allowedModules && allowedModules.length > 0) {
             params.add(new Parameter("allowed_modules", Strings.join(allowedModules, ",")));
         }
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public ListParser getParser() {
         return new ListParser(columns, failOnError);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

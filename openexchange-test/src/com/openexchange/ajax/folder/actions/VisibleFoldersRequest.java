@@ -71,6 +71,8 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
 
     private final boolean failOnError;
 
+    private boolean altNames = false;
+
     /**
      * Initializes a new {@link VisibleFoldersRequest}.
      *
@@ -122,10 +124,17 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allVisible"));
         params.add(new Parameter(Folder.PARAMETER_CONTENT_TYPE, contentType));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public VisibleFoldersParser getParser() {
         return new VisibleFoldersParser(columns, failOnError);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

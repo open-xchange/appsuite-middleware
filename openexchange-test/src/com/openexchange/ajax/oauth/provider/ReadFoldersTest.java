@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,9 +81,9 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
-import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -133,25 +134,41 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private Set<Integer> groups;
 
+    private EnumAPI api;
+
+    private boolean altNames;
+
     private static final Map<Scope, ContentType> S2CT = new HashMap<>();
     static {
         S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactContentType.getInstance());
         S2CT.put(Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE), CalendarContentType.getInstance());
         S2CT.put(Scope.newInstance(TaskActionFactory.OAUTH_READ_SCOPE), TaskContentType.getInstance());
+
     }
 
-    @Parameters(name = "{1}")
+    private static final Set<EnumAPI> APIS = EnumSet.allOf(EnumAPI.class);
+    static {
+        APIS.remove(EnumAPI.EAS_FOLDERS);
+    }
+
+    @Parameters(name = "{1}_{2}_altNames={3}")
     public static Collection<Object[]> generateData() {
         List<Object[]> params = new ArrayList<>(S2CT.size());
         for (Scope scope : S2CT.keySet()) {
-            params.add(new Object[] { scope, S2CT.get(scope) });
+            for (EnumAPI api : APIS) {
+                for (boolean altNames : new boolean[] { true, false }) {
+                    params.add(new Object[] { scope, S2CT.get(scope), api, altNames });
+                }
+            }
         }
         return params;
     }
 
-    public ReadFoldersTest(Scope scope, ContentType contentType) throws OXException {
+    public ReadFoldersTest(Scope scope, ContentType contentType, EnumAPI api, boolean altNames) throws OXException {
         super(scope);
         this.contentType = contentType;
+        this.api = api;
+        this.altNames = altNames;
     }
 
     private int moduleId() {
@@ -203,6 +220,20 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         // prepare shared folders
         ajaxClient2 = new AJAXClient(User.User2);
         ftm2 = new FolderTestManager(ajaxClient2);
+        // remove any non-private permissions from client2s private folder
+        OCLPermission adminPermission = new OCLPermission();
+        adminPermission.setEntity(ajaxClient2.getValues().getUserId());
+        adminPermission.setGroupPermission(false);
+        adminPermission.setFolderAdmin(true);
+        adminPermission.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        FolderObject client2PrivateFolder = ftm2.getFolderFromServer(privateFolderId(ajaxClient2));
+        client2PrivateFolder.setPermissionsAsArray(new OCLPermission[] { adminPermission });
+        client2PrivateFolder.setLastModified(new Date());
+        ftm2.updateFolderOnServer(client2PrivateFolder);
         sharedSubfolder = ftm2.generateSharedFolder("oauth provider folder tree test - shared " + contentType.toString() + " "  + System.currentTimeMillis(), moduleId(), privateFolderId(ajaxClient2), ajaxClient2.getValues().getUserId(), userId);
         ftm2.insertFoldersOnServer(new FolderObject[] { sharedSubfolder });
 
@@ -214,29 +245,43 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     public void testFolderTreeNavigation() throws Exception {
         // expect root folders
         Set<Integer> expectedFolderIds = new HashSet<>();
-        expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        expectedFolderIds.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        expectedFolderIds.add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        if (api == EnumAPI.OUTLOOK) {
+            expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        } else {
+            expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+            expectedFolderIds.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+            expectedFolderIds.add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        }
 
-        Set<Integer> rootFolderIds = collectFolderIds(new RootRequest(EnumAPI.OX_NEW));
+        RootRequest rootRequest = new RootRequest(api);
+        rootRequest.setAltNames(altNames);
+        Set<Integer> rootFolderIds = collectFolderIds(rootRequest);
         Assert.assertTrue(rootFolderIds.containsAll(expectedFolderIds));
         Assert.assertFalse(rootFolderIds.contains(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
 
-        List<FolderObject> privateFolders = listFolders(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        ListRequest listPrivateRequest = new ListRequest(api, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        listPrivateRequest.setAltNames(altNames);
+        List<FolderObject> privateFolders = listFolders(listPrivateRequest);
         assertContentTypeAndPermissions(privateFolders);
         Assert.assertTrue(collectFolderIds(privateFolders).contains(privateFolderId()));
 
-        List<FolderObject> privateSubFolders = listFolders(new ListRequest(EnumAPI.OX_NEW, privateFolderId()));
+        ListRequest listPrivateSubfoldersRequest = new ListRequest(api, privateFolderId());
+        listPrivateSubfoldersRequest.setAltNames(altNames);
+        List<FolderObject> privateSubFolders = listFolders(listPrivateSubfoldersRequest);
         assertContentTypeAndPermissions(privateSubFolders);
         Assert.assertTrue(collectFolderIds(privateSubFolders).contains(privateSubfolder.getObjectID()));
 
         // expect public folders
-        List<FolderObject> publicSubFolders = listFolders(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        ListRequest listPublicRequest = new ListRequest(api, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        listPublicRequest.setAltNames(altNames);
+        List<FolderObject> publicSubFolders = listFolders(listPublicRequest);
         assertContentTypeAndPermissions(publicSubFolders);
         Assert.assertTrue(collectFolderIds(publicSubFolders).contains(publicSubfolder.getObjectID()));
 
         // expect shared folders
-        List<FolderObject> sharedFolders = listFolders(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        ListRequest listSharedFolders = new ListRequest(api, FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        listSharedFolders.setAltNames(altNames);
+        List<FolderObject> sharedFolders = listFolders(listSharedFolders);
         assertContentTypeAndPermissions(sharedFolders);
         FolderObject client2Folder = null;
         for (FolderObject folder : sharedFolders) {
@@ -246,13 +291,17 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             }
         }
         Assert.assertNotNull(client2Folder);
-        Assert.assertTrue(collectFolderIds(new ListRequest(EnumAPI.OX_NEW, "u:" + ajaxClient2.getValues().getUserId())).contains(sharedSubfolder.getObjectID()));
+        ListRequest listSharedSubFolders = new ListRequest(api, "u:" + ajaxClient2.getValues().getUserId());
+        listSharedSubFolders.setAltNames(altNames);
+        Assert.assertTrue(collectFolderIds(listSharedSubFolders).contains(sharedSubfolder.getObjectID()));
     }
 
     @Test
     public void testAllVisibleFolders() throws Exception {
         Set<Integer> expectedFolderIds = new HashSet<>();
-        VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, contentType.toString()));
+        VisibleFoldersRequest request = new VisibleFoldersRequest(api, contentType.toString());
+        request.setAltNames(altNames);
+        VisibleFoldersResponse response = client.execute(request);
         assertNoErrorsAndWarnings(response);
 
         // private
@@ -279,7 +328,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Test
     public void testUpdates() throws Exception {
-        FolderUpdatesResponse updatesResponse = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE));
+        UpdatesRequest request = new UpdatesRequest(api, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE);
+        request.setAltNames(altNames);
+        FolderUpdatesResponse updatesResponse = client.execute(request);
         assertNoErrorsAndWarnings(updatesResponse);
         List<FolderObject> folders = updatesResponse.getFolders();
         assertContentTypeAndPermissions(folders);
@@ -292,7 +343,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Test
     public void testPath() throws Exception {
-        PathResponse pathResponse = client.execute(new PathRequest(EnumAPI.OX_NEW, Integer.toString(privateSubfolder.getObjectID())));
+        PathRequest request = new PathRequest(api, Integer.toString(privateSubfolder.getObjectID()));
+        request.setAltNames(altNames);
+        PathResponse pathResponse = client.execute(request);
         assertNoErrorsAndWarnings(pathResponse);
         List<FolderObject> folders = toList(pathResponse.getFolder());
         assertContentTypeAndPermissions(folders);
@@ -318,7 +371,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         folderIds.add(sharedSubfolder.getObjectID());
 
         for (int folderId : folderIds) {
-            com.openexchange.ajax.folder.actions.GetResponse response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderId));
+            com.openexchange.ajax.folder.actions.GetRequest request = new com.openexchange.ajax.folder.actions.GetRequest(api, folderId);
+            request.setAltNames(altNames);
+            com.openexchange.ajax.folder.actions.GetResponse response = client.execute(request);
             assertNoErrorsAndWarnings(response);
             assertContentTypeAndPermissions(response.getFolder());
         }
@@ -330,7 +385,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         invalidScopes.remove(scope);
         for (Scope invalidScope : invalidScopes) {
             ContentType invalidContentType = S2CT.get(invalidScope);
-            VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false));
+            VisibleFoldersRequest request = new VisibleFoldersRequest(api, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false);
+            request.setAltNames(altNames);
+            VisibleFoldersResponse response = client.execute(request);
             assertFolderNotVisibleError(response, invalidScope);
         }
     }
@@ -343,7 +400,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             ContentType invalidContentType = S2CT.get(invalidScope);
             // get folders via ajax client and verify that every single get-request for those folders fails
             // for the according OAuth client because of insufficient scope
-            VisibleFoldersResponse allResponse = ajaxClient.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false));
+            VisibleFoldersRequest allRequest = new VisibleFoldersRequest(api, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false);
+            allRequest.setAltNames(altNames);
+            VisibleFoldersResponse allResponse = ajaxClient.execute(allRequest);
             assertNoErrorsAndWarnings(allResponse);
             List<FolderObject> allFolders = new LinkedList<>();
             allFolders.addAll(toList(allResponse.getPrivateFolders()));
@@ -352,9 +411,13 @@ public class ReadFoldersTest extends AbstractOAuthTest {
             for (FolderObject folder : allFolders) {
                 com.openexchange.ajax.folder.actions.GetResponse response;
                 if (folder.getObjectID() < 0) {
-                    response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getFullName(), false));
+                    com.openexchange.ajax.folder.actions.GetRequest getRequest = new com.openexchange.ajax.folder.actions.GetRequest(api, folder.getFullName(), false);
+                    getRequest.setAltNames(altNames);
+                    response = client.execute(getRequest);
                 } else {
-                    response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID(), false));
+                    com.openexchange.ajax.folder.actions.GetRequest getRequest = new com.openexchange.ajax.folder.actions.GetRequest(api, folder.getObjectID(), false);
+                    getRequest.setAltNames(altNames);
+                    response = client.execute(getRequest);
                 }
 
                 assertFolderNotVisibleError(response, invalidScope);

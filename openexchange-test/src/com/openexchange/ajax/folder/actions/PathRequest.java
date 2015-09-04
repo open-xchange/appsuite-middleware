@@ -70,6 +70,7 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
     private final String folder;
     private final int[] columns;
     private final boolean failOnError;
+    private boolean altNames = false;
 
     public PathRequest(final API api, final String folderId, final int[] columns, final boolean failOnError) {
         super(api);
@@ -109,11 +110,18 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
         params.add(new Parameter(Folder.PARAMETER_ID, folder));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public PathParser getParser() {
         return new PathParser(columns, failOnError);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 
     private static class PathParser extends AbstractColumnsParser<PathResponse> {

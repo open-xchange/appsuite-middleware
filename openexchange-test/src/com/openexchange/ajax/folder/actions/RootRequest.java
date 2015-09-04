@@ -68,6 +68,8 @@ public class RootRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean ignoreMail;
 
+    private boolean altNames = true;
+
     public RootRequest(final API api, final int[] columns, final boolean ignoreMail) {
         super(api);
         this.columns = columns;
@@ -99,10 +101,17 @@ public class RootRequest extends AbstractFolderRequest<ListResponse> {
         if (ignoreMail) {
             params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
         }
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public ListParser getParser() {
         return new ListParser(columns, true);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

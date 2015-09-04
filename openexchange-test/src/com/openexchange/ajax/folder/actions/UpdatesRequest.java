@@ -63,6 +63,8 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
 
     private final API api;
 
+    private boolean altNames = false;
+
     public UpdatesRequest(final API api, final int[] columns, final int sort, final Order order, final Date lastModified) {
         this(api, columns, sort, order, lastModified, CommonUpdatesRequest.Ignore.DELETED);
     }
@@ -84,6 +86,13 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
         if (api.getTreeId() != -1) {
             l.add(new Parameter("tree", api.getTreeId()));
         }
+        if (altNames) {
+            l.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
         return l.toArray(new Parameter[l.size()]);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }
