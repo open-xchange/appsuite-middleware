@@ -111,12 +111,12 @@ public static final int SKEW = 1000;
 		assertTrue(nameSet.toString(),nameSet.isEmpty());
 	}
 
-	public static void assertOptions(final Iterable<Protocol.WEBDAV_METHOD> expect, final Protocol.WEBDAV_METHOD...methods) throws OXException{
+	public static void assertOptions(final Iterable<WebdavMethod> expect, final WebdavMethod...methods) throws OXException{
 		//assertEquals(displayNames.length, resources.size());
 
-		final Set<Protocol.WEBDAV_METHOD> methodSet = new HashSet<Protocol.WEBDAV_METHOD>(Arrays.asList(methods));
+		final Set<WebdavMethod> methodSet = new HashSet<WebdavMethod>(Arrays.asList(methods));
 
-		for(final Protocol.WEBDAV_METHOD method : expect) {
+		for(final WebdavMethod method : expect) {
 			assertTrue(method+" not expected",methodSet.remove(method));
 		}
 		assertTrue(methodSet.toString(),methodSet.isEmpty());

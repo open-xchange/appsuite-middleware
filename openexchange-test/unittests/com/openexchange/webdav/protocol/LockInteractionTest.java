@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
 import com.openexchange.webdav.protocol.WebdavLock.Type;
 
@@ -154,8 +153,8 @@ public class LockInteractionTest extends TestCase {
 		res.lock(lock);
 		res = collection.resolveResource(new WebdavPath("test.txt"));
 
-		final WEBDAV_METHOD[] methods = res.getOptions();
-		final List<WEBDAV_METHOD> expect = Arrays.asList(WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE);
+		final WebdavMethod[] methods = res.getOptions();
+		final List<WebdavMethod> expect = Arrays.asList(WebdavMethod.PUT, WebdavMethod.MKCOL, WebdavMethod.OPTIONS, WebdavMethod.PROPFIND, WebdavMethod.LOCK, WebdavMethod.UNLOCK, WebdavMethod.TRACE);
 
 		AbstractResourceTest.assertOptions(expect, methods);
 	}

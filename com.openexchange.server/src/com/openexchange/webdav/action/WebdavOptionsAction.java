@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavOptionsAction extends AbstractAction {
@@ -65,9 +65,9 @@ public class WebdavOptionsAction extends AbstractAction {
 		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
 	}
 
-	private String join(final WEBDAV_METHOD[] options) {
+	private String join(final WebdavMethod[] options) {
 		final StringBuffer buffer = new StringBuffer();
-		for(final WEBDAV_METHOD m : options) {
+		for(final WebdavMethod m : options) {
 			buffer.append(m.toString());
 			buffer.append(", ");
 		}
