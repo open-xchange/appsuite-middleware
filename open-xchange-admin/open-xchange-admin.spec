@@ -217,6 +217,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2535
     ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    
+    # SoftwareChange_Request-2699
+    ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
 fi
 
 %clean
