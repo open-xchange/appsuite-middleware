@@ -67,22 +67,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TestTool {
-//
-//    public static Context createContext(OXContextInterface ci, User admin, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-//        Context ctx = null;
-//        int ctxId = Integer.MAX_VALUE;
-//        boolean created = false;
-//        while (!created) {
-//            try {
-//                ctx = ci.create(AbstractRMITest.newContext("UserMoveSourceCtx_" + ctxId, ctxId), admin, "all", superAdminCredentials);
-//                created = true;
-//            } catch (ContextExistsException e) {
-//                --ctxId;
-//            }
-//        }
-//
-//        return ctx;
-//    }
 
     public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Context ctx = null;
@@ -95,6 +79,13 @@ public class TestTool {
             } catch (ContextExistsException e) {
                 ctxId = getRandomContextId();
             }
+        }
+        try {
+            // wait to ensure the context is available for further operations
+            // FIXME when master-slave setup for configdb is available remove the line below
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // should not happen
         }
 
         return ctx;

@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore.webdav;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,10 +59,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
-
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -73,9 +69,9 @@ import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -85,7 +81,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 public class InfostoreLockNullResource extends AbstractCollection implements OXWebdavResource{
 
-	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
+	private static final WebdavMethod[] OPTIONS = {WebdavMethod.PUT, WebdavMethod.MKCOL, WebdavMethod.OPTIONS, WebdavMethod.PROPFIND, WebdavMethod.LOCK, WebdavMethod.UNLOCK, WebdavMethod.TRACE};
 
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreLockNullResource.class);
@@ -389,7 +385,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	}
 
 	@Override
-	public WEBDAV_METHOD[] getOptions(){
+	public WebdavMethod[] getOptions(){
 		return OPTIONS;
 	}
 
