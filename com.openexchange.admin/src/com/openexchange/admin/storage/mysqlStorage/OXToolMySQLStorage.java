@@ -1693,7 +1693,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen",e);
             }
             log.error("Error in checking/updating schema",e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 
