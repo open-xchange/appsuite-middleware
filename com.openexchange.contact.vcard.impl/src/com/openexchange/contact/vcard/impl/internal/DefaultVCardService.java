@@ -69,8 +69,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
 import ezvcard.Ezvcard.WriterChainText;
-import ezvcard.util.IOUtils;
 import ezvcard.VCard;
+import ezvcard.util.IOUtils;
 
 /**
  * {@link DefaultVCardService}
@@ -114,7 +114,11 @@ public class DefaultVCardService implements VCardService {
         VCard template = null;
         if (null != originalVCard) {
             try {
-                template = Ezvcard.parse(originalVCard).first();
+                if (vCardParameters.isEnforceUtf8()) {
+                    template = Ezvcard.parse(IOUtils.utf8Reader(originalVCard)).first();
+                } else {
+                    template = Ezvcard.parse(originalVCard).first();
+                }
             } catch (IOException e) {
                 org.slf4j.LoggerFactory.getLogger(DefaultVCardService.class).error(
                     "Error parsing original vCard during export of contact {}: {}", contact, e.getMessage(), e);
