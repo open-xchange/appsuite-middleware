@@ -49,6 +49,14 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.getNextSerialForAdmin;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.getSubfolderIDs;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.getUserDefaultFolder;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.insertDefaultFolderSQL;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.lookUpFolder;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.markAsDefaultFolder;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.updateFolderType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
@@ -58,7 +66,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.tools.StringHelper;
-import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -87,12 +94,12 @@ public final class InfoStoreFolderAdminHelper {
      */
     public static void addDefaultFolders(Connection connection, int contextID, int userID) throws OXException {
         int userFolderID = addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.PUBLIC, false, null);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, false, null);
-        int documentsFolderID = InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, false, null);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, false, null);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, false, null);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, false, null);
-        InfoStoreFolderAdminHelper.addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, false, null);
+        addDefaultFolder(connection, contextID, userID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.TRASH, false, null);
+        int documentsFolderID = addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.DOCUMENTS, false, null);
+        addDefaultFolder(connection, contextID, userID, documentsFolderID, FolderObject.TEMPLATES, false, null);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.PICTURES, false, null);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.MUSIC, false, null);
+        addDefaultFolder(connection, contextID, userID, userFolderID, FolderObject.VIDEOS, false, null);
     }
 
     /**
@@ -158,11 +165,12 @@ public final class InfoStoreFolderAdminHelper {
                 /*
                  * check for an equally named existing folder first
                  */
-                int existingFolderID = OXFolderSQL.lookUpFolder(parentFolderID, folderName, FolderObject.INFOSTORE, connection, context);
+                int existingFolderID = lookUpFolder(parentFolderID, folderName, FolderObject.INFOSTORE, connection, context);
                 if (-1 != existingFolderID) {
-                    OXFolderSQL.markAsDefaultFolder(connection, context, existingFolderID, type, folderName, System.currentTimeMillis());
+                    markAsDefaultFolder(connection, context, existingFolderID, type, folderName, System.currentTimeMillis());
                     LOG.info("Marked existing infostore folder '{}' [type={}, id={}] as default folder for user {} in context {}.",
                         folderName, I(type), I(existingFolderID), I(userID), I(contextID));
+                    updateFolderType(connection, context, type, getSubfolderIDs(existingFolderID, connection, context, true));
                     return existingFolderID;
                 }
                 /*
@@ -171,11 +179,12 @@ public final class InfoStoreFolderAdminHelper {
                 if (null != locale) {
                     String localizedFolderName = getLocalizedDefaultFolderName(connection, locale, contextID, userID, type);
                     if (false == folderName.equals(localizedFolderName)) {
-                        existingFolderID = OXFolderSQL.lookUpFolder(parentFolderID, localizedFolderName, FolderObject.INFOSTORE, connection, context);
+                        existingFolderID = lookUpFolder(parentFolderID, localizedFolderName, FolderObject.INFOSTORE, connection, context);
                         if (-1 != existingFolderID) {
-                            OXFolderSQL.markAsDefaultFolder(connection, context, existingFolderID, type, folderName, System.currentTimeMillis());
+                            markAsDefaultFolder(connection, context, existingFolderID, type, folderName, System.currentTimeMillis());
                             LOG.info("Marked existing infostore folder '{}' [type={}, id={}] as default folder for user {} in context {}.",
                                 localizedFolderName, I(type), I(existingFolderID), I(userID), I(contextID));
+                            updateFolderType(connection, context, type, getSubfolderIDs(existingFolderID, connection, context, true));
                             return existingFolderID;
                         }
                     }
@@ -185,8 +194,8 @@ public final class InfoStoreFolderAdminHelper {
              * insert new default folder
              */
             FolderObject folder = prepareDefaultFolder(userID, parentFolderID, type, folderName);
-            int folderID = OXFolderSQL.getNextSerialForAdmin(context, connection);
-            OXFolderSQL.insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), context, connection);
+            int folderID = getNextSerialForAdmin(context, connection);
+            insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), context, connection);
             LOG.info("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
                 folderName, I(type), I(folderID), I(userID), I(contextID));
             return folderID;
@@ -197,7 +206,7 @@ public final class InfoStoreFolderAdminHelper {
 
     private static int getOrCreateDefaultFolderID(Connection connection, int contextID, int userID, int type, boolean createAsNeeded, Locale locale) throws OXException, SQLException {
         Context context = new ContextImpl(contextID);
-        int folderID = OXFolderSQL.getUserDefaultFolder(userID, FolderObject.INFOSTORE, type, connection, context);
+        int folderID = getUserDefaultFolder(userID, FolderObject.INFOSTORE, type, connection, context);
         if (-1 == folderID && createAsNeeded) {
             folderID = addDefaultFolder(connection, contextID, userID, type, locale);
         }
@@ -211,7 +220,7 @@ public final class InfoStoreFolderAdminHelper {
                 String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
                 int resetLen = name.length();
                 int count = 0;
-                while (-1 != OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {
+                while (-1 != lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {
                     name = name.substring(0, resetLen) + " (" + String.valueOf(++count) + ')';
                 }
                 return name;
@@ -239,7 +248,7 @@ public final class InfoStoreFolderAdminHelper {
                 String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
                 int resetLen = name.length();
                 int count = 0;
-                while (-1 != OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {
+                while (-1 != lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {
                     name = name.substring(0, resetLen) + " (" + String.valueOf(++count) + ')';
                 }
                 return name;

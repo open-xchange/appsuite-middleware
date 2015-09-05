@@ -47,53 +47,94 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency;
 
-import java.util.Set;
-import com.openexchange.consistency.Entity;
+import java.net.URI;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
- * {@link RemoveFileSolver}
+ * {@link SimQuotaFileStorageService}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RemoveFileSolver implements ProblemSolver {
+public class SimQuotaFileStorageService implements QuotaFileStorageService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveFileSolver.class);
+    private InMemoryFileStorage fileStorage;
 
-    private final FileStorage storage;
-
-    public RemoveFileSolver(final FileStorage storage) {
+    /**
+     * Initialises a new {@link SimQuotaFileStorageService}.
+     */
+    public SimQuotaFileStorageService(InMemoryFileStorage fileStorage) {
         super();
-        this.storage = storage;
+        this.fileStorage = fileStorage;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#getUnlimitedQuotaFileStorage(java.net.URI, int, int)
+     */
     @Override
-    public void solve(final Entity entity, final Set<String> problems) {
-        try {
-            for (final String identifier : problems) {
-                try {
-                    if (storage.deleteFile(identifier)) {
-                        LOG.info("Deleted identifier: {}", identifier);
-                    }
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-            /*
-             * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
-             */
-            storage.recreateStateFile();
-        } catch (final OXException e) {
-            LOG.error("", e);
-        }
+    public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#getQuotaFileStorage(int)
+     */
     @Override
-    public String description() {
-        return "delete file";
+    public QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#getQuotaFileStorage(int, int)
+     */
+    @Override
+    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException {
+        return fileStorage;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#getFileStorageUriFor(int, int)
+     */
+    @Override
+    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#invalidateCacheFor(int)
+     */
+    @Override
+    public void invalidateCacheFor(int contextId) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.filestore.QuotaFileStorageService#invalidateCacheFor(int, int)
+     */
+    @Override
+    public void invalidateCacheFor(int userId, int contextId) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

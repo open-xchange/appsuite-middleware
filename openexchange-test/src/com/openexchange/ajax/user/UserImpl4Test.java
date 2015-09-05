@@ -61,6 +61,8 @@ public class UserImpl4Test implements User {
 
 	private Locale locale;
 
+    private int[] groups;
+
 	public UserImpl4Test() {
 
 	}
@@ -160,8 +162,13 @@ public class UserImpl4Test implements User {
 
 	@Override
     public int[] getGroups() {
-		return null;
+		return groups;
 	}
+
+
+    public void setGroups(int[] groups) {
+        this.groups = groups;
+    }
 
 	@Override
     public int getContactId() {

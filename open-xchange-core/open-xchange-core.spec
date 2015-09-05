@@ -228,6 +228,9 @@ for FILE in ${COCONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
 done
 
+# Fix for bug 25999
+ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
+
 # SoftwareChange_Request-1297
 rm -f /opt/open-xchange/etc/sessioncache.ccf
 
@@ -1212,6 +1215,15 @@ ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
+# SoftwareChange_Request-2652
+ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
+
+# SoftwareChange_Request-2662
+ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
+
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
@@ -1219,17 +1231,8 @@ ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xcha
 ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-2665
-ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
-
-# SoftwareChange_Request-2662
-ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
-
-# SoftwareChange_Request-2652
-ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
+#SoftwareChange_Request-2698
+ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
 PROTECT="configdb.properties hazelcast.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT

@@ -174,9 +174,9 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User knownUser = new User();
         knownUser.setName(myUserName);
-        User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
+        User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials); // required line for test
+        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials);// required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User queriedUser = queriedUsers[0];
@@ -189,8 +189,8 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testGetAllUsers() throws Exception {
         final Credentials credentials = DummyCredentials();
-        User[] allUsers = ui.listAll(context, credentials); // required line for test
-        User[] queriedUsers = ui.getData(context, allUsers, credentials); // required line for test
+        User[] allUsers = ui.listAll(context, credentials);// required line for test
+        User[] queriedUsers = ui.getData(context, allUsers, credentials);// required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
     }
 
@@ -236,8 +236,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
                 @Override
                 public boolean verify(Resource fromCollection, Resource myResource) {
-                    return myResource.getDisplayname().equals(fromCollection.getDisplayname()) && myResource.getEmail().equals(
-                        fromCollection.getEmail()) && myResource.getName().equals(fromCollection.getName());
+                    return myResource.getDisplayname().equals(fromCollection.getDisplayname()) && myResource.getEmail().equals(fromCollection.getEmail()) && myResource.getName().equals(fromCollection.getName());
                 }
             }));
         } finally {
@@ -262,9 +261,9 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
-            newContext = conInterface.create(newContext, newAdmin, superAdminCredentials); // required line for test
+            newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);// required line for test
             Credentials newAdminCredentials = new Credentials();
-            newAdmin.setId(Integer.valueOf(2)); // has to be hardcoded, because it cannot be looked up easily.
+            newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
             newAdminCredentials.setLogin(newAdmin.getName());
             newAdminCredentials.setPassword("secret");
             assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
@@ -301,7 +300,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
-            group = groupInterface.create(context, group, adminCredentials); // required line for test
+            group = groupInterface.create(context, group, adminCredentials);// required line for test
             groupCreated = true;
             assertGroupWasCreatedProperly(group, context, adminCredentials);
         } finally {
@@ -340,7 +339,8 @@ public class AdditionalRMITests extends AbstractRMITest {
         try {
             ui.change(context, changesToAdmin, adminCredentials);// required line for test
             valueChanged = true;
-            admin = ui.getData(context, admin, adminCredentials);; // refresh data
+            admin = ui.getData(context, admin, adminCredentials);
+            ;// refresh data
             assertEquals(changesToAdmin.getAssistant_name(), admin.getAssistant_name());
         } finally {
             if (valueChanged) {
@@ -361,8 +361,8 @@ public class AdditionalRMITests extends AbstractRMITest {
             Group groupChange = new Group();
             groupChange.setId(group.getId());
             groupChange.setName("changed groupname");
-            groupInterface.change(context, groupChange, adminCredentials); // required line for test
-            group = groupInterface.getData(context, group, adminCredentials); // update
+            groupInterface.change(context, groupChange, adminCredentials);// required line for test
+            group = groupInterface.getData(context, group, adminCredentials);// update
 
             assertEquals("Name should have been changed", group.getName(), groupChange.getName());
         } finally {
@@ -384,7 +384,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             resChange.setId(res.getId());
             resChange.setDisplayname("changed display name");
             resInterface.change(context, resChange, adminCredentials);// required line for test
-            res = resInterface.getData(context, res, adminCredentials); // update
+            res = resInterface.getData(context, res, adminCredentials);// update
             assertEquals("Display name should have changed", resChange.getDisplayname(), res.getDisplayname());
         } finally {
             if (resourceCreated) {
@@ -415,9 +415,9 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User knownUser = new User();
         knownUser.setName(this.myUserName);
-        User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
+        User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+        User[] queriedUsers = ui.getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
@@ -440,10 +440,10 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testGetUser() throws Exception {
         User knownUser = new User();
         knownUser.setName(this.myUserName);
-        User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be
-                                                        // looked
-        // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials); // query by mailboxNames (User.name)
+        User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be
+                                                       // looked
+                                                       // up
+        User[] queriedUsers = ui.getData(context, mailboxNames, adminCredentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User receivedUser = queriedUsers[0];
@@ -457,9 +457,9 @@ public class AdditionalRMITests extends AbstractRMITest {
 
         User knownUser = new User();
         knownUser.setName("oxadmin");
-        User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
+        User[] mailboxNames = new User[] { knownUser };// users with only their mailbox name (User#name) - the rest is going to be looked
         // up
-        User[] queriedUsers = ui.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+        User[] queriedUsers = ui.getData(context, mailboxNames, credentials);// query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];

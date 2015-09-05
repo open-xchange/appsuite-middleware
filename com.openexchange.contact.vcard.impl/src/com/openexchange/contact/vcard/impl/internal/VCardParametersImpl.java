@@ -198,8 +198,9 @@ public class VCardParametersImpl implements VCardParameters {
     }
 
     @Override
-    public void setEnforceUtf8(boolean enforceUtf8) {
+    public VCardParameters setEnforceUtf8(boolean enforceUtf8) {
         this.enforceUtf8 = enforceUtf8;
+        return this;
     }
 
 }

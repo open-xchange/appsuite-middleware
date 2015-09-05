@@ -74,7 +74,7 @@ import com.openexchange.test.mock.assertion.ServiceMockActivatorAsserter;
 
 /**
  * Unit tests for {@link CapabilitiesActivator}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -85,9 +85,9 @@ public class CapabilitiesActivatorTest {
      */
     private CapabilitiesActivator capabilitiesActivator = null;
 
-    private ConfigurationService configurationService = PowerMockito.mock(ConfigurationService.class);
+    private final ConfigurationService configurationService = PowerMockito.mock(ConfigurationService.class);
 
-    private CacheService cacheService = PowerMockito.mock(CacheService.class);
+    private final CacheService cacheService = PowerMockito.mock(CacheService.class);
 
     private BundleContext bundleContext;
 
@@ -112,20 +112,6 @@ public class CapabilitiesActivatorTest {
         // CONTEXT
         Mockito.when(this.bundleContext.getBundle()).thenReturn(this.bundle);
         MockUtils.injectValueIntoPrivateField(this.capabilitiesActivator, InjectionFieldConstants.CONTEXT, bundleContext);
-    }
-
-    @Test
-    public void testStartBundle_EverythingFine_AllServicesRegistered() throws Exception {
-        this.capabilitiesActivator.startBundle();
-
-        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.capabilitiesActivator, 5);
-    }
-
-    @Test
-    public void testStartBundle_EverythingFine_AllTrackersRegistered() throws Exception {
-        this.capabilitiesActivator.startBundle();
-
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.capabilitiesActivator, 3);
     }
 
     @Test

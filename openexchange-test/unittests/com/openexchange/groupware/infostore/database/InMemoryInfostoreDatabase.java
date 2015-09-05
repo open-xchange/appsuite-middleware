@@ -59,10 +59,12 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.ldap.User;
@@ -74,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
-    private final Map<Context,Map<Integer, List<DocumentMetadata>>> data = new HashMap<Context, Map<Integer, List<DocumentMetadata>>>();
+    private final Map<Context, Map<Integer, List<DocumentMetadata>>> data = new HashMap<Context, Map<Integer, List<DocumentMetadata>>>();
 
     private final Map<Context, List<DocumentMetadata>> changes = new HashMap<Context, List<DocumentMetadata>>();
 
@@ -82,15 +84,14 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
     private final Map<Context, List<DocumentMetadata>> creations = new HashMap<Context, List<DocumentMetadata>>();
 
-
     public void put(final Context ctx, final DocumentMetadata dm) {
-        final List<DocumentMetadata> versions = getVersions(ctx,dm.getId());
+        final List<DocumentMetadata> versions = getVersions(ctx, dm.getId());
         assureSize(versions, dm.getVersion());
         versions.set(dm.getVersion(), dm);
     }
 
     private void assureSize(final List<DocumentMetadata> versions, final int index) {
-        while(index >= versions.size()) {
+        while (index >= versions.size()) {
             versions.add(null);
         }
     }
@@ -101,7 +102,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
     private List<DocumentMetadata> getVersions(final Context ctx, final int id) {
         final Map<Integer, List<DocumentMetadata>> ctxMap = getCtxMap(ctx);
-        if(ctxMap.containsKey(I(id))) {
+        if (ctxMap.containsKey(I(id))) {
             return ctxMap.get(I(id));
         }
         final List<DocumentMetadata> dms = new ArrayList<DocumentMetadata>();
@@ -110,7 +111,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     private Map<Integer, List<DocumentMetadata>> getCtxMap(final Context ctx) {
-        if(data.containsKey(ctx)) {
+        if (data.containsKey(ctx)) {
             return data.get(ctx);
         }
         final Map<Integer, List<DocumentMetadata>> versions = new HashMap<Integer, List<DocumentMetadata>>();
@@ -145,24 +146,24 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
     @Override
     public int[] removeDocument(final String identifier, final Context ctx) {
-        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(final DocumentMetadata metadata : versions) {
+        for (final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for (final DocumentMetadata metadata : versions) {
                 final String location = metadata.getFilestoreLocation();
-                if(location != null && location.equals(identifier)) {
+                if (location != null && location.equals(identifier)) {
                     deletions.get(ctx).add(metadata);
-                    return new int[]{1,1};
+                    return new int[] { 1, 1 };
                 }
             }
         }
-        return new int[]{1,1};
+        return new int[] { 1, 1 };
     }
 
     @Override
     public int modifyDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) {
-        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(final DocumentMetadata metadata : versions) {
+        for (final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for (final DocumentMetadata metadata : versions) {
                 final String location = metadata.getFilestoreLocation();
-                if(location != null && location.equals(oldidentifier)) {
+                if (location != null && location.equals(oldidentifier)) {
                     metadata.setFilestoreLocation(newidentifier);
                     metadata.setDescription(description);
                     metadata.setFileMIMEType(mimetype);
@@ -177,17 +178,17 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     @Override
     public int[] saveDocumentMetadata(final String identifier, final DocumentMetadata document, final User user, final Context ctx) {
         document.setFilestoreLocation(identifier);
-        creations.get(ctx).add(document);
-        return new int[]{1,1,1};
+        creations.get(ctx).add(new DocumentMetadataImpl(document));
+        return new int[] { 1, 1, 1 };
     }
 
     @Override
     public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) {
-       final SortedSet<String> locations = new TreeSet<String>();
-        for(final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
-            for(final DocumentMetadata metadata : versions) {
+        final SortedSet<String> locations = new TreeSet<String>();
+        for (final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for (final DocumentMetadata metadata : versions) {
                 final String location = metadata.getFilestoreLocation();
-                if(location != null) {
+                if (location != null) {
                     locations.add(location);
                 }
             }
@@ -295,7 +296,6 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public void rollbackDBTransaction() {
         throw new UnsupportedOperationException();
@@ -311,7 +311,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     public List<DocumentMetadata> getChanges(final Context ctx) {
-        if(!changes.containsKey(ctx)) {
+        if (!changes.containsKey(ctx)) {
             return new ArrayList<DocumentMetadata>();
         }
         return changes.get(ctx);
@@ -338,4 +338,16 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
         // Nothing to do.
     }
 
+    @Override
+    public int getDocumentHolderFor(String fileIdentifier, Context ctx) throws OXException {
+        for (final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for (final DocumentMetadata metadata : versions) {
+                final String location = metadata.getFilestoreLocation();
+                if (location != null && location.equals(fileIdentifier)) {
+                    return metadata.getCreatedBy();
+                }
+            }
+        }
+        return -1;
+    }
 }

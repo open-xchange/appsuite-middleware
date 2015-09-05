@@ -359,7 +359,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsOriginalFolder()) {
                     originalFolder = mail.getOriginalFolder();
                     if (null != originalFolder) {
-                        jsonObject.put(ORIGINAL_FOLDER_ID, originalFolder);
+                        jsonObject.put(ORIGINAL_FOLDER_ID, prepareFullname(accountId, originalFolder));
                     }
                 }
                 if (null != originalId && null != originalFolder) {

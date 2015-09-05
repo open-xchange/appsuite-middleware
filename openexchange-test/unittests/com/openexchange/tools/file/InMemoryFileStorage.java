@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.B;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InMemoryFileStorage extends LocalFileStorage {
+public class InMemoryFileStorage extends LocalFileStorage implements com.openexchange.filestore.QuotaFileStorage{
 
     private final Map<Context, Map<String, byte[]>> data = new HashMap<Context, Map<String, byte[]>>();
 
@@ -119,6 +120,11 @@ public class InMemoryFileStorage extends LocalFileStorage {
             return null;
         }
         return new ByteArrayInputStream(bytes);
+    }
+    
+    @Override
+    public InputStream getFile(String name) throws OXException {
+        return load(name);
     }
 
     @Override
@@ -190,5 +196,68 @@ public class InMemoryFileStorage extends LocalFileStorage {
 
     public List<String> getDeleted(final Context context) {
         return deletions.get(context);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#getUri()
+     */
+    @Override
+    public URI getUri() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#getQuota()
+     */
+    @Override
+    public long getQuota() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#getUsage()
+     */
+    @Override
+    public long getUsage() throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage()
+     */
+    @Override
+    public void recalculateUsage() throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage(java.util.Set)
+     */
+    @Override
+    public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#saveNewFile(java.io.InputStream, long)
+     */
+    @Override
+    public String saveNewFile(InputStream file, long sizeHint) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.filestore.QuotaFileStorage#appendToFile(java.io.InputStream, java.lang.String, long, long)
+     */
+    @Override
+    public long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }

@@ -52,7 +52,7 @@ package com.openexchange.consistency.solver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.consistency.Entity;
 
 /**
  * {@link RecordSolver}
@@ -69,7 +69,7 @@ public class RecordSolver implements ProblemSolver {
     private final List<String> memory = new ArrayList<String>();
 
     @Override
-    public void solve(final Context ctx, final Set<String> problems) {
+    public void solve(final Entity entity, final Set<String> problems) {
         memory.addAll(problems);
     }
 

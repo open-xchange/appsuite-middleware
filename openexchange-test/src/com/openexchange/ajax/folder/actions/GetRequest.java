@@ -81,6 +81,8 @@ public class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     private final int[] columns;
 
+    private boolean altNames = false;
+
     /**
      * Initializes a new {@link GetRequest} for specified columns
      */
@@ -130,6 +132,9 @@ public class GetRequest extends AbstractFolderRequest<GetResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
@@ -143,5 +148,9 @@ public class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     protected int[] getColumns() {
         return columns;
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

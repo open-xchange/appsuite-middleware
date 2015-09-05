@@ -1693,7 +1693,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen",e);
             }
             log.error("Error in checking/updating schema",e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 
@@ -2284,13 +2284,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForContext(contextId);
             boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+            String uname = autoLowerCase ? user.getName().toLowerCase() : user.getName();
             stmt = con.prepareStatement("SELECT uid FROM login2user WHERE cid=? AND uid=? AND id!=?");
             stmt.setInt(1, contextId);
-            stmt.setString(2, autoLowerCase ? user.getName().toLowerCase() : user.getName());
+            stmt.setString(2, uname);
             stmt.setInt(3, user.getId().intValue());
             result = stmt.executeQuery();
             while (!foundOther && result.next()) {
-                foundOther = user.getName().equals(result.getString(1));
+                foundOther = uname.equals(result.getString(1));
             }
         } catch (PoolException e) {
             log.error("Pool Error", e);

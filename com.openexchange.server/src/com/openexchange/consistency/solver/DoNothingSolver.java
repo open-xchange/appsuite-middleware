@@ -50,7 +50,7 @@
 package com.openexchange.consistency.solver;
 
 import java.util.Set;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.consistency.Entity;
 
 /**
  * {@link DoNothingSolver}
@@ -65,7 +65,7 @@ public class DoNothingSolver implements ProblemSolver {
     }
 
     @Override
-    public void solve(final Context ctx, final Set<String> problems) {
+    public void solve(final Entity entity, final Set<String> problems) {
         // Ignore
     }
 
