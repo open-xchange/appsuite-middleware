@@ -3,6 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.adminAuth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.capabilities"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.configuration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rest.services.html"/>

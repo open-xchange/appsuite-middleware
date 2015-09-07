@@ -47,65 +47,27 @@
  *
  */
 
-package com.openexchange.capabilities.rest;
+package com.openexchange.rest.services.capabilities.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import org.json.JSONException;
-import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.capabilities.internal.CapabilityServiceImpl;
-import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
-import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.OXRESTService;
-import com.openexchange.rest.services.annotations.GET;
-import com.openexchange.rest.services.annotations.ROOT;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.rest.services.capabilities.CapabilitiesRESTService;
+import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 
 /**
- * The {@link CapabilitiesRESTService} allows clients to retrieve capabilities for arbitrary users.
+ * {@link CapabilitiesRESTServiceActivator} - Activator for "com.openexchange.rest.services.capabilities" bundle.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@ROOT("/capabilities/v1")
-public class CapabilitiesRESTService extends OXRESTService<Void> {
-    
-    private static final AtomicReference<CapabilityServiceImpl> CAP_SERVICE_REF = new AtomicReference<CapabilityServiceImpl>();
-    
-    /**
-     * Sets the given capabilities service
-     *
-     * @param capService The service to set
-     */
-    public static void setCapabilityService(CapabilityServiceImpl capService) {
-        CAP_SERVICE_REF.set(capService);
-    }
-    
-    // ------------------------------------------------------------------------------------------------------------------------------
+public class CapabilitiesRESTServiceActivator extends OXRESTActivator {
 
-    /**
-     * Initializes a new {@link CapabilitiesRESTService}.
-     */
-    public CapabilitiesRESTService() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CapabilityService.class };
     }
-    
-    /**
-     * GET /rest/capabilities/v1/all/[contextId]/[userId]
-     */
-    @GET("/all/:context/:user")
-    public Object getAll(int context, int user) throws OXException {
-        CapabilityServiceImpl capService = CAP_SERVICE_REF.get();
-        if (null == capService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
-        }
-        
-        try {
-            CapabilitySet capabilities = capService.getCapabilities(user, context);
-            return CapabilitiesJsonWriter.toJson(capabilities.asSet());
-        } catch (JSONException e) {
-            throw CapabilityExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerWebService(CapabilitiesRESTService.class);
     }
 
 }

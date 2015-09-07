@@ -64,7 +64,6 @@ import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
-import com.openexchange.capabilities.rest.CapabilitiesRESTService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 import com.openexchange.server.ServiceLookup;
@@ -81,7 +81,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.userconf.UserPermissionService;
 
-public class CapabilitiesActivator extends OXRESTActivator {
+public class CapabilitiesActivator extends HousekeepingActivator {
 
     /** The service look-up */
     public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
@@ -170,9 +170,6 @@ public class CapabilitiesActivator extends OXRESTActivator {
          */
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
         registerService(CapabilityService.class, capService);
-        
-        CapabilitiesRESTService.setCapabilityService(capService);
-        registerWebService(CapabilitiesRESTService.class);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
 
@@ -207,7 +204,6 @@ public class CapabilitiesActivator extends OXRESTActivator {
             cacheService.freeCache("CapabilitiesUser");
             cacheService.freeCache("Capabilities");
         }
-        CapabilitiesRESTService.setCapabilityService(null);
         super.stopBundle();
     }
 
