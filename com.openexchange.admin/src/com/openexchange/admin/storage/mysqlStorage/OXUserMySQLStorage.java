@@ -1774,9 +1774,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int pos = 1;
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, userId);
-                stmt.setLong(pos++, System.currentTimeMillis());
+                long now = System.currentTimeMillis();
+                stmt.setLong(pos++, now);
                 stmt.setInt(pos++, userId);
-                stmt.setLong(pos++, System.currentTimeMillis());
+                stmt.setLong(pos++, now);
                 stmt.setLong(pos++, userId);
                 stmt.setLong(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
                 stmt.setInt(pos++, contactId);
