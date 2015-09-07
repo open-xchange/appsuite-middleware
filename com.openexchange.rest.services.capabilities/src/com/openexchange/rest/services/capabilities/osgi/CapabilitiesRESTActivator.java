@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,27 @@
  *
  */
 
-package com.openexchange.realtime.handle.osgi;
+package com.openexchange.rest.services.capabilities.osgi;
 
-import java.util.concurrent.Future;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.directory.ResourceDirectory;
-import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.handle.StanzaQueueService;
-import com.openexchange.realtime.handle.StanzaStorage;
-import com.openexchange.realtime.handle.impl.Services;
-import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
-import com.openexchange.realtime.handle.impl.iq.IQHandler;
-import com.openexchange.realtime.handle.impl.message.MessageHandler;
-import com.openexchange.realtime.handle.impl.message.ResourceListener;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.rest.services.capabilities.CapabilitiesRESTService;
 
-public class StanzaHandlerActivator extends HousekeepingActivator {
-
-    private volatile Future<Object> messageFuture;
-
-    private volatile Future<Object> iqFuture;
+/**
+ * {@link CapabilitiesRESTActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class CapabilitiesRESTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, MessageDispatcher.class, LocalMessageDispatcher.class, ThreadPoolService.class, StanzaStorage.class };
+        return new Class<?>[] { CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
-        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        messageFuture = threadPoolService.submit(ThreadPools.task(new MessageHandler(queueService.getMessageQueue())));
-        iqFuture = threadPoolService.submit(ThreadPools.task(new IQHandler(queueService.getIqQueue())));
-        registerService(StanzaQueueService.class, queueService);
-        getService(ResourceDirectory.class).addListener(new ResourceListener());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        Future<Object> messageFuture = this.messageFuture;
-        if (messageFuture != null) {
-            this.messageFuture = null;
-            messageFuture.cancel(true);
-        }
-
-        Future<Object> iqFuture = this.iqFuture;
-        if (iqFuture != null) {
-            this.iqFuture = null;
-            iqFuture.cancel(true);
-        }
+        registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(this));
     }
 
 }

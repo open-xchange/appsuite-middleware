@@ -789,8 +789,11 @@ public final class InternalList {
         // Remove accounts related to facebook
         list.add(new com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask());
 
-        //Add primary key to dlist tables
+        // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
+
+        // Remove the "presenceSubscriptions" table
+        list.add(new com.openexchange.groupware.update.tasks.RemoveRealtimePresenceTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
