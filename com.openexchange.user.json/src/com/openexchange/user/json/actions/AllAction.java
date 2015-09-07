@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
@@ -173,9 +174,7 @@ public final class AllAction extends AbstractUserAction {
                 userContacts.add(new UserContact(contact, user));
             }
         } finally {
-        	if (null != searchIterator) {
-        		searchIterator.close();
-        	}
+            SearchIterators.close(searchIterator);
         }
         /*
          * Sort by users if a user field was denoted by sort field
