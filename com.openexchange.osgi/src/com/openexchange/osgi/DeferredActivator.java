@@ -595,6 +595,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param <S> Type of service's class
      * @param clazz The service's class
      * @return The service obtained by service tracker or <code>null</code>
+     * @throws ShutDownRuntimeException If system is currently shutting down
      */
     @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {

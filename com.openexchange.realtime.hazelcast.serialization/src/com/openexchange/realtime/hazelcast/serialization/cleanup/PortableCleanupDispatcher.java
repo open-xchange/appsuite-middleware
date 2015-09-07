@@ -59,6 +59,7 @@ import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
@@ -67,7 +68,7 @@ import com.openexchange.realtime.packet.ID;
 
 /**
  * {@link PortableCleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -91,7 +92,7 @@ public class PortableCleanupDispatcher extends AbstractCustomPortable implements
 
     /**
      * Initializes a new {@link PortableCleanupDispatcher}.
-     * 
+     *
      * @param id The ID to clean up for.
      * @param cleanupScopes The scopes to clean up on the remote machines.
      */
@@ -109,14 +110,18 @@ public class PortableCleanupDispatcher extends AbstractCustomPortable implements
 
     @Override
     public Void call() throws Exception {
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        if (localRealtimeCleanup != null) {
-            localRealtimeCleanup.cleanForId(id);
-        } else {
-            LOG.error(
-                "Error while trying to cleanup for ResponseChannel ID: {}",
-                id,
-                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
+        // Do the local cleanup via a simple service call
+        LocalRealtimeCleanup localRealtimeCleanup;
+        try {
+            localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
+            if (localRealtimeCleanup != null) {
+                localRealtimeCleanup.cleanForId(id);
+            } else {
+                LOG.error("Error while trying to cleanup for ResponseChannel ID: {}", id, RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class.getName()));
+            }
+        } catch (ShutDownRuntimeException shutDown) {
+            // Shutting down
+            LOG.debug("Unable to start local cleanup for ResponseChannel ID {} due to shut-down.", id, shutDown);
         }
         return null;
     }
