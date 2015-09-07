@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.capabilities.json.actions;
 
 import java.util.Collection;
 import java.util.HashMap;

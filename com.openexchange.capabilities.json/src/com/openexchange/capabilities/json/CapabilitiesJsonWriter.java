@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,74 +54,52 @@ import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.capabilities.Capability;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Capability2JSON}
+ * {@link CapabilitiesJsonWriter} - A simple JSON writer for capabilities.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-public class Capability2JSON implements ResultConverter {
+public class CapabilitiesJsonWriter {
 
     /**
-     * Initializes a new {@link Capability2JSON}.
+     * Initializes a new {@link CapabilitiesJsonWriter}.
      */
-    public Capability2JSON() {
+    private CapabilitiesJsonWriter() {
         super();
-    }
-
-    @Override
-    public String getInputFormat() {
-        return "capability";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-        try {
-            if (Collection.class.isInstance(resultObject)) {
-                result.setResultObject(transform((Collection<Capability>) resultObject), "json");
-            } else {
-                result.setResultObject(transform((Capability) resultObject), "json");
-            }
-        } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
-        }
     }
 
     private static final JSONObject EMPTY_JSON = new JSONObject(0);
 
-    private JSONObject transform(Capability resultObject) throws JSONException {
+    /**
+     * Converts given capability to its JSON representation.
+     *
+     * @param capability The capability
+     * @return The capability's JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject toJson(Capability capability) throws JSONException {
         final JSONObject object = new JSONObject(3);
-        object.put("id", resultObject.getId());
+        object.put("id", capability.getId());
         object.put("attributes", EMPTY_JSON);
         return object;
     }
 
-    private JSONArray transform(Collection<Capability> resultObjects) throws JSONException {
-        int size = resultObjects.size();
+    /**
+     * Converts given capabilities collection to its JSON representation.
+     *
+     * @param capabilities The capabilities collection
+     * @return The JSON representation for the capabilities collection
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONArray toJson(Collection<Capability> capabilities) throws JSONException {
+        int size = capabilities.size();
         JSONArray array = new JSONArray(size);
-        Iterator<Capability> iterator = resultObjects.iterator();
-        for (int i = size; i-- > 0 ;) {
-            array.put(transform(iterator.next()));
+        Iterator<Capability> iterator = capabilities.iterator();
+        for (int i = size; i-- > 0;) {
+            array.put(toJson(iterator.next()));
         }
         return array;
     }

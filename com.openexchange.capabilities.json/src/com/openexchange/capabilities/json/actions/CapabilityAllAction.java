@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.capabilities.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
