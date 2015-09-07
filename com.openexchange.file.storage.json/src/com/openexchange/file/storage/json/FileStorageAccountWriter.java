@@ -57,10 +57,10 @@ import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.tools.id.IDMangler;
 
 /**
  * Renders a FileStorageAccount in its JSON representation also using the dynamic form description of the parent file storage service.
@@ -90,10 +90,11 @@ public class FileStorageAccountWriter {
         JSONObject accountJSON = new JSONObject(6);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
-        accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, IDMangler.mangle(fsService.getId(), account.getId()));
+        accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
         accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
         accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
+        accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
         final DynamicFormDescription formDescription = fsService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
             final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
