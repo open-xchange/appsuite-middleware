@@ -82,6 +82,8 @@ public final class VirtualFolder implements ParameterizedFolder {
 
     private String treeId;
 
+    private String accountId;
+
     private String name;
 
     private String localizedName;
@@ -158,6 +160,24 @@ public final class VirtualFolder implements ParameterizedFolder {
     @Override
     public void setNewID(final String newId) {
         this.newId = newId;
+    }
+
+    @Override
+    public String getAccountID() {
+        if (accountId == null) {
+            if (realFolder == null) {
+                return "unknown";
+            } else {
+                return realFolder.getAccountID();
+            }
+        }
+
+        return accountId;
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override

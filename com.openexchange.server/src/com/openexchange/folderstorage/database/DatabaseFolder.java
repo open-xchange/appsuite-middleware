@@ -53,6 +53,8 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccounts;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -143,6 +145,9 @@ public class DatabaseFolder extends AbstractFolder {
         parent = String.valueOf(folderObject.getParentFolderID());
         type = getType(folderObject.getType());
         contentType = getContentType(folderObject.getModule());
+        if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
+            accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
+        }
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         permissions = new Permission[oclPermissions.length];
         for (int i = 0; i < oclPermissions.length; i++) {

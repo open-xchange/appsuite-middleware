@@ -162,6 +162,16 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
     }
 
     @Override
+    public String getAccountID() {
+        return realFolder.getAccountID();
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        realFolder.setAccountID(accountId);
+    }
+
+    @Override
     public int getCreatedBy() {
         return realFolder.getCreatedBy();
     }

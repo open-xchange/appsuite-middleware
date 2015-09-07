@@ -197,6 +197,22 @@ public interface Folder extends Serializable, Cloneable {
     void setParentID(String parentId);
 
     /**
+     * Gets the ID of the account the folder belongs to.
+     *
+     * @return The account ID. Will be <code>null</code> if the folder does not belong to any account
+     * (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-
+     * agnostic system folder.
+     */
+    String getAccountID();
+
+    /**
+     * Sets the ID of the account the folder belongs to.
+     *
+     * @param accountId The ID to set
+     */
+    void setAccountID(String accountId);
+
+    /**
      * Gets the subfolder IDs.
      * <p>
      * <b>Note</b>: This method is allowed to return <code>null</code>. A returned <code>null</code> value indicates that:

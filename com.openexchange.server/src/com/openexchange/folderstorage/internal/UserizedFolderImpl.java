@@ -252,6 +252,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     @Override
+    public String getAccountID() {
+        return folder.getAccountID();
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        folder.setAccountID(accountId);
+    }
+
+    @Override
     public Permission[] getPermissions() {
         return null == permissions ? folder.getPermissions() : permissions;
     }
