@@ -16,7 +16,7 @@ import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
 import com.openexchange.exception.OXException;
 
 /**
- * The {@link CapabilitiesRESTService}.
+ * The {@link CapabilitiesRESTService} - Allows clients to retrieve capabilities for arbitrary users
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
