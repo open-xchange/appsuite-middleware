@@ -1,3 +1,7 @@
+* 2015-09-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40922: Return empty iterator if start is out of range
+
 * 2015-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 40902: Put proper prepared full name as "original_folder_id" field into mail JSON representation.

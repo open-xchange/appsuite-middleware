@@ -413,6 +413,10 @@ public final class IMAPConversationWorker {
         final List<List<MailMessage>> first = (List<List<MailMessage>>) parts[0];
         @SuppressWarnings("unchecked")
         List<List<MailMessage>> slice = (List<List<MailMessage>>) parts[1];
+        if (null == slice) {
+            // Return empty iterator if start is out of range
+            return Collections.emptyList();
+        }
         @SuppressWarnings("unchecked")
         final List<List<MailMessage>> rest = (List<List<MailMessage>>) parts[2];
         parts = null;
@@ -475,13 +479,13 @@ public final class IMAPConversationWorker {
         List<List<MailMessage>> list = listOfConversations;
         // Check for index range
         int fromIndex = indexRange.start;
-        int toIndex = indexRange.end;
         int size = list.size();
         if ((fromIndex) > size) {
             // Return empty iterator if start is out of range
             return new Object[] { list, null, null };
         }
         // Reset end index if out of range
+        int toIndex = indexRange.end;
         if (toIndex >= size) {
             if (fromIndex == 0) {
                 return new Object[] { null, list, null };
