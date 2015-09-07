@@ -1,3 +1,7 @@
+* 2015-09-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40923: Handle possible null reference (requester was no member) when querying for a sign-off message from a group dispatcher
+
 * 2015-09-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 40922: Return empty iterator if start is out of range
