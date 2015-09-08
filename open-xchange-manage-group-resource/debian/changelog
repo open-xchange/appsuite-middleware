@@ -1,3 +1,9 @@
+open-xchange-manage-group-resource (7.6.2-32) stable; urgency=medium
+
+  * Build for patch 2015-09-14 (2732)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Sep 2015 11:20:23 +0200
+
 open-xchange-manage-group-resource (7.6.2-31) stable; urgency=medium
 
   * Build for patch 2015-09-01 (2726)
