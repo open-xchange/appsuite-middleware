@@ -75,6 +75,10 @@ public enum PasswordMech {
         public boolean check(String candidate, String encoded) throws UnsupportedEncodingException {
             if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
             return UnixCrypt.matches(encoded, candidate);
         }
@@ -90,6 +94,10 @@ public enum PasswordMech {
         public boolean check(String candidate, String encoded) throws NoSuchAlgorithmException, UnsupportedEncodingException {
             if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
             return SHACrypt.makeSHAPasswd(candidate).equals(encoded);
         }
@@ -105,7 +113,12 @@ public enum PasswordMech {
         public boolean check(String candidate, String encoded) {
             if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
+
             return BCrypt.checkpw(candidate, encoded);
         }
     }),
