@@ -84,6 +84,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  */
 public final class SystemInfostoreFolder {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class);
+
     /**
      * Initializes a new {@link SystemInfostoreFolder}.
      */
@@ -242,7 +244,7 @@ public final class SystemInfostoreFolder {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
+            LOGGER.debug("", e);
             return false;
         }
     }
@@ -262,7 +264,7 @@ public final class SystemInfostoreFolder {
             }
             return id;
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).error("", e);
+            LOGGER.debug("", e);
             return -1;
         }
     }
