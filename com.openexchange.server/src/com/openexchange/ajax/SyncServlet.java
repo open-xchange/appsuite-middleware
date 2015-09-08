@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
@@ -88,41 +87,41 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SyncServlet extends PermissionServlet {
 
-	private static final long serialVersionUID = 8749478304854849616L;
+    private static final long serialVersionUID = 8749478304854849616L;
 
-	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncServlet.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncServlet.class);
 
-	public static final String ACTION_REFRESH_SERVER = "refresh_server";
+    public static final String ACTION_REFRESH_SERVER = "refresh_server";
 
-	/**
-	 * Default constructor
-	 */
-	public SyncServlet() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public SyncServlet() {
+        super();
+    }
 
-	@Override
-	protected void incrementRequests() {
-		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.SYNCML);
-	}
+    @Override
+    protected void incrementRequests() {
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.SYNCML);
+    }
 
-	@Override
-	protected void decrementRequests() {
-		MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.SYNCML);
-	}
+    @Override
+    protected void decrementRequests() {
+        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.SYNCML);
+    }
 
-	@Override
-	protected boolean hasModulePermission(final ServerSession session) {
-		return session.getUserPermissionBits().hasSyncML();
-	}
+    @Override
+    protected boolean hasModulePermission(final ServerSession session) {
+        return session.getUserPermissionBits().hasSyncML();
+    }
 
-	@Override
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-		Tools.disableCaching(resp);
-		try {
-			actionPut(req, resp);
-		} catch (final OXException e) {
+    @Override
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        Tools.disableCaching(resp);
+        try {
+            actionPut(req, resp);
+        } catch (final OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
                     LOG.trace("", e);
@@ -142,57 +141,52 @@ public class SyncServlet extends PermissionServlet {
                 default:
                     break;
             }
-			final Writer writer = resp.getWriter();
-			final Response response = new Response();
-			response.setException(e);
-			try {
-				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
-			} catch (final JSONException e1) {
-				LOG.error("", e1);
-			}
-		} catch (final Exception e) {
-			final OXException wrapper = getWrappingOXException(e);
-			LOG.error("", wrapper);
-			final Writer writer = resp.getWriter();
-			final Response response = new Response();
-			response.setException(wrapper);
-			try {
-				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
-			} catch (final JSONException e1) {
-				LOG.error("", e1);
-			}
-		}
-	}
+            final Writer writer = resp.getWriter();
+            final Response response = new Response();
+            response.setException(e);
+            try {
+                ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
+            } catch (final JSONException e1) {
+                LOG.error("", e1);
+            }
+        } catch (final Exception e) {
+            final OXException wrapper = getWrappingOXException(e);
+            LOG.error("", wrapper);
+            final Writer writer = resp.getWriter();
+            final Response response = new Response();
+            response.setException(wrapper);
+            try {
+                ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
+            } catch (final JSONException e1) {
+                LOG.error("", e1);
+            }
+        }
+    }
 
-	/**
-	 * Assigns incoming PUT request to corresponding method
-	 */
-	private final void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
-			OXException {
-		final String actionStr = checkStringParam(req, PARAMETER_ACTION);
-		if (actionStr.equalsIgnoreCase(ACTION_REFRESH_SERVER)) {
-			actionPutClearFolderContent(req, resp);
-		} else {
-			throw getWrappingOXException(new Exception("Action \"" + actionStr
-					+ "\" NOT supported via PUT on module sync"));
-		}
-	}
+    /**
+     * Assigns incoming PUT request to corresponding method
+     */
+    private final void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
+        final String actionStr = checkStringParam(req, PARAMETER_ACTION);
+        if (actionStr.equalsIgnoreCase(ACTION_REFRESH_SERVER)) {
+            actionPutClearFolderContent(req, resp);
+        } else {
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on module sync"));
+        }
+    }
 
-	private final void actionPutClearFolderContent(final HttpServletRequest req, final HttpServletResponse resp)
-			throws IOException {
-		try {
-			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer
-					.getInstance(req, resp));
-		} catch (final JSONException e) {
-			writeErrorResponse((HttpServletResponseWrapper) resp, e, getSessionObject(req));
-		}
-	}
+    private final void actionPutClearFolderContent(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        try {
+            actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer.getInstance(req, resp));
+        } catch (final JSONException e) {
+            writeErrorResponse((HttpServletResponseWrapper) resp, e, getSessionObject(req));
+        }
+    }
 
-	private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer, final String body,
-			final ParamContainer paramContainer) throws JSONException, IOException {
-		/*
-		 * Some variables
-		 */
+    private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer, final String body, final ParamContainer paramContainer) throws JSONException, IOException {
+        /*
+         * Some variables
+         */
         final Response response;
         try {
             response = new Response(sessionObj);
@@ -200,71 +194,68 @@ public class SyncServlet extends PermissionServlet {
             ResponseWriter.write(new Response().setException(e1), writer, localeFrom(sessionObj));
             return;
         }
-		final AllocatingStringWriter strWriter = new AllocatingStringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
-		Date lastModifiedDate = null;
-		/*
-		 * Start response
-		 */
-		jsonWriter.array();
-		try {
-			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			Date timestamp = null;
-			final JSONArray jsonArr = new JSONArray(body);
-			final int length = jsonArr.length();
-			FolderSyncInterface folderSyncInterface = null;
-			MailServletInterface mailInterface = null;
-			try {
-				long lastModified = 0;
-				final OXFolderAccess access = new OXFolderAccess(ctx);
-				NextId: for (int i = 0; i < length; i++) {
-					final String deleteIdentifier = jsonArr.getString(i);
-					int delFolderId = -1;
-					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) >= 0) {
-						if (timestamp == null) {
-							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
-						}
-						if (folderSyncInterface == null) {
-							folderSyncInterface = new RdbFolderSyncInterface(sessionObj, ctx, access);
-						}
-						FolderObject delFolderObj;
-						try {
-							delFolderObj = access.getFolderObject(delFolderId);
-						} catch (final OXException exc) {
-							LOG.warn("", exc);
-							continue NextId;
-						}
-						if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {
-							jsonWriter.value(delFolderObj.getObjectID());
-							continue NextId;
-						}
-						folderSyncInterface.clearFolder(delFolderObj, timestamp);
-						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
-					} else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-					    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(sessionObj.getUserId(), ctx),
-                            deleteIdentifier,
-                            Integer.valueOf(ctx.getContextId()));
-					} else {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
-							if (mailInterface == null) {
-								mailInterface = MailServletInterface.getInstance(sessionObj);
-							}
-							mailInterface.clearFolder(deleteIdentifier);
-						} else {
-							jsonWriter.value(deleteIdentifier);
-						}
-					}
-				}
-				if (lastModified != 0) {
-					lastModifiedDate = new Date(lastModified);
-				}
-			} finally {
-				if (mailInterface != null) {
-					mailInterface.close(true);
-					mailInterface = null;
-				}
-			}
+        final AllocatingStringWriter strWriter = new AllocatingStringWriter();
+        final JSONWriter jsonWriter = new JSONWriter(strWriter);
+        Date lastModifiedDate = null;
+        /*
+         * Start response
+         */
+        jsonWriter.array();
+        try {
+            final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+            Date timestamp = null;
+            final JSONArray jsonArr = new JSONArray(body);
+            final int length = jsonArr.length();
+            FolderSyncInterface folderSyncInterface = null;
+            MailServletInterface mailInterface = null;
+            try {
+                long lastModified = 0;
+                final OXFolderAccess access = new OXFolderAccess(ctx);
+                NextId: for (int i = 0; i < length; i++) {
+                    final String deleteIdentifier = jsonArr.getString(i);
+                    int delFolderId = -1;
+                    if ((delFolderId = getUnsignedInteger(deleteIdentifier)) >= 0) {
+                        if (timestamp == null) {
+                            timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
+                        }
+                        if (folderSyncInterface == null) {
+                            folderSyncInterface = new RdbFolderSyncInterface(sessionObj, ctx, access);
+                        }
+                        FolderObject delFolderObj;
+                        try {
+                            delFolderObj = access.getFolderObject(delFolderId);
+                        } catch (final OXException exc) {
+                            LOG.warn("", exc);
+                            continue NextId;
+                        }
+                        if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {
+                            jsonWriter.value(delFolderObj.getObjectID());
+                            continue NextId;
+                        }
+                        folderSyncInterface.clearFolder(delFolderObj, timestamp);
+                        lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
+                    } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(sessionObj.getUserId(), deleteIdentifier, Integer.valueOf(ctx.getContextId()));
+                    } else {
+                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
+                            if (mailInterface == null) {
+                                mailInterface = MailServletInterface.getInstance(sessionObj);
+                            }
+                            mailInterface.clearFolder(deleteIdentifier);
+                        } else {
+                            jsonWriter.value(deleteIdentifier);
+                        }
+                    }
+                }
+                if (lastModified != 0) {
+                    lastModifiedDate = new Date(lastModified);
+                }
+            } finally {
+                if (mailInterface != null) {
+                    mailInterface.close(true);
+                    mailInterface = null;
+                }
+            }
         } catch (final OXException e) {
             switch (e.getCategories().get(0).getLogLevel()) {
                 case TRACE:
@@ -290,55 +281,53 @@ public class SyncServlet extends PermissionServlet {
                 response.setException(e);
             }
         } catch (final Exception e) {
-			final OXException wrapper = getWrappingOXException(e);
-			LOG.error("", wrapper);
-			response.setException(wrapper);
-		}
-		/*
-		 * Close response and flush print writer
-		 */
-		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
-		response.setTimestamp(lastModifiedDate);
-		ResponseWriter.write(response, writer, localeFrom(sessionObj));
-	}
+            final OXException wrapper = getWrappingOXException(e);
+            LOG.error("", wrapper);
+            response.setException(wrapper);
+        }
+        /*
+         * Close response and flush print writer
+         */
+        jsonWriter.endArray();
+        response.setData(new JSONArray(strWriter.toString()));
+        response.setTimestamp(lastModifiedDate);
+        ResponseWriter.write(response, writer, localeFrom(sessionObj));
+    }
 
-	/*-
-	 * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
-	 */
+    /*-
+     * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
+     */
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session)
-			throws IOException {
-		final OXException wrapper = getWrappingOXException(e);
-		LOG.error("", wrapper);
-		writeErrorResponse(resp, wrapper, session);
-	}
+    private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session) throws IOException {
+        final OXException wrapper = getWrappingOXException(e);
+        LOG.error("", wrapper);
+        writeErrorResponse(resp, wrapper, session);
+    }
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final OXException e, final Session session) throws IOException {
-		final Writer writer = resp.getWriter();
-		final Response response = new Response();
-		response.setException(e);
-		try {
-			ResponseWriter.write(response, writer, localeFrom(session));
-		} catch (final JSONException e1) {
-			LOG.error("", e1);
-		}
-	}
+    private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final OXException e, final Session session) throws IOException {
+        final Writer writer = resp.getWriter();
+        final Response response = new Response();
+        response.setException(e);
+        try {
+            ResponseWriter.write(response, writer, localeFrom(session));
+        } catch (final JSONException e1) {
+            LOG.error("", e1);
+        }
+    }
 
-	private static final OXException getWrappingOXException(final Throwable cause) {
-		return AjaxExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-	}
+    private static final OXException getWrappingOXException(final Throwable cause) {
+        return AjaxExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+    }
 
-	private static final String checkStringParam(final HttpServletRequest req, final String paramName)
-			throws OXException {
-		final String paramVal = req.getParameter(paramName);
-		if (paramVal == null) {
-			throw OXFolderExceptionCode.MISSING_PARAMETER.create(paramName);
-		}
-		return paramVal;
-	}
+    private static final String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {
+        final String paramVal = req.getParameter(paramName);
+        if (paramVal == null) {
+            throw OXFolderExceptionCode.MISSING_PARAMETER.create(paramName);
+        }
+        return paramVal;
+    }
 
-	/**
+    /**
      * The radix for base <code>10</code>.
      */
     private static final int RADIX = 10;
@@ -399,28 +388,28 @@ public class SyncServlet extends PermissionServlet {
 
     private static int digit(final char c) {
         switch (c) {
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
-        default:
-            return -1;
+            case '0':
+                return 0;
+            case '1':
+                return 1;
+            case '2':
+                return 2;
+            case '3':
+                return 3;
+            case '4':
+                return 4;
+            case '5':
+                return 5;
+            case '6':
+                return 6;
+            case '7':
+                return 7;
+            case '8':
+                return 8;
+            case '9':
+                return 9;
+            default:
+                return -1;
         }
     }
 
