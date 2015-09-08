@@ -651,7 +651,7 @@ public final class UploadUtility {
                 }
             }
             // Trim end while last char is not a digit
-            while (result.length() > 0 && ! Character.isDigit(result.charAt(result.length()))) {
+            while (result.length() > 0 && !Character.isDigit(result.charAt(result.length() - 1))) {
                 result = result.substring(result.length() - 1);
             }
             return result;
