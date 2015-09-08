@@ -89,7 +89,7 @@ public final class InfostoreContentType implements ContentType {
 
     @Override
     public int getPriority() {
-        return 0;
+        return 7;
     }
 
 //    @Override

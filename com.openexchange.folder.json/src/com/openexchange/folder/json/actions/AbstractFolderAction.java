@@ -286,32 +286,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (null == tmp) {
             return null;
         }
-        /*
-         * Get available content types
-         */
-        final Map<Integer, ContentType> availableContentTypes =
-            ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
-        final int module = getUnsignedInteger(tmp);
-        ContentType contentType = null;
-        if (module < 0) {
-            /*
-             * Not a number
-             */
-            for (final Map.Entry<Integer, ContentType> entry : availableContentTypes.entrySet()) {
-                final ContentType ct = entry.getValue();
-                if (ct.toString().equals(tmp)) {
-                    contentType = ct;
-                    break;
-                }
-            }
-        } else {
-            /*
-             * A number
-             */
-            final Integer key = Integer.valueOf(module);
-            contentType = availableContentTypes.get(key);
-        }
-
+        ContentType contentType = ServiceRegistry.getInstance().getService(FolderService.class, true).parseContentType(tmp);
         if (null == contentType) {
             org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class).error("No content type for module: {}", tmp);
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);

@@ -73,6 +73,17 @@ public interface FolderService {
     Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
+     * Parses a specific content type, either based on the content type's textual representation, or using the content type's module
+     * identifier.
+     * <p/>
+     * If there are multiple suitable candidates among the registered content types, the one with the highest priority is returned.
+     *
+     * @param value The content type to parse
+     * @return The content type, or <code>null</code> if not found
+     */
+    ContentType parseContentType(String value);
+
+    /**
      * Reinitializes the denoted tree (if necessary).
      *
      * @param treeId The tree identifier

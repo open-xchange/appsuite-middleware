@@ -75,11 +75,11 @@ import com.openexchange.folderstorage.internal.performers.GetPerformer;
 import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
-import com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
+import com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerformer;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -350,6 +350,16 @@ public final class FolderServiceImpl implements FolderService {
     @Override
     public Map<Integer, ContentType> getAvailableContentTypes() {
         return ContentTypeRegistry.getInstance().getAvailableContentTypes();
+    }
+
+    @Override
+    public ContentType parseContentType(String value) {
+        int module = Tools.getUnsignedInteger(value);
+        if (-1 != module) {
+            return ContentTypeRegistry.getInstance().getByModule(module);
+        } else {
+            return ContentTypeRegistry.getInstance().getByString(value);
+        }
     }
 
 }
