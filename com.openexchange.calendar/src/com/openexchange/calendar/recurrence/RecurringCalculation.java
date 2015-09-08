@@ -383,7 +383,7 @@ public class RecurringCalculation {
     private void checkValues() {
 		if (!contains_until) {
 			Calendar tmp = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
-			tmp.setTimeInMillis(start_of_series);
+			tmp.setTimeInMillis(normalized_start_of_series);
 			tmp.add(Calendar.YEAR, recurring_type == CalendarObject.YEARLY ? CalendarCollectionService.MAX_OCCURRENCESE : 99);
 			end_of_series = tmp.getTimeInMillis();
 			this.until = end_of_series;
@@ -483,7 +483,7 @@ public class RecurringCalculation {
         final boolean boundaries = hasBoundaries();
 
         int hoursJumped = 0; // This is to detect jumps in the time. Happens during timezone offset transitions.
-        while (normalized_start_of_series < end_of_calculation) {
+        while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             if (start_of_series >= sst && normalized_start_of_series <= end_of_series) {
                 final long start_of_occurrence = calc.getTimeInMillis();
@@ -590,7 +590,7 @@ public class RecurringCalculation {
 
         final boolean boundaries = hasBoundaries();
 
-        loop: while (normalized_start_of_series < end_of_calculation) {
+        loop: while (normalized_start_of_series <= end_of_calculation) {
             increaseCalculationCounter();
             for (int a = 0; a < c; a++) {
                 increaseCalculationCounter();
@@ -677,7 +677,7 @@ public class RecurringCalculation {
             // MARKER-END
             // ///////////////////
 
-            while (start_of_series < end_of_calculation) {
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
                 final int month = calc.get(Calendar.MONTH);
@@ -762,7 +762,7 @@ public class RecurringCalculation {
             // MARKER-END
             // ///////////////////
 
-            while (start_of_series < end_of_calculation) {
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
                 helper.setTimeInMillis(start_of_series);
@@ -919,7 +919,9 @@ public class RecurringCalculation {
                 end_of_calculation = Math.min(end_of_series, range_end);
             }
 
-            while (start_of_series < end_of_calculation) {
+            while (start_of_series <= end_of_calculation) {
+                Calendar sos = Calendar.getInstance();
+                sos.setTimeInMillis(start_of_series);
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
                 calc.set(Calendar.YEAR, calc.get(Calendar.YEAR));
@@ -999,7 +1001,7 @@ public class RecurringCalculation {
             // MARKER-END
             // ///////////////////
 
-            while (start_of_series < end_of_calculation) {
+            while (start_of_series <= end_of_calculation) {
                 increaseCalculationCounter();
                 calc.setTimeInMillis(start_of_series);
                 if (day_or_type < 5) {
