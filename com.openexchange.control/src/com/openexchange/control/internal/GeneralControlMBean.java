@@ -99,8 +99,9 @@ public interface GeneralControlMBean {
      * URL.
      *
      * @param local The location identifier of the bundle to install.
+     * @throws MBeanException If bundle installation fails
      */
-    public void install(final String local);
+    public void install(final String local) throws MBeanException;
 
     /**
      * Uninstalls the bundle denoted by specified bundle name.
