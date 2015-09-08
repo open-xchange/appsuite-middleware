@@ -62,6 +62,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2553
     ox_add_property com.openexchange.smtp.sendPartial false $PFILE
+
+    ox_update_permissions /opt/open-xchange/etc/noreply.properties root:open-xchange 640
 fi
 
 %clean
