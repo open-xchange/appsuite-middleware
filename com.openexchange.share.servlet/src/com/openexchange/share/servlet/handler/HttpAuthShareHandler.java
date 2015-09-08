@@ -110,7 +110,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException;
 
     @Override
-    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
         if (false == handles(share, target, request, response)) {
             return ShareHandlerReply.NEUTRAL;
         }

@@ -121,6 +121,11 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
+    public List<PersonalizedShareTarget> getPersonalizedTargets() {
+        return new ArrayList<>(targetMap.keySet());
+    }
+
+    @Override
     public int getCommonModule() {
         Collection<ShareTarget> targets = targetMap.values();
         if (null == targets || 0 == targets.size()) {

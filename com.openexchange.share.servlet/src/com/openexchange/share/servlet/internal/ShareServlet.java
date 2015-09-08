@@ -61,12 +61,12 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
-import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -109,7 +109,8 @@ public class ShareServlet extends AbstractShareServlet {
             request.getSession(true);
 
             // Extract share from path info
-            PersonalizedShareTarget target;
+            PersonalizedShareTarget target = null;
+            boolean invalidTarget = false;
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
@@ -125,27 +126,22 @@ public class ShareServlet extends AbstractShareServlet {
                     return;
                 }
 
+                // Switch language for errors if appropriate
+                translator = translatorFactory.translatorFor(determineLocale(request, share.getGuest()));
+
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
                 if (1 < paths.length) {
                     target = share.resolvePersonalizedTarget(paths[1]);
-                    if (null == target) {
-                        //TODO: fallback to share without target?
-                        LOG.debug("Share target '{}' not found in share '{}' at '{}'", paths[1], paths[0], pathInfo);
-                        sendNotFound(response, translator);
-                        return;
+                    if (target == null) {
+                        invalidTarget = true;
                     }
-                } else {
-                    target = null;
                 }
             }
-
-            // Switch language for errors if appropriate
-            translator = translatorFactory.translatorFor(determineLocale(request, share.getGuest()));
 
             /*
              * Determine appropriate ShareHandler and handle the share
              */
-            if (false == handle(share, target, request, response)) {
+            if (false == handle(share, target, invalidTarget, request, response)) {
                 // No appropriate ShareHandler available
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
@@ -170,13 +166,15 @@ public class ShareServlet extends AbstractShareServlet {
      *
      * @param share The guest share
      * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param invalidTarget <code>true</code> if the target is <code>null</code> because the requested one
+     * isn't existing or accessible.
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
      */
-    private boolean handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private boolean handle(GuestShare share, PersonalizedShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-            ShareHandlerReply reply = handler.handle(share, target, request, response);
+            ShareHandlerReply reply = handler.handle(share, target, invalidTarget, request, response);
             if (ShareHandlerReply.NEUTRAL != reply) {
                 return true;
             }

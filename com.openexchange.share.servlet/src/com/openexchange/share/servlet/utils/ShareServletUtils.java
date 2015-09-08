@@ -80,7 +80,6 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Cookies;

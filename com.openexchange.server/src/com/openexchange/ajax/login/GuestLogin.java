@@ -93,7 +93,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
 
     @Override
     protected boolean checkAuthenticationMode(AuthenticationMode authenticationMode) throws OXException {
-        return (AuthenticationMode.GUEST_PASSWORD == authenticationMode);
+        return (AuthenticationMode.GUEST_PASSWORD == authenticationMode || AuthenticationMode.GUEST == authenticationMode);
     }
 
     @Override
@@ -115,13 +115,10 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
 
                 pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                if (Strings.isEmpty(pass)) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
-                }
             } else {
                 // By request body
                 JSONObject jBody = new JSONObject(body);
-                pass = jBody.getString("password");
+                pass = jBody.optString("password", null);
                 login = jBody.getString("login");
             }
 
@@ -152,6 +149,9 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         // Resolve the user
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
         User user = userService.getUser(share.getGuest().getGuestID(), context);
+        if (Strings.isEmpty(user.getUserPassword()) && Strings.isEmpty(loginInfo.getPassword())) {
+            return user;
+        }
 
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {

@@ -83,11 +83,13 @@ public interface ShareHandler {
      *
      * @param share The share
      * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param invalidTarget <code>true</code> if the target is <code>null</code> because the requested one
+     * isn't existing or accessible.
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
      * @throws OXException If the attempt to resolve given share fails
      */
-    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

@@ -75,6 +75,13 @@ public interface GuestShare {
     List<ShareTarget> getTargets();
 
     /**
+     * Gets a list of all share targets the guest has access to in their personalized form.
+     *
+     * @return The share targets
+     */
+    List<PersonalizedShareTarget> getPersonalizedTargets();
+
+    /**
      * Gets the common module identifier if all contained share targets are pointing to the same module.
      *
      * @return The common module ID, or <code>0</code> if the modules are different between the share targets

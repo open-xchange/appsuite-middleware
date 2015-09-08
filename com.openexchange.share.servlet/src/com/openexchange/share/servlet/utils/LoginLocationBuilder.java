@@ -83,10 +83,12 @@ public class LoginLocationBuilder {
      */
     public LoginLocationBuilder loginType(AuthenticationMode authentication) {
         switch (authentication) {
-            case ANONYMOUS_PASSWORD:
-                return parameter("login_type", "anonymous");
-            case GUEST_PASSWORD:
+            case GUEST:
                 return parameter("login_type", "guest");
+            case GUEST_PASSWORD:
+                return parameter("login_type", "guest_password");
+            case ANONYMOUS_PASSWORD:
+                return parameter("login_type", "anonymous_password");
             default:
                 throw new UnsupportedOperationException("No login type for " + authentication);
         }
