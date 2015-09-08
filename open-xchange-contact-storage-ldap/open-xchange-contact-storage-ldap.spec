@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 31
+%define        ox_release 32
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -50,6 +50,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/contact-storage-ldap/cache.properties
 
 %changelog
+* Tue Sep 08 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-09-14 (2732)
 * Wed Sep 02 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
