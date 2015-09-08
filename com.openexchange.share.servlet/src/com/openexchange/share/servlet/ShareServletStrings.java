@@ -79,4 +79,6 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String INVALID_REQUEST = "We were unable to process your request.";
 
+    public static final String NO_GUEST_PASSWORD_REQUIRED = "Your guest account is currently not protected with a password. Resetting password will be aborted.";
+
 }
