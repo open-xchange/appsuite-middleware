@@ -1234,7 +1234,7 @@ ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xch
 #SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
-PROTECT="configdb.properties hazelcast.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties hazelcast.properties jolokia.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
