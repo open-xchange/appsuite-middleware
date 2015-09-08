@@ -2,6 +2,7 @@
 
  - Fix for bug 40991: Fixed JMX authentication for all JMX-connecting command-line tools
  - Fix for bug 40981: Aligned recommendation for creating a SHA hash to recent distribution's packaging changes
+ - Fix for bug 40982: Orderly changed "-f,--file" option description to explicitly pointing out that a path name is expected
 
 * 2015-09-08 - tobias.friedrich@open-xchange.com
 
