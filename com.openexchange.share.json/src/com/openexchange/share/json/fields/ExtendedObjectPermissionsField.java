@@ -143,7 +143,7 @@ public class ExtendedObjectPermissionsField implements AdditionalFileField {
                 org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).error("Error serializing extended permissions", e);
             }
         }
-        return null;
+        return new JSONArray(0);
     }
 
 }
