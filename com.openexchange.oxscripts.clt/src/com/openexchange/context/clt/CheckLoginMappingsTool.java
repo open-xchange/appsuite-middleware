@@ -60,7 +60,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -71,7 +70,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.context.mbean.ContextMBean;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link CheckLoginMappingsTool} - Serves <code>checkloginmappings</code> command-line tool.
@@ -212,7 +210,8 @@ public final class CheckLoginMappingsTool {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+                String[] creds = new String[] { jmxLogin, jmxPassword };
+                environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
             // Invoke MBean

@@ -59,7 +59,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -70,7 +69,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.tools.Constants;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskResetVersionCLT} - Command-Line access to reset version via update task toolkit.
@@ -209,7 +207,8 @@ public final class UpdateTaskResetVersionCLT {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+                String[] creds = new String[] { jmxLogin, jmxPassword };
+                environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");

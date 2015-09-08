@@ -1,3 +1,7 @@
+* 2015-09-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40991: Fixed JMX authentication for all JMX-connecting command-line tools
+
 * 2015-09-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 40657: Avoid reset of recurring appointment exceptions on update via CalDAV
