@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,57 @@
  *
  */
 
-package com.openexchange.authentication;
+package com.openexchange.user.internal.mapping;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
+import com.openexchange.passwordmechs.PasswordMech;
 
 /**
- * {@link BasicAuthenticationService} - The special basic authentication service.
- * <p>
- * Especially used to authenticate guest users.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * {@link PasswordMechMapping}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-@SingletonService
-public interface BasicAuthenticationService extends AuthenticationService {
+public final class PasswordMechMapping extends VarCharMapping<User> {
 
-    /**
-     * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
-     * context.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return An {@link Authenticated} instance that is rather used to perform additional modifications through implementing
-     *         {@link SessionEnhancement} and/or {@link ResponseEnhancement}
-     * @throws OXException If an Open-Xchange error occurs
-     */
-    Authenticated handleLoginInfo(int userId, int contextId) throws OXException;
+    public PasswordMechMapping() {
+        super("passwordMech", "Password Mechanism");
+    }
 
-    /**
-     * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
-     * context and checks if the password is valid for the user/context relation.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param password The password to check
-     * @return An {@link Authenticated} instance that is rather used to perform additional modifications through implementing
-     *         {@link SessionEnhancement} and/or {@link ResponseEnhancement}
-     * @throws OXException If the user cannot be authenticated or an Open-Xchange error occurs
-     */
-    Authenticated handleLoginInfo(int userId, int contextId, String password) throws OXException;
+    @Override
+    public boolean isSet(User user) {
+        String passwordMech = user.getPasswordMech();
+        if (passwordMech == null) {
+            return false;
+        }
+
+        boolean isSet = false;
+        if ((passwordMech.equalsIgnoreCase(PasswordMech.CRYPT.getIdentifier())) || (passwordMech.equalsIgnoreCase(PasswordMech.BCRYPT.getIdentifier())) || (passwordMech.equalsIgnoreCase(PasswordMech.SHA.getIdentifier()))) {
+            isSet = true;
+        }
+        return isSet;
+    }
+
+    @Override
+    public void set(User user, String value) {
+        // Normally this method should only be called on objects created by {@link UserMapper#newInstance()}.
+        if (user instanceof UserImpl) {
+            ((UserImpl) user).setPasswordMech(value);
+        } else {
+            throw new UnsupportedOperationException("com.openexchange.groupware.ldap.User.setPasswordMech(String)");
+        }
+    }
+
+    @Override
+    public String get(User user) {
+        return user.getPasswordMech();
+    }
+
+    @Override
+    public void remove(User user) {
+        throw new UnsupportedOperationException();
+    }
 }

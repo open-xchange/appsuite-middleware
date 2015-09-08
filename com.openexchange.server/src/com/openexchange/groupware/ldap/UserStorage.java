@@ -232,11 +232,13 @@ public abstract class UserStorage {
      * <li>IMAP server</li>
      * <li>SMTP server</li>
      * <li>IMAP login</li>
+     * <li>User password (should be provided encrypted)</li>
+     * <li>Password mechanism</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
      * For guest users, additionally the following properties may be changed:
      * <ul>
-     * <li>User password</li>
+     * <li>User password (should be provided encrypted)</li>
      * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>
@@ -271,11 +273,13 @@ public abstract class UserStorage {
      * <li>IMAP server</li>
      * <li>SMTP server</li>
      * <li>IMAP login</li>
+     * <li>User password (should be provided encrypted)</li>
+     * <li>Password mechanism</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
      * For guest users, additionally the following properties may be changed:
      * <ul>
-     * <li>User password</li>
+     * <li>User password (should be provided encrypted)</li>
      * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>

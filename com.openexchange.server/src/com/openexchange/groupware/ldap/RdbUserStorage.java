@@ -63,8 +63,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -100,7 +98,6 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -126,10 +123,6 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
-
-    private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
-
-    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
 
     private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
         "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
@@ -835,7 +828,6 @@ public class RdbUserStorage extends UserStorage {
         if (null != user.getAttributes()) {
             updateAttributes(context, user, con);
         }
-        updateUserPassword(con, user, context);
     }
 
     private void updateUserFields(final Connection con, final User user, final Context context) throws SQLException, OXException {
@@ -851,36 +843,6 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(pos++, context.getContextId());
                 stmt.setInt(pos++, user.getId());
                 stmt.execute();
-            } finally {
-                closeSQLStuff(stmt);
-            }
-        }
-    }
-
-    private void updateUserPassword(final Connection con, final User user, final Context context) throws SQLException {
-        final int contextId = context.getContextId();
-        final int userId = user.getId();
-        final String password = user.getUserPassword();
-        final String mech = user.getPasswordMech();
-        final int shadowLastChanged = user.getShadowLastChange();
-        if (null != password && null != mech || user.isGuest()) {
-            PreparedStatement stmt = null;
-            try {
-                String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
-                stmt = con.prepareStatement(user.isGuest() ? SQL_UPDATE_PASSWORD_AND_MECH : SQL_UPDATE_PASSWORD);
-                int pos = 1;
-                stmt.setString(pos++, encodedPassword);
-                if (user.isGuest()) {
-                    stmt.setString(pos++, mech);
-                }
-                stmt.setInt(pos++, shadowLastChanged);
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                stmt.execute();
-            } catch (final UnsupportedEncodingException e) {
-                throw new SQLException(e.toString());
-            } catch (final NoSuchAlgorithmException e) {
-                throw new SQLException(e.toString());
             } finally {
                 closeSQLStuff(stmt);
             }
