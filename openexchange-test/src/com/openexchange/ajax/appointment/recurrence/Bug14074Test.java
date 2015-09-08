@@ -148,6 +148,7 @@ public final class Bug14074Test extends AbstractAJAXSession {
         appointment.setRecurrenceType(Appointment.WEEKLY);
         appointment.setInterval(1);
         appointment.setDays(Appointment.FRIDAY);
+        appointment.setIgnoreConflicts(true);
         return appointment;
     }
 
@@ -164,6 +165,7 @@ public final class Bug14074Test extends AbstractAJAXSession {
         changed.setRecurrenceType(Appointment.WEEKLY);
         changed.setInterval(1);
         changed.setDays(Appointment.FRIDAY);
+        changed.setIgnoreConflicts(true);
         return changed;
     }
 }
