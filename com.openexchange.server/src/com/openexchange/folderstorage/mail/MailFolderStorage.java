@@ -1135,6 +1135,11 @@ public final class MailFolderStorage implements FolderStorage {
                 return new SortableId[0];
             }
 
+            FolderServiceDecorator fsDecorator = storageParameters.getDecorator();
+            if (fsDecorator != null && !fsDecorator.getAllowedContentTypes().isEmpty() && !fsDecorator.getAllowedContentTypes().contains(MailContentType.getInstance())) {
+                return new SortableId[0];
+            }
+
             if (cannotConnect(session)) {
                 return new SortableId[0];
             }
