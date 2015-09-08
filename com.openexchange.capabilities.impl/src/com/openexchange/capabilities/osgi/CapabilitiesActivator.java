@@ -74,7 +74,6 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
