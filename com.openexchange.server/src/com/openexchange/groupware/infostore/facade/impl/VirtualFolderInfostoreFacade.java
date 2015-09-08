@@ -68,6 +68,7 @@ import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
@@ -377,6 +378,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     @Override
     public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
         return false;
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return new EmptyTimedResult();
     }
 
 }

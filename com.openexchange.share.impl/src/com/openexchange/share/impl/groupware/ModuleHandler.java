@@ -145,4 +145,13 @@ public interface ModuleHandler {
      */
     boolean exists(ShareTarget target, Session session) throws OXException;
 
+    /**
+     * Gets a list of all share targets accessible by a specific guest user.
+     *
+     * @param contextID The context identifier
+     * @param guestID The guest identifier
+     * @return The share targets, or an empty list of there are none
+     */
+    List<ShareTarget> listTargets(int contextID, int guestID) throws OXException;
+
 }

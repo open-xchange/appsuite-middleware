@@ -1517,16 +1517,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
     }
 
-    /**
-     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
-     *
-     * @param session The session
-     * @return The identifier of the shared documents folder
-     */
-    private int getSharedFilesFolderID(ServerSession session) {
-        return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
-    }
-
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
@@ -1658,118 +1648,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return getDocuments(context, user, permissionBits, folderId, columns, null, 0, -1, -1);
+    }
+
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
-        /*
-         * get appropriate infostore iterator
-         */
-        Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final long sharedFilesFolderID = getSharedFilesFolderID(session);
-        Context context = session.getContext();
-        final User user = session.getUser();
-        final EffectiveInfostoreFolderPermission folderPermission;
-        InfostoreIterator iterator;
-        if (sharedFilesFolderID == folderId) {
-            /*
-             * load readable documents from virtual shared files folder
-             */
-            folderPermission = null;
-            iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
-            iterator.setCustomizer(new DocumentCustomizer() {
-
-                @Override
-                public DocumentMetadata handle(DocumentMetadata document) {
-                    document.setOriginalFolderId(document.getFolderId());
-                    document.setFolderId(sharedFilesFolderID);
-                    return document;
-                }
-            });
-        } else {
-            /*
-             * load all / own objects from physical folder
-             */
-            folderPermission = security.getFolderPermission(folderId, context, user, session.getUserPermissionBits());
-            if (folderPermission.canReadAllObjects()) {
-                iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
-            } else if (folderPermission.canReadOwnObjects()) {
-                iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
-            } else {
-                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-            }
-        }
-        /*
-         * check requested metadata
-         */
-        boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
-        boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-        boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
-        boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
-        if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
-            /*
-             * stick to plain infostore timed result if no further metadata is needed
-             */
-            return new InfostoreTimedResult(iterator);
-        }
-        /*
-         * prepare customizable timed result to add additional metadata as requested
-         */
-        final List<DocumentMetadata> documents = iterator.asList();
-        if (0 == documents.size()) {
-            return com.openexchange.groupware.results.Results.emptyTimedResult();
-        }
-        long maxSequenceNumber = 0;
-        List<Integer> objectIDs = new ArrayList<Integer>(documents.size());
-        for (DocumentMetadata document : documents) {
-            maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
-            objectIDs.add(Integer.valueOf(document.getId()));
-        }
-        final long sequenceNumber = maxSequenceNumber;
-        TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
-
-            @Override
-            public SearchIterator<DocumentMetadata> results() throws OXException {
-                return new SearchIteratorAdapter<DocumentMetadata>(documents.iterator());
-            }
-
-            @Override
-            public long sequenceNumber() throws OXException {
-                return sequenceNumber;
-            }
-        };
-        /*
-         * add object permissions if requested or needed to evaluate "shareable" flag
-         */
-        if (addObjectPermissions) {
-            timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
-        }
-        if (addLocked) {
-            timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
-        }
-        if (addNumberOfVersions) {
-            timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
-        }
-        if (addShareable) {
-            final boolean hasSharedFolderAccess = session.getUserConfiguration().hasFullSharedFolderAccess();
-            timedResult = new CustomizableTimedResult<DocumentMetadata>(timedResult, new Customizer<DocumentMetadata>() {
-
-                @Override
-                public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
-                        /*
-                         * no permissions to share or re-share
-                         */
-                        document.setShareable(false);
-                    } else {
-                        /*
-                         * set "shareable" flag based on folder permissions
-                         */
-                        document.setShareable(folderPermission.canWriteAllObjects() ||
-                            folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
-                    }
-                    return document;
-                }
-            });
-        }
-        return timedResult;
+        return getDocuments(session.getContext(), session.getUser(), session.getUserPermissionBits(), folderId, columns, sort, order, start, end);
     }
 
     @Override
@@ -2532,6 +2417,139 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             new FilenamesMayNotContainSlashesValidator(),
             new ObjectPermissionValidator(this)
         );
+    }
+
+    private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {
+        /*
+         * get appropriate infostore iterator
+         */
+        Metadata[] cols = addLastModifiedIfNeeded(columns);
+        final long sharedFilesFolderID = getSharedFilesFolderID(context, user);
+        final EffectiveInfostoreFolderPermission folderPermission;
+        InfostoreIterator iterator;
+        if (sharedFilesFolderID == folderId) {
+            /*
+             * load readable documents from virtual shared files folder
+             */
+            folderPermission = null;
+            iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
+            iterator.setCustomizer(new DocumentCustomizer() {
+
+                @Override
+                public DocumentMetadata handle(DocumentMetadata document) {
+                    document.setOriginalFolderId(document.getFolderId());
+                    document.setFolderId(sharedFilesFolderID);
+                    return document;
+                }
+            });
+        } else {
+            /*
+             * load all / own objects from physical folder
+             */
+            folderPermission = security.getFolderPermission(folderId, context, user, permissionBits);
+            if (folderPermission.canReadAllObjects()) {
+                iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
+            } else if (folderPermission.canReadOwnObjects()) {
+                iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
+            } else {
+                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+            }
+        }
+        /*
+         * check requested metadata
+         */
+        boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
+        boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
+        if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
+            /*
+             * stick to plain infostore timed result if no further metadata is needed
+             */
+            return new InfostoreTimedResult(iterator);
+        }
+        /*
+         * prepare customizable timed result to add additional metadata as requested
+         */
+        final List<DocumentMetadata> documents = iterator.asList();
+        if (0 == documents.size()) {
+            return com.openexchange.groupware.results.Results.emptyTimedResult();
+        }
+        long maxSequenceNumber = 0;
+        List<Integer> objectIDs = new ArrayList<Integer>(documents.size());
+        for (DocumentMetadata document : documents) {
+            maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
+            objectIDs.add(Integer.valueOf(document.getId()));
+        }
+        final long sequenceNumber = maxSequenceNumber;
+        TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
+
+            @Override
+            public SearchIterator<DocumentMetadata> results() throws OXException {
+                return new SearchIteratorAdapter<DocumentMetadata>(documents.iterator());
+            }
+
+            @Override
+            public long sequenceNumber() throws OXException {
+                return sequenceNumber;
+            }
+        };
+        /*
+         * add object permissions if requested or needed to evaluate "shareable" flag
+         */
+        if (addObjectPermissions) {
+            timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
+        }
+        if (addLocked) {
+            timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
+        }
+        if (addNumberOfVersions) {
+            timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
+        }
+        if (addShareable) {
+            final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();
+            timedResult = new CustomizableTimedResult<DocumentMetadata>(timedResult, new Customizer<DocumentMetadata>() {
+
+                @Override
+                public DocumentMetadata customize(DocumentMetadata document) throws OXException {
+                    if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
+                        /*
+                         * no permissions to share or re-share
+                         */
+                        document.setShareable(false);
+                    } else {
+                        /*
+                         * set "shareable" flag based on folder permissions
+                         */
+                        document.setShareable(folderPermission.canWriteAllObjects() ||
+                            folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
+                    }
+                    return document;
+                }
+            });
+        }
+        return timedResult;
+    }
+
+    /**
+     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
+     *
+     * @param session The session
+     * @return The identifier of the shared documents folder
+     */
+    private int getSharedFilesFolderID(ServerSession session) {
+        return getSharedFilesFolderID(session.getContext(), session.getUser());
+    }
+
+    /**
+     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
+     *
+     * @param context The context
+     * @param user The user
+     * @return The identifier of the shared documents folder
+     */
+    private int getSharedFilesFolderID(Context context, User user) {
+        return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
     }
 
 }

@@ -51,6 +51,8 @@ package com.openexchange.share.impl.groupware;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -59,7 +61,9 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.PersonalizedShareTarget;
@@ -68,7 +72,12 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -247,6 +256,39 @@ public class ModuleSupportImpl implements ModuleSupport {
     @Override
     public int getShareModuleId(String module) {
         return ShareModuleMapping.moduleMapping2int(module);
+    }
+
+    @Override
+    public List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException {
+        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
+        /*
+         * get available folder targets for the module
+         */
+        Context context = requireService(ContextService.class, services).getContext(contextID);
+        User user = requireService(UserService.class, services).getUser(guestID, context);
+        UserPermissionBits permissionBits = requireService(UserPermissionService.class, services).getUserPermissionBits(guestID, context);
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                guestID, user.getGroups(), permissionBits.getAccessibleModules(), module, context);
+            while (searchIterator.hasNext()) {
+                FolderObject folder = searchIterator.next();
+                if (FolderObject.SYSTEM_TYPE == folder.getType() || FolderObject.MIN_FOLDER_ID > folder.getObjectID()) {
+                    continue;
+                }
+                shareTargets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        /*
+         * get targets from a registered module handler, too
+         */
+        ModuleHandler handler = handlers.opt(module);
+        if (null != handler) {
+            shareTargets.addAll(handler.listTargets(contextID, guestID));
+        }
+        return shareTargets;
     }
 
 }

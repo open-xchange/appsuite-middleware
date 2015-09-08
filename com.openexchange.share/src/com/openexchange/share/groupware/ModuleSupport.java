@@ -50,6 +50,7 @@
 package com.openexchange.share.groupware;
 
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.PersonalizedShareTarget;
@@ -170,5 +171,11 @@ public interface ModuleSupport {
      * @throws OXException
      */
     boolean exists(ShareTarget target, Session session) throws OXException;
+
+
+//    List<ShareTarget> listTargets(Session session, int module) throws OXException;
+
+
+    List<ShareTarget> listTargets(int contextID, int userID, int module) throws OXException;
 
 }

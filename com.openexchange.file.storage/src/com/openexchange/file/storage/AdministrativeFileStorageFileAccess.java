@@ -51,7 +51,9 @@ package com.openexchange.file.storage;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.groupware.results.TimedResult;
 
 
 /**
@@ -147,5 +149,15 @@ public interface AdministrativeFileStorageFileAccess {
      * @throws OXException If one of the files doesn't exist or an error occurs
      */
     boolean canDelete(String folderId, String id, int userId) throws OXException;
+
+    /**
+     * Loads the metadata for all files in a folder, as seen by a specific user.
+     *
+     * @param folderId The folder identifier
+     * @param userId The user id
+     * @param fields The metadata to return
+     * @return The documents
+     */
+    TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields) throws OXException;
 
 }

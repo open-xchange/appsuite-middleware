@@ -69,7 +69,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -158,6 +161,14 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
     public boolean canDelete(String folderId, String id, int userId) throws OXException {
         User user = Services.getService(UserService.class).getUser(userId, context);
         return getInfostore(folderId).hasDocumentAccess(ID(id), InfostoreFacade.AccessPermission.DELETE, user, context);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields) throws OXException {
+        User user = Services.getService(UserService.class).getUser(userId, context);
+        UserPermissionBits permissionBits = Services.getService(UserPermissionService.class).getUserPermissionBits(userId, context);
+        TimedResult<DocumentMetadata> timedResult = getInfostore(folderId).getDocuments(ID(folderId), FieldMapping.getMatching(fields), context, user, permissionBits);
+        return new InfostoreTimedResult(timedResult);
     }
 
 }

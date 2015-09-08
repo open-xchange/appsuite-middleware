@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -68,11 +69,14 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.ConnectionHolder;
 
 
@@ -256,6 +260,26 @@ public class FileStorageHandler implements ModuleHandler {
     private IDBasedFileAccess getFileAccess(Session session) throws OXException {
         IDBasedFileAccessFactory factory = requireService(IDBasedFileAccessFactory.class, services);
         return factory.createAccess(session);
+    }
+
+    @Override
+    public List<ShareTarget> listTargets(int contextID, int guestID) throws OXException {
+        List<ShareTarget> targets = new ArrayList<ShareTarget>();
+        Context context = requireService(ContextService.class, services).getContext(contextID);
+        IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
+        List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID);
+        TimedResult<File> timedResult = administrativeFileAccess.getDocuments(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), guestID, fields);
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = timedResult.results();
+            while (searchIterator.hasNext()) {
+                File file = searchIterator.next();
+                targets.add(new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return targets;
     }
 
 }
