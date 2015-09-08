@@ -53,6 +53,8 @@ GLOBIGNORE='*'
 # SoftwareChange_Request-1992
 ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
 
+ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
