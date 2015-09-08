@@ -1,6 +1,7 @@
 * 2015-09-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 40991: Fixed JMX authentication for all JMX-connecting command-line tools
+ - Fix for bug 40981: Aligned recommendation for creating a SHA hash to recent distribution's packaging changes
 
 * 2015-09-08 - tobias.friedrich@open-xchange.com
 
