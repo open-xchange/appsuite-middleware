@@ -1,3 +1,7 @@
+* 2015-09-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40657: Avoid reset of recurring appointment exceptions on update via CalDAV
+
 * 2015-09-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 40923: Handle possible null reference (requester was no member) when querying for a sign-off message from a group dispatcher
