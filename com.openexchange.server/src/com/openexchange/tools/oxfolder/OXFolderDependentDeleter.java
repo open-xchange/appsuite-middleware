@@ -52,16 +52,12 @@ package com.openexchange.tools.oxfolder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -98,7 +94,6 @@ public class OXFolderDependentDeleter {
 
         deletePublicationsAndSubscriptions(con, context, folder, subfolderIDs);
         deleteObjectPermissions(con, context, folder, subfolderIDs);
-        deleteShares(con, serverSession, folder, subfolderIDs);
     }
 
     /**
@@ -145,29 +140,6 @@ public class OXFolderDependentDeleter {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    private static void deleteShares(Connection con, ServerSession session, FolderObject folder, List<Integer> subfolderIDs) throws OXException {
-        /*
-         * determine share targets
-         */
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        targets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
-        if (null != subfolderIDs && 0 < subfolderIDs.size()) {
-            for (Integer subfolderID : subfolderIDs) {
-                targets.add(new ShareTarget(folder.getModule(), String.valueOf(subfolderID)));
-            }
-        }
-        /*
-         * delete targets via share service
-         */
-        ShareService shareService = ServerServiceRegistry.getServize(ShareService.class, true);
-        session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), con);
-        try {
-            shareService.deleteTargets(session, targets, true);
-        } finally {
-            session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
         }
     }
 

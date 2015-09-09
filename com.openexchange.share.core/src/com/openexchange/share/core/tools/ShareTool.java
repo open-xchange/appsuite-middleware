@@ -69,8 +69,8 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -90,6 +90,11 @@ public class ShareTool {
      * The user attribute key for a link target
      */
     public static final String LINK_TARGET_USER_ATTRIBUTE = "com.openexchange.share.LinkTarget";
+
+    /**
+     * The user attribute key for the expiry date of a link target
+     */
+    public static final String EXPIRY_DATE_USER_ATTRIBUTE = "com.openexchange.share.expiryDate";
 
     /**
      * Extracts the first value of a specific attribute from a user.
@@ -137,15 +142,16 @@ public class ShareTool {
      * @param shares The shares to filter
      * @return The expired shares that were removed from the supplied list, or <code>null</code> if no shares were expired
      */
-    public static List<Share> filterExpiredShares(List<Share> shares) {
-        List<Share> expiredShares = null;
+    public static List<ShareInfo> filterExpiredShares(List<ShareInfo> shares) {
+        List<ShareInfo> expiredShares = null;
         if (null != shares && 0 < shares.size()) {
-            Iterator<Share> iterator = shares.iterator();
+            Iterator<ShareInfo> iterator = shares.iterator();
             while (iterator.hasNext()) {
-                Share share = iterator.next();
-                if (share.isExpired()) {
+                ShareInfo share = iterator.next();
+                Date expiryDate = share.getGuest().getExpiryDate();
+                if (null != expiryDate && expiryDate.before(new Date())) {
                     if (null == expiredShares) {
-                        expiredShares = new ArrayList<Share>();
+                        expiredShares = new ArrayList<ShareInfo>();
                     }
                     iterator.remove();
                     expiredShares.add(share);
@@ -206,13 +212,13 @@ public class ShareTool {
      * @param shares The shares to get the guest users for
      * @return The guest user identifiers in a set
      */
-    public static Set<Integer> getGuestIDs(List<Share> shares) {
+    public static Set<Integer> getGuestIDs(List<ShareInfo> shares) {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptySet();
         }
         Set<Integer> guestIDs = new HashSet<Integer>();
-        for (Share share : shares) {
-            guestIDs.add(Integer.valueOf(share.getGuest()));
+        for (ShareInfo share : shares) {
+            guestIDs.add(Integer.valueOf(share.getGuest().getGuestID()));
         }
         return guestIDs;
     }
@@ -223,18 +229,18 @@ public class ShareTool {
      * @param shares The shares to perform the mapping for
      * @return All different share targets, mapped to the referenced guest user identifiers.
      */
-    public static Map<ShareTarget, Set<Integer>> mapGuestsByTarget(List<Share> shares) {
+    public static Map<ShareTarget, Set<Integer>> mapGuestsByTarget(List<ShareInfo> shares) {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptyMap();
         }
         Map<ShareTarget, Set<Integer>> guestsByTarget = new HashMap<ShareTarget, Set<Integer>>();
-        for (Share share : shares) {
+        for (ShareInfo share : shares) {
             Set<Integer> guestIDs = guestsByTarget.get(share.getTarget());
             if (null == guestIDs) {
                 guestIDs = new HashSet<Integer>();
                 guestsByTarget.put(share.getTarget(), guestIDs);
             }
-            guestIDs.add(Integer.valueOf(share.getGuest()));
+            guestIDs.add(Integer.valueOf(share.getGuest().getGuestID()));
         }
         return guestsByTarget;
     }
@@ -269,9 +275,6 @@ public class ShareTool {
      * @throws OXException
      */
     public static void validateTarget(ShareTarget target) throws OXException {
-        if (0 == target.getOwnedBy()) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No owned by information specified in share target");
-        }
         if (null == target.getItem() && null == target.getFolder()) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No folder or item specified in share target");
         }

@@ -264,7 +264,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                             String item = null != target ? target.getItem() :
                                 null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
                             jLoginResult.putOpt("item", item);
-                            jLoginResult.putOpt("meta", share.getMeta());
                         }
                     };
                     retval.setContext(context);

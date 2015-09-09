@@ -58,7 +58,6 @@ import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -84,28 +83,17 @@ public class UpdateLinkAction extends AbstractDriveAction {
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
-        Date clientTimestamp = shareInfo.getShare().getModified();
         /*
          * update share based on present data in update request
          */
-        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
         try {
-            if (json.has("meta")) {
-                toUpdate.setMeta(json.isNull("meta") ? null : getShareParser().parseMeta(json.getJSONObject("meta")));
-            }
             if (json.has("expiry_date")) {
-                if (json.isNull("expiry_date")) {
-                    toUpdate.setExpiryDate(null);
-                } else {
-                    toUpdate.setExpiryDate(new Date(json.getLong("expiry_date")));
-                }
+                Date newExpiry = json.isNull("expiry_date") ? null : new Date(json.getLong("expiry_date"));
+                getShareService().updateLink(session.getServerSession(), shareInfo.getTarget(), newExpiry);
             }
             if (json.has("password")) {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateShare(session.getServerSession(), toUpdate, newPassword, clientTimestamp);
-            } else {
-                getShareService().updateShare(session.getServerSession(), toUpdate, clientTimestamp);
-
+                getShareService().updateLink(session.getServerSession(), shareInfo.getTarget(), newPassword);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

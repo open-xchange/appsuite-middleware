@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -85,7 +84,6 @@ public class UpdateLinkAction extends AbstractShareAction {
         /*
          * parse parameters & target
          */
-        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
         JSONObject json = (JSONObject) requestData.requireData();
         ShareTarget target = getParser().parseTarget(json);
         /*
@@ -98,24 +96,14 @@ public class UpdateLinkAction extends AbstractShareAction {
         /*
          * update share based on present data in update request
          */
-        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
         try {
-            if (json.has("meta")) {
-                toUpdate.setMeta(json.isNull("meta") ? null : getParser().parseMeta(json.getJSONObject("meta")));
-            }
             if (json.has("expiry_date")) {
-                if (json.isNull("expiry_date")) {
-                    toUpdate.setExpiryDate(null);
-                } else {
-                    toUpdate.setExpiryDate(new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
-                }
+                Date newExpiry = json.isNull("expiry_date") ? null : new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session)));
+                getShareService().updateLink(session, target, newExpiry);
             }
             if (json.has("password")) {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateShare(session, toUpdate, newPassword, clientTimestamp);
-            } else {
-                getShareService().updateShare(session, toUpdate, clientTimestamp);
-
+                getShareService().updateLink(session, target, newPassword);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

@@ -167,7 +167,7 @@ public class ShareUtils {
      * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
      * @return The share
      */
-    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, Date expiryDate) {
+    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target) {
         Date now = new Date();
         Share share = new Share();
         share.setTarget(target);
@@ -176,7 +176,6 @@ public class ShareUtils {
         share.setCreatedBy(sharingUser.getId());
         share.setModifiedBy(sharingUser.getId());
         share.setGuest(guestUserID);
-        share.setExpiryDate(expiryDate);
         return share;
     }
 
@@ -249,6 +248,10 @@ public class ShareUtils {
             guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
         } else {
             guestUser.setPasswordMech("");
+        }
+        if (null != recipient.getExpiryDate()) {
+            String expiryDateValue = String.valueOf(recipient.getExpiryDate().getTime());
+            ShareTool.assignUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
         }
         try {
             ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());

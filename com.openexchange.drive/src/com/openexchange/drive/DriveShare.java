@@ -50,7 +50,6 @@
 package com.openexchange.drive;
 
 import java.util.Date;
-import java.util.Map;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
 
@@ -141,41 +140,6 @@ public class DriveShare extends Share {
     @Override
     public void setModifiedBy(int modifiedBy) {
         delegate.setModifiedBy(modifiedBy);
-    }
-
-    @Override
-    public Date getExpiryDate() {
-        return delegate.getExpiryDate();
-    }
-
-    @Override
-    public void setExpiryDate(Date expiryDate) {
-        delegate.setExpiryDate(expiryDate);
-    }
-
-    @Override
-    public boolean isExpired() {
-        return delegate.isExpired();
-    }
-
-    @Override
-    public boolean containsExpiryDate() {
-        return delegate.containsExpiryDate();
-    }
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return delegate.getMeta();
-    }
-
-    @Override
-    public void setMeta(Map<String, Object> meta) {
-        delegate.setMeta(meta);
-    }
-
-    @Override
-    public boolean containsMeta() {
-        return delegate.containsMeta();
     }
 
     @Override

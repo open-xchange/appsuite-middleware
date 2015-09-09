@@ -195,7 +195,7 @@ public interface DriveService {
      * @param target The target to get the shares for
      * @return The shares, or an empty list if there are none
      */
-    List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException;
+    DriveShareInfo getLink(DriveSession session, DriveShareTarget target) throws OXException;
 
     /**
      * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.

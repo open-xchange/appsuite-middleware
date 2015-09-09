@@ -53,7 +53,6 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
@@ -139,15 +137,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
      */
     protected DriveShareInfo discoverLink(DriveSession session, DriveShareTarget target) throws OXException {
-        List<DriveShareInfo> shares = getDriveService().getShares(session, target);
-        if (null != shares && 0 < shares.size()) {
-            for (DriveShareInfo share : shares) {
-                if (RecipientType.ANONYMOUS.equals(share.getGuest().getRecipientType())) {
-                    return share;
-                }
-            }
-        }
-        return null;
+        return getDriveService().getLink(session, target);
     }
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {

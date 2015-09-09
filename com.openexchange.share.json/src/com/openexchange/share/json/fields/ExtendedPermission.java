@@ -50,7 +50,6 @@
 package com.openexchange.share.json.fields;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +57,6 @@ import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
@@ -144,14 +142,10 @@ public abstract class ExtendedPermission {
             if (null != requestData) {
                 jsonObject.putOpt("share_url", share.getShareURL(requestData.getHostData()));
             }
-            Date expiryDate = share.getShare().getExpiryDate();
+            Date expiryDate = share.getGuest().getExpiryDate();
             if (null != expiryDate) {
                 long time = null != requestData ? addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData)) : expiryDate.getTime();
                 jsonObject.put("expiry_date", time);
-            }
-            Map<String, Object> meta = share.getShare().getMeta();
-            if (null != meta) {
-                jsonObject.put("meta", JSONCoercion.coerceToJSON(meta));
             }
             jsonObject.putOpt("password", share.getGuest().getPassword());
         }

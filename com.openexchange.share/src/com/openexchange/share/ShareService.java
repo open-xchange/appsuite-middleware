@@ -73,7 +73,7 @@ public interface ShareService {
      * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
      * is thrown.
      */
-    GuestShare resolveToken(String token) throws OXException;
+//    GuestShare resolveToken(String token) throws OXException;
 
     /**
      * Resolves the guest associated to the given token.
@@ -151,61 +151,6 @@ public interface ShareService {
     CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
 
     /**
-     * Deletes a list of share targets for all shares that belong to a certain list of guests.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share targets on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
-     * or not, so again it's up to the caller to perform the necessary checks</li>
-     * <li>Shares targeting items located in a folder whose target is deleted are not removed implicitly; this can be achieved via
-     * {@link #deleteTargets(Session, List, List, boolean)}</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param targets The share targets to delete
-     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
-     */
-    void deleteTargets(Session session, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException;
-
-    /**
-     * Deletes a list of share targets for all shares of to any guest user, optionally including item targets in case the parent folder
-     * target is removed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share targets on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
-     * or not, so again it's up to the caller to perform the necessary checks</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param targets The share targets to delete
-     * @param includeItems <code>true</code> to remove item targets upon parent folder target removal, <code>false</code>, otherwise
-     */
-    void deleteTargets(Session session, List<ShareTarget> targets, boolean includeItems) throws OXException;
-
-    /**
-     * Deletes a share.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
-     * of those for the caller</li>
-     * <li>Since the referenced share targets are updated accordingly, depending permissions checks are performed, especially
-     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
-     * permissions are not sufficient</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param share The share to delete
-     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     */
-    void deleteShare(Session session, Share share, Date clientTimestamp) throws OXException;
-
-    /**
      * Updates certain properties of a specific share. This currently includes the expiry date and the arbitrary meta-field.
      * <p/>
      * <b>Remarks:</b>
@@ -222,7 +167,7 @@ public interface ShareService {
      * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
      * @return A share info representing the updated share
      */
-    ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
+//    ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
 
     /**
      * Updates certain properties of a specific "anonymous" share. This currently includes the expiry date and the arbitrary meta-field,
@@ -245,7 +190,31 @@ public interface ShareService {
      * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
      * @return A share info representing the updated share
      */
-    ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException;
+//    ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException;
+
+    void updateLink(Session session, ShareTarget target, String password) throws OXException;
+
+    void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException;
+
+    ShareInfo getLink(Session session, ShareTarget target) throws OXException;
+
+    /**
+     * Deletes a share.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
+     * of those for the caller</li>
+     * <li>Since the referenced share targets are updated accordingly, depending permissions checks are performed, especially
+     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
+     * permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share to delete
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     */
+    void deleteLink(Session session, ShareTarget target, Date clientTimestamp) throws OXException;
 
     /**
      * Gets all shares for a specific target.
@@ -256,7 +225,7 @@ public interface ShareService {
      * @param item The item, or <code>null</code> if not applicable
      * @return The shares, or an empty list if there are none
      */
-    List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException;
+//    List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException;
 
     /**
      * Gets all users that shared something to specified guest.

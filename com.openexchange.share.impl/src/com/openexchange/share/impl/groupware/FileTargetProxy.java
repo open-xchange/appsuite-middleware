@@ -90,11 +90,6 @@ public class FileTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public int getOwner() {
-        return file.getCreatedBy();
-    }
-
-    @Override
     public String getTitle() {
         return file.getTitle();
     }

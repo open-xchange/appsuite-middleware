@@ -90,11 +90,6 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public int getOwner() {
-        return folder.getCreatedBy();
-    }
-
-    @Override
     public String getTitle() {
         String name = folder.getLocalizedName(folder.getUser().getLocale(), true);
         if (name == null) {

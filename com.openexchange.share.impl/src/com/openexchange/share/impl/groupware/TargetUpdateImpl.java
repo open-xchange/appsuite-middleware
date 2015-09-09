@@ -177,8 +177,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 foldersById.put(folder.getID(), new FolderTools.FolderHolder<UserizedFolder>(folder, isPublic));
                 proxies.put(folderTarget, proxy);
             } else {
-                int ownedBy = parameters.getUser().getId();
-                proxies.put(folderTarget, new VirtualTargetProxy(ownedBy, folderTarget));
+                proxies.put(folderTarget, new VirtualTargetProxy(folderTarget));
             }
         }
 

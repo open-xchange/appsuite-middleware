@@ -605,7 +605,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             @Override
             protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
                 access.removeDocument(id.getFolderId(), sequenceNumber);
-                ShareHelper.removeShares(session, access, id.getFolderId());
                 return null;
             }
         };
@@ -638,7 +637,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber, hardDelete);
                     List<IDTuple> deleted = new ArrayList<FileStorageFileAccess.IDTuple>(toDelete);
                     deleted.removeAll(conflicted);
-                    ShareHelper.removeShares(session, access, deleted);
                     return conflicted;
                 }
             }.call(access);
@@ -1006,7 +1004,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
                     List<IDTuple> ids = Collections.singletonList(new IDTuple(id.getFolderId(), id.getFileId()));
                     access.removeDocument(ids, sequenceNumber, true);
-                    ShareHelper.removeShares(session, access, ids);
                     return null;
                 }
             };

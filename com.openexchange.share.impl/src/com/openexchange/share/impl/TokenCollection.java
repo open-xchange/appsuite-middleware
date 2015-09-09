@@ -61,6 +61,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.storage.ShareStorage;
@@ -141,15 +143,16 @@ public class TokenCollection {
      * @return The shares
      * @throws OXException
      */
-    public List<Share> loadShares(StorageParameters parameters) throws OXException {
-        List<Share> shares = new ArrayList<Share>();
+    public List<ShareInfo> loadShares(StorageParameters parameters) throws OXException {
+        List<ShareInfo> shares = new ArrayList<ShareInfo>();
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*
          * gather all shares for guest users with base token only
          */
         for (ShareToken baseToken : baseTokensOnly) {
-            shares.addAll(shareStorage.loadSharesForGuest(contextID, baseToken.getUserID(), parameters));
+            List<ShareTarget> targets = moduleSupport.listTargets(contextID, baseToken.getUserID());
+            shares.addAll(DefaultShareInfo.createShareInfos(services, contextID, baseToken.getUserID(), targets));
         }
         /*
          * pick specific shares for guest users with base tokens and paths

@@ -62,8 +62,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -79,7 +77,6 @@ public class ResolvedGuestShare implements GuestShare {
     protected final DefaultGuestInfo guestInfo;
     protected final ServiceLookup services;
     protected final Date expiryDate;
-    protected final Map<String, Object> meta;
     protected final Map<PersonalizedShareTarget, ShareTarget> targetMap;
 
     /**
@@ -89,37 +86,27 @@ public class ResolvedGuestShare implements GuestShare {
      * @param services A service lookup reference
      * @param contextID The context ID
      * @param guestUser The guest user
-     * @param shares The shares
+     * @param targets The share targets
      * @param personalizedTargets The list of personalized (for the guest user) share targets. Must be in the same order as <code>shares</code>.
      * @throws OXException
      */
-    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, List<PersonalizedShareTarget> personalizedTargets) throws OXException {
+    public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<ShareTarget> targets, List<PersonalizedShareTarget> personalizedTargets) throws OXException {
         super();
         this.services = services;
         if (ShareTool.isAnonymousGuest(guestUser)) {
-            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, shares.get(0).getTarget());
+            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, targets.get(0));
         } else {
             this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
         }
-        if (1 == shares.size()) {
-            expiryDate = shares.get(0).getExpiryDate();
-            meta = shares.get(0).getMeta();
-        } else {
-            expiryDate = null;
-            meta = null;
-        }
-        this.targetMap = new HashMap<>(shares.size() * 2);
+        expiryDate = guestInfo.getExpiryDate();
+        this.targetMap = new HashMap<>(targets.size() * 2);
         services.getService(ModuleSupport.class);
-        Iterator<Share> sit = shares.iterator();
+        Iterator<ShareTarget> sit = targets.iterator();
         Iterator<PersonalizedShareTarget> pit = personalizedTargets.iterator();
         while (sit.hasNext()) {
-            Share share = sit.next();
+            ShareTarget target = sit.next();
             PersonalizedShareTarget personalizedTarget = pit.next();
-            if (share.getGuest() != guestUser.getId()) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
-            }
-
-            targetMap.put(personalizedTarget, share.getTarget());
+            targetMap.put(personalizedTarget, target);
         }
     }
 
@@ -201,11 +188,6 @@ public class ResolvedGuestShare implements GuestShare {
     @Override
     public Date getExpiryDate() {
         return expiryDate;
-    }
-
-    @Override
-    public Map<String, Object> getMeta() {
-        return meta;
     }
 
     @Override

@@ -51,7 +51,6 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@link GuestShare}
@@ -126,12 +125,5 @@ public interface GuestShare {
      * @return The expiry date of the share, or <code>null</code> if not defined
      */
     Date getExpiryDate();
-
-    /**
-     * If defined, gets arbitrary metadata for the share in a map. This is only available for "single" share targets.
-     *
-     * @return The metadata, or <code>null</code> if not defined
-     */
-    Map<String, Object> getMeta();
 
 }

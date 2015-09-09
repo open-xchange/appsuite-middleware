@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 
 
@@ -91,30 +90,6 @@ public class TokenParser {
 //
 //        return new Pair<String, String>(shareToken, targetPath);
 //    }
-
-    /**
-     * Obtains the share identified by the given token from the given {@link ShareService} instance.
-     * This method takes care about general and specific tokens. I.e. if the token has a postfix for
-     * a specific {@link ShareTarget}, the resolve-method is called with the general token.
-     *
-     * @param token The token
-     * @param shareService The {@link ShareService}
-     * @return The guest share, containing all shares the user has access to, or null if no valid share could be looked up
-     * @throws OXException
-     */
-    public static GuestShare resolveShare(String token, ShareService shareService) throws OXException {
-        String shareToken = null;
-        String[] split = token.split("/");
-        if (split.length == 1) {
-            shareToken = token;
-        } else if (split.length == 2) {
-            shareToken = split[0];
-        } else {
-            throw ShareExceptionCodes.INVALID_TOKEN.create(token);
-        }
-
-        return shareService.resolveToken(shareToken);
-    }
 
     /**
      * Gets the list of {@link ShareTarget}s identified by the given token. This method takes care about

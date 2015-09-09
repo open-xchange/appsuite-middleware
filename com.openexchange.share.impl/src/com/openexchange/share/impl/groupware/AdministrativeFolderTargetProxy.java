@@ -97,7 +97,6 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         return Integer.toString(folder.getParentFolderID());
     }
 
-    @Override
     public int getOwner() {
         return folder.getCreatedBy();
     }

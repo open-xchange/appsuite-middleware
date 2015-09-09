@@ -289,7 +289,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(jsonObject, session.getPermissionResolver().getShare(file, permission.getEntity()));
+                    addShareInfo(jsonObject, session.getPermissionResolver().getLink(file, permission.getEntity()));
                 } else {
                     addUserInfo(jsonObject, user);
                 }

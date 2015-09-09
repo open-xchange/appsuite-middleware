@@ -49,13 +49,13 @@
 
 package com.openexchange.share.impl;
 
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -71,7 +71,7 @@ public class InternalUserShareInfo implements ShareInfo {
 
     private final int contextID;
     private final User user;
-    private final Share share;
+    private final ShareTarget target;
     private final PersonalizedShareTarget personalizedTarget;
 
     /**
@@ -79,20 +79,20 @@ public class InternalUserShareInfo implements ShareInfo {
      *
      * @param contextID The context identifier
      * @param user The user
-     * @param share The share
+     * @param target The target
      * @param personalizedTarget The personalized target to generate the share link
      */
-    public InternalUserShareInfo(int contextID, User user, Share share, PersonalizedShareTarget personalizedTarget) {
+    public InternalUserShareInfo(int contextID, User user, ShareTarget target, PersonalizedShareTarget personalizedTarget) {
         super();
         this.contextID = contextID;
         this.user = user;
-        this.share = share;
+        this.target = target;
         this.personalizedTarget = personalizedTarget;
     }
 
     @Override
-    public Share getShare() {
-        return share;
+    public ShareTarget getTarget() {
+        return target;
     }
 
     @Override
@@ -154,6 +154,11 @@ public class InternalUserShareInfo implements ShareInfo {
 
             @Override
             public ShareTarget getLinkTarget() {
+                return null;
+            }
+
+            @Override
+            public Date getExpiryDate() {
                 return null;
             }
         };

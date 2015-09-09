@@ -50,12 +50,10 @@
 package com.openexchange.drive.json.action;
 
 import java.util.Date;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
@@ -100,15 +98,11 @@ public class GetLinkAction extends AbstractDriveAction {
             JSONObject jsonResult = new JSONObject();
             jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
             jsonResult.put("is_new", isNew);
-            Date expiryDate = shareInfo.getShare().getExpiryDate();
+            Date expiryDate = shareInfo.getGuest().getExpiryDate();
             if (null != expiryDate) {
                 jsonResult.put("expiry_date", expiryDate.getTime());
             }
             jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
-            Map<String, Object> meta = shareInfo.getShare().getMeta();
-            if (null != meta) {
-                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
-            }
             return new AJAXRequestResult(jsonResult, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

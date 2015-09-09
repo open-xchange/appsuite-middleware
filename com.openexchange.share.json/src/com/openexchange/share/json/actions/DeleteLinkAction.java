@@ -95,7 +95,7 @@ public class DeleteLinkAction extends AbstractShareAction {
         /*
          * perform the deletion, return empty result in case of success
          */
-        getShareService().deleteShare(session, shareInfo.getShare(), clientTimestamp);
+        getShareService().deleteLink(session, shareInfo.getTarget(), clientTimestamp);
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 

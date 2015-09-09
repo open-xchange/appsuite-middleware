@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -87,6 +88,13 @@ public interface GuestInfo {
      * @return The password of the anonymous share recipient, or <code>null</code> if no password is set or the guest user is not anonymous
      */
     String getPassword();
+
+    /**
+     * Gets the expiry date of the guest user in case the share recipient is anonymous and an expiry date is set for the share.
+     *
+     * @return The expiry date of the anonymous share recipient, or <code>null</code> if no expiry date is set or the guest user is not anonymous
+     */
+    Date getExpiryDate();
 
     /**
      * Gets the recipient type of the guest user.

@@ -336,8 +336,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * prepare new shares for added guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
-                        processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions, transactionManager.getConnection());
+                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions, transactionManager.getConnection());
                     }
                     if (cascadePermissions) {
                         /*
@@ -382,12 +381,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             }
                             throw e;
                         }
-                    }
-                    /*
-                     * delete existing shares for removed guest permissions
-                     */
-                    if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
-                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
                     }
                 } else if (changeSubscription) {
                     /*

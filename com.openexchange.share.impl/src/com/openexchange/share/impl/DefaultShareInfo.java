@@ -49,27 +49,21 @@
 
 package com.openexchange.share.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
-import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.user.UserService;
 
@@ -89,37 +83,70 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param shares The shares
      * @return The share infos
      */
-    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-        if (null == shares || 0 == shares.size()) {
+//    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
+//        if (null == shares || 0 == shares.size()) {
+//            return Collections.emptyList();
+//        }
+//        /*
+//         * retrieve referenced guest users
+//         */
+//        Context context = services.getService(ContextService.class).getContext(contextID);
+//        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
+//        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
+//        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
+//        for (User user : users) {
+//            if (false == user.isGuest()) {
+//                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
+//            }
+//            guestUsers.put(Integer.valueOf(user.getId()), user);
+//        }
+//        /*
+//         * build & return share infos
+//         */
+//        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+//        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
+//        for (Share share : shares) {
+//            User user = guestUsers.get(I(share.getGuest()));
+//            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), contextID, user.getId());
+//            shareInfos.add(new DefaultShareInfo(services, contextID, user, share, personalizedTarget));
+//        }
+//        return shareInfos;
+//    }
+
+    /**
+     * Creates a list of extended share info objects for the supplied shares.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param guestID The guest ID
+     * @param targets The share targets
+     * @return The share infos
+     */
+    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, int guestID, List<ShareTarget> targets) throws OXException {
+        if (null == targets || 0 == targets.size()) {
             return Collections.emptyList();
         }
         /*
          * retrieve referenced guest users
          */
         Context context = services.getService(ContextService.class).getContext(contextID);
-        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
-        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
-        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
-        for (User user : users) {
-            if (false == user.isGuest()) {
-                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
-            }
-            guestUsers.put(Integer.valueOf(user.getId()), user);
+        User user = services.getService(UserService.class).getUser(guestID, context);
+        if (false == user.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(Autoboxing.I(user.getId()));
         }
         /*
          * build & return share infos
          */
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
-        for (Share share : shares) {
-            User user = guestUsers.get(I(share.getGuest()));
-            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), contextID, user.getId());
-            shareInfos.add(new DefaultShareInfo(services, contextID, user, share, personalizedTarget));
+        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(targets.size());
+        for (ShareTarget target : targets) {
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, contextID, user.getId());
+            shareInfos.add(new DefaultShareInfo(services, contextID, user, target, personalizedTarget));
         }
         return shareInfos;
     }
 
-    private final Share share;
+    private final ShareTarget target;
     private final PersonalizedShareTarget personalizedTarget;
 
     /**
@@ -128,18 +155,18 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param services A service lookup reference
      * @param contextID The context ID
      * @param guestUser The guest user
-     * @param share The share
+     * @param target The target
      * @throws OXException
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share, PersonalizedShareTarget personalizedTarget) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share), Collections.singletonList(personalizedTarget));
-        this.share = share;
+    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget target, PersonalizedShareTarget personalizedTarget) throws OXException {
+        super(services, contextID, guestUser, Collections.singletonList(target), Collections.singletonList(personalizedTarget));
+        this.target = target;
         this.personalizedTarget = personalizedTarget;
     }
 
     @Override
-    public Share getShare() {
-        return share;
+    public ShareTarget getTarget() {
+        return target;
     }
 
     @Override

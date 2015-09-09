@@ -64,7 +64,7 @@ public interface ShareInfo {
      *
      * @return The share
      */
-    Share getShare();
+    ShareTarget getTarget();
 
     /**
      * Gets additional information about the guest user the share is associated with.

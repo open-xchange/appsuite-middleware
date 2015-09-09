@@ -57,10 +57,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONInputStream;
 import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -251,23 +248,20 @@ public class ShareMapper extends DefaultDbMapper<RdbShare, ShareField> {
 
             @Override
             public void set(RdbShare share, Long value) {
-                share.getShare().setExpiryDate(new Date(value));
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return share.getShare().containsExpiryDate();
+                return false;
             }
 
             @Override
             public Long get(RdbShare share) {
-                Date expiryDate = share.getShare().getExpiryDate();
-                return null == expiryDate ? null : Long.valueOf(expiryDate.getTime());
+                return null;
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.getShare().setExpiryDate(null);
             }
         });
         mappings.put(ShareField.CREATED, new BigIntMapping<RdbShare>("created", "Creation date") {
@@ -378,41 +372,25 @@ public class ShareMapper extends DefaultDbMapper<RdbShare, ShareField> {
 
             @Override
             public void set(PreparedStatement statement, int parameterIndex, RdbShare share) throws SQLException {
-                if (isSet(share)) {
-                    Object coerced;
-                    try {
-                        coerced = JSONCoercion.coerceToJSON(share.getShare().getMeta());
-                    } catch (JSONException e) {
-                        throw new SQLException(e);
-                    }
-                    if (null == coerced || JSONObject.NULL.equals(coerced)) {
-                        statement.setNull(parameterIndex, getSqlType());
-                    } else {
-                        statement.setBinaryStream(parameterIndex, new JSONInputStream((JSONValue) coerced, "US-ASCII"));
-                    }
-                } else {
-                    statement.setNull(parameterIndex, getSqlType());
-                }
+                statement.setNull(parameterIndex, getSqlType());
             }
 
             @Override
             public boolean isSet(RdbShare share) {
-                return share.getShare().containsMeta();
+                return false;
             }
 
             @Override
             public void set(RdbShare share, Map<String, Object> value) throws OXException {
-                share.getShare().setMeta(value);
             }
 
             @Override
             public Map<String, Object> get(RdbShare share) {
-                return share.getShare().getMeta();
+                return null;
             }
 
             @Override
             public void remove(RdbShare share) {
-                share.getShare().setMeta(null);
             }
         });
 

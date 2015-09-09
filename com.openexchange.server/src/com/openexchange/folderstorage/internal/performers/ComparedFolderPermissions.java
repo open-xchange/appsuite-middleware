@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -237,6 +238,11 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
 
         @Override
         public ShareTarget getLinkTarget() {
+            return null;
+        }
+
+        @Override
+        public Date getExpiryDate() {
             return null;
         }
     };

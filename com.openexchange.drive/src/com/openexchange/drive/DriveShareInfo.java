@@ -60,11 +60,11 @@ import com.openexchange.share.ShareInfo;
 public interface DriveShareInfo extends ShareInfo {
 
     /**
-     * Gets the underlying share.
+     * Gets the underlying share target.
      *
-     * @return The share
+     * @return The share target
      */
     @Override
-    DriveShare getShare();
+    DriveShareTarget getTarget();
 
 }

@@ -105,7 +105,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getShare(file, permission.getEntity()));
+                    addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
                 } else {
                     addUserInfo(requestData, jsonObject, user);
                 }

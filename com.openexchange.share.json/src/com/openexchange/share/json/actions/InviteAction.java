@@ -50,6 +50,7 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -109,7 +110,7 @@ public class InviteAction extends AbstractShareAction {
              */
             JSONObject jsonResult = new JSONObject();
             jsonResult.put("entity", shareInfo.getGuest().getGuestID());
-            AJAXRequestResult result = new AJAXRequestResult(jsonResult, shareInfo.getShare().getModified(), "json");
+            AJAXRequestResult result = new AJAXRequestResult(jsonResult, new Date(), "json");
             result.addWarnings(warnings);
             return result;
         } catch (JSONException e) {

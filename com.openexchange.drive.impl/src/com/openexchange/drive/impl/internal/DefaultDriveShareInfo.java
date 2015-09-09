@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.impl.internal;
 
-import com.openexchange.drive.DriveShare;
 import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -64,12 +63,12 @@ import com.openexchange.share.ShareInfo;
 public class DefaultDriveShareInfo implements DriveShareInfo {
 
     private final ShareInfo shareInfo;
-    private final DriveShare driveShare;
+    private final DriveShareTarget driveTarget;
 
     public DefaultDriveShareInfo(ShareInfo shareInfo, DriveShareTarget driveTarget) {
         super();
         this.shareInfo = shareInfo;
-        this.driveShare = new DriveShare(shareInfo.getShare(), driveTarget);
+        this.driveTarget = driveTarget;
     }
 
     @Override
@@ -83,8 +82,8 @@ public class DefaultDriveShareInfo implements DriveShareInfo {
     }
 
     @Override
-    public DriveShare getShare() {
-        return driveShare;
+    public DriveShareTarget getTarget() {
+        return driveTarget;
     }
 
 }

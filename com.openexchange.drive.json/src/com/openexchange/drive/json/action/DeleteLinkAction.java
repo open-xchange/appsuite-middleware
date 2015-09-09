@@ -80,11 +80,10 @@ public class DeleteLinkAction extends AbstractDriveAction {
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
-        Date clientTimestamp = shareInfo.getShare().getModified();
         /*
          * perform the deletion, return empty result in case of success
          */
-        getShareService().deleteShare(session.getServerSession(), shareInfo.getShare(), clientTimestamp);
+        getShareService().deleteLink(session.getServerSession(), shareInfo.getTarget(), new Date());
         return new AJAXRequestResult(new JSONObject(), "json");
     }
 

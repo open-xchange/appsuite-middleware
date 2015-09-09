@@ -50,12 +50,10 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
@@ -128,19 +126,16 @@ public class GetLinkAction extends AbstractShareAction {
             jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
             jsonResult.put("entity", shareInfo.getGuest().getGuestID());
             jsonResult.put("is_new", isNew);
-            Date expiryDate = shareInfo.getShare().getExpiryDate();
+            Date expiryDate = shareInfo.getGuest().getExpiryDate();
             if (null != expiryDate) {
                 jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
             }
             jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
-            Map<String, Object> meta = shareInfo.getShare().getMeta();
-            if (null != meta) {
-                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
-            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        return new AJAXRequestResult(jsonResult, shareInfo.getShare().getModified(), "json");
+        //TODO: client timestamp?
+        return new AJAXRequestResult(jsonResult, new Date(), "json");
     }
 
 }

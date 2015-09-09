@@ -64,7 +64,6 @@ public class ShareTarget implements Cloneable, Serializable {
     private int module;
     private String folder;
     private String item;
-    private int ownedBy;
 
     /**
      * Initializes a new, empty {@link ShareTarget}.
@@ -104,7 +103,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public ShareTarget(ShareTarget target) {
         this(target.getModule(), target.getFolder(), target.getItem());
-        this.ownedBy = target.getOwnedBy();
     }
 
     /**
@@ -168,26 +166,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setItem(String item) {
         this.item = item;
-    }
-
-    /**
-     * Gets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
-     * shared folder or item, but not necessarily the user who shared the target itself.
-     *
-     * @return The identifier of the user considered as the owner of the share target
-     */
-    public int getOwnedBy() {
-        return ownedBy;
-    }
-
-    /**
-     * Sets the identifier of the user that is considered as the owner of the share target, which is usually the user who created the
-     * shared folder or item, but not necessarily the user who shared the target itself.
-     *
-     * @param ownedBy The identifier of the user considered as the owner of the share target
-     */
-    public void setOwnedBy(int ownedBy) {
-        this.ownedBy = ownedBy;
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.share.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
-import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -64,7 +63,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -185,15 +183,7 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
      */
     protected ShareInfo discoverLink(ServerSession session, ShareTarget target) throws OXException {
-        List<ShareInfo> shares = getShareService().getShares(session, moduleFor(target), target.getFolder(), target.getItem());
-        if (null != shares && 0 < shares.size()) {
-            for (ShareInfo share : shares) {
-                if (RecipientType.ANONYMOUS.equals(share.getGuest().getRecipientType())) {
-                    return share;
-                }
-            }
-        }
-        return null;
+        return getShareService().getLink(session, target);
     }
 
 }

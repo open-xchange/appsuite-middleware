@@ -78,13 +78,6 @@ public interface TargetProxy {
     String getFolderID();
 
     /**
-     * Gets the owner of this folder or item.
-     *
-     * @return The entity ID of the owner (i.e. a user or group ID)
-     */
-    int getOwner();
-
-    /**
      * Gets the title of this folder or item.
      *
      * @return The title (e.g. a folder or file name)
