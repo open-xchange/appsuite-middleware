@@ -172,10 +172,23 @@ public interface ModuleSupport {
      */
     boolean exists(ShareTarget target, Session session) throws OXException;
 
+    /**
+     * Gets a list of all share targets a specific guest user has access to.
+     *
+     * @param contextID The context identifier
+     * @param guestID The identifier of the guest user
+     * @return The share targets, or an empty list if there are none
+     */
+    List<ShareTarget> listTargets(int contextID, int guestID) throws OXException;
 
-//    List<ShareTarget> listTargets(Session session, int module) throws OXException;
-
-
-    List<ShareTarget> listTargets(int contextID, int userID, int module) throws OXException;
+    /**
+     * Gets a list of all share targets of a certain module a specific guest user has access to.
+     *
+     * @param contextID The context identifier
+     * @param guestID The identifier of the guest user
+     * @param module The share module identifier
+     * @return The share targets, or an empty list if there are none
+     */
+    List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException;
 
 }
