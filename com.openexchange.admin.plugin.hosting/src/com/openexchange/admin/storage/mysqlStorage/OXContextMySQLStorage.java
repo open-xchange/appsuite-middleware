@@ -473,7 +473,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXContextStorageInterface#enableAll()
      */
     @Override
@@ -1074,6 +1074,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (!OXToolStorageInterface.getInstance().existsStore(i(storeId))) {
                 throw new StorageException("Filestore with identifier " + storeId + " does not exist.");
             }
+        }
+
+        // Load it to ensure validity
+        OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+        try {
+            URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(storeId)));
+            FileStorages.getFileStorageService().getFileStorage(uri);
+        } catch (OXException e) {
+            throw new StorageException(e.getMessage(), e);
         }
 
         final Connection configCon;

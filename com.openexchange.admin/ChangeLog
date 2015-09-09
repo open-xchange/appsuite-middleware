@@ -1,3 +1,7 @@
+* 2015-09-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 41015: Ensure file storage validity prior to creating entities or changing an entity's file storage assignment
+
 * 2015-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 38882: Added missing options to CSV import
