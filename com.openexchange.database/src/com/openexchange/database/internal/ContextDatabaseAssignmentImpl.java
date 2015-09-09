@@ -220,10 +220,14 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 if (update) {
                     myCache.remove(key);
                 }
+                AssignmentImpl cacheValue = new AssignmentImpl(assign);
                 try {
-                    myCache.putSafe(key, new AssignmentImpl(assign));
+                    myCache.putSafe(key, cacheValue);
                 } catch (OXException e) {
-                    LOG.error("Cannot put database assignment into cache.", e);
+                    // Already present...
+                    LOG.debug("Cannot put database assignment into cache.", e);
+                    myCache.remove(key);
+                    myCache.putSafe(key, cacheValue);
                 }
             } finally {
                 cacheLock.unlock();
