@@ -704,7 +704,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final Long store_size = fstore.getSize();
             if (null != store_size && fstore.getSize() != -1) {
                 final Long l_max = MAX_FILESTORE_CAPACITY;
-                if (store_size.doubleValue() > l_max.longValue()) {
+                if (store_size.longValue() > l_max.longValue()) {
                     throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
                 }
                 long store_size_double = store_size.longValue();
