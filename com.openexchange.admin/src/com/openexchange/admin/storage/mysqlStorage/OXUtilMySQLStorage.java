@@ -710,7 +710,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 long store_size_double = store_size.longValue();
                 store_size_double = store_size_double << 20;
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET size = ? WHERE id = ?");
-                prep.setLong(1, Math.round(store_size_double));
+                prep.setLong(1, store_size_double);
                 prep.setInt(2, id);
                 prep.executeUpdate();
                 prep.close();

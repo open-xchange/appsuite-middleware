@@ -1,6 +1,7 @@
 * 2015-09-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 41005: Also check presence of "check" parameter in specified options mapping
+ - Fix for bug 41013: Pass proper long value to database
 
 * 2015-09-08 - thorben.betten@open-xchange.com
 
