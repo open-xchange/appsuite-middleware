@@ -955,14 +955,8 @@ public class DefaultShareService implements ShareService {
         return guestUser;
     }
 
-    /**
-     * Schedules guest cleanup tasks in a context.
-     *
-     * @param contextID The context ID
-     * @param guestIDs The guest IDs to consider, or <code>null</code> to cleanup all guest users in the context
-     * @throws OXException
-     */
-    private void scheduleGuestCleanup(int contextID, int[] guestIDs) throws OXException {
+    @Override
+    public void scheduleGuestCleanup(int contextID, int...guestIDs) throws OXException {
         if (null == guestIDs) {
             guestCleaner.scheduleContextCleanup(contextID);
         } else {

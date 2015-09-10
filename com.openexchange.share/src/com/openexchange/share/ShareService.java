@@ -169,4 +169,12 @@ public interface ShareService {
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
+    /**
+     * Schedules guest cleanup tasks in a context.
+     *
+     * @param contextID The context ID
+     * @param guestIDs The guest IDs to consider, or <code>null</code> to cleanup all guest users in the context
+     */
+    void scheduleGuestCleanup(int contextID, int...guestIDs) throws OXException;
+
 }
