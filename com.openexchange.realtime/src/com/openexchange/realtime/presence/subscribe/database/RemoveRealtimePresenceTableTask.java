@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.realtime.presence.subscribe.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
