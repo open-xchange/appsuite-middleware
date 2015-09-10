@@ -82,6 +82,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
@@ -141,7 +142,7 @@ public class ICalHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    protected boolean handles(GuestInfo guest, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return null != target &&
             (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
             (acceptsICal(request) || indicatesICalClient(request));
@@ -328,7 +329,7 @@ public class ICalHandler extends HttpAuthShareHandler {
             }
             return name;
         } catch (OXException e) {
-            LOG.warn("Error extracting name for share {}", share.getShare(), e);
+            LOG.warn("Error extracting name for share {}", share, e);
             return null;
         }
     }

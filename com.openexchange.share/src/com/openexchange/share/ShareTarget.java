@@ -50,6 +50,11 @@
 package com.openexchange.share;
 
 import java.io.Serializable;
+import java.util.Iterator;
+import java.util.List;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ShareTarget}
@@ -166,6 +171,57 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setItem(String item) {
         this.item = item;
+    }
+
+    public String getPath() {
+        StringBuilder sb = new StringBuilder(64).append("/1/");
+        sb.append(getModule()).append('/');
+        sb.append(BaseEncoding.base64Url().omitPadding().encode(getFolder().getBytes(Charsets.UTF_8))).append('/');
+        if (getItem() != null) {
+            sb.append(BaseEncoding.base64Url().omitPadding().encode(getItem().getBytes(Charsets.UTF_8))).append('/');
+        }
+        return sb.toString();
+    }
+
+    public static ShareTarget fromPath(String path) {
+        List<String> segments = Strings.splitAndTrim(path, "/");
+        try {
+            Iterator<String> it = segments.iterator();
+            it.next(); // skip version
+            int module = Integer.parseInt(it.next());
+            String folder = it.next();
+            String item = null;
+            if (it.hasNext()) {
+                item = it.next();
+            }
+            if (!it.hasNext()) {
+                return new ShareTarget(module, folder, item);
+            }
+        } catch (Exception e) {
+
+        }
+
+        return null;
+    }
+
+    public static ShareTarget fromPathSegments(List<String> segments) {
+        try {
+            Iterator<String> it = segments.iterator();
+            it.next(); // skip version
+            int module = Integer.parseInt(it.next());
+            String folder = it.next();
+            String item = null;
+            if (it.hasNext()) {
+                item = it.next();
+            }
+            if (!it.hasNext()) {
+                return new ShareTarget(module, folder, item);
+            }
+        } catch (Exception e) {
+
+        }
+
+        return null;
     }
 
     @Override

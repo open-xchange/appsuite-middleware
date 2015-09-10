@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -57,10 +58,10 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.ShareHandler;
@@ -101,7 +102,6 @@ public class ShareServlet extends AbstractShareServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         Translator translator = Translator.EMPTY;
-        GuestShare share = null;
         try {
             TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
             translator = translatorFactory.translatorFor(determineLocale(request, null));
@@ -109,31 +109,47 @@ public class ShareServlet extends AbstractShareServlet {
             request.getSession(true);
 
             // Extract share from path info
-            PersonalizedShareTarget target = null;
+            String pathInfo = request.getPathInfo();
+            if (pathInfo == null) {
+                sendNotFound(response, translator);
+                return;
+            }
+
+            List<String> paths = ShareServletUtils.splitPath(pathInfo);
+            if (paths.isEmpty()) {
+                LOG.debug("No share found at '{}'", pathInfo);
+                sendNotFound(response, translator);
+                return;
+            }
+
+            GuestInfo guest = ShareServiceLookup.getService(ShareService.class, true).resolveGuest(paths.get(0));
+            if (guest == null) {
+//                    LOG.debug("No guest with token '{}' found at '{}'", paths[0], pathInfo); TODO
+                sendNotFound(response, translator);
+                return;
+            }
+
+//            LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share); TODO
+            // Switch language for errors if appropriate
+            translator = translatorFactory.translatorFor(determineLocale(request, guest));
+
+            ShareTarget target = null;
             boolean invalidTarget = false;
-            {
-                String pathInfo = request.getPathInfo();
-                String[] paths = ShareServletUtils.splitPath(pathInfo);
-                if (paths == null || paths.length == 0) {
-                    LOG.debug("No share found at '{}'", pathInfo);
-                    sendNotFound(response, translator);
-                    return;
-                }
-                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
-                if (null == share) {
-                    LOG.debug("No share with token '{}' found at '{}'", paths[0], pathInfo);
-                    sendNotFound(response, translator);
-                    return;
-                }
-
-                // Switch language for errors if appropriate
-                translator = translatorFactory.translatorFor(determineLocale(request, share.getGuest()));
-
-                LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
-                if (1 < paths.length) {
-                    target = share.resolvePersonalizedTarget(paths[1]);
-                    if (target == null) {
+            if (paths.size() > 1) {
+                target = ShareTarget.fromPathSegments(paths.subList(1, paths.size()));
+                if (target == null) {
+                    invalidTarget = true;
+                } else {
+                    ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
+                    if (!moduleSupport.exists(target, guest.getContextID(), guest.getGuestID()) || !moduleSupport.isVisible(target, guest.getContextID(), guest.getGuestID())) {
                         invalidTarget = true;
+                        List<ShareTarget> otherTargets = moduleSupport.listTargets(guest.getContextID(), guest.getGuestID());
+                        if (otherTargets.isEmpty()) {
+                            sendNotFound(response, translator);
+                            return;
+                        }
+
+                        target = otherTargets.iterator().next();
                     }
                 }
             }
@@ -141,7 +157,7 @@ public class ShareServlet extends AbstractShareServlet {
             /*
              * Determine appropriate ShareHandler and handle the share
              */
-            if (false == handle(share, target, invalidTarget, request, response)) {
+            if (false == handle(guest, target, invalidTarget, request, response)) {
                 // No appropriate ShareHandler available
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
@@ -164,7 +180,7 @@ public class ShareServlet extends AbstractShareServlet {
     /**
      * Passes the resolved share to the most appropriate handler and lets him serve the request.
      *
-     * @param share The guest share
+     * @param guest The guest info
      * @param target The share target within the share, or <code>null</code> if not addressed
      * @param invalidTarget <code>true</code> if the target is <code>null</code> because the requested one
      * isn't existing or accessible.
@@ -172,9 +188,9 @@ public class ShareServlet extends AbstractShareServlet {
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
      */
-    private boolean handle(GuestShare share, PersonalizedShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private boolean handle(GuestInfo guest, ShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-            ShareHandlerReply reply = handler.handle(share, target, invalidTarget, request, response);
+            ShareHandlerReply reply = handler.handle(guest, target, invalidTarget, request, response);
             if (ShareHandlerReply.NEUTRAL != reply) {
                 return true;
             }

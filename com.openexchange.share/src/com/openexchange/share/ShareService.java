@@ -68,7 +68,7 @@ public interface ShareService {
      * Resolves the guest associated to the given token.
      *
      * @param token - the token the GuestInfo should be resolved for
-     * @return GuestInfo with information about the guest associated to the token
+     * @return GuestInfo with information about the guest associated to the token or <code>null</code> if no guest user exists for the token
      * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
      * is thrown.
      */

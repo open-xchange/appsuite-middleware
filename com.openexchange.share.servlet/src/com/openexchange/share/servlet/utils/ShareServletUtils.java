@@ -77,7 +77,6 @@ import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -117,15 +116,15 @@ public final class ShareServletUtils {
         return config;
     }
 
-    public static boolean createSessionAndRedirect(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
+    public static boolean createSessionAndRedirect(GuestInfo guest, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
         Session session = null;
         try {
             /*
              * get, authenticate and login as associated guest user
              */
             ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
-            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), loginMethod);
+            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(guest);
+            LoginResult loginResult = ShareServletUtils.login(guest, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), loginMethod);
             if (null == loginResult) {
                 return false;
             }
@@ -137,7 +136,7 @@ public final class ShareServletUtils {
             LoginServlet.addHeadersAndCookies(loginResult, response);
             response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
             if (loginConfig.isSessiondAutoLogin()) {
-                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
             }
             /*
              * set public session cookie if not yet present
@@ -153,8 +152,8 @@ public final class ShareServletUtils {
             /*
              * construct & send redirect
              */
-            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, target, loginConfig);
-            LOG.debug("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), target, loginConfig);
+            LOG.debug("Redirecting share {} to {}...", guest.getBaseToken(), url);
             response.sendRedirect(url);
             return true;
         } catch (IOException e) {
@@ -167,7 +166,7 @@ public final class ShareServletUtils {
     /**
      * Authenticates the request to the share and performs a guest login.
      *
-     * @param share The share
+     * @param guest The guest info
      * @param request The request
      * @param response The response
      * @param loginConfig The login configuration to use
@@ -175,11 +174,10 @@ public final class ShareServletUtils {
      * @param loginMethod The login method to use
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException, IOException {
+    public static LoginResult login(GuestInfo guest, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException, IOException {
         /*
          * try guest auto-login at this stage if enabled
          */
-        GuestInfo guest = share.getGuest();
         LoginResult loginResult = AutoLoginTools.tryGuestAutologin(guest, loginConfig, request, response);
         if (null != loginResult) {
             LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
@@ -254,7 +252,7 @@ public final class ShareServletUtils {
      * @param pathInfo The path info to split
      * @return The splitted path
      */
-    public static String[] splitPath(String pathInfo) {
+    public static List<String> splitPath(String pathInfo) {
         List<String> paths = Strings.splitAndTrim(pathInfo, "/");
         Iterator<String> iterator = paths.iterator();
         while (iterator.hasNext()) {
@@ -262,7 +260,7 @@ public final class ShareServletUtils {
                 iterator.remove();
             }
         }
-        return paths.toArray(new String[paths.size()]);
+        return paths;
     }
 
 }

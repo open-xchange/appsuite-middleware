@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
@@ -165,10 +166,14 @@ public class ResolvedGuestShare implements GuestShare {
 
     @Override
     public PersonalizedShareTarget resolvePersonalizedTarget(String path) {
+        if (path == null) {
+            return null;
+        }
+
         if (null != targetMap && 0 < targetMap.size() && null != path) {
-            for (PersonalizedShareTarget target : targetMap.keySet()) {
-                if (path.equals(target.getPath())) {
-                    return target;
+            for (Entry<PersonalizedShareTarget, ShareTarget> entry : targetMap.entrySet()) {
+                if (path.equals(entry.getValue().getPath())) {
+                    return entry.getKey();
                 }
             }
         }

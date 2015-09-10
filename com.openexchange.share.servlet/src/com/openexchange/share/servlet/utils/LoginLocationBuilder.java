@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.java.Charsets;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.encoding.URLCoder;
 
 /**
@@ -110,7 +110,7 @@ public class LoginLocationBuilder {
      * @param target The share target to append, or <code>null</code> if not specified
      * @return The builder
      */
-    public LoginLocationBuilder target(PersonalizedShareTarget target) {
+    public LoginLocationBuilder target(ShareTarget target) {
         return null != target ? parameter("target", target.getPath()) : this;
     }
 

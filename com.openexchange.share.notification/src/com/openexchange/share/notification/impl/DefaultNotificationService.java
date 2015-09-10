@@ -75,7 +75,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -193,7 +192,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getShareTarget(), context.getContextId(), user.getId());
                 String shareUrl;
                 if (user.isGuest()) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), share.getShareTarget());
                 } else {
                     shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
                 }
@@ -261,21 +260,20 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, HostData hostData) throws OXException {
+    public void sendPasswordResetConfirmationNotification(Transport transport, GuestInfo guestInfo, String confirmToken, HostData hostData) throws OXException {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
 
         try {
             UserService userService = serviceLookup.getService(UserService.class);
-            GuestInfo guestInfo = guestShare.getGuest();
             String mailAddress = guestInfo.getEmailAddress();
             String displayName = guestInfo.getDisplayName();
             if (null == displayName) {
                 displayName = mailAddress;
             }
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-            String baseToken = guestShare.getGuest().getBaseToken();
+            String baseToken = guestInfo.getBaseToken();
 
             ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
                 .setTransportInfo(new QuotedInternetAddress(mailAddress, displayName, "UTF-8"))
@@ -427,7 +425,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 boolean isGuest = user.isGuest();
                 PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, context.getContextId(), user.getId());
                 if (isGuest) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), target);
                 } else {
                     shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
                 }

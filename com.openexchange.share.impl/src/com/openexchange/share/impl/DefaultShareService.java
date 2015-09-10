@@ -396,7 +396,7 @@ public class DefaultShareService implements ShareService {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(targets.size());
         for (ShareTarget target : targets) {
             PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, contextID, guest.getGuestID());
-            if (null == path || path.equals(personalizedTarget.getPath())) {
+            if (null == path || path.equals(target.getPath())) {
                 shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), target, personalizedTarget));
             }
         }

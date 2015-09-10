@@ -56,7 +56,6 @@ import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -136,8 +135,7 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
             GuestInfo guest = info.getGuest();
             int contextID = guest.getContextID();
             int guestID = guest.getGuestID();
-            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(info.getTarget(), contextID, guestID);
-            sb.append("Token: ").append(guest.getBaseToken() + '/' + personalizedTarget.getPath()).append(" ("); // TODO: don't generate token here
+            sb.append("Token: ").append(guest.getBaseToken() + '/' + info.getTarget().getPath()).append(" ("); // TODO: don't generate token here
             ShareTarget target = info.getTarget();
             sb.append("Share [guest created by ").append(guest.getCreatedBy()).append(" in context ").append(contextID).append(", guest=").append(guestID)
               .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())

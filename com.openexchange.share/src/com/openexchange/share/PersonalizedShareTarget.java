@@ -87,14 +87,14 @@ public class PersonalizedShareTarget {
         return item;
     }
 
-    /**
-     * Gets the relative path of this target to address it uniquely within an underlying share.
-     *
-     * @return The share-relative path to the target
-     */
-    public String getPath() {
-        return String.format("%08x", Integer.valueOf(hashCode()));
-    }
+//    /**
+//     * Gets the relative path of this target to address it uniquely within an underlying share.
+//     *
+//     * @return The share-relative path to the target
+//     */
+//    public String getPath() {
+//        return String.format("%08x", Integer.valueOf(hashCode()));
+//    }
 
     @Override
     public int hashCode() {

@@ -55,7 +55,6 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -84,36 +83,27 @@ public class ShareRedirectUtils {
      *
      * @param session The session
      * @param user The user
-     * @param share The share
      * @param target The personalized share target within the share, or <code>null</code> if not addressed
      * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    public static String getWebSessionRedirectURL(Session session, User user, GuestShare share, PersonalizedShareTarget target, LoginConfiguration loginConfig) {
+    public static String getWebSessionRedirectURL(Session session, User user, PersonalizedShareTarget target, LoginConfiguration loginConfig) {
         /*
          * evaluate link destination based on share or target
          */
-        int module;
-        String folder;
-        String item;
+        int module = -1;
+        String folder = null;
+        String item = null;
         if (null != target) {
             module = target.getModule();
             folder = target.getFolder();
             item = target.getItem();
-        } else if (share.isMultiTarget()) {
-            module = share.getCommonModule();
-            folder = share.getCommonFolder();
-            item = null;
-        } else {
-            module = share.getSingleTarget().getModule();
-            folder = share.getSingleTarget().getFolder();
-            item = share.getSingleTarget().getItem();
         }
         /*
          * prepare url, appending placeholders for link destination parameters
          */
         StringBuilder stringBuilder = new StringBuilder("[uiwebpath]#!&session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
-        if (0 != module) {
+        if (module > 0) {
             stringBuilder.append("&m=[module]");
         }
         if (null != folder) {
@@ -132,7 +122,7 @@ public class ShareRedirectUtils {
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
         redirectLink = P_CONTEXT_ID.matcher(redirectLink).replaceAll(String.valueOf(session.getContextId()));
         redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
-        if (0 != module) {
+        if (module > 0) {
             String name = ShareServiceLookup.getService(ModuleSupport.class).getShareModule(module);
             redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
         }

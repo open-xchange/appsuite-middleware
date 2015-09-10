@@ -79,7 +79,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
@@ -92,10 +91,11 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -155,22 +155,34 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             throw ServiceExceptionCode.absentService(ShareService.class);
         }
 
-        // Get the share
-        final GuestShare share = shareService.resolveToken(token);
-        if (null == share) {
+        // Get the guest
+        final GuestInfo guest = shareService.resolveGuest(token);
+        if (null == guest) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-        String targetPath = httpRequest.getParameter("target");
-        final PersonalizedShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolvePersonalizedTarget(targetPath);
 
-        final LoginConfiguration conf = this.conf.getLoginConfig(share);
+        ModuleSupport moduleSupport = ServerServiceRegistry.getInstance().getService(ModuleSupport.class);
+        String targetPath = httpRequest.getParameter("target");
+        final PersonalizedShareTarget target;
+        if (targetPath == null) {
+            target = null;
+        } else {
+            ShareTarget shareTarget = ShareTarget.fromPath(targetPath);
+            if (shareTarget == null) {
+                target = null;
+            } else {
+                target = moduleSupport.personalizeTarget(shareTarget, guest.getContextID(), guest.getGuestID());
+            }
+        }
+
+        final LoginConfiguration conf = this.conf.getLoginConfig(guest);
         LoginClosure loginClosure = new LoginClosure() {
 
             @Override
             public LoginResult doLogin(final HttpServletRequest req) throws OXException {
                 try {
                     // Check for matching authentication mode
-                    if (false == checkAuthenticationMode(share.getGuest().getAuthentication())) {
+                    if (false == checkAuthenticationMode(guest.getAuthentication())) {
                         throw INVALID_CREDENTIALS.create();
                     }
 
@@ -180,7 +192,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     }
 
                     // Get the login info from HTTP request
-                    LoginInfo loginInfo = getLoginInfoFrom(share, httpRequest);
+                    LoginInfo loginInfo = getLoginInfoFrom(httpRequest);
 
                     // Resolve context
                     Context context;
@@ -190,14 +202,14 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                             throw ServiceExceptionCode.absentService(ContextService.class);
                         }
 
-                        context = contextService.getContext(share.getGuest().getContextID());
+                        context = contextService.getContext(guest.getContextID());
                     }
 
                     // Resolve & authenticate user
-                    User user = authenticateUser(share, loginInfo, context);
+                    User user = authenticateUser(guest, loginInfo, context);
 
                     // Pass to basic authentication service in case more handling needed
-                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest().getGuestID(), share.getGuest().getContextID());
+                    Authenticated  authenticated = basicService.handleLoginInfo(guest.getGuestID(), guest.getContextID());
                     if (null == authenticated) {
                         return null;
                     }
@@ -250,8 +262,19 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
 
                         @Override
                         protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                            int module = null != target ? target.getModule() : share.getCommonModule();
-                            if (0 != module) {
+                            int module = -1;
+                            String folder = null;
+                            String item = null;
+                            if (target == null) {
+                                // FIXME
+                                module = 8;
+                                folder = "10";
+                            } else {
+                                module = target.getModule();
+                                folder = target.getFolder();
+                                item = target.getItem();
+                            }
+                            if (module > 0) {
                                 String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(module);
                                 if ("infostore".equals(folderModule)) {
                                     //TODO: check
@@ -259,10 +282,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                                 }
                                 jLoginResult.put("module", folderModule);
                             }
-                            String folder = null != target ? target.getFolder() : share.getCommonFolder();
                             jLoginResult.putOpt("folder", folder);
-                            String item = null != target ? target.getItem() :
-                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
                             jLoginResult.putOpt("item", item);
                         }
                     };
@@ -301,7 +321,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                  */
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
                 if (loginConfig.isSessiondAutoLogin()) {
-                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
                 }
                 /*
                  * set public session cookie if not yet present
@@ -333,22 +353,21 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
     /**
      * Gets the appropriate share's login information from given HTTP request
      *
-     * @param share The associated share
      * @param httpRequest The HTTP request
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(GuestShare share, HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
      *
-     * @param share The share
+     * @param guest The guest
      * @param loginInfo The login information
      * @param context The context associated with the share
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException;
 
 }

@@ -158,12 +158,17 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean isVisible(ShareTarget target, Session session) throws OXException {
+        return isVisible(target, session.getContextId(), session.getUserId());
+    }
+
+    @Override
+    public boolean isVisible(ShareTarget target, int contextID, int userID) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
-        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
-        return getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), session.getUserId());
+        Context context = requireService(ContextService.class, services).getContext(contextID);
+        return getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), userID);
     }
 
     @Override
@@ -184,11 +189,16 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public boolean exists(ShareTarget target, Session session) throws OXException {
+        return exists(target, session.getContextId(), session.getUserId());
+    }
+
+    @Override
+    public boolean exists(ShareTarget target, int contextID, int guestID) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (null == fileID.getFolderId()) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
-        Context context = requireService(ContextService.class, services).getContext(session.getContextId());
+        Context context = requireService(ContextService.class, services).getContext(contextID);
         return getAdministrativeFileAccess(context).exists(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
     }
 

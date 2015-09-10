@@ -69,7 +69,7 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
@@ -104,7 +104,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    protected boolean handles(GuestInfo guest, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return null != target && Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem() &&
             (indicatesDownload(request) || indicatesRaw(request));
     }

@@ -153,6 +153,34 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
+    public boolean isVisible(ShareTarget target, int contextID, int guestID) throws OXException {
+        if (null == target) {
+            return false;
+        }
+
+        if (target.isFolder()) {
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                try {
+                    UserService userService = requireService(UserService.class, services);
+                    Context context = userService.getContext(contextID);
+                    User user = userService.getUser(guestID, context);
+                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), user, context, null);
+                    return true;
+                } catch (OXException e) {
+                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                        return false;
+                    }
+                    throw e;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return handlers.get(target.getModule()).isVisible(target, contextID, guestID);
+        }
+    }
+
+    @Override
     public boolean mayAdjust(ShareTarget target, Session session) throws OXException {
         if (null == target) {
             return false;
@@ -200,6 +228,36 @@ public class ModuleSupportImpl implements ModuleSupport {
             }
         } else {
             return handlers.get(target.getModule()).exists(target, session);
+        }
+    }
+
+    @Override
+    public boolean exists(ShareTarget target, int contextID, int guestID) throws OXException {
+        if (null == target) {
+            return false;
+        }
+
+        if (target.isFolder()) {
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                try {
+                    UserService userService = requireService(UserService.class, services);
+                    Context context = userService.getContext(contextID);
+                    User user = userService.getUser(guestID, context);
+                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), user, context, null));
+                } catch (OXException e) {
+                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                        return true;
+                    }
+                    if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                        return false;
+                    }
+                    throw e;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return handlers.get(target.getModule()).exists(target, contextID, guestID);
         }
     }
 

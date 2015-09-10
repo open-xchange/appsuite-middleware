@@ -126,6 +126,18 @@ public interface ModuleHandler {
     boolean isVisible(ShareTarget target, Session session) throws OXException;
 
     /**
+     * Gets a value indicating whether a share target is visible for a guest user or not, i.e. if the user has sufficient
+     * permissions to read the folder or item represented by the share target.
+     *
+     * @param target The share target to check
+     * @param contextID The context ID
+     * @param guestID The guest users ID
+     * @return <code>true</code> if the share target is visible, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean isVisible(ShareTarget target, int contextID, int userID) throws OXException;
+
+    /**
      * Gets a value indicating whether a share target may be adjusted by the session's user or not, i.e. if the user has sufficient
      * permissions to read & update the folder or item represented by the share target.
      *
@@ -144,6 +156,17 @@ public interface ModuleHandler {
      * @throws OXException
      */
     boolean exists(ShareTarget target, Session session) throws OXException;
+
+    /**
+     * Gets a value indicating whether a share target (still) exists.
+     *
+     * @param target The share target to check
+     * @param contextID The context ID
+     * @param guestID The guest users ID
+     * @return <code>true</code> if the share target exists, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean exists(ShareTarget target, int contextID, int guestID) throws OXException;
 
     /**
      * Gets a list of all share targets accessible by a specific guest user.
