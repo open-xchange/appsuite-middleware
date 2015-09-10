@@ -66,16 +66,6 @@ import com.openexchange.share.recipient.ShareRecipient;
 public interface ShareService {
 
     /**
-     * Resolves the supplied guest token to a guest share, holding all accessible share targets from the guest user's point of view.
-     *
-     * @param token The guest users base token
-     * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
-     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
-     * is thrown.
-     */
-//    GuestShare resolveToken(String token) throws OXException;
-
-    /**
      * Resolves the guest associated to the given token.
      *
      * @param token - the token the GuestInfo should be resolved for
@@ -151,55 +141,48 @@ public interface ShareService {
     CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
 
     /**
-     * Updates certain properties of a specific share. This currently includes the expiry date and the arbitrary meta-field.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
-     * appropriate exception if the permissions are not sufficient</li>
-     * <li>The supplied share must contain the target, as well as the referenced guest identifier</li>
-     * <li>Only modified properties are updated, i.e. those properties where the {@link Share#containsXXX}</li>-methods return
-     * <code>true</code>
-     * </ul>
+     * Gets an existing "anonymous" share link for a specific target.
      *
      * @param session The session
-     * @param share The share to update, with only modified fields being set
-     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     * @return A share info representing the updated share
+     * @param target The share target referenced by the link
+     * @return Share info for the link, or <code>null</code> if no anonymous share was found
      */
-//    ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
-
-    /**
-     * Updates certain properties of a specific "anonymous" share. This currently includes the expiry date and the arbitrary meta-field,
-     * and/or the password of the share's guest user.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
-     * appropriate exception if the permissions are not sufficient</li>
-     * <li>The supplied share must contain the target, as well as the referenced guest identifier</li>
-     * <li>Only modified properties are updated, i.e. those properties where the {@link Share#containsXXX}</li>-methods return
-     * <code>true</code></li>
-     * <li>This method should only be called when updating the password of the anonymous guest behind the share - passing
-     * <code>null</code> as password will remove it!</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param share The share to update, with only modified fields being set
-     * @param password The password to set for the anonymous guest user, or <code>null</code> to remove the password protection
-     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     * @return A share info representing the updated share
-     */
-//    ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException;
-
-    void updateLink(Session session, ShareTarget target, String password) throws OXException;
-
-    void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException;
-
     ShareInfo getLink(Session session, ShareTarget target) throws OXException;
 
     /**
-     * Deletes a share.
+     * Updates the password used to access a specific "anonymous" share link.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * <li>Passing <code>null</code> is allowed to remove the password for the anonymous guest user</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target referenced by the link
+     * @param password The new password, or <code>null</code> to remove it
+     */
+    void updateLink(Session session, ShareTarget target, String password) throws OXException;
+
+    /**
+     * Updates the expiration date date for a specific "anonymous" share link.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * <li>Passing <code>null</code> is allowed to remove the expiry date for the anonymous guest user</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target referenced by the link
+     * @param expiryDate The new expiration date, or <code>null</code> to remove it
+     */
+    void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException;
+
+    /**
+     * Deletes an existing "anonymous" share link.
      * <p/>
      * <b>Remarks:</b>
      * <ul>
@@ -215,17 +198,6 @@ public interface ShareService {
      * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
      */
     void deleteLink(Session session, ShareTarget target, Date clientTimestamp) throws OXException;
-
-    /**
-     * Gets all shares for a specific target.
-     *
-     * @param session The session
-     * @param module The module
-     * @param folder The folder
-     * @param item The item, or <code>null</code> if not applicable
-     * @return The shares, or an empty list if there are none
-     */
-//    List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException;
 
     /**
      * Gets all users that shared something to specified guest.

@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,7 +91,6 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
@@ -454,25 +452,22 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Gets all shares created in a specific context that were created by a specific user.
+     * Gets all shares created in a specific context that were created for a specific user.
      *
      * @param contextID The context identifier
-     * @param userID The user identifier
+     * @param guestID The guest user identifier
      * @return The shares, or an empty list if there are none
      */
-    List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
+    List<ShareInfo> getAllShares(int contextID, int guestID) throws OXException {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>();
         Context context = services.getService(ContextService.class).getContext(contextID);
-        User[] guestUsers = services.getService(UserService.class).getUser(context, true, false);
-        if (null != guestUsers && 0 < guestUsers.length) {
-            for (User guest : guestUsers) {
-                if (guest.getCreatedBy() == userID) {
-                    List<ShareTarget> targets = services.getService(ModuleSupport.class).listTargets(contextID, guest.getId());
-                    if (0 < targets.size()) {
-                        shareInfos.addAll(DefaultShareInfo.createShareInfos(services, contextID, guest.getId(), targets));
-                    }
-                }
-            }
+        User guest = services.getService(UserService.class).getUser(guestID, context);
+        if (false == guest.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
+        }
+        List<ShareTarget> targets = services.getService(ModuleSupport.class).listTargets(contextID, guest.getId());
+        if (0 < targets.size()) {
+            shareInfos.addAll(DefaultShareInfo.createShareInfos(services, contextID, guest.getId(), targets));
         }
         return shareInfos;
     }
@@ -489,13 +484,13 @@ public class DefaultShareService implements ShareService {
      * @return The number of affected shares
      */
     int removeShares(int contextID) throws OXException {
+        /*
+         * load & delete all shares in the context, removing associated target permissions
+         */
         List<ShareInfo> shares = getAllShares(contextID);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
-            /*
-             * load & delete all shares in the context, removing associated target permissions
-             */
             if (0 < shares.size()) {
                 removeTargetPermissions(null, connectionHelper, shares);
             }
@@ -513,7 +508,7 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Removes all shares in a context that were created by a specific user.
+     * Removes all shares in a context that were created for a specific user.
      * <P/>
      * Associated guest permission entities from the referenced share targets are removed implicitly, guest cleanup tasks are scheduled as
      * needed.
@@ -521,42 +516,31 @@ public class DefaultShareService implements ShareService {
      * This method ought to be called in an administrative context, hence no session is required and no permission checks are performed.
      *
      * @param contextID The context identifier
-     * @param userID The identifier of the user to delete the shares for
+     * @param guestID The identifier of the guest user to delete the shares for
      * @return The number of affected shares
      */
-    int removeShares(int contextID, int userID) throws OXException {
-
-        // TODO
-        return 0;
-
-//        ShareStorage shareStorage = services.getService(ShareStorage.class);
-//        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
-//        List<Share> shares = shareStorage.loadSharesCreatedBy(contextID, userID, -1, connectionHelper.getParameters());
-//        try {
-//            /*
-//             * load & delete all shares in the context, removing associated target permissions
-//             */
-//            if (0 < shares.size()) {
-//                for (Share share : shares) {
-//                    try {
-//                        List<Share> toRemove = Collections.singletonList(share);
-//                        shareStorage.deleteShares(contextID, toRemove, connectionHelper.getParameters());
-//                        removeTargetPermissions(null, connectionHelper, toRemove);
-//                    } catch (Exception e) {
-//                        LOG.error("Could not delete share {}", share, e);
-//                    }
-//                }
-//            }
-//        } finally {
-//            connectionHelper.finish();
-//        }
-//        /*
-//         * schedule cleanup tasks as needed
-//         */
-//        if (0 < shares.size()) {
-//            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
-//        }
-//        return shares.size();
+    int removeShares(int contextID, int guestID) throws OXException {
+        /*
+         * load & delete all shares in the context, removing associated target permissions
+         */
+        List<ShareInfo> shares = getAllShares(contextID, guestID);
+        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        try {
+            connectionHelper.start();
+            if (0 < shares.size()) {
+                removeTargetPermissions(null, connectionHelper, shares);
+            }
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (0 < shares.size()) {
+            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(shares)));
+        }
+        return shares.size();
     }
 
     /**
@@ -722,30 +706,6 @@ public class DefaultShareService implements ShareService {
              */
             if (0 < affectedShares) {
                 scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
-            }
-        }
-        return shares;
-    }
-
-    /**
-     * Filters out those shares from the supplied list where the session's user has no access to the targets.
-     *
-     * @param session The session
-     * @param shares The shares
-     * @return The filtered shares, which may be an empty list if all shares were expired
-     */
-    private List<Share> removeInaccessible(Session session, List<Share> shares) throws OXException {
-        if (null != shares && 0 < shares.size()) {
-            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-            Iterator<Share> iterator = shares.iterator();
-            while (iterator.hasNext()) {
-                Share share = iterator.next();
-                ShareTarget target = share.getTarget();
-                if (false == moduleSupport.exists(target, session)) {
-                    iterator.remove();
-                } else if (false == moduleSupport.isVisible(target, session)) {
-                    iterator.remove();
-                }
             }
         }
         return shares;
@@ -1047,7 +1007,6 @@ public class DefaultShareService implements ShareService {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not compile or resolve share target", e);
             }
         }
-
         return null;
     }
 

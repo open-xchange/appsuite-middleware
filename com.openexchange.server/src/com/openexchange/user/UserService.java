@@ -284,12 +284,12 @@ public interface UserService {
      * Gets all guest users that were created by a specific user.
      *
      * @param connection A (readable) database connection
-     * @param contextId The context identifier
+     * @param context The context
      * @param userId The identifier of the user to load the created guests for
      * @return The created guest users, or an empty array if there are none
      * @throws OXException
      */
-    User[] getGuestsCreatedBy(Connection connection, int contextId, int userId) throws OXException;
+    User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to

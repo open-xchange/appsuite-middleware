@@ -85,8 +85,8 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public String listShares(int contextId, int userId) throws OXException {
-        return formatForCLT(shareService.getAllShares(contextId, userId));
+    public String listShares(int contextId, int guestId) throws OXException {
+        return formatForCLT(shareService.getAllShares(contextId, guestId));
     }
 
     @Override
@@ -122,8 +122,8 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public int removeShares(int contextId, int userId) throws OXException {
-        return shareService.removeShares(contextId, userId);
+    public int removeShares(int contextId, int guestId) throws OXException {
+        return shareService.removeShares(contextId, guestId);
     }
 
     private String formatForCLT(List<ShareInfo> shareInfos) throws OXException {

@@ -52,7 +52,9 @@ package com.openexchange.share.impl.quota;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
@@ -141,10 +143,8 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
             return Quota.UNLIMITED_AMOUNT;
         }
         UserService userService = services.getService(UserService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(userService);
-        }
-        User[] createdGuests = userService.getGuestsCreatedBy(connectionHelper.getConnection(), session.getContextId(), session.getUserId());
+        Context context = services.getService(ContextService.class).getContext(session.getContextId());
+        User[] createdGuests = userService.getGuestsCreatedBy(connectionHelper.getConnection(), context, session.getUserId());
         long usage = null != createdGuests && 0 < createdGuests.length ? getUsedQuota(createdGuests) : null;
         return new Quota(QuotaType.AMOUNT, limit, usage);
     }

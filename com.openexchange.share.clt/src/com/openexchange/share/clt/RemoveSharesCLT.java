@@ -76,7 +76,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
 
     private String contextId = "-1";
 
-    private String userId;
+    private String guestId;
 
     private String token;
 
@@ -96,7 +96,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
             contextId = cmd.getOptionValue("c");
         }
         if (cmd.hasOption("i")) {
-            userId = cmd.getOptionValue("i");
+            guestId = cmd.getOptionValue("i");
         }
         if (cmd.hasOption("T")) {
             token = cmd.getOptionValue("T");
@@ -139,7 +139,7 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
-        options.addOption("i", "userid", true, "The id of the user who created the shares.");
+        options.addOption("i", "userid", true, "The id of the guest user.");
         options.addOption("T", "token", true, "Token or URL to remove.");
         options.addOption("f", "force", false, "Force removal of token.");
     }
@@ -170,8 +170,8 @@ public class RemoveSharesCLT extends AbstractMBeanCLI<Void> {
                     result = mbean.removeShare(shareToken, targetPath);
                 }
             } else if (null != contextId && !contextId.isEmpty() && !"-1".equals(contextId)) {
-                if (null != userId && !userId.isEmpty()) {
-                    result = mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+                if (null != guestId && !guestId.isEmpty()) {
+                    result = mbean.removeShares(Integer.parseInt(contextId), Integer.parseInt(guestId));
                 } else {
                     result = mbean.removeShares(Integer.parseInt(contextId));
                 }

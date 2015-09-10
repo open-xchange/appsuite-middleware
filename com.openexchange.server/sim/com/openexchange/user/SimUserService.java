@@ -313,4 +313,9 @@ public class SimUserService implements UserService {
 
     }
 
+    @Override
+    public User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException {
+        return new User[0];
+    }
+
 }
