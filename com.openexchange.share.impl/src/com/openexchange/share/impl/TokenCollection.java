@@ -64,7 +64,6 @@ import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.storage.StorageParameters;
 
 /**
  * {@link TokenCollection}
@@ -141,7 +140,7 @@ public class TokenCollection {
      * @return The shares
      * @throws OXException
      */
-    public List<ShareInfo> loadShares(StorageParameters parameters) throws OXException {
+    public List<ShareInfo> loadShares() throws OXException {
         List<ShareInfo> shares = new ArrayList<ShareInfo>();
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*

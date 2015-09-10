@@ -51,6 +51,7 @@ package com.openexchange.share.impl.cleanup;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareTool;
@@ -204,7 +206,26 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             }
         } else {
             /*
-             * guest user still has shares, adjust permissions as needed
+             * guest user still has shares, check for an expired anonymous link first
+             */
+            if (RecipientType.ANONYMOUS == guestInfo.getRecipientType()) {
+                Date expiryDate = null;
+                String expiryDateValue = ShareTool.getUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE);
+                if (Strings.isNotEmpty(expiryDateValue)) {
+                    try {
+                        expiryDate = new Date(Long.parseLong(expiryDateValue));
+                    } catch (NumberFormatException e) {
+                        getLogger(DefaultGuestInfo.class).warn("Invalid value for {}: {}", ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, e);
+                    }
+                }
+                if (null != expiryDate && expiryDate.before(new Date())) {
+                    LOG.debug("Anonymous share for {} remaining, deleting guest user.", guestInfo);
+                    deleteGuest(connectionHelper.getConnection(), context, guestID);
+                    return;
+                }
+            }
+            /*
+             * adjust permissions for remaining shares as needed
              */
             Collection<Integer> modules = ShareTool.mapTargetsByModule(targets).keySet();
             ShareUtils utils = new ShareUtils(services);

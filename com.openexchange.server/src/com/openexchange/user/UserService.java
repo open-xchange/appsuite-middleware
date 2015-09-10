@@ -265,20 +265,31 @@ public interface UserService {
      * @return an array with all user objects from a context.
      * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
-   User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+    User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
-   /**
-    * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
-    * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
-    *
-    * @param con A database connection
-    * @param ctx the context.
-    * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
-    * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
-    * @return an array with all user objects from a context.
-    * @throws OXException if all user objects can not be loaded from the persistent storage.
-    */
-   User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+    /**
+     * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+     *
+     * @param con A database connection
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Gets all guest users that were created by a specific user.
+     *
+     * @param connection A (readable) database connection
+     * @param contextId The context identifier
+     * @param userId The identifier of the user to load the created guests for
+     * @return The created guest users, or an empty array if there are none
+     * @throws OXException
+     */
+    User[] getGuestsCreatedBy(Connection connection, int contextId, int userId) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to

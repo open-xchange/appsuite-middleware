@@ -57,7 +57,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.storage.StorageParameters;
 
 /**
  * {@link ConnectionHelper}
@@ -145,15 +144,6 @@ public class ConnectionHelper {
      */
     public int getContextID() {
         return contextID;
-    }
-
-    /**
-     * Gets a {@link StorageParameters} instance wrapping the underlying connection.
-     *
-     * @return The storage parameters
-     */
-    public StorageParameters getParameters() {
-        return StorageParameters.newInstance(Connection.class.getName(), connection);
     }
 
     /**

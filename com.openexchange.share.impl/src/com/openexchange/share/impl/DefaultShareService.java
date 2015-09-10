@@ -113,8 +113,6 @@ import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -607,35 +605,6 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Removes share targets for specific guest users in a context.
-     *
-     * @param contextID The context identifier
-     * @param targets The share targets
-     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
-     * @throws OXException
-     */
-    public void removeTargets(int contextID, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
-        if (null == targets || 0 == targets.size() || null != guestIDs && 0 == guestIDs.size()) {
-            return;
-        }
-        int[] affectedGuests;
-        ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
-        try {
-            connectionHelper.start();
-            affectedGuests = removeTargets(connectionHelper, targets, guestIDs);
-            connectionHelper.commit();
-        } finally {
-            connectionHelper.finish();
-        }
-        /*
-         * schedule cleanup tasks as needed
-         */
-        if (null != affectedGuests && 0 < affectedGuests.length) {
-            scheduleGuestCleanup(contextID, affectedGuests);
-        }
-    }
-
-    /**
      * Checks that the sharing user doesn't try to share targets to himself and has sufficient permissions
      * to create links or invite guests.
      *
@@ -680,67 +649,6 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Checks that for every target at most one link exists
-     * @param recipients
-     * @param target
-     * @param context
-     * @param shareStorage
-     * @param userService
-     * @param connectionHelper
-     * @throws OXException
-     */
-    private static void checkForDuplicateLinks(List<ShareRecipient> recipients, ShareTarget target, Context context, ShareStorage shareStorage, UserService userService, ConnectionHelper connectionHelper) throws OXException {
-        int numLinks = 0;
-        for (ShareRecipient recipient : recipients) {
-            if (recipient.getType() == RecipientType.ANONYMOUS) {
-                if (numLinks > 0) {
-                    throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
-                }
-                numLinks++;
-
-                List<Share> existingShares = shareStorage.loadSharesForTarget(context.getContextId(), target.getModule(), target.getFolder(), target.getItem(), connectionHelper.getParameters());
-                for (Share share : existingShares) {
-                    User guestUser = userService.getUser(connectionHelper.getConnection(), share.getGuest(), context);
-                    if (ShareTool.isAnonymousGuest(guestUser)) {
-                        throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Deletes a list of share targets for all shares that belong to a certain list of guests.
-     *
-     * @param connectionHelper A (started) connection helper
-     * @param targets The share targets to delete
-     * @param guestIDs The guest IDs to consider, or <code>null</code> to delete all shares of all guests referencing the targets
-     * @return The identifiers of the affected guest users, or an empty array if no shares were deleted
-     */
-    private int[] removeTargets(ConnectionHelper connectionHelper, List<ShareTarget> targets, List<Integer> guestIDs) throws OXException {
-        int contextId = connectionHelper.getContextID();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        if (null == guestIDs) {
-            /*
-             * delete all targets for all guest users
-             */
-            return shareStorage.deleteTargets(contextId, targets, connectionHelper.getParameters());
-        } else {
-            /*
-             * delete targets for specific guests
-             */
-            List<Share> shares = new ArrayList<Share>(targets.size() * guestIDs.size());
-            for (ShareTarget target : targets) {
-                for (Integer guestID : guestIDs) {
-                    shares.add(new Share(guestID.intValue(), target));
-                }
-            }
-            int affectedShares = shareStorage.deleteShares(contextId, shares, connectionHelper.getParameters());
-            return 0 < affectedShares ? I2i(guestIDs) : new int[0];
-        }
-    }
-
-    /**
      * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
      * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being removed.
      * <P/>
@@ -767,7 +675,7 @@ public class DefaultShareService implements ShareService {
             /*
              * load all shares referenced by the supplied tokens
              */
-            shares = tokenCollection.loadShares(connectionHelper.getParameters());
+            shares = tokenCollection.loadShares();
             /*
              * delete the shares by removing the associated target permissions
              */
@@ -834,7 +742,6 @@ public class DefaultShareService implements ShareService {
                 Share share = iterator.next();
                 ShareTarget target = share.getTarget();
                 if (false == moduleSupport.exists(target, session)) {
-                    removeTargets(session.getContextId(), Collections.singletonList(target), Collections.singletonList(Integer.valueOf(share.getGuest())));
                     iterator.remove();
                 } else if (false == moduleSupport.isVisible(target, session)) {
                     iterator.remove();
@@ -1133,24 +1040,8 @@ public class DefaultShareService implements ShareService {
             try {
                 String targetAttr = ShareTool.getUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE);
                 if (targetAttr == null) {
-                    LOG.warn("Found anonymous guest {} without link target attribute in context {}. Trying to restore consistency...", guestUser.getId(), contextId);
-                    List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextId, guestUser.getId(), StorageParameters.NO_PARAMETERS);
-                    Share share;
-                    if (shares.isEmpty()) {
-                        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Anonymous guest " + guestUser.getId() + " in context " + contextId + " is in inconsistent state - no share target exists.");
-                    } else if (shares.size() > 1) {
-                        LOG.warn("Anonymous guest {} in context {} is in inconsistent state - multiple share targets exist.", guestUser.getId(), contextId);
-                        share = shares.get(0);
-                    } else {
-                        share = shares.get(0);
-                    }
-
-                    ShareTarget target = share.getTarget();
-                    Context context = services.getService(ContextService.class).getContext(contextId);
-                    services.getService(UserService.class).setAttribute(ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString(), guestUser.getId(), context);
-                    return target;
+                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Anonymous guest " + guestUser.getId() + " in context " + contextId + " is in inconsistent state - no share target exists.");
                 }
-
                 return ShareTool.jsonToTarget(new JSONObject(targetAttr));
             } catch (JSONException e) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not compile or resolve share target", e);

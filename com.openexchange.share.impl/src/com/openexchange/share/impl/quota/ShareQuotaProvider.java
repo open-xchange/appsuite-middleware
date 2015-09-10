@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
@@ -64,7 +65,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.impl.ConnectionHelper;
-import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ShareQuotaProvider}
@@ -96,12 +97,12 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
     /**
      * Gets the used amount quota for a specific user.
      *
-     * @param storage The share storage
+     * @param createdGuests The guest users that were already created by the user
      * @param connectionHelper A (started) connection helper
      * @param userID The identifier of the user to get the quota usage for
      * @return The used quota
      */
-    protected abstract long getUsedQuota(ShareStorage storage, ConnectionHelper connectionHelper, int userID) throws OXException;
+    protected abstract long getUsedQuota(User[] createdGuests) throws OXException;
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
@@ -139,11 +140,12 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
         if (limit == Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         }
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        if (null == shareStorage) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareStorage.class.getName());
+        UserService userService = services.getService(UserService.class);
+        if (null == userService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(userService);
         }
-        long usage = getUsedQuota(shareStorage, connectionHelper, session.getUserId());
+        User[] createdGuests = userService.getGuestsCreatedBy(connectionHelper.getConnection(), session.getContextId(), session.getUserId());
+        long usage = null != createdGuests && 0 < createdGuests.length ? getUsedQuota(createdGuests) : null;
         return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
