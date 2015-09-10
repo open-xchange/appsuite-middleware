@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
 
@@ -483,4 +484,11 @@ public class CachingUserStorage extends UserStorage {
         return delegate;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+        delegate.updatePasswordInternal(connection, context, userId, mech, password);
+    }
 }

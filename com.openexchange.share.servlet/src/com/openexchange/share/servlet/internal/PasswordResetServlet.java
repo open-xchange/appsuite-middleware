@@ -297,7 +297,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
         }
-        userService.updateUser(user, context);
+        userService.updatePassword(user, context);
         userService.invalidateUser(context, userId);
         return userService.getUser(userId, context);
     }

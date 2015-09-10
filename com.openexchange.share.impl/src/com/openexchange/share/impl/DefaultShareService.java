@@ -1077,7 +1077,7 @@ public class DefaultShareService implements ShareService {
                 updatedGuest.setUserPassword(services.getService(ShareCryptoService.class).encrypt(password));
                 updatedGuest.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
             }
-            services.getService(UserService.class).updateUser(connectionHelper.getConnection(), updatedGuest, context);
+            services.getService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
             return true;
         }
         return false;

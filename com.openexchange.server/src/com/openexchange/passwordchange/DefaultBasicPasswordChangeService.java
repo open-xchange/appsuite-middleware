@@ -100,7 +100,7 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             }
         }
 
-        userService.updateUser(updatedUser, ctx);
+        userService.updatePassword(updatedUser, ctx);
         userService.invalidateUser(ctx, event.getSession().getUserId());
 
         if (updatedUser.isGuest()) {

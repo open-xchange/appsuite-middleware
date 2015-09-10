@@ -80,8 +80,6 @@ public final class UserMapper extends DefaultDbMapper<User, UserField> {
         mapping.put(UserField.PREFERRED_LANGUAGE, new PreferredLanguageMapping());
         mapping.put(UserField.SMTP_SERVER, new SMTPServerMapping());
         mapping.put(UserField.TIME_ZONE, new TimeZoneMapping());
-        mapping.put(UserField.PASSWORD, new PasswordMapping());
-        mapping.put(UserField.PASSWORD_MECHANISM, new PasswordMechMapping());
         return mapping;
     }
 }

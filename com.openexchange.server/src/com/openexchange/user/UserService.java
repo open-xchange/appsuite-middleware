@@ -90,6 +90,7 @@ public interface UserService {
      * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
      * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
      * API.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
@@ -265,20 +266,20 @@ public interface UserService {
      * @return an array with all user objects from a context.
      * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
-   User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+    User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
-   /**
-    * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
-    * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
-    *
-    * @param con A database connection
-    * @param ctx the context.
-    * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
-    * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
-    * @return an array with all user objects from a context.
-    * @throws OXException if all user objects can not be loaded from the persistent storage.
-    */
-   User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+    /**
+     * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+     *
+     * @param con A database connection
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
@@ -293,16 +294,18 @@ public interface UserService {
      * <li>IMAP login</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
-     * For guest users, additionally the following properties may be changed:
+     * For guest users, additionally the following property may be changed:
      * <ul>
-     * <li>User password</li>
-     * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>
      *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.user.UserService.updatePassword(User, Context)
+     * </b>
+     *
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws OXException  if an error occurs.
+     * @throws OXException if an error occurs.
      * @see #getContext(int)
      */
     void updateUser(User user, Context context) throws OXException;
@@ -326,20 +329,41 @@ public interface UserService {
      * <li>IMAP login</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
-     * For guest users, additionally the following properties may be changed:
+     * For guest users, additionally the following property may be changed:
      * <ul>
-     * <li>User password</li>
-     * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>
+     *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.user.UserService.updatePassword(Connection, User, Context)
+     * </b>
      *
      * @param con a writable database connection
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws OXException  if an error occurs.
+     * @throws OXException if an error occurs.
      * @see #getContext(int)
      */
     void updateUser(Connection con, User user, Context context) throws OXException;
+
+    /**
+     * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
+     *
+     * @param user User object with userPassword and passwordMech set.
+     * @param context The context.
+     * @throws OXException
+     */
+    void updatePassword(User user, Context context) throws OXException;
+
+    /**
+     * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
+     *
+     * @param connection a writable database connection
+     * @param user User object with userPassword and passwordMech set.
+     * @param context The context.
+     * @throws OXException if an error occurs.
+     */
+    void updatePassword(Connection connection, User user, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.

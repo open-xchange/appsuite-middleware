@@ -98,6 +98,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -124,13 +125,13 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
-        "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
-        "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " + "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " + "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
+
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ? WHERE cid = ? AND id = ?";
 
     /**
      * Default constructor.
@@ -307,8 +308,7 @@ public class RdbUserStorage extends UserStorage {
              * insert tombstone record into del_user table
              */
             try {
-                stmt = con.prepareStatement(
-                    "INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
+                stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.setInt(3, contactId);
@@ -483,9 +483,7 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
-                        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy," +
-                        "filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=?" + " AND id IN (", currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," + "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy," + "filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=?" + " AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -738,13 +736,13 @@ public class RdbUserStorage extends UserStorage {
         }
 
         UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
-         // Proceed iterating users
+        // Proceed iterating users
         for (final UserImpl user : users.valueCollection()) {
             final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
             {
                 Set<String> aliases = userAlias.getAliases(contextId, user.getId());
                 final List<String> tmp = new ArrayList<String>(aliases.size());
-                if(aliases != null && false == aliases.isEmpty()) {
+                if (aliases != null && false == aliases.isEmpty()) {
                     for (final String alias : aliases) {
                         try {
                             tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
@@ -843,6 +841,41 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(pos++, context.getContextId());
                 stmt.setInt(pos++, user.getId());
                 stmt.execute();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            updatePasswordInternal(con, context, userId, mech, password);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    @Override
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+        if (connection == null) {
+            updatePasswordInternal(context, userId, mech, password);
+            return;
+        }
+
+        if (null != mech) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
+                int pos = 1;
+                stmt.setString(pos++, password);
+                stmt.setString(pos++, mech.getIdentifier());
+                stmt.setInt(pos++, context.getContextId());
+                stmt.setInt(pos++, userId);
+                stmt.execute();
+            } catch (SQLException e) {
+                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(stmt);
             }
@@ -1450,8 +1483,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listModifiedUser(final Date modifiedSince, final Context context)
-        throws OXException {
+    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -1586,8 +1618,7 @@ public class RdbUserStorage extends UserStorage {
             }
             users = sia.toArray();
         } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e
-                .getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
