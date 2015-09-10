@@ -652,9 +652,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 String folderId = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
                 String fileId = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
                 EventProperty hardDeleteProperty = new EventProperty(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
-                EventProperty shareCleanupDoneProperty = new EventProperty(FileStorageEventConstants.SHARE_CLEANUP_DONE, Boolean.TRUE);
                 postEvent(FileStorageEventHelper.buildDeleteEvent(
-                    session, serviceId, accountId, folderId, fileId, null, null, hardDeleteProperty, shareCleanupDoneProperty));
+                    session, serviceId, accountId, folderId, fileId, null, null, hardDeleteProperty));
             }
         }
         return notDeleted;

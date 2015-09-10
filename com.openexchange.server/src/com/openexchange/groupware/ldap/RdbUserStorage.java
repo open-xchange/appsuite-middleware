@@ -591,6 +591,14 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException {
+        if (0 == userIds.length) {
+            return new User[0];
+        }
+        return getUser(ctx, con, userIds);
+    }
+
     private static void loadLoginInfo(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
             final TIntIterator iter = users.keySet().iterator();

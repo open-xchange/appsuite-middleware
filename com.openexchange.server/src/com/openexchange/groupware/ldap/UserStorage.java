@@ -181,6 +181,17 @@ public abstract class UserStorage {
     public abstract User[] getUser(Context ctx, int[] userIds) throws OXException;
 
     /**
+     * Reads out the data from multiple users from the underlying persistent data storage.
+     *
+     * @param ctx The context
+     * @param userIds The identifiers of the users to get
+     * @param con a readable database connection.
+     * @return The users
+     * @throws OXException if an error occurs while reading from the persistent storage or one of the users doesn't exist
+     */
+    public abstract User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException;
+
+    /**
      * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
      * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
      * @param ctx the context.

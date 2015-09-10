@@ -115,9 +115,4 @@ public class FileStorageEventConstants {
 
     public static final String HARD_DELETE = "hardDelete";
 
-    /**
-     * Indicates that any share-related cleanup has already been processed.
-     */
-    public static final String SHARE_CLEANUP_DONE = "shareCleanupDone";
-
 }
