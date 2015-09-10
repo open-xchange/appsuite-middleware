@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -173,17 +172,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
      */
     protected String moduleFor(ShareTarget target) throws OXException {
         return getModuleSupport().getShareModule(target.getModule());
-    }
-
-    /**
-     * Gets an existing link, i.e. an anonymous share, for a specific share target.
-     *
-     * @param session The session
-     * @param target The target to get the link for
-     * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
-     */
-    protected ShareInfo discoverLink(ServerSession session, ShareTarget target) throws OXException {
-        return getShareService().getLink(session, target);
     }
 
 }

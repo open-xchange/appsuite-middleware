@@ -192,7 +192,7 @@ public class PermissionResolver {
         String module = services.getService(ModuleSupport.class).getShareModule(moduleID);
         ShareTarget target = new ShareTarget(moduleID, folder, item);
         try {
-            return services.getService(ShareService.class).getLink(session, target);
+            return services.getService(ShareService.class).optLink(session, target);
         } catch (OXException e) {
             getLogger(PermissionResolver.class).error("Error getting share link for folder {}, item {} in module {}", folder, item, module, e);
         }

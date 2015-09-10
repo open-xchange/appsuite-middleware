@@ -52,6 +52,7 @@ package com.openexchange.share.impl.groupware;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -235,6 +236,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public boolean mayAdjust() {
         return true;
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return folder.getLastModified();
     };
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -171,6 +172,11 @@ public class FileTargetProxy extends AbstractTargetProxy {
     @Override
     public boolean mayAdjust() {
         return file.isShareable();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return new Date(file.getSequenceNumber());
     }
 
 }

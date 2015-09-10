@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
@@ -187,6 +188,11 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     @Override
     public boolean mayAdjust() {
         return folder.getOwnPermission().isAdmin();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return folder.getLastModifiedUTC();
     }
 
 }

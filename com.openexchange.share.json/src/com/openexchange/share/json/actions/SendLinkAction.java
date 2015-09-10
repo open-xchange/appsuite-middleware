@@ -101,7 +101,7 @@ public class SendLinkAction extends AbstractShareAction {
         /*
          * lookup share
          */
-        ShareInfo shareInfo = discoverLink(session, target);
+        ShareInfo shareInfo = getShareService().optLink(session, target);
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }

@@ -47,53 +47,30 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-
+import java.util.Date;
 
 /**
- * {@link ShareActionFactory}
+ * {@link ShareLink}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+public interface ShareLink extends ShareInfo {
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * The timestamp of the underlying share target to catch concurrent modifications.
+     *
+     * @return The timestamp
      */
-    public ShareActionFactory(ServiceLookup services) {
-        super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
-    }
+    Date getTimestamp();
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
-    }
+    /**
+     * Gets a value indicating whether the share link was just created or if it existed before.
+     *
+     * @return <code>true</code> if the link is new, <code>false</code>, otherwise
+     */
+    boolean isNew();
 
 }

@@ -60,9 +60,9 @@ import com.openexchange.groupware.notify.hostname.HostData;
 public interface ShareInfo {
 
     /**
-     * Gets the underlying share.
+     * Gets the underlying share target.
      *
-     * @return The share
+     * @return The share target
      */
     ShareTarget getTarget();
 

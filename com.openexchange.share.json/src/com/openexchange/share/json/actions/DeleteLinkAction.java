@@ -55,8 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,16 +84,9 @@ public class DeleteLinkAction extends AbstractShareAction {
         JSONObject json = (JSONObject) requestData.requireData();
         ShareTarget target = getParser().parseTarget(json);
         /*
-         * lookup share
-         */
-        ShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
-        }
-        /*
          * perform the deletion, return empty result in case of success
          */
-        getShareService().deleteLink(session, shareInfo.getTarget(), clientTimestamp);
+        getShareService().deleteLink(session, target, clientTimestamp);
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 

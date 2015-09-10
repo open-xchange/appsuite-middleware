@@ -47,53 +47,64 @@
  *
  */
 
-package com.openexchange.share.json;
+package com.openexchange.share.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.json.actions.DeleteLinkAction;
-import com.openexchange.share.json.actions.GetLinkAction;
-import com.openexchange.share.json.actions.SendLinkAction;
-import com.openexchange.share.json.actions.UpdateLinkAction;
-
+import java.util.Date;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareLink;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ShareActionFactory}
+ * {@link DefaultShareLink}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareActionFactory implements AJAXActionServiceFactory {
+public class DefaultShareLink implements ShareLink {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final ShareInfo delegate;
+    private final Date timestamp;
+    private final boolean isNew;
 
     /**
-     * Initializes a new {@link ShareActionFactory}.
-     * @param services
-     * @param translatorFactory
+     * Initializes a new {@link DefaultShareLink}.
+     *
+     * @param delegate The underlying share link
+     * @param timestamp The target timestamp
+     * @param isNew <code>true</code> if the link was just created, <code>false</code>, otherwise
      */
-    public ShareActionFactory(ServiceLookup services) {
+    public DefaultShareLink(ShareInfo delegate, Date timestamp, boolean isNew) {
         super();
-        actions.put("update", new UpdateLinkAction(services));
-        actions.put("getLink", new GetLinkAction(services));
-        actions.put("updateLink", new UpdateLinkAction(services));
-        actions.put("deleteLink", new DeleteLinkAction(services));
-        actions.put("sendLink", new SendLinkAction(services));
+        this.delegate = delegate;
+        this.timestamp = timestamp;
+        this.isNew = isNew;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public ShareTarget getTarget() {
+        return delegate.getTarget();
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return null;
+    public GuestInfo getGuest() {
+        return delegate.getGuest();
+    }
+
+    @Override
+    public String getShareURL(HostData hostData) {
+        return delegate.getShareURL(hostData);
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
     }
 
 }

@@ -124,30 +124,28 @@ public interface ShareService {
     CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
 
     /**
-     * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest user on the share target are updated implicitly via corresponding target proxies
-     * automatically</li>
-     * <li>Permissions checks are performed implicitly during the update of the referenced target</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipient The recipient for the share
-     * @return The created share
-     */
-    CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
-
-    /**
-     * Gets an existing "anonymous" share link for a specific target.
+     * Gets an existing "anonymous" share link with read-only permissions for a specific target if one exists.
      *
      * @param session The session
      * @param target The share target referenced by the link
-     * @return Share info for the link, or <code>null</code> if no anonymous share was found
+     * @return The share link, or <code>null</code> if there is none
      */
-    ShareInfo getLink(Session session, ShareTarget target) throws OXException;
+    ShareLink optLink(Session session, ShareTarget target) throws OXException;
+
+    /**
+     * Gets or creates an "anonymous" share link with read-only permissions for a specific target.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target referenced by the link
+     * @return The share link
+     */
+    ShareLink getLink(Session session, ShareTarget target) throws OXException;
 
     /**
      * Updates the password used to access a specific "anonymous" share link.
@@ -162,8 +160,9 @@ public interface ShareService {
      * @param session The session
      * @param target The share target referenced by the link
      * @param password The new password, or <code>null</code> to remove it
+     * @return The share link
      */
-    void updateLink(Session session, ShareTarget target, String password) throws OXException;
+    ShareLink updateLink(Session session, ShareTarget target, String password, Date clientTimestamp) throws OXException;
 
     /**
      * Updates the expiration date date for a specific "anonymous" share link.
@@ -178,8 +177,9 @@ public interface ShareService {
      * @param session The session
      * @param target The share target referenced by the link
      * @param expiryDate The new expiration date, or <code>null</code> to remove it
+     * @return The share link
      */
-    void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException;
+    ShareLink updateLink(Session session, ShareTarget target, Date expiryDate, Date clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing "anonymous" share link.

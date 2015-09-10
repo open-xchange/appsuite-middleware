@@ -49,6 +49,7 @@
 
 package com.openexchange.share.groupware;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
 
@@ -135,6 +136,18 @@ public interface TargetProxy {
      */
     boolean isPublic();
 
+    /**
+     * Gets a value indicating whether the underlying target permissions may be adjusted through this proxy or not.
+     *
+     * @return <code>true</code> if it may be adjusted, <code>false</code>, otherwise
+     */
     boolean mayAdjust();
+
+    /**
+     * Gets the last modification timestamp of the target.
+     *
+     * @return The timestamp
+     */
+    Date getTimestamp();
 
 }

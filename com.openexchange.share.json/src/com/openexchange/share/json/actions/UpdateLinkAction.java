@@ -56,8 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -84,26 +82,20 @@ public class UpdateLinkAction extends AbstractShareAction {
         /*
          * parse parameters & target
          */
+        Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
         JSONObject json = (JSONObject) requestData.requireData();
         ShareTarget target = getParser().parseTarget(json);
-        /*
-         * lookup share
-         */
-        ShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
-        }
         /*
          * update share based on present data in update request
          */
         try {
             if (json.has("expiry_date")) {
                 Date newExpiry = json.isNull("expiry_date") ? null : new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session)));
-                getShareService().updateLink(session, target, newExpiry);
+                getShareService().updateLink(session, target, newExpiry, clientTimestamp);
             }
             if (json.has("password")) {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateLink(session, target, newPassword);
+                getShareService().updateLink(session, target, newPassword, clientTimestamp);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

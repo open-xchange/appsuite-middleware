@@ -55,13 +55,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -72,10 +68,6 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public class GetLinkAction extends AbstractShareAction {
-
-    /** The default permission bits to use for anonymous link shares */
-    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 
     /**
      * Initializes a new {@link GetLinkAction}.
@@ -89,53 +81,27 @@ public class GetLinkAction extends AbstractShareAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
-         * parse target
+         * parse target & get or create the share link
          */
         ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
-        /*
-         * reuse existing or create a new anonymous share as needed
-         */
-        boolean isNew = false;
-        ShareInfo shareInfo = null;
-        for (int i = 0; i < 5 && null == shareInfo; i++) {
-            try {
-                shareInfo = discoverLink(session, target);
-                if (null == shareInfo) {
-                    AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-                    CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
-                    shareInfo = createdShare.getShareInfo();
-                    isNew = true;
-                }
-            } catch (OXException e) {
-                /*
-                 * try again in case of concurrent modifications
-                 */
-                if (i < 4 && ("IFO-1302".equals(e.getErrorCode()) || "FLD-1022".equals(e.getErrorCode()))) {
-                    org.slf4j.LoggerFactory.getLogger(GetLinkAction.class).info(
-                        "Detected concurrent modification during link creation: \"{}\" - trying again...", e.getMessage());
-                    continue;
-                }
-                throw e;
-            }
-        }
+        ShareLink shareLink = getShareService().getLink(session, target);
         /*
          * return appropriate result
          */
         JSONObject jsonResult = new JSONObject();
         try {
-            jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
-            jsonResult.put("entity", shareInfo.getGuest().getGuestID());
-            jsonResult.put("is_new", isNew);
-            Date expiryDate = shareInfo.getGuest().getExpiryDate();
+            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
+            jsonResult.put("entity", shareLink.getGuest().getGuestID());
+            jsonResult.put("is_new", shareLink.isNew());
+            Date expiryDate = shareLink.getGuest().getExpiryDate();
             if (null != expiryDate) {
                 jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
             }
-            jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
+            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        //TODO: client timestamp?
-        return new AJAXRequestResult(jsonResult, new Date(), "json");
+        return new AJAXRequestResult(jsonResult, shareLink.getTimestamp(), "json");
     }
 
 }
