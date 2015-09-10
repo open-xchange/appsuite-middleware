@@ -349,7 +349,7 @@ public interface UserService {
     /**
      * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
      *
-     * @param user User object with userPassword and passwordMech set.
+     * @param user User object with the (encoded) userPassword and passwordMech set.
      * @param context The context.
      * @throws OXException
      */
@@ -358,8 +358,8 @@ public interface UserService {
     /**
      * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
      *
-     * @param connection a writable database connection
-     * @param user User object with userPassword and passwordMech set.
+     * @param connection a writable database connection (or <code>null</code> if you do not have a connection)
+     * @param user User object with the (encoded) userPassword and passwordMech set.
      * @param context The context.
      * @throws OXException if an error occurs.
      */

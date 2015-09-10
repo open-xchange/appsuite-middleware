@@ -263,7 +263,7 @@ public abstract class UserStorage {
      * @param context The context.
      * @param userId The user id to change
      * @param mech The password mech to set
-     * @param password The password to set
+     * @param password The (encoded) password to set
      * @throws OXException if an error occurs.
      */
     public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
