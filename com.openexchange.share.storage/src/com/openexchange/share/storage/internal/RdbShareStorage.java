@@ -273,7 +273,7 @@ public class RdbShareStorage implements ShareStorage {
     @Override
     public int countGuests(int contextId, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextId, parameters);
-        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail <> \"\"");
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND createdBy = ? AND u.mail <> \"\"");
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -298,7 +298,7 @@ public class RdbShareStorage implements ShareStorage {
     @Override
     public int countLinks(int contextId, int createdBy, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getReadProvider(contextId, parameters);
-        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail = \"\"");
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND createdBy = ? AND u.mail = \"\"");
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
