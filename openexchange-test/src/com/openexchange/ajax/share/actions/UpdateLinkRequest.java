@@ -51,7 +51,6 @@ package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +60,6 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.share.ShareTarget;
 
@@ -83,8 +81,6 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
     private boolean containsPassword;
     private Date expiryDate;
     private boolean containsExpiryDate;
-    private Map<String, Object> meta;
-    private boolean containsMeta;
 
     /**
      * Initializes a new {@link UpdateLinkRequest} with UTC as time zone
@@ -121,11 +117,6 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
     public void setExpiryDate(Date expiryDate) {
         this.expiryDate = expiryDate;
         containsExpiryDate = true;
-    }
-
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
-        containsMeta = true;
     }
 
     @Override
@@ -167,9 +158,6 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
         }
         if (containsPassword) {
             json.put("password", null == password ? JSONObject.NULL : password);
-        }
-        if (containsMeta) {
-            json.put("meta", JSONCoercion.coerceToJSON(meta));
         }
         return json;
     }

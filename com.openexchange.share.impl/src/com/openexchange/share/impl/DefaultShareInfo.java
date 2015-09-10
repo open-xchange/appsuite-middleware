@@ -80,44 +80,6 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      *
      * @param services A service lookup reference
      * @param contextID The context ID
-     * @param shares The shares
-     * @return The share infos
-     */
-//    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-//        if (null == shares || 0 == shares.size()) {
-//            return Collections.emptyList();
-//        }
-//        /*
-//         * retrieve referenced guest users
-//         */
-//        Context context = services.getService(ContextService.class).getContext(contextID);
-//        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
-//        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
-//        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
-//        for (User user : users) {
-//            if (false == user.isGuest()) {
-//                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
-//            }
-//            guestUsers.put(Integer.valueOf(user.getId()), user);
-//        }
-//        /*
-//         * build & return share infos
-//         */
-//        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-//        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
-//        for (Share share : shares) {
-//            User user = guestUsers.get(I(share.getGuest()));
-//            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getTarget(), contextID, user.getId());
-//            shareInfos.add(new DefaultShareInfo(services, contextID, user, share, personalizedTarget));
-//        }
-//        return shareInfos;
-//    }
-
-    /**
-     * Creates a list of extended share info objects for the supplied shares.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
      * @param guestID The guest ID
      * @param targets The share targets
      * @return The share infos
