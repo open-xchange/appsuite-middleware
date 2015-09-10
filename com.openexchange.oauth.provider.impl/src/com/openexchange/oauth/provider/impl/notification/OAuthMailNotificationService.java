@@ -162,7 +162,7 @@ public class OAuthMailNotificationService {
     }
 
     private String getSettingsUrl(HttpServletRequest request) throws OXException, URISyntaxException {
-        String uiWebPath = Services.requireService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite");
+        String uiWebPath = Services.requireService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite/");
         URI settingsURI = new URIBuilder()
             .setScheme("https")
             .setHost(URLHelper.getHostname(request))

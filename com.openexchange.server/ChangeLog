@@ -1,3 +1,9 @@
+* 2015-09-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 40842: Changed defaults for properties "com.openexchange.UIWebPath" (server.properties) and
+                      "com.openexchange.ajax.login.http-auth.client" (login.properties) to App Suite UI settings.
+                      That is "com.openexchange.UIWebPath=/appsuite/" and "com.openexchange.ajax.login.http-auth.client=open-xchange-appsuite"
+
 * 2015-09-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 41005: Also check presence of "check" parameter in specified options mapping

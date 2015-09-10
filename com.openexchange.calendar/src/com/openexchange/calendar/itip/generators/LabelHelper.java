@@ -243,7 +243,7 @@ public class LabelHelper {
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
 		final String template = patternSlashFixer.matcher(config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]")).replaceAll("/");
-		String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+		String webpath = config.getProperty("com.openexchange.UIWebPath", "/appsuite/");
 		if (webpath.startsWith("/")) {
 		    webpath = webpath.substring(1, webpath.length());
 		}
