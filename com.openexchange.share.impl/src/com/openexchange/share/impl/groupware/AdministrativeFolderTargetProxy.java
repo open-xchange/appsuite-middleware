@@ -230,6 +230,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             return new TargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission));
         }
 
+    }
+
+    @Override
+    public boolean mayAdjust() {
+        return true;
     };
 
 }

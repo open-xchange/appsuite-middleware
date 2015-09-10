@@ -184,4 +184,9 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         return isPublic;
     }
 
+    @Override
+    public boolean mayAdjust() {
+        return folder.getOwnPermission().isAdmin();
+    }
+
 }

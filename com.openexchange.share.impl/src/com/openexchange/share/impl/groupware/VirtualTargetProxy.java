@@ -131,4 +131,9 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
         return false;
     }
 
+    @Override
+    public boolean mayAdjust() {
+        return true;
+    }
+
 }

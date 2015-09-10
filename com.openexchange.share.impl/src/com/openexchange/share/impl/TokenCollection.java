@@ -50,6 +50,7 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,14 +59,11 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 
 /**
@@ -145,7 +143,6 @@ public class TokenCollection {
      */
     public List<ShareInfo> loadShares(StorageParameters parameters) throws OXException {
         List<ShareInfo> shares = new ArrayList<ShareInfo>();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*
          * gather all shares for guest users with base token only
@@ -159,20 +156,8 @@ public class TokenCollection {
          */
         for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
             int guestID = entry.getKey().getUserID();
-            List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, guestID, parameters);
-            Map<PersonalizedShareTarget, Share> personalizedTargets = new HashMap<>(sharesForGuest.size() * 2);
-            for (Share share : sharesForGuest) {
-                personalizedTargets.put(moduleSupport.personalizeTarget(share.getTarget(), contextID, guestID), share);
-            }
-
-            for (String path : entry.getValue()) {
-                for (PersonalizedShareTarget personalizedTarget : personalizedTargets.keySet()) {
-                    if (path.equals(personalizedTarget.getPath())) {
-                        shares.add(personalizedTargets.get(personalizedTarget));
-                        break;
-                    }
-                }
-            }
+            List<ShareTarget> targets = getTargets(entry.getValue());
+            shares.addAll(DefaultShareInfo.createShareInfos(services, contextID, guestID, targets));
         }
         return shares;
     }
@@ -202,6 +187,19 @@ public class TokenCollection {
      */
     public int[] getGuestUserIDs() {
         return Autoboxing.I2i(guestIDs);
+    }
+
+    private static List<ShareTarget> getTargets(Collection<String> paths) {
+        List<ShareTarget> targets = new ArrayList<ShareTarget>();
+        for (String path : paths) {
+            targets.add(getTarget(path));
+        }
+        return targets;
+    }
+
+    private static ShareTarget getTarget(String path) {
+        // TODO
+        return null;
     }
 
 }

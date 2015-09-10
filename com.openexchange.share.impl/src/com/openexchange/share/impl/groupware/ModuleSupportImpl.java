@@ -171,7 +171,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 return true;
             }
         } else {
-            return handlers.get(target.getModule()).isVisible(target, session);
+            return handlers.get(target.getModule()).mayAdjust(target, session);
         }
     }
 

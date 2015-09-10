@@ -135,4 +135,6 @@ public interface TargetProxy {
      */
     boolean isPublic();
 
+    boolean mayAdjust();
+
 }

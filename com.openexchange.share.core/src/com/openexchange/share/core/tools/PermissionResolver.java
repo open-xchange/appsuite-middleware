@@ -194,7 +194,7 @@ public class PermissionResolver {
         try {
             return services.getService(ShareService.class).getLink(session, target);
         } catch (OXException e) {
-            getLogger(PermissionResolver.class).error("Error shares for folder {}, item {} in module {}", folder, item, module, e);
+            getLogger(PermissionResolver.class).error("Error getting share link for folder {}, item {} in module {}", folder, item, module, e);
         }
         return null;
     }

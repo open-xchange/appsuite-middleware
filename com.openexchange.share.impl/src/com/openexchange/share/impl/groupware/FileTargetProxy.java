@@ -168,4 +168,9 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     };
 
+    @Override
+    public boolean mayAdjust() {
+        return file.isShareable();
+    }
+
 }

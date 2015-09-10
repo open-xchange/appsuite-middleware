@@ -255,11 +255,6 @@ public class ShareHelper {
                 if (null == shareService) {
                     throw ServiceExceptionCode.absentService(ShareService.class);
                 }
-                int owner = document.getCreatedBy();
-                if (0 >= owner) {
-                    owner = access.getFileMetadata(
-                        document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION).getCreatedBy();
-                }
                 String service = access.getAccountAccess().getService().getId();
                 String account = access.getAccountAccess().getAccountId();
                 String folderID = new FolderID(service, account, document.getFolderId()).toUniqueID();

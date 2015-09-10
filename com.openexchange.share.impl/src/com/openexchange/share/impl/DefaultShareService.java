@@ -104,6 +104,7 @@ import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
@@ -145,155 +146,6 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
-        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
-        //TODO: more distinct "created by" based on all share targets accessible by this guest?
-        return Collections.singleton(I(guestUser.getCreatedBy()));
-    }
-
-    @Override
-    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        return addTarget(session, target, recipients, null);
-    }
-
-    @Override
-    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
-        ShareTool.validateTarget(target);
-        LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
-        Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            /*
-             * Initial checks
-             */
-            checkRecipients(recipients, session);
-            checkForDuplicateLinks(recipients, target, utils.getContext(session), shareStorage, services.getService(UserService.class), connectionHelper);
-            /*
-             * prepare guest users and resulting shares
-             */
-            List<ShareInfo> sharesInfos = new ArrayList<ShareInfo>(recipients.size());
-            User sharingUser = utils.getUser(session);
-            for (ShareRecipient recipient : recipients) {
-                /*
-                 * prepare shares for this recipient
-                 */
-                ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
-                sharesInfos.add(shareInfo);
-                sharesByRecipient.put(recipient, shareInfo);
-            }
-            /*
-             * check quota restrictions, commit transaction & trigger collection of e-mail addresses
-             */
-            checkQuota(session, connectionHelper, sharesInfos);
-            connectionHelper.commit();
-            LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
-            return new CreatedSharesImpl(sharesByRecipient);
-        } finally {
-            connectionHelper.finish();
-        }
-    }
-
-    @Override
-    public CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
-        List<ShareRecipient> recipients = Collections.singletonList(recipient);
-        checkRecipients(recipients, session);
-        LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        TargetUpdate targetUpdate = null;
-        try {
-            connectionHelper.start();
-            /*
-             * pre-fetch targets (implicitly checking access to them as current session's user)
-             */
-            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connectionHelper.getConnection());
-            targetUpdate.fetch(Collections.singletonList(target));
-            /*
-             * prepare guest users, target permissions and resulting shares
-             */
-            User sharingUser = utils.getUser(session);
-            List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(1);
-            /*
-             * prepare share for the recipient & check quota reatrictions
-             */
-            ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
-            checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
-            /*
-             * remember target permission
-             */
-            RecipientType type = shareInfo.getGuest().getRecipientType();
-            targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), RecipientType.GROUP.equals(type), recipient.getBits()));
-            /*
-             * apply permissions for this target
-             */
-            targetUpdate.get(target).applyPermissions(targetPermissions);
-            /*
-             * run target update, commit transaction & return created shares result
-             */
-            targetUpdate.run();
-            connectionHelper.commit();
-            LOG.info("Shares to target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
-            return new CreatedShareImpl(recipient, shareInfo);
-        } finally {
-            if (null != targetUpdate) {
-                targetUpdate.close();
-            }
-            connectionHelper.finish();
-        }
-    }
-
-    @Override
-    public void updateLink(Session session, ShareTarget target, String password) throws OXException {
-        //TODO: get proxy from module support, check permissions, discover anonymous entity, update guest user password
-    }
-
-    @Override
-    public void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException {
-        //TODO: get proxy from module support, check permissions, discover anonymous entity, update guest user expiry attribute
-    }
-
-    @Override
-    public ShareInfo getLink(Session session, ShareTarget target) throws OXException {
-        //TODO: get proxy from module support, check permissions, discover anonymous entity
-
-        return null;
-    }
-
-    @Override
-    public void deleteLink(Session session, ShareTarget target, Date clientTimestamp) throws OXException {
-        //TODO: get proxy from module support, check permissions, discover anonymous entity, remove entity
-
-//        boolean deleted;
-//        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-//        try {
-//            connectionHelper.start();
-//            /*
-//             * delete the shares in storage, checking the provided last modification timestamp
-//             */
-//            deleted = services.getService(ShareStorage.class).deleteShare(session.getContextId(), share, clientTimestamp, connectionHelper.getParameters());
-//            if (false == deleted) {
-//                throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(share);
-//            }
-//            /*
-//             * remove target permissions (implicitly checking the session user's permissions)
-//             */
-//            removeTargetPermissions(session, connectionHelper, Collections.singletonList(share));
-//            connectionHelper.commit();
-//        } finally {
-//            connectionHelper.finish();
-//        }
-//        /*
-//         * schedule cleanup tasks as needed
-//         */
-//        if (deleted) {
-//            scheduleGuestCleanup(session.getContextId(), new int[] { share.getGuest() });
-//        }
-    }
-
-    @Override
     public DefaultGuestInfo resolveGuest(String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
         int contextID = shareToken.getContextID();
@@ -331,6 +183,233 @@ public class DefaultShareService implements ShareService {
         return null;
     }
 
+    @Override
+    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
+        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
+        //TODO: more distinct "created by" based on all share targets accessible by this guest?
+        return Collections.singleton(I(guestUser.getCreatedBy()));
+    }
+
+    @Override
+    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
+        return addTarget(session, target, recipients, null);
+    }
+
+    @Override
+    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
+        ShareTool.validateTarget(target);
+        LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
+        Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * Initial checks
+             */
+            checkRecipients(recipients, session);
+            /*
+             * prepare guest users and resulting shares
+             */
+            List<ShareInfo> sharesInfos = new ArrayList<ShareInfo>(recipients.size());
+            User sharingUser = utils.getUser(session);
+            for (ShareRecipient recipient : recipients) {
+                /*
+                 * prepare shares for this recipient
+                 */
+                ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
+                sharesInfos.add(shareInfo);
+                sharesByRecipient.put(recipient, shareInfo);
+            }
+            /*
+             * check quota restrictions, commit transaction & trigger collection of e-mail addresses
+             */
+            checkQuota(session, connectionHelper, sharesInfos);
+            connectionHelper.commit();
+            LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
+            utils.collectAddresses(session, recipients);
+            return new CreatedSharesImpl(sharesByRecipient);
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
+        checkRecipients(Collections.singletonList(recipient), session);
+        LOG.info("Adding share target {} for recipient {} in context {}...", target, recipient, I(session.getContextId()));
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        TargetUpdate targetUpdate = null;
+        try {
+            connectionHelper.start();
+            /*
+             * pre-fetch targets (implicitly checking access to them as current session's user)
+             */
+            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connectionHelper.getConnection());
+            targetUpdate.fetch(Collections.singletonList(target));
+            /*
+             * prepare share for the recipient & check quota restrictions
+             */
+            ShareInfo shareInfo = prepareShare(connectionHelper, utils.getUser(session), recipient, target, meta);
+            checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
+            /*
+             * apply new permissions for this target
+             */
+            boolean isGroup = RecipientType.GROUP.equals(recipient.getType());
+            TargetPermission targetPermission = new TargetPermission(shareInfo.getGuest().getGuestID(), isGroup, recipient.getBits());
+            targetUpdate.get(target).applyPermissions(Collections.singletonList(targetPermission));
+            /*
+             * run target update, commit transaction & return created shares result
+             */
+            targetUpdate.run();
+            connectionHelper.commit();
+            LOG.info("Shares to target {} for recipient {} in context {} added successfully.", target, recipient, I(session.getContextId()));
+            utils.collectAddresses(session, Collections.singletonList(recipient));
+            return new CreatedShareImpl(recipient, shareInfo);
+        } finally {
+            if (null != targetUpdate) {
+                targetUpdate.close();
+            }
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public ShareInfo getLink(Session session, ShareTarget target) throws OXException {
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        TargetProxy targetProxy = moduleSupport.load(target, session);
+        return optLink(utils.getContext(session), target, targetProxy);
+    }
+
+    @Override
+    public void updateLink(Session session, ShareTarget target, String password) throws OXException {
+        /*
+         * update password of anonymous user for this share link
+         */
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        Context context = utils.getContext(session);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            TargetProxy targetProxy = moduleSupport.load(target, session);
+            if (false == targetProxy.mayAdjust()) {
+                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
+            }
+            DefaultShareInfo shareInfo = optLink(context, target, targetProxy);
+            if (null == shareInfo) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(target); //TODO other exception
+            }
+            UserService userService = services.getService(UserService.class);
+            User guest = userService.getUser(connectionHelper.getConnection(), shareInfo.getGuest().getGuestID(), context);
+            if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
+                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
+            }
+            boolean guestUserUpdated = updatePassword(connectionHelper, context, guest, password);
+            connectionHelper.commit();
+            if (guestUserUpdated) {
+                userService.invalidateUser(context, guest.getId());
+            }
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public void updateLink(Session session, ShareTarget target, Date expiryDate) throws OXException {
+        /*
+         * update expiry of anonymous user for this share link
+         */
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        Context context = utils.getContext(session);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            TargetProxy targetProxy = moduleSupport.load(target, session);
+            if (false == targetProxy.mayAdjust()) {
+                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
+            }
+            DefaultShareInfo shareInfo = optLink(context, target, targetProxy);
+            if (null == shareInfo) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(target); //TODO other exception
+            }
+            UserService userService = services.getService(UserService.class);
+            User guest = userService.getUser(connectionHelper.getConnection(), shareInfo.getGuest().getGuestID(), context);
+            if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
+                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
+            }
+            UserImpl toUpdate = new UserImpl(guest);
+            String expiryDateValue = null != expiryDate ? String.valueOf(expiryDate.getTime()) : null;
+            ShareTool.assignUserAttribute(toUpdate, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
+            userService.updateUser(connectionHelper.getConnection(), toUpdate, context);
+            connectionHelper.commit();
+            userService.invalidateUser(context, guest.getId());
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public void deleteLink(Session session, ShareTarget target, Date clientTimestamp) throws OXException {
+        /*
+         * update expiry of anonymous user for this share link
+         */
+        int guestID;
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        Context context = utils.getContext(session);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            TargetUpdate targetUpdate = moduleSupport.prepareUpdate(session, connectionHelper.getConnection());
+            targetUpdate.fetch(Collections.singletonList(target));
+            TargetProxy targetProxy = targetUpdate.get(target);
+            if (false == targetProxy.mayAdjust()) {
+                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
+            }
+            DefaultShareInfo shareInfo = optLink(context, target, targetProxy);
+            if (null == shareInfo) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(target); //TODO other exception
+            }
+            guestID = shareInfo.getGuest().getGuestID();
+            targetProxy.removePermissions(Collections.singletonList(new TargetPermission(guestID, false, 0)));
+            targetUpdate.run();
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        scheduleGuestCleanup(session.getContextId(), new int[] { guestID });
+    }
+
+    /**
+     * Optionally gets an existing share link for a specific share target, i.e. a share to an anonymous guest user.
+     *
+     * @param context The context
+     * @param target The share target
+     * @param proxy The target proxy
+     * @return The share link, if one exists for the target, or <code>null</code>, otherwise
+     */
+    private DefaultShareInfo optLink(Context context, ShareTarget target, TargetProxy proxy) throws OXException {
+        List<TargetPermission> permissions = proxy.getPermissions();
+        if (null != permissions && 0 < permissions.size()) {
+            List<Integer> entities = new ArrayList<Integer>(permissions.size());
+            for (TargetPermission permission : permissions) {
+                if (false == permission.isGroup()) { //TODO: quick check for "read-only" beforehand
+                    entities.add(I(permission.getEntity()));
+                }
+            }
+            if (0 < entities.size()) {
+                UserService userService = services.getService(UserService.class);
+                for (Integer entity : entities) {
+                    User user = userService.getUser(entity.intValue(), context);
+                    if (ShareTool.isAnonymousGuest(user)) {
+
+                        PersonalizedShareTarget personalizedTarget = services.getService(ModuleSupport.class).personalizeTarget(target, context.getContextId(), user.getId());
+                        return new DefaultShareInfo(services, context.getContextId(), user, target, personalizedTarget);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Resolves the a share token to the referenced shares.
      *
@@ -338,7 +417,7 @@ public class DefaultShareService implements ShareService {
      * @param path The path to a specific share target, or <code>null</code> to resolve all accessible shares
      * @return The shares
      */
-    public List<ShareInfo> getShares(String token, String path) throws OXException {
+    List<ShareInfo> getShares(String token, String path) throws OXException {
         DefaultGuestInfo guest = resolveGuest(token);
         if (null == guest) {
             return null;
@@ -448,6 +527,7 @@ public class DefaultShareService implements ShareService {
      * @return The number of affected shares
      */
     int removeShares(int contextID, int userID) throws OXException {
+
         // TODO
         return 0;
 
@@ -680,7 +760,7 @@ public class DefaultShareService implements ShareService {
          * prepare a token collection to distinguish between base tokens only or base token with specific paths
          */
         TokenCollection tokenCollection = new TokenCollection(services, contextID, tokens);
-        List<Share> shares;
+        List<ShareInfo> shares;
         ConnectionHelper connectionHelper = null != session ? new ConnectionHelper(session, services, true) : new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
@@ -689,10 +769,9 @@ public class DefaultShareService implements ShareService {
              */
             shares = tokenCollection.loadShares(connectionHelper.getParameters());
             /*
-             * delete the shares in storage, removing the associated target permissions as well
+             * delete the shares by removing the associated target permissions
              */
             if (0 < shares.size()) {
-                services.getService(ShareStorage.class).deleteShares(contextID, shares, connectionHelper.getParameters());
                 removeTargetPermissions(session, connectionHelper, shares);
             }
             connectionHelper.commit();
@@ -724,8 +803,7 @@ public class DefaultShareService implements ShareService {
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
                 connectionHelper.start();
-                // TODO: remove target permissions
-//                removeTargetPermissions(null, connectionHelper, expiredShares);
+                removeTargetPermissions(null, connectionHelper, expiredShares);
                 affectedShares = 0;
                 connectionHelper.commit();
             } finally {
@@ -735,8 +813,7 @@ public class DefaultShareService implements ShareService {
              * schedule cleanup tasks as needed
              */
             if (0 < affectedShares) {
-                //TODO
-//                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
+                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
             }
         }
         return shares;
