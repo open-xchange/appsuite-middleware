@@ -215,17 +215,15 @@ public final class PasswordChangeServlet extends SessionServlet {
                 if (!jBody.has(paramNewPw) || jBody.isNull(paramNewPw) && false == user.isGuest()) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramNewPw);
                 }
-                if (!jBody.has(paramOldPw) || jBody.isNull(paramOldPw)) {
+                if (!jBody.has(paramOldPw) || jBody.isNull(paramOldPw) && false == user.isGuest()) {
                     throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramOldPw);
                 }
 
                 newPw = jBody.isNull(paramNewPw) ? null : jBody.getString(paramNewPw);
-                oldPw = jBody.getString(paramOldPw);
+                oldPw = jBody.isNull(paramOldPw) ? null : jBody.getString(paramOldPw);
             }
 
             // Perform password change
-
-
             if (user.isGuest()) {
                 BasicPasswordChangeService passwordChangeService = services.getService(BasicPasswordChangeService.class);
                 if (passwordChangeService == null) {
