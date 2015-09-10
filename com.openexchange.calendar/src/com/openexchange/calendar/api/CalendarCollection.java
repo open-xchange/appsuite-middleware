@@ -3122,9 +3122,9 @@ public final class CalendarCollection implements CalendarCollectionService {
             return false;
         }
         addMissingRecurrenceInformation(clone, edao);
-        RecurringResultsInterface resultsNew = calculateRecurring(clone, 0, 0, 0);
+        RecurringResultsInterface resultsNew = calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
         RecurringResultInterface lastOccurrenceNew = resultsNew.getRecurringResult(resultsNew.size() - 1);
-        RecurringResultsInterface resultsOld = calculateRecurring(edao, 0, 0, 0);
+        RecurringResultsInterface resultsOld = calculateRecurringIgnoringExceptions(edao, 0, 0, 0);
         RecurringResultInterface lastOccurrenceOld = resultsOld.getRecurringResult(resultsOld.size() - 1);
         if (lastOccurrenceNew.getEnd() != lastOccurrenceOld.getEnd()) {
             return true;
