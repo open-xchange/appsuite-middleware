@@ -50,6 +50,7 @@
 package com.openexchange.share.groupware;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -190,5 +191,15 @@ public interface ModuleSupport {
      * @return The share targets, or an empty list if there are none
      */
     List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException;
+
+    /**
+     * Gets the identifiers of those modules a specific guest user has access to, i.e. those where at least one share target for the
+     * guest exists.
+     *
+     * @param contextID The context identifier
+     * @param guestID The identifier of the guest user
+     * @return The identifiers of the modules the guest user has access to, or an empty set if there are none
+     */
+    Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException;
 
 }

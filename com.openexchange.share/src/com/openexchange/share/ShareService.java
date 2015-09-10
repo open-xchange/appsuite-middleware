@@ -51,7 +51,6 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -103,27 +102,6 @@ public interface ShareService {
     CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
-     * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest users on the share target are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share target on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
-     * or not, so again it's up to the caller to perform the necessary checks</li>
-     * <li>If specified, the metadata is is stored for each created share (i.e. for each recipient). If different metadata is required
-     * for different recipients, this method should be invoked multiple times.</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipients The recipients for the shares
-     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
-     * @return The created shares for each recipient, in the same order as the supplied recipient list
-     */
-    CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
-
-    /**
      * Gets an existing "anonymous" share link with read-only permissions for a specific target if one exists.
      *
      * @param session The session
@@ -148,38 +126,21 @@ public interface ShareService {
     ShareLink getLink(Session session, ShareTarget target) throws OXException;
 
     /**
-     * Updates the password used to access a specific "anonymous" share link.
+     * Updates the certain properties of a specific "anonymous" share link.
      * <p/>
      * <b>Remarks:</b>
      * <ul>
      * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
      * appropriate exception if the permissions are not sufficient</li>
-     * <li>Passing <code>null</code> is allowed to remove the password for the anonymous guest user</li>
      * </ul>
      *
      * @param session The session
      * @param target The share target referenced by the link
-     * @param password The new password, or <code>null</code> to remove it
+     * @param linkUpdate The link update holding the updated properties
+     * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The share link
      */
-    ShareLink updateLink(Session session, ShareTarget target, String password, Date clientTimestamp) throws OXException;
-
-    /**
-     * Updates the expiration date date for a specific "anonymous" share link.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
-     * appropriate exception if the permissions are not sufficient</li>
-     * <li>Passing <code>null</code> is allowed to remove the expiry date for the anonymous guest user</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param target The share target referenced by the link
-     * @param expiryDate The new expiration date, or <code>null</code> to remove it
-     * @return The share link
-     */
-    ShareLink updateLink(Session session, ShareTarget target, Date expiryDate, Date clientTimestamp) throws OXException;
+    ShareLink updateLink(Session session, ShareTarget target, LinkUpdate linkUpdate, Date clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing "anonymous" share link.

@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +81,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -155,28 +153,6 @@ public class ShareUtils {
             return ((ServerSession) session).getUser();
         }
         return requireService(UserService.class).getUser(session.getUserId(), session.getContextId());
-    }
-
-    /**
-     * Prepares a new share.
-     *
-     * @param contextID The context ID
-     * @param sharingUser The sharing user
-     * @param guestUserID The guest user ID
-     * @param target The share target
-     * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
-     * @return The share
-     */
-    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target) {
-        Date now = new Date();
-        Share share = new Share();
-        share.setTarget(target);
-        share.setCreated(now);
-        share.setModified(now);
-        share.setCreatedBy(sharingUser.getId());
-        share.setModifiedBy(sharingUser.getId());
-        share.setGuest(guestUserID);
-        return share;
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,104 +47,84 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.share;
 
 import java.util.Date;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareTarget;
 
 /**
- * {@link DriveShare}
+ * {@link LinkUpdate}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class DriveShare extends Share {
+public class LinkUpdate {
 
-    private static final long serialVersionUID = -5781164235991072065L;
-
-    private DriveShareTarget target;
-    private Share delegate;
+    private Date expiryDate;
+    private String password;
+    private boolean containsExpiryDate;
+    private boolean containsPassword;
 
     /**
-     * Initializes a new {@link DriveShare}.
-     *
-     * @param share The underlying share
-     * @param target The corresponding drive share target
+     * Initializes a new {@link LinkUpdate}.
      */
-    public DriveShare(Share share, DriveShareTarget target) {
-        super(share.getGuest(), share.getTarget());
-        this.delegate = share;
-        this.target = target;
+    public LinkUpdate() {
+        super();
     }
 
-    @Override
-    public int getGuest() {
-        return delegate.getGuest();
+    /**
+     * Gets the expiryDate
+     *
+     * @return The expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
-    @Override
-    public DriveShareTarget getTarget() {
-        return target;
+    /**
+     * Sets the expiryDate
+     *
+     * @param expiryDate The expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+        containsExpiryDate = true;
     }
 
-    public void setTarget(DriveShareTarget target) {
-        this.target = target;
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
     }
 
-    @Override
-    public void setTarget(ShareTarget target) {
-        throw new UnsupportedOperationException();
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+        containsPassword = true;
     }
 
-    @Override
-    public int getCreatedBy() {
-        return delegate.getCreatedBy();
+    /**
+     * Gets the containsExpiryDate
+     *
+     * @return The containsExpiryDate
+     */
+    public boolean containsExpiryDate() {
+        return containsExpiryDate;
     }
 
-    @Override
-    public void setCreatedBy(int sharedBy) {
-        delegate.setCreatedBy(sharedBy);
-    }
-
-    @Override
-    public void setGuest(int guest) {
-        delegate.setGuest(guest);
-    }
-
-    @Override
-    public Date getCreated() {
-        return delegate.getCreated();
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        delegate.setCreated(created);
-    }
-
-    @Override
-    public Date getModified() {
-        return delegate.getModified();
-    }
-
-    @Override
-    public void setModified(Date modified) {
-        delegate.setModified(modified);
-    }
-
-    @Override
-    public int getModifiedBy() {
-        return delegate.getModifiedBy();
-    }
-
-    @Override
-    public void setModifiedBy(int modifiedBy) {
-        delegate.setModifiedBy(modifiedBy);
-    }
-
-    @Override
-    public String toString() {
-        return delegate.toString();
+    /**
+     * Gets the containsPassword
+     *
+     * @return The containsPassword
+     */
+    public boolean containsPassword() {
+        return containsPassword;
     }
 
 }

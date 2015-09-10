@@ -52,12 +52,10 @@ package com.openexchange.drive;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -187,32 +185,5 @@ public interface DriveService {
      * @throws OXException
      */
     DriveUtility getUtility();
-
-    /**
-     * Gets all shares for a specific target.
-     *
-     * @param session The session
-     * @param target The target to get the shares for
-     * @return The shares, or an empty list if there are none
-     */
-    DriveShareInfo getLink(DriveSession session, DriveShareTarget target) throws OXException;
-
-    /**
-     * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest user on the share target are updated implicitly via corresponding target proxies
-     * automatically</li>
-     * <li>Permissions checks are performed implicitly during the update of the referenced target</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipient The recipient for the share
-     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
-     * @return The created share
-     */
-    DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
 
 }

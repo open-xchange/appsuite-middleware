@@ -70,7 +70,6 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
@@ -168,8 +167,8 @@ public class GuestCleanupTask extends AbstractTask<Void> {
          * check to which share targets the guest user has still access to (if any)
          */
         DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
-        List<ShareTarget> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestUser.getId());
-        if (0 == targets.size()) {
+        Collection<Integer> modules = services.getService(ModuleSupport.class).getAccessibleModules(contextID, guestID);
+        if (0 == modules.size()) {
             /*
              * no shares remaining
              */
@@ -227,7 +226,6 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             /*
              * adjust permissions for remaining shares as needed
              */
-            Collection<Integer> modules = ShareTool.mapTargetsByModule(targets).keySet();
             ShareUtils utils = new ShareUtils(services);
             int requiredPermissionBits = utils.getRequiredPermissionBits(guestUser, modules);
             UserPermissionBits updatedPermissionBits = utils.setPermissionBits(connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);

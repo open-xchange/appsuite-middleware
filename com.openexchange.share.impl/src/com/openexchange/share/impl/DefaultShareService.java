@@ -91,6 +91,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
@@ -191,11 +192,6 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        return addTarget(session, target, recipients, null);
-    }
-
-    @Override
-    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
         ShareTool.validateTarget(target);
         LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
         Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
@@ -284,7 +280,7 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public ShareLink updateLink(Session session, ShareTarget target, String password, Date clientTimestamp) throws OXException {
+    public ShareLink updateLink(Session session, ShareTarget target, LinkUpdate linkUpdate, Date clientTimestamp) throws OXException {
         /*
          * update password of anonymous user for this share link
          */
@@ -309,49 +305,21 @@ public class DefaultShareService implements ShareService {
             if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
                 throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
             }
-            boolean guestUserUpdated = updatePassword(connectionHelper, context, guest, password);
+            boolean guestUserUpdated = false;
+            if (linkUpdate.containsPassword()) {
+                guestUserUpdated |= updatePassword(connectionHelper, context, guest, linkUpdate.getPassword());
+            }
+            if (linkUpdate.containsExpiryDate()) {
+                UserImpl toUpdate = new UserImpl(guest);
+                String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
+                ShareTool.assignUserAttribute(toUpdate, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
+                userService.updateUser(connectionHelper.getConnection(), toUpdate, context);
+                guestUserUpdated = true;
+            }
             connectionHelper.commit();
             if (guestUserUpdated) {
                 userService.invalidateUser(context, guest.getId());
             }
-            return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
-        } finally {
-            connectionHelper.finish();
-        }
-    }
-
-    @Override
-    public ShareLink updateLink(Session session, ShareTarget target, Date expiryDate, Date clientTimestamp) throws OXException {
-        /*
-         * update expiry of anonymous user for this share link
-         */
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-        Context context = utils.getContext(session);
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            TargetProxy targetProxy = moduleSupport.load(target, session);
-            if (false == targetProxy.mayAdjust()) {
-                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
-            }
-            if (clientTimestamp.before(targetProxy.getTimestamp())) {
-                throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(target);
-            }
-            DefaultShareInfo shareInfo = optLinkShare(context, target, targetProxy);
-            if (null == shareInfo) {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create(target); //TODO other exception
-            }
-            UserService userService = services.getService(UserService.class);
-            User guest = userService.getUser(connectionHelper.getConnection(), shareInfo.getGuest().getGuestID(), context);
-            if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
-                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
-            }
-            UserImpl toUpdate = new UserImpl(guest);
-            String expiryDateValue = null != expiryDate ? String.valueOf(expiryDate.getTime()) : null;
-            ShareTool.assignUserAttribute(toUpdate, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
-            userService.updateUser(connectionHelper.getConnection(), toUpdate, context);
-            connectionHelper.commit();
-            userService.invalidateUser(context, guest.getId());
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
         } finally {
             connectionHelper.finish();

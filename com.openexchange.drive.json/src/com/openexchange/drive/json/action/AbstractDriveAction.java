@@ -64,8 +64,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.json.DriveShareJSONParser;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
@@ -127,17 +125,6 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      */
     protected ShareService getShareService() throws OXException {
         return requireService(ShareService.class, Services.get());
-    }
-
-    /**
-     * Gets an existing link, i.e. an anonymous share, for a specific share target.
-     *
-     * @param session The session
-     * @param target The target to get the link for
-     * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
-     */
-    protected DriveShareInfo discoverLink(DriveSession session, DriveShareTarget target) throws OXException {
-        return getDriveService().getLink(session, target);
     }
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {

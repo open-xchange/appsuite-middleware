@@ -52,7 +52,6 @@ package com.openexchange.drive.impl.internal.throttle;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DirectoryMetadata;
@@ -64,14 +63,11 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ThrottlingDriveService}
@@ -172,16 +168,6 @@ public class ThrottlingDriveService implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return delegate.getUtility();
-    }
-
-    @Override
-    public List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException {
-        return delegate.getShares(session, target);
-    }
-
-    @Override
-    public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
-        return delegate.addShare(session, target, recipient, meta);
     }
 
     private void enterSyncOperation() throws OXException {

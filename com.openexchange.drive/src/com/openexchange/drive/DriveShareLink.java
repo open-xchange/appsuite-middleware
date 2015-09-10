@@ -47,34 +47,24 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveShareTarget;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareLink;
 
 /**
- * {@link DeleteLinkAction}
+ * {@link DriveShareLink}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DeleteLinkAction extends AbstractDriveAction {
+public interface DriveShareLink extends ShareLink, DriveShareInfo {
 
+    /**
+     * Gets the underlying share target.
+     *
+     * @return The share target
+     */
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        /*
-         * parse target
-         */
-        DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
-        /*
-         * perform the deletion, return empty result in case of success
-         */
-        getDriveService().getUtility().deleteLink(session, target);
-        return new AJAXRequestResult(new JSONObject(), "json");
-    }
+    DriveShareTarget getTarget();
 
 }

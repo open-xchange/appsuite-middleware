@@ -54,11 +54,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.LinkUpdate;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -77,24 +76,19 @@ public class UpdateLinkAction extends AbstractDriveAction {
         JSONObject json = (JSONObject) requestData.requireData();
         DriveShareTarget target = getShareParser().parseTarget(json);
         /*
-         * lookup share, assume latest timestamp if client checksum matches
-         */
-        DriveShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
-        }
-        /*
          * update share based on present data in update request
          */
         try {
+            LinkUpdate linkUpdate = new LinkUpdate();
             if (json.has("expiry_date")) {
                 Date newExpiry = json.isNull("expiry_date") ? null : new Date(json.getLong("expiry_date"));
-                getShareService().updateLink(session.getServerSession(), shareInfo.getTarget(), newExpiry);
+                linkUpdate.setExpiryDate(newExpiry);
             }
             if (json.has("password")) {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateLink(session.getServerSession(), shareInfo.getTarget(), newPassword);
+                linkUpdate.setPassword(newPassword);
             }
+            getDriveService().getUtility().updateLink(session, target, linkUpdate);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

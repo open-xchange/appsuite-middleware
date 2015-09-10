@@ -56,6 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.LinkUpdate;
+import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -88,22 +90,25 @@ public class UpdateLinkAction extends AbstractShareAction {
         /*
          * update share based on present data in update request
          */
+        ShareLink shareLink;
         try {
+            LinkUpdate linkUpdate = new LinkUpdate();
             if (json.has("expiry_date")) {
                 Date newExpiry = json.isNull("expiry_date") ? null : new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session)));
-                getShareService().updateLink(session, target, newExpiry, clientTimestamp);
+                linkUpdate.setExpiryDate(newExpiry);
             }
             if (json.has("password")) {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateLink(session, target, newPassword, clientTimestamp);
+                linkUpdate.setPassword(newPassword);
             }
+            shareLink = getShareService().updateLink(session, target, linkUpdate, clientTimestamp);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
         /*
          * return empty result in case of success
          */
-        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
+        return new AJAXRequestResult(new JSONObject(), shareLink.getTimestamp(), "json");
     }
 
 }

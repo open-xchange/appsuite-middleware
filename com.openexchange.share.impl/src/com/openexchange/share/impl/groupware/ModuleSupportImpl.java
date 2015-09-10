@@ -52,6 +52,7 @@ package com.openexchange.share.impl.groupware;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -79,7 +81,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
-
 
 /**
  * {@link ModuleSupportImpl}
@@ -267,6 +268,13 @@ public class ModuleSupportImpl implements ModuleSupport {
     @Override
     public List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException {
         return listTargets(contextID, guestID, new int[] { module });
+    }
+
+    @Override
+    public Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException {
+        //TODO: more sophisticated check if targets exist per module
+        List<ShareTarget> targets = listTargets(contextID, guestID);
+        return ShareTool.mapTargetsByModule(targets).keySet();
     }
 
     private List<ShareTarget> listTargets(int contextID, int guestID, int[] moduleIDs) throws OXException {
