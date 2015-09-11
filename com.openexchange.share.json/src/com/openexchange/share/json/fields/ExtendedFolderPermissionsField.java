@@ -124,18 +124,18 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
         if (null != value && List.class.isInstance(value)) {
-            try {
-                List<?> values = (List<?>) value;
-                JSONArray jsonArray = new JSONArray(values.size());
-                for (Object item : values) {
-                    if (ExtendedFolderPermission.class.isInstance(item)) {
+            List<?> values = (List<?>) value;
+            JSONArray jsonArray = new JSONArray(values.size());
+            for (Object item : values) {
+                if (ExtendedFolderPermission.class.isInstance(item)) {
+                    try {
                         jsonArray.put(((ExtendedFolderPermission) item).toJSON(requestData));
+                    } catch (JSONException | OXException e) {
+                        org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
                     }
                 }
-                return jsonArray;
-            } catch (JSONException | OXException e) {
-                org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
             }
+            return jsonArray;
         }
         return null;
     }

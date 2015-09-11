@@ -130,18 +130,18 @@ public class ExtendedObjectPermissionsField implements AdditionalFileField {
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
         if (null != value && List.class.isInstance(value)) {
-            try {
-                List<?> values = (List<?>) value;
-                JSONArray jsonArray = new JSONArray(values.size());
-                for (Object item : values) {
-                    if (ExtendedObjectPermission.class.isInstance(item)) {
+            List<?> values = (List<?>) value;
+            JSONArray jsonArray = new JSONArray(values.size());
+            for (Object item : values) {
+                if (ExtendedObjectPermission.class.isInstance(item)) {
+                    try {
                         jsonArray.put(((ExtendedObjectPermission) item).toJSON(requestData));
+                    } catch (JSONException | OXException e) {
+                        org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).error("Error serializing extended permissions", e);
                     }
                 }
-                return jsonArray;
-            } catch (JSONException | OXException e) {
-                org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).error("Error serializing extended permissions", e);
             }
+            return jsonArray;
         }
         return new JSONArray(0);
     }

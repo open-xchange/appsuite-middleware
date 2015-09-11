@@ -70,6 +70,8 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
@@ -164,9 +166,25 @@ public class GuestCleanupTask extends AbstractTask<Void> {
 
     private void cleanGuest(ConnectionHelper connectionHelper, Context context, User guestUser) throws OXException {
         /*
+         * Check if entity is consistent
+         */
+        ShareToken shareToken;
+        try {
+            shareToken = new ShareToken(contextID, guestUser);
+        } catch (OXException e) {
+            if (ShareExceptionCodes.INVALID_TOKEN.equals(e)) {
+                LOG.info("Found invalid guest entity {} in context {} without a valid base token. Guest user will be deleted...", guestID, contextID);
+                deleteGuest(connectionHelper.getConnection(), context, guestID);
+                return;
+            }
+
+            throw e;
+        }
+
+        /*
          * check to which share targets the guest user has still access to (if any)
          */
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guestUser, shareToken, null);
         Collection<Integer> modules = services.getService(ModuleSupport.class).getAccessibleModules(contextID, guestID);
         if (0 == modules.size()) {
             /*

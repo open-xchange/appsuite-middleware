@@ -85,6 +85,7 @@ public class DefaultGuestInfo implements GuestInfo {
      * @param contextID The identifier of the context this guest user belongs to
      * @param linkTarget The link target if this guest is anonymous; otherwise <code>null</code>
      * @param guestUser The guest user
+     * @throws OXException If the guest users token is invalid
      */
     public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget linkTarget) throws OXException {
         this(services, guestUser, new ShareToken(contextID, guestUser), linkTarget);

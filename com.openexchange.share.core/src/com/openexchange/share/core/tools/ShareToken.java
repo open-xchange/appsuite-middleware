@@ -114,7 +114,8 @@ public class ShareToken {
      *
      * @param contextID The context ID
      * @param guestUser the guest user
-     * @throws OXException
+     * @throws OXException If the guest users token is invalid
+     * @see ShareExceptionCodes#INVALID_TOKEN
      */
     public ShareToken(int contextID, User guestUser) throws OXException {
         super();

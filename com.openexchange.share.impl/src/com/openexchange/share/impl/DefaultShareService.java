@@ -956,7 +956,10 @@ public class DefaultShareService implements ShareService {
             try {
                 String targetAttr = ShareTool.getUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE);
                 if (targetAttr == null) {
-                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Anonymous guest " + guestUser.getId() + " in context " + contextId + " is in inconsistent state - no share target exists.");
+                    scheduleGuestCleanup(contextId, guestUser.getId());
+                    OXException e = ShareExceptionCodes.UNEXPECTED_ERROR.create("Anonymous guest " + guestUser.getId() + " in context " + contextId + " is in inconsistent state - no share target exists.");
+                    LOG.warn("Scheduled clean up of broken guest user entity", e);
+                    return null;
                 }
                 return ShareTool.jsonToTarget(new JSONObject(targetAttr));
             } catch (JSONException e) {

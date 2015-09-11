@@ -69,6 +69,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -287,6 +288,12 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                     "Can't resolve uon entity {} for file {}", permission.getEntity(), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
+                if (guest == null) {
+                    int contextId = session.getServerSession().getContextId();
+                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
+                        "It might have been deleted in the mean time or is in an inconsistent state.");
+                }
+
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
                     addShareInfo(jsonObject, session.getPermissionResolver().getLink(file, permission.getEntity()));
