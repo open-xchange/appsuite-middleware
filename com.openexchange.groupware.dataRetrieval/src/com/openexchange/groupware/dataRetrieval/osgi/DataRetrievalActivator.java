@@ -104,15 +104,17 @@ public class DataRetrievalActivator extends AbstractSessionServletActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
-
         OSGIDataProviderRegistry dataProviderRegistry = this.dataProviderRegistry;
         if (dataProviderRegistry != null) {
             this.dataProviderRegistry = null;
             dataProviderRegistry.close();
-            final SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
-            containerRetrievalService.destroyRandomTokenContainer(NAMESPACE, null);
+            SessionSpecificContainerRetrievalService containerRetrievalService = getService(SessionSpecificContainerRetrievalService.class);
+            if (null != containerRetrievalService) {
+                containerRetrievalService.destroyRandomTokenContainer(NAMESPACE, null);
+            }
         }
+
+        super.stopBundle();
     }
 
     @Override
