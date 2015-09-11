@@ -374,7 +374,7 @@ public class Strings {
      * Splits given string by comma separator.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByComma(final String s) {
         if (null == s) {
@@ -419,7 +419,7 @@ public class Strings {
      * Splits given string by CR?LF; yields line-wise output.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByCRLF(final String s) {
         if (null == s) {
@@ -428,13 +428,28 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
+    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+
+    /**
+     * Splits given string by tabs.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByTab(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_TAB.split(s, 0);
+    }
+
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * Splits given string by whitespaces.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByWhitespaces(final String s) {
         if (null == s) {
