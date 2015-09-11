@@ -267,8 +267,7 @@ public class CalendarTest extends TestCase {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
 
-        final ContextStorage cs = ContextStorage.getInstance();
-        final Context context = cs.getContext(cs.getContextId("defaultcontext"));
+        final Context context = new ContextImpl(contextid);
 
         readcon = DBPool.pickup(context);
 
