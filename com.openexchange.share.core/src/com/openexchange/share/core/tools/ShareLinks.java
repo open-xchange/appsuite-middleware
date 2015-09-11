@@ -50,8 +50,6 @@
 package com.openexchange.share.core.tools;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -96,7 +94,7 @@ public class ShareLinks {
         }
         String targetPath = "";
         if (target != null) {
-            targetPath = "/" + target.getPath();
+            targetPath = target.getPath();
         }
         return builder.setPath(serverPath(hostData, "/" + guestToken + targetPath)).toString();
     }
@@ -209,74 +207,5 @@ public class ShareLinks {
         }
         return hostname;
     }
-
-    private static final Map<Character, Character> CHAR_MAPPING = new HashMap<>();
-    static {
-        CHAR_MAPPING.put(new Character('0'), new Character('j'));
-        CHAR_MAPPING.put(new Character('1'), new Character('w'));
-        CHAR_MAPPING.put(new Character('2'), new Character('s'));
-        CHAR_MAPPING.put(new Character('3'), new Character('7'));
-        CHAR_MAPPING.put(new Character('4'), new Character('9'));
-        CHAR_MAPPING.put(new Character('5'), new Character('S'));
-        CHAR_MAPPING.put(new Character('6'), new Character('k'));
-        CHAR_MAPPING.put(new Character('7'), new Character('3'));
-        CHAR_MAPPING.put(new Character('8'), new Character('Q'));
-        CHAR_MAPPING.put(new Character('9'), new Character('4'));
-        CHAR_MAPPING.put(new Character('a'), new Character('m'));
-        CHAR_MAPPING.put(new Character('A'), new Character('P'));
-        CHAR_MAPPING.put(new Character('B'), new Character('o'));
-        CHAR_MAPPING.put(new Character('b'), new Character('V'));
-        CHAR_MAPPING.put(new Character('c'), new Character('U'));
-        CHAR_MAPPING.put(new Character('C'), new Character('x'));
-        CHAR_MAPPING.put(new Character('D'), new Character('l'));
-        CHAR_MAPPING.put(new Character('d'), new Character('N'));
-        CHAR_MAPPING.put(new Character('E'), new Character('i'));
-        CHAR_MAPPING.put(new Character('e'), new Character('Z'));
-        CHAR_MAPPING.put(new Character('f'), new Character('g'));
-        CHAR_MAPPING.put(new Character('F'), new Character('W'));
-        CHAR_MAPPING.put(new Character('g'), new Character('f'));
-        CHAR_MAPPING.put(new Character('G'), new Character('I'));
-        CHAR_MAPPING.put(new Character('H'), new Character('J'));
-        CHAR_MAPPING.put(new Character('h'), new Character('M'));
-        CHAR_MAPPING.put(new Character('i'), new Character('E'));
-        CHAR_MAPPING.put(new Character('I'), new Character('G'));
-        CHAR_MAPPING.put(new Character('j'), new Character('0'));
-        CHAR_MAPPING.put(new Character('J'), new Character('H'));
-        CHAR_MAPPING.put(new Character('k'), new Character('6'));
-        CHAR_MAPPING.put(new Character('K'), new Character('X'));
-        CHAR_MAPPING.put(new Character('l'), new Character('D'));
-        CHAR_MAPPING.put(new Character('L'), new Character('n'));
-        CHAR_MAPPING.put(new Character('m'), new Character('a'));
-        CHAR_MAPPING.put(new Character('M'), new Character('h'));
-        CHAR_MAPPING.put(new Character('_'), new Character('T'));
-        CHAR_MAPPING.put(new Character('-'), new Character('b'));
-        CHAR_MAPPING.put(new Character('N'), new Character('d'));
-        CHAR_MAPPING.put(new Character('n'), new Character('L'));
-        CHAR_MAPPING.put(new Character('o'), new Character('B'));
-        CHAR_MAPPING.put(new Character('O'), new Character('R'));
-        CHAR_MAPPING.put(new Character('P'), new Character('A'));
-        CHAR_MAPPING.put(new Character('p'), new Character('-'));
-        CHAR_MAPPING.put(new Character('Q'), new Character('8'));
-        CHAR_MAPPING.put(new Character('q'), new Character('v'));
-        CHAR_MAPPING.put(new Character('R'), new Character('O'));
-        CHAR_MAPPING.put(new Character('r'), new Character('Y'));
-        CHAR_MAPPING.put(new Character('s'), new Character('2'));
-        CHAR_MAPPING.put(new Character('S'), new Character('5'));
-        CHAR_MAPPING.put(new Character('T'), new Character('p'));
-        CHAR_MAPPING.put(new Character('t'), new Character('z'));
-        CHAR_MAPPING.put(new Character('U'), new Character('c'));
-        CHAR_MAPPING.put(new Character('u'), new Character('y'));
-        CHAR_MAPPING.put(new Character('V'), new Character('_'));
-        CHAR_MAPPING.put(new Character('v'), new Character('q'));
-        CHAR_MAPPING.put(new Character('w'), new Character('1'));
-        CHAR_MAPPING.put(new Character('W'), new Character('F'));
-        CHAR_MAPPING.put(new Character('x'), new Character('C'));
-        CHAR_MAPPING.put(new Character('X'), new Character('K'));
-        CHAR_MAPPING.put(new Character('Y'), new Character('r'));
-        CHAR_MAPPING.put(new Character('y'), new Character('u'));
-        CHAR_MAPPING.put(new Character('Z'), new Character('e'));
-        CHAR_MAPPING.put(new Character('z'), new Character('t'));
-    }
-
 
 }

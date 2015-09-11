@@ -124,12 +124,13 @@ public class ShareServlet extends AbstractShareServlet {
 
             GuestInfo guest = ShareServiceLookup.getService(ShareService.class, true).resolveGuest(paths.get(0));
             if (guest == null) {
-//                    LOG.debug("No guest with token '{}' found at '{}'", paths[0], pathInfo); TODO
+                LOG.debug("No guest with token '{}' found at '{}'", paths.get(0), pathInfo);
                 sendNotFound(response, translator);
                 return;
             }
 
-//            LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share); TODO
+            LOG.debug("Successfully resolved guest at '{}' to {}", pathInfo, guest);
+
             // Switch language for errors if appropriate
             translator = translatorFactory.translatorFor(determineLocale(request, guest));
 
@@ -141,9 +142,11 @@ public class ShareServlet extends AbstractShareServlet {
                     invalidTarget = true;
                 } else {
                     ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
-                    if (!moduleSupport.exists(target, guest.getContextID(), guest.getGuestID()) || !moduleSupport.isVisible(target, guest.getContextID(), guest.getGuestID())) {
+                    int contextId = guest.getContextID();
+                    int guestId = guest.getGuestID();
+                    if (!moduleSupport.exists(target, contextId, guestId) || !moduleSupport.isVisible(target, contextId, guestId)) {
                         invalidTarget = true;
-                        List<ShareTarget> otherTargets = moduleSupport.listTargets(guest.getContextID(), guest.getGuestID());
+                        List<ShareTarget> otherTargets = moduleSupport.listTargets(contextId, guestId);
                         if (otherTargets.isEmpty()) {
                             sendNotFound(response, translator);
                             return;
