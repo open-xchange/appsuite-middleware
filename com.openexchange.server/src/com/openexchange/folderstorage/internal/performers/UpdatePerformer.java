@@ -130,10 +130,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
-    public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        super(storageParameters, folderStorageDiscoverer);
-    }
-
     /**
      * Performs the <code>UPDATE</code> request.
      *
@@ -468,7 +464,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
                 if (!ignoreWarnings) {
-                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), f.getName(), Integer.valueOf(context.getContextId()));
+                    int contextId;
+                    int userId;
+                    if (session == null) {
+                        contextId = context.getContextId();
+                        userId = user.getId();
+                    } else {
+                        contextId = session.getContextId();
+                        userId = session.getUserId();
+                    }
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(userId, f.getName(), Integer.valueOf(contextId));
                 }
             } else {
                 ids.add(f.getID());

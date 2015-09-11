@@ -120,17 +120,6 @@ public abstract class AbstractPerformer {
     }
 
     /**
-     * Initializes a new {@link AbstractPerformer} from given {@link StorageParameters}.
-     *
-     * @param storageParameters The {@link StorageParameters}. Must not be <code>null</code> and must contain a valid session.
-     * @param folderStorageDiscoverer The folder storage discoverer
-     * @throws OXException If passed parameters are invalid
-     */
-    protected AbstractPerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        this(ServerSessionAdapter.valueOf(storageParameters.getSession()), storageParameters, folderStorageDiscoverer);
-    }
-
-    /**
      * Initializes a new {@link AbstractPerformer} from given session.
      *
      * @param session The session
@@ -425,7 +414,7 @@ public abstract class AbstractPerformer {
     /**
      * Gets the session.
      *
-     * @return The session
+     * @return The session or <code>null</code>
      */
     public ServerSession getSession() {
         return session;

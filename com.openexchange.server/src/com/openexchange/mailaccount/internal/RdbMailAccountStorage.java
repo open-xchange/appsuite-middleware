@@ -92,6 +92,7 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
@@ -196,7 +197,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     public Set<String> call() throws OXException {
                         Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
                         if (null == set) {
-                            set = getPOP3StorageFolders0(session);
+                            set = getPOP3StorageFolders0(session.getContextId(), session.getUserId());
                             session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
                         }
                         return set;
@@ -212,15 +213,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return set;
     }
 
-    static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
-        final int contextId = session.getContextId();
+    /**
+     * Gets the POP3 storage folders for specified user.
+     *
+     * @param user The user
+     * @param context The context
+     * @return The POP3 storage folder full names
+     * @throws OXException If an error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static Set<String> getPOP3StorageFolders(final User user, final Context context) throws OXException {
+        return getPOP3StorageFolders0(context.getContextId(), user.getId());
+    }
+
+    static Set<String> getPOP3StorageFolders0(int contextId, int userId) throws OXException {
         final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND name = ?");
             stmt.setInt(1, contextId);
-            stmt.setInt(2, session.getUserId());
+            stmt.setInt(2, userId);
             stmt.setString(3, "pop3.path");
             rs = stmt.executeQuery();
             final Set<String> set = new HashSet<String>(4);

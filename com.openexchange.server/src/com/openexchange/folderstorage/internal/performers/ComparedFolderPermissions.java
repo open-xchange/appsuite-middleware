@@ -80,7 +80,7 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
     /**
      * Initializes a new {@link ComparedFolderPermissions}.
      *
-     * @param session The session
+     * @param session The session or <code>null</code>; no guest information can be loaded then.
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
      * @param shareService The share service
@@ -168,6 +168,10 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @throws OXException If loading the guest info fails
      */
     public GuestInfo getGuestInfo(int guestId) throws OXException {
+        if (session == null) {
+            return null;
+        }
+
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
             guestInfo = shareService.getGuestInfo(session, guestId);

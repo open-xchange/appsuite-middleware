@@ -206,18 +206,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     *
-     * @param storageParameters
-     * @param folderStorageDiscoverer
-     * @throws OXException
-     */
-    public AbstractUserizedFolderPerformer(StorageParameters storageParameters, FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        super(storageParameters, folderStorageDiscoverer);
-        this.decorator = storageParameters.getDecorator();
-    }
-
-    /**
      * Those content type identifiers which are capable to accept folder names containing parenthesis characters.
      */
     protected static final Set<String> PARENTHESIS_CAPABLE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
@@ -522,7 +510,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check for equally named folder on same level
          */
         Set<String> conflictingNames = new HashSet<String>();
-        UserizedFolder[] existingFolders = new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, targetFolderId, true, true);
+        ListPerformer listPerformer;
+        if (session == null) {
+            listPerformer = new ListPerformer(user, context, null, folderStorageDiscoverer);
+        } else {
+            listPerformer = new ListPerformer(session, null, folderStorageDiscoverer);
+        }
+        UserizedFolder[] existingFolders = listPerformer.doList(treeId, targetFolderId, true, true);
         for (UserizedFolder existingFolder : existingFolders) {
             if (false == existingFolder.getID().equals(folderToSave.getID())) {
                 String conflictingName = existingFolder.getName().toLowerCase(getLocale());
@@ -574,7 +568,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Adds share targets as a consequence of added guest permission entities. This also includes creating or resolving the corresponding
-     * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically.
+     * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically. This method needs the
+     * session set on the according folder performer. If no session is set, this is a no-op.
      *
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
@@ -582,6 +577,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param connection The database connection to use or <code>null</code>
      */
     protected void processAddedGuestPermissions(String folderID, ContentType contentType, ComparedFolderPermissions comparedPermissions, Connection connection) throws OXException {
+        if (session == null) {
+            return;
+        }
+
         if (comparedPermissions.hasNewGuests()) {
             Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(folderID, contentType, comparedPermissions.getNewGuestPermissions());
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
@@ -858,7 +857,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             final String id = visibleIds[0].getId();
                             final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
                             if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
+                                final Permission p;
+                                if (session == null) {
+                                    p = CalculatePermission.calculate(subfolder, user, context, getAllowedContentTypes());
+                                } else {
+                                    p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
+                                }
                                 if (p.isVisible()) {
                                     dummyId = id;
                                 }

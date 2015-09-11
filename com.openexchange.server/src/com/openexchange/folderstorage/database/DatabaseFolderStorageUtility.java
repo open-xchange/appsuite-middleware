@@ -52,16 +52,19 @@ package com.openexchange.folderstorage.database;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DatabaseFolderStorageUtility} - Utility methods for database folder storage.
@@ -182,14 +185,19 @@ public final class DatabaseFolderStorageUtility {
      */
     public static UserPermissionBits getUserPermissionBits(Connection connection, StorageParameters storageParameters) throws OXException {
         Session session = storageParameters.getSession();
-        if (ServerSession.class.isInstance(session)) {
+        if (session != null && ServerSession.class.isInstance(session)) {
             return ((ServerSession) session).getUserPermissionBits();
         }
-        UserPermissionBitsStorage storage = UserPermissionBitsStorage.getInstance();
+
+        UserPermissionService userPermissionService = FolderStorageServices.requireService(UserPermissionService.class);
         if (null == connection) {
-            return storage.getUserPermissionBits(storageParameters.getUserId(), storageParameters.getContext());
+            return userPermissionService.getUserPermissionBits(storageParameters.getUserId(), storageParameters.getContextId());
         } else {
-            return storage.getUserPermissionBits(connection, storageParameters.getUserId(), storageParameters.getContext());
+            Context context = storageParameters.getContext();
+            if (context == null) {
+                context = FolderStorageServices.requireService(ContextService.class).getContext(storageParameters.getContextId());
+            }
+            return userPermissionService.getUserPermissionBits(connection, storageParameters.getUserId(), context);
         }
     }
 

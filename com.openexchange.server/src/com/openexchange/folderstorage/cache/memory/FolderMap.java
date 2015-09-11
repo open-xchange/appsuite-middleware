@@ -204,6 +204,7 @@ public final class FolderMap {
      *
      * @param folderId the folder id
      * @param treeId the tree id
+     * @param session The session or <code>null</code>
      * @return The folder
      */
     public Folder get(final String folderId, final String treeId, final Session session) {
@@ -264,6 +265,7 @@ public final class FolderMap {
      *
      * @param treeId the tree id
      * @param folder the folder
+     * @param session The session or <code>null</code>
      * @return The folder
      */
     public Folder put(final String treeId, final Folder folder, final Session session) {
@@ -276,6 +278,7 @@ public final class FolderMap {
      * @param folderId the folder id
      * @param treeId the tree id
      * @param folder the folder
+     * @param session The session or <code>null</code>
      * @return The folder
      */
     public Folder put(final String folderId, final String treeId, final Folder folder, final Session session) {

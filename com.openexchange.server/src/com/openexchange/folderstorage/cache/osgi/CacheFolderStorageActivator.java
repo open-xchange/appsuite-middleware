@@ -83,6 +83,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
@@ -309,13 +311,13 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 protected void doHandleEvent(final CacheFolderStorage tmp, final Event event) {
                     try {
                         final String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
-                        final Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                        final ServerSession session = ServerSessionAdapter.valueOf((Session)event.getProperty(FileStorageEventConstants.SESSION));
                         final String[] folderPath = (String[]) event.getProperty(FileStorageEventConstants.FOLDER_PATH);
                         tmp.removeFromGlobalCache(folderID, FolderStorage.REAL_TREE_ID, session.getContextId());
                         if (null != folderPath) {
-                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session, Arrays.asList(folderPath));
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session.getUser(), session.getContext(), session, Arrays.asList(folderPath));
                         } else {
-                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session);
+                            tmp.removeFromCache(folderID, FolderStorage.REAL_TREE_ID, false, session.getUser(), session.getContext(), session);
                         }
                     } catch (final OXException e) {
                         LOG.error("", e);

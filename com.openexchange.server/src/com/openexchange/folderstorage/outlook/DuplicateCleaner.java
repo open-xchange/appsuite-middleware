@@ -110,11 +110,10 @@ public final class DuplicateCleaner {
         final FolderStorageDiscoverer folderStorageRegistry = outlookFolderStorage.folderStorageRegistry;
         final String realTreeId = outlookFolderStorage.realTreeId;
 
-        final Session session = storageParameters.getSession();
         final int tree = Tools.getUnsignedInteger(treeId);
 
-        final int contextId = session.getContextId();
-        final int userId = session.getUserId();
+        final int contextId = storageParameters.getContextId();
+        final int userId = storageParameters.getUserId();
         final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(contextId, tree, userId);
         if (name2ids.isEmpty()) {
             return null;
