@@ -88,11 +88,34 @@ public final class FolderServiceDecorator implements Cloneable {
     }
 
     /**
+     * Checks if specified content type is allowed by this decorator.
+     *
+     * @param toCheck The content type to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean isContentTypeAllowed(ContentType toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        if (allowedContentTypes.isEmpty()) {
+            return true;
+        }
+
+        for (ContentType allowedContentType : allowedContentTypes) {
+            if (allowedContentType.getModule() == toCheck.getModule()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the list of allowed content types or an empty list if all are allowed.
      *
      * @return The list of allowed content types
      */
-    public List<ContentType> getAllowedContentTypes() {
+    public List<ContentType> getAllowedContentTypes2() {
         return allowedContentTypes;
     }
 

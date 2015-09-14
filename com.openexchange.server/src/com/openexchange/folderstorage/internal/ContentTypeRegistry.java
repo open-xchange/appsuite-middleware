@@ -90,10 +90,9 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
     private static final class Element {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
-
         private volatile Queue<FolderStorage> generalStorages;
 
-        public Element() {
+        Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
             generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
@@ -192,13 +191,13 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      * @return The available content types
      */
     public Map<Integer, ContentType> getAvailableContentTypes() {
-        final ConcurrentMap<ContentType, FolderStorage> concreteStorages =
-            getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
+        ConcurrentMap<ContentType, FolderStorage> concreteStorages = getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
         if (concreteStorages.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
-        for (final ContentType contentType : concreteStorages.keySet()) {
+
+        Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
+        for (ContentType contentType : concreteStorages.keySet()) {
             ret.put(Integer.valueOf(contentType.getModule()), contentType);
         }
         return ret;
