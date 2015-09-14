@@ -60,7 +60,6 @@ import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
@@ -112,7 +111,7 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public GuestInfo getGuest() {
+    public DefaultGuestInfo getGuest() {
         return guestInfo;
     }
 

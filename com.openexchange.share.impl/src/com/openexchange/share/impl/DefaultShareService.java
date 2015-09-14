@@ -264,6 +264,7 @@ public class DefaultShareService implements ShareService {
         /*
          * update password of anonymous user for this share link
          */
+        UserService userService = services.getService(UserService.class);
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         Context context = utils.getContext(session);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
@@ -276,12 +277,11 @@ public class DefaultShareService implements ShareService {
             if (clientTimestamp.before(targetProxy.getTimestamp())) {
                 throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(target);
             }
-            DefaultShareInfo shareInfo = optLinkShare(context, target, targetProxy);
+            DefaultShareInfo shareInfo = optLinkShare(connectionHelper, context, target, targetProxy);
             if (null == shareInfo) {
                 throw ShareExceptionCodes.INVALID_LINK_TARGET.create(I(target.getModule()), target.getFolder(), target.getItem());
             }
-            UserService userService = services.getService(UserService.class);
-            User guest = userService.getUser(connectionHelper.getConnection(), shareInfo.getGuest().getGuestID(), context);
+            User guest = shareInfo.getGuest().getUser();
             if (false == guest.isGuest() || false == ShareTool.isAnonymousGuest(guest)) {
                 throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guest.getId()));
             }
@@ -324,7 +324,7 @@ public class DefaultShareService implements ShareService {
             if (clientTimestamp.before(targetProxy.getTimestamp())) {
                 throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(target);
             }
-            DefaultShareInfo shareInfo = optLinkShare(context, target, targetProxy);
+            DefaultShareInfo shareInfo = optLinkShare(connectionHelper, context, target, targetProxy);
             if (null == shareInfo) {
                 throw ShareExceptionCodes.INVALID_LINK_TARGET.create(I(target.getModule()), target.getFolder(), target.getItem());
             }
@@ -356,6 +356,19 @@ public class DefaultShareService implements ShareService {
      * @return The share link, if one exists for the target, or <code>null</code>, otherwise
      */
     private DefaultShareInfo optLinkShare(Context context, ShareTarget target, TargetProxy proxy) throws OXException {
+        return optLinkShare(null, context, target, proxy);
+    }
+
+    /**
+     * Optionally gets an existing share link for a specific share target, i.e. a share to an anonymous guest user.
+     *
+     * @param connectionHelper A (started) connection helper, or <code>null</code> if not available
+     * @param context The context
+     * @param target The share target
+     * @param proxy The target proxy
+     * @return The share link, if one exists for the target, or <code>null</code>, otherwise
+     */
+    private DefaultShareInfo optLinkShare(ConnectionHelper connectionHelper, Context context, ShareTarget target, TargetProxy proxy) throws OXException {
         List<TargetPermission> permissions = proxy.getPermissions();
         if (null != permissions && 0 < permissions.size()) {
             List<Integer> entities = new ArrayList<Integer>(permissions.size());
@@ -367,7 +380,12 @@ public class DefaultShareService implements ShareService {
             if (0 < entities.size()) {
                 UserService userService = services.getService(UserService.class);
                 for (Integer entity : entities) {
-                    User user = userService.getUser(entity.intValue(), context);
+                    User user;
+                    if (null != connectionHelper) {
+                        user = userService.getUser(connectionHelper.getConnection(), entity.intValue(), context);
+                    } else {
+                        user = userService.getUser(entity.intValue(), context);
+                    }
                     if (ShareTool.isAnonymousGuest(user)) {
                         PersonalizedShareTarget personalizedTarget = services.getService(ModuleSupport.class).personalizeTarget(target, context.getContextId(), user.getId());
                         return new DefaultShareInfo(services, context.getContextId(), user, target, personalizedTarget);
@@ -981,7 +999,7 @@ public class DefaultShareService implements ShareService {
             if (false == targetProxy.mayAdjust()) {
                 throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
             }
-            DefaultShareInfo existingLink = optLinkShare(context, target, targetProxy);
+            DefaultShareInfo existingLink = optLinkShare(connectionHelper, context, target, targetProxy);
             if (null != existingLink) {
                 return new DefaultShareLink(existingLink, targetProxy.getTimestamp(), false);
             }
