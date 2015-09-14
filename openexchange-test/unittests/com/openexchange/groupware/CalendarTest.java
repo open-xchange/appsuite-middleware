@@ -52,6 +52,7 @@ package com.openexchange.groupware;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
@@ -528,16 +529,30 @@ public class CalendarTest extends TestCase {
         fo.setType(FolderObject.PUBLIC);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp });
         int public_folder_id = 0;
+        java.util.List<Integer> appointments2Delete = new ArrayList<Integer>(2);
         try {
             //ofa.createFolder(fo, so, true, readcon, writecon, false);
             fo = oxma.createFolder(fo, true, System.currentTimeMillis());
             public_folder_id = fo.getObjectID();
 
+            {
+                CalendarDataObject cdao = new CalendarDataObject();
+                cdao.setContext(context);
+                cdao.setTitle("test");
+                cdao.setParentFolderID(folder_id);
+                cdao.setIgnoreConflicts(true);
+
+                fillDatesInDao(cdao);
+                cdao.setIgnoreConflicts(true);
+
+                csql.insertAppointmentObject(cdao);
+                appointments2Delete.add(cdao.getObjectID());
+            }
 
             AppointmentSearchObject searchObj = new AppointmentSearchObject();
             searchObj.setQueries(Collections.singleton("test"));
             searchObj.setFolderIDs(Collections.singleton(Integer.valueOf(folder_id)));
-            SearchIterator si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
+            SearchIterator<Appointment> si = csql.searchAppointments(searchObj, 0, Order.ASCENDING, cols);
             boolean gotresults = si.hasNext();
             assertTrue("Got real results by searching \"test\"", gotresults);
             while (si.hasNext()) {
@@ -581,7 +596,12 @@ public class CalendarTest extends TestCase {
             si.close();
         } finally {
         	oxma.deleteFolder(new FolderObject(public_folder_id), true, System.currentTimeMillis());
-            //ofa.deleteFolder(public_folder_id, so, true, SUPER_END);
+        	for (Integer objectId : appointments2Delete) {
+        	    CalendarDataObject cdao = new CalendarDataObject();
+        	    cdao.setObjectID(objectId.intValue());
+        	    cdao.setContext(context);
+        	    csql.deleteAppointmentObject(cdao, folder_id, new Date(Long.MAX_VALUE), false);
+            }
         }
 
 
