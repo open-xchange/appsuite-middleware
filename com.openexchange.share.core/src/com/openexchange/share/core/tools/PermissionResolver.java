@@ -168,7 +168,7 @@ public class PermissionResolver {
     public ShareInfo getLink(File file, int guestID) {
         String folderId;
         String fileId;
-        if (file instanceof UserizedFile) {
+        if (file instanceof UserizedFile && 1 == 2) {
             UserizedFile uFile = (UserizedFile) file;
             fileId = uFile.getOriginalId();
             folderId = uFile.getOriginalFolderId();

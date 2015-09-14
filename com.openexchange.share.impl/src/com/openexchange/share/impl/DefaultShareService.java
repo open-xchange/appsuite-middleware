@@ -291,7 +291,7 @@ public class DefaultShareService implements ShareService {
             }
             if (linkUpdate.containsExpiryDate()) {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
-                userService.setAttribute(ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
+                userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
                 guestUserUpdated = true;
             }
             connectionHelper.commit();
@@ -411,7 +411,7 @@ public class DefaultShareService implements ShareService {
      */
     List<ShareInfo> getAllShares(int contextID) throws OXException {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>();
-        int[] guestIDs = services.getService(UserService.class).listAllUser(contextID, true, true);
+        int[] guestIDs = services.getService(UserService.class).listAllUser(contextID, true, false);
         if (null != guestIDs && 0 < guestIDs.length) {
             for (int guestID : guestIDs) {
                 List<ShareTarget> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);

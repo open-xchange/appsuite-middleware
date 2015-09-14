@@ -204,7 +204,7 @@ public class GetALinkTest extends ShareTest {
         client.execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
         assertNull("Share was not deleted", discoverGuestEntity(file.getFolderId(), file.getId(), guestId));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
-        assertNull("Permission was not deleted", objectPermissions);
+        assertTrue("Permission was not deleted", null == objectPermissions || 0 == objectPermissions.size());
     }
 
 }

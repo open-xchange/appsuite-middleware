@@ -121,6 +121,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
+        UserStorage.getInstance().setAttribute(con, name, value, userId, context);
+    }
+
+    @Override
     public User getUser(final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(uid, context);
     }

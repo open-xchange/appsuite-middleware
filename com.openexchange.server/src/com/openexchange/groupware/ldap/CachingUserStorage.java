@@ -372,6 +372,15 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
+        }
+        delegate.setAttribute(con, name, value, userId, context);
+        invalidateUserCache(context, userId);
+    }
+
+    @Override
     public int getUserId(final String uid, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
