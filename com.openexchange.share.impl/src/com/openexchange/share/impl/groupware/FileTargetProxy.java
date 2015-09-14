@@ -153,6 +153,11 @@ public class FileTargetProxy extends AbstractTargetProxy {
         }
 
         @Override
+        public boolean isSystem(FileStorageObjectPermission permission) {
+            return false;
+        }
+
+        @Override
         public int getBits(FileStorageObjectPermission permission) {
             return permission.getPermissions();
         }

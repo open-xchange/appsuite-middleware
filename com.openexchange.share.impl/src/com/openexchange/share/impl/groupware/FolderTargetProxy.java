@@ -160,6 +160,11 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         }
 
         @Override
+        public boolean isSystem(Permission permission) {
+            return permission.getSystem() > 0;
+        }
+
+        @Override
         public int getBits(Permission permission) {
             return Permissions.createPermissionBits(permission);
         }

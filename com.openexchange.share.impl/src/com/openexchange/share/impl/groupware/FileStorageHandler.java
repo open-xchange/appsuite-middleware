@@ -62,6 +62,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
@@ -284,7 +285,12 @@ public class FileStorageHandler implements ModuleHandler {
             searchIterator = timedResult.results();
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();
-                targets.add(new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+                if (file instanceof UserizedFile) {
+                    UserizedFile uFile = (UserizedFile) file;
+                    targets.add(new ShareTarget(FolderObject.INFOSTORE, uFile.getOriginalFolderId(), uFile.getOriginalId()));
+                } else {
+                    targets.add(new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+                }
             }
         } finally {
             SearchIterators.close(searchIterator);

@@ -212,6 +212,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         }
 
         @Override
+        public boolean isSystem(OCLPermission permission) {
+            return permission.isSystem();
+        }
+
+        @Override
         public int getBits(OCLPermission permission) {
             return Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
                 permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin());
