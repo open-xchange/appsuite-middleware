@@ -64,10 +64,9 @@ public class Bug35291Test extends AbstractSanitizing {
     public void testObeyEndTagsForStandaloneTags() {
         String content = getHtmlService().getConformHTML("<img src=\"https://foo.bar.tld/foo2bar.jpg\">", "UTF-8");
 
-        assertEquals("Unexpected return value", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><img src=\"https://foo.bar.tld/foo2bar.jpg\"></body></html>", content);
+        assertEquals("Unexpected return value", "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><img src=\"https://foo.bar.tld/foo2bar.jpg\"></body></html>\n ", content);
     }
 }

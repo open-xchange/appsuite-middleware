@@ -63,10 +63,10 @@ public class Bug29695Test extends AbstractSanitizing {
     @Test
     public void testDontReplaceCopyRegEntities() {
         String content = getHtmlService().getConformHTML("<b>&copy; by &reg;</b>", "UTF-8");
-        assertEquals("Unexpected return value ", "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><b>\u00a9 by \u00ae</b></body></html>",
+        assertEquals("Unexpected return value ", "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><b>\u00a9 by \u00ae</b></body></html>\n ",
             content);
     }
 }

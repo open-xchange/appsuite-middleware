@@ -68,11 +68,10 @@ public class Bug17195Test extends AbstractSanitizing {
 
         String url = "https://ox6.local.com/ox6/#m=3Dinfostore&f=485D112&i=4D89719";
 
-        String expected = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body>https://ox6.local.com/ox6/#m=3Dinfostore&#38;f=485D112&#38;i=4D89719</body></html>";
+        String expected = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body>https://ox6.local.com/ox6/#m=3Dinfostore&#38;f=485D112&#38;i=4D89719</body></html>\n ";
 
         assertEquals("Unexpected return value", expected, htmlService.getConformHTML(url, "UTF-8"));
     }

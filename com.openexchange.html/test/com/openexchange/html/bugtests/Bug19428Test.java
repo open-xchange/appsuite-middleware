@@ -148,11 +148,9 @@ public class Bug19428Test extends AbstractSanitizing {
             "    </center>\n" +
             "</body>";
 
-        String expectedConformHtml = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " \n" +
+        String expectedConformHtml = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n\n" +
             "        \n" +
             "        <!-- \n" +
             "            Diese Internet-Praesenz wird mit INQUIRE gepflegt.\n" +
@@ -235,7 +233,7 @@ public class Bug19428Test extends AbstractSanitizing {
             "    </tbody></table>\n" +
             "    <font class=\"abmeldetext\" style=\"width: 150px; padding: 10px 0 0 10px;\">Der Newsletter wurde von uns an <span class=\"linktext\">h.thiet@mahlmann.biz</span> gesendet. Um sich abzumelden, klicken Sie bitte <a href=\"https://bvmw.stage-x.de/wb_newsletter.php?e=22111|ap1,1971,0\" target=\"_blank\"><span class=\"linktext\">hier</span></a></font>\n" +
             "    </center>\n" +
-            "</body></html>";
+            "</body></html>\n ";
 
         String ret = getHtmlService().getConformHTML(content, "UTF-8");
         assertEquals("Unexpected return value", expectedConformHtml, ret);
