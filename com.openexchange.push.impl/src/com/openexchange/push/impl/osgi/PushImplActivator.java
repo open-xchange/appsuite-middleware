@@ -67,6 +67,7 @@ import com.openexchange.event.EventFactoryService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.management.ManagementService;
@@ -196,6 +197,13 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     this.rescheduler = rescheduler;
                     pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
+
+                    // Event handler registration
+                    {
+                        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                        serviceProperties.put(EventConstants.EVENT_TOPIC, UpdaterEventConstants.getTopics());
+                        registerService(EventHandler.class, rescheduler, serviceProperties);
+                    }
                 } else {
                     pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
                 }
