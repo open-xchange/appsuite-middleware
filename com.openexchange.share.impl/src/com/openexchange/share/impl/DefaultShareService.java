@@ -411,7 +411,7 @@ public class DefaultShareService implements ShareService {
      */
     List<ShareInfo> getAllShares(int contextID) throws OXException {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>();
-        int[] guestIDs = services.getService(UserService.class).listAllUser(contextID, true, false);
+        int[] guestIDs = services.getService(UserService.class).listAllUser(contextID, true, true);
         if (null != guestIDs && 0 < guestIDs.length) {
             for (int guestID : guestIDs) {
                 List<ShareTarget> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
