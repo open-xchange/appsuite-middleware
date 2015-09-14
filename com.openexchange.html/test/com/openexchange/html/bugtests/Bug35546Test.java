@@ -65,7 +65,7 @@ public class Bug35546Test extends AbstractSanitizing {
         String content = getHtmlService().getConformHTML("<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>", "UTF-8");
         assertEquals("Unexpected return value", "<!DOCTYPE html>\n" +
             "<html><head>\n" +
-            "    <meta charset=\"UTF-8\"/>\n" +
-            " </head><body><p>Text before one empty line</p><p><br></p><p>Text after empty line.</p></body></html>\n ", content);
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><p>Text before one empty line</p><p><br></p><p>Text after empty line.</p></body></html>\n ", content);
     }
 }
