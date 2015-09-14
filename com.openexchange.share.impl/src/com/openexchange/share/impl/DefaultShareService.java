@@ -1020,6 +1020,18 @@ public class DefaultShareService implements ShareService {
         Date expiryDate = guestInfo.getExpiryDate();
         if (null != expiryDate && expiryDate.before(new Date())) {
             LOG.info("Guest user {} in context {} expired, scheduling guest cleanup.", I(guestInfo.getGuestID()), I(guestInfo.getContextID()));
+            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+            ShareTarget target = guestInfo.getLinkTarget();
+            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, guestInfo.getContextID(), guestInfo.getGuestID());
+            ShareInfo shareInfo = new DefaultShareInfo(services, guestInfo.getContextID(), guestInfo.getUser(), target, personalizedTarget);
+            ConnectionHelper connectionHelper = new ConnectionHelper(guestInfo.getContextID(), services, true);
+            try {
+                connectionHelper.start();
+                removeTargetPermissions(null, connectionHelper, Collections.singletonList(shareInfo));
+                connectionHelper.commit();
+            } finally {
+                connectionHelper.finish();
+            }
             scheduleGuestCleanup(guestInfo.getContextID(), guestInfo.getGuestID());
             return null;
         }

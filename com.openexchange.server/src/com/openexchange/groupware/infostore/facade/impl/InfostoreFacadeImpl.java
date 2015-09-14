@@ -50,7 +50,9 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -140,6 +142,7 @@ import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
@@ -154,6 +157,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.file.AppendFileAction;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.Customizer;
@@ -165,6 +169,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -211,6 +216,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     private final EntityLockManager lockManager = new EntityLockManagerImpl("infostore_lock");
 
     private final ThreadLocal<List<FileRemoveInfo>> fileIdRemoveList = new ThreadLocal<List<FileRemoveInfo>>();
+    private final ThreadLocal<Map<Integer, Set<Integer>>> guestCleanupList = new ThreadLocal<Map<Integer, Set<Integer>>>();
 
     private final TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
 
@@ -1128,6 +1134,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         perform(new DeleteVersionAction(this, QUERIES, context, delVers, session), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, delDocs, session), true);
         perform(new DeleteObjectPermissionAction(this, context, delDocs), true);
+        rememberForGuestCleanup(context.getContextId(), delDocs);
     }
 
     /**
@@ -1165,6 +1172,33 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 } else {
                     for (int i = 0; i < size; i++) {
                         getFileStorage(folderAdmins[i], contextId).deleteFile(filestoreLocations.get(i));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Remembers the permission entities of the supplied documents for subsequent guest cleanup tasks.
+     *
+     * @param contextID The context identifier
+     * @param removedDocuments The documents being removed
+     */
+    private void rememberForGuestCleanup(int contextID, List<DocumentMetadata> removedDocuments) {
+        if (null != removedDocuments && 0 < removedDocuments.size()) {
+            for (DocumentMetadata document : removedDocuments) {
+                List<ObjectPermission> objectPermissions = document.getObjectPermissions();
+                if (null != objectPermissions && 0 < objectPermissions.size()) {
+                    Map<Integer, Set<Integer>> cleanupList = guestCleanupList.get();
+                    Set<Integer> entities = cleanupList.get(I(contextID));
+                    if (null == entities) {
+                        entities = new HashSet<Integer>(objectPermissions.size());
+                        cleanupList.put(I(contextID), entities);
+                    }
+                    for (ObjectPermission permission : objectPermissions) {
+                        if (false == permission.isGroup()) {
+                            entities.add(I(permission.getEntity()));
+                        }
                     }
                 }
             }
@@ -1322,6 +1356,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                  */
                 if (0 < objectPermissionsToDelete.size()) {
                     perform(new DeleteObjectPermissionAction(this, context, objectPermissionsToDelete), true);
+                    rememberForGuestCleanup(context.getContextId(), objectPermissionsToDelete);
                 }
                 if (0 < objectPermissionsToCreate.size()) {
                     for (DocumentMetadata document : objectPermissionsToCreate) {
@@ -1515,6 +1550,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         perform(new DeleteVersionAction(this, QUERIES, context, allVersions, null), true);
         perform(new DeleteDocumentAction(this, QUERIES, context, allDocuments, null), true);
         perform(new DeleteObjectPermissionAction(this, context, allDocuments), true);
+        rememberForGuestCleanup(context.getContextId(), allDocuments);
     }
 
     @Override
@@ -2304,12 +2340,47 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
             }
         }
+        /*
+         * schedule guest cleanup tasks as needed
+         */
+        Map<Integer, Set<Integer>> guestsToCleanup = guestCleanupList.get();
+        if (null != guestsToCleanup && 0 < guestsToCleanup.size()) {
+            for (Entry<Integer, Set<Integer>> entry : guestsToCleanup.entrySet()) {
+                int contextID = i(entry.getKey());
+                Set<Integer> guestIDs = filterGuests(contextID, entry.getValue());
+                if (null != guestIDs && 0 < guestIDs.size()) {
+                    ServerServiceRegistry.getServize(ShareService.class).scheduleGuestCleanup(contextID, I2i(guestIDs));
+                }
+            }
+        }
         super.commit();
+    }
+
+    private Set<Integer> filterGuests(int contextID, Set<Integer> entityIDs) throws OXException {
+        if (null == entityIDs || 0 == entityIDs.size()) {
+            return Collections.emptySet();
+        }
+        UserService userService = ServerServiceRegistry.getServize(UserService.class);
+        Set<Integer> guestIDs = new HashSet<Integer>(entityIDs.size());
+        for (Integer id : entityIDs) {
+            try {
+                if (userService.isGuest(id.intValue(), contextID)) {
+                    guestIDs.add(id);
+                }
+            } catch (OXException e) {
+                if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    continue;
+                }
+                throw e;
+            }
+        }
+        return guestIDs;
     }
 
     @Override
     public void finish() throws OXException {
         fileIdRemoveList.set(null);
+        guestCleanupList.set(null);
         db.finish();
         ServiceMethod.FINISH.callUnsafe(security);
         lockManager.finish();
@@ -2340,6 +2411,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public void startTransaction() throws OXException {
         fileIdRemoveList.set(new LinkedList<InfostoreFacadeImpl.FileRemoveInfo>());
+        guestCleanupList.set(new HashMap<Integer, Set<Integer>>());
         db.startTransaction();
         ServiceMethod.START_TRANSACTION.callUnsafe(security);
         lockManager.startTransaction();

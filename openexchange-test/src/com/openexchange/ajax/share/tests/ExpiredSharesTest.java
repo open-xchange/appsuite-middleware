@@ -78,7 +78,7 @@ public class ExpiredSharesTest extends ShareTest {
     }
 
     public void testAccessExpiredShareRandomly() throws Exception {
-        testAccessExpiredShare(randomFolderAPI(), randomModule());
+        testAccessExpiredShare(randomFolderAPI(), 3);
     }
 
     public void noTestAccessExpiredShareExtensively() throws Exception {
