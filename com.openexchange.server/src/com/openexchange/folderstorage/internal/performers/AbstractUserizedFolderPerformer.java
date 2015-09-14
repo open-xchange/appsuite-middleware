@@ -97,6 +97,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
@@ -564,6 +565,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             return true;
         }
         return false;
+    }
+
+    /**
+     * Schedules cleanup tasks for removed guest permission entities.
+     *
+     * @param removedPermissions The removed permissions
+     */
+    protected void processRemovedGuestPermissions(List<Permission> removedPermissions) throws OXException {
+        if (ignoreGuestPermissions()) {
+            return;
+        }
+        List<Integer> guestIDs = new ArrayList<Integer>(removedPermissions.size());
+        for (Permission permission : removedPermissions) {
+            guestIDs.add(Integer.valueOf(permission.getEntity()));
+        }
+        FolderStorageServices.requireService(ShareService.class).scheduleGuestCleanup(getContextId(), Autoboxing.I2i(guestIDs));
     }
 
     /**

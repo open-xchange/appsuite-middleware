@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
@@ -235,6 +236,15 @@ public class ShareHelper {
             if (comparedPermissions.hasNewGuests()) {
                 updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions);
             }
+            if (comparedPermissions.hasRemovedGuests()) {
+                /*
+                 * extract affected guest entities & schedule cleanup tasks
+                 */
+                List<Integer> affectedUserIDs = getAffectedUserIDs(comparedPermissions.getRemovedGuestPermissions());
+                if (0 < affectedUserIDs.size()) {
+                    Services.getService(ShareService.class).scheduleGuestCleanup(session.getContextId(), Autoboxing.I2i(affectedUserIDs));
+                }
+            }
         }
         return updatedPermissions;
     }
@@ -281,6 +291,19 @@ public class ShareHelper {
         }
 
         return null;
+    }
+
+    private static List<Integer> getAffectedUserIDs(List<FileStorageObjectPermission> permissions) {
+        if (null == permissions || 0 == permissions.size()) {
+            return Collections.emptyList();
+        }
+        List<Integer> affectedUserIDs = new ArrayList<Integer>(permissions.size());
+        for (FileStorageObjectPermission removedPermission : permissions) {
+            if (false == removedPermission.isGroup()) {
+                affectedUserIDs.add(Integer.valueOf(removedPermission.getEntity()));
+            }
+        }
+        return affectedUserIDs;
     }
 
     private static boolean isAnonymous(GuestInfo guestInfo) {

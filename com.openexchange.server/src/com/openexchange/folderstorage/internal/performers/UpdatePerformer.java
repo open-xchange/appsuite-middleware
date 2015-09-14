@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
@@ -377,6 +376,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             }
                             throw e;
                         }
+                    }
+                    /*
+                     * delete existing shares for removed guest permissions
+                     */
+                    if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
+                        processRemovedGuestPermissions(comparedPermissions.getRemovedGuestPermissions());
                     }
                 } else if (changeSubscription) {
                     /*

@@ -628,7 +628,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FileStorageFileAccess access = deleteOp.getKey();
             final List<IDTuple> toDelete = ensureFolderIDs(access, deleteOp.getValue());
             /*
-             * perform delete, collect any conflicting files, remove associated shares
+             * perform delete, collect any conflicting files
              */
             List<IDTuple> conflicted = new TransactionAwareFileAccessDelegation<List<IDTuple>>() {
 
@@ -652,8 +652,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 String folderId = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
                 String fileId = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
                 EventProperty hardDeleteProperty = new EventProperty(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));
+                EventProperty shareCleanupDoneProperty = new EventProperty(FileStorageEventConstants.SHARE_CLEANUP_DONE, Boolean.TRUE);
                 postEvent(FileStorageEventHelper.buildDeleteEvent(
-                    session, serviceId, accountId, folderId, fileId, null, null, hardDeleteProperty));
+                    session, serviceId, accountId, folderId, fileId, null, null, hardDeleteProperty, shareCleanupDoneProperty));
             }
         }
         return notDeleted;

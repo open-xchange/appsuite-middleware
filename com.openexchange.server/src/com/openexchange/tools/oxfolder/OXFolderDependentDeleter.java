@@ -49,15 +49,26 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -91,9 +102,122 @@ public class OXFolderDependentDeleter {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
-
+        /*
+         * publications & subscriptions
+         */
         deletePublicationsAndSubscriptions(con, context, folder, subfolderIDs);
+        /*
+         * determine potentially affected guest user entities
+         */
+        Set<Integer> affectedEntities = new HashSet<Integer>();
+        affectedEntities.addAll(getPermissionEntities(folder, false));
+        if (null != subfolderIDs && 0 < subfolderIDs.size()) {
+            try {
+                affectedEntities.addAll(OXFolderSQL.getPermissionEntities(subfolderIDs, con, context, false));
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        affectedEntities.addAll(getObjectPermissionEntities(con, context, folder, subfolderIDs, false));
+        /*
+         * remove any adjacent object permissions
+         */
         deleteObjectPermissions(con, context, folder, subfolderIDs);
+        /*
+         * schedule cleanup for affected guest users as needed
+         */
+        List<Integer> guestIDs = filterGuests(con, context, new ArrayList<Integer>(affectedEntities));
+        if (0 < guestIDs.size()) {
+            ServerServiceRegistry.getInstance().getService(ShareService.class, true).scheduleGuestCleanup(context.getContextId(), I2i(guestIDs));
+        }
+    }
+
+    private static List<Integer> filterGuests(Connection con, Context context, List<Integer> entityIDs) throws OXException {
+        if (0 == entityIDs.size()) {
+            return entityIDs;
+        }
+        List<Integer> guestIDs = new ArrayList<Integer>();
+        /*
+         * build statement
+         */
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT id FROM user where cid=? AND id");
+        if (1 == entityIDs.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < entityIDs.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        stringBuilder.append(" AND guestCreatedBy>0;");
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * execute query
+             */
+            stmt = con.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, context.getContextId());
+            for (int i = 0; i < entityIDs.size(); i++) {
+                stmt.setInt(i + 2, i(entityIDs.get(i)));
+            }
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                guestIDs.add(I(rs.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return guestIDs;
+    }
+
+    private static List<Integer> getObjectPermissionEntities(Connection con, Context context, FolderObject folder, List<Integer> subfolderIDs, boolean includeGroups) throws OXException {
+        List<Integer> entityIDs = new ArrayList<Integer>();
+        /*
+         * prepare statement
+         */
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
+        if (null == subfolderIDs || 0 == subfolderIDs.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 0; i < subfolderIDs.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        if (false == includeGroups) {
+            stringBuilder.append(" AND group_flag=0");
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * read out permission entities
+             */
+            stmt = con.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, context.getContextId());
+            int folderID = folder.getObjectID();
+            stmt.setInt(2, folder.getModule());
+            stmt.setInt(3, folderID);
+            if (null != subfolderIDs && 0 < subfolderIDs.size()) {
+                for (int i = 0; i < subfolderIDs.size(); i++) {
+                    stmt.setInt(i + 4, i(subfolderIDs.get(i)));
+                }
+            }
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                entityIDs.add(I(rs.getInt(1)));
+            }
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return entityIDs;
     }
 
     /**
@@ -132,7 +256,7 @@ public class OXFolderDependentDeleter {
             stmt.setInt(3, folderID);
             if (null != subfolderIDs && 0 < subfolderIDs.size()) {
                 for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt.setInt(i + 4, subfolderIDs.get(i));
+                    stmt.setInt(i + 4, i(subfolderIDs.get(i)));
                 }
             }
             stmt.executeUpdate();
@@ -154,12 +278,12 @@ public class OXFolderDependentDeleter {
             if (null == subfolderIDs || 0 == subfolderIDs.size()) {
                 whereFolderID = "=?;";
             } else {
-                StringBuilder StringBuilder = new StringBuilder(" IN (?");
+                StringBuilder stringBuilder = new StringBuilder(" IN (?");
                 for (int i = 0; i < subfolderIDs.size(); i++) {
-                    StringBuilder.append(",?");
+                    stringBuilder.append(",?");
                 }
-                StringBuilder.append(");");
-                whereFolderID = StringBuilder.toString();
+                stringBuilder.append(");");
+                whereFolderID = stringBuilder.toString();
             }
             /*
              * delete publications
@@ -171,7 +295,7 @@ public class OXFolderDependentDeleter {
             stmt1.setInt(3, folderID);
             if (null != subfolderIDs && 0 < subfolderIDs.size()) {
                 for (int i = 0; i < subfolderIDs.size(); i++) {
-                    stmt1.setInt(i + 4, subfolderIDs.get(i));
+                    stmt1.setInt(i + 4, i(subfolderIDs.get(i)));
                 }
             }
             /*
@@ -193,6 +317,27 @@ public class OXFolderDependentDeleter {
             DBUtils.closeSQLStuff(stmt1);
             DBUtils.closeSQLStuff(stmt2);
         }
+    }
+
+    /**
+     * Gets the identifiers of all permission entities found in a specific folder.
+     *
+     * @param folder The folder to get the permission entities for
+     * @param includeGroups <code>true</code> to also include group permissions, <code>false</code>, otherwise
+     * @return The entity IDs, or an empty list if none were found
+     */
+    private static Set<Integer> getPermissionEntities(FolderObject folder, boolean includeGroups) {
+        List<OCLPermission> permissions = folder.getPermissions();
+        if (null == permissions) {
+            return Collections.emptySet();
+        }
+        Set<Integer> entityIDs = new HashSet<Integer>(permissions.size());
+        for (OCLPermission permission : permissions) {
+            if (includeGroups || false == permission.isGroupPermission()) {
+                entityIDs.add(I(permission.getEntity()));
+            }
+        }
+        return entityIDs;
     }
 
 }

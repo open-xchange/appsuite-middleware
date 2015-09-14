@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -83,6 +84,16 @@ public class RemoveGuestPermissionTest extends ShareTest {
     public void testUpdateSharedFolderRandomly() throws Exception {
         int module = randomModule();
         testUpdateSharedFolder(randomFolderAPI(), module, randomGuestPermission(module));
+    }
+
+    public void testDeleteSharedFolderRandomly() throws Exception {
+        int module = randomModule();
+        testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), false);
+    }
+
+    public void testHardDeleteSharedFolderRandomly() throws Exception {
+        int module = randomModule();
+        testDeleteSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission(module), true);
     }
 
     public void noTestUpdateSharedFolderExtensively() throws Exception {
@@ -148,6 +159,68 @@ public class RemoveGuestPermissionTest extends ShareTest {
         for (OCLPermission permission : folder.getPermissions()) {
             assertTrue("Guest permission still present", permission.getEntity() != matchingPermission.getEntity());
         }
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
+            /*
+             * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
+             */
+            checkGuestUserDeleted(matchingPermission.getEntity());
+            guestClient.checkSessionAlive(true);
+            /*
+             * check if share link still accessible
+             */
+            GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient(), false);
+            ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
+            assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
+        } else {
+            /*
+             * check share target no longer accessible for non-anonymous guest user
+             */
+            guestClient.checkFolderNotAccessible(String.valueOf(folder.getObjectID()));
+            guestClient.logout();
+        }
+        /*
+         * check guest entities
+         */
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        assertNull("guest entity still found", guest);
+    }
+
+    private void testDeleteSharedFolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission, boolean hardDelete) throws Exception {
+        /*
+         * create folder shared to guest user
+         */
+        FolderObject folder = insertSharedFolder(api, module, parent, guestPermission);
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+        /*
+         * delete folder, thus implicitly revoke permissions
+         */
+        DeleteRequest deleteRequest = new DeleteRequest(api, folder.getObjectID(), folder.getLastModified());
+        if (hardDelete) {
+            deleteRequest.setHardDelete(Boolean.TRUE);
+        }
+        client.execute(deleteRequest);
         if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
             /*
              * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
