@@ -50,17 +50,19 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
@@ -186,6 +188,8 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         // remove sharing user if he somehow made it into the list of recipients
         sharesByUser.remove(session.getUserId());
+
+        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
         for (int userId : sharesByUser.keySet()) {
             User user = null;
             try {
@@ -195,6 +199,10 @@ public class DefaultNotificationService implements ShareNotificationService {
                 String shareUrl;
                 if (user.isGuest()) {
                     shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                    String mail = user.getMail();
+                    if (Strings.isNotEmpty(mail)) {
+                        collectedAddresses.add(new QuotedInternetAddress(mail));
+                    }
                 } else {
                     shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
                 }
@@ -207,6 +215,13 @@ public class DefaultNotificationService implements ShareNotificationService {
                     mailAddress = user.getMail();
                 }
                 collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
+        if (null != ccs) {
+            if (!collectedAddresses.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
             }
         }
 
@@ -236,19 +251,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 transportInfo = (InternetAddress) transportInfoObj;
                 Share share = link.getShare();
-                LinkCreatedNotification<InternetAddress> notification = MailNotifications.linkCreated()
-                    .setTransportInfo(transportInfo)
-                    .setContextID(session.getContextId())
-                    .setGuestID(guestInfo.getGuestID())
-                    .setLocale(guestInfo.getLocale())
-                    .setSession(session)
-                    .setTarget(share.getTarget())
-                    .setMessage(message)
-                    .setHostData(hostData)
-                    .setShareUrl(link.getShareURL(hostData))
-                    .setExpiryDate(share.getExpiryDate())
-                    .setPassword(guestInfo.getPassword())
-                    .build();
+                LinkCreatedNotification<InternetAddress> notification = MailNotifications.linkCreated().setTransportInfo(transportInfo).setContextID(session.getContextId()).setGuestID(guestInfo.getGuestID()).setLocale(guestInfo.getLocale()).setSession(session).setTarget(share.getTarget()).setMessage(message).setHostData(hostData).setShareUrl(link.getShareURL(hostData)).setExpiryDate(share.getExpiryDate()).setPassword(guestInfo.getPassword()).build();
                 send(notification);
             } catch (Exception e) {
                 String mailAddress = null;
@@ -279,15 +282,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
             String baseToken = guestShare.getGuest().getBaseToken();
 
-            ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
-                .setTransportInfo(new QuotedInternetAddress(mailAddress, displayName, "UTF-8"))
-                .setContextID(guestInfo.getContextID())
-                .setGuestID(guestInfo.getGuestID())
-                .setLocale(guest.getLocale())
-                .setHostData(hostData)
-                .setShareUrl(ShareLinks.generateExternal(hostData, baseToken, null))
-                .setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(hostData, baseToken, confirmToken))
-                .build();
+            ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm().setTransportInfo(new QuotedInternetAddress(mailAddress, displayName, "UTF-8")).setContextID(guestInfo.getContextID()).setGuestID(guestInfo.getGuestID()).setLocale(guest.getLocale()).setHostData(hostData).setShareUrl(ShareLinks.generateExternal(hostData, baseToken, null)).setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(hostData, baseToken, confirmToken)).build();
 
             send(notification);
         } catch (Exception e) {
@@ -300,8 +295,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     private <T> void send(ShareNotification<T> notification) throws OXException {
-        @SuppressWarnings("unchecked")
-        ShareNotificationHandler<T> handler = (ShareNotificationHandler<T>) handlers.get(notification.getTransport());
+        @SuppressWarnings("unchecked") ShareNotificationHandler<T> handler = (ShareNotificationHandler<T>) handlers.get(notification.getTransport());
         if (handler == null) {
             throw new OXException(new IllegalArgumentException("No provider exists to handle notifications for transport " + notification.getTransport().toString()));
         }
@@ -326,16 +320,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         try {
-            ShareCreatedBuilder shareCreatedBuilder = MailNotifications.shareCreated()
-                .setTransportInfo(new InternetAddress(user.getMail(), true))
-                .setContextID(session.getContextId())
-                .setGuestID(user.getId())
-                .setLocale(user.getLocale())
-                .setSession(session)
-                .setTargets(Collections.singletonList(target))
-                .setMessage(message)
-                .setHostData(hostData)
-                .setShareUrl(shareUrl);
+            ShareCreatedBuilder shareCreatedBuilder = MailNotifications.shareCreated().setTransportInfo(new QuotedInternetAddress(user.getMail(), true)).setContextID(session.getContextId()).setGuestID(user.getId()).setLocale(user.getLocale()).setSession(session).setTargets(Collections.singletonList(target)).setMessage(message).setHostData(hostData).setShareUrl(shareUrl);
 
             return shareCreatedBuilder.build();
         } catch (AddressException e) {
@@ -376,8 +361,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             User user = null;
             try {
                 user = userService.getUser(userId, context);
-                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(
-                    transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
+                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
                     usersById.put(userId, user);
                 }
             } catch (OXException e) {
@@ -402,8 +386,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                     User user = null;
                     try {
                         user = userService.getUser(userId, context);
-                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(
-                            transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
+                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
                             usersById.put(userId, user);
                         }
                     } catch (OXException e) {
@@ -421,6 +404,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         usersById.remove(session.getUserId());
 
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
+        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
         for (int userId : usersById.keySet()) {
             User user = null;
             try {
@@ -430,6 +414,10 @@ public class DefaultNotificationService implements ShareNotificationService {
                 PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, context.getContextId(), user.getId());
                 if (isGuest) {
                     shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                    String mail = user.getMail();
+                    if (Strings.isNotEmpty(mail)) {
+                        collectedAddresses.add(new QuotedInternetAddress(mail));
+                    }
                 } else {
                     shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
                 }
@@ -441,6 +429,13 @@ public class DefaultNotificationService implements ShareNotificationService {
                     mailAddress = user.getMail();
                 }
                 collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
+        if (null != ccs) {
+            if (!collectedAddresses.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
             }
         }
 
@@ -481,21 +476,6 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
     }
 
-    private static <T> List<T> toList(Iterable<T> iterable) {
-        if (iterable instanceof List<?>) {
-            return (List<T>) iterable;
-        } else if (iterable instanceof Collection<?>) {
-            return new ArrayList<>((Collection<T>) iterable);
-        }
-
-        ArrayList<T> list = new ArrayList<>();
-        for (T t : iterable) {
-            list.add(t);
-        }
-
-        return list;
-    }
-
     /**
      * Converts the passed permissions to a folder permission bit mask if necessary
      *
@@ -513,5 +493,4 @@ public class DefaultNotificationService implements ShareNotificationService {
                 throw new IllegalArgumentException("Unknown permission type: " + permission.getType());
         }
     }
-
 }

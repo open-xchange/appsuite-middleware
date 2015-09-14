@@ -219,12 +219,11 @@ public class DefaultShareService implements ShareService {
                 sharesByRecipient.put(recipient, shareInfo);
             }
             /*
-             * store shares & trigger collection of e-mail addresses
+             * store shares
              */
             storeShares(session, connectionHelper, sharesToStore);
             connectionHelper.commit();
             LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
             return new CreatedSharesImpl(sharesByRecipient);
         } finally {
             connectionHelper.finish();
@@ -274,7 +273,6 @@ public class DefaultShareService implements ShareService {
             targetUpdate.run();
             connectionHelper.commit();
             LOG.info("Shares to target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
             return new CreatedShareImpl(recipient, shareInfo);
         } finally {
             if (null != targetUpdate) {
