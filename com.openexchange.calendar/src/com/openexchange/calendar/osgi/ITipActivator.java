@@ -135,11 +135,11 @@ public class ITipActivator extends HousekeepingActivator {
             sender = new PoolingMailSenderService(pool, sender);
         }
 
-        Dictionary<String, String> analyzerProps = new Hashtable<String, String>();
-        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING.toString()); // Default
+        Dictionary<String, Object> analyzerProps = new Hashtable<String, Object>();
+        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING); // Default
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this), analyzerProps);
-        Dictionary<String, String> factoryProps = new Hashtable<String, String>();
-        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipDingeMacherFactoryService.RANKING.toString()); // Default
+        Dictionary<String, Object> factoryProps = new Hashtable<String, Object>();
+        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipDingeMacherFactoryService.RANKING); // Default
         registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails), factoryProps);
 
         registerService(ITipMailGeneratorFactory.class, mails);

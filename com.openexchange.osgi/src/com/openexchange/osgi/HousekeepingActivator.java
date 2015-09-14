@@ -57,6 +57,8 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -199,6 +201,21 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
+        context.addFrameworkListener(new FrameworkListener() {
+
+            @Override
+            public void frameworkEvent(FrameworkEvent event) {
+                if (event.getBundle().getSymbolicName().equalsIgnoreCase(context.getBundle().getSymbolicName())) {
+                    int eventType = event.getType();
+                    if (eventType == FrameworkEvent.ERROR) {
+                        LOG.error(event.toString(), event.getThrowable());
+                    } else {
+                        LOG.info(event.toString(), event.getThrowable());
+                    }
+                }
+            }
+        });
+
         // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
         if (!serviceTrackers.isEmpty()) {
             openTrackers();
@@ -276,8 +293,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param serviceRanking The value to configure the {@link Constants#SERVICE_RANKING} to
      */
     protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
-        Dictionary<String, String> properties = new Hashtable<String, String>(1);
-        properties.put(Constants.SERVICE_RANKING, String.valueOf(serviceRanking));
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(Constants.SERVICE_RANKING, serviceRanking);
         registerService(clazz, service, properties);
     }
 
