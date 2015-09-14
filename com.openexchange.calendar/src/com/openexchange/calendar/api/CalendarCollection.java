@@ -3131,29 +3131,25 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         return false;
     }
+    
+    private static final int[] RECURRENCE_FIELDS = new int[] {
+        CalendarObject.DAYS,
+        CalendarObject.DAY_IN_MONTH,
+        CalendarObject.INTERVAL,
+        CalendarObject.MONTH,
+        CalendarObject.UNTIL,
+        CalendarObject.RECURRENCE_TYPE
+    };
 
     private void addMissingRecurrenceInformation(CalendarDataObject cdao, CalendarDataObject edao) {
         cdao.setRecurringStart(edao.getRecurringStart());
         if (edao.getTimezone() != null) {
             cdao.setTimezone(edao.getTimezone()); // Use original TimeZone information for calculation purposes.
         }
-        if (!cdao.containsRecurrenceType() && edao.containsRecurrenceType()) {
-            cdao.setRecurrenceType(edao.getRecurrenceType());
-        }
-        if (!cdao.containsInterval() && edao.containsInterval()) {
-            cdao.setInterval(edao.getInterval());
-        }
-        if (!cdao.containsDays() && edao.containsDays()) {
-            cdao.setDays(edao.getDays());
-        }
-        if (!cdao.containsDayInMonth() && edao.containsDayInMonth()) {
-            cdao.setDayInMonth(edao.getDayInMonth());
-        }
-        if (!cdao.containsMonth() && edao.containsMonth()) {
-            cdao.setMonth(edao.getMonth());
-        }
-        if (!cdao.containsUntil() && edao.containsUntil()) {
-            cdao.setUntil(edao.getUntil());
+        for (int field : RECURRENCE_FIELDS) {
+            if (!cdao.contains(field) && edao.contains(field)) {
+                cdao.set(field, edao.get(field));
+            }
         }
         if (!cdao.containsOccurrence() && edao.containsOccurrence()) {
             cdao.setOccurrence(edao.getOccurrence());
@@ -3173,7 +3169,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         return cdao.getEndDate().getTime() != edao.getEndDate().getTime();
     }
-
+    
     private boolean recurrenceTypeChanged(CalendarDataObject cdao, CalendarDataObject edao) {
         if (!cdao.containsRecurrenceType()) {
             return false;
@@ -3182,6 +3178,19 @@ public final class CalendarCollection implements CalendarCollectionService {
             return false;
         }
         if (cdao.getRecurrenceType() != edao.getRecurrenceType()) {
+            return true;
+        }
+        for (int field : RECURRENCE_FIELDS) {
+            if (cdao.contains(field)) {
+                if (cdao.get(field) == null && edao.get(field) != null) {
+                    return true;
+                }
+                if (!cdao.get(field).equals(edao.get(field))) {
+                    return true;
+                }
+            }
+        }
+        if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
             return true;
         }
         return false;
