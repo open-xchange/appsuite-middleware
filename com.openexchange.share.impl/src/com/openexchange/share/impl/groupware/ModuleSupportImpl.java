@@ -67,6 +67,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
@@ -360,7 +361,19 @@ public class ModuleSupportImpl implements ModuleSupport {
                 if (FolderObject.SYSTEM_TYPE == folder.getType() || FolderObject.MIN_FOLDER_ID > folder.getObjectID()) {
                     continue;
                 }
-                shareTargets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
+                /*
+                 * Filter out system permissions
+                 */
+                boolean canRead = false;
+                for (OCLPermission p : folder.getPermissions()) {
+                    if (!p.isGroupPermission() && !p.isSystem() && p.getEntity() == user.getId() && (p.canReadOwnObjects() || p.canReadAllObjects())) {
+                        canRead = true;
+                        break;
+                    }
+                }
+                if (canRead) {
+                    shareTargets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
+                }
             }
         } finally {
             SearchIterators.close(searchIterator);
