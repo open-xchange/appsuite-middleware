@@ -122,6 +122,8 @@ public enum GroupExceptionCodes implements DisplayableOXExceptionCode {
      */
     RESERVED_DISPLAY_NAME("The display name \"%1$s\" is reserved. Please choose another one.", GroupExceptionMessage.RESERVED_DISPLAY_NAME_MSG, Category.CATEGORY_USER_INPUT, 15),
 
+    NO_GUEST_USER_IN_GROUP("Group contains a guest user %1$d.", GroupExceptionMessage.NO_GUEST_USER_IN_GROUP_MSG, Category.CATEGORY_USER_INPUT, 16),
+
     ;
 
     private final String message;
