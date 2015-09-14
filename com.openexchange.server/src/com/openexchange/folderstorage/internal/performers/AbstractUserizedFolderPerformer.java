@@ -291,7 +291,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             synchronized (this) {
                 tmp = allowedContentTypes;
                 if (null == tmp) {
-                    tmp = null == decorator ? ALL_ALLOWED : decorator.getAllowedContentTypes2();
+                    tmp = null == decorator ? ALL_ALLOWED : decorator.getAllowedContentTypes();
                     allowedContentTypes = tmp;
                 }
             }

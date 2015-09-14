@@ -115,7 +115,7 @@ public final class FolderServiceDecorator implements Cloneable {
      *
      * @return The list of allowed content types
      */
-    public List<ContentType> getAllowedContentTypes2() {
+    public List<ContentType> getAllowedContentTypes() {
         return allowedContentTypes;
     }
 
