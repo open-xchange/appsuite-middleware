@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,6 +81,7 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
@@ -432,16 +434,25 @@ public class DefaultShareService implements ShareService {
         UserService userService = services.getService(UserService.class);
         int[] guestIDs = userService.listAllUser(contextID, true, true);
         if (null != guestIDs && 0 < guestIDs.length) {
+            Set<Integer> guestsWithoutShares = new HashSet<>(guestIDs.length);
             for (int guestID : guestIDs) {
                 User guest = userService.getUser(guestID, contextID);
                 if (guest.isGuest()) { // double check
                     List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
-                    for (TargetProxy proxy : targets) {
-                        ShareTargetPath targetPath = proxy.getTargetPath();
-                        ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-                        shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath));
+                    if (targets.isEmpty()) {
+                        guestsWithoutShares.add(guestID);
+                    } else {
+                        for (TargetProxy proxy : targets) {
+                            ShareTargetPath targetPath = proxy.getTargetPath();
+                            ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+                            shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath));
+                        }
                     }
                 }
+            }
+
+            if (!guestsWithoutShares.isEmpty()) {
+                scheduleGuestCleanup(contextID, Autoboxing.Coll2i(guestsWithoutShares));
             }
         }
         return shareInfos;
