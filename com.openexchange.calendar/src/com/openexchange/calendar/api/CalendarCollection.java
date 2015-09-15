@@ -3083,6 +3083,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     @Override
     public boolean detectTimeChange(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
+        LOG.debug("detectTimeChange start");
         if (recurrenceTypeChanged(cdao, edao)) {
             return true;
         }
@@ -3111,6 +3112,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         RecurringResultInterface firstOccurrenceNew = calculateFirstRecurring(clone).getRecurringResult(0);
         RecurringResultInterface firstOccurrenceOld = calculateFirstRecurring(edao).getRecurringResult(0);
         if (firstOccurrenceNew.getStart() != firstOccurrenceOld.getStart()) {
+            LOG.debug(cdao.getObjectID() + ": Start changed (" + firstOccurrenceNew.getStart() + ")->(" + firstOccurrenceOld.getStart() + ")");
             return true;
         }
         return false;
@@ -3127,6 +3129,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         RecurringResultsInterface resultsOld = calculateRecurringIgnoringExceptions(edao, 0, 0, 0);
         RecurringResultInterface lastOccurrenceOld = resultsOld.getRecurringResult(resultsOld.size() - 1);
         if (lastOccurrenceNew.getEnd() != lastOccurrenceOld.getEnd()) {
+            LOG.debug(cdao.getObjectID() + ": End changed (" + lastOccurrenceNew.getStart() + ")->(" + lastOccurrenceOld.getStart() + ")");
             return true;
         }
         return false;
@@ -3180,25 +3183,30 @@ public final class CalendarCollection implements CalendarCollectionService {
             return false;
         }
         if (cdao.getRecurrenceType() != edao.getRecurrenceType()) {
+            LOG.debug(cdao.getObjectID() + ": Type changed (" + cdao.getRecurrenceType() + ")->(" + edao.getRecurrenceType() + ")");
             return true;
         }
         for (int field : RECURRENCE_FIELDS) {
             if (cdao.contains(field)) {
                 if (cdao.get(field) == null && edao.get(field) != null) {
+                    LOG.debug(cdao.getObjectID() + ": " + field + " changed (" + cdao.get(field) + ")->(" + edao.get(field) + ")");
                     return true;
                 }
                 if (cdao.get(field) == null && edao.get(field) == null) {
                     continue;
                 }
                 if (!cdao.get(field).equals(edao.get(field))) {
+                    LOG.debug(cdao.getObjectID() + ": " + field + " changed (" + cdao.get(field) + ")->(" + edao.get(field) + ")");
                     return true;
                 }
             }
         }
         if (untilChanged(cdao, edao)) {
+            LOG.debug(cdao.getObjectID() + ": Until changed (" + cdao.getUntil() + ", " + cdao.containsUntil() + ")->(" + edao.getUntil() + ", " + edao.containsUntil() + ")");
             return true;
         }
         if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
+            LOG.debug(cdao.getObjectID() + ": Occurrence changed (" + cdao.getOccurrence() + ")->(" + edao.getOccurrence() + ")");
             return true;
         }
         return false;
