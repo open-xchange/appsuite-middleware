@@ -145,8 +145,7 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
         UserService userService = services.getService(UserService.class);
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         User[] createdGuests = userService.getGuestsCreatedBy(connectionHelper.getConnection(), context, session.getUserId());
-        long usage = null != createdGuests && 0 < createdGuests.length ? getUsedQuota(createdGuests) : null;
-        return new Quota(QuotaType.AMOUNT, limit, usage);
+        return new Quota(QuotaType.AMOUNT, limit, getUsedQuota(createdGuests));
     }
 
 }
