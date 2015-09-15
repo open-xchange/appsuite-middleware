@@ -64,6 +64,10 @@ import java.util.Set;
  */
 public abstract class AbstractRootFolder implements FileStorageFolder {
 
+    protected int createdBy;
+
+    protected int modifiedBy;
+
     /**
      * Initializes a new {@link AbstractRootFolder}.
      */
@@ -156,10 +160,20 @@ public abstract class AbstractRootFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return Collections.emptyMap();
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return this.modifiedBy;
     }
 
 }
