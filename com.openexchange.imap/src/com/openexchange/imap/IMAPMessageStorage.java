@@ -1747,28 +1747,46 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // Check for special sort field
         if (hasSort && MailSortField.FLAG_SEEN.equals(sortField) && null == searchTerm) {
             // Perform "SEARCH UNSEEN" IMAP command
-            int[] unseenSeqNums;
-            {
+            int[] unseenSeqNums = null;
+            int[] seenSeqNums = null;
+
+            int[] seqNumsToFetch = null;
+            if (OrderDirection.ASC.equals(order)) {
                 SearchTerm<?> unseenSearchterm = new FlagTerm(MailMessage.FLAG_SEEN, false);
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig);
-                unseenSeqNums = result.msgIds;
-            }
+                unseenSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig).msgIds;
 
-            if (unseenSeqNums.length == 0) {
-                // No unseen messages at all
-                return performIMAPSearch(MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, indexRange, headerNames, messageCount);
-            }
+                if (unseenSeqNums.length == 0) {
+                    // No unseen messages at all
+                    return performIMAPSearch(MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, indexRange, headerNames, messageCount);
+                }
 
-            int[] seqNumsToFetch;
-            if (null != indexRange && OrderDirection.ASC.equals(order) && indexRange.start < unseenSeqNums.length && indexRange.end <= unseenSeqNums.length) {
-                // Complete requested range can be served by unseen messages
-                seqNumsToFetch = applyIndexRange(unseenSeqNums, indexRange);
+                if (null != indexRange && indexRange.start < unseenSeqNums.length && indexRange.end <= unseenSeqNums.length) {
+                    // Complete requested range can be served
+                    seqNumsToFetch = applyIndexRange(unseenSeqNums, indexRange);
+                }
             } else {
-                int[] seenSeqNums;
-                {
+                SearchTerm<?> seenSearchterm = new FlagTerm(MailMessage.FLAG_SEEN, true);
+                seenSeqNums = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig).msgIds;
+
+                if (seenSeqNums.length == 0) {
+                    // No seen messages at all
+                    return performIMAPSearch(MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, fields, indexRange, headerNames, messageCount);
+                }
+
+                if (null != indexRange && indexRange.start < seenSeqNums.length && indexRange.end <= seenSeqNums.length) {
+                    // Complete requested range can be served
+                    seqNumsToFetch = applyIndexRange(seenSeqNums, indexRange);
+                }
+            }
+
+            if (null == seqNumsToFetch) {
+                if (null == unseenSeqNums) {
+                    SearchTerm<?> unseenSearchterm = new FlagTerm(MailMessage.FLAG_SEEN, false);
+                    unseenSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig).msgIds;
+                }
+                if (null == seenSeqNums) {
                     SearchTerm<?> seenSearchterm = new FlagTerm(MailMessage.FLAG_SEEN, true);
-                    ImapSortResult result = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig);
-                    seenSeqNums = result.msgIds;
+                    seenSeqNums = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, imapConfig).msgIds;
                 }
 
                 int[] sortedSeqNums;
@@ -1835,6 +1853,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 MailMessage[] tmp = fetchMessages(seqNumsToFetch, fetchProfile, isRev1, getSeparator(imapFolder));
                 mailMessages = setAccountInfo(tmp);
             }
+
             return mailMessages;
         }
 
