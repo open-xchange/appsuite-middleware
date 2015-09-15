@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-01 17:03+0300\n"
+"PO-Revision-Date: 2015-09-14 11:00+0300\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -4487,7 +4487,6 @@ msgstr "Jūsu sesija ir pārtraukta. Lūdzu pieslēdzieties vēlreiz."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Jum nav nepieciešamo tiesību mapes \"%1$s\" apskatam."
 
@@ -8168,51 +8167,52 @@ msgstr "Norādītajam resursam iztrūkst obligātie lauki."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Jums nav šmodulim \"%2$s\" nepieiešamo tiesību."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Jum nav šīs mapes apskatam nepieciešamo tiesību."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Jūsu kontam koplietošanas mapes nav atļautas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Jum nav publiskās mapes \"%2$s\" piekļuvei nepieciešamo tiesību."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Jum nav publiskās mapes apskatam nepieciešamo tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr "Jums nav nepieciešamo tiesību apakšmapju izveidei mapē \"%2$s\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Jum nav apakšmapju izveidei nepieciešamo tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Mape \"%1$s\" neeksistē."
+msgid "Such a folder does not exist."
+msgstr "Šāda mape neeksistē."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Mape \"%1$s\" starplaikā ir izmainīta. Lūdzu pārlādējiet skatu un mēģiniet "
-"vēlreiz."
+"Mape starplaikā ir izmainīta. Lūdzu pārlādējiet skatu un mēģiniet vēlreiz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Šī operācija prasa mapes \"%2$s\" administrēšanas tiesības."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Šī operācija prasa mapes administrēšanas tiesības."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Mape \"%1$s\" ir noklusētā mape un to nevar izdzēst."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Mape ir noklusējuma mape un tā nevar tikt pārdēvēta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Mape \"%1$s\" jau satur apakšmapi ar vārdu \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "Mape jau satur apakšmapi ar šādu vārdu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Mape ar tipu \"%2$s\" nevar tikt izveidota kā apakšmape zem \"%1$s\"."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Mape ar tipu \"%2$s\" nevar tikt izveidota kā šīs mapes apakšmape."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Mapes modulim \"%2$s\" nevar tikt izveidotas zem \"%1$s\"."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Moduļa \"%2$s\" mapes nevar tikt izveidotas kā šīs mapes apakšmapes."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8234,60 +8234,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Ir nepieciešams vismaz viens lietotājs ar administrēšanas tiesīām."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "Mape \"%1$s\" ir noklusētā mape un to nevar pārvietot."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Mape ir noklusējuma mape un tā nevar tikt pārvietota."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Mape \"%1$s\" ir koplietojuma mape un to nevar pārvietot."
+msgid "The folder is shared and cannot be moved."
+msgstr "Mape ir koplietota un tā nevar tikt pārvietota."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Mapi nevar pārvietot uz koplietojuma mapi \"%1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Mapi nevar pārvietot uz koplietojuma mapi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "Mape \"%1$s\" ir sistēmas mape un to nevar pārvietot."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Mape ir sistēmas mape un tā nevar tikt pārvietota."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "Privātā mape \"%1$s\" var tikt pārvietota tikai uz citu privāto mapi."
+msgid "The private folder can only be moved to another private folder."
+msgstr "Privātā mape var tikt pārvietota tikai uz citu privāto mapi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr ""
-"Publiskā mape \"%1$s\" var tikt pārvietota tikai uz citu publisko mapi."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Publiskā mape var tikt pārvietota tikai uz citu publisko mapi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Norādītā mērķa mape ir tā pati kas avota mape."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr ""
-"Jums nav nepieiešamo tiesību visu apakšmapju pārvietošanai uz mapi \"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "Jum nav visu apakšmapju pārvietošanai nepieciešamo tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "Jum nav nepieciešamo tiesību koplietojuma mapes \"%2$s\" dzēšanai."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Jum nav nepieciešamo tiesību koplietojuma mapes dzēšanai."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "Mape \"%2$s\" ir noklusētā mape un tā nevar tikt dzēsta."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Mape ir noklusētā mape un tā nevar tikt dzēsta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr "Jums nav nepieciešamo tiesību visu objektu dzēšanai mapē \"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Jums nav visu satura vienību dzēšanai nepieciešamo tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "Mape \"%1$s\" nevar tikt pārvietota uz kādu no tās apakšmapēm."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Mape nevar tikt pārvietota uz kādu no tās apakšmapēm."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8296,8 +8288,8 @@ msgstr ""
 "Mape no moduļa \"%1$s\" nevar tikt pārvietota uz citu mapi modulī \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Koplietojuma mape \"%1$s\" nevar tikt jaunināta."
+msgid "The shared folder cannot be updated."
+msgstr "Koplietojuma mape nevar tikt jaunināta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8317,45 +8309,40 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
-msgstr ""
-"Tikai koplietojuma virsmapes \"%4$s\" īpašniekam ir administrēšanas tiesības."
+msgstr "Tikai koplietojuma virsmapes īpašniekam ir administrēšanas tiesības."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Mape \"%2$s\" ir noklusētā mape un administrēšanas tiesībām uz to ir "
-"jāpieder tās īpašniekam."
+"Mape ir noklusētā mape un administrēšanas tiesībām uz to ir jāpieder tās "
+"īpašniekam."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Jum nav nepieciešamo tiesību mapes \"%2$s\" koplietošanai."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Jum nav nepieciešamo tiesību mapes koplietošanai."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr ""
-"Izmaiņas mapē \"%2$s\" nevar tikt piemērotas nepietiekamu lietotāja \"%1$s\" "
-"tiesību ierobežojumu dēļ."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "Izmaiņas nevar tikt piemērotas piekļuves tiesību ierobežojumu dēļ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Mape \"%1$s\" nevar tikt dzēsta jo tā satur paslēptu apakšmapi piekļuvei pie "
-"kuras jums nav atbilstošu tiesību."
+"Mape nevar tikt dzēsta jo tā satur paslēptu apakšmapi piekļuvei pie kuras "
+"jums nav atbilstošu tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Mape \"%2$s\" jau satur apakšmapi \"%1$s\". lūdzu norādiet citu vārdu un "
+"Mape jau satur apakšmapi ar šādu vārdu. Lūdzu izvēlieties citu vārdu un "
 "mēģiniet vēlreiz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
@@ -8373,61 +8360,50 @@ msgstr ""
 "lietotāju. Lūdzu pārsauciet mapi pirms sākat to koplietot ar šo lietotāju."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Lietotājam \"%1$s\" ir definēti dublikāti tiesību ieraksti. Katram "
-"lietotājam ir atļautas tikai vienas tiesības."
+"Definētas dublikāta tiesības. Katram lietotājam ir atļauts tikai viens "
+"tiesību raksts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Grupai \"%1$s\" ir definēti dublikāti tiesību ieraksti. Katrai grupai var "
-"tikt piešķirtas tikai vienas tiesības."
+"Definētas dublikāta tiesības. Katrai grupai ir atļauts tikai viens tiesību "
+"raksts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "Mapei \"%1$s\" var mainīt tikai mapes redzamības tiesības."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Izmainītas var tikt tikai mapes apskata tiesības."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Mapei \"%1$s\" ir atļauts iestatīt tikai individuālas lietotāju tiesības, "
-"nevis lietotāju grupas tiesības."
+"Atļautas ir tikai atsevišķu lietotāju tiesības, nevis lietotāju grupu "
+"tiesības."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "Individuālas lietotāju piekļuves tiesības mapei \"%1$s\" nav atļautas."
+msgid "No individual user permissions are allowed."
+msgstr "Atsevišķu lietotāju tiesības nav atļautas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Jum nav nepieciešamo tiesību mapes \"%1$s\" pārsaukšanai."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Jum nav mapes pārsaukšanai nepieciešamo tiesību."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "Mape \"%1$s\" nevar tikt dzēsta, jo tā satur noslēgtus dokumentus."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Mape nevar tikt dzēsta, jo tā satur noslēgtus dokumentus."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Šo operāciju var veikt tikai konteksta administrators."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Mape \"%1$s\" nevar tikt izdzēsta."
+msgid "The folder cannot be deleted."
+msgstr "Mape nevar tikt dzēsta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Īpašnieka \"%1$s\" administrēšanas tiesības mapei \"%2$s\" ir atjaunotas."
+msgid "The administrative permissions were restored."
+msgstr "Administrēšanas tiesības ir atjaunotas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -11437,6 +11413,176 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Jum nav publiskās mapes \"%2$s\" piekļuvei nepieciešamo tiesību."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr "Jums nav nepieciešamo tiesību apakšmapju izveidei mapē \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Mape \"%1$s\" neeksistē."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Mape \"%1$s\" starplaikā ir izmainīta. Lūdzu pārlādējiet skatu un "
+#~ "mēģiniet vēlreiz."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "Šī operācija prasa mapes \"%2$s\" administrēšanas tiesības."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Mape \"%1$s\" ir noklusētā mape un to nevar izdzēst."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Mape \"%1$s\" jau satur apakšmapi ar vārdu \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr ""
+#~ "Mape ar tipu \"%2$s\" nevar tikt izveidota kā apakšmape zem \"%1$s\"."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Mapes modulim \"%2$s\" nevar tikt izveidotas zem \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "Mape \"%1$s\" ir noklusētā mape un to nevar pārvietot."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Mape \"%1$s\" ir koplietojuma mape un to nevar pārvietot."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Mapi nevar pārvietot uz koplietojuma mapi \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "Mape \"%1$s\" ir sistēmas mape un to nevar pārvietot."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Privātā mape \"%1$s\" var tikt pārvietota tikai uz citu privāto mapi."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Publiskā mape \"%1$s\" var tikt pārvietota tikai uz citu publisko mapi."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Jums nav nepieiešamo tiesību visu apakšmapju pārvietošanai uz mapi \"%2$s"
+#~ "\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr "Jum nav nepieciešamo tiesību koplietojuma mapes \"%2$s\" dzēšanai."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "Mape \"%2$s\" ir noklusētā mape un tā nevar tikt dzēsta."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr "Jums nav nepieciešamo tiesību visu objektu dzēšanai mapē \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "Mape \"%1$s\" nevar tikt pārvietota uz kādu no tās apakšmapēm."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Koplietojuma mape \"%1$s\" nevar tikt jaunināta."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Tikai koplietojuma virsmapes \"%4$s\" īpašniekam ir administrēšanas "
+#~ "tiesības."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Mape \"%2$s\" ir noklusētā mape un administrēšanas tiesībām uz to ir "
+#~ "jāpieder tās īpašniekam."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Jum nav nepieciešamo tiesību mapes \"%2$s\" koplietošanai."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Izmaiņas mapē \"%2$s\" nevar tikt piemērotas nepietiekamu lietotāja \"%1$s"
+#~ "\" tiesību ierobežojumu dēļ."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Mape \"%1$s\" nevar tikt dzēsta jo tā satur paslēptu apakšmapi piekļuvei "
+#~ "pie kuras jums nav atbilstošu tiesību."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Mape \"%2$s\" jau satur apakšmapi \"%1$s\". lūdzu norādiet citu vārdu un "
+#~ "mēģiniet vēlreiz."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Lietotājam \"%1$s\" ir definēti dublikāti tiesību ieraksti. Katram "
+#~ "lietotājam ir atļautas tikai vienas tiesības."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Grupai \"%1$s\" ir definēti dublikāti tiesību ieraksti. Katrai grupai var "
+#~ "tikt piešķirtas tikai vienas tiesības."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr "Mapei \"%1$s\" var mainīt tikai mapes redzamības tiesības."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Mapei \"%1$s\" ir atļauts iestatīt tikai individuālas lietotāju tiesības, "
+#~ "nevis lietotāju grupas tiesības."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Individuālas lietotāju piekļuves tiesības mapei \"%1$s\" nav atļautas."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "Jum nav nepieciešamo tiesību mapes \"%1$s\" pārsaukšanai."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr "Mape \"%1$s\" nevar tikt dzēsta, jo tā satur noslēgtus dokumentus."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Mape \"%1$s\" nevar tikt izdzēsta."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Īpašnieka \"%1$s\" administrēšanas tiesības mapei \"%2$s\" ir atjaunotas."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"
