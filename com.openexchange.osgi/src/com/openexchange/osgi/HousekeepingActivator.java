@@ -294,7 +294,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
         Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(Constants.SERVICE_RANKING, serviceRanking);
+        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(serviceRanking));
         registerService(clazz, service, properties);
     }
 

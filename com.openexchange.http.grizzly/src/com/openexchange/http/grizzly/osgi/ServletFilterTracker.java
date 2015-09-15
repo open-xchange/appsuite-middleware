@@ -65,20 +65,20 @@ import com.openexchange.http.grizzly.service.http.ServletFilterRegistration;
 /**
  * {@link ServletFilterTracker} - Tracks services with the type {@link Filter} and updates the central {@link OSGiMainHandler}
  * accordingly so the filters are applied to new incoming requests/outgoing responses.
- * 
+ *
  * <p>
  * A Filter service may be registered with an additional <strong>com.openexchange.servlet.Constants.FILTER_PATHS</strong> property. This
  * property may consist of path expressions including wildcards. The path property should be provided as:
- * 
+ *
  * <ol>
  *   <li>A single String for a single path</li>
  *   <li>An array of Strings</li>
  *   <li>A Collection of of Objects that provides the path via invocation of <cod>toString()</code></li>
  * </ol>
- * 
+ *
  * if the filter.path property is missing/null the filter will be used for every incoming request.
  * </p>
- * 
+ *
  * <p>
  * The form of a path must be one of:
  * <ol>
@@ -260,10 +260,14 @@ public class ServletFilterTracker implements ServiceTrackerCustomizer<Filter, Fi
         {
             final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
             if (null != oRanking) {
-                try {
-                    ranking = Integer.parseInt(oRanking.toString().trim());
-                } catch (final NumberFormatException e) {
-                    ranking = defaultRanking;
+                if (oRanking instanceof Integer) {
+                    ranking = ((Integer) oRanking).intValue();
+                } else {
+                    try {
+                        ranking = Integer.parseInt(oRanking.toString().trim());
+                    } catch (final NumberFormatException e) {
+                        ranking = defaultRanking;
+                    }
                 }
             }
         }
