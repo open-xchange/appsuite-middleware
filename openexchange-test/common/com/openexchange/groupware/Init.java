@@ -165,6 +165,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -578,7 +579,7 @@ public final class Init {
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
                 }
-            });
+            }, new PasswordMechFactoryImpl());
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
