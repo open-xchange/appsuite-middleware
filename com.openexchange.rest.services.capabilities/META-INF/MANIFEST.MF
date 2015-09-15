@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The REST service for capabilities
+Bundle-SymbolicName: com.openexchange.rest.services.capabilities
+Bundle-Version: 7.6.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.capabilities,
+ com.openexchange.capabilities.json,
+ com.openexchange.exception,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotations,
+ com.openexchange.rest.services.osgiservice,
+ com.openexchange.server,
+ org.json,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.rest.services.capabilities.osgi.CapabilitiesRESTServiceActivator

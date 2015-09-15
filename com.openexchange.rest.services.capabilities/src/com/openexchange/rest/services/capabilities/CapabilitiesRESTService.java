@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,50 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.rest.services.capabilities;
 
-import java.util.Collection;
-import java.util.Iterator;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityExceptionCodes;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.capabilities.json.CapabilitiesJsonWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.rest.services.OXRESTService;
+import com.openexchange.rest.services.annotations.GET;
+import com.openexchange.rest.services.annotations.ROOT;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * {@link Capability2JSON}
+ * The {@link CapabilitiesRESTService} allows clients to retrieve capabilities for arbitrary users.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Capability2JSON implements ResultConverter {
+@ROOT("/capabilities/v1")
+public class CapabilitiesRESTService extends OXRESTService<Void> {
 
     /**
-     * Initializes a new {@link Capability2JSON}.
+     * Initializes a new {@link CapabilitiesRESTService}.
      */
-    public Capability2JSON() {
+    public CapabilitiesRESTService() {
         super();
     }
-
-    @Override
-    public String getInputFormat() {
-        return "capability";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
+    
+    /**
+     * GET /rest/capabilities/v1/all/[contextId]/[userId]
+     */
+    @GET("/all/:context/:user")
+    public Object getAll(int context, int user) throws OXException {
+        CapabilityService capService = services.getOptionalService(CapabilityService.class);
+        if (null == capService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        
         try {
-            if (Collection.class.isInstance(resultObject)) {
-                result.setResultObject(transform((Collection<Capability>) resultObject), "json");
-            } else {
-                result.setResultObject(transform((Capability) resultObject), "json");
-            }
-        } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+            CapabilitySet capabilities = capService.getCapabilities(user, context);
+            return CapabilitiesJsonWriter.toJson(capabilities.asSet());
+        } catch (JSONException e) {
+            throw CapabilityExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private static final JSONObject EMPTY_JSON = new JSONObject(0);
-
-    private JSONObject transform(Capability resultObject) throws JSONException {
-        final JSONObject object = new JSONObject(3);
-        object.put("id", resultObject.getId());
-        object.put("attributes", EMPTY_JSON);
-        return object;
-    }
-
-    private JSONArray transform(Collection<Capability> resultObjects) throws JSONException {
-        int size = resultObjects.size();
-        JSONArray array = new JSONArray(size);
-        Iterator<Capability> iterator = resultObjects.iterator();
-        for (int i = size; i-- > 0 ;) {
-            array.put(transform(iterator.next()));
-        }
-        return array;
     }
 
 }

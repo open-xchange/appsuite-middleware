@@ -22,3 +22,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
+Export-Package: com.openexchange.capabilities.json

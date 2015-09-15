@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -76,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, TtlAware {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileImpl.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileImpl.class);
 
     private final ManagedFileManagementImpl management;
     private final String id;
@@ -97,15 +98,13 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private final int optTtl;
 
-
-
     /**
      * Initializes a new {@link ManagedFileImpl}.
      *
      * @param id The unique ID
      * @param file The kept file
      */
-    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file) {
+    public ManagedFileImpl(ManagedFileManagementImpl management, String id, File file) {
         this(management, id, file, -1);
     }
 
@@ -116,7 +115,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
      * @param file The kept file
      * @param optTtl The optional TTL
      */
-    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file, int optTtl) {
+    public ManagedFileImpl(ManagedFileManagementImpl management, String id, File file, int optTtl) {
         super();
         this.management = management;
         this.optTtl = optTtl;
@@ -197,6 +196,15 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
             return null;
         }
         touch();
+        return file;
+    }
+
+    /**
+     * Gets the file reference w/o touching last-accessed time stamp
+     *
+     * @return The file
+     */
+    public File getFilePlain() {
         return file;
     }
 

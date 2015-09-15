@@ -1203,6 +1203,9 @@ ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xcha
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
+#SoftwareChange_Request-2698
+ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1243,6 +1246,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-14 (2732)
+* Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>

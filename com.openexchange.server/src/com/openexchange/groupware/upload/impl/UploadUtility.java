@@ -83,7 +83,6 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -620,43 +619,52 @@ public final class UploadUtility {
         }
 
         private boolean isJavaVersionGreaterThan160_20() {
-            float javaClassVersion = Float.parseFloat(getSystemProperty("java.class.version"));
-            // Java <= 5
-            if (javaClassVersion <= 49.0f) {
-                return false;
-            }
-            // Java >= 7
-            if (javaClassVersion > 50.0f) {
+            try {
+                float javaClassVersion = Float.parseFloat(getSystemProperty("java.class.version"));
+                // Java <= 5
+                if (javaClassVersion <= 49.0f) {
+                    return false;
+                }
+                // Java >= 7
+                if (javaClassVersion > 50.0f) {
+                    return true;
+                }
+                // This is Java 6. Get patch level version.
+                // Assume JAVA_VERSION is 1.6.0_x
+                String javaVersion = getJavaVersionTrimmed();
+                assert javaVersion.startsWith("1.6") : javaVersion;
+                String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_') + 1);
+                return Integer.parseInt(patchLevelStr) > 20;
+            } catch (RuntimeException e) {
+                // Assume "yes"
                 return true;
             }
-            // This is Java 6. Get patch level version.
-            // Assume JAVA_VERSION is 1.6.0_x
-            String javaVersion = getJavaVersionTrimmed();
-            assert javaVersion.startsWith("1.6") : javaVersion;
-            String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_'));
-            return Integer.parseInt(patchLevelStr) > 20;
         }
 
+        /**
+         * Trims the text of the java version to start with numbers.
+         *
+         * @return the trimmed java version
+         */
         private String getJavaVersionTrimmed() {
             String javaVersion = getSystemProperty("java.version");
-            if (javaVersion == null) {
-                return null;
-            }
-
-            String result = javaVersion;
-            for (int i = 0; i < javaVersion.length(); ++i) {
-                if (Strings.isDigit(javaVersion.charAt(i))) {
-                    result = javaVersion.substring(i);
-                    break;
+            if (javaVersion != null) {
+                for (int i = 0; i < javaVersion.length(); i++) {
+                    char ch = javaVersion.charAt(i);
+                    if (ch >= '0' && ch <= '9') {
+                        return javaVersion.substring(i);
+                    }
                 }
             }
-            // Trim end while last char is not a digit
-            while (result.length() > 0 && ! Character.isDigit(result.charAt(result.length()))) {
-                result = result.substring(result.length() - 1);
-            }
-            return result;
+            return null;
         }
 
+        /**
+         * Gets a System property, defaulting to <code>null</code> if the property cannot be read.
+         *
+         * @param property The system property name
+         * @return the system property value or <code>null</code> if a security problem occurs
+         */
         private String getSystemProperty(String property) {
             try {
                 return System.getProperty(property);

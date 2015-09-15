@@ -97,6 +97,7 @@ import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
@@ -562,11 +563,26 @@ public final class NewAction extends AbstractMailAction {
             /*
              * Send raw message source
              */
-            final MailMessage sentMail;
-            if (m instanceof MimeMailMessage) {
-                sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(((MimeMailMessage) m).getMimeMessage(), session, null), ComposeType.NEW);
-            } else {
-                sentMail = transport.sendRawMessage(m.getSourceBytes());
+            MailMessage sentMail;
+            OXException oxError = null;
+            try {
+                if (m instanceof MimeMailMessage) {
+                    sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(((MimeMailMessage) m).getMimeMessage(), session, null), ComposeType.NEW);
+                } else {
+                    sentMail = transport.sendRawMessage(m.getSourceBytes());
+                }
+            } catch (OXException e) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                    throw e;
+                }
+
+                MailMessage ma = (MailMessage) e.getArgument("sent_message");
+                if (null == ma) {
+                    throw e;
+                }
+
+                sentMail = ma;
+                oxError = e;
             }
             /*
              * User settings
@@ -650,6 +666,9 @@ public final class NewAction extends AbstractMailAction {
                         mailAccess.close(true);
                     }
                 }
+            }
+            if (null != oxError) {
+                throw oxError;
             }
             return responseData;
         } finally {
