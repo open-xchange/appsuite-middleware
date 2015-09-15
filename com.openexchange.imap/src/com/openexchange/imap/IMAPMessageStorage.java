@@ -1896,8 +1896,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private MailMessage[] fetchMessages(int[] seqnums, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
         try {
             long start = System.currentTimeMillis();
-            MailMessageFetchIMAPCommand command = null == seqnums ? new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, fetchProfile, imapServerInfo) : new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fetchProfile, imapServerInfo);
-            MailMessage[] mailMessages = command.doCommand();
+            MailMessage[] mailMessages;
+            if (null == seqnums) {
+                mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, fetchProfile, imapServerInfo).doCommand();
+            } else {
+                mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fetchProfile, imapServerInfo).doCommand();
+            }
             long time = System.currentTimeMillis() - start;
             mailInterfaceMonitor.addUseTime(time);
             LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(mailMessages.length), Long.valueOf(time));
