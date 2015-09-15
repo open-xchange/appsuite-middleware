@@ -122,7 +122,6 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(ParallelGuestSessionsTest.class);
         tests.addTestSuite(QuotaTest.class);
         tests.addTestSuite(DownloadHandlerTest.class);
-        tests.addTestSuite(PasswordResetServletTest.class);
         tests.addTestSuite(MailNotificationTest.class);
         tests.addTestSuite(GuestAutologinTest.class);
         tests.addTestSuite(ConvertToInternalPermissionTest.class);
@@ -146,6 +145,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(Bug40722Test.class);
         tests.addTestSuite(Bug40826Test.class);
         tests.addTestSuite(AddGuestUserToGroupTest.class);
+        tests.addTestSuite(PasswordResetServletTest.class);
         return tests;
     }
 

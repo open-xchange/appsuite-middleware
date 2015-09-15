@@ -72,7 +72,6 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -83,10 +82,9 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.impl.NotificationStrings;
-import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.test.TestInit;
 
 /**
@@ -100,11 +98,11 @@ public class MailNotificationTest extends ShareTest {
     private InfostoreTestManager infostoreTestManager;
     private FolderObject testFolder1;
     private FolderObject publicDriveFolder;
-    private File image1, image2, file1, file2;
-    private final String IMAGENAME1 = "image1.jpg", IMAGENAME2 = "image2.png";
-    private final String IMAGETYPE1 = "image/jpeg", IMAGETYPE2 = "image/png";
-    private final String FILENAME1 = "snippet1.ad", FILENAME2 = "snippet2.md";
-    private final String FILETYPE1 = "text/plain", FILETYPE2 = "text/plain";
+    private File image1, file1;
+    private final String IMAGENAME1 = "image1.jpg";
+    private final String IMAGETYPE1 = "image/jpeg";
+    private final String FILENAME1 = "snippet1.ad";
+    private final String FILETYPE1 = "text/plain";
     private Contact clientContact;
     private String clientFullName, clientEmail;
     private final String clientShareMessage = "Hey there, i've got some shares for you!";
@@ -128,10 +126,8 @@ public class MailNotificationTest extends ShareTest {
         infostoreTestManager = new InfostoreTestManager(client);
         testFolder1 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
         publicDriveFolder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
-        image1 = createFile(testFolder1, IMAGENAME1, IMAGETYPE1);
-        image2 = createFile(testFolder1, IMAGENAME2, IMAGETYPE2);
-        file1 = createFile(testFolder1, FILENAME1, FILETYPE1);
-        file2 = createFile(testFolder1, FILENAME2, FILETYPE2);
+        image1 = getFile(createFile(testFolder1, IMAGENAME1, IMAGETYPE1).getId());
+        file1 = getFile(createFile(testFolder1, FILENAME1, FILETYPE1).getId());
         initUserConfig();
         shareExpireDate = new SimpleDateFormat("yyyy-MM-dd", userValues.getLocale()).parse("2048-12-02");
         dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, userValues.getLocale());
@@ -285,7 +281,6 @@ public class MailNotificationTest extends ShareTest {
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
             NotificationStrings.VIEW_IMAGE,
-            String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             null,
             shareExpireDate
             );
@@ -298,7 +293,6 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
         		NotificationStrings.VIEW_IMAGE,
-        		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
         		clientShareMessage,
         		shareExpireDate);
     }
@@ -312,7 +306,6 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		null,
         		shareExpireDate);
     }
@@ -324,7 +317,6 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		clientShareMessage,
         		shareExpireDate);
     }
@@ -338,7 +330,6 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		null,
         		shareExpireDate);
     }
@@ -350,7 +341,6 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		clientShareMessage,
         		shareExpireDate);
     }
@@ -431,18 +421,10 @@ public class MailNotificationTest extends ShareTest {
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
 
-    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, String knownSubject, String shareMessage, Date expiryDate) throws Exception {
+    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, Date expiryDate) throws Exception {
         //      System.out.println("Expiry date: " + expiryDate + " in Timezone:" + userValues.getTimeZone());
         OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null);
-        ShareTarget shareTarget;
-        if (null != file) {
-            shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        } else {
-            shareTarget = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()));
-        }
-        InviteRequest inviteRequest = new InviteRequest(shareTarget, guestPermission.getRecipient());
-        inviteRequest.setMessage(shareMessage);
-        client.execute(inviteRequest);
+        share(testFolder, file, guestPermission, shareMessage);
 
         Message message = assertAndGetMessage();
         Document document = message.requireHtml();
@@ -456,29 +438,52 @@ public class MailNotificationTest extends ShareTest {
 
         assertSignatureText(document, "");
         assertSignatureImage(message);
+    }
 
-        // share again and verify that the subject changed as the guest is already known
-        client.execute(inviteRequest);
-        message = assertAndGetMessage();
-        assertSubject(message.getMimeMessage(), knownSubject);
+    private void share(FolderObject testFolder, File file, OCLPermission guestPermission, final String shareMessage) throws Exception {
+        if (null != file) {
+            DefaultFile toUpdate = new DefaultFile();
+            toUpdate.setId(file.getId());
+            toUpdate.setFolderId(file.getFolderId());
+            toUpdate.setLastModified(file.getLastModified());
+            List<FileStorageObjectPermission> newPermissions = new ArrayList<>(2);
+            List<FileStorageObjectPermission> oldPermissions = file.getObjectPermissions();
+            if (oldPermissions != null) {
+                newPermissions.addAll(oldPermissions);
+            }
+
+            newPermissions.add(asObjectPermission(guestPermission));
+            toUpdate.setObjectPermissions(newPermissions);
+            file = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, new RequestCustomizer<UpdateInfostoreRequest>() {
+                @Override
+                public void customize(UpdateInfostoreRequest request) {
+                    request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                }
+            });
+        } else {
+            FolderObject toUpdate = new FolderObject();
+            toUpdate.setObjectID(testFolder.getObjectID());
+            toUpdate.setLastModified(testFolder.getLastModified());
+            toUpdate.setFolderName(testFolder.getFolderName());
+            toUpdate.setPermissions(testFolder.getPermissions());
+            toUpdate.addPermission(guestPermission);
+            updateFolder(EnumAPI.OX_NEW, toUpdate, new RequestCustomizer<UpdateRequest>() {
+                @Override
+                public void customize(UpdateRequest request) {
+                    request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                }
+            });
+        }
     }
 
     public void testUserGotNoNotification(FolderObject testFolder, File file) throws Exception {
         AJAXClient secondClient = new AJAXClient(User.User2);
         int internalUserId = secondClient.getValues().getUserId();
         secondClient.logout();
-        InternalRecipient r = new InternalRecipient();
-        r.setEntity(internalUserId);
-        r.setBits(257);
-        OCLGuestPermission guestPermission = new OCLGuestPermission(r);
-        ShareTarget shareTarget;
-        if (null != file) {
-            shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        } else {
-            shareTarget = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()));
-        }
-        InviteRequest inviteRequest = new InviteRequest(shareTarget, guestPermission.getRecipient());
-        client.execute(inviteRequest);
+        OCLPermission permission = new OCLPermission();
+        permission.setEntity(internalUserId);
+        permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        share(testFolder, file, permission, null);
         List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         assertEquals(0, messages.size());
     }

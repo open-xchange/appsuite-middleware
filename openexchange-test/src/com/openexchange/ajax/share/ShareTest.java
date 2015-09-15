@@ -1064,11 +1064,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
-    protected static FileStorageGuestObjectPermission asObjectPermission(OCLGuestPermission guestPermission) {
+    protected static FileStorageGuestObjectPermission asObjectPermission(OCLPermission guestPermission) {
         DefaultFileStorageGuestObjectPermission objectPermission = new DefaultFileStorageGuestObjectPermission();
         objectPermission.setEntity(guestPermission.getEntity());
         objectPermission.setGroup(guestPermission.isGroupPermission());
-        objectPermission.setRecipient(guestPermission.getRecipient());
+        if (guestPermission instanceof OCLGuestPermission) {
+            objectPermission.setRecipient(((OCLGuestPermission)guestPermission).getRecipient());
+        }
         if (guestPermission.canWriteAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.WRITE);
         } else if (guestPermission.canReadAllObjects()) {
