@@ -3137,7 +3137,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         CalendarObject.DAY_IN_MONTH,
         CalendarObject.INTERVAL,
         CalendarObject.MONTH,
-        CalendarObject.UNTIL,
         CalendarObject.RECURRENCE_TYPE
     };
 
@@ -3153,6 +3152,9 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         if (!cdao.containsOccurrence() && edao.containsOccurrence()) {
             cdao.setOccurrence(edao.getOccurrence());
+        }
+        if (!cdao.containsUntil() && edao.containsUntil()) {
+            cdao.setUntil(edao.getUntil());
         }
     }
 
@@ -3185,13 +3187,50 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.get(field) == null && edao.get(field) != null) {
                     return true;
                 }
+                if (cdao.get(field) == null && edao.get(field) == null) {
+                    continue;
+                }
                 if (!cdao.get(field).equals(edao.get(field))) {
                     return true;
                 }
             }
         }
+        if (untilChanged(cdao, edao)) {
+            return true;
+        }
         if (cdao.containsOccurrence() && cdao.getOccurrence() != edao.getOccurrence()) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks, if the until value has changed. Weird mechanism, because CalendarDataObject.getUntil() returns the implicit value even if no until is set.
+     * @param cdao
+     * @param edao
+     * @return
+     */
+    private boolean untilChanged(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (cdao.containsUntil()) {
+            if (cdao.getUntil() == null) {
+                if (edao.containsUntil()) {
+                    if (edao.getUntil() != null) {
+                        return true;
+                    }
+                }
+            } else {
+                if (edao.containsUntil()) {
+                    if (edao.getUntil() == null) {
+                        return true;
+                    } else {
+                        if (!cdao.getUntil().equals(edao.getUntil())) {
+                            return true;
+                        }
+                    }
+                } else {
+                    return true;
+                }
+            }
         }
         return false;
     }
