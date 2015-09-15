@@ -91,6 +91,8 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override

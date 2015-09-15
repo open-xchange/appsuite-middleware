@@ -102,6 +102,8 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override

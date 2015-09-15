@@ -643,6 +643,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
         fileStorageFolder.setPermissions(getfFileStoragePermissions(folder.getPermissions()));
+        fileStorageFolder.setCreatedBy(folder.getCreatedBy());
+        fileStorageFolder.setModifiedBy(folder.getModifiedBy());
         return fileStorageFolder;
     }
 
