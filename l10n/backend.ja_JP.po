@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-07 13:16+0200\n"
+"PO-Revision-Date: 2015-09-14 11:01+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -159,13 +159,13 @@ msgstr " %1$s日毎 %2$sの日月"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:71
 msgid "On %1$s %2$s every %3$s. month"
-msgstr "毎 %3$sの %1$s %2$s日月"
+msgstr "毎 の %1$s %2$s%3$s日月"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:835
 msgid "On %1$s %2$s in %3$s"
-msgstr "%3$s の %1$s %2$s"
+msgstr " %1$s の%2$s%3$s "
 
 #. E.g. "Every 2. February"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:76
@@ -456,11 +456,11 @@ msgstr "空き時間"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:94
 msgid "%1$s has declined your proposed changes for the appointment %2$s."
-msgstr "アポイント %2$s への新しい日時の指定を %1$s が辞退しました。"
+msgstr "アポイント%1$s  への新しい日時の指定を %1$s  %2$s が辞退しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:96
 msgid "%1$s has declined your proposed changes on behalf of %2$s for the appointment %3$s."
-msgstr "アポイント %3$s への新しい日時の指定を %1$s が %2$s の代理で辞退しました。"
+msgstr "アポイント%1$s への新しい日時の指定を %2$s が%3$sの代理で辞退しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:98
 msgid "%1$s would like to be brought up to date about the appointment %2$s. Please send another invitation."
@@ -494,7 +494,7 @@ msgstr "%1$s は次の出席依頼を %2$s しました:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:123
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:138
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
-msgstr "%1$s は %3$s の代理で次の出席依頼を %2$s しました:"
+msgstr "%1$s は  %2$s の代理で次の出席依頼を %2$s %3$s しました:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on your behalf"
@@ -523,7 +523,7 @@ msgstr "%1$s がこのアポイントのステータスを %2$s に設定しま�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:150
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
-msgstr "%1$s は %3$s の代理でこのアポイントのステータスを %2$s に設定しました:"
+msgstr "%1$s は %2$s  の代理でこのアポイントのステータスを %3$sに設定しました:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:152
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
@@ -2206,7 +2206,7 @@ msgstr "ビデオ"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
 msgid "Documents"
-msgstr "ドキュメント"
+msgstr "Documents"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Other"
@@ -2741,9 +2741,7 @@ msgstr "IMAP検索が\"%1$s\"の理由で失敗しました。アプリケーシ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid "IMAP sort failed due to reason \"%1$s\". Switching to application-based sorting."
-msgstr ""
-"IMAPソートは\"%1$s\"の理由で失敗しました。\n"
-"アプリケーションベースの検索に切り替えます。"
+msgstr "IMAPソートは\"%1$s\"の理由で失敗しました。アプリケーションベースの検索に切り替えます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
 msgid "Unknown search field: %1$s"
@@ -4060,7 +4058,6 @@ msgstr "有効なセッションがありません。もう一度ログインし
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "フォルダ \"%1$s\" を表示する適切な権限がありません。"
 
@@ -4703,7 +4700,7 @@ msgstr "マイ ファイル"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
-msgstr "Drive"
+msgstr "ドライブ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -6611,7 +6608,7 @@ msgstr "「%1$s」フォルダー内の仕事を編集する適切な権限が�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
-msgstr "共有フォルダ \"%1$s\" からのアイテムの移動、または共有フォルダ \"%1$s\" へのアイテムの移動は許可されていません。"
+msgstr "共有フォルダ \"%1$s\" からのアイテムの移動、またはそこからへのアイテムの移動は許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
@@ -7433,45 +7430,49 @@ msgstr "指定された設備の必須フィールドが入力されていませ
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "「%2$s」モジュールの適切な権限がありません。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "フォルダを表示する適切な権限がありません。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "ご利用のアカウントでは共有フォルダは利用できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "「%2$s」パブリック フォルダの適切な権限がありません。"
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "パブリック フォルダの適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid "You do not have appropriate permissions to create subfolders in folder \"%2$s\"."
-msgstr "「%2$s」フォルダー内のサブフォルダーを生成する適切な権限がありません。"
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "サブフォルダを作成する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "フォルダ \"%1$s\" は存在しません。"
+msgid "Such a folder does not exist."
+msgstr "該当するフォルダがありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
-msgid "The folder \"%1$s\" has been changed in the meantime. Please reload the view and try again."
-msgstr "フォルダ \"%1$s\" は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
+msgid "The folder has been changed in the meantime. Please reload the view and try again."
+msgstr "フォルダ は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "この操作には、フォルダ \"%2$s\" の管理者権限が必要です。"
+msgid "This operation requires administrative permissions for the folder."
+msgstr "この操作には、フォルダの管理者権限が必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、名前の変更はできません。"
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "フォルダ は既定のフォルダであるため、名前の変更はできません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "フォルダ \"%1$s\" には、名前 \"%3$s\" のフォルダが既に存在します。"
+msgid "The folder already contains a folder with such a name."
+msgstr "同じような名前のフォルダがすでに存在します。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "フォルダ タイプ \"%2$s\" を \"%1$s\" の配下に作成できません。"
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "タイプ \"%2$s\" のフォルダをこのフォルダの配下に作成できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "モジュール \"%2$s\" のフォルダは、\"%1$s\" の配下に作成できません。"
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "モジュール \"%2$s\" のフォルダをこのフォルダの配下に作成できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid "Only one user may have administrative permission roles in a private folder."
@@ -7490,92 +7491,92 @@ msgid "At least one user with administrative permissions is required."
 msgstr "管理者権限が付与されたユーザが 1 名以上必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、移動できません。"
+msgid "The folder is a default folder and cannot be moved."
+msgstr "フォルダ は既定のフォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "フォルダ \"%1$s\" は共有されているため、移動できません。"
+msgid "The folder is shared and cannot be moved."
+msgstr "フォルダは共有されているため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "共有フォルダ \"%1$s\" にフォルダを移動できません。"
+msgid "The folder cannot be moved to a shared folder."
+msgstr "共有フォルダにフォルダを移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "フォルダ \"%1$s\" はシステム フォルダであるため、移動できません。"
+msgid "The folder is a system folder and cannot be moved."
+msgstr "フォルダ はシステム フォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid "The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "プライベート フォルダ \"%1$s\" は別のプライベート フォルダのみに移動できます。"
+msgid "The private folder can only be moved to another private folder."
+msgstr "プライベート フォルダは別のプライベート フォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "パブリック フォルダ \"%1$s\" は別のパブリック フォルダのみに移動できます。"
+msgid "The public folder can only be moved to another public folder."
+msgstr "パブリック フォルダ は別のパブリック フォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "送り側と受け側のフォルダが同じです。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid "You do not have appropriate permissions to move all subfolders of folder \"%2$s\"."
-msgstr "「%2$s」フォルダー内のサブフォルダー全てを移動する適切な権限がありません。"
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "全てのサブフォルダを移動する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid "You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "「%2$s」フォルダーを削除する適切な権限がありません。"
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "共有フォルダーを削除する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、削除できません。"
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "フォルダは既定のフォルダであるため、削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid "You do not have appropriate permissions to delete all contained items in the folder \"%2$s\"."
-msgstr "「%2$s」フォルダー内のすべてのアイテムを削除する適切な権限がありません。"
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "全ての含まれるアイテムを削除する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "フォルダ \"%1$s\" は、その配下のいずれのサブフォルダにも移動できません。"
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "フォルダは、その配下のいずれのサブフォルダにも移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid "Folders of module \"%1$s\" cannot be moved to folders of module \"%2$s\"."
 msgstr "モジュール \"%1$s\" のフォルダをモジュール \"%2$s\" のフォルダに移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "共有フォルダ \"%1$s\" を更新できません。"
+msgid "The shared folder cannot be updated."
+msgstr "共有フォルダ を更新できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid "The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters."
-msgstr "属性 %1$s の値には、許可されている文字数 (%2$d) よりも大き文字が入力されています。現在の文字数: %3$d 文字"
+msgstr "属性 %1$s の値には、許可されている文字数 (%2$d) よりも大き文字が入力されています。現在の文字数: %3$d 文字。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:100
 msgid "The specified folder name exceeds the limit of %2$d characters. Please shorten the name and try again."
 msgstr "指定されたフォルダ名の文字数が %2$d 文字の制限を越えました。名前を短くして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
-msgid "Only the owner of the parent shared folder \"%4$s\" may hold administrative permissions."
-msgstr "共有された親フォルダ \"%4$s\" の所有者のみに管理者権限が割り当てられます。"
+msgid "Only the owner of the parent shared folder may hold administrative permissions."
+msgstr "共有された親フォルダの所有者のみに管理者権限が割り当てられます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
-msgid "The folder \"%2$s\" is a default folder where its owner needs to hold administrative permissions."
-msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、このフォルダの所有者には管理者権限の割り当てが必要です。"
+msgid "The folder is a default folder. Hence its owner needs to hold administrative permissions."
+msgstr "フォルダは規定のフォルダです。そのため、このフォルダの所有者には管理者権限の割り当てが必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "「%2$s」フォルダーを共有する適切な権限がありません。"
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "フォルダーを共有する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid "Due to limited permissions of user \"%1$s\", it is not possible to apply the changes for folder \"%2$s\"."
-msgstr "ユーザ \"%1$s\" の権限が制限されているため、フォルダ \"%2$s\" に変更を適用できません。"
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "権限が制限されているため、変更を適用できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
-msgid "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
-msgstr "フォルダ \"%1$s\" には隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
+msgid "The folder cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
+msgstr "フォルダには隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
-msgid "The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose a different name and try again."
-msgstr "フォルダ \"%2$s\" には、名前 \"%1$s\" のフォルダが既に存在します。別の名前に変更して、もう一度やり直してください。"
+msgid "The folder already contains a folder with such a name. Please choose a different name and try again."
+msgstr "同じような名前のフォルダがすでに存在します。別の名前に変更して、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -7590,44 +7591,44 @@ msgstr ""
 "フォルダの名前を変更してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid "Duplicate permission defined for user \"%1$s\". Only one permission per user is allowed."
-msgstr "ユーザ \"%1$s\" に権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
+msgid "Duplicate permission defined. Only one permission per user is allowed."
+msgstr "権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid "Duplicate permission defined for group \"%1$s\". Only one permission per group is allowed."
-msgstr "グループ \"%1$s\" に権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid "Only the folder visibility permission is allowed to be changed for folder \"%1$s\"."
-msgstr "フォルダ \"%1$s\" には、フォルダ表示権限の変更のみが許可されます。"
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "フォルダ表示権限の変更のみが許可されます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid "Only individual user permissions, but no group permissions are allowed for folder \"%1$s\"."
-msgstr "フォルダ\"%1$s\" には、グループ権限ではなく、個別のユーザ権限しか許可されていません。"
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "グループ権限ではなく、個別のユーザ権限しか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "フォルダ \"%1$s\" には、個別のユーザ権限が許可されていません。"
+msgid "No individual user permissions are allowed."
+msgstr "個別のユーザ権限が許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "「%2$s」フォルダー名を変更する適切な権限がありません。"
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "フォルダー名を変更する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "フォルダ \"%1$s\" にはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "フォルダにはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "コンテキストの管理者のみが操作を実行できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "フォルダ \"%1$s\" は削除できません。"
+msgid "The folder cannot be deleted."
+msgstr "フォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored."
-msgstr "フォルダ \"%2$s\" の所有者 \"%1$s\" の管理者権限が復元されました。"
+msgid "The administrative permissions were restored."
+msgstr "管理者権限が復元されました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -10529,6 +10530,114 @@ msgstr "UTC (協定世界時)"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "「%2$s」パブリック フォルダの適切な権限がありません。"
+
+#~ msgid "You do not have appropriate permissions to create subfolders in folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のサブフォルダーを生成する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "フォルダ \"%1$s\" は存在しません。"
+
+#~ msgid "The folder \"%1$s\" has been changed in the meantime. Please reload the view and try again."
+#~ msgstr "フォルダ \"%1$s\" は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
+
+#~ msgid "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "この操作には、フォルダ \"%2$s\" の管理者権限が必要です。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、名前の変更はできません。"
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、名前 \"%3$s\" のフォルダが既に存在します。"
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "フォルダ タイプ \"%2$s\" を \"%1$s\" の配下に作成できません。"
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "モジュール \"%2$s\" のフォルダは、\"%1$s\" の配下に作成できません。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、移動できません。"
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" は共有されているため、移動できません。"
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "共有フォルダ \"%1$s\" にフォルダを移動できません。"
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" はシステム フォルダであるため、移動できません。"
+
+#~ msgid "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr "プライベート フォルダ \"%1$s\" は別のプライベート フォルダのみに移動できます。"
+
+#~ msgid "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr "パブリック フォルダ \"%1$s\" は別のパブリック フォルダのみに移動できます。"
+
+#~ msgid "You do not have appropriate permissions to move all subfolders of folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のサブフォルダー全てを移動する適切な権限がありません。"
+
+#~ msgid "You do not have appropriate permissions to delete the shared folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダーを削除する適切な権限がありません。"
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、削除できません。"
+
+#~ msgid "You do not have appropriate permissions to delete all contained items in the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のすべてのアイテムを削除する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "フォルダ \"%1$s\" は、その配下のいずれのサブフォルダにも移動できません。"
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "共有フォルダ \"%1$s\" を更新できません。"
+
+#~ msgid "Only the owner of the parent shared folder \"%4$s\" may hold administrative permissions."
+#~ msgstr "共有された親フォルダ \"%4$s\" の所有者のみに管理者権限が割り当てられます。"
+
+#~ msgid "The folder \"%2$s\" is a default folder where its owner needs to hold administrative permissions."
+#~ msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、このフォルダの所有者には管理者権限の割り当てが必要です。"
+
+#~ msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダーを共有する適切な権限がありません。"
+
+#~ msgid "Due to limited permissions of user \"%1$s\", it is not possible to apply the changes for folder \"%2$s\"."
+#~ msgstr "ユーザ \"%1$s\" の権限が制限されているため、フォルダ \"%2$s\" に変更を適用できません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
+#~ msgstr "フォルダ \"%1$s\" には隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
+
+#~ msgid "The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose a different name and try again."
+#~ msgstr "フォルダ \"%2$s\" には、名前 \"%1$s\" のフォルダが既に存在します。別の名前に変更して、もう一度やり直してください。"
+
+#~ msgid "Duplicate permission defined for user \"%1$s\". Only one permission per user is allowed."
+#~ msgstr "ユーザ \"%1$s\" に権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
+
+#~ msgid "Duplicate permission defined for group \"%1$s\". Only one permission per group is allowed."
+#~ msgstr "グループ \"%1$s\" に権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
+
+#~ msgid "Only the folder visibility permission is allowed to be changed for folder \"%1$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、フォルダ表示権限の変更のみが許可されます。"
+
+#~ msgid "Only individual user permissions, but no group permissions are allowed for folder \"%1$s\"."
+#~ msgstr "フォルダ\"%1$s\" には、グループ権限ではなく、個別のユーザ権限しか許可されていません。"
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、個別のユーザ権限が許可されていません。"
+
+#~ msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー名を変更する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr "フォルダ \"%1$s\" にはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "フォルダ \"%1$s\" は削除できません。"
+
+#~ msgid "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored."
+#~ msgstr "フォルダ \"%2$s\" の所有者 \"%1$s\" の管理者権限が復元されました。"
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

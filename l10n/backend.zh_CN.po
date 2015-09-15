@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-07 20:53+1000\n"
+"PO-Revision-Date: 2015-09-14 20:57+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -4286,7 +4286,6 @@ msgstr "您没有一个有效会话，请再登录。"
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "您没有读取文件夹 \"%1$s\" 的适当权限。"
 
@@ -7809,49 +7808,51 @@ msgstr "在指定资源中缺少必填字段。"
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "您没有模组 \"%2$s\" 的适当权限。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "您没有检视文件夹的适当权限。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "您的户口没有分享文件夹可用。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "您没有公共文件夹 \"%2$s\" 的适当权限。"
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "您没有公共文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr "您没有在文件夹 \"%2$s\" 创建子文件夹的适当权限。"
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "您没有创建子文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "文件夹 \"%1$s\" 不存在。"
+msgid "Such a folder does not exist."
+msgstr "该个文件夹并不存在。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
-msgstr "文件夹 \"%1$s\" 期间被更改，请重刷视图后重试。"
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
+msgstr "文件夹期间被更改，请重刷视图后再试。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "此操作需要文件夹 \"%2$s\" 的管理权限。"
+msgid "This operation requires administrative permissions for the folder."
+msgstr "此操作要求文件夹的管理权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "文件夹  \"%1$s\" 为一默认文件夹，不能更名。"
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "文件夹为一默认文件夹因而不能更名。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "文件夹 \"%1$s\" 已经包含一个名为 \"%3$s\" 的文件夹。"
+msgid "The folder already contains a folder with such a name."
+msgstr "文件夹已经包括一个有该名称的文件夹。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "\"%2$s\" 类型的文件夹不能创建在 \"%1$s\" 之下。"
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "类型 \"%2$s\" 的文件夹不能在此文件夹下创建。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "不得在 \"%1$s\" 下面创建模组 \"%2$s\" 的文件夹。"
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "模组 \"%2$s\" 的文件夹不能在此文件夹下创建。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -7872,58 +7873,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "只要求最少一个有管理权限的用户。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "文件夹 \"%1$s\" 为一默认文件夹，不得移动。"
+msgid "The folder is a default folder and cannot be moved."
+msgstr "文件夹为一默认文件夹因而不能移动。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "文件夹 \"%1$s\" 正被分享，不得移动。"
+msgid "The folder is shared and cannot be moved."
+msgstr "文件夹已分享因而不能移动。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "文件夹不得移动到共享文件夹 \"%1$s\"。"
+msgid "The folder cannot be moved to a shared folder."
+msgstr "不能移动文件夹到一个共享文件夹。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "文件夹 \"%1$s\" 为一系统文件夹，不得移动。"
+msgid "The folder is a system folder and cannot be moved."
+msgstr "文件夹为一系统文件夹因而不能移动。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "私人文件夹 \"%1$s\" 只能移到别的私人文件夹。"
+msgid "The private folder can only be moved to another private folder."
+msgstr "私人文件夹只能移动到别的私人文件夹。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "公共文件夹 \"%1$s\" 只能别的公共文件夹。"
+msgid "The public folder can only be moved to another public folder."
+msgstr "公共文件夹只能移动到别的公共文件夹。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "目的地文件夹和来源地文件夹是一样的。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr "您没有移动文件夹  \"%2$s\" 所有子文件夹的适当权限。"
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "您没有移动所有子文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "您没有删除共享文件夹  \"%2$s\" 的适当权限。"
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "您没有删除共享文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "文件夹 \"%1$s\" 为一默认文件夹，不得删除。"
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "文件夹为一默认文件夹因而不能删除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr "您没有删除文件夹 \"%2$s\" 里所有包含项目的适当权限。"
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "您没有删除所有包括项目的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "文件夹  \"%1$s\" 不得移到其子文件夹内。"
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "文件夹不能移动到它的其中一个子文件夹里。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -7931,8 +7926,8 @@ msgid ""
 msgstr "模块 \"%1$s\" 的文件夹不得移到模块 \"%2$s\" 的文件夹内。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "不能更新共享文件夹  \"%1$s\"。"
+msgid "The shared folder cannot be updated."
+msgstr "共享文件夹不能更新。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -7948,40 +7943,35 @@ msgstr "制定的文件夹名称超出 %2$d 个字元限制，请缩短名称再
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
-msgstr "只有 \"%4$s\" 父分享文件夹主人拥有管理权限。"
+msgstr "只有母共享文件夹的拥有者持有管理权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
-msgstr "文件夹 \"%2$s\" 为一默认文件夹，其用有人必须持有管理权限。"
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
+msgstr "文件夹为一默认文件夹，其拥有者因而需要持有管理权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "您没有分享文件夹 \"%2$s\" 的适当权限。"
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "您没有分享文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr "因为用户 \"%1$s\" 限制权限，无法为文件夹 \"%2$s\" 套用改变。"
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "因为权限有限，所以不能套用更改。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
-msgstr ""
-"因为 \"%1$s\" 文件夹包含一个您没有适当权限的隐藏子文件夹，所以它不能删除。"
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
+msgstr "由于文件夹包括一个您没有适当权限的子文件夹，所以不能删除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
-msgstr ""
-"文件夹 \"%2$s\" 已经包含一个名为 \"%1$s\" 的文件夹，请选择一个不同的名称再"
-"试。"
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
+msgstr "文件夹已经包括一个有该名称的文件夹。请选择一个不同的名称后再试。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -7997,54 +7987,44 @@ msgstr ""
 "个同名的文件夹。请在与此用户分享文件夹前把它更名。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
-msgstr "用户 \"%1$s\" 定义了重复权限，每个用户只允许一个权限。"
+msgid "Duplicate permission defined. Only one permission per user is allowed."
+msgstr "定义了重复权限，每个群组只允许一个用户。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
-msgstr "组 \"%1$s\" 定义了重复权限，每个组只允许一个权限。"
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "定义了重复权限，每个群组只允许一个权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "只允许为文件夹 \"%1$s\" 更改文件夹可见性权限。"
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "只允许更改文件夹可视权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
-msgstr "只允许文件夹 \"%1$s\" 有单独用户权限，而不允许组权限。"
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "只允许个别用户权限，而不允许群组权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "不允许文件夹 \"%1$s\" 的单独用户权限。"
+msgid "No individual user permissions are allowed."
+msgstr "不允许个别用户权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "您没有更名文件夹  \"%2$s\" 的适当权限。"
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "您没有更名文件夹的适当权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "因为文件夹 \"%1$s\" 包含已锁定的文档，所以必能删除。"
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "由于文件夹包括锁定文档，因而不能删除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "操作只能由环境管理员执行。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "不能删除文件夹 \"%1$s\"。"
+msgid "The folder cannot be deleted."
+msgstr "不能删除文件夹。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr "\"%2$s\" 文件夹里 \"%1$s\" 用户的管理权限已经恢复。"
+msgid "The administrative permissions were restored."
+msgstr "已恢复管理权限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -10999,6 +10979,154 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "祖鲁"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "您没有公共文件夹 \"%2$s\" 的适当权限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr "您没有在文件夹 \"%2$s\" 创建子文件夹的适当权限。"
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "文件夹 \"%1$s\" 不存在。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr "文件夹 \"%1$s\" 期间被更改，请重刷视图后重试。"
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "此操作需要文件夹 \"%2$s\" 的管理权限。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "文件夹  \"%1$s\" 为一默认文件夹，不能更名。"
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "文件夹 \"%1$s\" 已经包含一个名为 \"%3$s\" 的文件夹。"
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "\"%2$s\" 类型的文件夹不能创建在 \"%1$s\" 之下。"
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "不得在 \"%1$s\" 下面创建模组 \"%2$s\" 的文件夹。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "文件夹 \"%1$s\" 为一默认文件夹，不得移动。"
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "文件夹 \"%1$s\" 正被分享，不得移动。"
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "文件夹不得移动到共享文件夹 \"%1$s\"。"
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "文件夹 \"%1$s\" 为一系统文件夹，不得移动。"
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr "私人文件夹 \"%1$s\" 只能移到别的私人文件夹。"
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr "公共文件夹 \"%1$s\" 只能别的公共文件夹。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr "您没有移动文件夹  \"%2$s\" 所有子文件夹的适当权限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr "您没有删除共享文件夹  \"%2$s\" 的适当权限。"
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "文件夹 \"%1$s\" 为一默认文件夹，不得删除。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr "您没有删除文件夹 \"%2$s\" 里所有包含项目的适当权限。"
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "文件夹  \"%1$s\" 不得移到其子文件夹内。"
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "不能更新共享文件夹  \"%1$s\"。"
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr "只有 \"%4$s\" 父分享文件夹主人拥有管理权限。"
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr "文件夹 \"%2$s\" 为一默认文件夹，其用有人必须持有管理权限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "您没有分享文件夹 \"%2$s\" 的适当权限。"
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr "因为用户 \"%1$s\" 限制权限，无法为文件夹 \"%2$s\" 套用改变。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "因为 \"%1$s\" 文件夹包含一个您没有适当权限的隐藏子文件夹，所以它不能删除。"
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "文件夹 \"%2$s\" 已经包含一个名为 \"%1$s\" 的文件夹，请选择一个不同的名称再"
+#~ "试。"
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr "用户 \"%1$s\" 定义了重复权限，每个用户只允许一个权限。"
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr "组 \"%1$s\" 定义了重复权限，每个组只允许一个权限。"
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr "只允许为文件夹 \"%1$s\" 更改文件夹可见性权限。"
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr "只允许文件夹 \"%1$s\" 有单独用户权限，而不允许组权限。"
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "不允许文件夹 \"%1$s\" 的单独用户权限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "您没有更名文件夹  \"%2$s\" 的适当权限。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr "因为文件夹 \"%1$s\" 包含已锁定的文档，所以必能删除。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "不能删除文件夹 \"%1$s\"。"
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr "\"%2$s\" 文件夹里 \"%1$s\" 用户的管理权限已经恢复。"
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"
