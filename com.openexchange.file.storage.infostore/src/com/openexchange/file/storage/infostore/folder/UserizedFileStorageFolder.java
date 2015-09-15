@@ -108,6 +108,8 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
         FolderID folderID = new FolderID(folder.getID());
         setType(getType(folder.getType()));
+        setCreatedBy(folder.getCreatedBy());
+        setModifiedBy(folder.getModifiedBy());
         /*
          * only assume all infostore capabilities if it's really an infostore folder
          */
