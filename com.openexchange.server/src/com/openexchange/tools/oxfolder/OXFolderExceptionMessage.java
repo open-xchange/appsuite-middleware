@@ -125,4 +125,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     // Unsupported character. Please correct your input.
     public static final String INVALID_CHARACTER_SIMPLE_MSG = "Unsupported character. Please correct your input.";
 
+    // You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
+    public static final String INVALID_ENTITY_FROM_USER_MSG = "You are not allowed to share the folder to \"%2$s\"";
+
 }
