@@ -57,6 +57,8 @@ import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -71,13 +73,15 @@ import com.openexchange.share.groupware.TargetProxyType;
 public class FolderTargetProxy extends AbstractTargetProxy {
 
     private final UserizedFolder folder;
+    private final ShareTarget target;
+    private final ShareTargetPath targetPath;
 
-    private final boolean isPublic;
 
-    public FolderTargetProxy(UserizedFolder folder, boolean isPublic) {
+    public FolderTargetProxy(int module, UserizedFolder folder) {
         super();
         this.folder = folder;
-        this.isPublic = isPublic;
+        target = new ShareTarget(module, folder.getID(), null);
+        targetPath = new ShareTargetPath(module, folder.getID(), null);
     }
 
     @Override
@@ -88,6 +92,16 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     @Override
     public String getFolderID() {
         return folder.getParentID();
+    }
+
+    @Override
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    @Override
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
     @Override
@@ -148,6 +162,21 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         return folder;
     }
 
+    @Override
+    public TargetProxyType getProxyType() {
+        return DriveTargetProxyType.FOLDER;
+    }
+
+    @Override
+    public boolean mayAdjust() {
+        return folder.getOwnPermission().isAdmin();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return folder.getLastModifiedUTC();
+    }
+
     private static PermissionConverter<Permission> CONVERTER = new PermissionConverter<Permission>() {
         @Override
         public int getEntity(Permission permission) {
@@ -179,25 +208,5 @@ public class FolderTargetProxy extends AbstractTargetProxy {
             return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
         }
     };
-
-    @Override
-    public TargetProxyType getProxyType() {
-        return DriveTargetProxyType.FOLDER;
-    }
-
-    @Override
-    public boolean isPublic() {
-        return isPublic;
-    }
-
-    @Override
-    public boolean mayAdjust() {
-        return folder.getOwnPermission().isAdmin();
-    }
-
-    @Override
-    public Date getTimestamp() {
-        return folder.getLastModifiedUTC();
-    }
 
 }

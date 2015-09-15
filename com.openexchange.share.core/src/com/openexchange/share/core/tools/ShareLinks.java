@@ -60,8 +60,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
 
 
@@ -83,7 +83,7 @@ public class ShareLinks {
      * @param target The share target
      * @return The share link
      */
-    public static String generateExternal(HostData hostData, String guestToken, ShareTarget target) {
+    public static String generateExternal(HostData hostData, String guestToken, ShareTargetPath targetPath) {
         URIBuilder builder = prepare(hostData);
         String guestHostname = getGuestHostname(guestToken);
         if (false == Strings.isEmpty(guestHostname)) {
@@ -92,11 +92,11 @@ public class ShareLinks {
             getLogger(ShareLinks.class).warn("No hostname for guests is configured. Falling back to current host \"{}\" for share link " +
                 "generation. Please configure \"com.openexchange.share.guestHostname\" to make this warning disappear.", builder.getHost());
         }
-        String targetPath = "";
-        if (target != null) {
-            targetPath = target.getPath();
+        String targetPathStr = "";
+        if (targetPath != null) {
+            targetPathStr = targetPath.get();
         }
-        return builder.setPath(serverPath(hostData, "/" + guestToken + targetPath)).toString();
+        return builder.setPath(serverPath(hostData, "/" + guestToken + targetPathStr)).toString();
     }
 
     /**
@@ -106,7 +106,7 @@ public class ShareLinks {
      * @param target The personalized share target according to the user for who the link is generated
      * @return The link
      */
-    public static String generateInternal(HostData hostData, PersonalizedShareTarget target) {
+    public static String generateInternal(HostData hostData, ShareTarget target) {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();

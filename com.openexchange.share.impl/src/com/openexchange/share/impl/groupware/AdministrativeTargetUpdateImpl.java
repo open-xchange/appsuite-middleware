@@ -50,7 +50,6 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +104,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     @Override
     protected Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException {
         Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>(folderTargets.size() + objectsByModule.size(), 1.0F);
-        Map<String, FolderTools.FolderHolder<FolderObject>> foldersById = loadFolderTargets(folderTargets, proxies);
+        Map<String, FolderObject> foldersById = loadFolderTargets(folderTargets, proxies);
         loadObjectTargets(objectsByModule, foldersById, true, proxies);
         return proxies;
     }
@@ -132,28 +131,23 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
 
     }
 
-    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderTools.FolderHolder<FolderObject>> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
+    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderObject> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         for (int module : objectsByModule.keySet()) {
             ModuleHandler handler = handlers.get(module);
             List<ShareTarget> targetList = objectsByModule.get(module);
-            List<Boolean> publicFlags = new ArrayList<>(targetList.size());
             for (ShareTarget target : targetList) {
-                FolderTools.FolderHolder<FolderObject> folderHolder = foldersById.get(target.getFolder());
-                if (folderHolder == null) {
-                    FolderObject folder;
+                FolderObject folder = foldersById.get(target.getFolder());
+                if (folder == null) {
                     try {
                         folder = folderAccess.getFolderObject(Integer.valueOf(target.getFolder()));
+                        foldersById.put(target.getFolder(), folder);
                     } catch (NumberFormatException e) {
                         throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
-                    folderHolder = new FolderTools.FolderHolder<FolderObject>(folder, FolderTools.isPublicFolder(folder, folderAccess));
-                    foldersById.put(target.getFolder(), folderHolder);
                 }
-
-                publicFlags.add(folderHolder.isPublic());
             }
 
-            List<TargetProxy> objects = handler.loadTargets(targetList, publicFlags, parameters);
+            List<TargetProxy> objects = handler.loadTargets(targetList, parameters);
             Iterator<ShareTarget> tlit = targetList.iterator();
             for (TargetProxy proxy : objects) {
                 proxies.put(tlit.next(), proxy);
@@ -161,8 +155,8 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
         }
     }
 
-    private Map<String, FolderTools.FolderHolder<FolderObject>> loadFolderTargets(List<ShareTarget> folderTargets, Map<ShareTarget, TargetProxy> proxies) throws OXException {
-        Map<String, FolderTools.FolderHolder<FolderObject>> foldersById = new HashMap<>();
+    private Map<String, FolderObject> loadFolderTargets(List<ShareTarget> folderTargets, Map<ShareTarget, TargetProxy> proxies) throws OXException {
+        Map<String, FolderObject> foldersById = new HashMap<>();
         for (ShareTarget folderTarget : folderTargets) {
             if (null != Module.getForFolderConstant(folderTarget.getModule())) {
                 FolderObject folder;
@@ -171,9 +165,8 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
                 } catch (NumberFormatException e) {
                     throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
-                boolean isPublic = FolderTools.isPublicFolder(folder, folderAccess);
-                AdministrativeFolderTargetProxy proxy = new AdministrativeFolderTargetProxy(folder, isPublic);
-                foldersById.put(folderTarget.getFolder(), new FolderTools.FolderHolder<FolderObject>(folder, isPublic));
+                AdministrativeFolderTargetProxy proxy = new AdministrativeFolderTargetProxy(folder);
+                foldersById.put(folderTarget.getFolder(), folder);
                 proxies.put(folderTarget, proxy);
             } else {
                 proxies.put(folderTarget, new VirtualTargetProxy(folderTarget));

@@ -88,6 +88,11 @@ public class DefaultShareLink implements ShareLink {
     }
 
     @Override
+    public ShareTarget getDestinationTarget() {
+        return delegate.getDestinationTarget();
+    }
+
+    @Override
     public GuestInfo getGuest() {
         return delegate.getGuest();
     }

@@ -73,8 +73,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -97,39 +97,35 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public List<TargetProxy> loadTargets(List<ShareTarget> targets, List<Boolean> publicFlags, HandlerParameters parameters) throws OXException {
+    public List<TargetProxy> loadTargets(List<ShareTarget> targets, HandlerParameters parameters) throws OXException {
         List<TargetProxy> files = new ArrayList<TargetProxy>(targets.size());
         ConnectionHolder.CONNECTION.set(parameters.getWriteCon());
         try {
             if (parameters.isAdministrative()) {
                 IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
                 Iterator<ShareTarget> targetIt = targets.iterator();
-                Iterator<Boolean> publicIt = publicFlags.iterator();
                 while (targetIt.hasNext()) {
                     ShareTarget target = targetIt.next();
-                    boolean isPublic = publicIt.next().booleanValue();
                     FileID fileID = new FileID(target.getItem());
                     if (fileID.getFolderId() == null) {
                         fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
                     }
                     File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                    files.add(new FileTargetProxy(file, isPublic));
+                    files.add(new FileTargetProxy(file));
                 }
             } else {
                 Iterator<ShareTarget> targetIt = targets.iterator();
-                Iterator<Boolean> publicIt = publicFlags.iterator();
                 IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
                 try {
                     fileAccess.startTransaction();
                     while (targetIt.hasNext()) {
                         ShareTarget target = targetIt.next();
-                        boolean isPublic = publicIt.next().booleanValue();
                         FileID fileID = new FileID(target.getItem());
                         if (fileID.getFolderId() == null) {
                             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
                         }
                         File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                        files.add(new FileTargetProxy(file, isPublic));
+                        files.add(new FileTargetProxy(file));
                     }
                     fileAccess.commit();
                 } catch (OXException e) {
@@ -147,26 +143,21 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public TargetProxy loadTarget(ShareTarget target, boolean isPublic, Session session) throws OXException {
+    public TargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
 
         IDBasedFileAccess fileAccess = getFileAccess(session);
-        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION), isPublic);
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
     }
 
     @Override
-    public boolean isVisible(ShareTarget target, Session session) throws OXException {
-        return isVisible(target, session.getContextId(), session.getUserId());
-    }
-
-    @Override
-    public boolean isVisible(ShareTarget target, int contextID, int userID) throws OXException {
-        FileID fileID = new FileID(target.getItem());
+    public boolean isVisible(String folder, String item, int contextID, int userID) throws OXException {
+        FileID fileID = new FileID(item);
         if (null == fileID.getFolderId()) {
-            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+            fileID.setFolderId(new FolderID(folder).getFolderId());
         }
         Context context = requireService(ContextService.class, services).getContext(contextID);
         return getAdministrativeFileAccess(context).canRead(fileID.toUniqueID(), userID);
@@ -189,29 +180,24 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public boolean exists(ShareTarget target, Session session) throws OXException {
-        return exists(target, session.getContextId(), session.getUserId());
-    }
-
-    @Override
-    public boolean exists(ShareTarget target, int contextID, int guestID) throws OXException {
-        FileID fileID = new FileID(target.getItem());
+    public boolean exists(String folder, String item, int contextID, int guestID) throws OXException {
+        FileID fileID = new FileID(item);
         if (null == fileID.getFolderId()) {
-            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+            fileID.setFolderId(new FolderID(folder).getFolderId());
         }
         Context context = requireService(ContextService.class, services).getContext(contextID);
         return getAdministrativeFileAccess(context).exists(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
     }
 
     @Override
-    public TargetProxy loadTarget(ShareTarget target, boolean isPublic, Context context) throws OXException {
-        FileID fileID = new FileID(target.getItem());
+    public TargetProxy loadTarget(String folderId, String item, Context context) throws OXException {
+        FileID fileID = new FileID(item);
         if (fileID.getFolderId() == null) {
-            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+            fileID.setFolderId(new FolderID(folderId).getFolderId());
         }
 
         IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
-        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION), isPublic);
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
     }
 
     @Override
@@ -254,15 +240,6 @@ public class FileStorageHandler implements ModuleHandler {
         }
     }
 
-    @Override
-    public PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException {
-        FileID fileID = new FileID(target.getItem());
-        fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        FolderID folderID = new FolderID(target.getFolder());
-        folderID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        return new PersonalizedShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());
-    }
-
     private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {
         IDBasedFileAccessFactory factory = requireService(IDBasedFileAccessFactory.class, services);
         return factory.createAccess(context.getContextId());
@@ -274,8 +251,8 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public List<ShareTarget> listTargets(int contextID, int guestID) throws OXException {
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
+    public List<TargetProxy> listTargets(int contextID, int guestID) throws OXException {
+        List<TargetProxy> targets = new ArrayList<>();
         Context context = requireService(ContextService.class, services).getContext(contextID);
         IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
         List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID);
@@ -285,17 +262,68 @@ public class FileStorageHandler implements ModuleHandler {
             searchIterator = timedResult.results();
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();
-                if (file instanceof UserizedFile) {
-                    UserizedFile uFile = (UserizedFile) file;
-                    targets.add(new ShareTarget(FolderObject.INFOSTORE, uFile.getOriginalFolderId(), uFile.getOriginalId()));
-                } else {
-                    targets.add(new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
-                }
+                targets.add(new FileTargetProxy(file));
             }
         } finally {
             SearchIterators.close(searchIterator);
         }
         return targets;
+    }
+
+    @Override
+    public ShareTargetPath getPath(ShareTarget target, Session session) throws OXException {
+        if (Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID).equals(target.getFolder())) {
+            File file = getFileAccess(session).getFileMetadata(target.getItem(), FileStorageFileAccess.CURRENT_VERSION);
+            String folderId;
+            String fileId;
+            if (file instanceof UserizedFile) {
+                UserizedFile uFile = (UserizedFile) file;
+                folderId = uFile.getOriginalFolderId();
+                fileId = uFile.getOriginalId();
+            } else {
+                folderId = file.getFolderId();
+                fileId = file.getId();
+            }
+
+            return new ShareTargetPath(target.getModule(), folderId, fileId);
+        }
+
+        return new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+    }
+
+    @Override
+    public ShareTargetPath getPath(ShareTarget target, int contextID, int guestID) throws OXException {
+        if (Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID).equals(target.getFolder())) {
+            Context context = requireService(ContextService.class, services).getContext(contextID);
+            File file = getAdministrativeFileAccess(context).getFileMetadata(target.getItem(), FileStorageFileAccess.CURRENT_VERSION);
+            String folderId;
+            String fileId;
+            if (file instanceof UserizedFile) {
+                UserizedFile uFile = (UserizedFile) file;
+                folderId = uFile.getOriginalFolderId();
+                fileId = uFile.getOriginalId();
+            } else {
+                folderId = file.getFolderId();
+                fileId = file.getId();
+            }
+
+            return new ShareTargetPath(target.getModule(), folderId, fileId);
+        }
+
+        return new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+    }
+
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+        return adjustTarget(target, session.getContextId(), session.getUserId(), targetUserId);
+    }
+
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+        FolderID folderID = new FolderID(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        FileID fileID = new FileID(target.getItem());
+        fileID.setFolderId(folderID.getFolderId());
+        return new ShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());
     }
 
 }

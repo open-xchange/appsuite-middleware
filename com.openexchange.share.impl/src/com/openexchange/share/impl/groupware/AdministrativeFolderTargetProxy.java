@@ -59,6 +59,8 @@ import java.util.Set;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -74,23 +76,25 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     private final FolderObject folder;
     private final Set<Integer> affectedUsers;
-    private final boolean isPublic;
+    private final ShareTarget target;
+    private final ShareTargetPath targetPath;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
      *
      * @param folder The underlying folder object
      */
-    public AdministrativeFolderTargetProxy(FolderObject folder, boolean isPublic) {
+    public AdministrativeFolderTargetProxy(FolderObject folder) {
         super();
         this.folder = folder;
-        this.affectedUsers = new HashSet<Integer>();
-        this.isPublic = isPublic;
+        affectedUsers = new HashSet<Integer>();
+        target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()), null);
+        targetPath = new ShareTargetPath(folder.getModule(), Integer.toString(folder.getObjectID()), null);
     }
 
     @Override
     public String getID() {
-        return Integer.toString(folder.getObjectID());
+        return targetPath.getFolder();
     }
 
     @Override
@@ -154,8 +158,13 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public boolean isPublic() {
-        return isPublic;
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    @Override
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
     /**
@@ -246,6 +255,6 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public Date getTimestamp() {
         return folder.getLastModified();
-    };
+    }
 
 }

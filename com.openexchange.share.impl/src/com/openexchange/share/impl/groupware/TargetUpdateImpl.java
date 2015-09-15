@@ -50,7 +50,6 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -103,7 +102,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
     @Override
     protected Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException {
         Map<ShareTarget, TargetProxy> proxies = new HashMap<ShareTarget, TargetProxy>(folderTargets.size() + objectsByModule.size(), 1.0F);
-        Map<String, FolderTools.FolderHolder<UserizedFolder>> foldersById = loadFolderTargets(folderTargets, true, proxies);
+        Map<String, UserizedFolder> foldersById = loadFolderTargets(folderTargets, true, proxies);
         loadObjectTargets(objectsByModule, foldersById, true, proxies);
         return proxies;
     }
@@ -117,32 +116,27 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         }
     }
 
-    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderTools.FolderHolder<UserizedFolder>> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
+    private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
         for (int module : objectsByModule.keySet()) {
             ModuleHandler handler = handlers.get(module);
             List<ShareTarget> targetList = objectsByModule.get(module);
-            List<Boolean> publicFlags = new ArrayList<>(targetList.size());
             for (ShareTarget target : targetList) {
-                FolderTools.FolderHolder<UserizedFolder> folderHolder = foldersById.get(target.getFolder());
-                if (folderHolder == null) {
-                    UserizedFolder[] path = folderService.getPath(FolderStorage.REAL_TREE_ID,
+                UserizedFolder folder = foldersById.get(target.getFolder());
+                if (folder == null) {
+                    folder = folderService.getFolder(FolderStorage.REAL_TREE_ID,
                         target.getFolder(),
                         parameters.getSession(),
-                        parameters.getFolderServiceDecorator()).getResponse();
-                    UserizedFolder folder = path[0];
-                    folderHolder = new FolderTools.FolderHolder<UserizedFolder>(folder, FolderTools.isPublicFolder(path));
-                    foldersById.put(folder.getID(), folderHolder);
+                        parameters.getFolderServiceDecorator());
+                    foldersById.put(folder.getID(), folder);
                 }
-
-                publicFlags.add(folderHolder.isPublic());
             }
 
-            List<TargetProxy> objects = handler.loadTargets(targetList, publicFlags, parameters);
+            List<TargetProxy> objects = handler.loadTargets(targetList, parameters);
             Iterator<ShareTarget> tlit = targetList.iterator();
             for (TargetProxy proxy : objects) {
                 ShareTarget target = tlit.next();
-                UserizedFolder parentFolder = foldersById.get(target.getFolder()).getFolder();
+                UserizedFolder parentFolder = foldersById.get(target.getFolder());
                 if (checkPermissions && !canShareObject(parentFolder, proxy, handler)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
                         parameters.getUser().getId(),
@@ -155,18 +149,16 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         }
     }
 
-    private Map<String, FolderTools.FolderHolder<UserizedFolder>> loadFolderTargets(List<ShareTarget> folderTargets, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
-        Map<String, FolderTools.FolderHolder<UserizedFolder>> foldersById = new HashMap<>();
+    private Map<String, UserizedFolder> loadFolderTargets(List<ShareTarget> folderTargets, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
+        Map<String, UserizedFolder> foldersById = new HashMap<>();
         FolderService folderService = getFolderService();
         for (ShareTarget folderTarget : folderTargets) {
             if (null != Module.getForFolderConstant(folderTarget.getModule())) {
-                UserizedFolder[] path = folderService.getPath(FolderStorage.REAL_TREE_ID,
+                UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID,
                     folderTarget.getFolder(),
                     parameters.getSession(),
-                    parameters.getFolderServiceDecorator()).getResponse();
-                UserizedFolder folder = path[0];
-                boolean isPublic = FolderTools.isPublicFolder(path);
-                FolderTargetProxy proxy = new FolderTargetProxy(folder, isPublic);
+                    parameters.getFolderServiceDecorator());
+                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget.getModule(), folder);
                 if (checkPermissions && !canShareFolder(folder)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
                         parameters.getUser().getId(),
@@ -174,7 +166,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                         parameters.getContext().getContextId());
                 }
 
-                foldersById.put(folder.getID(), new FolderTools.FolderHolder<UserizedFolder>(folder, isPublic));
+                foldersById.put(folder.getID(), folder);
                 proxies.put(folderTarget, proxy);
             } else {
                 proxies.put(folderTarget, new VirtualTargetProxy(folderTarget));

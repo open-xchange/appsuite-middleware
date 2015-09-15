@@ -77,9 +77,9 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -193,16 +193,17 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 user = userService.getUser(userId, session.getContextId());
                 CreatedShare share = sharesByUser.get(userId);
-                PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getShareTarget(), context.getContextId(), user.getId());
                 String shareUrl;
+                ShareTarget target = share.getShareTarget();
                 if (user.isGuest()) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), share.getShareTarget());
+                    // FIXME: ensure the target is always personalized
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
                         collectedAddresses.add(new QuotedInternetAddress(mail));
                     }
                 } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
                 }
 
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, share.getShareTarget(), message, shareUrl, session, hostData);
@@ -418,16 +419,15 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 user = usersById.get(userId);
                 String shareUrl;
-                boolean isGuest = user.isGuest();
-                PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, context.getContextId(), user.getId());
-                if (isGuest) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), target);
+                if (user.isGuest()) {
+                    // FIXME: ensure the target is always personalized
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
                         collectedAddresses.add(new QuotedInternetAddress(mail));
                     }
                 } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
                 }
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, target, message, shareUrl, session, hostData);
                 send(shareNotification);

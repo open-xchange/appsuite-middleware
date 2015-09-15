@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -95,13 +94,13 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     /**
      * Checks if this redirecting share handler fees responsible for passed guest and target
      *
-     * @param guest The guest
+     * @param shareRequest The share request
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
-    protected abstract boolean handles(GuestInfo guest, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    protected abstract boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Handles the given resolved share.
@@ -113,13 +112,8 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException;
 
     @Override
-    public ShareHandlerReply handle(GuestInfo guest, ShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        PersonalizedShareTarget personalizedTarget = null;
-        if (target != null) {
-            personalizedTarget = ShareServiceLookup.getService(ModuleSupport.class, true).personalizeTarget(target, guest.getContextID(), guest.getGuestID());
-        }
-
-        if (false == handles(guest, personalizedTarget, request, response)) {
+    public ShareHandlerReply handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (false == handles(shareRequest, request, response)) {
             return ShareHandlerReply.NEUTRAL;
         }
 
@@ -128,6 +122,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
             /*
              * get, authenticate and login as associated guest user
              */
+            GuestInfo guest = shareRequest.getGuest();
             ShareLoginConfiguration shareLoginConfig = ShareServletUtils.getShareLoginConfiguration();
             LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(guest);
             ShareLoginMethod shareLoginMethod = getShareLoginMethod(guest);
@@ -138,7 +133,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
             }
             session = loginResult.getSession();
 
-            handleResolvedShare(new ResolvedShare(personalizedTarget, loginResult, loginConfig, request, response));
+            handleResolvedShare(new ResolvedShare(shareRequest, loginResult, loginConfig, request, response));
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());

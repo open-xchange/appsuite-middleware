@@ -55,7 +55,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 
@@ -83,11 +83,11 @@ public class ShareRedirectUtils {
      *
      * @param session The session
      * @param user The user
-     * @param target The personalized share target within the share, or <code>null</code> if not addressed
+     * @param target The share target within the share, or <code>null</code> if not addressed
      * @param loginConfig The login configuration to use
      * @return The redirect URL
      */
-    public static String getWebSessionRedirectURL(Session session, User user, PersonalizedShareTarget target, LoginConfiguration loginConfig) {
+    public static String getWebSessionRedirectURL(Session session, User user, ShareTarget target, LoginConfiguration loginConfig) {
         /*
          * evaluate link destination based on share or target
          */

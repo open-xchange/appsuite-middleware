@@ -60,10 +60,13 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
+import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
 import com.openexchange.share.servlet.utils.LoginLocationBuilder;
@@ -134,33 +137,45 @@ public class ShareServlet extends AbstractShareServlet {
             // Switch language for errors if appropriate
             translator = translatorFactory.translatorFor(determineLocale(request, guest));
 
+            ShareTargetPath targetPath = null;
             ShareTarget target = null;
             boolean invalidTarget = false;
+            int contextId = guest.getContextID();
+            int guestId = guest.getGuestID();
             if (paths.size() > 1) {
-                target = ShareTarget.fromPathSegments(paths.subList(1, paths.size()));
-                if (target == null) {
+                ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
+                targetPath = ShareTargetPath.parse(paths.subList(1, paths.size()));
+                if (targetPath == null) {
                     invalidTarget = true;
                 } else {
-                    ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
-                    int contextId = guest.getContextID();
-                    int guestId = guest.getGuestID();
-                    if (!moduleSupport.exists(target, contextId, guestId) || !moduleSupport.isVisible(target, contextId, guestId)) {
+                    int m = targetPath.getModule();
+                    String f = targetPath.getFolder();
+                    String i = targetPath.getItem();
+                    if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
+                        TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+                        target = targetProxy.getTarget();
+                    } else {
                         invalidTarget = true;
-                        List<ShareTarget> otherTargets = moduleSupport.listTargets(contextId, guestId);
-                        if (otherTargets.isEmpty()) {
-                            sendNotFound(response, translator);
-                            return;
-                        }
-
-                        target = otherTargets.iterator().next();
                     }
+                }
+
+                if (invalidTarget) {
+                    List<TargetProxy> otherTargets = moduleSupport.listTargets(contextId, guestId);
+                    if (otherTargets.isEmpty()) {
+                        sendNotFound(response, translator);
+                        return;
+                    }
+
+                    TargetProxy targetProxy = otherTargets.iterator().next();
+                    targetPath = targetProxy.getTargetPath();
+                    target = targetProxy.getTarget();
                 }
             }
 
             /*
              * Determine appropriate ShareHandler and handle the share
              */
-            if (false == handle(guest, target, invalidTarget, request, response)) {
+            if (false == handle(new AccessShareRequest(guest, targetPath, target, invalidTarget), request, response)) {
                 // No appropriate ShareHandler available
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
@@ -183,17 +198,15 @@ public class ShareServlet extends AbstractShareServlet {
     /**
      * Passes the resolved share to the most appropriate handler and lets him serve the request.
      *
-     * @param guest The guest info
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param invalidTarget <code>true</code> if the target is <code>null</code> because the requested one
+     * @param shareRequest The share request
      * isn't existing or accessible.
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
      */
-    private boolean handle(GuestInfo guest, ShareTarget target, boolean invalidTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private boolean handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
         for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-            ShareHandlerReply reply = handler.handle(guest, target, invalidTarget, request, response);
+            ShareHandlerReply reply = handler.handle(shareRequest, request, response);
             if (ShareHandlerReply.NEUTRAL != reply) {
                 return true;
             }

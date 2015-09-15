@@ -55,6 +55,7 @@ import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareLink;
+import com.openexchange.share.ShareTarget;
 
 /**
  * {@link DefaultDriveShareLink}
@@ -85,6 +86,11 @@ public class DefaultDriveShareLink implements DriveShareLink {
     @Override
     public DriveShareTarget getTarget() {
         return driveTarget;
+    }
+
+    @Override
+    public ShareTarget getDestinationTarget() {
+        return shareLink.getDestinationTarget();
     }
 
     @Override

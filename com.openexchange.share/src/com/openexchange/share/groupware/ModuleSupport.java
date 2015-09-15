@@ -54,8 +54,8 @@ import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 
 
 /**
@@ -109,22 +109,13 @@ public interface ModuleSupport {
      * The item is loaded using administrative access to the underlying module services. This method must only
      * be used for administrative tasks when no session object is available.
      *
-     * @param target The target to get the proxy for
+     * @param module The module
+     * @param folder The folder ID; must be globally valid - not personalized in terms of the passed guest user ID
+     * @param item The item ID or <code>null</code>; must be globally valid - not personalized in terms of the passed guest user ID
      * @param contextID The context identifier
      * @return The proxy
      */
-    TargetProxy loadAsAdmin(ShareTarget target, int contextID) throws OXException;
-
-    /**
-     * Optionally adjusts a share target to be used by a specific user. This might be required if the target identifiers are different
-     * depending on the user who accesses the share target, especially if the user is a guest or not.
-     *
-     * @param target The share target to adjust
-     * @param contextID The identifier of the context the user is located in
-     * @param userID The identifier of the user to adjust the share target for
-     * @return The adjusted target, or the supplied target if no adjustments were necessary
-     */
-    PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException;
+    TargetProxy loadAsAdmin(int module, String folder, String item, int contextID) throws OXException;
 
     /**
      * Resolves the module id to module name
@@ -146,24 +137,15 @@ public interface ModuleSupport {
      * Gets a value indicating whether a share target is visible for the session's user or not, i.e. if the user has sufficient
      * permissions to read the folder or item represented by the share target.
      *
-     * @param target The share target to check
-     * @param session The session of the user trying to access the share target
-     * @return <code>true</code> if the share target is visible, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    boolean isVisible(ShareTarget target, Session session) throws OXException;
-
-    /**
-     * Gets a value indicating whether a share target is visible for the session's user or not, i.e. if the user has sufficient
-     * permissions to read the folder or item represented by the share target.
-     *
-     * @param target The share target to check
+     * @param module The module
+     * @param folder The folder ID; must be globally valid - not personalized in terms of the passed guest user ID
+     * @param item The item ID or <code>null</code>; must be globally valid - not personalized in terms of the passed guest user ID
      * @param contextID The context ID
      * @param guestID The guest users ID
      * @return <code>true</code> if the share target is visible, <code>false</code>, otherwise
      * @throws OXException
      */
-    boolean isVisible(ShareTarget target, int contextID, int guestID) throws OXException;
+    boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException;
 
     /**
      * Gets a value indicating whether a share target may be adjusted by the session's user or not, i.e. if the user has sufficient
@@ -176,34 +158,26 @@ public interface ModuleSupport {
     boolean mayAdjust(ShareTarget target, Session session) throws OXException;
 
     /**
-     * Gets a value indicating whether a share target (still) exists.
+     * Gets a value indicating whether a folder/item exists.
      *
-     * @param target The share target to check
-     * @param session The session of the user trying to access the share target
-     * @return <code>true</code> if the share target exists, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    boolean exists(ShareTarget target, Session session) throws OXException;
-
-    /**
-     * Gets a value indicating whether a share target (still) exists.
-     *
-     * @param target The share target to check
+     * @param module The module
+     * @param folder The folder ID; must be globally valid - not personalized in terms of the passed guest user ID
+     * @param item The item ID or <code>null</code>; must be globally valid - not personalized in terms of the passed guest user ID
      * @param contextID The context ID
      * @param guestID The guest users ID
      * @return <code>true</code> if the share target exists, <code>false</code>, otherwise
      * @throws OXException
      */
-    boolean exists(ShareTarget target, int contextID, int guestID) throws OXException;
+    boolean exists(int module, String folder, String item, int contextID, int guestID) throws OXException;
 
     /**
      * Gets a list of all share targets a specific guest user has access to.
      *
      * @param contextID The context identifier
      * @param guestID The identifier of the guest user
-     * @return The share targets, or an empty list if there are none
+     * @return The share target proxies, or an empty list if there are none
      */
-    List<ShareTarget> listTargets(int contextID, int guestID) throws OXException;
+    List<TargetProxy> listTargets(int contextID, int guestID) throws OXException;
 
     /**
      * Gets a list of all share targets of a certain module a specific guest user has access to.
@@ -211,9 +185,9 @@ public interface ModuleSupport {
      * @param contextID The context identifier
      * @param guestID The identifier of the guest user
      * @param module The share module identifier
-     * @return The share targets, or an empty list if there are none
+     * @return The share target proxies, or an empty list if there are none
      */
-    List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException;
+    List<TargetProxy> listTargets(int contextID, int guestID, int module) throws OXException;
 
     /**
      * Gets the identifiers of those modules a specific guest user has access to, i.e. those where at least one share target for the
@@ -224,5 +198,52 @@ public interface ModuleSupport {
      * @return The identifiers of the modules the guest user has access to, or an empty set if there are none
      */
     Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException;
+
+    TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException;
+
+    /**
+     * Gets the path for a given target and session. The target must contain IDs from the session users point of view.
+     *
+     * @param target The target
+     * @param session The session
+     */
+    ShareTargetPath getPath(ShareTarget target, Session session) throws OXException;
+
+    /**
+     * Gets the path for a given target and guest user. The target must contain IDs from the guest users point of view.
+     *
+     * @param target The target
+     * @param contextID The context ID
+     * @param guestID The guest users ID
+     */
+    ShareTargetPath getPath(ShareTarget target, int contextID, int guestID) throws OXException;
+
+    /**
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
+     *
+     * @param The target from the sharing users point of view
+     * @param session The requesting users session
+     * @param targetUserId The ID of the user to adjust the target for
+     */
+    ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException;
+
+    /**
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
+     *
+     * @param The target from the sharing users point of view
+     * @param contextId The context ID
+     * @param requestUserId The requesting users ID
+     * @param targetUserId The ID of the user to adjust the target for
+     */
+    ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException;
+
+    /**
+     * Checks whether a given share target is public, i.e. a public folder oder an item located within a public folder.
+     *
+     * @param target The share target from the session users point of view
+     * @param session The session
+     * @throws OXException
+     */
+    boolean isPublic(ShareTarget target, Session session) throws OXException;
 
 }

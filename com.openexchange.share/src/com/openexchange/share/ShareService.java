@@ -95,7 +95,7 @@ public interface ShareService {
      * </ul>
      *
      * @param session The session
-     * @param target The share target to add
+     * @param target The share target to add from the sharing users point of view
      * @param recipients The recipients for the shares
      * @return The created shares for each recipient, in the same order as the supplied recipient list
      */
@@ -105,7 +105,7 @@ public interface ShareService {
      * Gets an existing "anonymous" share link with read-only permissions for a specific target if one exists.
      *
      * @param session The session
-     * @param target The share target referenced by the link
+     * @param target The share target from the session users point of view
      * @return The share link, or <code>null</code> if there is none
      */
     ShareLink optLink(Session session, ShareTarget target) throws OXException;
@@ -120,7 +120,7 @@ public interface ShareService {
      * </ul>
      *
      * @param session The session
-     * @param target The share target referenced by the link
+     * @param target The share target from the session users point of view
      * @return The share link
      */
     ShareLink getLink(Session session, ShareTarget target) throws OXException;
@@ -135,7 +135,7 @@ public interface ShareService {
      * </ul>
      *
      * @param session The session
-     * @param target The share target referenced by the link
+     * @param target The share target from the session users point of view
      * @param linkUpdate The link update holding the updated properties
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The share link
@@ -155,7 +155,7 @@ public interface ShareService {
      * </ul>
      *
      * @param session The session
-     * @param target The share to delete
+     * @param target The share to delete from the session users point of view
      * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
      */
     void deleteLink(Session session, ShareTarget target, Date clientTimestamp) throws OXException;

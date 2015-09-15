@@ -47,92 +47,61 @@
  *
  */
 
-package com.openexchange.share;
+package com.openexchange.share.servlet.handler;
+
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 
 /**
- * {@link PersonalizedShareTarget}
+ * Encapsulates data of requests targeting the share servlet.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class PersonalizedShareTarget {
+public class AccessShareRequest {
 
-    private int module;
-    private String folder;
-    private String item;
+    private final GuestInfo guest;
+
+    private final ShareTargetPath targetPath;
+
+    private final ShareTarget target;
+
+    private final boolean invalidTarget;
 
     /**
-     * Initializes a new {@link PersonalizedShareTarget}.
-     *
-     * @param module The groupware module of the share's target folder
-     * @param folder The identifier of the share's folder
-     * @param item The identifier of the share's item or <code>null</code>
+     * Initializes a new {@link AccessShareRequest}.
+     * @param guest
+     * @param targetPath
+     * @param target
+     * @param invalidTarget
      */
-    public PersonalizedShareTarget(int module, String folder, String item) {
+    public AccessShareRequest(GuestInfo guest, ShareTargetPath targetPath, ShareTarget target, boolean invalidTarget) {
         super();
-        this.module = module;
-        this.folder = folder;
-        this.item = item;
+        this.guest = guest;
+        this.targetPath = targetPath;
+        this.target = target;
+        this.invalidTarget = invalidTarget;
     }
 
-    public int getModule() {
-        return module;
+    public GuestInfo getGuest() {
+        return guest;
     }
 
-    public String getFolder() {
-        return folder;
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
-    public String getItem() {
-        return item;
+    public ShareTarget getTarget() {
+        return target;
     }
 
-//    /**
-//     * Gets the relative path of this target to address it uniquely within an underlying share.
-//     *
-//     * @return The share-relative path to the target
-//     */
-//    public String getPath() {
-//        return String.format("%08x", Integer.valueOf(hashCode()));
-//    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-        result = prime * result + ((item == null) ? 0 : item.hashCode());
-        result = prime * result + module;
-        return result;
+    public boolean isInvalidTarget() {
+        return invalidTarget;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        PersonalizedShareTarget other = (PersonalizedShareTarget) obj;
-        if (folder == null) {
-            if (other.folder != null)
-                return false;
-        } else if (!folder.equals(other.folder))
-            return false;
-        if (item == null) {
-            if (other.item != null)
-                return false;
-        } else if (!item.equals(other.item))
-            return false;
-        if (module != other.module)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "PersonalizedShareTarget [module=" + module + ", folder=" + folder + ", item=" + item + "]";
+    public boolean hasTarget() {
+        return target != null;
     }
 
 }

@@ -50,11 +50,6 @@
 package com.openexchange.share;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import com.google.common.io.BaseEncoding;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 
 /**
  * {@link ShareTarget}
@@ -171,93 +166,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setItem(String item) {
         this.item = item;
-    }
-
-    public String getPath() {
-        StringBuilder sb = new StringBuilder(64).append("/");
-        String version = "1";
-        sb.append(version).append('/');
-        sb.append(module).append('/');
-        sb.append(encodeFolder(version, folder)).append('/');
-        if (item != null) {
-            sb.append(encodeItem(version, item)).append('/');
-        }
-        return sb.toString();
-    }
-
-    public static ShareTarget fromPath(String path) {
-        List<String> segments = Strings.splitAndTrim(path, "/");
-        Iterator<String> iterator = segments.iterator();
-        while (iterator.hasNext()) {
-            if (Strings.isEmpty(iterator.next())) {
-                iterator.remove();
-            }
-        }
-        return fromPathSegments(segments);
-    }
-
-    public static ShareTarget fromPathSegments(List<String> segments) {
-        try {
-            Iterator<String> it = segments.iterator();
-            String version = it.next();
-            int module = Integer.parseInt(it.next());
-            String folder = decodeFolder(version, it.next());
-            String item = null;
-            if (it.hasNext()) {
-                item = decodeItem(version, it.next());
-            }
-            if (!it.hasNext()) {
-                return new ShareTarget(module, folder, item);
-            }
-        } catch (Exception e) {
-
-        }
-
-        return null;
-    }
-
-    private static String encodeFolder(String version, String folder) {
-        if ("1".equals(version)) {
-            return base64(folder, true);
-        }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
-    }
-
-    private static String decodeFolder(String version, String folder) {
-        if ("1".equals(version)) {
-            return base64(folder, false);
-        }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
-    }
-
-    private static String encodeItem(String version, String item) {
-        if ("1".equals(version)) {
-            return base64(item, true);
-        }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
-    }
-
-    private static String decodeItem(String version, String item) {
-        if ("1".equals(version)) {
-            return base64(item, false);
-        }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
-    }
-
-    private static String base64(String input, boolean encode) {
-        if (input == null) {
-            return null;
-        }
-
-        if (encode) {
-            return BaseEncoding.base64Url().omitPadding().encode(input.getBytes(Charsets.UTF_8));
-        }
-
-        return new String(BaseEncoding.base64Url().omitPadding().decode(input), Charsets.UTF_8);
     }
 
     @Override

@@ -53,7 +53,9 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -69,10 +71,9 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -121,51 +122,23 @@ public class ModuleSupportImpl implements ModuleSupport {
             return new VirtualTargetProxy(target);
         }
 
-        UserizedFolder[] folderPath = requireService(FolderService.class, services).getPath(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null).getResponse();
         if (target.isFolder()) {
-            return new FolderTargetProxy(folderPath[0], FolderTools.isPublicFolder(folderPath));
+            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            return new FolderTargetProxy(target.getModule(), folder);
         } else {
-            return handlers.get(target.getModule()).loadTarget(target, FolderTools.isPublicFolder(folderPath), session);
+            return handlers.get(target.getModule()).loadTarget(target, session);
         }
     }
 
     @Override
-    public boolean isVisible(ShareTarget target, Session session) throws OXException {
-        if (null == target) {
-            return false;
-        }
-        if (target.isFolder()) {
-            if (null != Module.getForFolderConstant(target.getModule())) {
-                try {
-                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
-                    return true;
-                } catch (OXException e) {
-                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                        return false;
-                    }
-                    throw e;
-                }
-            } else {
-                return true;
-            }
-        } else {
-            return handlers.get(target.getModule()).isVisible(target, session);
-        }
-    }
-
-    @Override
-    public boolean isVisible(ShareTarget target, int contextID, int guestID) throws OXException {
-        if (null == target) {
-            return false;
-        }
-
-        if (target.isFolder()) {
-            if (null != Module.getForFolderConstant(target.getModule())) {
+    public boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException {
+        if (item == null) {
+            if (null != Module.getForFolderConstant(module)) {
                 try {
                     UserService userService = requireService(UserService.class, services);
                     Context context = userService.getContext(contextID);
                     User user = userService.getUser(guestID, context);
-                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), user, context, null);
+                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
                     return true;
                 } catch (OXException e) {
                     if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
@@ -177,7 +150,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 return true;
             }
         } else {
-            return handlers.get(target.getModule()).isVisible(target, contextID, guestID);
+            return handlers.get(module).isVisible(folder, item, contextID, guestID);
         }
     }
 
@@ -206,45 +179,14 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public boolean exists(ShareTarget target, Session session) throws OXException {
-        if (null == target) {
-            return false;
-        }
-
-        if (target.isFolder()) {
-            if (null != Module.getForFolderConstant(target.getModule())) {
-                try {
-                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null));
-                } catch (OXException e) {
-                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                        return true;
-                    }
-                    if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                        return false;
-                    }
-                    throw e;
-                }
-            } else {
-                return true;
-            }
-        } else {
-            return handlers.get(target.getModule()).exists(target, session);
-        }
-    }
-
-    @Override
-    public boolean exists(ShareTarget target, int contextID, int guestID) throws OXException {
-        if (null == target) {
-            return false;
-        }
-
-        if (target.isFolder()) {
-            if (null != Module.getForFolderConstant(target.getModule())) {
+    public boolean exists(int module, String folder, String item, int contextID, int guestID) throws OXException {
+        if (item == null) {
+            if (null != Module.getForFolderConstant(module)) {
                 try {
                     UserService userService = requireService(UserService.class, services);
                     Context context = userService.getContext(contextID);
                     User user = userService.getUser(guestID, context);
-                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), user, context, null));
+                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null));
                 } catch (OXException e) {
                     if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
                         return true;
@@ -258,56 +200,38 @@ public class ModuleSupportImpl implements ModuleSupport {
                 return true;
             }
         } else {
-            return handlers.get(target.getModule()).exists(target, contextID, guestID);
+            return handlers.get(module).exists(folder, item, contextID, guestID);
         }
     }
 
     @Override
-    public TargetProxy loadAsAdmin(ShareTarget target, int contextID) throws OXException {
-        if (null == target) {
-            return null;
-        }
+    public TargetProxy loadAsAdmin(int module, String folderId, String item, int contextID) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextID);
-
-        if (Module.getForFolderConstant(target.getModule()) == null) {
-            return new VirtualTargetProxy(target);
+        if (Module.getForFolderConstant(module) == null) {
+            return new VirtualTargetProxy(module, folderId, item, "virtual");
         }
 
         int folderID;
         try {
-            folderID = Integer.valueOf(target.getFolder());
+            folderID = Integer.valueOf(folderId);
         } catch (NumberFormatException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
         OXFolderAccess folderAccess = new OXFolderAccess(context);
         FolderObject folder = folderAccess.getFolderObject(folderID);
-        if (target.isFolder()) {
-            return new AdministrativeFolderTargetProxy(folder, FolderTools.isPublicFolder(folder, folderAccess));
+        if (item == null) {
+            return new AdministrativeFolderTargetProxy(folder);
         } else {
-            return handlers.get(target.getModule()).loadTarget(target, FolderTools.isPublicFolder(folder, folderAccess), context);
+            return handlers.get(module).loadTarget(folderId, item, context);
         }
     }
 
     @Override
-    public PersonalizedShareTarget personalizeTarget(ShareTarget target, int contextID, int userID) throws OXException {
-        if (null == target) {
-            return null;
-        }
-
-        if (!target.isFolder()) {
-            /*
-             * adjust target via module handler as required
-             */
-            ModuleHandler handler = handlers.opt(target.getModule());
-            if (null != handler) {
-                return handler.personalizeTarget(target, contextID, userID);
-            }
-        }
-
-        return new PersonalizedShareTarget(target.getModule(), target.getFolder(), target.getItem());
+    public TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException {
+        TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId);
+        return proxy;
     }
-
 
     @Override
     public String getShareModule(int moduleId) {
@@ -320,24 +244,71 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public List<ShareTarget> listTargets(int contextID, int guestID) throws OXException {
+    public List<TargetProxy> listTargets(int contextID, int guestID) throws OXException {
         return listTargets(contextID, guestID, Autoboxing.I2i(ShareModuleMapping.getModuleIDs()));
     }
 
     @Override
-    public List<ShareTarget> listTargets(int contextID, int guestID, int module) throws OXException {
+    public List<TargetProxy> listTargets(int contextID, int guestID, int module) throws OXException {
         return listTargets(contextID, guestID, new int[] { module });
     }
 
     @Override
     public Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException {
         //TODO: more sophisticated check if targets exist per module
-        List<ShareTarget> targets = listTargets(contextID, guestID);
-        return ShareTool.mapTargetsByModule(targets).keySet();
+        Set<Integer> modules = new HashSet<>(5);
+        List<TargetProxy> targets = listTargets(contextID, guestID);
+        for (TargetProxy t : targets) {
+            modules.add(t.getTarget().getModule());
+        }
+        return modules;
     }
 
-    private List<ShareTarget> listTargets(int contextID, int guestID, int[] moduleIDs) throws OXException {
-        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
+    @Override
+    public ShareTargetPath getPath(ShareTarget target, Session session) throws OXException {
+        if (target.isFolder()) {
+            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
+            return new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+        }
+        return handlers.get(target.getModule()).getPath(target, session);
+    }
+
+    @Override
+    public ShareTargetPath getPath(ShareTarget target, int contextID, int guestID) throws OXException {
+        if (target.isFolder()) {
+            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
+            return new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+        }
+        return handlers.get(target.getModule()).getPath(target, contextID, guestID);
+    }
+
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
+        if (target.isFolder()) {
+            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
+            return new ShareTarget(target);
+        }
+        return handlers.get(target.getModule()).adjustTarget(target, session, targetUserId);
+    }
+
+    @Override
+    public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+        if (target.isFolder()) {
+            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
+            return new ShareTarget(target);
+        }
+        return handlers.get(target.getModule()).adjustTarget(target, contextId, requestUserId, targetUserId);
+    }
+
+    @Override
+    public boolean isPublic(ShareTarget target, Session session) throws OXException {
+        FolderService folderService = requireService(FolderService.class, services);
+        UserizedFolder[] path = folderService.getPath(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null).getResponse();
+        return FolderTools.isPublicFolder(path);
+    }
+
+    private List<TargetProxy> listTargets(int contextID, int guestID, int[] moduleIDs) throws OXException {
+        List<TargetProxy> shareTargets = new ArrayList<>();
         Context context = requireService(ContextService.class, services).getContext(contextID);
         User user = requireService(UserService.class, services).getUser(guestID, context);
         UserPermissionBits permissionBits = requireService(UserPermissionService.class, services).getUserPermissionBits(guestID, context);
@@ -347,8 +318,8 @@ public class ModuleSupportImpl implements ModuleSupport {
         return shareTargets;
     }
 
-    private List<ShareTarget> listTargets(Context context, User user, UserPermissionBits permissionBits, int moduleID) throws OXException {
-        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
+    private List<TargetProxy> listTargets(Context context, User user, UserPermissionBits permissionBits, int moduleID) throws OXException {
+        List<TargetProxy> shareTargets = new ArrayList<>();
         /*
          * get available folder targets for the module
          */
@@ -372,7 +343,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                     }
                 }
                 if (canRead) {
-                    shareTargets.add(new ShareTarget(folder.getModule(), String.valueOf(folder.getObjectID())));
+                    shareTargets.add(new AdministrativeFolderTargetProxy(folder));
                 }
             }
         } finally {

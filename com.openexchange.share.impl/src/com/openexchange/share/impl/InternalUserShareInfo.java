@@ -55,7 +55,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -71,28 +70,38 @@ public class InternalUserShareInfo implements ShareInfo {
 
     private final int contextID;
     private final User user;
-    private final ShareTarget target;
-    private final PersonalizedShareTarget personalizedTarget;
+    private final ShareTarget srcTarget;
+    private final ShareTarget dstTarget;
 
     /**
      * Initializes a new {@link InternalUserShareInfo}.
      *
      * @param contextID The context identifier
      * @param user The user
-     * @param target The target
-     * @param personalizedTarget The personalized target to generate the share link
+     * @param srcTarget The share target from the sharing users point of view
+     * @param dstTarget The share target from the recipients point of view
      */
-    public InternalUserShareInfo(int contextID, User user, ShareTarget target, PersonalizedShareTarget personalizedTarget) {
+    public InternalUserShareInfo(int contextID, User user, ShareTarget srcTarget, ShareTarget dstTarget) {
         super();
         this.contextID = contextID;
         this.user = user;
-        this.target = target;
-        this.personalizedTarget = personalizedTarget;
+        this.srcTarget = srcTarget;
+        this.dstTarget = dstTarget;
     }
 
     @Override
     public ShareTarget getTarget() {
-        return target;
+        return srcTarget;
+    }
+
+    @Override
+    public ShareTarget getDestinationTarget() {
+        return dstTarget;
+    }
+
+    @Override
+    public String getShareURL(HostData hostData) {
+        return ShareLinks.generateInternal(hostData, dstTarget);
     }
 
     @Override
@@ -162,11 +171,6 @@ public class InternalUserShareInfo implements ShareInfo {
                 return null;
             }
         };
-    }
-
-    @Override
-    public String getShareURL(HostData hostData) {
-        return ShareLinks.generateInternal(hostData, personalizedTarget);
     }
 
 }

@@ -50,7 +50,6 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,8 +61,11 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.user.UserService;
 
 /**
  * {@link TokenCollection}
@@ -142,21 +144,34 @@ public class TokenCollection {
      */
     public List<ShareInfo> loadShares() throws OXException {
         List<ShareInfo> shares = new ArrayList<ShareInfo>();
+        UserService userService = services.getService(UserService.class);
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*
          * gather all shares for guest users with base token only
          */
         for (ShareToken baseToken : baseTokensOnly) {
-            List<ShareTarget> targets = moduleSupport.listTargets(contextID, baseToken.getUserID());
-            shares.addAll(DefaultShareInfo.createShareInfos(services, contextID, baseToken.getUserID(), targets));
+            List<TargetProxy> targetProxies = moduleSupport.listTargets(contextID, baseToken.getUserID());
+            for (TargetProxy proxy : targetProxies) {
+                ShareTargetPath targetPath = proxy.getTargetPath();
+                ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+                shares.add(new DefaultShareInfo(services, baseToken.getUserID(), userService.getUser(baseToken.getUserID(), contextID), srcTarget, proxy.getTarget(), targetPath));
+            }
         }
         /*
          * pick specific shares for guest users with base tokens and paths
          */
         for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
             int guestID = entry.getKey().getUserID();
-            List<ShareTarget> targets = getTargets(entry.getValue());
-            shares.addAll(DefaultShareInfo.createShareInfos(services, contextID, guestID, targets));
+            for (String path : entry.getValue()) {
+                ShareTargetPath targetPath = ShareTargetPath.parse(path);
+                if (targetPath != null) {
+                    TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextID, guestID);
+                    if (targetProxy != null) {
+                        ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+                        shares.add(new DefaultShareInfo(services, guestID, userService.getUser(guestID, contextID), srcTarget, targetProxy.getTarget(), targetPath));
+                    }
+                }
+            }
         }
         return shares;
     }
@@ -186,19 +201,6 @@ public class TokenCollection {
      */
     public int[] getGuestUserIDs() {
         return Autoboxing.I2i(guestIDs);
-    }
-
-    private static List<ShareTarget> getTargets(Collection<String> paths) {
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        for (String path : paths) {
-            targets.add(getTarget(path));
-        }
-        return targets;
-    }
-
-    private static ShareTarget getTarget(String path) {
-        // TODO
-        return null;
     }
 
 }
