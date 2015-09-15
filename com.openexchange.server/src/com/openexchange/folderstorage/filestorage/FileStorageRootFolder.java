@@ -90,6 +90,8 @@ public class FileStorageRootFolder extends DefaultFileStorageFolder implements T
         setName(accountDisplayName);
         setSubfolders(true);
         setSubscribedSubfolders(true);
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override

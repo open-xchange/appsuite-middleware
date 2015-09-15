@@ -60,6 +60,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -79,6 +81,10 @@ import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DurationToJSONConverter;
 import com.openexchange.realtime.payload.converter.impl.JSONToDurationConverter;
+import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTaskV2;
+import com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask;
+import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
+import com.openexchange.realtime.presence.subscribe.database.RemoveRealtimePresenceTableTask;
 import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -97,9 +103,15 @@ public class RealtimeActivator extends HousekeepingActivator {
 
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
 
-    private SyntheticChannel synth;
-
+    private volatile SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
+
+    /**
+     * Initializes a new {@link RealtimeActivator}.
+     */
+    public RealtimeActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -139,7 +151,8 @@ public class RealtimeActivator extends HousekeepingActivator {
             }
         });
 
-        synth = new SyntheticChannel(this, localRealtimeCleanup);
+        final SyntheticChannel synth = new SyntheticChannel(this, localRealtimeCleanup);
+        this.synth = synth;
         RealtimeJanitors.getInstance().addJanitor(synth);
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
@@ -170,6 +183,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(Channel.class, new DevNullChannel());
         registerService(SimplePayloadConverter.class, new DurationToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToDurationConverter());
+
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreatePresenceSubscriptionDB(), new AddUUIDColumnTask(), new AddPrimaryKeyTaskV2(), new RemoveRealtimePresenceTableTask()));
 
         //Register all RealtimeJanitors
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {

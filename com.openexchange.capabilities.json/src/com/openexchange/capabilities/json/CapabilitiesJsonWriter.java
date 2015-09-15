@@ -60,7 +60,7 @@ import com.openexchange.capabilities.Capability;
  * {@link CapabilitiesJsonWriter} - A simple JSON writer for capabilities.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.6.2
  */
 public class CapabilitiesJsonWriter {
 

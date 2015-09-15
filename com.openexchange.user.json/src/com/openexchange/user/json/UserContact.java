@@ -194,35 +194,37 @@ public class UserContact {
      * @return the serialized user contact
      * @throws OXException
      */
-    public JSONArray serialize(Session session, int[] columnIDs, String timeZoneID, Map<String, List<String>> attributeParameters)
-    		throws OXException {
-    	final JSONArray jsonArray = new JSONArray();
-		final UserField[] userFields = UserMapper.getInstance().getFields(columnIDs);
-		final ContactField[] contactFields = ContactMapper.getInstance().getFields(columnIDs);
-		final JSONObject temp = this.serialize(session, contactFields, userFields, timeZoneID);
-		for (final int columnID : columnIDs) {
-			final UserField userField = UserMapper.getInstance().getMappedField(columnID);
-			if (null != userField) {
-				final String ajaxName = UserMapper.getInstance().get(userField).getAjaxName();
-				jsonArray.put(temp.opt(ajaxName));
-				continue;
-			} else {
-    			final ContactField contactField = ContactMapper.getInstance().getMappedField(columnID);
+    public JSONArray serialize(Session session, int[] columnIDs, String timeZoneID, Map<String, List<String>> attributeParameters) throws OXException {
+		UserField[] userFields = UserMapper.getInstance().getFields(columnIDs);
+		ContactField[] contactFields = ContactMapper.getInstance().getFields(columnIDs);
+		JSONObject temp = this.serialize(session, contactFields, userFields, timeZoneID);
+		JSONArray jsonArray = new JSONArray(columnIDs.length);
+
+		// Iterate column identifiers
+		for (int columnID : columnIDs) {
+			UserField userField = UserMapper.getInstance().getMappedField(columnID);
+			if (null == userField) {
+    			ContactField contactField = ContactMapper.getInstance().getMappedField(columnID);
     			if (null != contactField) {
     				final String ajaxName = ContactMapper.getInstance().get(contactField).getAjaxName();
     				jsonArray.put(temp.opt(ajaxName));
-    				continue;
+    			} else {
+    			    LOG.warn("Unknown field: {}", Integer.valueOf(columnID), new Throwable());
+    			    jsonArray.put(JSONObject.NULL);
     			}
+			} else {
+				final String ajaxName = UserMapper.getInstance().get(userField).getAjaxName();
+				jsonArray.put(temp.opt(ajaxName));
 			}
-            LOG.warn("Unknown field: {}", columnID, new Throwable());
-			jsonArray.put(JSONObject.NULL);
 		}
+
+		// Append attributes
 		if (null != attributeParameters && 0 < attributeParameters.size()) {
 			try {
-				for (final Entry<String, List<String>> entry : attributeParameters.entrySet()) {
+				for (Map.Entry<String, List<String>> entry : attributeParameters.entrySet()) {
 					appendUserAttribute(jsonArray, entry.getKey(), entry.getValue());
 				}
-			} catch (final JSONException e) {
+			} catch (JSONException e) {
 	    		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
 			}
 		}

@@ -96,6 +96,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
@@ -2330,11 +2331,23 @@ public final class OutlookFolderStorage implements FolderStorage {
      * Creates a new storage parameter instance.
      */
     static StorageParameters newStorageParameters(final StorageParameters source) {
+        StorageParametersImpl parameters;
         final Session session = source.getSession();
         if (null == session) {
-            return new StorageParametersImpl(source.getUser(), source.getContext());
+            parameters = new StorageParametersImpl(source.getUser(), source.getContext());
+        } else {
+            parameters = new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
+
+        FolderServiceDecorator decorator = source.getDecorator();
+        if (decorator != null) {
+            try {
+                parameters.setDecorator(decorator.clone());
+            } catch (CloneNotSupportedException e) {
+                // ignore
+            }
+        }
+        return parameters;
     }
 
     @Override

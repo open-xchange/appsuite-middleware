@@ -259,26 +259,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * update exception
                  */
-                // TODO fix for bug 32536 - closing reminder for appointment results in 'containing changes'
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
                     LOG.debug("No changes detected in {}, skipping update.", exceptionToSave);
                 } else {
-                    try {
-                        getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
-                    } catch (OXException e) {
-                        if ("OX-0001".equals(e.getErrorCode())) {
-                            StringBuilder stringBuilder = new StringBuilder("Exception when saving exception: ").append(e.getMessage()).append("\r\n")
-                                .append("appointmentToSave: ").append(appointmentToSave).append("\r\n")
-                                .append("originalAppointment: ").append(originalAppointment).append("\r\n")
-                                .append("exceptionToSave: ").append(exceptionToSave).append("\r\n")
-                                .append("originalException: ").append(originalException).append("\r\n")
-                                .append("originalExceptions: ").append(Arrays.toString(originalExceptions)).append("\r\n")
-                                .append("parsedICal:\r\n").append(parsedICal).append("\r\n")
-                            ;
-                            LOG.warn(stringBuilder.toString());
-                        }
-                        throw e;
-                    }
+                    getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
                     if (null != exceptionToSave.getLastModified()) {
                         clientLastModified = exceptionToSave.getLastModified();
                     }
@@ -449,14 +433,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
-    String parsedICal;
-
     private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
         try {
-            if (LOG.isTraceEnabled() || 1 == 1) {
+            if (LOG.isTraceEnabled()) {
                 byte[] iCal = Streams.stream2bytes(body);
-                parsedICal = new String(iCal, Charsets.UTF_8);
-                LOG.trace(parsedICal);
+                LOG.trace(new String(iCal, Charsets.UTF_8));
                 body = Streams.newByteArrayInputStream(iCal);
             }
             return factory.getIcalParser().parseAppointments(
@@ -466,61 +447,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
-    private static boolean differs(Object value1, Object value2) {
-        if (value1 == value2) {
-            return false;
-        } else if (null == value1 && null != value2) {
-            return true;
-        } else if (null == value2) {
-            return true;
-        } else if (String.class.isInstance(value1) && String.class.isInstance(value2)) {
-            return 0 != ((String)value1).trim().compareTo(((String)value2).trim());
-        } else if (Participant[].class.isInstance(value1)) {
-            return false == ParticipantTools.equals((Participant[])value1, (Participant[])value2, true);
-        } else if (Comparable.class.isInstance(value1)) {
-            return 0 != ((Comparable)value1).compareTo(value2);
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean differs(int field, Appointment oldAppointment, CalendarDataObject cdo) {
-        return oldAppointment.contains(field) && false == cdo.contains(field) ||
-            false == oldAppointment.contains(field) && cdo.contains(field) ||
-            differs(oldAppointment.get(field), cdo.get(field));
-    }
-
     private static boolean containsChanges(Appointment oldAppointment, CalendarDataObject cdo) {
-        boolean useDiff = true;
-        if (useDiff) {
-            AppointmentDiff diff = AppointmentDiff.compare(oldAppointment, cdo);
-            return diff.anyFieldChangedOf(CALDAV_FIELDS) ||
-                CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType() &&
-                diff.anyFieldChangedOf(RECURRENCE_FIELDS);
-        }
-        try {
-            /*
-             * check appointment fields
-             */
-            for (int field : CALDAV_FIELDS) {
-                if (differs(field, oldAppointment, cdo)) {
-                    return true;
-                }
-            }
-            if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-                for (int field : RECURRENCE_FIELDS) {
-                    if (differs(field, oldAppointment, cdo)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) { // not enough trust in generic comparisons
-            LOG.error("Error checking for appointment changes", e);
-            return true;
-        }
-        return false;
+        AppointmentDiff diff = AppointmentDiff.compare(oldAppointment, cdo);
+        return diff.anyFieldChangedOf(CALDAV_FIELDS) ||
+            CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
+            CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType() &&
+            diff.anyFieldChangedOf(RECURRENCE_FIELDS);
     }
 
     private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment) {

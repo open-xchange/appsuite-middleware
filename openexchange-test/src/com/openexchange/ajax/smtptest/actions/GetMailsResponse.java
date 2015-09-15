@@ -64,6 +64,7 @@ import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.json.JSONArray;
@@ -113,6 +114,8 @@ public class GetMailsResponse extends AbstractAJAXResponse {
 
     public static final class Message {
 
+        private Document html;
+
         static {
             MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
             final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
@@ -158,6 +161,16 @@ public class GetMailsResponse extends AbstractAJAXResponse {
             headers.put(name, value);
         }
 
+        public MimeMessage getMimeMessage() {
+            return mimeMessage;
+        }
+
+        public String requirePlainText() throws IOException, MessagingException {
+            String text = getPlainText();
+            assertNotNull("MIME message did not contain a plain text part.", text);
+            return text;
+        }
+
         public String getPlainText() throws IOException, MessagingException {
             Object content = mimeMessage.getContent();
             if (content instanceof String) {
@@ -166,11 +179,76 @@ public class GetMailsResponse extends AbstractAJAXResponse {
                 return readStream((InputStream) content);
             } else if (content instanceof MimeMultipart) {
                 MimeMultipart multipart = (MimeMultipart) content;
-                for (int i = 0; i < multipart.getCount(); i++) {
-                    BodyPart bodyPart = multipart.getBodyPart(i);
-                    if (bodyPart.getContentType().startsWith("text/plain")) {
-                        return readStream(bodyPart.getInputStream());
+                BodyPart bodyPart = findPartByContentType(multipart, "text/plain");
+                if (bodyPart != null) {
+                    return readStream(bodyPart.getInputStream());
+                }
+            }
+
+            return null;
+        }
+
+        public Document requireHtml() throws IOException, MessagingException {
+            Document document = getHtml();
+            assertNotNull("MIME message did not contain an HTML part.", document);
+            return document;
+        }
+
+        public Document getHtml() throws IOException, MessagingException {
+            if (html == null) {
+                Object content = mimeMessage.getContent();
+                if (content instanceof MimeMultipart) {
+                    MimeMultipart multipart = (MimeMultipart) content;
+                    BodyPart bodyPart = findPartByContentType(multipart, "text/html");
+                    if (bodyPart != null) {
+                        String readStream = readStream(bodyPart.getInputStream());
+                        Document document = Jsoup.parse(readStream);
+                        html = document;
                     }
+                }
+            }
+
+            return html;
+        }
+
+        public BodyPart getBodyPartByContentType(String contentType) throws MessagingException, IOException {
+            Object content = mimeMessage.getContent();
+            if (content instanceof MimeMultipart) {
+                return findPartByContentType((MimeMultipart) content, contentType);
+            }
+
+            return null;
+        }
+
+        public BodyPart getBodyPartByContentID(String cid) throws MessagingException, IOException {
+            Object content = mimeMessage.getContent();
+            if (content instanceof MimeMultipart) {
+                return findPartByContentID((MimeMultipart) content, cid);
+            }
+
+            return null;
+        }
+
+        private BodyPart findPartByContentType(MimeMultipart multipart, String contentType) throws MessagingException, IOException {
+            for (int i = 0; i < multipart.getCount(); i++) {
+                BodyPart bodyPart = multipart.getBodyPart(i);
+                if (bodyPart.getContentType().startsWith("multipart/")) {
+                    return findPartByContentType((MimeMultipart) bodyPart.getContent(), contentType);
+                } else if (bodyPart.getContentType().startsWith(contentType)) {
+                    return bodyPart;
+                }
+            }
+
+            return null;
+        }
+
+        private BodyPart findPartByContentID(MimeMultipart multipart, String cid) throws MessagingException, IOException {
+            for (int i = 0; i < multipart.getCount(); i++) {
+                MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
+                if (cid.equals(bodyPart.getContentID())) {
+                    return bodyPart;
+                } else if (bodyPart.getContentType().startsWith("multipart/")) {
+                    return findPartByContentID((MimeMultipart) bodyPart.getContent(), cid);
                 }
             }
 
@@ -187,31 +265,6 @@ public class GetMailsResponse extends AbstractAJAXResponse {
             }
             br.close();
             return sb.toString();
-        }
-
-        private Document html;
-
-        public Document getHtml() throws IOException, MessagingException {
-            if (html == null) {
-                Object content = mimeMessage.getContent();
-                if (content instanceof MimeMultipart) {
-                    MimeMultipart multipart = (MimeMultipart) content;
-                    for (int i = 0; i < multipart.getCount(); i++) {
-                        BodyPart bodyPart = multipart.getBodyPart(i);
-                        if (bodyPart.getContentType().startsWith("text/html")) {
-                            String readStream = readStream(bodyPart.getInputStream());
-                            Document document = Jsoup.parse(readStream);
-                            html = document;
-                        }
-                    }
-                }
-            }
-
-            return html;
-        }
-
-        public MimeMessage getMimeMessage() {
-            return mimeMessage;
         }
 
     }

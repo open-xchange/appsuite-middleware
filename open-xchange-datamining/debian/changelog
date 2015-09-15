@@ -1,3 +1,9 @@
+open-xchange-datamining (7.8.0-3) stable; urgency=medium
+
+  * Third candidate for 7.8.0 release
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 07 Sep 2015 15:25:44 +0200
+
 open-xchange-datamining (7.8.0-2) stable; urgency=medium
 
   * Second candidate for 7.8.0 release
@@ -15,6 +21,18 @@ open-xchange-datamining (7.8.0-0) unstable; urgency=medium
   * prepare for 7.8.0 release
 
  -- Karsten Will <karsten.will@open-xchange.com>  Wed, 05 Nov 2014 09:40:46 +0100
+
+open-xchange-datamining (7.6.2-32) stable; urgency=medium
+
+  * Build for patch 2015-09-14 (2732)
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Tue, 08 Sep 2015 13:34:32 +0200
+
+open-xchange-datamining (7.6.2-31) stable; urgency=medium
+
+  * Build for patch 2015-09-01 (2726)
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Wed, 02 Sep 2015 11:03:41 +0200
 
 open-xchange-datamining (7.6.2-30) stable; urgency=medium
 

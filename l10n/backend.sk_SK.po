@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-20 14:19+0200\n"
+"PO-Revision-Date: 2015-09-11 13:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Virtaal 0.7.1\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -54,76 +54,24 @@ msgstr ""
 msgid "No Kerberos delegation ticket found in session."
 msgstr "V relácii nebol nájdený žiadny delegačný lístok Kerberos."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:103
-msgid "/servlet/dav/caldav"
-msgstr "/servlet/dav/caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
-msgid "/servlet/dav/dev/null"
-msgstr "/servlet/dav/dev/null"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:145
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "caldav"
-msgstr "caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "modules"
-msgstr "modules"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "module"
-msgstr "module"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:181
-msgid "modules/caldav/active"
-msgstr "modules/caldav/active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:186
-msgid "io.ox/caldav//active"
-msgstr "io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:191
-msgid "modules/caldav/active > io.ox/caldav//active"
-msgstr "modules/caldav/active > io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:198
-msgid "modules/caldav/url"
-msgstr "modules/caldav/url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:203
-msgid "io.ox/caldav//url"
-msgstr "io.ox/caldav//url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:208
-msgid "modules/caldav/url > io.ox/caldav//url"
-msgstr "modules/caldav/url > io.ox/caldav//url"
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your calendars and appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/OAuthStrings.java:61
 msgid "Synchronize your calendars and appointments."
 msgstr "Synchronizovať vaše kalendáre a schôdzky."
-
-#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-#. registerService(TargetService.class, new ModifyThroughDependant(), props);
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
-msgid "calendar"
-msgstr "calendar"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
 msgid "Read all your appointments."
 msgstr "Zobraziť všetky vaše schôdzky."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
 msgid "Create, modify and delete appointments."
 msgstr "Vytvárať, upravovať a odstraňovať schôdzky."
 
@@ -917,27 +865,10 @@ msgstr ""
 "Tento email ste dostali, pretože táto schôdzka obsahuje zdroj %1$s, ktorý "
 "spravujete."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:88
-msgid "starting bundle: \"com.openexchange.carddav\""
-msgstr "počiatočný zväzok: „com.openexchange.carddav“"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:135
-msgid "/servlet/dav/carddav"
-msgstr "/servlet/dav/carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:101
-msgid "carddav"
-msgstr "carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:121
-msgid "stopping bundle: \"com.openexchange.carddav\""
-msgstr "zastavuje sa zväzok: „com.openexchange.carddav“"
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "Synchronizovať vaše adresáre a kontakty."
 
@@ -961,6 +892,14 @@ msgstr "Hľadanie používateľa v LDAP vrátilo príliš mnoho výsledkov."
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr ""
 "Hľadanie používateľského objektu „%s“ v LDAP nevrátilo žiadne výsledky."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
+msgid ""
+"The LDAP search in distribution lists for specific attributes is not "
+"supported."
+msgstr ""
+"Vyhľadávanie podľa konkrétnych atribútov LDAP v distribučných zoznamoch nie "
+"je podporované."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -1416,37 +1355,17 @@ msgstr ""
 msgid "Unable to access the file store."
 msgstr "Nebolo možné pristupovať k úložisku súborov."
 
-#.
-#. * register ajax module
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:88
-msgid "contacts"
-msgstr "contacts"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "identifier"
-msgstr "identifier"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-msgid "com.openexchange.contact.json"
-msgstr "com.openexchange.contact.json"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "com.openexchange.contact"
-msgstr "com.openexchange.contact"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
 msgstr "Zobraziť všetky vaše kontakty."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete contacts."
 msgstr "Vytvárať, upravovať a odstraňovať kontakty."
 
@@ -1746,6 +1665,10 @@ msgid ""
 msgstr ""
 "Adresára „%1$s“ nie je možné synchronizovať. Prosím, vyberte iný adresár."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:92
+msgid "The supplied metadata could not be parsed: \"%1$s\""
+msgstr "Poskytnuté metadáta nebolo možné spracovať: „%1$s“"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1928,44 +1851,46 @@ msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr "Zmazanie zdroja „%1$s“ bolo zamietnuté: %2$s"
 
 #. Missing configuration for %1$s account "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+#. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+#. E.g. 'Missing configuration for boxcom account "3".'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
 msgid "Missing configuration for %1$s account \"%2$s\"."
 msgstr "Chýba konfigurácia účtu %1$s %2$s."
 
 #. The provided %1$s resource does not exist: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "Poskytnutý zdroj %1$s neexistuje: %2$s"
 
 #. The file %1$s doesn't have any content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The file %1$s doesn't have any content."
 msgstr "Súbor „%1$s“ nemá žiadny obsah."
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "The associated %2$s account does no more exist"
 msgstr "Pridružený účet %2$s už neexistuje"
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Individuálne oprávnenia nie sú v účte „%1$s“ podporované."
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "Ukladanie poznámok k súboru „%1$s“ nie je v účte „%2$s“ podporované."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
 "Priraďovanie kategórií k súboru „%1$s“ nie je v účte „%2$s“ podporované."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
@@ -2000,7 +1925,7 @@ msgid ""
 "by all users of the system. Please select a different name and try again."
 msgstr ""
 "Názov požadovaného vedra nie je k dispozícii. Menný priestor vedier zdieľajú "
-"všetci používatelia systému. Vyberte iný názov a skúste znova."
+"všetci používatelia systému. Vyberte iný názov a skúste to znova."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
@@ -2776,6 +2701,11 @@ msgstr "Chyba počas čítania/zápisu údajov z/do databázy."
 msgid "Data cannot be stored into the database because it is too big"
 msgstr "Údaje nie je možné uložiť do databázy, pretože sú príliš veľké"
 
+#. The request sent by the client was syntactically incorrect
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+msgid "The request sent by the client was syntactically incorrect"
+msgstr "Požiadavka zaslaná klientovi nebola syntakticky správna"
+
 #. *
 #. * File not found: %1$s
 #.
@@ -2846,39 +2776,39 @@ msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr "Lístok protokolu Kerberos v relácii chýba. Prosím, skúste to znova."
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
 msgid "A Guard error occurred: %1$s"
 msgstr "Vyskytla sa chyba Guard: %1$s"
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid ""
 "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
 "Vyskytla sa chyba servera Guard so stavovým kódom HTTP %1$s. Správa %2$s"
 
 #. Invalid Guard URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
 msgid "The provided Guard URL: %1$s is invalid"
 msgstr "Poskytnutý URL Guard „%1$s“ je neplatný"
 
 #. The Guard resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Poskytnutý zdroj Guard neexistuje: %1$s"
 
 #. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
 msgid "An I/O error occurred: %1$s"
 msgstr "Vyskytla sa V/V chyba: %1$s"
 
 #. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "Authentication failed: %1$s"
 msgstr "Autentifikácia používateľa zlyhala: %1$s"
 
 #. The Guard resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
 msgstr "Zdroj Guard neexistuje"
 
@@ -4424,78 +4354,6 @@ msgstr "Neočakávaná chyba: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Neplatný ID. Identifikátor zdroja chýba."
 
-#. XMPP
-#. * The client has sent a message that is malformed or cannot be processed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
-msgid ""
-"The client has sent a message that is malformed or cannot be processed: %1$s"
-msgstr ""
-"Klient poslal správu, ktorá je poškodená alebo ju nie je možné spracovať: "
-"%1$s"
-
-#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
-msgid ""
-"The server could not process the stanza because of a misconfiguration or an "
-"otherwise-undefined internal server error: %1$s"
-msgstr ""
-"Server nemohol spracovať Stanzu kvôli chybe v konfigurácii alebo inej "
-"bližšie neurčenej vnútornej chybe servera: %1$s"
-
-#. * The recipient you tried to reach is currently unavailable
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-msgid "The recipient you tried to reach is currently unavailable: %1$s"
-msgstr ""
-"Príjemca, ktorého ste sa snažili zastihnúť, je momentálne nedostupný: %1$s"
-
-#. * Your session is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
-msgid "Your session is invalid."
-msgstr "Vaša relácia je neplatná."
-
-#. * You are no member of the GroupDispatcher: %1$s. Please join first.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:95
-msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
-msgstr ""
-"Nie ste členom GroupDispatcher: %1$s. Prosím, najskôr sa staňte členom "
-"skupiny."
-
-#. * The request didn't yield any response.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:98
-msgid "The request didn't yield any response."
-msgstr "Na požiadavku neprišla žiadna odpoveď."
-
-#. * The GroupDispatcher %1$s was already disposed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
-msgid "The GroupDispatcher %1$s was already disposed."
-msgstr "GroupDispatcher %1$s bol už zrušený."
-
-#. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
-msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
-msgstr "GroupDispatcher %1$s nedokázal spracovať Stanzu z %2$s do %3$s."
-
-#. * Joining the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
-msgid "Joining the GroupDispatcher %1$s failed."
-msgstr "Pridanie sa ku GroupDispatcher %1$s zlyhalo."
-
-#. * Leaving the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
-msgid "Leaving the GroupDispatcher %1$s failed."
-msgstr "Opustenie GroupDispatcher %1$s zlyhalo."
-
-#. * ResponseChannel timed out while simulating synchronous behaviour.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
-msgid "ResponseChannel timed out while simulating synchronous behaviour."
-msgstr ""
-"Časový limit ResponseChannel vypršal počas simulácie synchrónneho správania."
-
-#. * You are already a member of the GroupDispatcher %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
-msgid "You are already a member of the GroupDispatcher %1$s"
-msgstr "Už ste členom GroupDispatcher %1$s"
-
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -4556,14 +4414,10 @@ msgstr "Používateľ je deaktivovaný"
 msgid "Password expired"
 msgstr "Platnosť hesla vypršala"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:84
-msgid "config"
-msgstr "config"
-
 #. Application 'xyz' requires following permissions:
 #. - Read and change your settings.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/OAuthScopeDescription.java:9
 msgid "Read and change your settings."
 msgstr "Zobraziť a meniť vaše nastavenia."
 
@@ -4641,7 +4495,6 @@ msgstr "Nemáte platnú reláciu. Prosím, prihláste sa znova."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Nemáte príslušné oprávnenie na zobrazenie priečinka „%1$s“."
 
@@ -5270,6 +5123,10 @@ msgid ""
 msgstr ""
 "Požiadavka „%1$s“ obsahuje príliš mnoho vzorov. Prosím, skráťte požiadavky a "
 "skúste to znova."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
+msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr "Vzor „%1$s“ bol počas vyhľadávania ignorovaný."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -6861,6 +6718,15 @@ msgstr ""
 "Vzhľadom na obmedzené schopnosti používateľa „%1$s“ nie je možné aplikovať "
 "zmeny oprávnení."
 
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid ""
+"Concurrent write attempt. Please await the previous save operation to "
+"terminate."
+msgstr ""
+"Pokus o súbežné zapisovanie. Prosím, počkajte na ukončenie predošlej "
+"operácie ukladania."
+
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
@@ -7069,7 +6935,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
-"Aktuálne heslo chýba. Prosím, zadajte svoje aktuálne heslo a skúste znova."
+"Aktuálne heslo chýba. Prosím, zadajte svoje aktuálne heslo a skúste to znova."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -7077,7 +6943,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
 msgid ""
 "The new password is missing. Please enter your new password and try again."
-msgstr "Nové heslo chýba. Prosím, zadajte svoje nové heslo a skúste znova."
+msgstr "Nové heslo chýba. Prosím, zadajte svoje nové heslo a skúste to znova."
 
 #. *
 #. * User is missing for the reminder.
@@ -7159,21 +7025,17 @@ msgstr "Žiadna cieľová služba nie je zaregistrovaná pre modul %1$d."
 msgid "Required  value \"identifier\" was not supplied."
 msgstr "Požadovaná hodnota „Identifikátor“ nebola zadaná."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
-msgid "reminder"
-msgstr "pripomenutie"
-
 #. Application 'xyz' requires following permissions:
 #. - Read reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:9
 msgid "Read reminders for appointments and tasks."
 msgstr "Čítať pripomenutia schôdzok a úloh."
 
 #. Application 'xyz' requires following permissions:
 #. - Set or change reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:14
 msgid "Set or change reminders for appointments and tasks."
 msgstr "Nastavovať alebo meniť pripomenutia schôdzok a úloh."
 
@@ -8318,52 +8180,53 @@ msgstr "Chýbajú povinné polia v damon zdroji."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Nemáte príslušné oprávnenie k modulu „%2$s“."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Nemáte príslušné oprávnenie na zobrazenie priečinka."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Zdieľané priečinky nie sú dostupné pre váš účet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie k verejnému priečinku „%2$s“."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Nemáte príslušné oprávnenie k verejnému priečinku."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na vytvorenie podpriečinkov v priečinku „%2$s“."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Nemáte príslušné oprávnenie na vytvorenie podpriečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Priečinok „%1$s“ neexistuje."
+msgid "Such a folder does not exist."
+msgstr "Taký priečinok neexistuje."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Priečinok „%1$s“ sa medzitým zmenil. Prosím, znovu načítajte zobrazenie a "
-"skúste to znova."
+"Priečinok bol medzitým zmenený. Prosím, znovu načítajte zobrazenie a skúste "
+"to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Táto operácia vyžaduje povolenia správcu pre priečinok „%2$s“."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Táto operácia vyžaduje oprávnenie správcu k priečinku."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho premenovať."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Priečinok je predvolený priečinok a nemožno ho premenovať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Priečinok s názvom „%1$s“ už obsahuje podpriečinok s názvom „%3$s“."
+msgid "The folder already contains a folder with such a name."
+msgstr "Priečinok už obsahuje priečinok s týmto názvom."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Priečinky typu „%2$s“ nie je možné vytvoriť v „%1$s“."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Priečinky typu „%2$s“ nie je možné pod týmto priečinkom vytvoriť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Priečinky modulu „%2$s“ nie je možné vytvoriť v „%1$s“."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Priečinky modulu „%2$s“ nie je možné pod týmto priečinkom vytvoriť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8385,65 +8248,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Požaduje sa aspoň jeden používateľ s oprávneniami správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho presunúť."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Priečinok je predvolený priečinok a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Priečinok „%1$s“ je zdieľaný a nedá sa presunúť."
+msgid "The folder is shared and cannot be moved."
+msgstr "Priečinok je zdieľaný a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Priečinok sa nedá presunúť do zdieľaného priečinka „%1$s“."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Priečinok nemožno presunúť do zdieľaného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "Priečinok „%1$s“ je systémový priečinok a nemožno premiestniť."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Priečinok je systémový priečinok a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"Súkromný priečinok „%1$s“ je možné presunúť iba do iného súkromného "
-"priečinka."
+msgid "The private folder can only be moved to another private folder."
+msgstr "Súkromný priečinok je možné presunúť iba do iného súkromného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr ""
-"Verejný priečinok „%1$s“ je možné presunúť iba do iného verejného priečinka."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Verejný priečinok je možné presunúť iba do iného verejného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Cieľový priečinok je rovnaký ako zdrojový priečinok."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov priečinka "
-"„%2$s“."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka „%2$s“."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "Priečinok „%2$s“ je predvolený priečinok a nie je možné ho odstrániť."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Priečinok je predvolený priečinok a nemožno ho zmazať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na zmazanie všetkých položiek v zdieľanom "
-"priečinku „%2$s“."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Nemáte príslušné oprávnenie na zmazanie všetkých obsiahnutých položiek."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "Priečinok „%1$s“ nesmie byť presunutý do jedného z jeho podpriečinkov."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Priečinok nie je možné presunúť do jedného z jeho podpriečinkov."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8452,8 +8302,8 @@ msgstr ""
 "Priečinky modulu „%1$s“ nie je možné presunúť do priečinkov modulu „%2$s“."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Zdieľaný priečinok „%1$s“ sa nedá aktualizovať."
+msgid "The shared folder cannot be updated."
+msgstr "Zdieľaný priečinok nie je možné aktualizovať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8473,47 +8323,42 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Iba vlastník nadradeného priečinka súkromného priečinka „%4$s“ môže mať "
-"povolenia správcu."
+"Iba vlastník nadradeného zdieľaného priečinka môže mať povolenia správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Priečinok „%2$s“ je predvolený priečinok, ktorého vlastník musí mať "
-"oprávnenia správcu."
+"Priečinok je predvolený priečinok. Preto jeho vlastník musí mať oprávnenia "
+"správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka „%2$s“."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr ""
-"Vzhľadom na obmedzené oprávnenia používateľa „%1$s“ nie je možné vykonať "
-"zmeny priečinka „%2$s“."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "Nie je možné aplikovať zmeny z dôvodu nedostatočných oprávnení."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Priečinok „%1$s“ nie je možné zmazať, pretože obsahuje skrytý podpriečinok, "
-"ku ktorému nemáte príslušné oprávnenia."
+"Priečinok nie je možné zmazať, pretože obsahuje skrytý podpriečinok, ku "
+"ktorému nemáte príslušné oprávnenia."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Priečinok „%2$s“ už obsahuje priečinok s názvom „%1$s“. Prosím, vyberte iný "
-"názov a skúste znova."
+"Priečinok už obsahuje priečinok s takým názvom. Prosím, vyberte iný názov a "
+"skúste to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8531,65 +8376,51 @@ msgstr ""
 "používateľom."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Sú definované duplicitné oprávnenia pre používateľa „%1$s“. Je povolené iba "
-"jedno oprávnenie na používateľa."
+"Sú definované duplicitné oprávnenia. Je povolené iba jedno oprávnenie na "
+"používateľa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Sú definované duplicitné oprávnenia pre skupinu „%1$s“. Je povolené iba "
-"jedno oprávnenie na skupiny."
+"Sú definované duplicitné oprávnenia. Je povolené iba jedno oprávnenie na "
+"skupinu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
 msgstr ""
-"Pre priečinok „%1$s“ je povolené zmeniť iba oprávnenie na viditeľnosť "
-"priečinka."
+"Pre priečinok je povolené zmeniť iba oprávnenie na viditeľnosť priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Iba oprávnenia jednotlivých používateľov, ale nie skupinové oprávnenia sú "
-"povolené pre priečinok „%1$s“."
+"Sú povolené iba oprávnenia jednotlivých používateľov, ale nie skupinové "
+"oprávnenia."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr ""
-"Oprávnenia jednotlivých používateľov nie sú povolené pre priečinok „%1$s“."
+msgid "No individual user permissions are allowed."
+msgstr "Oprávnenia jednotlivých používateľov nie sú povolené."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka „%2$s“."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"Priečinok „%1$s“ nesmie byť zmazaný, pretože obsahuje zamknuté dokumenty."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Priečinok nie je možné zmazať, pretože obsahuje zamknuté dokumenty."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Operáciu je možné vykonať iba pre správcu kontextu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Priečinok „%1$s“ nemožno zmazať."
+msgid "The folder cannot be deleted."
+msgstr "Priečinok nemožno zmazať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Administratívne oprávnenia vlastníka „%1$s“ v priečinku „%2$s“ boli obnovené."
+msgid "The administrative permissions were restored."
+msgstr "Administratívne oprávnenia boli obnovené."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8743,45 +8574,77 @@ msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s s vami zdieľal priečinky „%2$s“."
 
 #. detailed body
-#. * $username ($user_email) has shared file "$filename" with you.
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
-msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
-msgstr "%1$s (%2$s) s vami zdieľal súbor „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa súbor „%3$s“. Môžete ho zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared $number_of_files files with you.
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
-msgid "%1$s (%2$s) has shared %3$s files with you."
-msgstr "%1$s (%2$s) s vami zdieľal súbory „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa %3$s súborov. Môžete ich zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared image "$filename" with you.
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
-msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
-msgstr "%1$s (%2$s) s vami zdieľal obrázok „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa obrázok „%3$s“. Môžete ho zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared $number_of_images iamges with you.
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
-msgid "%1$s (%2$s) has shared %3$s images with you."
-msgstr "%1$s (%2$s) s vami zdieľal obrázky „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa obrázky „%3$s“. Môžete ich zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared item "$filename" with you.
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
-msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
-msgstr "%1$s (%2$s) s vami zdieľal položku „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa položku „%3$s“. Môžete ju zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared $number items with you.
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
-msgid "%1$s (%2$s) has shared %3$s items with you."
-msgstr "%1$s (%2$s) s vami zdieľal položky „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa %3$s položiek. Môžete ich zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared folder $folder with you.
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
-msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
-msgstr "%1$s (%2$s) s vami zdieľal priečinok „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa priečinok „%3$s“. Môžete ho zobraziť kliknutím na "
+"tlačidlo nižšie."
 
-#. * $username ($user_email) has shared folder $number folders with you.
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
-msgid "%1$s (%2$s) has shared %3$ folders with you."
-msgstr "%1$s (%2$s) s vami zdieľal priečinky „%3$s“."
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) s vami zdieľa %3$s priečinkov. Môžete ich zobraziť kliknutím na "
+"tlačidlo nižšie."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -8827,65 +8690,54 @@ msgstr "%1$s (%2$s) s vami zdieľal položky „%3$s“ a zanechal vám správu:
 msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
 msgstr "%1$s (%2$s) s vami zdieľal priečinky „%3$s“ a zanechal vám správu:"
 
-#. please click
-#. * Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
-msgid "Please click the button below to view it."
-msgstr "Prosím, zobrazte ju kliknutím na tlačidlo nižšie."
-
-#. * Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
-msgid "Please click the button below to view them."
-msgstr "Prosím, zobrazte ich kliknutím na tlačidlo nižšie."
-
 #. button with label
-#. * View photo
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
 msgid "View image"
 msgstr "Zobraziť obrázok"
 
-#. * View photos
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
 msgid "View images"
 msgstr "Zobraziť obrázky"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
 msgid "View file"
 msgstr "Zobraziť súbor"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
 msgid "View files"
 msgstr "Zobraziť súbory"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
 msgid "View folder"
 msgstr "Zobraziť priečinok"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
 msgid "View folders"
 msgstr "Zobraziť priečinky"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
 msgid "View item"
 msgstr "Zobraziť položku"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
 msgid "View items"
 msgstr "Zobraziť položky"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
 msgid "The link will expire on %1$s"
 msgstr "Odkaz vyprší %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr ""
@@ -8898,16 +8750,16 @@ msgstr ""
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Zabudli ste heslo?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid "Hello,"
 msgstr "Dobrý deň,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -8915,12 +8767,12 @@ msgstr ""
 "dostali sme správu, že ste zabudli heslo. Nové heslo si môžete nastaviť tu:"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "Set password"
 msgstr "Nastaviť heslo"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -8929,12 +8781,12 @@ msgstr ""
 "nezmení pokým nepoužijete tlačidlo vyššie a nenastavíte si nové."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
 msgid "This is an automated message, please do not reply."
 msgstr "Toto je automatická správa. Prosím, neodpovedajte na ňu."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
 msgid "unknown"
 msgstr "neznámy"
 
@@ -9010,7 +8862,7 @@ msgid ""
 "and try again."
 msgstr ""
 "Zdieľanie bolo medzitým upravené. Prosí, znovu načítajte stránku alebo "
-"spustite synchronizáciu a potom to skúste znova."
+"spustite synchronizáciu a potom to skúste to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
 msgid "You don't have sufficient permissions to delete the share."
@@ -9214,21 +9066,17 @@ msgstr ""
 msgid "You already have such a subscription."
 msgstr "Takýto odber už je aktívny."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
-msgid "tasks"
-msgstr "úlohy"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your tasks."
 msgstr "Zobraziť všetky vaše úlohy."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete tasks."
 msgstr "Vytvárať, upravovať a odstraňovať úlohy."
 
@@ -11581,6 +11429,337 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie k verejnému priečinku „%2$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na vytvorenie podpriečinkov v priečinku "
+#~ "„%2$s“."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Priečinok „%1$s“ neexistuje."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ sa medzitým zmenil. Prosím, znovu načítajte zobrazenie a "
+#~ "skúste to znova."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "Táto operácia vyžaduje povolenia správcu pre priečinok „%2$s“."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho premenovať."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Priečinok s názvom „%1$s“ už obsahuje podpriečinok s názvom „%3$s“."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Priečinky typu „%2$s“ nie je možné vytvoriť v „%1$s“."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Priečinky modulu „%2$s“ nie je možné vytvoriť v „%1$s“."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho presunúť."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je zdieľaný a nedá sa presunúť."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Priečinok sa nedá presunúť do zdieľaného priečinka „%1$s“."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je systémový priečinok a nemožno premiestniť."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Súkromný priečinok „%1$s“ je možné presunúť iba do iného súkromného "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Verejný priečinok „%1$s“ je možné presunúť iba do iného verejného "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov "
+#~ "priečinka „%2$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka „%2$s“."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ je predvolený priečinok a nie je možné ho odstrániť."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na zmazanie všetkých položiek v zdieľanom "
+#~ "priečinku „%2$s“."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nesmie byť presunutý do jedného z jeho podpriečinkov."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Zdieľaný priečinok „%1$s“ sa nedá aktualizovať."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Iba vlastník nadradeného priečinka súkromného priečinka „%4$s“ môže mať "
+#~ "povolenia správcu."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ je predvolený priečinok, ktorého vlastník musí mať "
+#~ "oprávnenia správcu."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka „%2$s“."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vzhľadom na obmedzené oprávnenia používateľa „%1$s“ nie je možné vykonať "
+#~ "zmeny priečinka „%2$s“."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nie je možné zmazať, pretože obsahuje skrytý "
+#~ "podpriečinok, ku ktorému nemáte príslušné oprávnenia."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ už obsahuje priečinok s názvom „%1$s“. Prosím, vyberte "
+#~ "iný názov a skúste znova."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Sú definované duplicitné oprávnenia pre používateľa „%1$s“. Je povolené "
+#~ "iba jedno oprávnenie na používateľa."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Sú definované duplicitné oprávnenia pre skupinu „%1$s“. Je povolené iba "
+#~ "jedno oprávnenie na skupiny."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Pre priečinok „%1$s“ je povolené zmeniť iba oprávnenie na viditeľnosť "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Iba oprávnenia jednotlivých používateľov, ale nie skupinové oprávnenia sú "
+#~ "povolené pre priečinok „%1$s“."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Oprávnenia jednotlivých používateľov nie sú povolené pre priečinok „%1$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka „%2$s“."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nesmie byť zmazaný, pretože obsahuje zamknuté dokumenty."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Priečinok „%1$s“ nemožno zmazať."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Administratívne oprávnenia vlastníka „%1$s“ v priečinku „%2$s“ boli "
+#~ "obnovené."
+
+#~ msgid "/servlet/dav/caldav"
+#~ msgstr "/servlet/dav/caldav"
+
+#~ msgid "/servlet/dav/dev/null"
+#~ msgstr "/servlet/dav/dev/null"
+
+#~ msgid "caldav"
+#~ msgstr "caldav"
+
+#~ msgid "modules"
+#~ msgstr "modules"
+
+#~ msgid "module"
+#~ msgstr "module"
+
+#~ msgid "modules/caldav/active"
+#~ msgstr "modules/caldav/active"
+
+#~ msgid "io.ox/caldav//active"
+#~ msgstr "io.ox/caldav//active"
+
+#~ msgid "modules/caldav/active > io.ox/caldav//active"
+#~ msgstr "modules/caldav/active > io.ox/caldav//active"
+
+#~ msgid "modules/caldav/url"
+#~ msgstr "modules/caldav/url"
+
+#~ msgid "io.ox/caldav//url"
+#~ msgstr "io.ox/caldav//url"
+
+#~ msgid "modules/caldav/url > io.ox/caldav//url"
+#~ msgstr "modules/caldav/url > io.ox/caldav//url"
+
+#~ msgid "calendar"
+#~ msgstr "calendar"
+
+#~ msgid "starting bundle: \"com.openexchange.carddav\""
+#~ msgstr "počiatočný zväzok: „com.openexchange.carddav“"
+
+#~ msgid "/servlet/dav/carddav"
+#~ msgstr "/servlet/dav/carddav"
+
+#~ msgid "carddav"
+#~ msgstr "carddav"
+
+#~ msgid "stopping bundle: \"com.openexchange.carddav\""
+#~ msgstr "zastavuje sa zväzok: „com.openexchange.carddav“"
+
+#~ msgid "contacts"
+#~ msgstr "contacts"
+
+#~ msgid "identifier"
+#~ msgstr "identifier"
+
+#~ msgid "com.openexchange.contact.json"
+#~ msgstr "com.openexchange.contact.json"
+
+#~ msgid "com.openexchange.contact"
+#~ msgstr "com.openexchange.contact"
+
+#~ msgid ""
+#~ "The client has sent a message that is malformed or cannot be processed: "
+#~ "%1$s"
+#~ msgstr ""
+#~ "Klient poslal správu, ktorá je poškodená alebo ju nie je možné spracovať: "
+#~ "%1$s"
+
+#~ msgid ""
+#~ "The server could not process the stanza because of a misconfiguration or "
+#~ "an otherwise-undefined internal server error: %1$s"
+#~ msgstr ""
+#~ "Server nemohol spracovať Stanzu kvôli chybe v konfigurácii alebo inej "
+#~ "bližšie neurčenej vnútornej chybe servera: %1$s"
+
+#~ msgid "The recipient you tried to reach is currently unavailable: %1$s"
+#~ msgstr ""
+#~ "Príjemca, ktorého ste sa snažili zastihnúť, je momentálne nedostupný: %1$s"
+
+#~ msgid "Your session is invalid."
+#~ msgstr "Vaša relácia je neplatná."
+
+#~ msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
+#~ msgstr ""
+#~ "Nie ste členom GroupDispatcher: %1$s. Prosím, najskôr sa staňte členom "
+#~ "skupiny."
+
+#~ msgid "The request didn't yield any response."
+#~ msgstr "Na požiadavku neprišla žiadna odpoveď."
+
+#~ msgid "The GroupDispatcher %1$s was already disposed."
+#~ msgstr "GroupDispatcher %1$s bol už zrušený."
+
+#~ msgid ""
+#~ "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
+#~ msgstr "GroupDispatcher %1$s nedokázal spracovať Stanzu z %2$s do %3$s."
+
+#~ msgid "Joining the GroupDispatcher %1$s failed."
+#~ msgstr "Pridanie sa ku GroupDispatcher %1$s zlyhalo."
+
+#~ msgid "Leaving the GroupDispatcher %1$s failed."
+#~ msgstr "Opustenie GroupDispatcher %1$s zlyhalo."
+
+#~ msgid "ResponseChannel timed out while simulating synchronous behaviour."
+#~ msgstr ""
+#~ "Časový limit ResponseChannel vypršal počas simulácie synchrónneho "
+#~ "správania."
+
+#~ msgid "You are already a member of the GroupDispatcher %1$s"
+#~ msgstr "Už ste členom GroupDispatcher %1$s"
+
+#~ msgid "config"
+#~ msgstr "config"
+
+#~ msgid "reminder"
+#~ msgstr "pripomenutie"
+
+#~ msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal súbor „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared %3$s files with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal súbory „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal obrázok „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared %3$s images with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal obrázky „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal položku „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared %3$s items with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal položky „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal priečinok „%3$s“."
+
+#~ msgid "%1$s (%2$s) has shared %3$ folders with you."
+#~ msgstr "%1$s (%2$s) s vami zdieľal priečinky „%3$s“."
+
+#~ msgid "Please click the button below to view it."
+#~ msgstr "Prosím, zobrazte ju kliknutím na tlačidlo nižšie."
+
+#~ msgid "Please click the button below to view them."
+#~ msgstr "Prosím, zobrazte ich kliknutím na tlačidlo nižšie."
+
+#~ msgid "tasks"
+#~ msgstr "úlohy"
 
 #~ msgid "Invalid presence status."
 #~ msgstr "Neplatný stav prítomnosti."

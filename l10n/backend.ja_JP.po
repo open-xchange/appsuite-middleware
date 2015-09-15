@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-08-20 13:38+0200\n"
+"PO-Revision-Date: 2015-09-14 11:01+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -61,76 +61,24 @@ msgstr "更新が必要な認証情報が件名 %1$s に見つかりません。
 msgid "No Kerberos delegation ticket found in session."
 msgstr "Kerberos 委任チケットがセッションに見つかりません。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:103
-msgid "/servlet/dav/caldav"
-msgstr "/servlet/dav/caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
-msgid "/servlet/dav/dev/null"
-msgstr "/servlet/dav/dev/null"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:145
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "caldav"
-msgstr "caldav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "modules"
-msgstr "modules"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:168
-msgid "module"
-msgstr "module"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:181
-msgid "modules/caldav/active"
-msgstr "modules/caldav/active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:186
-msgid "io.ox/caldav//active"
-msgstr "io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:191
-msgid "modules/caldav/active > io.ox/caldav//active"
-msgstr "modules/caldav/active > io.ox/caldav//active"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:198
-msgid "modules/caldav/url"
-msgstr "modules/caldav/url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:203
-msgid "io.ox/caldav//url"
-msgstr "io.ox/caldav//url"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:208
-msgid "modules/caldav/url > io.ox/caldav//url"
-msgstr "modules/caldav/url > io.ox/caldav//url"
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your calendars and appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/OAuthStrings.java:61
 msgid "Synchronize your calendars and appointments."
 msgstr "予定表とアポイントを同期"
-
-#. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-#. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-#. registerService(TargetService.class, new ModifyThroughDependant(), props);
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:86
-msgid "calendar"
-msgstr "calendar"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
 msgid "Read all your appointments."
 msgstr "すべてのアポイントを表示"
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete appointments.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
 msgid "Create, modify and delete appointments."
 msgstr "アポイントの作成、変更、削除"
 
@@ -211,13 +159,13 @@ msgstr " %1$s日毎 %2$sの日月"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:71
 msgid "On %1$s %2$s every %3$s. month"
-msgstr "毎 %3$sの %1$s %2$s日月"
+msgstr "毎 の %1$s %2$s%3$s日月"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:835
 msgid "On %1$s %2$s in %3$s"
-msgstr "%3$s の %1$s %2$s"
+msgstr " %1$s の%2$s%3$s "
 
 #. E.g. "Every 2. February"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:76
@@ -508,11 +456,11 @@ msgstr "空き時間"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:94
 msgid "%1$s has declined your proposed changes for the appointment %2$s."
-msgstr "アポイント %2$s への新しい日時の指定を %1$s が辞退しました。"
+msgstr "アポイント%1$s  への新しい日時の指定を %1$s  %2$s が辞退しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:96
 msgid "%1$s has declined your proposed changes on behalf of %2$s for the appointment %3$s."
-msgstr "アポイント %3$s への新しい日時の指定を %1$s が %2$s の代理で辞退しました。"
+msgstr "アポイント%1$s への新しい日時の指定を %2$s が%3$sの代理で辞退しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:98
 msgid "%1$s would like to be brought up to date about the appointment %2$s. Please send another invitation."
@@ -546,7 +494,7 @@ msgstr "%1$s は次の出席依頼を %2$s しました:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:123
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:138
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
-msgstr "%1$s は %3$s の代理で次の出席依頼を %2$s しました:"
+msgstr "%1$s は  %2$s の代理で次の出席依頼を %2$s %3$s しました:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on your behalf"
@@ -575,7 +523,7 @@ msgstr "%1$s がこのアポイントのステータスを %2$s に設定しま�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:150
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
-msgstr "%1$s は %3$s の代理でこのアポイントのステータスを %2$s に設定しました:"
+msgstr "%1$s は %2$s  の代理でこのアポイントのステータスを %3$sに設定しました:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:152
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
@@ -872,27 +820,10 @@ msgstr "このメールは、このアポイントの開催者であるあなた
 msgid "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you."
 msgstr "このメールは、このアポイントで使用する施設 %1$s を管理するあなた宛に送信されています。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:88
-msgid "starting bundle: \"com.openexchange.carddav\""
-msgstr "開始バンドル: \"com.openexchange.carddav\""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:100
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:135
-msgid "/servlet/dav/carddav"
-msgstr "/servlet/dav/carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:101
-msgid "carddav"
-msgstr "carddav"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:121
-msgid "stopping bundle: \"com.openexchange.carddav\""
-msgstr "停止バンドル: \"com.openexchange.carddav\""
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:145
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/OAuthStrings.java:10
 msgid "Synchronize your address books and contacts."
 msgstr "アドレス帳と連絡先を同期してください。"
 
@@ -915,6 +846,10 @@ msgstr "ユーザの LDAP 検索結果が多過ぎます。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "The LDAP search for the user object \"%s\" gave no results."
 msgstr "ユーザ オブジェクト \"%s\" の LDAP 検索では、該当する結果がありませんでした。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
+msgid "The LDAP search in distribution lists for specific attributes is not supported."
+msgstr "特定の属性についての配布リストのLDAP検索はサポートされていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -1365,37 +1300,17 @@ msgstr "vCardは最大許容サイズを超えており、インポートでき�
 msgid "Unable to access the file store."
 msgstr "ファイル ストアにアクセスできません。"
 
-#.
-#. * register ajax module
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:88
-msgid "contacts"
-msgstr "contacts"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "identifier"
-msgstr "identifier"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
-msgid "com.openexchange.contact.json"
-msgstr "com.openexchange.contact.json"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
-msgid "com.openexchange.contact"
-msgstr "com.openexchange.contact"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:125
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your contacts."
 msgstr "すべての連絡先を表示。"
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete contacts."
 msgstr "連絡先の作成、変更、削除。"
 
@@ -1660,6 +1575,10 @@ msgstr "パス \"%1$s\" は \"%2$s\" の同名のファイルと競合してい�
 msgid "The directory \"%1$s\" is not synchronizable. Please select another directory."
 msgstr "ディレクトリ \"%1$s\" を同期できません。別のディレクトリを選択してください。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:92
+msgid "The supplied metadata could not be parsed: \"%1$s\""
+msgstr "入力されたメタデータ\"%1$s\"が解析できませんでした。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1808,42 +1727,44 @@ msgid "Delete denied for \"%1$s\" resource: %2$s"
 msgstr " \"%1$s\" リソースの削除が拒否されました： %2$s"
 
 #. Missing configuration for %1$s account "%2$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
+#. The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+#. E.g. 'Missing configuration for boxcom account "3".'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:136
 msgid "Missing configuration for %1$s account \"%2$s\"."
 msgstr " %1$s アカウント \"%2$s\" の構成が見つかりません。"
 
 #. The provided %1$s resource does not exist: %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "The provided %1$s resource does not exist: %2$s"
 msgstr "入力した %1$s のリソースは存在しません: %2$s"
 
 #. The file %1$s doesn't have any content.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
 msgid "The file %1$s doesn't have any content."
 msgstr "ファイル %1$sには内容がありません。 "
 
 #. The associated %2$s account does no more exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:145
 msgid "The associated %2$s account does no more exist"
 msgstr "関連付けられている %2$s アカウントは存在しません。"
 
 #. Individual permissions are not supported in account \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "個々の許可は、アカウント\"%1$s\"でサポートされていません。"
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "ファイル \"%1$s\" のメモの保存は、アカウント \"%2$s\" でサポートされていません。 "
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr "カテゴリのファイル \"%1$s\" への割り当ては、アカウント \"%2$s\" でサポートされていません。"
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid "The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details."
 msgstr "データが失われた可能性があるため、ファイル \"%1$s\" は保存されませんでした。詳細については警告を確認してください。"
 
@@ -2285,7 +2206,7 @@ msgstr "ビデオ"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
 msgid "Documents"
-msgstr "ドキュメント"
+msgstr "Documents"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:96
 msgid "Other"
@@ -2595,6 +2516,11 @@ msgstr "データベースへのデータの書き込みまたはデータベー
 msgid "Data cannot be stored into the database because it is too big"
 msgstr "データが長すぎるため、データベースに保存できません。"
 
+#. The request sent by the client was syntactically incorrect
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+msgid "The request sent by the client was syntactically incorrect"
+msgstr "クライアントから送信された要求は、構文的に正しくありません。"
+
 #. *
 #. * File not found: %1$s
 #.
@@ -2653,37 +2579,37 @@ msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr "セッション中のKerberosチケットが見つかりません。もう一度やり直してください。"
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
 msgid "A Guard error occurred: %1$s"
 msgstr "Guardエラーが発生しました： %1$s"
 
 #. A Guard error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr "GuardサーバエラーがHTTPステータスコード %1$sで発生しました。エラー メッセージ: %2$s"
 
 #. Invalid Guard URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
 msgid "The provided Guard URL: %1$s is invalid"
 msgstr "入力したGuard URL: %1$s は無効です。"
 
 #. The Guard resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "入力したGuardリソースは存在しません： %1$s"
 
 #. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
 msgid "An I/O error occurred: %1$s"
 msgstr "I/O エラーが発生しました: %1$s"
 
 #. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
 msgid "Authentication failed: %1$s"
 msgstr "次の認証に失敗しました: %1$s"
 
 #. The Guard resource does not exist
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard/src/com/openexchange/guard/GuardApiExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
 msgid "The Guard resource does not exist"
 msgstr "Guardリソースは存在しません。"
 
@@ -2815,9 +2741,7 @@ msgstr "IMAP検索が\"%1$s\"の理由で失敗しました。アプリケーシ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid "IMAP sort failed due to reason \"%1$s\". Switching to application-based sorting."
-msgstr ""
-"IMAPソートは\"%1$s\"の理由で失敗しました。\n"
-"アプリケーションベースの検索に切り替えます。"
+msgstr "IMAPソートは\"%1$s\"の理由で失敗しました。アプリケーションベースの検索に切り替えます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
 msgid "Unknown search field: %1$s"
@@ -2833,7 +2757,6 @@ msgid ""
 "In that case, please try to empty your deleted items first, or delete smaller messages first."
 msgstr ""
 "このメッセージをごみ箱フォルダに移動できませんでした。メールボックスがいっぱいである可能性があります。\n"
-"\n"
 "最初に削除済みアイテムを空にするか、サイズの小さいメッセージから先に削除してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
@@ -2902,7 +2825,7 @@ msgstr "個人の名前空間が見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
 msgid "Parsing thread-sort string failed: %1$s."
-msgstr "thread-sort 文字列の解析に失敗しました: %s"
+msgstr "スレードソート文字列の解析に失敗しました：%1$s。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
 msgid "A SQL error occurred: %1$s"
@@ -3135,7 +3058,7 @@ msgstr "Twitter メッセージ アカウントが無効です。Twitter メッ�
 #. A messaging error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
 msgid "A messaging error occurred: %1$s"
-msgstr "次のメッセージ エラーが発生しました: %s"
+msgstr "次のメッセージ エラーが発生しました: %1$s。"
 
 #. Wrongly formatted address: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3587,8 +3510,8 @@ msgid ""
 "This message could not be moved to trash folder, possibly because your mailbox is nearly full. In that case, please try to empty your deleted "
 "items first, or delete smaller messages first."
 msgstr ""
-"このメッセージをごみ箱フォルダに移動できませんでした。メールボックスがいっぱいである可能性があります。\n"
-"最初に削除済みアイテムを空にするか、サイズの小さいメッセージから先に削除してください。"
+"このメッセージをごみ箱フォルダに移動できませんでした。メールボックスがいっぱいである可能性があります。最初に削除済みアイテムを空にするか、サイズの"
+"小さいメッセージから先に削除してください。"
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -3800,7 +3723,7 @@ msgstr "現在、既定のメール アカウントの割当量が制限され�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
 msgid "The following field(s) are too long: %1$s. Please shorten the values and try again"
-msgstr "次のフィールドが長過ぎます。値を短くして、もう一度やり直してください: %1$s"
+msgstr "次のフィールドが長過ぎます：%1$s。値を短くして、もう一度やり直してください: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:64
 msgid "The data you provided (%1$s) cannot be changed."
@@ -4003,67 +3926,6 @@ msgstr "予期しないエラーが発生しました: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "ID が無効です。リソースの識別子が見つかりません。"
 
-#. XMPP
-#. * The client has sent a message that is malformed or cannot be processed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
-msgid "The client has sent a message that is malformed or cannot be processed: %1$s"
-msgstr "クライアントが送信した次のメッセージはフォーマットが無効か、処理できません: %1$s"
-
-#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
-msgid "The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s"
-msgstr "サーバの構成が誤っているか、定義されていない次の内部サーバ エラーが発生したため、サーバはスタンザを処理できませんでした: %1$s"
-
-#. * The recipient you tried to reach is currently unavailable
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-msgid "The recipient you tried to reach is currently unavailable: %1$s"
-msgstr "送信しようとした次の宛先は現在利用できません: %1$s"
-
-#. * Your session is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:92
-msgid "Your session is invalid."
-msgstr "セッションが無効です。"
-
-#. * You are no member of the GroupDispatcher: %1$s. Please join first.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:95
-msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
-msgstr "GroupDispatcher のメンバではありません: %1$sまず参加してください。"
-
-#. * The request didn't yield any response.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:98
-msgid "The request didn't yield any response."
-msgstr "要求によって応答はありませんでした。"
-
-#. * The GroupDispatcher %1$s was already disposed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
-msgid "The GroupDispatcher %1$s was already disposed."
-msgstr "GroupDispatcher %1$s はすでに割り当てられました。"
-
-#. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
-msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
-msgstr "GroupDispatcher %1$s は、 %2$s から %3$s のスタンザの処理に失敗しました。"
-
-#. * Joining the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
-msgid "Joining the GroupDispatcher %1$s failed."
-msgstr "GroupDispatcher \"%1$s\" の参加に失敗しました。"
-
-#. * Leaving the GroupDispatcher %1$s failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
-msgid "Leaving the GroupDispatcher %1$s failed."
-msgstr "GroupDispatcher %1$s の退室に失敗しました。"
-
-#. * ResponseChannel timed out while simulating synchronous behaviour.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
-msgid "ResponseChannel timed out while simulating synchronous behaviour."
-msgstr "同期動作のシミュレーション中に応答チャンネルがタイムアウトになりました。"
-
-#. * You are already a member of the GroupDispatcher %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
-msgid "You are already a member of the GroupDispatcher %1$s"
-msgstr "すでにGroupDispatcher のメンバです: %1$s"
-
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -4123,14 +3985,10 @@ msgstr "ユーザが無効になっています。"
 msgid "Password expired"
 msgstr "パスワードの期限が切れました。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:84
-msgid "config"
-msgstr "config"
-
 #. Application 'xyz' requires following permissions:
 #. - Read and change your settings.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/OAuthScopeDescription.java:9
 msgid "Read and change your settings."
 msgstr "設定を読み込みおよび変更します。"
 
@@ -4200,7 +4058,6 @@ msgstr "有効なセッションがありません。もう一度ログインし
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "フォルダ \"%1$s\" を表示する適切な権限がありません。"
 
@@ -4563,7 +4420,7 @@ msgstr "プライベート フォルダ以外のフォルダにプライベー�
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
 msgid "Invalid characters (%2$s) in field %1$s."
-msgstr "フィールド %1$ に無効な文字 (%2$s)  があります。"
+msgstr "フィールド %1$s に無効な文字 (%2$s)  があります。"
 
 #. *
 #. * Series end is before start date.
@@ -4743,6 +4600,10 @@ msgstr "フィールド\"%2$s\" の文字 \"%1$s\" が保存できません。�
 msgid "The query \"%1$s\" contains too many patterns. Please shorten the query and try again."
 msgstr "クエリ \"%1$s\" には、パターンが多すぎます。クエリを短くして、もう一度やり直してください。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:141
+msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr "パターン \"%1$s\" は検索中に無視されました。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "アカウント %1$d が見つかりませんでした。"
@@ -4839,7 +4700,7 @@ msgstr "マイ ファイル"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
-msgstr "Drive"
+msgstr "ドライブ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -6323,6 +6184,11 @@ msgstr "サポートされていない文字入力を修正してください。
 msgid "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes."
 msgstr "ユーザ \"%1$s\" の機能が制限されているため、権限変更を適用できません。"
 
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Concurrent write attempt. Please await the previous save operation to terminate."
+msgstr "同時書き込み試行以前の保存操作が終了するのをお待ち下さい。"
+
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
@@ -6375,7 +6241,7 @@ msgstr "同じ識別子 \"%1$d\" のリソース グループが見つかりま�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:75
 msgid "No resource found with identifier \"%1$d\"."
-msgstr "識別子 \"%1$s\" のリソースが見つかりません。"
+msgstr "識別子 \"%1$d\" のリソースが見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:73
 msgid "Found resource(s) with same identifier \"%1$s.\"."
@@ -6449,7 +6315,7 @@ msgstr "1 人以上のユーザの読み込みに失敗しました。"
 #. * Alias entries are missing for user %1$d in context %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
 msgid "Alias entries are missing for user %1$d in context %2$d."
-msgstr "コンテキスト %2$s のユーザ %1$s 用のエイリアス エントリが見つかりません。"
+msgstr "コンテキスト %2$d のユーザ %1$d 用のエイリアス エントリが見つかりません。"
 
 #. * Updating attributes failed in context %1$d for user %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:127
@@ -6495,7 +6361,7 @@ msgstr "\"%s\" は有効なタイムゾーンではありません。"
 #. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:156
 msgid "Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes."
-msgstr "%1$d 人のユーザの属性をロックできませんでした。複数のユーザのロック属性が許可されていません。"
+msgstr "%1$d 人のユーザの属性をロックできませんでした。%1$d のユーザ属性をロックしようとしています。"
 
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
@@ -6604,21 +6470,17 @@ msgstr "モジュール %1$d に対象サービスが登録されていません
 msgid "Required  value \"identifier\" was not supplied."
 msgstr "必要な値 \"識別子\" が入力されていません。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:84
-msgid "reminder"
-msgstr "アラーム"
-
 #. Application 'xyz' requires following permissions:
 #. - Read reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:9
 msgid "Read reminders for appointments and tasks."
 msgstr "アポイントと仕事に関するアラームを表示"
 
 #. Application 'xyz' requires following permissions:
 #. - Set or change reminders for appointments and tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/OAuthScopeDescription.java:14
 msgid "Set or change reminders for appointments and tasks."
 msgstr "アポイントと仕事に関するアラームを設定または変更"
 
@@ -6714,7 +6576,7 @@ msgstr "検索に日付範囲を指定する場合、%d 個ではなく、2 個�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:83
 msgid "You do not have the appropriate permissions to read the contents of folder \"%1$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgstr "「%1$s」フォルダーの内容を読み取る適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -6722,7 +6584,7 @@ msgstr "仕事が無効になっています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to create tasks in folder \"%1$s\"."
-msgstr "オブジェクトを生成する適切な権限がありません。"
+msgstr "「%1$s」フォルダー内の仕事を生成する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -6742,11 +6604,11 @@ msgstr "まだ開始されていない仕事の完成率は %d でなく、0 に
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:97
 msgid "You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgstr "「%1$s」フォルダー内の仕事を編集する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
-msgstr "共有フォルダ \"%1$s\" からのアイテムの移動、または共有フォルダ \"%1$s\" へのアイテムの移動は許可されていません。"
+msgstr "共有フォルダ \"%1$s\" からのアイテムの移動、またはそこからへのアイテムの移動は許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
@@ -7033,8 +6895,8 @@ msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly full. Please try to empty your deleted items first, or delete smaller "
 "messages first."
 msgstr ""
-"このメッセージをごみ箱フォルダに移動できませんでした。メールボックスがほぼいっぱいです。\n"
-"最初に削除済みアイテムを空にするか、サイズの小さいメッセージから先に削除してください。"
+"このメッセージをごみ箱フォルダに移動できませんでした。メールボックスがほぼいっぱいです。最初に削除済みアイテムを空にするか、サイズの小さいメッセー"
+"ジから先に削除してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
 msgid "No content available in mail part."
@@ -7299,14 +7161,14 @@ msgstr "指定されたメール アドレス \"%1$s\" は無効です。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid "You do not have the appropriate permissions to change the content of folder \"%1$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgstr "「%1$s」フォルダーの内容を変更する適切な権限がありません。"
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:115
 msgid "You do not have the appropriate permissions to change the content of folder \"%1$s\" on mail server %2$s."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgstr "「%2$s」メールサーバー内の「%1$s」フォルダーの内容を変更する適切な権限がありません。"
 
 #. *
 #. * Invalid search expression: %1$s
@@ -7566,47 +7428,51 @@ msgstr "指定された設備の必須フィールドが入力されていませ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
-msgstr "このオブジェクトを移動する適切な権限がありません。"
+msgstr "「%2$s」モジュールの適切な権限がありません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "フォルダを表示する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "ご利用のアカウントでは共有フォルダは利用できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "パブリック フォルダの適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid "You do not have appropriate permissions to create subfolders in folder \"%2$s\"."
-msgstr "オブジェクトを生成する適切な権限がありません。"
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "サブフォルダを作成する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "フォルダ \"%1$s\" は存在しません。"
+msgid "Such a folder does not exist."
+msgstr "該当するフォルダがありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
-msgid "The folder \"%1$s\" has been changed in the meantime. Please reload the view and try again."
-msgstr "フォルダ \"%1$s\" は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
+msgid "The folder has been changed in the meantime. Please reload the view and try again."
+msgstr "フォルダ は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "この操作には、フォルダ \"%2$s\" の管理者権限が必要です。"
+msgid "This operation requires administrative permissions for the folder."
+msgstr "この操作には、フォルダの管理者権限が必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、名前の変更はできません。"
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "フォルダ は既定のフォルダであるため、名前の変更はできません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "フォルダ \"%1$s\" には、名前 \"%3$s\" のフォルダが既に存在します。"
+msgid "The folder already contains a folder with such a name."
+msgstr "同じような名前のフォルダがすでに存在します。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "フォルダ タイプ \"%2$s\" を \"%1$s\" の配下に作成できません。"
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "タイプ \"%2$s\" のフォルダをこのフォルダの配下に作成できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "モジュール \"%2$s\" のフォルダは、\"%1$s\" の配下に作成できません。"
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "モジュール \"%2$s\" のフォルダをこのフォルダの配下に作成できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid "Only one user may have administrative permission roles in a private folder."
@@ -7625,92 +7491,92 @@ msgid "At least one user with administrative permissions is required."
 msgstr "管理者権限が付与されたユーザが 1 名以上必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、移動できません。"
+msgid "The folder is a default folder and cannot be moved."
+msgstr "フォルダ は既定のフォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "フォルダ \"%1$s\" は共有されているため、移動できません。"
+msgid "The folder is shared and cannot be moved."
+msgstr "フォルダは共有されているため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "共有フォルダ \"%1$s\" にフォルダを移動できません。"
+msgid "The folder cannot be moved to a shared folder."
+msgstr "共有フォルダにフォルダを移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "フォルダ \"%1$s\" はシステム フォルダであるため、移動できません。"
+msgid "The folder is a system folder and cannot be moved."
+msgstr "フォルダ はシステム フォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid "The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "プライベート フォルダ \"%1$s\" は別のプライベート フォルダのみに移動できます。"
+msgid "The private folder can only be moved to another private folder."
+msgstr "プライベート フォルダは別のプライベート フォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "パブリック フォルダ \"%1$s\" は別のパブリック フォルダのみに移動できます。"
+msgid "The public folder can only be moved to another public folder."
+msgstr "パブリック フォルダ は別のパブリック フォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "送り側と受け側のフォルダが同じです。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid "You do not have appropriate permissions to move all subfolders of folder \"%2$s\"."
-msgstr "このオブジェクトを移動する適切な権限がありません。"
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "全てのサブフォルダを移動する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid "You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "共有フォルダーを削除する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、削除できません。"
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "フォルダは既定のフォルダであるため、削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid "You do not have appropriate permissions to delete all contained items in the folder \"%2$s\"."
-msgstr "少なくとも 1 つ以上のインフォアイテムを削除する適切な権限がありません。"
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "全ての含まれるアイテムを削除する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "フォルダ \"%1$s\" は、その配下のいずれのサブフォルダにも移動できません。"
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "フォルダは、その配下のいずれのサブフォルダにも移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid "Folders of module \"%1$s\" cannot be moved to folders of module \"%2$s\"."
 msgstr "モジュール \"%1$s\" のフォルダをモジュール \"%2$s\" のフォルダに移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "共有フォルダ \"%1$s\" を更新できません。"
+msgid "The shared folder cannot be updated."
+msgstr "共有フォルダ を更新できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid "The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters."
-msgstr "属性 %1$s の値には、許可されている文字数 (%2$d) よりも大き文字が入力されています。現在の文字数: %3$d 文字"
+msgstr "属性 %1$s の値には、許可されている文字数 (%2$d) よりも大き文字が入力されています。現在の文字数: %3$d 文字。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:100
 msgid "The specified folder name exceeds the limit of %2$d characters. Please shorten the name and try again."
 msgstr "指定されたフォルダ名の文字数が %2$d 文字の制限を越えました。名前を短くして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
-msgid "Only the owner of the parent shared folder \"%4$s\" may hold administrative permissions."
-msgstr "共有された親フォルダ \"%4$s\" の所有者のみに管理者権限が割り当てられます。"
+msgid "Only the owner of the parent shared folder may hold administrative permissions."
+msgstr "共有された親フォルダの所有者のみに管理者権限が割り当てられます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
-msgid "The folder \"%2$s\" is a default folder where its owner needs to hold administrative permissions."
-msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、このフォルダの所有者には管理者権限の割り当てが必要です。"
+msgid "The folder is a default folder. Hence its owner needs to hold administrative permissions."
+msgstr "フォルダは規定のフォルダです。そのため、このフォルダの所有者には管理者権限の割り当てが必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "フォルダーを共有する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid "Due to limited permissions of user \"%1$s\", it is not possible to apply the changes for folder \"%2$s\"."
-msgstr "ユーザ \"%1$s\" の権限が制限されているため、フォルダ \"%2$s\" に変更を適用できません。"
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "権限が制限されているため、変更を適用できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
-msgid "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
-msgstr "フォルダ \"%1$s\" には隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
+msgid "The folder cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
+msgstr "フォルダには隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
-msgid "The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose a different name and try again."
-msgstr "フォルダ \"%2$s\" には、名前 \"%1$s\" のフォルダが既に存在します。別の名前に変更して、もう一度やり直してください。"
+msgid "The folder already contains a folder with such a name. Please choose a different name and try again."
+msgstr "同じような名前のフォルダがすでに存在します。別の名前に変更して、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -7725,44 +7591,44 @@ msgstr ""
 "フォルダの名前を変更してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid "Duplicate permission defined for user \"%1$s\". Only one permission per user is allowed."
-msgstr "ユーザ \"%1$s\" に権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
+msgid "Duplicate permission defined. Only one permission per user is allowed."
+msgstr "権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid "Duplicate permission defined for group \"%1$s\". Only one permission per group is allowed."
-msgstr "グループ \"%1$s\" に権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid "Only the folder visibility permission is allowed to be changed for folder \"%1$s\"."
-msgstr "フォルダ \"%1$s\" には、フォルダ表示権限の変更のみが許可されます。"
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "フォルダ表示権限の変更のみが許可されます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid "Only individual user permissions, but no group permissions are allowed for folder \"%1$s\"."
-msgstr "フォルダ\"%1$s\" には、グループ権限ではなく、個別のユーザ権限しか許可されていません。"
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "グループ権限ではなく、個別のユーザ権限しか許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "フォルダ \"%1$s\" には、個別のユーザ権限が許可されていません。"
+msgid "No individual user permissions are allowed."
+msgstr "個別のユーザ権限が許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "フォルダー名を変更する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "フォルダ \"%1$s\" にはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "フォルダにはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "コンテキストの管理者のみが操作を実行できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "フォルダ \"%1$s\" は削除できません。"
+msgid "The folder cannot be deleted."
+msgstr "フォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored."
-msgstr "フォルダ \"%2$s\" の所有者 \"%1$s\" の管理者権限が復元されました。"
+msgid "The administrative permissions were restored."
+msgstr "管理者権限が復元されました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -7778,7 +7644,7 @@ msgstr "要求された操作が無効になっています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:64
 msgid "You do not have appropriate permissions for module %1$s."
-msgstr "このオブジェクトを読み取る適切な権限がありません。"
+msgstr "「%1$s」モジュールを読み取る適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:65
 msgid "The object has been changed in the meantime. Please reload the view and try again."
@@ -7894,48 +7760,48 @@ msgstr "%1$s がフォルダ %2$s を共有しています。"
 #. * $username has shared $number folders with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:86
 msgid "%1$s has shared %2$d folders with you."
-msgstr "%1$s が %2$s フォルダを共有しています。"
+msgstr "%1$s が %2$d フォルダを共有しています。"
 
 #. detailed body
-#. * $username ($user_email) has shared file "$filename" with you.
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
-msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
-msgstr "%1$s ( %2$s)はファイル \"%3$s\" を共有しています。"
+msgid "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button below to view it."
+msgstr "%1$s ( %2$s)はファイル \"%3$s\" を共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared $number_of_files files with you.
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
-msgid "%1$s (%2$s) has shared %3$s files with you."
-msgstr "%1$s ( %2$s)は \"%3$s\" ファイルを共有しています。"
+msgid "%1$s (%2$s) has shared %3$s files with you. Please click the button below to view them."
+msgstr "%1$s ( %2$s)は \"%3$s\" ファイルを共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared image "$filename" with you.
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
-msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
-msgstr "%1$s ( %2$s)は画像 \"%3$s\" を共有しています。"
+msgid "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button below to view it."
+msgstr "%1$s ( %2$s)は画像 \"%3$s\" を共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared $number_of_images iamges with you.
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
-msgid "%1$s (%2$s) has shared %3$s images with you."
-msgstr "%1$s ( %2$s)は \"%3$s\" 画像を共有しています。"
+msgid "%1$s (%2$s) has shared %3$s images with you. Please click the button below to view them."
+msgstr "%1$s ( %2$s)は \"%3$s\" 画像を共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared item "$filename" with you.
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
-msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
-msgstr "%1$s ( %2$s)はアイテム \"%3$s\" を共有しています。"
+msgid "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button below to view it."
+msgstr "%1$s ( %2$s)はアイテム \"%3$s\" を共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared $number items with you.
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
-msgid "%1$s (%2$s) has shared %3$s items with you."
-msgstr "%1$s ( %2$s)は \"%3$s\" アイテムを共有しています。"
+msgid "%1$s (%2$s) has shared %3$s items with you. Please click the button below to view them."
+msgstr "%1$s ( %2$s)は \"%3$s\" アイテムを共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared folder $folder with you.
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
-msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
-msgstr "%1$s ( %2$s)はフォルダ \"%3$s\" を共有しています。"
+msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button below to view it."
+msgstr "%1$s ( %2$s)はフォルダ \"%3$s\" を共有しています。下のボタンをクリックして表示してください。"
 
-#. * $username ($user_email) has shared folder $number folders with you.
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
-msgid "%1$s (%2$s) has shared %3$ folders with you."
-msgstr "%1$s ( %2$s)は \"%3$s\" フォルダを共有しています。"
+msgid "%1$s (%2$s) has shared %3$ folders with you. Please click the button below to view them."
+msgstr "%1$s ( %2$s)は \"%3$s\" フォルダを共有しています。下のボタンをクリックして表示してください。"
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -7970,72 +7836,61 @@ msgstr "%1$s ( %2$s)は \"%3$s\" フォルダを共有して、メッセージ�
 #. * $username ($user_email) has shared $number_of_items items with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:133
 msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
-msgstr "%1$s ( %2$s)は \"%3$s\" アイテムを共有して、メッセージを残しています。"
+msgstr "%1$s ( %2$s)は \"%3$d\" アイテムを共有して、メッセージを残しています。"
 
 #. * $username ($user_email) has shared $number_of_folder items with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:136
 msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
-msgstr "%1$s ( %2$s)は \"%3$s\" フォルダを共有して、メッセージを残しています。"
-
-#. please click
-#. * Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
-msgid "Please click the button below to view it."
-msgstr "下のボタンをクリックして表示してください。"
-
-#. * Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
-msgid "Please click the button below to view them."
-msgstr "下のボタンをクリックして表示してください。"
+msgstr "%1$s ( %2$s)は \"%3$d\" フォルダを共有して、メッセージを残しています。"
 
 #. button with label
-#. * View photo
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
 msgid "View image"
 msgstr "画像を表示"
 
-#. * View photos
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
 msgid "View images"
 msgstr "画像を表示"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
 msgid "View file"
 msgstr "ファイルの表示"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
 msgid "View files"
 msgstr "ファイルの表示"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
 msgid "View folder"
 msgstr "フォルダを表示"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
 msgid "View folders"
 msgstr "フォルダを表示"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
 msgid "View item"
 msgstr "アイテムを表示"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:168
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
 msgid "View items"
 msgstr "アイテムを表示"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
 msgid "The link will expire on %1$s"
-msgstr "リンクの有効期限は %s です。"
+msgstr "リンクの有効期限は %1$s です。"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
 msgid "This link is password protected. You need the following password to open it:"
 msgstr "このリンクはパスワードで保護されています。表示するには次のパスワードが必要です。"
 
@@ -8045,38 +7900,38 @@ msgstr "このリンクはパスワードで保護されています。表示す
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - パスワードをお忘れですか？"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid "Hello,"
 msgstr "こんにちは、"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid "we got informed that you forgot your password. You can set a new password here:"
 msgstr "パスワードをお忘れですか？新しいパスワードをここで設定できます。"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "Set password"
 msgstr "パスワードの設定"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
 msgid "If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one."
 msgstr ""
 "設定のリクエストをしていない場合は、本メールを無視してください。上のボタンにアクセスして、新しいパスワードを設定するまではパスワードは変更されませ"
 "ん。"
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
 msgid "This is an automated message, please do not reply."
 msgstr "本メールは自動メッセージですので、返信しないでください。"
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
 msgid "unknown"
 msgstr "不明"
 
@@ -8215,7 +8070,7 @@ msgstr "新規メッセージの宛先が見つかりません。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
 msgid "The following recipient is not allowed: %1$s. Please remove associated address and try again."
-msgstr "次の宛先は許可されていません。関連付けられたアドレスを削除してもう一度やり直してください: %1$s"
+msgstr "次の宛先は許可されていません：%1$s。関連付けられたアドレスを削除してもう一度やり直してください: %1$s"
 
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
@@ -8323,21 +8178,17 @@ msgstr ""
 msgid "You already have such a subscription."
 msgstr "既に登録しています。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:79
-msgid "tasks"
-msgstr "仕事"
-
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
 msgid "Read all your tasks."
 msgstr "仕事全てを表示。"
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
 msgid "Create, modify and delete tasks."
 msgstr "仕事の作成、変更、削除。"
 
@@ -10679,6 +10530,249 @@ msgstr "UTC (協定世界時)"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "「%2$s」パブリック フォルダの適切な権限がありません。"
+
+#~ msgid "You do not have appropriate permissions to create subfolders in folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のサブフォルダーを生成する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "フォルダ \"%1$s\" は存在しません。"
+
+#~ msgid "The folder \"%1$s\" has been changed in the meantime. Please reload the view and try again."
+#~ msgstr "フォルダ \"%1$s\" は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
+
+#~ msgid "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "この操作には、フォルダ \"%2$s\" の管理者権限が必要です。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、名前の変更はできません。"
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、名前 \"%3$s\" のフォルダが既に存在します。"
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "フォルダ タイプ \"%2$s\" を \"%1$s\" の配下に作成できません。"
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "モジュール \"%2$s\" のフォルダは、\"%1$s\" の配下に作成できません。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" は既定のフォルダであるため、移動できません。"
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" は共有されているため、移動できません。"
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "共有フォルダ \"%1$s\" にフォルダを移動できません。"
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "フォルダ \"%1$s\" はシステム フォルダであるため、移動できません。"
+
+#~ msgid "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr "プライベート フォルダ \"%1$s\" は別のプライベート フォルダのみに移動できます。"
+
+#~ msgid "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr "パブリック フォルダ \"%1$s\" は別のパブリック フォルダのみに移動できます。"
+
+#~ msgid "You do not have appropriate permissions to move all subfolders of folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のサブフォルダー全てを移動する適切な権限がありません。"
+
+#~ msgid "You do not have appropriate permissions to delete the shared folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダーを削除する適切な権限がありません。"
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、削除できません。"
+
+#~ msgid "You do not have appropriate permissions to delete all contained items in the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー内のすべてのアイテムを削除する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "フォルダ \"%1$s\" は、その配下のいずれのサブフォルダにも移動できません。"
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "共有フォルダ \"%1$s\" を更新できません。"
+
+#~ msgid "Only the owner of the parent shared folder \"%4$s\" may hold administrative permissions."
+#~ msgstr "共有された親フォルダ \"%4$s\" の所有者のみに管理者権限が割り当てられます。"
+
+#~ msgid "The folder \"%2$s\" is a default folder where its owner needs to hold administrative permissions."
+#~ msgstr "フォルダ \"%2$s\" は既定のフォルダであるため、このフォルダの所有者には管理者権限の割り当てが必要です。"
+
+#~ msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダーを共有する適切な権限がありません。"
+
+#~ msgid "Due to limited permissions of user \"%1$s\", it is not possible to apply the changes for folder \"%2$s\"."
+#~ msgstr "ユーザ \"%1$s\" の権限が制限されているため、フォルダ \"%2$s\" に変更を適用できません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for."
+#~ msgstr "フォルダ \"%1$s\" には隠しサブフォルダが含まれており、この隠しフォルダへの適切な権限がないため、このフォルダを削除できません。"
+
+#~ msgid "The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose a different name and try again."
+#~ msgstr "フォルダ \"%2$s\" には、名前 \"%1$s\" のフォルダが既に存在します。別の名前に変更して、もう一度やり直してください。"
+
+#~ msgid "Duplicate permission defined for user \"%1$s\". Only one permission per user is allowed."
+#~ msgstr "ユーザ \"%1$s\" に権限が重複して定義されました。権限はユーザごとに 1 つしか許可されていません。"
+
+#~ msgid "Duplicate permission defined for group \"%1$s\". Only one permission per group is allowed."
+#~ msgstr "グループ \"%1$s\" に権限が重複して定義されました。権限はグループごとに 1 つしか許可されていません。"
+
+#~ msgid "Only the folder visibility permission is allowed to be changed for folder \"%1$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、フォルダ表示権限の変更のみが許可されます。"
+
+#~ msgid "Only individual user permissions, but no group permissions are allowed for folder \"%1$s\"."
+#~ msgstr "フォルダ\"%1$s\" には、グループ権限ではなく、個別のユーザ権限しか許可されていません。"
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "フォルダ \"%1$s\" には、個別のユーザ権限が許可されていません。"
+
+#~ msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "「%2$s」フォルダー名を変更する適切な権限がありません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr "フォルダ \"%1$s\" にはロックされたドキュメントが含まれているため、このフォルダは削除できません。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "フォルダ \"%1$s\" は削除できません。"
+
+#~ msgid "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were restored."
+#~ msgstr "フォルダ \"%2$s\" の所有者 \"%1$s\" の管理者権限が復元されました。"
+
+#~ msgid "/servlet/dav/caldav"
+#~ msgstr "/servlet/dav/caldav"
+
+#~ msgid "/servlet/dav/dev/null"
+#~ msgstr "/servlet/dav/dev/null"
+
+#~ msgid "caldav"
+#~ msgstr "caldav"
+
+#~ msgid "modules"
+#~ msgstr "modules"
+
+#~ msgid "module"
+#~ msgstr "module"
+
+#~ msgid "modules/caldav/active"
+#~ msgstr "modules/caldav/active"
+
+#~ msgid "io.ox/caldav//active"
+#~ msgstr "io.ox/caldav//active"
+
+#~ msgid "modules/caldav/active > io.ox/caldav//active"
+#~ msgstr "modules/caldav/active > io.ox/caldav//active"
+
+#~ msgid "modules/caldav/url"
+#~ msgstr "modules/caldav/url"
+
+#~ msgid "io.ox/caldav//url"
+#~ msgstr "io.ox/caldav//url"
+
+#~ msgid "modules/caldav/url > io.ox/caldav//url"
+#~ msgstr "modules/caldav/url > io.ox/caldav//url"
+
+#~ msgid "calendar"
+#~ msgstr "calendar"
+
+#~ msgid "starting bundle: \"com.openexchange.carddav\""
+#~ msgstr "開始バンドル: \"com.openexchange.carddav\""
+
+#~ msgid "/servlet/dav/carddav"
+#~ msgstr "/servlet/dav/carddav"
+
+#~ msgid "carddav"
+#~ msgstr "carddav"
+
+#~ msgid "stopping bundle: \"com.openexchange.carddav\""
+#~ msgstr "停止バンドル: \"com.openexchange.carddav\""
+
+#~ msgid "contacts"
+#~ msgstr "contacts"
+
+#~ msgid "identifier"
+#~ msgstr "identifier"
+
+#~ msgid "com.openexchange.contact.json"
+#~ msgstr "com.openexchange.contact.json"
+
+#~ msgid "com.openexchange.contact"
+#~ msgstr "com.openexchange.contact"
+
+#~ msgid "The client has sent a message that is malformed or cannot be processed: %1$s"
+#~ msgstr "クライアントが送信した次のメッセージはフォーマットが無効か、処理できません: %1$s"
+
+#~ msgid "The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s"
+#~ msgstr "サーバの構成が誤っているか、定義されていない次の内部サーバ エラーが発生したため、サーバはスタンザを処理できませんでした: %1$s"
+
+#~ msgid "The recipient you tried to reach is currently unavailable: %1$s"
+#~ msgstr "送信しようとした次の宛先は現在利用できません: %1$s"
+
+#~ msgid "Your session is invalid."
+#~ msgstr "セッションが無効です。"
+
+#~ msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
+#~ msgstr "GroupDispatcher のメンバではありません: %1$sまず参加してください。"
+
+#~ msgid "The request didn't yield any response."
+#~ msgstr "要求によって応答はありませんでした。"
+
+#~ msgid "The GroupDispatcher %1$s was already disposed."
+#~ msgstr "GroupDispatcher %1$s はすでに割り当てられました。"
+
+#~ msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
+#~ msgstr "GroupDispatcher %1$s は、 %2$s から %3$s のスタンザの処理に失敗しました。"
+
+#~ msgid "Joining the GroupDispatcher %1$s failed."
+#~ msgstr "GroupDispatcher \"%1$s\" の参加に失敗しました。"
+
+#~ msgid "Leaving the GroupDispatcher %1$s failed."
+#~ msgstr "GroupDispatcher %1$s の退室に失敗しました。"
+
+#~ msgid "ResponseChannel timed out while simulating synchronous behaviour."
+#~ msgstr "同期動作のシミュレーション中に応答チャンネルがタイムアウトになりました。"
+
+#~ msgid "You are already a member of the GroupDispatcher %1$s"
+#~ msgstr "すでにGroupDispatcher のメンバです: %1$s"
+
+#~ msgid "config"
+#~ msgstr "config"
+
+#~ msgid "reminder"
+#~ msgstr "アラーム"
+
+#~ msgid "%1$s (%2$s) has shared the file \"%3$s\" with you."
+#~ msgstr "%1$s ( %2$s)はファイル \"%3$s\" を共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared %3$s files with you."
+#~ msgstr "%1$s ( %2$s)は \"%3$s\" ファイルを共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared the image \"%3$s\" with you."
+#~ msgstr "%1$s ( %2$s)は画像 \"%3$s\" を共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared %3$s images with you."
+#~ msgstr "%1$s ( %2$s)は \"%3$s\" 画像を共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared the item \"%3$s\" with you."
+#~ msgstr "%1$s ( %2$s)はアイテム \"%3$s\" を共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared %3$s items with you."
+#~ msgstr "%1$s ( %2$s)は \"%3$s\" アイテムを共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared the folder \"%3$s\" with you."
+#~ msgstr "%1$s ( %2$s)はフォルダ \"%3$s\" を共有しています。"
+
+#~ msgid "%1$s (%2$s) has shared %3$ folders with you."
+#~ msgstr "%1$s ( %2$s)は \"%3$s\" フォルダを共有しています。"
+
+#~ msgid "Please click the button below to view it."
+#~ msgstr "下のボタンをクリックして表示してください。"
+
+#~ msgid "Please click the button below to view them."
+#~ msgstr "下のボタンをクリックして表示してください。"
+
+#~ msgid "tasks"
+#~ msgstr "仕事"
 
 #~ msgid "Invalid presence status."
 #~ msgstr "存在ステータスが無効です。"

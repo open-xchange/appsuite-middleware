@@ -91,7 +91,6 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
 
         if (Strings.isEmpty(event.getNewPassword())) {
             updatedUser.setUserPassword(null);
-            updatedUser.setPasswordMech("");
         } else {
             if (Strings.isEmpty(user.getPasswordMech())) {
                 updatedUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
@@ -101,7 +100,7 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             }
         }
 
-        userService.updateUser(updatedUser, ctx);
+        userService.updatePassword(updatedUser, ctx);
         userService.invalidateUser(ctx, event.getSession().getUserId());
 
         if (updatedUser.isGuest()) {

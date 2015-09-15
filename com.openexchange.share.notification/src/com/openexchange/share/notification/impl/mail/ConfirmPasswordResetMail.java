@@ -60,10 +60,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.notification.BasicNotificationTemplate;
-import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
+import com.openexchange.notification.mail.MailData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.notification.impl.NotificationStrings;
@@ -77,7 +75,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0.
  */
-public class ConfirmPasswordResetMail extends NotificationMail {
+public class ConfirmPasswordResetMail extends ShareNotificationMail {
 
     private static final String PWRC_GREETING = "pwrc_greeting";
     private static final String PWRC_REQUESTRECEIVED = "pwrc_requestreceived";
@@ -86,8 +84,8 @@ public class ConfirmPasswordResetMail extends NotificationMail {
     private static final String PWRC_IGNORE = "pwrc_ignore";
     private static final String PWRC_AUTOMATED_MAIL = "pwrc_automated_mail";
 
-    private ConfirmPasswordResetMail(MailData mailData) {
-        super(mailData);
+    private ConfirmPasswordResetMail(MailData mailData, ServiceLookup services) {
+        super(services, mailData);
     }
 
     public static ConfirmPasswordResetMail init(PasswordResetConfirmNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
@@ -107,27 +105,19 @@ public class ConfirmPasswordResetMail extends NotificationMail {
 
         // Set variables
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator, serverConfig);
-        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
-        BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
-        basicTemplate.applyStyle(vars);
-        FooterImage footerImage = basicTemplate.applyFooter(vars);
+        MailData mailData = MailData.newBuilder()
+            .setRecipient(notification.getTransportInfo())
+            .setSubject(String.format(translator.translate(NotificationStrings.PWRC_SUBJECT), serverConfig.getProductName()))
+            .setHtmlTemplate("notify.share.pwreset.confirm.mail.html.tmpl")
+            .setTemplateVars(vars)
+            .setMailConfig(serverConfig.getNotificationMailConfig())
+            .setContext(context)
+            .addMailHeader("X-Open-Xchange-Share-Type", notification.getType().getId())
+            .addMailHeader("X-Open-Xchange-Share-URL", notification.getShareUrl())
+            .addMailHeader("X-Open-Xchange-Share-Reset-PW-URL", notification.getConfirmPasswordResetUrl())
+            .build();
 
-        // Compile HTML
-        String htmlContent = compileTemplate("notify.share.pwreset.confirm.mail.html.tmpl", vars, services);
-
-        MailData mailData = new MailData();
-        mailData.sender = null;
-        mailData.recipient = notification.getTransportInfo();
-        mailData.subject = String.format(translator.translate(NotificationStrings.PWRC_SUBJECT), serverConfig.getProductName());
-        mailData.htmlContent = htmlContent;
-        mailData.footerImage = footerImage;
-        mailData.context = context;
-        mailData.transportProvider = transportProvider;
-        mailData.mailHeaders = new HashMap<>(6);
-        mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getShareUrl());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-Reset-PW-URL", notification.getConfirmPasswordResetUrl());
-        return new ConfirmPasswordResetMail(mailData);
+        return new ConfirmPasswordResetMail(mailData, services);
     }
 
     private static Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator, ServerConfig serverConfig) throws OXException {

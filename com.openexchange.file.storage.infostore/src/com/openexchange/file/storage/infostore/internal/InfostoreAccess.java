@@ -52,9 +52,12 @@ package com.openexchange.file.storage.infostore.internal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -82,10 +85,16 @@ public abstract class InfostoreAccess {
         this.infostore = infostore;
     }
 
-    protected InfostoreFacade getInfostore(final String folderId) {
-        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
-            return VIRTUAL_INFOSTORE;
-        }
+    protected InfostoreFacade getInfostore(final String folderId) throws OXException {
+        if (Strings.isNotEmpty(folderId)) {
+            try {
+                if (VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
+                    return VIRTUAL_INFOSTORE;
+                }
+            } catch (NumberFormatException e) {
+                throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(e, folderId);
+            }
+        }        
         return infostore;
     }
 

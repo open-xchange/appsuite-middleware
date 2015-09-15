@@ -572,7 +572,7 @@ public final class ServerConfig implements Reloadable {
          * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
          * default conforms to the path where the UI is installed by the standard packages on the web server.
          */
-        UI_WEB_PATH("com.openexchange.UIWebPath", "/ox6/index.html"),
+        UI_WEB_PATH("com.openexchange.UIWebPath", "/appsuite/"),
         /**
          * The cookie time-to-live
          */

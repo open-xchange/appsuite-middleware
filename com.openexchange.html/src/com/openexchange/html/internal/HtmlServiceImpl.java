@@ -64,7 +64,6 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1410,28 +1409,27 @@ public final class HtmlServiceImpl implements HtmlService {
         html = validate(html);
 
         // Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
-        final int headTagLen = TAG_S_HEAD.length();
-        final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
+        int headTagLen = TAG_S_HEAD.length();
+        int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
-            final int end = html.indexOf(TAG_E_HEAD);
-            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type")) {
-                final StringBuilder sb = new StringBuilder(html);
-                final String cs;
-                if (null == charset) {
-                    LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
-                    cs = CHARSET_UTF_8;
-                } else {
-                    cs = charset;
-                }
-                /*-
-                 * In reverse order:
-                 *
-                 * "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + <charset> + "\" />\r\n "
-                 *
-                 */
-                sb.insert(start, "\" />\r\n ");
+            int end = html.indexOf(TAG_E_HEAD);
+            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type", "charset=\"UTF-8\"", "charset=UTF-8")) {
+                StringBuilder sb = new StringBuilder(html);
+                String cs = null == charset ? CHARSET_UTF_8 : charset;
+
+                // Append in reverse order
+                sb.insert(start, Strings.getLineSeparator());
+                sb.insert(start, "\">").append(Strings.getLineSeparator()).append(' ');
                 sb.insert(start, cs);
-                sb.insert(start, "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
+
+                if (html.indexOf("<!DOCTYPE html>") >= 0) {
+                    sb.insert(start, "<meta charset=\"");
+                } else {
+                    sb.insert(start, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
+                }
+
+                sb.insert(start, "    ");
+                sb.insert(start, Strings.getLineSeparator());
                 html = sb.toString();
             }
         }
@@ -1484,15 +1482,17 @@ public final class HtmlServiceImpl implements HtmlService {
         return outputDocument.toString();
     }
 
-    private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
-        final String source = ignorecase ? str.toLowerCase(Locale.US) : str;
+    private static boolean occursWithin(String str, int start, int end, boolean ignorecase, String... searchStrings) {
+        String source = ignorecase ? Strings.asciiLowerCase(str) : str;
+
         int index;
-        for (final String searchString : searchStrings) {
-            final String searchMe = ignorecase ? searchString.toLowerCase(Locale.US) : searchString;
+        for (String searchString : searchStrings) {
+            String searchMe = ignorecase ? Strings.asciiLowerCase(searchString) : searchString;
             if (((index = source.indexOf(searchMe, start)) >= start) && ((index + searchMe.length()) < end)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -1848,7 +1848,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return new SimpleHtmlSerializer(newCleanerProperties());
     }
 
-    private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
+    private static final String DOCTYPE_DECL = "<!DOCTYPE html>" + Strings.getLineSeparator();
 
     private static final List<Pattern> P_HTMLE = Collections.unmodifiableList(Arrays.asList(
         Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE),
@@ -1915,13 +1915,6 @@ public final class HtmlServiceImpl implements HtmlService {
             String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
-
-            // Check for presence of HTML namespace
-            if (!htmlNode.hasAttribute("xmlns")) {
-                final Map<String, String> attributes = new HashMap<String, String>(1);
-                attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
-                htmlNode.setAttributes(attributes);
-            }
 
             // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());

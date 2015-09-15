@@ -380,6 +380,14 @@ public final class FolderWriter {
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.FOLDER_ID.getName() : null, pid);
             }
         });
+        m.put(FolderField.ACCOUNT_ID.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                final String accountId = folder.getAccountID();
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.ACCOUNT_ID.getName() : null, accountId == null ? JSONObject.NULL : accountId);
+            }
+        });
         m.put(FolderField.FOLDER_NAME.getColumn(), new FolderFieldWriter() {
 
             @Override

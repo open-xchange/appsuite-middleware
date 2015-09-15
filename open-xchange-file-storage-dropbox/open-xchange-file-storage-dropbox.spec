@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 2
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Sep 07 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Third candidate for 7.8.0 release
 * Fri Aug 21 2015 Thorben Betten <thorben.betten@open-xchange.com>
 Second candidate for 7.8.0 release
 * Wed Aug 05 2015 Thorben Betten <thorben.betten@open-xchange.com>

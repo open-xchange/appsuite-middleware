@@ -61,23 +61,18 @@ import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
 import com.openexchange.realtime.handle.impl.iq.IQHandler;
 import com.openexchange.realtime.handle.impl.message.MessageHandler;
 import com.openexchange.realtime.handle.impl.message.ResourceListener;
-import com.openexchange.realtime.handle.impl.presence.PresenceHandler;
-import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
 public class StanzaHandlerActivator extends HousekeepingActivator {
-    
-    private Future<Object> presenceFuture;
-    
-    private Future<Object> messageFuture;
-    
-    private Future<Object> iqFuture;
+
+    private volatile Future<Object> messageFuture;
+
+    private volatile Future<Object> iqFuture;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, PresenceSubscriptionService.class,
-            MessageDispatcher.class, LocalMessageDispatcher.class, ThreadPoolService.class, StanzaStorage.class };
+        return new Class<?>[] { ResourceDirectory.class, MessageDispatcher.class, LocalMessageDispatcher.class, ThreadPoolService.class, StanzaStorage.class };
     }
 
     @Override
@@ -85,25 +80,25 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        presenceFuture = threadPoolService.submit(ThreadPools.task(new PresenceHandler(queueService.getPresenceQueue())));
         messageFuture = threadPoolService.submit(ThreadPools.task(new MessageHandler(queueService.getMessageQueue())));
         iqFuture = threadPoolService.submit(ThreadPools.task(new IQHandler(queueService.getIqQueue())));
         registerService(StanzaQueueService.class, queueService);
         getService(ResourceDirectory.class).addListener(new ResourceListener());
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        if (presenceFuture != null) {
-            presenceFuture.cancel(true);
-        }
-        
+
+        Future<Object> messageFuture = this.messageFuture;
         if (messageFuture != null) {
+            this.messageFuture = null;
             messageFuture.cancel(true);
         }
-        
+
+        Future<Object> iqFuture = this.iqFuture;
         if (iqFuture != null) {
+            this.iqFuture = null;
             iqFuture.cancel(true);
         }
     }

@@ -157,7 +157,7 @@ public final class EffectivePermission implements Permission {
      * @param contentType The type of the referenced folder
      * @param userPermissionBits The configuration profile of the current logged in user
      */
-    public EffectivePermission(final Permission underlyingPerm, final String folderId, final Type type, final ContentType contentType, final UserPermissionBits userPermissionBits, final List<ContentType> allowedContentTypes) {
+    public EffectivePermission(Permission underlyingPerm, String folderId, Type type, ContentType contentType, UserPermissionBits userPermissionBits, List<ContentType> allowedContentTypes) {
         super();
         this.underlyingPerm = underlyingPerm;
         this.folderId = folderId;
@@ -167,8 +167,8 @@ public final class EffectivePermission implements Permission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             this.allowedContentTypes = EmptyTIntSet.getInstance();
         } else {
-            final TIntSet set = new TIntHashSet(allowedContentTypes.size() + 1);
-            for (final ContentType allowedContentType : allowedContentTypes) {
+            TIntSet set = new TIntHashSet(allowedContentTypes.size() + 1);
+            for (ContentType allowedContentType : allowedContentTypes) {
                 set.add(allowedContentType.getModule());
             }
             // Module SYSTEM is allowed in any case
@@ -206,9 +206,6 @@ public final class EffectivePermission implements Permission {
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof Permission)) {
             return false;

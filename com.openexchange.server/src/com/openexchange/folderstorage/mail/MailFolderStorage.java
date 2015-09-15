@@ -885,7 +885,8 @@ public final class MailFolderStorage implements FolderStorage {
         final Folder retval;
         final boolean hasSubfolders;
         if (cannotConnect(session)) {
-            return new DummyFolder(treeId, argument.getFullname(), "default0/INBOX", argument.getFullname(), session.getUserId());
+            String accountName = "default" + argument.getAccountId();
+            return new DummyFolder(treeId, argument.getFullname(), accountName, accountName, argument.getFullname(), session.getUserId());
         }
 
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
@@ -1131,6 +1132,11 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             if (!session.getUserConfiguration().hasWebMail()) {
+                return new SortableId[0];
+            }
+
+            FolderServiceDecorator fsDecorator = storageParameters.getDecorator();
+            if (fsDecorator != null && !fsDecorator.isContentTypeAllowed(MailContentType.getInstance())) {
                 return new SortableId[0];
             }
 

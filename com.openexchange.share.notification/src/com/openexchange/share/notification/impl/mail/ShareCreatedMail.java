@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -64,11 +63,9 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.notification.BasicNotificationTemplate;
-import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.notification.FullNameBuilder;
+import com.openexchange.notification.mail.MailData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareTarget;
@@ -85,15 +82,15 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareCreatedMail extends NotificationMail {
+public class ShareCreatedMail extends ShareNotificationMail {
 
     static final String HAS_SHARED_ITEMS = "has_shared_items";
     static final String USER_MESSAGE = "user_message";
     static final String VIEW_ITEMS_LINK = "view_items_link";
     static final String VIEW_ITEMS_LABEL = "view_items_label";
 
-    protected ShareCreatedMail(MailData data) {
-        super(data);
+    protected ShareCreatedMail(MailData data, ServiceLookup services) {
+        super(services, data);
     }
 
     private static class CollectVarsData {
@@ -111,7 +108,6 @@ public class ShareCreatedMail extends NotificationMail {
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
-        ConfigurationService configService = requireService(ConfigurationService.class, services);
 
         Context context = contextService.getContext(notification.getContextID());
         User sharingUser = userService.getUser(notification.getSession().getUserId(), context);
@@ -140,25 +136,20 @@ public class ShareCreatedMail extends NotificationMail {
             notification.getHostData().getHost(),
             targetUser.getId(),
             context.getContextId());
-        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
-        BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
-        Map<String, Object> vars = prepareShareCreatedVars(data);
-        basicTemplate.applyStyle(vars);
-        FooterImage footerImage = basicTemplate.applyFooter(vars);
-        String htmlContent = compileTemplate("notify.share.create.mail.html.tmpl", vars, services);
 
-        MailData mailData = new MailData();
-        mailData.sender = getSenderAddress(configService, notification.getSession(), sharingUser);
-        mailData.recipient = notification.getTransportInfo();
-        mailData.subject = textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values());
-        mailData.htmlContent = htmlContent;
-        mailData.footerImage = footerImage;
-        mailData.context = context;
-        mailData.transportProvider = transportProvider;
-        mailData.mailHeaders = new HashMap<>(5);
-        mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getShareUrl());
-        return new ShareCreatedMail(mailData);
+        Map<String, Object> vars = prepareShareCreatedVars(data);
+        MailData mailData = MailData.newBuilder()
+            .setSendingUser(sharingUser)
+            .setRecipient(notification.getTransportInfo())
+            .setSubject(textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values()))
+            .setHtmlTemplate("notify.share.create.mail.html.tmpl")
+            .setTemplateVars(vars)
+            .setMailConfig(serverConfig.getNotificationMailConfig())
+            .setContext(context)
+            .addMailHeader("X-Open-Xchange-Share-Type", notification.getType().getId())
+            .addMailHeader("X-Open-Xchange-Share-URL", notification.getShareUrl())
+            .build();
+        return new ShareCreatedMail(mailData, services);
     }
 
     /**

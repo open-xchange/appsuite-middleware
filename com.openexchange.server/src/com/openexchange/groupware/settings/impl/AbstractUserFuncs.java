@@ -75,8 +75,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
         /*
          * write to user storage
          */
-        UserImpl newUser = new UserImpl();
-        newUser.setId(user.getId());
+        UserImpl newUser = new UserImpl(user);
         setValue(newUser, setting.getSingleValue().toString(), user);
         UserStorage.getInstance().updateUser(newUser, ctx);
         /*

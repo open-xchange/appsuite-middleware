@@ -51,6 +51,8 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -106,6 +108,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -405,6 +408,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
+            // Load it to ensure validity
+            String baseUri = destFilestore.getUrl();
+            try {
+                URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
+                FileStorages.getFileStorageService().getFileStorage(uri);
+            } catch (OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                throw new StorageException("Invalid file storage URI: " + baseUri, e);
+            }
+
             // Initialize mover instance
             FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id), dstFilestore, storageUser, ctx);
 
@@ -666,6 +680,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
             }
 
+            // Load it to ensure validity
+            String baseUri = destFilestore.getUrl();
+            try {
+                URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
+                FileStorages.getFileStorageService().getFileStorage(uri);
+            } catch (OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                throw new StorageException("Invalid file storage URI: " + baseUri, e);
+            }
+
             // Initialize mover instance
             FilestoreDataMover fsdm = FilestoreDataMover.newUserFromMasterMover(srcFilestore, destFilestore, maxQuota, storageUser, storageMasterUser, ctx);
 
@@ -770,6 +795,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // Check capacity
             if (!equal && !oxu.hasSpaceForAnotherUser(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another user.");
+            }
+
+            // Load it to ensure validity
+            String baseUri = destFilestore.getUrl();
+            try {
+                URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
+                FileStorages.getFileStorageService().getFileStorage(uri);
+            } catch (OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                throw new StorageException("Invalid file storage URI: " + baseUri, e);
             }
 
             // Initialize mover instance
@@ -1032,12 +1068,24 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
-        // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system
+        // Check if he wants to change the filestore id
         {
             Integer filestoreId = usrdata.getFilestoreId();
             if (filestoreId != null) {
                 if (!tool.existsStore(filestoreId.intValue())) {
                     final InvalidDataException inde = new InvalidDataException("No such filestore with id " + filestoreId.intValue());
+                    LOGGER.error("", inde);
+                    throw inde;
+                }
+
+                Integer fsId = getData(ctx, usrdata, credentials).getFilestoreId();
+                if (fsId == null || fsId.intValue() <= 0) {
+                    final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
+                    LOGGER.error("", inde);
+                    throw inde;
+                }
+                if (fsId.intValue() != filestoreId.intValue()) {
+                    final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
                     LOGGER.error("", inde);
                     throw inde;
                 }
@@ -1063,6 +1111,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     int fileStorageToPrefer = oxutil.getFilestoreIdFromContext(ctx.getId().intValue());
                     Filestore filestoreForUser = oxutil.findFilestoreForUser(fileStorageToPrefer);
 
+                    // Load it to ensure validity
+                    OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+                    try {
+                        URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(filestoreForUser.getId())));
+                        FileStorages.getFileStorageService().getFileStorage(uri);
+                    } catch (OXException e) {
+                        throw new StorageException(e.getMessage(), e);
+                    }
+
                     // Move from context to individual user file storage
                     try {
                         moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials);
@@ -1074,6 +1131,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 } else {
                     if (!OXToolStorageInterface.getInstance().existsStore(i(fsId))) {
                         throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
+                    }
+
+                    // Load it to ensure validity
+                    OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+                    try {
+                        URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(fsId)));
+                        FileStorages.getFileStorageService().getFileStorage(uri);
+                    } catch (OXException e) {
+                        throw new StorageException(e.getMessage(), e);
                     }
                 }
             }

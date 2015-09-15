@@ -67,14 +67,14 @@ public class Bug22304Test extends AbstractSanitizing {
             "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +
             "</o:shapelayout></xml><![endif]-->";
 
-        String expected = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><!-- [if gte mso 9]> --><xml>\n" +
+        String expected = "<!DOCTYPE html>\n" +
+            // "\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><!-- [if gte mso 9]> --><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
             "<o:idmap v:ext=\"edit\" data=\"1\"/>\n" +
-            "</o:shapelayout></xml><!-- <![endif] --></body></html>";
+            "</o:shapelayout></xml><!-- <![endif] --></body></html>\n ";
 
         String ret = getHtmlService().getConformHTML(content, "UTF-8");
         assertEquals("Unexpected return value", expected, ret);

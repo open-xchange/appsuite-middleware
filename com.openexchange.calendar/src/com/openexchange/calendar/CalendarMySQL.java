@@ -2749,7 +2749,12 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         CalendarDataObject clone = null;
 
-        final boolean changeMasterTime = Tools.checkRecurrenceMasterTimeUpdate(cdao, edao);
+        final boolean changeMasterTime;
+        if (CalendarObject.NO_RECURRENCE == edao.getRecurrenceType() || 0 != cdao.getRecurrencePosition() || null != cdao.getRecurrenceDatePosition()) {
+            changeMasterTime = false; // no recurrence or not master
+        } else {
+            changeMasterTime = COLLECTION.detectTimeChange(cdao, edao);
+        }
 
         // Reset all exceptions (change and delete)
         if (changeMasterTime) {

@@ -63,6 +63,14 @@ public interface ContentTypeDiscoveryService {
      * @param contentTypeString The content type string
      * @return The content type for specified string or <code>null</code> if none matches
      */
-    public ContentType getByString(final String contentTypeString);
+    ContentType getByString(String contentTypeString);
+
+    /**
+     * Gets the content type for specified module identifier.
+     *
+     * @param module The module identifier
+     * @return The content type for specified module or <code>null</code> if none matches
+     */
+    ContentType getByModule(int module);
 
 }

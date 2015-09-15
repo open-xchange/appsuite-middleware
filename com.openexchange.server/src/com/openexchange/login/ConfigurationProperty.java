@@ -74,7 +74,7 @@ public enum ConfigurationProperty implements InitProperty {
      * <p>
      * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
      */
-    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml"),
+    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "open-xchange-appsuite"),
 
     /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version

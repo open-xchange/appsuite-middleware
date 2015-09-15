@@ -65,7 +65,6 @@ import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
-import com.openexchange.capabilities.rest.CapabilitiesRESTService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -174,8 +173,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
          */
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
         registerService(CapabilityService.class, capService);
-
-        registerService(CapabilitiesRESTService.class, new CapabilitiesRESTService(capService));
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
 

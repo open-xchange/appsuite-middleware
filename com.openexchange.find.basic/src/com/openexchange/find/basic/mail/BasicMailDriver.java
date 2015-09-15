@@ -301,7 +301,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         } finally {
             MailAccess.closeInstance(mailAccess);
             long diff = System.currentTimeMillis() - start;
-            LOG.info("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
+            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
         }
     }
 

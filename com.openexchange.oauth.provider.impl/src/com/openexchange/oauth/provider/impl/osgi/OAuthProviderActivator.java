@@ -80,6 +80,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.impl.authcode.HzAuthorizationCodeProvider;
@@ -241,7 +242,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
-            SessiondService.class, CapabilityService.class, ConfigViewFactory.class };
+            SessiondService.class, CapabilityService.class, ConfigViewFactory.class, NotificationMailFactory.class };
     }
 
     @Override
@@ -297,6 +298,11 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             openTrackers();
             provider.start(new DbAuthorizationCodeProvider(this));
         }
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override

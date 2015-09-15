@@ -90,10 +90,9 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
     private static final class Element {
 
         private final ConcurrentMap<ContentType, FolderStorage> concreteStorages;
-
         private volatile Queue<FolderStorage> generalStorages;
 
-        public Element() {
+        Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
             generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
@@ -192,13 +191,13 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      * @return The available content types
      */
     public Map<Integer, ContentType> getAvailableContentTypes() {
-        final ConcurrentMap<ContentType, FolderStorage> concreteStorages =
-            getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
+        ConcurrentMap<ContentType, FolderStorage> concreteStorages = getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
         if (concreteStorages.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
-        for (final ContentType contentType : concreteStorages.keySet()) {
+
+        Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
+        for (ContentType contentType : concreteStorages.keySet()) {
             ret.put(Integer.valueOf(contentType.getModule()), contentType);
         }
         return ret;
@@ -243,7 +242,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
                 final FolderStorage folderStorage = genStorage;
                 final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
                 for (final ContentType supportedContentType : supportedContentTypes) {
-                    if (supportedContentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() > supportedContentType.getPriority())) {
+                    if (supportedContentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() < supportedContentType.getPriority())) {
                         candidate = supportedContentType;
                     }
                 }
@@ -256,7 +255,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
              */
             final Set<ContentType> concreteCTs = entry.getValue().getConcreteStorages().keySet();
             for (final ContentType contentType : concreteCTs) {
-                if (contentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() > contentType.getPriority())) {
+                if (contentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() < contentType.getPriority())) {
                     candidate = contentType;
                 }
             }
@@ -307,6 +306,42 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      */
     public void removeTreeContentTypes(final String treeId) {
         registry.remove(treeId);
+    }
+
+    @Override
+    public ContentType getByModule(int module) {
+        for (final Entry<String, Element> entry : registry.entrySet()) {
+            final Queue<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
+            /*
+             * Iterate general storages' content types
+             */
+            ContentType candidate = null;
+            for (final FolderStorage genStorage : generalStorages) {
+                final FolderStorage folderStorage = genStorage;
+                final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
+                for (final ContentType supportedContentType : supportedContentTypes) {
+                    if (supportedContentType.getModule() == module && (null == candidate || candidate.getPriority() < supportedContentType.getPriority())) {
+                        candidate = supportedContentType;
+                    }
+                }
+            }
+            if (candidate != null) {
+                return candidate;
+            }
+            /*
+             * Iterate concrete content types
+             */
+            final Set<ContentType> concreteCTs = entry.getValue().getConcreteStorages().keySet();
+            for (final ContentType contentType : concreteCTs) {
+                if (contentType.getModule() == module && (null == candidate || candidate.getPriority() < contentType.getPriority())) {
+                    candidate = contentType;
+                }
+            }
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
 }

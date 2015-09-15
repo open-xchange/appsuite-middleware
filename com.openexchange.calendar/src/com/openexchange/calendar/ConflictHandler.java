@@ -175,17 +175,17 @@ public class ConflictHandler {
             }
         }
         RecurringResultsInterface results;
-        if (edao == null || Tools.checkRecurrenceMasterTimeUpdate(clone, edao)) {
+        if (edao == null || (0 == clone.getRecurrencePosition() && null == clone.getRecurrenceDatePosition() && recColl.detectTimeChange(clone, edao))) {
             results = recColl.calculateRecurringIgnoringExceptions(cdao, 0, 0, 0);
         } else {
             results = recColl.calculateRecurring(cdao, 0, 0, 0);
         }
-        
+
         if (results == null || results.size() < 1) {
             LOG.debug("No occurrences for this appointment: " + cdao.toString());
             return new CalendarDataObject[]{};
         }
-        
+
         final Date resultStart = new Date(results.getRecurringResult(0).getStart());
         final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
         final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);

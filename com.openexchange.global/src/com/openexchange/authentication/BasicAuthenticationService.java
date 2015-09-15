@@ -74,4 +74,17 @@ public interface BasicAuthenticationService extends AuthenticationService {
      * @throws OXException If an Open-Xchange error occurs
      */
     Authenticated handleLoginInfo(int userId, int contextId) throws OXException;
+
+    /**
+     * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
+     * context and checks if the password is valid for the user/context relation.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param password The password to check
+     * @return An {@link Authenticated} instance that is rather used to perform additional modifications through implementing
+     *         {@link SessionEnhancement} and/or {@link ResponseEnhancement}
+     * @throws OXException If the user cannot be authenticated or an Open-Xchange error occurs
+     */
+    Authenticated handleLoginInfo(int userId, int contextId, String password) throws OXException;
 }

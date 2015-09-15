@@ -157,6 +157,12 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         if (!tool.existsUser(ctx, members)) {
             throw new NoSuchUserException("No such user");
         }
+        for (User user : members) {
+            int userId = user.getId();
+            if (tool.isGuestUser(ctx, userId)) {
+                throw new NoSuchUserException("Cannot add guest user to group");
+            }
+        }
 
         final int grp_id = grp.getId();
         try {
@@ -367,6 +373,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
                 if (!tool.existsUser(ctx, I2i(grp.getMembers()))) {
                     throw new NoSuchUserException("No such user");
+                }
+                for (int userId : grp.getMembers()) {
+                    if (tool.isGuestUser(ctx, userId)) {
+                        throw new NoSuchUserException("Cannot add guest user to group");
+                    }
                 }
             }
         } catch (final InvalidDataException e2) {

@@ -94,4 +94,23 @@ public interface NotificationMailConfig {
      */
     String getFooterImage();
 
+    /**
+     * Gets the alternative text of the footer image. This text is shown by email clients
+     * that don't show images at all.
+     *
+     * @return The alternative text; not <code>null</code> if {@link #getFooterImage()} is
+     * also not <code>null</code>.
+     */
+    String getFooterImageAltText();
+
+    /**
+     * Gets whether a potential footer image shall be embedded as data URL (i.e. in the form
+     * of <code>&lt;img src="data:image/png;base64,iVBO...." /&gt;</code> or if it shall be
+     * contained as a separate MIME part and be referenced via its content ID (i.e. <code>
+     * &lt;img src="cid:ce29ee25-eb59-4147-a4ab-aed71224773b" /&gt;</code>.
+     *
+     * @return <code>true</code> if a data URL shall be used, <code>false</code> otherwise.
+     */
+    boolean embedFooterImage();
+
 }

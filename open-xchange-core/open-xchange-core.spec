@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1234,8 +1234,8 @@ ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xch
 #SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
-PROTECT="configdb.properties hazelcast.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
-for FILE in $PROTECT
+PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
+for FILE in "${PROTECT[@]}"
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
 done
@@ -1271,9 +1271,14 @@ exit 0
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
-%doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
+* Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
 * Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>

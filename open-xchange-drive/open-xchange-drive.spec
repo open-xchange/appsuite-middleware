@@ -14,7 +14,7 @@ BuildRequires:  java7-devel
 BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 2
+%define         ox_release 3
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -53,6 +53,8 @@ GLOBIGNORE='*'
 # SoftwareChange_Request-1992
 ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
 
+ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
@@ -64,6 +66,12 @@ ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/dr
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Sep 08 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Third candidate for 7.8.0 release
+* Wed Sep 02 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-08-24 (2674)
 * Fri Aug 21 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

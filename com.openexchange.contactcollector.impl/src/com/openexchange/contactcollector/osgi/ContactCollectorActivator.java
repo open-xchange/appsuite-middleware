@@ -147,8 +147,8 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         collectorInstance.start();
         this.collectorInstance = collectorInstance;
 
-        Dictionary<String, String> props = new Hashtable<String, String>();
-        props.put(Constants.SERVICE_RANKING, ContactCollectorServiceImpl.RANKING.toString()); //Default
+        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+        props.put(Constants.SERVICE_RANKING, ContactCollectorServiceImpl.RANKING); //Default
         /*
          * Register all
          */

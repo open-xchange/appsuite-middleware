@@ -462,7 +462,7 @@ public class DriveConfig implements Initialization {
             "m=infostore&f=[folder]");
         directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
             "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
-        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
         dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
         /*
          * version restrictions

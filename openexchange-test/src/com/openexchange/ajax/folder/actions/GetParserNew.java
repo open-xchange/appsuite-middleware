@@ -118,4 +118,14 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
     public ContentType getByString(String contentTypeString) {
         return TYPES.get(contentTypeString);
     }
+
+    @Override
+    public ContentType getByModule(int module) {
+        for (ContentType type : TYPES.values()) {
+            if (type.getModule() == module) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

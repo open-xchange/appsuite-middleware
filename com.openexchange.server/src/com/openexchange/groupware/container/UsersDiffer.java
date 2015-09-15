@@ -132,12 +132,12 @@ public class UsersDiffer extends Differ<CalendarObject> {
         boolean changed = false;
 
         ConfirmationChange change = new ConfirmationChange(Integer.toString(original.getIdentifier()));
-        if (original.getConfirm() != update.getConfirm()) {
+        if (update.containsConfirm() && original.getConfirm() != update.getConfirm()) {
             changed = true;
             change.setStatus(original.getConfirm(), update.getConfirm());
         }
 
-        if (original.getConfirmMessage() != update.getConfirmMessage() && (original.getConfirmMessage() == null && update.getConfirmMessage() != null || !original.getConfirmMessage().equals(update.getConfirmMessage()))) {
+        if (update.containsConfirmMessage() && original.getConfirmMessage() != update.getConfirmMessage() && (original.getConfirmMessage() == null && update.getConfirmMessage() != null || !original.getConfirmMessage().equals(update.getConfirmMessage()))) {
             changed = true;
             change.setMessage(original.getConfirmMessage(), update.getConfirmMessage());
         }

@@ -153,6 +153,10 @@ public enum FolderField {
      */
     SUPPORTED_CAPABILITIES(317, "supported_capabilities"),
     /**
+     * The folders account ID
+     */
+    ACCOUNT_ID(318, "account_id"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

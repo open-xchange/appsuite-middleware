@@ -82,11 +82,24 @@ class DummyFolder implements Folder {
 
     private final int userId;
 
-    DummyFolder(String treeId, String id, String parentId, String name, int userId) {
+    private final String accountId;
+
+    /**
+     * Initializes a new {@link DummyFolder}.
+     *
+     * @param treeId The folder tree ID
+     * @param id The folder ID
+     * @param parentId The parent folder ID
+     * @param accountId The folders account ID
+     * @param name The folder name
+     * @param userId The requesting users ID
+     */
+    DummyFolder(String treeId, String id, String parentId, String accountId, String name, int userId) {
         super();
         this.treeId = treeId;
         this.id = id;
         this.parentId = parentId;
+        this.accountId = accountId;
         this.name = name;
         this.userId = userId;
     }
@@ -176,6 +189,15 @@ class DummyFolder implements Folder {
 
     @Override
     public void setParentID(String parentId) {
+    }
+
+    @Override
+    public String getAccountID() {
+        return accountId;
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
     }
 
     @Override
@@ -348,7 +370,7 @@ class DummyFolder implements Folder {
 
     @Override
     public Object clone() {
-        return new DummyFolder(treeId, id, parentId, name, userId);
+        return new DummyFolder(treeId, id, parentId, accountId, name, userId);
     }
 
 }

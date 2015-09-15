@@ -1,15 +1,15 @@
 package com.openexchange.share.notification.osgi;
 
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.group.GroupService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareService;
@@ -22,8 +22,6 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 public class ShareNotificationActivator extends HousekeepingActivator {
-
-    final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareNotificationActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -38,28 +36,13 @@ public class ShareNotificationActivator extends HousekeepingActivator {
             ConfigViewFactory.class,
             TemplateService.class,
             HtmlService.class,
-            ShareService.class
+            ShareService.class,
+            NotificationMailFactory.class
         };
     }
 
     @Override
     protected void startBundle() throws Exception {
-
-        context.addFrameworkListener(new FrameworkListener() {
-
-            @Override
-            public void frameworkEvent(FrameworkEvent event) {
-                if (event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.share.notification")) {
-                    int eventType = event.getType();
-                    if (eventType == FrameworkEvent.ERROR) {
-                        LOG.error(event.toString(), event.getThrowable());
-                    } else {
-                        LOG.info(event.toString(), event.getThrowable());
-                    }
-                }
-            }
-        });
-
         // Initialize share notification service
         final DefaultNotificationService defaultNotificationService = new DefaultNotificationService(this);
 
@@ -88,8 +71,15 @@ public class ShareNotificationActivator extends HousekeepingActivator {
             }
         });
 
+        trackService(ContactCollectorService.class);
+
         registerService(ShareNotificationService.class, defaultNotificationService);
         openTrackers();
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
 }

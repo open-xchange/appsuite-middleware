@@ -92,6 +92,8 @@ public final class OneDriveFolder extends DefaultFileStorageFolder implements Ty
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override

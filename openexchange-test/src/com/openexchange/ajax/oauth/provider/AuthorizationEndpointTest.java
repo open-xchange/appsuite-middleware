@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.mail.BodyPart;
-import javax.mail.internet.MimeMultipart;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -348,7 +347,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             String subject = headers.get("Subject");
             assertNotNull("Mail subject is null.", subject);
             assertTrue("External application name expected in subject.", subject.contains(oauthClient.getName()));
-            assertSignatureText(message.getHtml(), "");
+            assertSignatureText(message.requireHtml(), "");
             assertSignatureImage(message);
         } finally {
             ajaxClient.execute(new StopSMTPRequest());
@@ -426,9 +425,8 @@ public class AuthorizationEndpointTest extends EndpointTest {
     }
 
     private void assertSignatureImage(Message message) throws Exception {
-        String src = message.getHtml().getElementById("signature_image").attr("src");
-        MimeMultipart multipart = (MimeMultipart) message.getMimeMessage().getContent();
-        BodyPart image = multipart.getBodyPart("<" + src.substring(4) + ">");
+        String src = message.requireHtml().getElementById("signature_image").attr("src");
+        BodyPart image = message.getBodyPartByContentID("<" + src.substring(4) + ">");
         assertNotNull(image);
         byte[] expectedBytes = BaseEncoding.base64().decode(SIGNATURE_IMAGE);
         byte[] imageBytes = ByteStreams.toByteArray(image.getInputStream());

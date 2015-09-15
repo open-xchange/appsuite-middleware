@@ -369,6 +369,7 @@ public class DefaultGuestService implements GuestService {
         // the following is required to identify the user as guest within com.openexchange.groupware.ldap.RdbUserStorage.updateUserPassword(Connection, User, Context)
         userToUpdate.setCreatedBy(origUser.getCreatedBy());
 
+        userService.updatePassword(contextConnection, userToUpdate, context);
         userService.updateUser(contextConnection, userToUpdate, context);
     }
 

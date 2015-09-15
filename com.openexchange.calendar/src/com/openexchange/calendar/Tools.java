@@ -65,10 +65,8 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -251,48 +249,6 @@ public final class Tools {
         }
         sb.append(')');
         return sb.toString();
-    }
-
-    /**
-     * Checks, if the start or end date of the whole sequence has been changed.
-     *
-     * @param newObject new CalendarDataObject
-     * @param currencObject old CalendarDataObject
-     * @return
-     */
-    public static boolean checkRecurrenceMasterTimeUpdate(final CalendarDataObject newObject, final CalendarDataObject currentObject) {
-        // Is sequence?
-        if (!currentObject.containsRecurrenceType() || currentObject.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
-            return false;
-        }
-
-        // Is Exception
-        if (newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
-            return false;
-        }
-        if (newObject.containsRecurrenceDatePosition()) {
-            return false;
-        }
-
-        final Date newStart = newObject.getStartDate();
-        final Date newEnd = newObject.getEndDate();
-
-        // No new dates
-        if (newStart == null && newEnd == null) {
-            return false;
-        }
-
-        // New start date
-        if (newStart != null && !newStart.equals(currentObject.getStartDate())) {
-            return true;
-        }
-
-        // New end date
-        if (newEnd != null && !newEnd.equals(currentObject.getEndDate())) {
-            return true;
-        }
-
-        return false;
     }
 
 }

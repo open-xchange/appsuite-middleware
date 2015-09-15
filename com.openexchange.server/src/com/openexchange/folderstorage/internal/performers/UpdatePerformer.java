@@ -77,7 +77,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
-import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -476,7 +475,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
                 if (!ignoreWarnings) {
-                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), f.getName(), Integer.valueOf(context.getContextId()));
                 }
             } else {
                 ids.add(f.getID());

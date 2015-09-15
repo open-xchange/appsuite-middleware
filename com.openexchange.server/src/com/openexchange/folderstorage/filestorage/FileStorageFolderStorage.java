@@ -63,6 +63,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -410,9 +411,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        FileStorageFolder fsFolder = getFolderAccess(storageParameters).getFolder(new FolderID(folderId));
+        FolderID fid = new FolderID(folderId);
+        FileStorageFolder fsFolder = getFolderAccess(storageParameters).getFolder(fid);
         boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-        FileStorageFolderImpl retval = new FileStorageFolderImpl(fsFolder, storageParameters.getSession(), altNames);
+        String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
+        FileStorageFolderImpl retval = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getSession(), altNames);
         boolean hasSubfolders = fsFolder.hasSubfolders();
         retval.setTreeID(treeId);
         retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
@@ -640,6 +643,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
             fileStorageFolder.setSubscribed(folder.isSubscribed());
         }
         fileStorageFolder.setPermissions(getfFileStoragePermissions(folder.getPermissions()));
+        fileStorageFolder.setCreatedBy(folder.getCreatedBy());
+        fileStorageFolder.setModifiedBy(folder.getModifiedBy());
         return fileStorageFolder;
     }
 

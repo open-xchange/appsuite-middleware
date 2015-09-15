@@ -160,11 +160,13 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * Subfolder identifiers and tree identifier are not set within this constructor.
      *
      * @param fsFolder The underlying file storage folder
+     * @param accountId The full-qualified file storage account ID
      */
-    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final Session session, final boolean altNames) {
+    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final Session session, final boolean altNames) {
         super();
         id = fsFolder.getId();
         name = fsFolder.getName();
+        this.accountId = accountId;
         if (fsFolder.isRootFolder()) {
             parent = PRIVATE_FOLDER_ID;
             defaultFolderType = FileStorageDefaultFolderType.NONE;
@@ -231,6 +233,8 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         supportedCapabilities = fsFolder.getCapabilities();
         lastModified = fsFolder.getLastModifiedDate();
         creationDate = fsFolder.getCreationDate();
+        createdBy = fsFolder.getCreatedBy();
+        modifiedBy = fsFolder.getModifiedBy();
     }
 
     private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {

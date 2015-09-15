@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderServiceDecorator {
+public final class FolderServiceDecorator implements Cloneable {
 
     public static final String PROPERTY_IGNORE_GUEST_PERMISSIONS = "com.openexchange.folderstorage.ignoreGuestPermissions";
 
@@ -85,6 +85,29 @@ public final class FolderServiceDecorator {
         super();
         allowedContentTypes = Collections.<ContentType> emptyList();
         properties = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
+    }
+
+    /**
+     * Checks if specified content type is allowed by this decorator.
+     *
+     * @param toCheck The content type to check
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     */
+    public boolean isContentTypeAllowed(ContentType toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        if (allowedContentTypes.isEmpty()) {
+            return true;
+        }
+
+        for (ContentType allowedContentType : allowedContentTypes) {
+            if (allowedContentType.getModule() == toCheck.getModule()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -248,6 +271,16 @@ public final class FolderServiceDecorator {
      */
     public Map<String, Object> getProperties() {
         return new HashMap<String, Object>(properties);
+    }
+
+    @Override
+    public FolderServiceDecorator clone() throws CloneNotSupportedException {
+        FolderServiceDecorator fsDecorator = new FolderServiceDecorator();
+        fsDecorator.setAllowedContentTypes(allowedContentTypes);
+        fsDecorator.setLocale(locale);
+        fsDecorator.setTimeZone(timeZone);
+        fsDecorator.putProperties(properties);
+        return fsDecorator;
     }
 
 }

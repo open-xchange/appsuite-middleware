@@ -185,20 +185,12 @@ public final class CalculatePermission {
      * @throws OXException If calculating the effective permission fails
      */
     public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserPermissionBits userPermissionBits;
         try {
-            userPermissionBits = getUserPermissionBits(user.getId(), context);
+            UserPermissionBits userPermissionBits = getUserPermissionBits(user.getId(), context);
+            return new EffectivePermission(getMaxPermission(folder.getPermissions(), userPermissionBits), folder.getID(), folder.getType(), folder.getContentType(), userPermissionBits, allowedContentTypes).setEntityInfo(user.getId(), context);
         } catch (OXException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
-
-        return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userPermissionBits),
-            folder.getID(),
-            folder.getType(),
-            folder.getContentType(),
-            userPermissionBits,
-            allowedContentTypes).setEntityInfo(user.getId(), context);
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
@@ -213,10 +205,10 @@ public final class CalculatePermission {
         /*
          * Check visibility by folder
          */
-        final Type type = folder.getType();
-        final ContentType contentType = folder.getContentType();
+        Type type = folder.getType();
+        ContentType contentType = folder.getContentType();
         if (PrivateType.getInstance().equals(type)) {
-            final int createdBy = folder.getCreatedBy();
+            int createdBy = folder.getCreatedBy();
             if (createdBy <= 0 || createdBy == user.getId()) {
                 return hasAccess(contentType, userPermissionBits, allowedContentTypes);
             }
@@ -225,13 +217,7 @@ public final class CalculatePermission {
         /*
          * Check visibility by effective permission
          */
-        return new EffectivePermission(
-            getMaxPermission(folder.getPermissions(), userPermissionBits),
-            folder.getID(),
-            type,
-            contentType,
-            userPermissionBits,
-            allowedContentTypes).isVisible();
+        return new EffectivePermission(getMaxPermission(folder.getPermissions(), userPermissionBits), folder.getID(), type, contentType, userPermissionBits, allowedContentTypes).isVisible();
     }
 
     private static boolean hasAccess(final ContentType contentType, final UserPermissionBits permissionBits, final java.util.List<ContentType> allowedContentTypes) {

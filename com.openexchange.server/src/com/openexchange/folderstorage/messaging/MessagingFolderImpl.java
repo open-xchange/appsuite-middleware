@@ -75,6 +75,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link MessagingFolderImpl} - A messaging folder.
@@ -158,6 +159,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         final String fullname = messagingFolder.getId();
         id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
         name = messagingFolder.getName();
+        super.accountId = IDMangler.mangle(serviceId, Integer.toString(accountId));
         final boolean isRootFolder = messagingFolder.isRootFolder();
         if (isRootFolder) { // Root folder
             parent = PRIVATE_FOLDER_ID;

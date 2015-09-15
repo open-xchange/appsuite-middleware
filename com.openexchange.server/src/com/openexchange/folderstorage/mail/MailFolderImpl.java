@@ -203,6 +203,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider, final MailAccess<?, ?> mailAccess) throws OXException {
         super();
         this.accountId = accountId;
+        super.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
         userId = user.getId();
         contextId = context.getContextId();
         fullName = mailFolder.getFullname();

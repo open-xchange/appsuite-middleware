@@ -113,6 +113,17 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
         return new AuthenticatedImpl(new String[] {ctx.getLoginInfo()[0], user.getLoginInfo()});
     }
 
+    @Override
+    public Authenticated handleLoginInfo(int userId, int contextId, String password) throws OXException {
+        Context ctx = contextService.getContext(contextId);
+        User user = userService.getUser(userId, ctx);
+
+        if (!userService.authenticate(user, password)) {
+            throw INVALID_CREDENTIALS.create();
+        }
+        return new AuthenticatedImpl(new String[] {ctx.getLoginInfo()[0], user.getLoginInfo()});
+    }
+
     /**
      * {@inheritDoc}
      */

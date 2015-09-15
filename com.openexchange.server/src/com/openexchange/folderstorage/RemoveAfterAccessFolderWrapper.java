@@ -163,6 +163,11 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     }
 
     @Override
+    public String getAccountID() {
+        return folder.getAccountID();
+    }
+
+    @Override
     public String getLocalizedName(final Locale locale) {
         return folder.getLocalizedName(locale);
     }
@@ -210,6 +215,11 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
     @Override
     public void setParentID(final String parentId) {
         folder.setParentID(parentId);
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        folder.setAccountID(accountId);
     }
 
     @Override

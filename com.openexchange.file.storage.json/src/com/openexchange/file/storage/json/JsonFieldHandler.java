@@ -185,7 +185,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 return jPermissions;
             }
 
-            return null;
+            return new JSONArray(0);
         default: // do nothing;
         }
 

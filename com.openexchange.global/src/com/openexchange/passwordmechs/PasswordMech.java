@@ -56,7 +56,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.mechs.SHACrypt;
 import com.openexchange.passwordmechs.mechs.UnixCrypt;
 
-
 /**
  * {@link PasswordMech} - An enumeration for supported password hashing mechanisms.
  *
@@ -67,40 +66,62 @@ public enum PasswordMech {
 
     CRYPT("{CRYPT}", new Encoder() {
 
-            @Override
-            public String encode(String str) throws UnsupportedEncodingException {
-                return UnixCrypt.crypt(str);
-            }
+        @Override
+        public String encode(String str) throws UnsupportedEncodingException {
+            return UnixCrypt.crypt(str);
+        }
 
-            @Override
-            public boolean check(String candidate, String encoded) throws UnsupportedEncodingException {
-                return UnixCrypt.matches(encoded, candidate);
+        @Override
+        public boolean check(String candidate, String encoded) throws UnsupportedEncodingException {
+            if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
-        }),
+            return UnixCrypt.matches(encoded, candidate);
+        }
+    }),
     SHA("{SHA}", new Encoder() {
 
-            @Override
-            public String encode(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-                return SHACrypt.makeSHAPasswd(str);
-            }
+        @Override
+        public String encode(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            return SHACrypt.makeSHAPasswd(str);
+        }
 
-            @Override
-            public boolean check(String candidate, String encoded) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-                return SHACrypt.makeSHAPasswd(candidate).equals(encoded);
+        @Override
+        public boolean check(String candidate, String encoded) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
-        }),
+            return SHACrypt.makeSHAPasswd(candidate).equals(encoded);
+        }
+    }),
     BCRYPT("{BCRYPT}", new Encoder() {
 
-            @Override
-            public String encode(String str) {
-                return BCrypt.hashpw(str, BCrypt.gensalt());
+        @Override
+        public String encode(String str) {
+            return BCrypt.hashpw(str, BCrypt.gensalt());
+        }
+
+        @Override
+        public boolean check(String candidate, String encoded) {
+            if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return true;
+            } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
+                return false;
+            } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
+                return false;
             }
 
-            @Override
-            public boolean check(String candidate, String encoded) {
-                return BCrypt.checkpw(candidate, encoded);
-            }
-        }),
+            return BCrypt.checkpw(candidate, encoded);
+        }
+    }),
 
     ;
 

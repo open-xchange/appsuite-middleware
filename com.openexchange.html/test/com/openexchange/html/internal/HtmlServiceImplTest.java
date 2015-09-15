@@ -242,4 +242,28 @@ public class HtmlServiceImplTest {
         String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
         Assert.assertTrue(test.indexOf("<div") < 0);
     }
+
+    @Test
+    public void testBug40943() {
+        String html = "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "<title>Title of the document</title>\n" +
+            "</head>\n" +
+            "\n" +
+            "<body>\n" +
+            "<article>\n" +
+            "  <header>\n" +
+            "    <h1>Headline</h1>\n" +
+            "    <p>Abstract</p>\n" +
+            "  </header>\n" +
+            "  <p>Content</p>\n" +
+            "</article>\n" +
+            "</body>\n" +
+            "</html>";
+        String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
+        Assert.assertTrue(test.indexOf("<meta charset=\"UTF-8\">") > 0);
+        Assert.assertTrue(test.indexOf("<!DOCTYPE html>") >= 0);
+    }
 }
