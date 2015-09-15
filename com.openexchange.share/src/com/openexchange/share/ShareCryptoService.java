@@ -50,13 +50,14 @@
 package com.openexchange.share;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.passwordmechs.IPasswordMech;
 
 /**
  * {@link ShareCryptoService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ShareCryptoService {
+public interface ShareCryptoService extends IPasswordMech {
 
     /**
      * The password mechanism identifier used for the share crypto service.

@@ -73,7 +73,6 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -133,10 +132,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
             }
 
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
-                String redirectUrl = new LoginLocationBuilder()
-                    .status("reset_password_info")
-                    .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_GUEST_PASSWORD_REQUIRED))
-                    .build();
+                String redirectUrl = new LoginLocationBuilder().status("reset_password_info").message(MessageType.INFO, translator.translate(ShareServletStrings.NO_GUEST_PASSWORD_REQUIRED)).build();
                 response.sendRedirect(redirectUrl);
                 return;
             }
@@ -270,6 +266,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
     private static LoginMethodClosure loginMethod(final User user, final Context context) {
         return new LoginMethodClosure() {
+
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
                 return new ShareAuthenticated(user, context);
@@ -282,11 +279,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
         User guest = userService.getUser(userId, context);
         UserImpl user = new UserImpl(guest);
         user.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        try {
-            user.setUserPassword(PasswordMech.BCRYPT.encode(newPassword));
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
-        }
+        user.setUserPassword(PasswordMech.BCRYPT.encode(newPassword));
         userService.updatePassword(user, context);
         userService.invalidateUser(context, userId);
         return userService.getUser(userId, context);
@@ -313,20 +306,13 @@ public class PasswordResetServlet extends AbstractShareServlet {
     }
 
     private static void sendInvalidRequest(Translator translator, HttpServletResponse response) throws IOException {
-        String redirectUrl = new LoginLocationBuilder()
-            .status("invalid_request")
-            .message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST))
-            .build();
+        String redirectUrl = new LoginLocationBuilder().status("invalid_request").message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST)).build();
         response.sendRedirect(redirectUrl);
     }
 
     private static void sendInternalError(Translator translator, HttpServletResponse response) throws IOException {
-        String redirectUrl = new LoginLocationBuilder()
-            .status("internal_error")
-            .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
-            .build();
+        String redirectUrl = new LoginLocationBuilder().status("internal_error").message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY)).build();
         response.sendRedirect(redirectUrl);
     }
 
 }
-

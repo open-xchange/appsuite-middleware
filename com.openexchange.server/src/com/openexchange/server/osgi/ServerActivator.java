@@ -206,6 +206,7 @@ import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -293,7 +294,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class };
+        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class, PasswordMechFactory.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -573,7 +574,8 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
-        UserService userService = new UserServiceImpl(interceptorRegistry);
+
+        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         // Start up server the usual way

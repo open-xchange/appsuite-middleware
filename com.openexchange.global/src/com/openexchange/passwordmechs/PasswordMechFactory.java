@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,42 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.passwordchange;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import com.openexchange.exception.OXException;
-import com.openexchange.passwordmechs.PasswordMech;
+package com.openexchange.passwordmechs;
 
+/**
+ * {@link PasswordMechFactory}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
+ */
+public interface PasswordMechFactory {
 
-public class PasswordMechanism {
+    public void register(IPasswordMech... passwordMech);
 
-    public static final String MECH_CRYPT = PasswordMech.CRYPT.getIdentifier();
-
-    public static final String MECH_SHA = PasswordMech.SHA.getIdentifier();
-
-    public static final String MECH_BCRYPT = PasswordMech.BCRYPT.getIdentifier();
-
-    /**
-     * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     *
-     * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
-     * @param newPassword The new password to encode
-     * @return The encoded password
-     * @throws UnsupportedEncodingException
-     * @throws NoSuchAlgorithmException
-     * @throws OXException If encoding the new password fails
-     */
-    public static final String getEncodedPassword(final String mech, final String newPassword) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        if (MECH_CRYPT.equals(mech)) {
-            return PasswordMech.CRYPT.encode(newPassword);
-        } else if (MECH_SHA.equals(mech)) {
-            return PasswordMech.SHA.encode(newPassword);
-        } else if (MECH_BCRYPT.equals(mech)) {
-            return PasswordMech.BCRYPT.encode(newPassword);
-        } else {
-            return null;
-        }
-    }
+    public IPasswordMech get(String identifier);
 
 }

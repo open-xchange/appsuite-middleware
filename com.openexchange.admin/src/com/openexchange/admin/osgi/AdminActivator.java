@@ -97,6 +97,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -127,6 +128,7 @@ public class AdminActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
 
+        track(PasswordMechFactory.class, new RegistryServiceTrackerCustomizer<PasswordMechFactory>(context, AdminServiceRegistry.getInstance(), PasswordMechFactory.class));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));

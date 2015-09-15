@@ -63,6 +63,7 @@ import com.openexchange.guest.impl.internal.GuestDeleteContextGroupListener;
 import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
 import com.openexchange.guest.impl.internal.GuestStorageServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.user.UserService;
 
 /**
@@ -79,7 +80,7 @@ public class GuestImplActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, DatabaseService.class, ConfigViewFactory.class, ContactUserStorage.class, ConfigurationService.class, ContextService.class
+            UserService.class, DatabaseService.class, ConfigViewFactory.class, ContactUserStorage.class, ConfigurationService.class, ContextService.class, PasswordMechFactory.class
         };
     }
 
@@ -93,7 +94,7 @@ public class GuestImplActivator extends HousekeepingActivator {
 
         GuestStorageServiceLookup.set(this);
 
-        GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class));
+        GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class), getService(PasswordMechFactory.class));
         registerService(GuestService.class, guestService, 2);
 
         GuestService delegateGuestService = new DelegateGuestService(guestService, getService(ConfigurationService.class));

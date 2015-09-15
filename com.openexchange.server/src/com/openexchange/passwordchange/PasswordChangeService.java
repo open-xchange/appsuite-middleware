@@ -49,8 +49,6 @@
 
 package com.openexchange.passwordchange;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -79,6 +77,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -335,19 +335,16 @@ public abstract class PasswordChangeService {
      * @throws OXException If encoding the new password fails
      */
     protected static final String getEncodedPassword(final String mech, final String newPassword) throws OXException {
-        try {
-            final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
-            if (null == cryptedPassword) {
-                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
-            }
-            return cryptedPassword;
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Error encrypting password according to CRYPT mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        } catch (final NoSuchAlgorithmException e) {
-            LOG.error("Error encrypting password according to SHA mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+        PasswordMechFactory factory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
+        IPasswordMech iPasswordMech = factory.get(mech);
+        if (iPasswordMech == null) {
+            throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
         }
+        final String cryptedPassword = iPasswordMech.encode(newPassword);
+        if (null == cryptedPassword) {
+            throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
+        }
+        return cryptedPassword;
     }
 
     /*-

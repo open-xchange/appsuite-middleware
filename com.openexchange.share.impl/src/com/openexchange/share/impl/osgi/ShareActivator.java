@@ -74,6 +74,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.share.ShareCryptoService;
@@ -116,7 +117,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class };
     }
 
     @Override
@@ -144,6 +145,11 @@ public class ShareActivator extends HousekeepingActivator {
                 CryptoService service = context.getService(serviceReference);
                 ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
                 addService(ShareCryptoService.class, shareCryptoService);
+
+                PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
+                if (passwordMechFactory != null) {
+                    passwordMechFactory.register(shareCryptoService);
+                }
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;

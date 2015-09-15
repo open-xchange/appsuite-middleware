@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,31 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.passwordmechs;
 
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.share.ShareCryptoService;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link ShareCryptoServiceImpl}
+ * {@link PasswordMechFactoryImpl}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class ShareCryptoServiceImpl implements ShareCryptoService {
+public class PasswordMechFactoryImpl implements PasswordMechFactory {
 
-    private final CryptoService cryptoService;
-    private final String cryptKey;
-
-    /**
-     * Initializes a new {@link ShareCryptoServiceImpl}.
-     *
-     * @param cryptoService The underlying crypto service
-     * @param cryptKey The key use to encrypt / decrypt data
-     */
-    public ShareCryptoServiceImpl(CryptoService cryptoService, String cryptKey) {
-        super();
-        this.cryptoService = cryptoService;
-        this.cryptKey = cryptKey;
-    }
+    private final Map<String, IPasswordMech> registeredPasswordMechs = new HashMap<String, IPasswordMech>();
 
     @Override
-    public String encrypt(String value) throws OXException {
-        return cryptoService.encrypt(value, cryptKey);
-    }
+    public void register(IPasswordMech ... passwordMech) {
+        for (IPasswordMech mech : passwordMech) {
+            registeredPasswordMechs.put(mech.getIdentifier(), mech);
 
-    @Override
-    public String decrypt(String value) throws OXException {
-        return cryptoService.decrypt(value, cryptKey);
-    }
-
-    @Override
-    public String getIdentifier() {
-        return PASSWORD_MECH_ID;
-    }
-
-    @Override
-    public String encode(String str) throws OXException {
-        return encrypt(str);
-    }
-
-    @Override
-    public boolean check(String toCheck, String encoded) throws OXException {
-        if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return true;
-        } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
-            return false;
-        } else if ((Strings.isNotEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return false;
         }
+    }
 
-        String decrypted = decrypt(encoded);
-        if (encoded.equals(decrypted)) {
-            return true;
-        }
-        return false;
+    @Override
+    public IPasswordMech get(String identifier) {
+        return registeredPasswordMechs.get(identifier);
     }
 }

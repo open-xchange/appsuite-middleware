@@ -49,15 +49,15 @@
 
 package com.openexchange.admin.storage.fileStorage;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
-import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.exception.OXException;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 
 /**
  * Default file implementation for admin auth.
@@ -83,15 +83,17 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {
             try {
-                PasswordMech passwordMech = PasswordMech.getPasswordMechFor(master.getPasswordMech());
-                return GenericChecks.authByMech(master.getPassword(), authdata.getPassword(), passwordMech.getIdentifier());
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException | IllegalArgumentException e) {
+                PasswordMechFactory factory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class);
+                if (factory != null) {
+                    IPasswordMech passwordMech = factory.get(master.getPasswordMech());
+                    return passwordMech.check(authdata.getPassword(), master.getPassword());
+                }
+            } catch (OXException e) {
                 log.error("", e);
                 return false;
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

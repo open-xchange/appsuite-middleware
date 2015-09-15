@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,41 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.passwordmechs;
 
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.share.ShareCryptoService;
 
 /**
- * {@link ShareCryptoServiceImpl}
+ * {@link IPasswordMech}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class ShareCryptoServiceImpl implements ShareCryptoService {
-
-    private final CryptoService cryptoService;
-    private final String cryptKey;
+public interface IPasswordMech {
 
     /**
-     * Initializes a new {@link ShareCryptoServiceImpl}.
+     * Returns the string representation of the password mechanism identifier
      *
-     * @param cryptoService The underlying crypto service
-     * @param cryptKey The key use to encrypt / decrypt data
+     * @return The identifier
      */
-    public ShareCryptoServiceImpl(CryptoService cryptoService, String cryptKey) {
-        super();
-        this.cryptoService = cryptoService;
-        this.cryptKey = cryptKey;
-    }
+    public String getIdentifier();
 
-    @Override
-    public String encrypt(String value) throws OXException {
-        return cryptoService.encrypt(value, cryptKey);
-    }
+    /**
+     * Encodes the given string according to this password mechanism and returns the encoded string.
+     *
+     * @param password The password to encode
+     * @return The encoded string
+     * @throws OXException
+     */
+    public String encode(String password) throws OXException;
 
-    @Override
-    public String decrypt(String value) throws OXException {
-        return cryptoService.decrypt(value, cryptKey);
-    }
-
-    @Override
-    public String getIdentifier() {
-        return PASSWORD_MECH_ID;
-    }
-
-    @Override
-    public String encode(String str) throws OXException {
-        return encrypt(str);
-    }
-
-    @Override
-    public boolean check(String toCheck, String encoded) throws OXException {
-        if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return true;
-        } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
-            return false;
-        } else if ((Strings.isNotEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
-            return false;
-        }
-
-        String decrypted = decrypt(encoded);
-        if (encoded.equals(decrypted)) {
-            return true;
-        }
-        return false;
-    }
+    /**
+     * Checks if given password matches the encoded string according to this password mechanism.
+     *
+     * @param toCheck The password to check
+     * @param encoded The encoded string to check against
+     * @return <code>true</code> if string matches; otherwise <code>false</code>
+     * @throws OXException
+     */
+    public boolean check(String toCheck, String encoded) throws OXException;
 }

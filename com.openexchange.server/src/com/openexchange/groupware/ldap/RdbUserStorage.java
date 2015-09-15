@@ -98,7 +98,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -855,7 +855,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
@@ -866,7 +866,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
         if (connection == null) {
             updatePasswordInternal(context, userId, mech, password);
             return;

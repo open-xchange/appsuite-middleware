@@ -49,18 +49,13 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -277,11 +272,11 @@ public abstract class UserStorage {
      * @param password The (encoded) password to set
      * @throws OXException if an error occurs.
      */
-    public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+    public void updatePassword(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
         updatePasswordInternal(connection, context, userId, mech, password);
     }
 
-    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException;
+    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException;
 
     /**
      * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
@@ -596,62 +591,6 @@ public abstract class UserStorage {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
         }
-    }
-
-    private static interface PasswordCheck {
-
-        boolean checkPassword(String candidate, String userHash) throws OXException;
-    }
-
-    private static final Map<String, PasswordCheck> CHECKERS;
-
-    static {
-        final Map<String, PasswordCheck> m = new HashMap<String, UserStorage.PasswordCheck>(3);
-        m.put(PasswordMech.CRYPT.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.CRYPT.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        m.put(PasswordMech.SHA.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.SHA.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        m.put(PasswordMech.BCRYPT.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.BCRYPT.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        CHECKERS = Collections.unmodifiableMap(m);
-    }
-
-    public static final boolean authenticate(final User user, final String password) throws OXException {
-        final PasswordCheck check = CHECKERS.get(user.getPasswordMech());
-        return null == check ? false : check.checkPassword(password, user.getUserPassword());
     }
 
     /**

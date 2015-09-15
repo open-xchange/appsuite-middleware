@@ -49,8 +49,6 @@
 
 package com.openexchange.share.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
@@ -192,11 +190,7 @@ public class ShareUtils {
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
         if (Strings.isNotEmpty(recipient.getPassword())) {
-            try {
-                guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
-            }
+            guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
         }
         return guestUser;
     }

@@ -67,6 +67,9 @@ import com.openexchange.exception.interception.internal.OXExceptionInterceptorTr
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceHolderInit;
 import com.openexchange.session.inspector.SessionInspectorChain;
@@ -131,6 +134,9 @@ public final class GlobalActivator implements BundleActivator {
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+            PasswordMechFactoryImpl passwordMechFactoryImpl = new PasswordMechFactoryImpl();
+            passwordMechFactoryImpl.register(PasswordMech.BCRYPT, PasswordMech.CRYPT, PasswordMech.SHA);
+            context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
 
             threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
 
