@@ -231,7 +231,9 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             CalendarDataObject cdo = 0 < appointment.getParentFolderID() ?
                 getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
                 getAppointmentInterface().getObjectById(appointment.getObjectID());
-            this.remember(appointment);
+            if (null != knownAppointments) {
+                remember(appointment);
+            }
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
             throw super.protocolException(e);
