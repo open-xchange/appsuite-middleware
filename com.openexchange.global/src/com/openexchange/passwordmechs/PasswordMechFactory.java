@@ -59,6 +59,12 @@ public interface PasswordMechFactory {
 
     public void register(IPasswordMech... passwordMech);
 
+    /**
+     * Returns the password mechanism related to given identifier or <code>null</code> if no password mechanism is registered for the given identifier.
+     *
+     * @param identifier The identifier for the password mechanism
+     * @return {@link IPasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
+     */
     public IPasswordMech get(String identifier);
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.passwordmechs;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PasswordMechFactoryImpl}
@@ -63,15 +64,26 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory {
     private final Map<String, IPasswordMech> registeredPasswordMechs = new HashMap<String, IPasswordMech>();
 
     @Override
-    public void register(IPasswordMech ... passwordMech) {
+    public void register(IPasswordMech... passwordMech) {
         for (IPasswordMech mech : passwordMech) {
-            registeredPasswordMechs.put(mech.getIdentifier(), mech);
+            registeredPasswordMechs.put(mech.getIdentifier().toUpperCase(), mech);
 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IPasswordMech get(String identifier) {
-        return registeredPasswordMechs.get(identifier);
+        String id = Strings.toUpperCase(identifier);
+        if (!id.startsWith("{")) {
+            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
+        }
+        if (!id.endsWith("}")) {
+            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
+        }
+
+        return registeredPasswordMechs.get(id);
     }
 }

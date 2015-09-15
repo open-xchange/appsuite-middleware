@@ -147,9 +147,7 @@ public class ShareActivator extends HousekeepingActivator {
                 addService(ShareCryptoService.class, shareCryptoService);
 
                 PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
-                if (passwordMechFactory != null) {
-                    passwordMechFactory.register(shareCryptoService);
-                }
+                passwordMechFactory.register(shareCryptoService);
                 cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
