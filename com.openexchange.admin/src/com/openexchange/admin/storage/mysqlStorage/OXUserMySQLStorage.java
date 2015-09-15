@@ -1548,6 +1548,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         throw new StorageException("Filestore with identifier " + fsId + " does not exist.");
                     }
                 }
+
+                // Load it to ensure validity
+                OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+                try {
+                    URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), oxu.getFilestoreURI(i(usrdata.getFilestoreId())));
+                    FileStorages.getFileStorageService().getFileStorage(uri);
+                } catch (OXException e) {
+                    throw new StorageException(e.getMessage(), e);
+                }
             }
         }
 

@@ -47,93 +47,62 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.realtime.presence.subscribe.database;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.WorkingLevel;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DropStoredProceduresUpdateTask}
+ * Removes the "presenceSubscriptions" table.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.8.0
  */
-public class DropStoredProceduresUpdateTask extends UpdateTaskAdapter {
+public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
 
-    // The list of stored procedures
-    private final List<String> storedProcedures = Collections.unmodifiableList(Arrays.asList(
-        "get_attachment_id",
-        "get_calendar_id",
-        "get_contact_id",
-        "get_folder_id",
-        "get_forum_id",
-        "get_gid_number_id",
-        "get_gui_setting_id",
-        "get_ical_id",
-        "get_infostore_id",
-        "get_mail_service_id",
-        "get_pinboard_id",
-        "get_principal_id",
-        "get_project_id",
-        "get_resource_group_id",
-        "get_resource_id",
-        "get_task_id",
-        "get_uid_number_id",
-        "get_unique_id",
-        "get_webdav_id"));
+    /**
+     * Initializes a new {@link RemoveRealtimePresenceTableTask}.
+     */
+    public RemoveRealtimePresenceTableTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        Connection conn = Database.getNoTimeout(ctxId, true);
+        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        boolean rollback = false;
         try {
-            conn.setAutoCommit(false);
-            for(String proc : storedProcedures) {
-                if(DBUtils.procedureExists(conn, proc)) {
-                    Statement stmt = null;
-                    try {
-                        stmt = conn.createStatement();
-                        stmt.execute("DROP PROCEDURE " + proc);
-                    } finally {
-                        closeSQLStuff(null, stmt);
-                    }
-                }
+            DBUtils.startTransaction(connection);
+            rollback = true;
+
+            if (Tools.tableExists(connection, "presenceSubscriptions")) {
+                Tools.dropTable(connection, "presenceSubscriptions");
             }
-            conn.commit();
+
+            connection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            DBUtils.rollback(conn);
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(conn);
-            Database.backNoTimeout(ctxId, true, conn);
+            if (rollback) {
+                DBUtils.rollback(connection);
+            }
+            DBUtils.autocommit(connection);
+            Database.backNoTimeout(params.getContextId(), true, connection);
         }
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { "com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTaskV2" };
     }
 
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
-    }
+
 }

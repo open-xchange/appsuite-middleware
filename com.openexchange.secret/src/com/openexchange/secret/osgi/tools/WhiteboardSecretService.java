@@ -86,7 +86,7 @@ public class WhiteboardSecretService implements RankingAwareSecretService {
             return Integer.MIN_VALUE;
         }
         final Object ranking = reference.getProperty(org.osgi.framework.Constants.SERVICE_RANKING);
-        return null == ranking ? Integer.MIN_VALUE : Integer.parseInt(ranking.toString().trim());
+        return null == ranking ? Integer.MIN_VALUE : ((ranking instanceof Integer) ? ((Integer) ranking).intValue() : Integer.parseInt(ranking.toString().trim()));
     }
 
     @Override

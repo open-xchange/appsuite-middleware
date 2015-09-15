@@ -61,7 +61,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
-import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -182,7 +181,6 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 
-        trackService(ContactCollectorService.class);
         trackService(ModuleSupport.class);
         track(ManagementService.class, new ManagementServiceTracker(context, shareService, moduleSupport));
         trackService(IDBasedFileAccessFactory.class);

@@ -237,9 +237,9 @@ public class AdminActivator extends HousekeepingActivator {
         }
 
         // UserServiceInterceptor Bridge
-        Dictionary<String, String> props = new Hashtable<String, String>(2);
+        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
         props.put("name", "OXUser");
-        props.put(Constants.SERVICE_RANKING, Integer.toString(200));
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
         registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
 
         //Register CreateTableServices

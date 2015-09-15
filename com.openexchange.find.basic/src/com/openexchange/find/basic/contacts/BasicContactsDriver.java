@@ -253,7 +253,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         List<Facet> facets = new ArrayList<Facet>();
         String prefix = autocompleteRequest.getPrefix();
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             /*
              * add prefix-aware field facets
              */
@@ -270,13 +270,9 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             facets.add(new EmailFacet(prefix, prefixTokens));
             facets.add(new PhoneFacet(prefix, prefixTokens));
             facets.add(new AddressFacet(prefix, prefixTokens));
-        }
-        /*
-         * add ContactsFacetType.CONTACT facet dynamically
-         */
-        {
-        	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
-        	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
+
+            AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+            parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
             List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
             if (null != contacts && !contacts.isEmpty()) {
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
@@ -292,6 +288,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                 facets.add(builder.build());
             }
         }
+
         /*
          * add other facets
          */

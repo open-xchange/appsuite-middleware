@@ -58,8 +58,6 @@ import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
@@ -103,21 +101,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
-            context.addFrameworkListener(new FrameworkListener() {
-
-                @Override
-                public void frameworkEvent(FrameworkEvent event) {
-                    if (event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
-                        int eventType = event.getType();
-                        if (eventType == FrameworkEvent.ERROR) {
-                            log.error(event.toString(), event.getThrowable());
-                        } else {
-                            log.info(event.toString(), event.getThrowable());
-                        }
-                    }
-                }
-            });
-
             ServletFilterRegistration.initInstance();
             {
                 ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));

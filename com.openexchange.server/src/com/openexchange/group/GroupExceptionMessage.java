@@ -106,4 +106,7 @@ public class GroupExceptionMessage implements LocalizableStrings {
     // The display name "%1$s" is reserved. Please choose another one.
     public static final String RESERVED_DISPLAY_NAME_MSG = "The display name \"%1$s\" is reserved. Please choose another one.";
 
+    // Group contains a guest user %1$d.
+    public static final String NO_GUEST_USER_IN_GROUP_MSG = "Group contains a guest user %1$d.";
+
 }

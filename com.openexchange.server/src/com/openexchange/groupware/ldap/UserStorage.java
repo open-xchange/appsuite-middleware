@@ -69,6 +69,7 @@ import com.openexchange.user.UserService;
 /**
  * This interface provides methods to read data from users in the directory
  * service. This class is implemented according the DAO design pattern.
+ *
  * @author <a href="mailto:marcus@open-xchange.de">Marcus Klein </a>
  */
 public abstract class UserStorage {
@@ -111,11 +112,12 @@ public abstract class UserStorage {
 
     /**
      * Searches for a user whose login matches the given uid.
+     *
      * @param loginInfo Login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
      * @throws OXException if an error occurs while searching the user or the
-     * user doesn't exist.
+     *             user doesn't exist.
      */
     public abstract int getUserId(String loginInfo, Context context) throws OXException;
 
@@ -142,6 +144,7 @@ public abstract class UserStorage {
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
+     *
      * @param uid User identifier.
      * @param context The context.
      * @return a user object.
@@ -162,6 +165,7 @@ public abstract class UserStorage {
 
     /**
      * Reads the data from a user from the underlying persistent data storage by through using the given database connection.
+     *
      * @param ctx The context.
      * @param userId User identifier.
      * @param con a readable database connection.
@@ -194,6 +198,7 @@ public abstract class UserStorage {
     /**
      * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
      * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
+     *
      * @param ctx the context.
      * @return an array with all user objects from a context.
      * @throws OXException if all user objects can not be loaded from the persistent storage.
@@ -247,18 +252,36 @@ public abstract class UserStorage {
      * </ul>
      * For guest users, additionally the following properties may be changed:
      * <ul>
-     * <li>User password</li>
-     * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>
      *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.groupware.ldap.UserStorage.updatePassword(Context, int, PasswordMech, String)
+     * </b>
+     *
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws OXException  if an error occurs.
+     * @throws OXException if an error occurs.
      */
-    public final void updateUser(final User user, final Context context) throws OXException{
+    public final void updateUser(final User user, final Context context) throws OXException {
         updateUser(null, user, context);
     }
+
+    /**
+     * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
+     *
+     * @param connection a writable database connection
+     * @param context The context.
+     * @param userId The user id to change
+     * @param mech The password mech to set
+     * @param password The (encoded) password to set
+     * @throws OXException if an error occurs.
+     */
+    public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+        updatePasswordInternal(connection, context, userId, mech, password);
+    }
+
+    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException;
 
     /**
      * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
@@ -286,18 +309,20 @@ public abstract class UserStorage {
      * </ul>
      * For guest users, additionally the following properties may be changed:
      * <ul>
-     * <li>User password</li>
-     * <li>Password mechanism</li>
      * <li>Shadow last change</li>
      * </ul>
+     *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.groupware.ldap.UserStorage.updatePassword(Connection, int, int, PasswordMech, String)
+     * </b>
      *
      * @param con a writable database connection
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws OXException  if an error occurs.
+     * @throws OXException if an error occurs.
      * @see #getContext(int)
      */
-    public final void updateUser(final Connection con, final User user, final Context context) throws OXException{
+    public final void updateUser(final Connection con, final User user, final Context context) throws OXException {
         updateUserInternal(con, user, context);
         // Drop possible cached locale-sensitive folder data.
         // TODO We need some logic layer above the storage layer for users. Every component then needs to be refactored to use the
@@ -322,6 +347,7 @@ public abstract class UserStorage {
      * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
      * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
      * API.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
@@ -364,10 +390,11 @@ public abstract class UserStorage {
     /**
      * Searches a user by its email address. This is used for converting iCal to
      * appointments.
+     *
      * @param email the email address of the user.
      * @param context The context.
      * @return a User object if the user was found by its email address or
-     * <code>null</code> if no user could be found.
+     *         <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
     public User searchUser(String email, Context context) throws OXException {
@@ -377,10 +404,11 @@ public abstract class UserStorage {
     /**
      * Searches a user by its email address. This is used for converting iCal to
      * appointments.
+     *
      * @param email the email address of the user.
      * @param context The context.
      * @return a User object if the user was found by its email address or
-     * <code>null</code> if no user could be found.
+     *         <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
     public User searchUser(String email, Context context, boolean considerAliases) throws OXException {
@@ -397,7 +425,7 @@ public abstract class UserStorage {
      * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
      * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
      * @return a User object if the user was found by its email address or
-     * <code>null</code> if no user could be found.
+     *         <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
     public abstract User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException;
@@ -437,6 +465,7 @@ public abstract class UserStorage {
 
     /**
      * Returns an array with all user identifier of the context.
+     *
      * @param context The context.
      * @return an array with all user identifier of the context.
      * @throws OXException if generating this list fails.
@@ -471,6 +500,7 @@ public abstract class UserStorage {
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
+     *
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
@@ -480,28 +510,31 @@ public abstract class UserStorage {
 
     /**
      * Performs internal start-up
+     *
      * @throws OXException If internal start-up fails
      */
     protected abstract void startInternal() throws OXException;
 
     /**
      * Performs internal shut-down
+     *
      * @throws OXException If internal shut-down fails
      */
     protected abstract void stopInternal() throws OXException;
 
     /**
      * Searches users who where modified later than the given date.
+     *
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
      * @throws OXException if an error occurs during the search.
      */
-    public abstract int[] listModifiedUser(Date modifiedSince, Context context)
-        throws OXException;
+    public abstract int[] listModifiedUser(Date modifiedSince, Context context) throws OXException;
 
     /**
      * Removes a user from the cache if caching is used.
+     *
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @throws OXException if removing gives an exception.
@@ -623,6 +656,7 @@ public abstract class UserStorage {
 
     /**
      * Initialization.
+     *
      * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws OXException {
@@ -657,6 +691,7 @@ public abstract class UserStorage {
 
     /**
      * Creates a new instance implementing the user storage interface.
+     *
      * @return an instance implementing the user storage interface.
      */
     public static UserStorage getInstance() {

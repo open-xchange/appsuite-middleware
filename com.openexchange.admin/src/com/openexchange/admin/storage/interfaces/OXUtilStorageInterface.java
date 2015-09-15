@@ -251,6 +251,15 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore getFilestore(int filestoreId, boolean loadUsage) throws StorageException;
 
     /**
+     * Loads the base URI from specified filestore.
+     *
+     * @param filestoreId The filestore identifier
+     * @return The filestore base URI
+     * @throws StorageException If filestore base URI cannot be returned
+     */
+    public abstract java.net.URI getFilestoreURI(int filestoreId) throws StorageException;
+
+    /**
      * Unregister filestore from configbdb
      *
      * @param store_id

@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -90,6 +91,14 @@ public class AJAXRequestDataBuilder {
     public AJAXRequestDataBuilder httpResources(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         data.setHttpServletRequest(httpRequest);
         data.setHttpServletResponse(httpResponse);
+        return this;
+    }
+
+    /**
+     * Specify the session
+     */
+    public AJAXRequestDataBuilder session(ServerSession session) {
+        data.setSession(session);
         return this;
     }
 
@@ -147,7 +156,7 @@ public class AJAXRequestDataBuilder {
         data.setPathInfo(path);
         return this;
     }
-    
+
     public AJAXRequestData build() {
     	return build(null);
     }

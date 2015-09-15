@@ -60,6 +60,7 @@ import java.util.regex.PatternSyntaxException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.Cache;
@@ -172,19 +173,25 @@ public abstract class PasswordChangeService {
                 throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
             }
 
-            if (false == user.isGuest()) {
-                Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
-                {
-                    Map<String, List<String>> headers = event.getHeaders();
-                    if (headers != null) {
-                        properties.put("headers", headers);
-                    }
-                    com.openexchange.authentication.Cookie[] cookies = event.getCookies();
-                    if (null != cookies) {
-                        properties.put("cookies", cookies);
-                    }
+            Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
+            {
+                Map<String, List<String>> headers = event.getHeaders();
+                if (headers != null) {
+                    properties.put("headers", headers);
                 }
+                com.openexchange.authentication.Cookie[] cookies = event.getCookies();
+                if (null != cookies) {
+                    properties.put("cookies", cookies);
+                }
+            }
+            if (!user.isGuest()) {
                 authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
+            } else {
+                BasicAuthenticationService basicService = Authentication.getBasicService();
+                if (basicService == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
+                }
+                basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
             }
         } catch (final OXException e) {
             if (e.equalsCode(6, "LGI")) {

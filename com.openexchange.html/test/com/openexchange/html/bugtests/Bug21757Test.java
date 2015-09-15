@@ -66,10 +66,10 @@ public class Bug21757Test extends AbstractSanitizing {
         String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
         String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
         StringBuilder expectedBuilder = new StringBuilder();
-        expectedBuilder.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n");
-        expectedBuilder.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n");
-        expectedBuilder.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n");
-        expectedBuilder.append(" </head><body><center>Lorem Ipsum Dolor<table><tbody><tr><td>cell</td></tr></tbody></table></center></body></html>");
+        expectedBuilder.append("<!DOCTYPE html>\n");
+        expectedBuilder.append("<html><head>\n");
+        expectedBuilder.append("    <meta charset=\"UTF-8\">\n");
+        expectedBuilder.append("</head><body><center>Lorem Ipsum Dolor<table><tbody><tr><td>cell</td></tr></tbody></table></center></body></html>\n ");
         String expected = expectedBuilder.toString();
         assertTrue("The opening <body> tag is missing", actual.contains("<body>"));
         assertTrue("The closing </body> tag is missing", actual.contains("</body>"));

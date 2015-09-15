@@ -63,8 +63,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -100,7 +98,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordchange.PasswordMechanism;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -127,17 +125,13 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
-
-    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
-
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
-        "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
-        "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " + "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " + "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
+
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ? WHERE cid = ? AND id = ?";
 
     /**
      * Default constructor.
@@ -314,8 +308,7 @@ public class RdbUserStorage extends UserStorage {
              * insert tombstone record into del_user table
              */
             try {
-                stmt = con.prepareStatement(
-                    "INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
+                stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?);");
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, userId);
                 stmt.setInt(3, contactId);
@@ -490,9 +483,7 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
-                        "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy," +
-                        "filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=?" + " AND id IN (", currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," + "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy," + "filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=?" + " AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -753,13 +744,13 @@ public class RdbUserStorage extends UserStorage {
         }
 
         UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
-         // Proceed iterating users
+        // Proceed iterating users
         for (final UserImpl user : users.valueCollection()) {
             final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
             {
                 Set<String> aliases = userAlias.getAliases(contextId, user.getId());
                 final List<String> tmp = new ArrayList<String>(aliases.size());
-                if(aliases != null && false == aliases.isEmpty()) {
+                if (aliases != null && false == aliases.isEmpty()) {
                     for (final String alias : aliases) {
                         try {
                             tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
@@ -843,7 +834,6 @@ public class RdbUserStorage extends UserStorage {
         if (null != user.getAttributes()) {
             updateAttributes(context, user, con);
         }
-        updateUserPassword(con, user, context);
     }
 
     private void updateUserFields(final Connection con, final User user, final Context context) throws SQLException, OXException {
@@ -865,30 +855,35 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updateUserPassword(final Connection con, final User user, final Context context) throws SQLException {
-        final int contextId = context.getContextId();
-        final int userId = user.getId();
-        final String password = user.getUserPassword();
-        final String mech = user.getPasswordMech();
-        final int shadowLastChanged = user.getShadowLastChange();
-        if (null != password && null != mech || user.isGuest()) {
+    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickupWriteable(context);
+            updatePasswordInternal(con, context, userId, mech, password);
+        } finally {
+            DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    @Override
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+        if (connection == null) {
+            updatePasswordInternal(context, userId, mech, password);
+            return;
+        }
+
+        if (null != mech) {
             PreparedStatement stmt = null;
             try {
-                String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
-                stmt = con.prepareStatement(user.isGuest() ? SQL_UPDATE_PASSWORD_AND_MECH : SQL_UPDATE_PASSWORD);
+                stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
                 int pos = 1;
-                stmt.setString(pos++, encodedPassword);
-                if (user.isGuest()) {
-                    stmt.setString(pos++, mech);
-                }
-                stmt.setInt(pos++, shadowLastChanged);
-                stmt.setInt(pos++, contextId);
+                stmt.setString(pos++, password);
+                stmt.setString(pos++, mech.getIdentifier());
+                stmt.setInt(pos++, context.getContextId());
                 stmt.setInt(pos++, userId);
                 stmt.execute();
-            } catch (final UnsupportedEncodingException e) {
-                throw new SQLException(e.toString());
-            } catch (final NoSuchAlgorithmException e) {
-                throw new SQLException(e.toString());
+            } catch (SQLException e) {
+                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(stmt);
             }
@@ -1510,8 +1505,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listModifiedUser(final Date modifiedSince, final Context context)
-        throws OXException {
+    public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -1646,8 +1640,7 @@ public class RdbUserStorage extends UserStorage {
             }
             users = sia.toArray();
         } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e
-                .getMessage());
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

@@ -152,10 +152,14 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
         {
             final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
             if (null != oRanking) {
-                try {
-                    ranking = Integer.parseInt(oRanking.toString().trim());
-                } catch (final NumberFormatException e) {
-                    ranking = defaultRanking;
+                if (oRanking instanceof Integer) {
+                    ranking = ((Integer) oRanking).intValue();
+                } else {
+                    try {
+                        ranking = Integer.parseInt(oRanking.toString().trim());
+                    } catch (final NumberFormatException e) {
+                        ranking = defaultRanking;
+                    }
                 }
             }
         }

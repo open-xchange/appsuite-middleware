@@ -323,4 +323,16 @@ public class SimUserService implements UserService {
         return new User[0];
     }
 
+    @Override
+    public void updatePassword(User user, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void updatePassword(Connection connection, User user, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

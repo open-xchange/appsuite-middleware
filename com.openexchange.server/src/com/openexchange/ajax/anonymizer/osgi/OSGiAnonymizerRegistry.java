@@ -134,10 +134,14 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
         {
             Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
             if (null != oRanking) {
-                try {
-                    ranking = Integer.parseInt(oRanking.toString().trim());
-                } catch (NumberFormatException e) {
-                    ranking = defaultRanking;
+                if (oRanking instanceof Integer) {
+                    ranking = ((Integer) oRanking).intValue();
+                } else {
+                    try {
+                        ranking = Integer.parseInt(oRanking.toString().trim());
+                    } catch (NumberFormatException e) {
+                        ranking = defaultRanking;
+                    }
                 }
             }
         }

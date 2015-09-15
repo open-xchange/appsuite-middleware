@@ -835,6 +835,23 @@ public final class Tools {
         return sb.toString();
     }
 
+    /**
+     * Generates an empty HTML page for given arguments.
+     *
+     * @return An empty HTML page
+     */
+    public static String getEmptyPage() {
+        StringBuilder sb = new StringBuilder(128);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        sb.append("<title>A blank HTML page</title>").append(lineSep);
+        sb.append("<meta charset=\"utf-8\" />").append(lineSep);
+        sb.append("</head><body>").append(lineSep);
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");

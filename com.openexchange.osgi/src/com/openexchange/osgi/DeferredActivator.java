@@ -157,10 +157,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 {
                     Object oRanking = reference.getProperty(SERVICE_RANKING);
                     if (null != oRanking) {
-                        try {
-                            ranking = Integer.parseInt(oRanking.toString().trim());
-                        } catch (NumberFormatException e) {
-                            ranking = 0;
+                        if (oRanking instanceof Integer) {
+                            ranking = ((Integer) oRanking).intValue();
+                        } else {
+                            try {
+                                ranking = Integer.parseInt(oRanking.toString().trim());
+                            } catch (NumberFormatException e) {
+                                ranking = 0;
+                            }
                         }
                     }
                 }

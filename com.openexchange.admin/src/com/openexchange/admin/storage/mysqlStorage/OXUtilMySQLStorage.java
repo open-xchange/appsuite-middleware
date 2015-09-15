@@ -55,6 +55,8 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -704,13 +706,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final Long store_size = fstore.getSize();
             if (null != store_size && fstore.getSize() != -1) {
                 final Long l_max = MAX_FILESTORE_CAPACITY;
-                if (store_size.doubleValue() > l_max.longValue()) {
+                if (store_size.longValue() > l_max.longValue()) {
                     throw new StorageException("Filestore size to large for database (max=" + l_max.longValue() + ")");
                 }
                 long store_size_double = store_size.longValue();
                 store_size_double = store_size_double << 20;
                 prep = configdb_write_con.prepareStatement("UPDATE filestore SET size = ? WHERE id = ?");
-                prep.setLong(1, Math.round(store_size_double));
+                prep.setLong(1, store_size_double);
                 prep.setInt(2, id);
                 prep.executeUpdate();
                 prep.close();
@@ -1795,6 +1797,50 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private static long toMB(long value) {
         return 0 == value ? 0 : value / 0x100000;
+    }
+
+    @Override
+    public URI getFilestoreURI(int filestoreId) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            return getFilestoreURI(filestoreId, con);
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private URI getFilestoreURI(int filestoreId, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT uri FROM filestore WHERE id=?");
+            stmt.setInt(1, filestoreId);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw new StorageException("No such file storage for identifier " + filestoreId);
+            }
+            String uri = result.getString(1);
+            try {
+                return new java.net.URI(uri);
+            } catch (URISyntaxException e) {
+                throw new StorageException("Invalid file storage URI: " + uri, e);
+            }
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 
     @Override

@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -307,7 +308,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) {
         if (!user.isGuest()) {
             for (UserServiceInterceptor interceptor : interceptors) {
                 try {
@@ -327,7 +328,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
+    private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) {
         if (!user.isGuest()) {
             for (UserServiceInterceptor interceptor : interceptors) {
                 try {
@@ -377,11 +378,10 @@ public final class UserServiceImpl implements UserService {
          */
         if (language == null || LocaleTools.getLocale(language) == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
-        } else {
-            final Locale locale = LocaleTools.getLocale(language);
-            if (locale == null) {
-                throw UserExceptionCode.INVALID_LOCALE.create(language);
-            }
+        }
+        final Locale locale = LocaleTools.getLocale(language);
+        if (locale == null) {
+            throw UserExceptionCode.INVALID_LOCALE.create(language);
         }
 
         /*
@@ -389,19 +389,18 @@ public final class UserServiceImpl implements UserService {
          */
         if (timeZone == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("timezone");
-        } else {
-            final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
-            boolean found = false;
-            for (final String validTimeZone : validTimeZones) {
-                if (validTimeZone.equals(timeZone)) {
-                    found = true;
-                    break;
-                }
+        }
+        final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
+        boolean found = false;
+        for (final String validTimeZone : validTimeZones) {
+            if (validTimeZone.equals(timeZone)) {
+                found = true;
+                break;
             }
+        }
 
-            if (!found) {
-                throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
-            }
+        if (!found) {
+            throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
         }
 
         /*
@@ -414,4 +413,19 @@ public final class UserServiceImpl implements UserService {
         // TODO: Maybe we have to check the contact id here.
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePassword(User user, Context context) throws OXException {
+        UserStorage.getInstance().updatePassword(null, context, user.getId(), PasswordMech.getPasswordMechFor(user.getPasswordMech()), user.getUserPassword());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePassword(Connection connection, User user, Context context) throws OXException {
+        UserStorage.getInstance().updatePassword(connection, context, user.getId(), PasswordMech.getPasswordMechFor(user.getPasswordMech()), user.getUserPassword());
+    }
 }

@@ -218,12 +218,12 @@ public class DefaultShareService implements ShareService {
                 sharesByRecipient.put(recipient, shareInfo);
             }
             /*
-             * check quota restrictions, commit transaction & trigger collection of e-mail addresses
+             * check quota restrictions & commit transaction
+             * store shares
              */
             checkQuota(session, connectionHelper, sharesInfos);
             connectionHelper.commit();
             LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
             return new CreatedSharesImpl(sharesByRecipient);
         } finally {
             connectionHelper.finish();
@@ -864,7 +864,7 @@ public class DefaultShareService implements ShareService {
                 updatedGuest.setUserPassword(services.getService(ShareCryptoService.class).encrypt(password));
                 updatedGuest.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
             }
-            services.getService(UserService.class).updateUser(connectionHelper.getConnection(), updatedGuest, context);
+            services.getService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
             return true;
         }
         return false;

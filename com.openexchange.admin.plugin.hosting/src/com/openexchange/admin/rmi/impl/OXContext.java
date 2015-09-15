@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,7 @@ import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.tools.pipesnfilters.Filter;
 
@@ -1115,11 +1117,23 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
             }
 
-            // Check capacity
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dst_filestore.getId().intValue());
+
+            // Check capacity
             if (!oxu.hasSpaceForAnotherContext(destFilestore)) {
                 throw new StorageException("Destination filestore does not have enough space for another context.");
+            }
+
+            // Load it to ensure validity
+            String baseUri = destFilestore.getUrl();
+            try {
+                URI uri = FileStorages.getFullyQualifyingUriForContext(ctx.getId().intValue(), new java.net.URI(baseUri));
+                FileStorages.getFileStorageService().getFileStorage(uri);
+            } catch (OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (URISyntaxException e) {
+                throw new StorageException("Invalid file storage URI: " + baseUri, e);
             }
 
             try {

@@ -777,9 +777,6 @@ public final class InternalList {
         // Grants "read all" permissions for the user infostore folder
         list.add(new com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore());
 
-        // Drops the unused stored procedures from the database
-        list.add(new com.openexchange.groupware.update.tasks.DropStoredProceduresUpdateTask());
-
         // Add vCardId column if missing
         list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdTask());
 
@@ -791,9 +788,6 @@ public final class InternalList {
 
         // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
-
-        // Remove the "presenceSubscriptions" table
-        list.add(new com.openexchange.groupware.update.tasks.RemoveRealtimePresenceTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

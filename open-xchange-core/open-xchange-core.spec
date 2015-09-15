@@ -1271,7 +1271,6 @@ exit 0
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
-%doc com.openexchange.server/ChangeLog
 
 %changelog
 * Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>

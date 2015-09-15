@@ -50,6 +50,7 @@
 package com.openexchange.admin.console.user;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -58,6 +59,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
@@ -133,9 +135,14 @@ public class GenerateMasterPasswordCLT {
                 clearPassword = cl.getOptionValue("P");
             } else {
                 builder.append("Enter password for user ").append(parameters.get(Parameter.adminuser)).append(": ");
-                System.out.print(builder.toString());
-                BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                clearPassword = bufferRead.readLine();
+                Console console = System.console();
+                char[] passwd;
+                if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
+                    clearPassword = Arrays.toString(passwd);
+                } else {
+                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                    clearPassword = bufferRead.readLine();
+                }
             }
             final String encPassword = encryptPassword(parameters.get(Parameter.encryption), clearPassword);
             clearPassword = null;
@@ -175,11 +182,11 @@ public class GenerateMasterPasswordCLT {
         StringBuilder builder = new StringBuilder();
         String mpasswdFilename = parameters.get(Parameter.mpasswdfile);
         File file = new File(mpasswdFilename);
-        
+
         if (!file.exists()) {
             file.createNewFile();
         }
-        
+
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             boolean updated = false;

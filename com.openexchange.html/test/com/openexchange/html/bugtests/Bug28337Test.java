@@ -64,10 +64,9 @@ public class Bug28337Test extends AbstractSanitizing {
     public void testGetConformHtml() {
         String content = getHtmlService().getConformHTML("<strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</ul>", "UTF-8");
 
-        assertEquals("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n" +
-            "\r\n" +
-            "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head>\r\n" +
-            "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\r\n" +
-            " </head><body><strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</li></ul></body></html>", content);
+        assertEquals("<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</li></ul></body></html>\n ", content);
     }
 }

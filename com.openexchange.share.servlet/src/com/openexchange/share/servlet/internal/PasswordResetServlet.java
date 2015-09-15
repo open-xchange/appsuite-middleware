@@ -133,7 +133,11 @@ public class PasswordResetServlet extends AbstractShareServlet {
             }
 
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
-                sendInvalidRequest(translator, response);
+                String redirectUrl = new LoginLocationBuilder()
+                    .status("reset_password_info")
+                    .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_GUEST_PASSWORD_REQUIRED))
+                    .build();
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
@@ -182,6 +186,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
                         .share(guestInfo.getBaseToken());
                     response.sendRedirect(redirectUrl.build());
                 } else {
+
                     sendInvalidRequest(translator, response);
                 }
             }
@@ -282,7 +287,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
         }
-        userService.updateUser(user, context);
+        userService.updatePassword(user, context);
         userService.invalidateUser(context, userId);
         return userService.getUser(userId, context);
     }

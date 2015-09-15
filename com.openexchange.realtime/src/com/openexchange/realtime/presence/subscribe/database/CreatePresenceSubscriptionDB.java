@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,31 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.realtime.presence.subscribe.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
 
 /**
- * Removes the "presenceSubscriptions" table.
+ * {@link CreatePresenceSubscriptionDB} - This is a dummy task that needs to be present to keep update task dependencies intact.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.8.0
  */
-public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
+public class CreatePresenceSubscriptionDB extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link RemoveRealtimePresenceTableTask}.
-     */
-    public RemoveRealtimePresenceTableTask() {
+    public CreatePresenceSubscriptionDB() {
         super();
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean rollback = false;
-        try {
-            DBUtils.startTransaction(connection);
-            rollback = true;
-
-            if (Tools.tableExists(connection, "presenceSubscriptions")) {
-                Tools.dropTable(connection, "presenceSubscriptions");
-            }
-
-            connection.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                DBUtils.rollback(connection);
-            }
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
-        }
+        // Nothing
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTaskV2" };
+        return new String[0];
     }
-
 
 }
