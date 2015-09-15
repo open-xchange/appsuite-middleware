@@ -1765,7 +1765,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return fetchSortAndSlice(msgIds, sortField, order, usedFields, indexRange, headerNames);
     }
 
-    private MailMessage[] fetchSortAndSlice(int[] msgIds, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames) throws OXException, MessagingException {
+    private MailMessage[] fetchSortAndSlice(int[] seqnums, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames) throws OXException, MessagingException {
         boolean fastFetch = getIMAPProperties().isFastFetch();
         boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
         char separator = getSeparator(imapFolder);
@@ -1776,9 +1776,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             List<MailMessage> list;
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             if (fetchBody) {
-                list = fetchMessages(msgIds, fetchProfile);
+                list = fetchMessages(seqnums, fetchProfile);
             } else {
-                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
+                MailMessage[] tmp = fetchMessages(seqnums, fetchProfile, hasIMAP4rev1, separator);
                 list = new ArrayList<MailMessage>(tmp.length);
                 for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
@@ -1803,7 +1803,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         List<MailMessage> list;
         {
             FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
-            MailMessage[] mailMessages = fetchMessages(msgIds, fp, hasIMAP4rev1, separator);
+            MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
 
             list = new ArrayList<MailMessage>(mailMessages.length);
             for (MailMessage mailMessage : mailMessages) {
