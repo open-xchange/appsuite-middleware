@@ -84,7 +84,6 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -305,7 +304,8 @@ public class ICalHandler extends HttpAuthShareHandler {
         String userAgentHeader = request.getHeader("User-Agent");
         return null != userAgentHeader && (
             userAgentHeader.contains("Microsoft Outlook") ||
-            userAgentHeader.contains("Lightning") && userAgentHeader.contains("Thunderbird")
+            userAgentHeader.contains("Lightning") && userAgentHeader.contains("Thunderbird") ||
+            userAgentHeader.contains("Google-Calendar-Importer")
         );
     }
 
