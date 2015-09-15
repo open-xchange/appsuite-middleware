@@ -2286,7 +2286,7 @@ public class IMAPProtocol extends Protocol {
 
 	// Grab all SEARCH responses
 	if (response.isOK()) { // command succesful
-	    final List<Integer> v = new ArrayList<Integer>();
+	    gnu.trove.list.TIntList v = new gnu.trove.list.array.TIntArrayList(r.length);
 	    int num;
 	    for (int i = 0, len = r.length; i < len; i++) {
 		if (!(r[i] instanceof IMAPResponse)) {
@@ -2297,18 +2297,14 @@ public class IMAPProtocol extends Protocol {
 		// There *will* be one SEARCH response.
 		if (ir.keyEquals("SEARCH")) {
 		    while ((num = ir.readNumber()) != -1) {
-                v.add(Integer.valueOf(num));
+                v.add(num);
             }
 		    r[i] = null;
 		}
 	    }
 
 	    // Copy the list into 'matches'
-	    final int vsize = v.size();
-	    matches = new int[vsize];
-	    for (int i = 0; i < vsize; i++) {
-            matches[i] = v.get(i).intValue();
-        }
+	    matches = v.toArray();
 	}
 
 	// dispatch remaining untagged responses
@@ -2381,7 +2377,7 @@ public class IMAPProtocol extends Protocol {
 
 	// Grab all SORT responses
 	if (response.isOK()) { // command succesful
-	    final List<Integer> v = new ArrayList<Integer>(r.length);
+	    gnu.trove.list.TIntList v = new gnu.trove.list.array.TIntArrayList(r.length);
 	    int num;
 	    for (int i = 0, len = r.length; i < len; i++) {
 		if (!(r[i] instanceof IMAPResponse)) {
@@ -2391,18 +2387,14 @@ public class IMAPProtocol extends Protocol {
 		final IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("SORT")) {
 		    while ((num = ir.readNumber()) != -1) {
-                v.add(Integer.valueOf(num));
+                v.add(num);
             }
 		    r[i] = null;
 		}
 	    }
 
 	    // Copy the vector into 'matches'
-	    final int vsize = v.size();
-	    matches = new int[vsize];
-	    for (int i = 0; i < vsize; i++) {
-            matches[i] = v.get(i).intValue();
-        }
+	    matches = v.toArray();
 	}
 
 	// dispatch remaining untagged responses
