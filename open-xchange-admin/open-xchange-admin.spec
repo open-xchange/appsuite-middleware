@@ -45,6 +45,11 @@ Requires:      mysql-client >= 5.0.0
 Requires:      mysql >= 5.0.0
 %endif
 Requires:      bzip2
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+Requires:      util-linux-ng
+%else
+Requires:      util-linux
+%endif
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
@@ -217,7 +222,7 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2535
     ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
     # SoftwareChange_Request-2699
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
 fi
