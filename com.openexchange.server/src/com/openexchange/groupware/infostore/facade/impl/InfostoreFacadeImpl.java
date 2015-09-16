@@ -269,14 +269,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             if (version == InfostoreFacade.CURRENT_VERSION) {
                 return searchIterator.hasNext();
             }
-
+            boolean found = false;
             while (searchIterator.hasNext()) {
-                if (searchIterator.next().getVersion() == version) {
-                    return true;
+                DocumentMetadata document = searchIterator.next();
+                if (version == document.getVersion()) {
+                    found = true;
+                    break;
                 }
             }
-
-            return false;
+            return found;
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -1684,8 +1685,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context context, User user, UserPermissionBits permissionBits) throws OXException {
-        return getDocuments(context, user, permissionBits, folderId, columns, null, 0, -1, -1);
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return getDocuments(context, user, permissionBits, folderId, columns, sort, order, start, end);
     }
 
     @Override

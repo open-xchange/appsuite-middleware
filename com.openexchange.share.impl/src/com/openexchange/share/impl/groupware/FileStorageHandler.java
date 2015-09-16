@@ -62,6 +62,8 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -89,8 +91,15 @@ import com.openexchange.tx.ConnectionHolder;
  */
 public class FileStorageHandler implements ModuleHandler {
 
+    private static final String SHARED_FILES_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+
     private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link FileStorageHandler}.
+     *
+     * @param services A service lookup reference
+     */
     public FileStorageHandler(ServiceLookup services) {
         super();
         this.services = services;
@@ -256,7 +265,7 @@ public class FileStorageHandler implements ModuleHandler {
         Context context = requireService(ContextService.class, services).getContext(contextID);
         IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
         List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID);
-        TimedResult<File> timedResult = administrativeFileAccess.getDocuments(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), guestID, fields);
+        TimedResult<File> timedResult = administrativeFileAccess.getDocuments(SHARED_FILES_FOLDER_ID, guestID, fields, Field.ID, SortDirection.ASC, null);
         SearchIterator<File> searchIterator = null;
         try {
             searchIterator = timedResult.results();
@@ -271,8 +280,23 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
+    public boolean hasTargets(int contextID, int guestID) throws OXException {
+        Context context = requireService(ContextService.class, services).getContext(contextID);
+        IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
+        List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID);
+        TimedResult<File> timedResult = administrativeFileAccess.getDocuments(SHARED_FILES_FOLDER_ID, guestID, fields, Field.ID, SortDirection.ASC, Range.valueOf(0, 1));
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = timedResult.results();
+            return searchIterator.hasNext();
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    @Override
     public ShareTargetPath getPath(ShareTarget target, Session session) throws OXException {
-        if (Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID).equals(target.getFolder())) {
+        if (SHARED_FILES_FOLDER_ID.equals(target.getFolder())) {
             File file = getFileAccess(session).getFileMetadata(target.getItem(), FileStorageFileAccess.CURRENT_VERSION);
             String folderId;
             String fileId;
@@ -293,7 +317,7 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public ShareTargetPath getPath(ShareTarget target, int contextID, int guestID) throws OXException {
-        if (Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID).equals(target.getFolder())) {
+        if (SHARED_FILES_FOLDER_ID.equals(target.getFolder())) {
             Context context = requireService(ContextService.class, services).getContext(contextID);
             File file = getAdministrativeFileAccess(context).getFileMetadata(target.getItem(), FileStorageFileAccess.CURRENT_VERSION);
             String folderId;
@@ -320,7 +344,7 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
-        FolderID folderID = new FolderID(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        FolderID folderID = new FolderID(SHARED_FILES_FOLDER_ID);
         FileID fileID = new FileID(target.getItem());
         fileID.setFolderId(folderID.getFolderId());
         return new ShareTarget(target.getModule(), folderID.toUniqueID(), fileID.toUniqueID());

@@ -147,6 +147,15 @@ public interface ModuleHandler {
     List<TargetProxy> listTargets(int contextID, int guestID) throws OXException;
 
     /**
+     * Gets a value indicating whether a specific guest user has at access to at least one target or not.
+     *
+     * @param contextID The context identifier
+     * @param guestID The guest identifier
+     * @return <code>true</code>, if there's at least one targetaccessible, <code>false</code>, otherwise
+     */
+    boolean hasTargets(int contextID, int guestID) throws OXException;
+
+    /**
      * Gets the path for a given target and session. The target must contain IDs from the session users point of view.
      *
      * @param target The target

@@ -75,6 +75,8 @@ import com.openexchange.server.impl.OCLPermission;
 /**
  * {@link Bug40627Test}
  *
+ * Sharing exposes internal and other guests mail addresses to guests
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug40627Test extends ShareTest {

@@ -800,14 +800,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return null;
     }
 
+    protected static Date futureTimestamp() {
+        return new Date(System.currentTimeMillis() + 1000000);
+    }
+
     protected static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
         deleteFoldersSilently(client, foldersToDelete.keySet());
     }
 
     protected static void deleteFoldersSilently(AJAXClient client, Collection<Integer> foldersIDs) throws Exception {
         if (null != client && null != foldersIDs && 0 < foldersIDs.size()) {
-            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
-            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp);
+            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp());
             deleteRequest.setHardDelete(Boolean.TRUE);
             client.execute(deleteRequest);
         }
@@ -815,14 +818,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static void deleteFilesSilently(AJAXClient client, Collection<File> files) throws Exception {
         if (null != client && null != files && 0 < files.size()) {
-            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
             List<String> folderIDs = new ArrayList<String>();
             List<String> fileIDs = new ArrayList<String>();
             for (File file : files) {
                 folderIDs.add(file.getFolderId());
                 fileIDs.add(file.getId());
             }
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp);
+            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp());
             deleteInfostoreRequest.setHardDelete(Boolean.TRUE);
             client.execute(deleteInfostoreRequest);
         }

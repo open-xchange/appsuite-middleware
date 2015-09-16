@@ -350,13 +350,17 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param folderId The folder identifier
      * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive)
+     * @param end The end index (exclusive)
      * @param context The context
      * @param user The user
      * @param permissionBits The user permission bits
      * @return The documents
      * @throws OXException If retrieval fails
      */
-    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context context, User user, UserPermissionBits permissionBits) throws OXException;
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException;
 
     /**
      * Gets the sorted folder's documents.

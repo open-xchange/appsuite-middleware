@@ -55,6 +55,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Range;
 import com.openexchange.groupware.results.TimedResult;
 
 
@@ -188,8 +190,11 @@ public interface IDBasedAdministrativeFileAccess {
      * @param folderId The folder identifier
      * @param userId The user id
      * @param fields The metadata to return
+     * @param sort The field to sort by
+     * @param order The sorting direction
+     * @param range The optional range
      * @return The documents
      */
-    TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields) throws OXException;
+    TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException;
 
 }

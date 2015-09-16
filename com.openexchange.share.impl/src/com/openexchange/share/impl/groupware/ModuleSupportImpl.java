@@ -255,13 +255,22 @@ public class ModuleSupportImpl implements ModuleSupport {
 
     @Override
     public Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException {
-        //TODO: more sophisticated check if targets exist per module
-        Set<Integer> modules = new HashSet<>(5);
-        List<TargetProxy> targets = listTargets(contextID, guestID);
-        for (TargetProxy t : targets) {
-            modules.add(t.getTarget().getModule());
+        Set<Integer> accessibleModules = new HashSet<Integer>();
+        Context context = requireService(ContextService.class, services).getContext(contextID);
+        User user = requireService(UserService.class, services).getUser(guestID, context);
+        UserPermissionBits permissionBits = requireService(UserPermissionService.class, services).getUserPermissionBits(guestID, context);
+        for (Integer moduleID : ShareModuleMapping.getModuleIDs()) {
+            if (OXFolderIteratorSQL.hasVisibleFoldersOfModule(
+                user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), Autoboxing.i(moduleID), context, true, null)) {
+                accessibleModules.add(moduleID);
+            } else {
+                ModuleHandler handler = handlers.opt(moduleID);
+                if (null != handler && handler.hasTargets(contextID, guestID)) {
+                    accessibleModules.add(moduleID);
+                }
+            }
         }
-        return modules;
+        return accessibleModules;
     }
 
     @Override

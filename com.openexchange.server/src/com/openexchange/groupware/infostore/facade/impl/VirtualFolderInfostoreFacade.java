@@ -381,7 +381,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
         return new EmptyTimedResult();
     }
 

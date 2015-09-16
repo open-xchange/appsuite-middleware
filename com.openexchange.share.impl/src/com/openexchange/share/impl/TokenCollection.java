@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
@@ -150,25 +151,28 @@ public class TokenCollection {
          * gather all shares for guest users with base token only
          */
         for (ShareToken baseToken : baseTokensOnly) {
-            List<TargetProxy> targetProxies = moduleSupport.listTargets(contextID, baseToken.getUserID());
+            User guestUser = userService.getUser(baseToken.getUserID(), contextID);
+            List<TargetProxy> targetProxies = moduleSupport.listTargets(contextID, guestUser.getId());
             for (TargetProxy proxy : targetProxies) {
                 ShareTargetPath targetPath = proxy.getTargetPath();
                 ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-                shares.add(new DefaultShareInfo(services, baseToken.getUserID(), userService.getUser(baseToken.getUserID(), contextID), srcTarget, proxy.getTarget(), targetPath));
+                ShareTarget dstTarget = proxy.getTarget();
+                shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
             }
         }
         /*
          * pick specific shares for guest users with base tokens and paths
          */
         for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
-            int guestID = entry.getKey().getUserID();
+            User guestUser = userService.getUser(entry.getKey().getUserID(), contextID);
             for (String path : entry.getValue()) {
                 ShareTargetPath targetPath = ShareTargetPath.parse(path);
                 if (targetPath != null) {
-                    TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextID, guestID);
-                    if (targetProxy != null) {
+                    TargetProxy proxy = moduleSupport.resolveTarget(targetPath, contextID, guestUser.getId());
+                    if (proxy != null) {
                         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-                        shares.add(new DefaultShareInfo(services, guestID, userService.getUser(guestID, contextID), srcTarget, targetProxy.getTarget(), targetPath));
+                        ShareTarget dstTarget = proxy.getTarget();
+                        shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
                     }
                 }
             }

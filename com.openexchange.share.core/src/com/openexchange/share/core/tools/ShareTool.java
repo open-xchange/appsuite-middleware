@@ -49,7 +49,6 @@
 
 package com.openexchange.share.core.tools;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -243,29 +242,6 @@ public class ShareTool {
             guestIDs.add(Integer.valueOf(share.getGuest().getGuestID()));
         }
         return guestsByTarget;
-    }
-
-    /**
-     * Maps a list of share targets by their module identifier.
-     *
-     * @param targets The targets to perform the mapping for
-     * @return All different module identifiers mapped to a list of corresponding share targets
-     */
-    public static Map<Integer, List<ShareTarget>> mapTargetsByModule(List<ShareTarget> targets) {
-        if (null == targets || 0 == targets.size()) {
-            return Collections.emptyMap();
-        }
-        Map<Integer, List<ShareTarget>> targetsByModule = new HashMap<Integer, List<ShareTarget>>();
-        for (ShareTarget target : targets) {
-            Integer module = I(target.getModule());
-            List<ShareTarget> mappedTargets = targetsByModule.get(module);
-            if (null == mappedTargets) {
-                mappedTargets = new ArrayList<ShareTarget>();
-                targetsByModule.put(module, mappedTargets);
-            }
-            mappedTargets.add(target);
-        }
-        return targetsByModule;
     }
 
     /**

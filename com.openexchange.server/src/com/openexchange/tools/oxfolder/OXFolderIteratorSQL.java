@@ -1711,6 +1711,64 @@ public final class OXFolderIteratorSQL {
     }
 
     /**
+     * Gets a value indicating whether a specific user has visible folders in a certain module.
+     *
+     * @param userId The identifier of the user to check
+     * @param memberInGroups An array supplying the identifier of those groups the user is member of
+     * @param accessibleModules The identifiers of those modules accessible by the user
+     * @param module The module identifier to check
+     * @param ctx The context
+     * @param ignoreSystem <code>true</code> to ignore folders of type {@link FolderObject#SYSTEM_TYPE} or with an identifier smaller
+     *        than {@link FolderObject#MIN_FOLDER_ID}, <code>false</code>, otherwise
+     * @param con The database connection to use, or <code>null</code> to acquire one dynamically from the pool
+     * @return <code>true</code> if there's at least one visible folder in the module, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public static boolean hasVisibleFoldersOfModule(int userId, int[] memberInGroups, int[] accessibleModules, int module, Context ctx, boolean ignoreSystem, Connection con) throws OXException {
+        /*
+         * prepare query
+         */
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("AND (ot.module=").append(module);
+        if (ignoreSystem) {
+            stringBuilder.append(" AND ot.type<>").append(FolderObject.SYSTEM_TYPE).append(" AND ot.fuid>=").append(FolderObject.MIN_FOLDER_ID);
+        }
+        stringBuilder.append(')');
+        String additionalCondition = stringBuilder.toString();
+        String sql = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT), permissionIds(userId, memberInGroups, ctx),
+            StringCollection.getSqlInString(accessibleModules), additionalCondition, getSubfolderOrderBy(STR_OT) + " LIMIT 1");
+        Connection readCon;
+        boolean closeReadCon = (con == null);
+        {
+            if (closeReadCon) {
+                readCon = DBPool.pickup(ctx);
+            } else {
+                readCon = con;
+            }
+        }
+        int contextId = ctx.getContextId();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = readCon.prepareStatement(sql);
+            int pos = 1;
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, contextId);
+            rs = executeQuery(stmt);
+            return rs.next();
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+        }
+    }
+
+    /**
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
     public static SearchIterator<FolderObject> getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Context ctx, final Connection con) throws OXException {
