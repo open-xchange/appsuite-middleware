@@ -150,7 +150,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.notification"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.servlet"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.handler.ical"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.share.handler.download"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.0,com.openexchange.snippet"/>
