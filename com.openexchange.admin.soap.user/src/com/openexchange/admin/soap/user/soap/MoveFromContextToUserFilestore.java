@@ -42,9 +42,9 @@ public class MoveFromContextToUserFilestore {
     protected Context ctx;
     @XmlElement(nillable = true)
     protected User user;
-    @XmlElement(name = "dst_filestore_id", nillable = true)
+    @XmlElement(name = "dst_filestore_id", required = true, nillable = true)
     protected Filestore dstFilestoreId;
-    @XmlElement(name = "max_quota", nillable = true)
+    @XmlElement(name = "max_quota", required = true, nillable = true)
     protected Long maxQuota;
     @XmlElement(nillable = true)
     protected Credentials auth;
