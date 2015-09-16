@@ -385,4 +385,14 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         return new EmptyTimedResult();
     }
 
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
 }

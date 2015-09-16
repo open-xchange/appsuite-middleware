@@ -153,8 +153,23 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
+     * @deprecated use {@link InfostoreFacade#getDocument(int, int, long, long, ServerSession)} instead
      */
+    @Deprecated
     DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets the denoted document's meta data information.
+     *
+     * @param folderId The identifier of the parent folder
+     * @param id The identifier
+     * @param version The version
+     * @param session The session
+     * @return The meta data
+     * @throws OXException If operation fails
+     * @see #CURRENT_VERSION
+     */
+    DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException;
 
     /**
      * Gets the denoted document's meta data information.<br>
@@ -226,8 +241,23 @@ public interface InfostoreFacade extends TransactionAware {
      * @param clientETag The client E-Tag to compare the current E-Tag to
      * @param session The session
      * @return The document metadata, including the document's input stream in case the client E-Tag is outdated
+     * @deprecated use {@link InfostoreFacade#getDocumentAndMetadata(int, int, int, String, ServerSession) instead
      */
+    @Deprecated
     DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException;
+
+    /**
+     * Gets a doucment's stream including associated metadata, depending on the supplied client E-Tag, i.e. the document data is only
+     * included in the result in case the client has a stale E-Tag.
+     *
+     * @param folderId The identifier of the parent folder
+     * @param id The identifier of the document to retrieve
+     * @param version The version of the document to retrieve
+     * @param clientETag The client E-Tag to compare the current E-Tag to
+     * @param session The session
+     * @return The document metadata, including the document's input stream in case the client E-Tag is outdated
+     */
+    DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).

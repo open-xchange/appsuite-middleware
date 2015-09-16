@@ -49,12 +49,10 @@
 
 package com.openexchange.share.notification.impl;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -75,8 +73,6 @@ public interface NotifyDecision {
      * @return <code>true</code> if a notification should be sent
      * @throws OXException
      */
-    boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException;
-
-    boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, List<ShareTarget> targets, Session session) throws OXException;
+    boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, ShareTargetPath targetPath, Session session) throws OXException;
 
 }

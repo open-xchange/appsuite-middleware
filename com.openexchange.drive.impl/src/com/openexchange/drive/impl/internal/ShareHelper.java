@@ -69,6 +69,7 @@ import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
@@ -309,7 +310,8 @@ public class ShareHelper {
         if (null == notificationService) {
             return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("ShareNotificationService was absent"));
         }
-        return notificationService.sendShareCreatedNotifications(transport, entities, message, target, session.getServerSession(), session.getHostData());
+        ShareTargetPath targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+        return notificationService.sendShareCreatedNotifications(transport, entities, message, targetPath, session.getServerSession(), session.getHostData());
     }
 
     private static ShareService getShareService() {

@@ -97,7 +97,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -334,8 +333,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 String f = targetPath.getFolder();
                 String i = targetPath.getItem();
                 if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
-                    TargetProxy proxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
-                    target = proxy.getTarget();
+                    //TODO: shouldn't the target proxy adjust the target?
+                    //TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+                    //target = targetProxy.getTarget();
+                    ShareTarget srcTarget = new ShareTarget(m, f, i);
+                    target = moduleSupport.adjustTarget(srcTarget, contextId, guestId, guestId);
                 }
             }
         }

@@ -113,12 +113,22 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession sessions) throws OXException {
         throw virtualFolder();
     }
 
     @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
         throw virtualFolder();
     }
 

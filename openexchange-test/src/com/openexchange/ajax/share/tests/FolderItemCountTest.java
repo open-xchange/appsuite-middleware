@@ -106,14 +106,9 @@ public class FolderItemCountTest extends ShareTest {
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, folder.getObjectID(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         /*
-         * check access to share
-         */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
-        /*
          * check item count in shared folder
          */
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
         GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, guestClient.getFolder(), new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 });
         GetResponseNew res = guestClient.execute(req);
         Folder fo = res.getFolder();

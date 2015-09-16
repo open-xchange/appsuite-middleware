@@ -367,4 +367,14 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return null;
     }
 
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        return null;
+    }
+
 }

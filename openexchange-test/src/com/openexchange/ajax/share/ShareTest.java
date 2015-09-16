@@ -344,7 +344,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The inserted file
      * @throws Exception
      */
-    protected File insertSharedFile(int folderID, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    protected File insertSharedFile(int folderID, FileStorageObjectPermission guestPermission) throws Exception {
         return insertSharedFile(folderID, randomUID(), guestPermission);
     }
 

@@ -60,9 +60,9 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -152,8 +152,11 @@ public class ShareServlet extends AbstractShareServlet {
                     String f = targetPath.getFolder();
                     String i = targetPath.getItem();
                     if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
-                        TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
-                        target = targetProxy.getTarget();
+                        //TODO: shouldn't the target proxy adjust the target?
+                        //TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+                        //target = targetProxy.getTarget();
+                        ShareTarget srcTarget = new ShareTarget(m, f, i);
+                        target = moduleSupport.adjustTarget(srcTarget, contextId, guestId, guestId);
                     } else {
                         invalidTarget = true;
                     }

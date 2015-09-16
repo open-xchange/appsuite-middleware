@@ -293,6 +293,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException {
+        return getDocumentMetadata(-1, id, version, session);
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
         Context context = session.getContext();
         /*
          * load document metadata (including object permissions)
@@ -308,7 +313,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required
          */
-        if (false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
             document.setOriginalFolderId(document.getFolderId());
             document.setFolderId(getSharedFilesFolderID(session));
             /*
@@ -387,8 +392,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         return FileStorageUtility.getETagFor(fileID.toUniqueID(), String.valueOf(metadata.getVersion()), metadata.getLastModified());
     }
 
+
     @Override
     public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        return getDocumentAndMetadata(-1, id, version, clientETag, session);
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
         Context context = session.getContext();
         /*
          * get needed metadata (including object permissions) & check read permissions
@@ -401,7 +412,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required, add further metadata
          */
-        if (false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
             metadata.setOriginalFolderId(metadata.getFolderId());
             metadata.setFolderId(getSharedFilesFolderID(session));
             /*

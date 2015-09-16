@@ -89,7 +89,7 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -542,7 +542,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             notificationData.getTransport(),
             entities,
             notificationData.getMessage(),
-            new ShareTarget(modified.getContentType().getModule(), modified.getID()),
+            new ShareTargetPath(modified.getContentType().getModule(), modified.getID(), null),
             session,
             hostData);
     }

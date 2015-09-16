@@ -63,12 +63,12 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
+import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 
 /**
  * {@link AbstractWriteAction}
@@ -208,7 +208,7 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
             transport,
             entities,
             message,
-            new ShareTarget(8, modified.getFolderId(), modified.getId()),
+            new ShareTargetPath(8, modified.getFolderId(), modified.getId()),
             session,
             hostData);
 

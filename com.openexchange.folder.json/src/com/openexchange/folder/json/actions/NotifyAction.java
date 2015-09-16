@@ -70,7 +70,7 @@ import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -150,13 +150,13 @@ public final class NotifyAction extends AbstractFolderAction {
          * notify entities
          */
         Entities entities = filterEntities(entityIDs, folder.getPermissions());
-        ShareTarget target = new ShareTarget(folder.getContentType().getModule(), folder.getID());
+        ShareTargetPath targetPath = new ShareTargetPath(folder.getContentType().getModule(), folder.getID(), null);
         ShareNotificationService notificationService = ServiceRegistry.getInstance().getService(ShareNotificationService.class);
         if (null == notificationService) {
             throw ServiceExceptionCode.absentService(ShareNotificationService.class);
         }
         List<OXException> warnings = notificationService.sendShareNotifications(
-            notificationData.getTransport(), entities, notificationData.getMessage(), target, session, request.getHostData());
+            notificationData.getTransport(), entities, notificationData.getMessage(), targetPath, session, request.getHostData());
         /*
          * return empty response in case of success, including any warnings that occurred during notification transport
          */

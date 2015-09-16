@@ -74,8 +74,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -88,9 +86,6 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
 import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.user.UserService;
 
 /**
@@ -141,100 +136,13 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares createdShares, String message, Session session, HostData hostData) {
-        if (transport != Transport.MAIL) {
-            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
-        }
-
-        List<OXException> warnings = new ArrayList<OXException>();
-        GroupService groupService = serviceLookup.getService(GroupService.class);
-        ContextService contextService = serviceLookup.getService(ContextService.class);
-        UserService userService = serviceLookup.getService(UserService.class);
-        ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
-        Context context;
-        try {
-            context = contextService.getContext(session.getContextId());
-        } catch (OXException e) {
-            collectWarning(warnings, e);
-            return warnings;
-        }
-
-        Map<Integer, CreatedShare> sharesByUser = new HashMap<>();
-        for (ShareRecipient recipient : createdShares.getRecipients()) {
-            CreatedShare share = createdShares.getShare(recipient);
-            GuestInfo guestInfo = share.getGuestInfo();
-            try {
-                if (notifyDecision.notifyAboutCreatedShare(transport, share, session)) {
-                    if (recipient.isInternal()) {
-                        InternalRecipient internalRecipient = recipient.toInternal();
-                        if (internalRecipient.isGroup()) {
-                            int[] members = groupService.getGroup(context, internalRecipient.getEntity()).getMember();
-                            for (int userId : members) {
-                                sharesByUser.put(userId, share);
-                            }
-                        } else {
-                            sharesByUser.put(guestInfo.getGuestID(), share);
-                        }
-                    } else if (recipient.getType() == RecipientType.GUEST) {
-                        sharesByUser.put(guestInfo.getGuestID(), share);
-                    }
-                }
-            } catch (Exception e) {
-                collectWarning(warnings, e, guestInfo.getEmailAddress());
-            }
-        }
-
-        // remove sharing user if he somehow made it into the list of recipients
-        sharesByUser.remove(session.getUserId());
-
-        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
-        for (int userId : sharesByUser.keySet()) {
-            User user = null;
-            try {
-                user = userService.getUser(userId, session.getContextId());
-                CreatedShare share = sharesByUser.get(userId);
-                String shareUrl;
-                ShareTarget target = share.getShareTarget();
-                if (user.isGuest()) {
-                    // FIXME: ensure the target is always personalized
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
-                    String mail = user.getMail();
-                    if (Strings.isNotEmpty(mail)) {
-                        collectedAddresses.add(new QuotedInternetAddress(mail));
-                    }
-                } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, target);
-                }
-
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, share.getShareTarget(), message, shareUrl, session, hostData);
-                send(shareNotification);
-            } catch (Exception e) {
-                String mailAddress = null;
-                if (user != null) {
-                    mailAddress = user.getMail();
-                }
-                collectWarning(warnings, e, mailAddress);
-            }
-        }
-
-        ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
-        if (null != ccs) {
-            if (!collectedAddresses.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
-            }
-        }
-
-        return warnings;
+    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
+        return sendShareNotifications(transport, entities, message, targetPath, session, hostData, notifyDecision);
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData) {
-        return sendShareNotifications(transport, entities, message, target, session, hostData, notifyDecision);
-    }
-
-    @Override
-    public List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData) {
-        return sendShareNotifications(transport, entities, message, target, session, hostData, null);
+    public List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData) {
+        return sendShareNotifications(transport, entities, message, targetPath, session, hostData, null);
     }
 
     @Override
@@ -343,12 +251,13 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @param transport The type of {@link Transport} to use when sending notifications
      * @param entities The entities to notify
      * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param targetPath The path to the share target
      * @param session The session of the notifying user
      * @param hostData The host data to generate share links
      * @param notifyDecision The notify decision to consider, or <code>null</code> to always send a notification
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    private List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData, NotifyDecision notifyDecision) {
+    private List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData, NotifyDecision notifyDecision) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -370,7 +279,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             User user = null;
             try {
                 user = userService.getUser(userId, context);
-                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
+                if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), targetPath, session)) {
                     usersById.put(userId, user);
                 }
             } catch (OXException e) {
@@ -395,7 +304,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                     User user = null;
                     try {
                         user = userService.getUser(userId, context);
-                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
+                        if (null == notifyDecision || notifyDecision.notifyAboutCreatedShare(transport, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), targetPath, session)) {
                             usersById.put(userId, user);
                         }
                     } catch (OXException e) {
@@ -413,23 +322,24 @@ public class DefaultNotificationService implements ShareNotificationService {
         usersById.remove(session.getUserId());
 
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
+        ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
         Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
         for (int userId : usersById.keySet()) {
             User user = null;
             try {
                 user = usersById.get(userId);
+                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
                 String shareUrl;
                 if (user.isGuest()) {
-                    // FIXME: ensure the target is always personalized
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), targetPath);
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
                         collectedAddresses.add(new QuotedInternetAddress(mail));
                     }
                 } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, target);
+                    shareUrl = ShareLinks.generateInternal(hostData, dstTarget);
                 }
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, target, message, shareUrl, session, hostData);
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, dstTarget, message, shareUrl, session, hostData);
                 send(shareNotification);
             } catch (Exception e) {
                 String mailAddress = null;
