@@ -107,7 +107,7 @@ public class Bug41287Test extends ShareTest {
         GuestClient guestClient = resolveShare(url);
         OCLGuestPermission perm = createAnonymousGuestPermission();
         perm.setEntity(guestClient.getValues().getUserId());
-        guestClient.checkFolderAccessible(String.valueOf(subfolder.getObjectID()), perm);
+        guestClient.checkFolderAccessible(String.valueOf(parent.getObjectID()), perm);
     }
 
 }
