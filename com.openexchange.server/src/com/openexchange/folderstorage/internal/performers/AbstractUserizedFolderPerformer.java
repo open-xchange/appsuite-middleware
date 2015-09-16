@@ -98,9 +98,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
@@ -620,9 +620,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                     }
                     for (GuestPermission permission : permissions) {
-                        CreatedShare share = shares.getShare(permission.getRecipient());
-                        permission.setEntity(share.getGuestInfo().getGuestID());
-                        comparedPermissions.rememberGuestInfo(share.getGuestInfo());
+                        ShareInfo share = shares.getShare(permission.getRecipient());
+                        permission.setEntity(share.getGuest().getGuestID());
+                        comparedPermissions.rememberGuestInfo(share.getGuest());
                     }
                 }
             } finally {

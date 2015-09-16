@@ -72,9 +72,9 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
@@ -272,8 +272,8 @@ public class ShareHelper {
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
                 CreatedShares shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (FileStorageGuestObjectPermission permission : newGuestPermissions) {
-                    CreatedShare share = shares.getShare(permission.getRecipient());
-                    GuestInfo guestInfo = share.getGuestInfo();
+                    ShareInfo share = shares.getShare(permission.getRecipient());
+                    GuestInfo guestInfo = share.getGuest();
                     allPermissions.add(new DefaultFileStorageObjectPermission(guestInfo.getGuestID(), false, permission.getPermissions()));
                     comparedPermissions.rememberGuestInfo(guestInfo);
                 }

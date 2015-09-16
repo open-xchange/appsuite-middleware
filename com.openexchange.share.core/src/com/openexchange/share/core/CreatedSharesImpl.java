@@ -50,10 +50,7 @@
 package com.openexchange.share.core;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -67,16 +64,11 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class CreatedSharesImpl implements CreatedShares {
 
-    private final Map<ShareRecipient, CreatedShareImpl> shares;
+    private final Map<ShareRecipient, ShareInfo> shares;
 
     public CreatedSharesImpl(Map<ShareRecipient, ShareInfo> createdShares) {
         super();
-        shares = new LinkedHashMap<>();
-        for (Entry<ShareRecipient, ShareInfo> entry : createdShares.entrySet()) {
-            ShareRecipient recipient = entry.getKey();
-            ShareInfo shareInfo = entry.getValue();
-            shares.put(recipient, new CreatedShareImpl(recipient, shareInfo));
-        }
+        this.shares = createdShares;
     }
 
     /**
@@ -97,7 +89,7 @@ public class CreatedSharesImpl implements CreatedShares {
      * @return The share
      */
     @Override
-    public CreatedShare getShare(ShareRecipient recipient) {
+    public ShareInfo getShare(ShareRecipient recipient) {
         return shares.get(recipient);
     }
 

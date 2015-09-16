@@ -73,7 +73,7 @@ public interface CreatedShares {
      * @param recipient The recipient
      * @return The share
      */
-    CreatedShare getShare(ShareRecipient recipient);
+    ShareInfo getShare(ShareRecipient recipient);
 
     /**
      * Gets the number of different recipients for who shares have been created.
