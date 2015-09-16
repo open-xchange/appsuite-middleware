@@ -70,13 +70,14 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -208,8 +209,9 @@ public class ShareUtils {
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
         if (null != recipient.getPassword()) {
-            guestUser.setUserPassword(requireService(ShareCryptoService.class).encrypt(recipient.getPassword()));
-            guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+            String encodedPassword = services.getService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(recipient.getPassword());
+            guestUser.setUserPassword(encodedPassword);
+            guestUser.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
         } else {
             guestUser.setPasswordMech("");
         }

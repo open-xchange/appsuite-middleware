@@ -188,6 +188,15 @@ public enum PasswordMech implements IPasswordMech {
         return encoder.check(toCheck, encoded);
     }
 
+    /**
+     * {@inheritDoc}
+     * {@link IPasswordMech}s within this class only provide one-way-enconding
+     */
+    @Override
+    public String decode(String encodedPassword) throws OXException {
+        throw PasswordMechExceptionCode.UNSUPPORTED_OPERATION.create(getIdentifier());
+    }
+
     // --------------------------------------------------------------------------------------- //
 
     private static interface Encoder {
@@ -196,5 +205,4 @@ public enum PasswordMech implements IPasswordMech {
 
         boolean check(String candidate, String encoded) throws OXException;
     }
-
 }

@@ -76,6 +76,15 @@ public interface IPasswordMech {
     public String encode(String password) throws OXException;
 
     /**
+     * Decodes the given string according to its password mechanism and returns the decoded string.
+     *
+     * @param password The password to decode
+     * @return The decoded string
+     * @throws OXException
+     */
+    public String decode(String encodedPassword) throws OXException;
+
+    /**
      * Checks if given password matches the encoded string according to this password mechanism.
      *
      * @param toCheck The password to check

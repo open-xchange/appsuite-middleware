@@ -65,11 +65,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 
@@ -140,18 +141,14 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
         if (null == userService) {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
-        ShareCryptoService cryptoService = ServerServiceRegistry.getInstance().getService(ShareCryptoService.class);
-        if (null == cryptoService) {
-            throw ServiceExceptionCode.absentService(ShareCryptoService.class);
+        PasswordMechFactory factory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
+        if (null == factory) {
+            throw ServiceExceptionCode.absentService(PasswordMechFactory.class);
         }
 
-        // Resolve user...
         User user = userService.getUser(guest.getGuestID(), context);
-        // ... and obtain user's decrypted password
-        String decryptedPassword = cryptoService.decrypt(user.getUserPassword());
-
-        // Check password
-        if (!decryptedPassword.equals(loginInfo.getPassword())) {
+        IPasswordMech iPasswordMech = factory.get(user.getPasswordMech());
+        if (!iPasswordMech.check(loginInfo.getPassword(), user.getUserPassword())) {
             throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }
 

@@ -77,11 +77,10 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
-import com.openexchange.share.impl.ShareCryptoServiceImpl;
+import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
@@ -133,8 +132,6 @@ public class ShareActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
-            private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
-
             private volatile ServiceRegistration<ShareService> shareRegistration;
 
             private volatile ServiceRegistration<EventHandler> cleanUpRegistration;
@@ -143,12 +140,10 @@ public class ShareActivator extends HousekeepingActivator {
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
-                ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
-                addService(ShareCryptoService.class, shareCryptoService);
 
                 PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
-                passwordMechFactory.register(shareCryptoService);
-                cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
+                SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
+                passwordMechFactory.register(sharePasswordMech);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }
@@ -164,11 +159,6 @@ public class ShareActivator extends HousekeepingActivator {
                 if (null != shareRegistration) {
                     shareRegistration.unregister();
                     this.shareRegistration = null;
-                }
-                ServiceRegistration<ShareCryptoService> cryptoRegistration = this.cryptoRegistration;
-                if (null != cryptoRegistration) {
-                    cryptoRegistration.unregister();
-                    this.cryptoRegistration = null;
                 }
                 ServiceRegistration<EventHandler> cleanUpRegistration = this.cleanUpRegistration;
                 if (null != cleanUpRegistration) {

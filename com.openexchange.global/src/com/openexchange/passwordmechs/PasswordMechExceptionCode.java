@@ -69,6 +69,11 @@ public enum PasswordMechExceptionCode implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_ENCODING("Encoding %s cannot be used.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
 
+    /**
+     * Encoding %s cannot be used.
+     */
+    UNSUPPORTED_OPERATION("Decoding for password mech %s not supported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
+
     ;
 
     private static final String PREFIX = "PWMECH";

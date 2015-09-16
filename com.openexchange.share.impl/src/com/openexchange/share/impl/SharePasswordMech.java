@@ -52,49 +52,40 @@ package com.openexchange.share.impl;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.ShareCryptoService;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.share.core.ShareConstants;
 
 /**
- * {@link ShareCryptoServiceImpl}
+ * {@link SharePasswordMech}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareCryptoServiceImpl implements ShareCryptoService {
+public class SharePasswordMech implements IPasswordMech {
 
     private final CryptoService cryptoService;
     private final String cryptKey;
 
     /**
-     * Initializes a new {@link ShareCryptoServiceImpl}.
+     * Initializes a new {@link SharePasswordMech}.
      *
      * @param cryptoService The underlying crypto service
      * @param cryptKey The key use to encrypt / decrypt data
      */
-    public ShareCryptoServiceImpl(CryptoService cryptoService, String cryptKey) {
+    public SharePasswordMech(CryptoService cryptoService, String cryptKey) {
         super();
         this.cryptoService = cryptoService;
         this.cryptKey = cryptKey;
     }
 
     @Override
-    public String encrypt(String value) throws OXException {
-        return cryptoService.encrypt(value, cryptKey);
-    }
-
-    @Override
-    public String decrypt(String value) throws OXException {
-        return cryptoService.decrypt(value, cryptKey);
-    }
-
-    @Override
     public String getIdentifier() {
-        return PASSWORD_MECH_ID;
+        return ShareConstants.PASSWORD_MECH_ID;
     }
 
     @Override
     public String encode(String str) throws OXException {
-        return encrypt(str);
+        return cryptoService.encrypt(str, cryptKey);
     }
 
     @Override
@@ -107,10 +98,15 @@ public class ShareCryptoServiceImpl implements ShareCryptoService {
             return false;
         }
 
-        String decrypted = decrypt(encoded);
-        if (encoded.equals(decrypted)) {
+        String decoded = decode(encoded);
+        if (toCheck.equals(decoded)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String decode(String encodedPassword) throws OXException {
+        return cryptoService.decrypt(encodedPassword, cryptKey);
     }
 }

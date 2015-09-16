@@ -83,6 +83,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -94,7 +95,6 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.LinkUpdate;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareLink;
@@ -102,6 +102,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.CreatedSharesImpl;
+import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -901,8 +902,9 @@ public class DefaultShareService implements ShareService {
                 updatedGuest.setPasswordMech("");
                 updatedGuest.setUserPassword(null);
             } else {
-                updatedGuest.setUserPassword(services.getService(ShareCryptoService.class).encrypt(password));
-                updatedGuest.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+                String encodePassword = services.getService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(password);
+                updatedGuest.setUserPassword(encodePassword);
+                updatedGuest.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
             }
             services.getService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
             return true;
