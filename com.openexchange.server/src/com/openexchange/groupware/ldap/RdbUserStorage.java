@@ -872,21 +872,19 @@ public class RdbUserStorage extends UserStorage {
             return;
         }
 
-        if (null != mech) {
-            PreparedStatement stmt = null;
-            try {
-                stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
-                int pos = 1;
-                stmt.setString(pos++, password);
-                stmt.setString(pos++, mech.getIdentifier());
-                stmt.setInt(pos++, context.getContextId());
-                stmt.setInt(pos++, userId);
-                stmt.execute();
-            } catch (SQLException e) {
-                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(stmt);
-            }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
+            int pos = 1;
+            stmt.setString(pos++, password);
+            stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, userId);
+            stmt.execute();
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 

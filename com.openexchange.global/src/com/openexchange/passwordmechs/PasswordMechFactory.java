@@ -50,13 +50,18 @@
 package com.openexchange.passwordmechs;
 
 /**
- * {@link PasswordMechFactory}
+ * Factory to register available {@link IPasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
 public interface PasswordMechFactory {
 
+    /**
+     * Register additional {@link IPasswordMech} implementations that can be used for password validation after retrieving it via com.openexchange.passwordmechs.PasswordMechFactory.get(String)
+     *
+     * @param passwordMech The {@link IPasswordMech} to register
+     */
     public void register(IPasswordMech... passwordMech);
 
     /**

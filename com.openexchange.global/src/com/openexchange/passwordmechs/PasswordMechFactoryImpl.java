@@ -63,11 +63,14 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory {
 
     private final Map<String, IPasswordMech> registeredPasswordMechs = new HashMap<String, IPasswordMech>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void register(IPasswordMech... passwordMech) {
         for (IPasswordMech mech : passwordMech) {
-            registeredPasswordMechs.put(mech.getIdentifier().toUpperCase(), mech);
-
+            String id = adaptIdentifier(mech.getIdentifier());
+            registeredPasswordMechs.put(id, mech);
         }
     }
 
@@ -76,6 +79,18 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory {
      */
     @Override
     public IPasswordMech get(String identifier) {
+        String id = adaptIdentifier(identifier);
+
+        return registeredPasswordMechs.get(id);
+    }
+
+    /**
+     * Adapts the given identifier to the expected format.
+     *
+     * @param identifier The given identifier
+     * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
+     */
+    private String adaptIdentifier(String identifier) {
         String id = Strings.toUpperCase(identifier);
         if (!id.startsWith("{")) {
             id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
@@ -83,7 +98,6 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory {
         if (!id.endsWith("}")) {
             id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
         }
-
-        return registeredPasswordMechs.get(id);
+        return id;
     }
 }
