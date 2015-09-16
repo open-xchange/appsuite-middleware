@@ -355,6 +355,10 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     INVALID_ENTITY("Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s", MESSAGE, Category.CATEGORY_ERROR, 44),
     /**
+     * Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s
+     */
+    INVALID_ENTITY_FROM_USER("Invalid entity id %1$s (%2$s) detected in permissions of folder %3$s in context %4$s", OXFolderExceptionMessage.INVALID_ENTITY_FROM_USER_MSG, Category.CATEGORY_USER_INPUT, INVALID_ENTITY.getNumber()),
+    /**
      * Folder %1$s must not be moved to one of its subfolders in context %2$s
      */
     NO_SUBFOLDER_MOVE("Folder %1$s must not be moved to one of its subfolders in context %2$s", OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),

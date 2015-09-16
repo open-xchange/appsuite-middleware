@@ -1,0 +1,21 @@
+diff --git a/net.fortuna.ical4j/src/net/fortuna/ical4j/model/component/Observance.java b/net.fortuna.ical4j/src/net/fortuna/ical4j/model/component/Observance.java
+index 21d385f..44c63b7 100644
+--- a/net.fortuna.ical4j/src/net/fortuna/ical4j/model/component/Observance.java
++++ b/net.fortuna.ical4j/src/net/fortuna/ical4j/model/component/Observance.java
+@@ -233,8 +231,16 @@
+             cal.setTime(date);
+             cal.add(Calendar.YEAR, 10);
+             onsetLimit = Dates.getInstance(cal.getTime(), Value.DATE_TIME);
++            // temporary apply offset to recurrence until to go conform with the not applied TZFROM offset of the initial onset
++            Date originalUntil = rrule.getRecur().getUntil();
++            if (null != originalUntil) {
++                DateTime withOffset = new DateTime(true);
++                withOffset.setTime(originalUntil.getTime() + getOffsetFrom().getOffset().getOffset());
++                rrule.getRecur().setUntil(withOffset);
++            }
+             final DateList recurrenceDates = rrule.getRecur().getDates(initialOnsetUTC,
+                     onsetLimit, Value.DATE_TIME);
++            rrule.getRecur().setUntil(originalUntil);
+             for (final Iterator j = recurrenceDates.iterator(); j.hasNext();) {
+                 final DateTime rruleOnset = applyOffsetFrom((DateTime) j.next());
+                 if (!rruleOnset.after(date) && rruleOnset.after(onset)) {
