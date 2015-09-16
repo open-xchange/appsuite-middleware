@@ -235,6 +235,16 @@ public class IDManglingFolder implements TypeAware {
     }
 
     @Override
+    public int getCreatedBy() {
+        return delegate.getCreatedBy();
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return delegate.getModifiedBy();
+    }
+
+    @Override
     public String toString() {
         return "IDManglingFolder [id=" + id + ", delegateId=" + delegate.getId() + ", name=" + delegate.getName() + "]";
     }

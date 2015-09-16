@@ -441,6 +441,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         permission.setEntity(userID);
         rootFolder.setPermissions(Collections.<FileStoragePermission>singletonList(permission));
         rootFolder.setOwnPermission(permission);
+        rootFolder.setCreatedBy(userID);
+        rootFolder.setModifiedBy(userID);
         return rootFolder;
     }
 

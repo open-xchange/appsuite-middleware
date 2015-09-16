@@ -233,4 +233,18 @@ public interface FileStorageFolder extends FileStorageConstants {
      */
     Map<String, Object> getMeta();
 
+    /**
+     * Gets the identifier of the entity who created this folder.
+     *
+     * @return The entity, or <code>-1</code> if not available
+     */
+    int getCreatedBy();
+
+    /**
+     * Gets the identifier of the entity who updated this folder.
+     *
+     * @return The entity, or <code>-1</code> if not available
+     */
+    int getModifiedBy();
+
 }

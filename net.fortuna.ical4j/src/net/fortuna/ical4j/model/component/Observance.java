@@ -31,7 +31,6 @@
  */
 package net.fortuna.ical4j.model.component;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,7 +40,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
@@ -58,7 +56,6 @@ import net.fortuna.ical4j.model.property.TzOffsetTo;
 import net.fortuna.ical4j.util.Dates;
 import net.fortuna.ical4j.util.PropertyValidator;
 import net.fortuna.ical4j.util.TimeZones;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -72,7 +69,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class Observance extends Component {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2523330383042085994L;
 
@@ -91,14 +88,14 @@ public abstract class Observance extends Component {
     private DateTime[] onsetsDates;
     private Map onsets = new TreeMap();
     private Date initialOnset = null;
-    
+
     /**
      * Used for parsing times in a UTC date-time representation.
      */
     private static final String UTC_PATTERN = "yyyyMMdd'T'HHmmss";
     private static final DateFormat UTC_FORMAT = new SimpleDateFormat(
             UTC_PATTERN);
-    
+
     static {
         UTC_FORMAT.setTimeZone(TimeZones.getUtcTimeZone());
         UTC_FORMAT.setLenient(false);
@@ -127,6 +124,7 @@ public abstract class Observance extends Component {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void validate(final boolean recurse) throws ValidationException {
 
         // From "4.8.3.3 Time Zone Offset From":
@@ -163,7 +161,7 @@ public abstract class Observance extends Component {
      * specified date
      */
     public final Date getLatestOnset(final Date date) {
-        
+
         if (initialOnset == null) {
             try {
                 initialOnset = applyOffsetFrom(calculateOnset(((DtStart) getProperty(Property.DTSTART)).getDate()));
@@ -174,7 +172,7 @@ public abstract class Observance extends Component {
                 return null;
             }
         }
-        
+
         // observance not applicable if date is before the effective date of this observance..
         if (date.before(initialOnset)) {
             return null;
@@ -233,8 +231,16 @@ public abstract class Observance extends Component {
             cal.setTime(date);
             cal.add(Calendar.YEAR, 10);
             onsetLimit = Dates.getInstance(cal.getTime(), Value.DATE_TIME);
+            // temporary apply offset to recurrence until to go conform with the not applied TZFROM offset of the initial onset
+            Date originalUntil = rrule.getRecur().getUntil();
+            if (null != originalUntil) {
+                DateTime withOffset = new DateTime(true);
+                withOffset.setTime(originalUntil.getTime() + getOffsetFrom().getOffset().getOffset());
+                rrule.getRecur().setUntil(withOffset);
+            }
             final DateList recurrenceDates = rrule.getRecur().getDates(initialOnsetUTC,
                     onsetLimit, Value.DATE_TIME);
+            rrule.getRecur().setUntil(originalUntil);
             for (final Iterator j = recurrenceDates.iterator(); j.hasNext();) {
                 final DateTime rruleOnset = applyOffsetFrom((DateTime) j.next());
                 if (!rruleOnset.after(date) && rruleOnset.after(onset)) {
@@ -301,21 +307,21 @@ public abstract class Observance extends Component {
     public final TzOffsetTo getOffsetTo() {
         return (TzOffsetTo) getProperty(Property.TZOFFSETTO);
     }
-    
+
 //    private Date calculateOnset(DateProperty dateProperty) {
 //        return calculateOnset(dateProperty.getValue());
 //    }
-//    
+//
     private DateTime calculateOnset(Date date) throws ParseException {
         return calculateOnset(date.toString());
     }
-    
+
     private DateTime calculateOnset(String dateStr) throws ParseException {
-        
-        // Translate local onset into UTC time by parsing local time 
+
+        // Translate local onset into UTC time by parsing local time
         // as GMT and adjusting by TZOFFSETFROM if required
         long utcOnset;
-       
+
         synchronized (UTC_FORMAT) {
             utcOnset = UTC_FORMAT.parse(dateStr).getTime();
         }

@@ -93,6 +93,8 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override

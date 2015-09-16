@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-01 21:36+0200\n"
+"PO-Revision-Date: 2015-09-11 13:15+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -1925,7 +1925,7 @@ msgid ""
 "by all users of the system. Please select a different name and try again."
 msgstr ""
 "Názov požadovaného vedra nie je k dispozícii. Menný priestor vedier zdieľajú "
-"všetci používatelia systému. Vyberte iný názov a skúste znova."
+"všetci používatelia systému. Vyberte iný názov a skúste to znova."
 
 #. Your previous request to create the named bucket succeeded and you already own it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
@@ -4495,7 +4495,6 @@ msgstr "Nemáte platnú reláciu. Prosím, prihláste sa znova."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Nemáte príslušné oprávnenie na zobrazenie priečinka „%1$s“."
 
@@ -6936,7 +6935,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
-"Aktuálne heslo chýba. Prosím, zadajte svoje aktuálne heslo a skúste znova."
+"Aktuálne heslo chýba. Prosím, zadajte svoje aktuálne heslo a skúste to znova."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -6944,7 +6943,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:176
 msgid ""
 "The new password is missing. Please enter your new password and try again."
-msgstr "Nové heslo chýba. Prosím, zadajte svoje nové heslo a skúste znova."
+msgstr "Nové heslo chýba. Prosím, zadajte svoje nové heslo a skúste to znova."
 
 #. *
 #. * User is missing for the reminder.
@@ -8181,52 +8180,53 @@ msgstr "Chýbajú povinné polia v damon zdroji."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Nemáte príslušné oprávnenie k modulu „%2$s“."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Nemáte príslušné oprávnenie na zobrazenie priečinka."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Zdieľané priečinky nie sú dostupné pre váš účet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie k verejnému priečinku „%2$s“."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Nemáte príslušné oprávnenie k verejnému priečinku."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na vytvorenie podpriečinkov v priečinku „%2$s“."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Nemáte príslušné oprávnenie na vytvorenie podpriečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Priečinok „%1$s“ neexistuje."
+msgid "Such a folder does not exist."
+msgstr "Taký priečinok neexistuje."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Priečinok „%1$s“ sa medzitým zmenil. Prosím, znovu načítajte zobrazenie a "
-"skúste to znova."
+"Priečinok bol medzitým zmenený. Prosím, znovu načítajte zobrazenie a skúste "
+"to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Táto operácia vyžaduje povolenia správcu pre priečinok „%2$s“."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Táto operácia vyžaduje oprávnenie správcu k priečinku."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho premenovať."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Priečinok je predvolený priečinok a nemožno ho premenovať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Priečinok s názvom „%1$s“ už obsahuje podpriečinok s názvom „%3$s“."
+msgid "The folder already contains a folder with such a name."
+msgstr "Priečinok už obsahuje priečinok s týmto názvom."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Priečinky typu „%2$s“ nie je možné vytvoriť v „%1$s“."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Priečinky typu „%2$s“ nie je možné pod týmto priečinkom vytvoriť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Priečinky modulu „%2$s“ nie je možné vytvoriť v „%1$s“."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Priečinky modulu „%2$s“ nie je možné pod týmto priečinkom vytvoriť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8248,65 +8248,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Požaduje sa aspoň jeden používateľ s oprávneniami správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho presunúť."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Priečinok je predvolený priečinok a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Priečinok „%1$s“ je zdieľaný a nedá sa presunúť."
+msgid "The folder is shared and cannot be moved."
+msgstr "Priečinok je zdieľaný a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Priečinok sa nedá presunúť do zdieľaného priečinka „%1$s“."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Priečinok nemožno presunúť do zdieľaného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "Priečinok „%1$s“ je systémový priečinok a nemožno premiestniť."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Priečinok je systémový priečinok a nemožno ho presunúť."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"Súkromný priečinok „%1$s“ je možné presunúť iba do iného súkromného "
-"priečinka."
+msgid "The private folder can only be moved to another private folder."
+msgstr "Súkromný priečinok je možné presunúť iba do iného súkromného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr ""
-"Verejný priečinok „%1$s“ je možné presunúť iba do iného verejného priečinka."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Verejný priečinok je možné presunúť iba do iného verejného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Cieľový priečinok je rovnaký ako zdrojový priečinok."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov priečinka "
-"„%2$s“."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka „%2$s“."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "Priečinok „%2$s“ je predvolený priečinok a nie je možné ho odstrániť."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Priečinok je predvolený priečinok a nemožno ho zmazať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr ""
-"Nemáte príslušné oprávnenie na zmazanie všetkých položiek v zdieľanom "
-"priečinku „%2$s“."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Nemáte príslušné oprávnenie na zmazanie všetkých obsiahnutých položiek."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "Priečinok „%1$s“ nesmie byť presunutý do jedného z jeho podpriečinkov."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Priečinok nie je možné presunúť do jedného z jeho podpriečinkov."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8315,8 +8302,8 @@ msgstr ""
 "Priečinky modulu „%1$s“ nie je možné presunúť do priečinkov modulu „%2$s“."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Zdieľaný priečinok „%1$s“ sa nedá aktualizovať."
+msgid "The shared folder cannot be updated."
+msgstr "Zdieľaný priečinok nie je možné aktualizovať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8336,47 +8323,42 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Iba vlastník nadradeného priečinka súkromného priečinka „%4$s“ môže mať "
-"povolenia správcu."
+"Iba vlastník nadradeného zdieľaného priečinka môže mať povolenia správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Priečinok „%2$s“ je predvolený priečinok, ktorého vlastník musí mať "
-"oprávnenia správcu."
+"Priečinok je predvolený priečinok. Preto jeho vlastník musí mať oprávnenia "
+"správcu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka „%2$s“."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr ""
-"Vzhľadom na obmedzené oprávnenia používateľa „%1$s“ nie je možné vykonať "
-"zmeny priečinka „%2$s“."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "Nie je možné aplikovať zmeny z dôvodu nedostatočných oprávnení."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Priečinok „%1$s“ nie je možné zmazať, pretože obsahuje skrytý podpriečinok, "
-"ku ktorému nemáte príslušné oprávnenia."
+"Priečinok nie je možné zmazať, pretože obsahuje skrytý podpriečinok, ku "
+"ktorému nemáte príslušné oprávnenia."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Priečinok „%2$s“ už obsahuje priečinok s názvom „%1$s“. Prosím, vyberte iný "
-"názov a skúste znova."
+"Priečinok už obsahuje priečinok s takým názvom. Prosím, vyberte iný názov a "
+"skúste to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8394,65 +8376,51 @@ msgstr ""
 "používateľom."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Sú definované duplicitné oprávnenia pre používateľa „%1$s“. Je povolené iba "
-"jedno oprávnenie na používateľa."
+"Sú definované duplicitné oprávnenia. Je povolené iba jedno oprávnenie na "
+"používateľa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Sú definované duplicitné oprávnenia pre skupinu „%1$s“. Je povolené iba "
-"jedno oprávnenie na skupiny."
+"Sú definované duplicitné oprávnenia. Je povolené iba jedno oprávnenie na "
+"skupinu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
 msgstr ""
-"Pre priečinok „%1$s“ je povolené zmeniť iba oprávnenie na viditeľnosť "
-"priečinka."
+"Pre priečinok je povolené zmeniť iba oprávnenie na viditeľnosť priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Iba oprávnenia jednotlivých používateľov, ale nie skupinové oprávnenia sú "
-"povolené pre priečinok „%1$s“."
+"Sú povolené iba oprávnenia jednotlivých používateľov, ale nie skupinové "
+"oprávnenia."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr ""
-"Oprávnenia jednotlivých používateľov nie sú povolené pre priečinok „%1$s“."
+msgid "No individual user permissions are allowed."
+msgstr "Oprávnenia jednotlivých používateľov nie sú povolené."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka „%2$s“."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"Priečinok „%1$s“ nesmie byť zmazaný, pretože obsahuje zamknuté dokumenty."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Priečinok nie je možné zmazať, pretože obsahuje zamknuté dokumenty."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Operáciu je možné vykonať iba pre správcu kontextu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Priečinok „%1$s“ nemožno zmazať."
+msgid "The folder cannot be deleted."
+msgstr "Priečinok nemožno zmazať."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Administratívne oprávnenia vlastníka „%1$s“ v priečinku „%2$s“ boli obnovené."
+msgid "The administrative permissions were restored."
+msgstr "Administratívne oprávnenia boli obnovené."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8894,7 +8862,7 @@ msgid ""
 "and try again."
 msgstr ""
 "Zdieľanie bolo medzitým upravené. Prosí, znovu načítajte stránku alebo "
-"spustite synchronizáciu a potom to skúste znova."
+"spustite synchronizáciu a potom to skúste to znova."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
 msgid "You don't have sufficient permissions to delete the share."
@@ -11461,6 +11429,188 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie k verejnému priečinku „%2$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na vytvorenie podpriečinkov v priečinku "
+#~ "„%2$s“."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Priečinok „%1$s“ neexistuje."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ sa medzitým zmenil. Prosím, znovu načítajte zobrazenie a "
+#~ "skúste to znova."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "Táto operácia vyžaduje povolenia správcu pre priečinok „%2$s“."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho premenovať."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Priečinok s názvom „%1$s“ už obsahuje podpriečinok s názvom „%3$s“."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Priečinky typu „%2$s“ nie je možné vytvoriť v „%1$s“."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Priečinky modulu „%2$s“ nie je možné vytvoriť v „%1$s“."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je predvolený priečinok a nemožno ho presunúť."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je zdieľaný a nedá sa presunúť."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Priečinok sa nedá presunúť do zdieľaného priečinka „%1$s“."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "Priečinok „%1$s“ je systémový priečinok a nemožno premiestniť."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Súkromný priečinok „%1$s“ je možné presunúť iba do iného súkromného "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Verejný priečinok „%1$s“ je možné presunúť iba do iného verejného "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na presunutie všetkých podpriečinkov "
+#~ "priečinka „%2$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na zmazanie zdieľaného priečinka „%2$s“."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ je predvolený priečinok a nie je možné ho odstrániť."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nemáte príslušné oprávnenie na zmazanie všetkých položiek v zdieľanom "
+#~ "priečinku „%2$s“."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nesmie byť presunutý do jedného z jeho podpriečinkov."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Zdieľaný priečinok „%1$s“ sa nedá aktualizovať."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Iba vlastník nadradeného priečinka súkromného priečinka „%4$s“ môže mať "
+#~ "povolenia správcu."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ je predvolený priečinok, ktorého vlastník musí mať "
+#~ "oprávnenia správcu."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie na zdieľanie priečinka „%2$s“."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vzhľadom na obmedzené oprávnenia používateľa „%1$s“ nie je možné vykonať "
+#~ "zmeny priečinka „%2$s“."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nie je možné zmazať, pretože obsahuje skrytý "
+#~ "podpriečinok, ku ktorému nemáte príslušné oprávnenia."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Priečinok „%2$s“ už obsahuje priečinok s názvom „%1$s“. Prosím, vyberte "
+#~ "iný názov a skúste znova."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Sú definované duplicitné oprávnenia pre používateľa „%1$s“. Je povolené "
+#~ "iba jedno oprávnenie na používateľa."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Sú definované duplicitné oprávnenia pre skupinu „%1$s“. Je povolené iba "
+#~ "jedno oprávnenie na skupiny."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Pre priečinok „%1$s“ je povolené zmeniť iba oprávnenie na viditeľnosť "
+#~ "priečinka."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Iba oprávnenia jednotlivých používateľov, ale nie skupinové oprávnenia sú "
+#~ "povolené pre priečinok „%1$s“."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Oprávnenia jednotlivých používateľov nie sú povolené pre priečinok „%1$s“."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "Nemáte príslušné oprávnenie na premenovanie priečinka „%2$s“."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Priečinok „%1$s“ nesmie byť zmazaný, pretože obsahuje zamknuté dokumenty."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Priečinok „%1$s“ nemožno zmazať."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Administratívne oprávnenia vlastníka „%1$s“ v priečinku „%2$s“ boli "
+#~ "obnovené."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

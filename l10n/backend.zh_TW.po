@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-02 16:06+0800\n"
+"PO-Revision-Date: 2015-09-13 12:20+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -4285,7 +4285,6 @@ msgstr "您的 session 已失效。請重新登入。"
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "您沒有檢視資料夾「%1$s」的適當權限。"
 
@@ -7833,49 +7832,51 @@ msgstr "在指定資源中缺少必填欄位。"
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "您沒有模組「%2$s」的適當權限。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "您沒有適當的權限來檢視資料夾。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "您的帳號無法使用共享資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "您沒有公開資料夾「%2$s」的適當權限。"
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "您沒有適當的權限來公開資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr "您沒有在資料夾「%2$s」中建立子資料夾的適當權限。"
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "您沒有適當的權限來建立子資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "資料夾「%1$s」不存在。"
+msgid "Such a folder does not exist."
+msgstr "該資料夾不存在。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
-msgstr "資料夾「%1$s」已同時被更改，請重新載入並再試一次。"
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
+msgstr "資料夾已變更，請重新載入畫面後再試一次。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "此操作需要對於「%2$s」資料夾擁有管理權限。"
+msgid "This operation requires administrative permissions for the folder."
+msgstr "此操作需要對資料夾有管理權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "資料夾「%1$s」是預設資料夾，無法更名。"
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "此資料夾是預設資料夾，無法更名。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "資料夾「%1$s」已包含名為「%3$s」的資料夾。"
+msgid "The folder already contains a folder with such a name."
+msgstr "資料夾中已包含有該名稱的子資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "無法在「%1$s」下建立「%2$s」類型的資料夾。"
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "無法在此資料夾內建立「%2$s」類型的子資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "無法在「%1$s」下建立模組資料夾「%2$s」。"
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "無法在此資料夾內建立「%2$s」類型的模組。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -7896,58 +7897,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "至少需要有一個含有管理權限的使用者。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "資料夾「%1$s」是預設資料夾，無法移動。"
+msgid "The folder is a default folder and cannot be moved."
+msgstr "此資料夾是預設資料夾，無法移動。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "資料夾「%1$s」已被共享，無法移動。"
+msgid "The folder is shared and cannot be moved."
+msgstr "此資料夾已被分享，無法移動。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "資料夾無法被移動至共享資料夾「%1$s」。"
+msgid "The folder cannot be moved to a shared folder."
+msgstr "此資料夾無法移動至共享資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "資料夾「%1$s」是系統資料夾，無法移動。"
+msgid "The folder is a system folder and cannot be moved."
+msgstr "此資料夾是系統資料夾，無法移動。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "私人資料夾「%1$s」僅能被移動至其他私人資料夾。"
+msgid "The private folder can only be moved to another private folder."
+msgstr "私人資料夾僅能移動至另一個私人資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "公開資料夾「%1$s」僅能被移動至其他公開資料夾。"
+msgid "The public folder can only be moved to another public folder."
+msgstr "公開資料夾僅能移動至另一個公開資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "目的資料夾與來源資料夾相同。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr "您沒有移動資料夾「%2$s」中所有子資料夾的適當權限。"
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "您沒有適當的權限來移動所有子資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "您沒有刪除資料夾「%2$s」的適當權限。"
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "您沒有適當的權限來刪除共享資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "資料夾「%2$s」是預設資料夾，無法刪除。"
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "此資料夾是預設資料夾，無法刪除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr "您沒有刪除資料夾「%2$s」中所有內容物的適當權限。"
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "您沒有適當的權限來刪除所有包含的項目。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "資料夾「%1$s」不得移到其子資料夾內。"
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "資料夾無法被移動至其子資料夾中。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -7955,8 +7950,8 @@ msgid ""
 msgstr "模組「%1$s」的資料夾不得移到模組「%2$s」的資料夾中。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "無法更新共享資料夾「%1$s」。"
+msgid "The shared folder cannot be updated."
+msgstr "無法更新共享資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -7972,37 +7967,35 @@ msgstr "指定的資料夾名稱超過 %2$d 字元的限制，請縮短名稱並
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
-msgstr "僅上層共享資料夾「%4$s」的擁有者可以保留管理權限。"
+msgstr "僅有父共享資料夾的擁有者能擁有管理權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
-msgstr "預設資料夾「%2$s」的所有者必須保留資料夾管理權限。"
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
+msgstr "此資料夾是預設資料夾，所以擁有者必須擁有管理權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "您沒有分享資料夾「%2$s」的適當權限。"
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "您沒有適當的權限來分享此資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr "用戶「%1$s」的權限受限，無法將變更套用至資料夾「%2$s」。"
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "因為權限限制，無法套用變更"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
-msgstr "因為包含您沒有需要的權限的隱藏子資料夾，資料夾「%1$s」無法被刪除。"
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
+msgstr "因為有隱藏的子資料夾，您又缺少適當的權限，無法刪除此資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
-msgstr "資料夾「%2$s」中已包含名為「%1$s」的資料夾。請改用不同名稱並重試。"
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
+msgstr "此資料夾已經含有一個使用該名稱的子資料夾。請選擇不同名稱後再試一次。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8018,54 +8011,44 @@ msgstr ""
 "個具有完全相同名稱的資料夾。請在與該用戶共用之前重命名該資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
-msgstr "用戶「%1$s」權限出現重複。只允許每個用戶有一個權限。"
+msgid "Duplicate permission defined. Only one permission per user is allowed."
+msgstr "設定了重複的權限。每位使用者僅能有一組權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
-msgstr "群組「%1$s」權限出現重複。只允許每個群組有一個權限。"
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "設定了重複的權限。每個群組僅能有一組權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "只允許更改資料夾「%1$s」的可見性。"
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "僅能變更資料夾公開程度的權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
-msgstr "對於資料夾「%1$s」，只允許單獨用戶權限，而不允許群組權限。"
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "僅能設定單一使用者的權限，無法設定群組權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "不允許針對資料夾「%1$s」設定單一用戶權限。"
+msgid "No individual user permissions are allowed."
+msgstr "不允許設定單一使用者的權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "您沒有更名資料夾「%2$s」的適當權限。"
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "您沒有適當的權限來更名此資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "不得刪除資料夾「%1$s」因為其包含鎖定的文件。"
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "因為含有被鎖定的文件，無法刪除該資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "只能由內容管理員進行操作。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "無法刪除資料夾「%1$s」。"
+msgid "The folder cannot be deleted."
+msgstr "無法刪除資料夾。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr "資料夾「%2$s」的擁有者「%1$s」的管理權限已被還原。"
+msgid "The administrative permissions were restored."
+msgstr "已恢復管理權限。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -11020,6 +11003,151 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "您沒有公開資料夾「%2$s」的適當權限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr "您沒有在資料夾「%2$s」中建立子資料夾的適當權限。"
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "資料夾「%1$s」不存在。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr "資料夾「%1$s」已同時被更改，請重新載入並再試一次。"
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "此操作需要對於「%2$s」資料夾擁有管理權限。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "資料夾「%1$s」是預設資料夾，無法更名。"
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "資料夾「%1$s」已包含名為「%3$s」的資料夾。"
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "無法在「%1$s」下建立「%2$s」類型的資料夾。"
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "無法在「%1$s」下建立模組資料夾「%2$s」。"
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "資料夾「%1$s」是預設資料夾，無法移動。"
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "資料夾「%1$s」已被共享，無法移動。"
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "資料夾無法被移動至共享資料夾「%1$s」。"
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "資料夾「%1$s」是系統資料夾，無法移動。"
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr "私人資料夾「%1$s」僅能被移動至其他私人資料夾。"
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr "公開資料夾「%1$s」僅能被移動至其他公開資料夾。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr "您沒有移動資料夾「%2$s」中所有子資料夾的適當權限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr "您沒有刪除資料夾「%2$s」的適當權限。"
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "資料夾「%2$s」是預設資料夾，無法刪除。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr "您沒有刪除資料夾「%2$s」中所有內容物的適當權限。"
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "資料夾「%1$s」不得移到其子資料夾內。"
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "無法更新共享資料夾「%1$s」。"
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr "僅上層共享資料夾「%4$s」的擁有者可以保留管理權限。"
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr "預設資料夾「%2$s」的所有者必須保留資料夾管理權限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "您沒有分享資料夾「%2$s」的適當權限。"
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr "用戶「%1$s」的權限受限，無法將變更套用至資料夾「%2$s」。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr "因為包含您沒有需要的權限的隱藏子資料夾，資料夾「%1$s」無法被刪除。"
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr "資料夾「%2$s」中已包含名為「%1$s」的資料夾。請改用不同名稱並重試。"
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr "用戶「%1$s」權限出現重複。只允許每個用戶有一個權限。"
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr "群組「%1$s」權限出現重複。只允許每個群組有一個權限。"
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr "只允許更改資料夾「%1$s」的可見性。"
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr "對於資料夾「%1$s」，只允許單獨用戶權限，而不允許群組權限。"
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "不允許針對資料夾「%1$s」設定單一用戶權限。"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "您沒有更名資料夾「%2$s」的適當權限。"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr "不得刪除資料夾「%1$s」因為其包含鎖定的文件。"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "無法刪除資料夾「%1$s」。"
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr "資料夾「%2$s」的擁有者「%1$s」的管理權限已被還原。"
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

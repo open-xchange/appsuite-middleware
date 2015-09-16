@@ -131,6 +131,8 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             if (null != folder.getLastModifiedDate()) {
                 jsonObject.put("modified", folder.getLastModifiedDate().getTime());
             }
+            jsonObject.put("created_by", folder.getCreatedBy());
+            jsonObject.put("modified_by", folder.getModifiedBy());
             if (folder.isDefaultFolder()) {
                 jsonObject.put("default_folder", true);
             }

@@ -105,6 +105,8 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
         final DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     /**

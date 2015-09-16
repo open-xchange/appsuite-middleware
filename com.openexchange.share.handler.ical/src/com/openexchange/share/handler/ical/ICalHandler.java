@@ -304,7 +304,9 @@ public class ICalHandler extends HttpAuthShareHandler {
         String userAgentHeader = request.getHeader("User-Agent");
         return null != userAgentHeader && (
             userAgentHeader.contains("Microsoft Outlook") ||
-            userAgentHeader.contains("Lightning") && userAgentHeader.contains("Thunderbird")
+            userAgentHeader.contains("Lightning") && userAgentHeader.contains("Thunderbird") ||
+            userAgentHeader.contains("Google-Calendar-Importer") ||
+            userAgentHeader.contains("org.dmfs.caldav.lib")
         );
     }
 

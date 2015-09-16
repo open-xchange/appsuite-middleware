@@ -22,6 +22,18 @@ open-xchange-unifiedmail (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:25 +0100
 
+open-xchange-unifiedmail (7.6.2-32) stable; urgency=medium
+
+  * Build for patch 2015-09-14 (2732)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Sep 2015 13:35:27 +0200
+
+open-xchange-unifiedmail (7.6.2-31) stable; urgency=medium
+
+  * Build for patch 2015-09-01 (2726)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 02 Sep 2015 11:04:41 +0200
+
 open-xchange-unifiedmail (7.6.2-30) stable; urgency=medium
 
   * Build for patch 2015-08-24 (2674)

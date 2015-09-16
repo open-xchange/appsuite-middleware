@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -314,8 +316,11 @@ public final class OXFolderUtility {
         boolean creatorIsAdmin = false;
         for (int i = 0; i < permissionsSize; i++) {
             final OCLPermission oclPerm = iter.next();
-            if (oclPerm.getEntity() < 0 || oclPerm.isGroupPermission() && GroupStorage.GUEST_GROUP_IDENTIFIER == oclPerm.getEntity()) {
+            if (oclPerm.getEntity() < 0) {
                 throw OXFolderExceptionCode.INVALID_ENTITY.create(I(oclPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+            }
+            if (oclPerm.isGroupPermission() && GroupStorage.GUEST_GROUP_IDENTIFIER == oclPerm.getEntity()) {
+                throw OXFolderExceptionCode.INVALID_ENTITY_FROM_USER.create(I(oclPerm.getEntity()), new LocalizableArgument(Groups.GUEST_GROUP), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
             if (oclPerm.isFolderAdmin()) {
                 adminEntities.add(oclPerm.getEntity());
