@@ -49,37 +49,38 @@
 
 package com.openexchange.drive.impl.internal;
 
-import com.openexchange.drive.DriveShareInfo;
+import java.util.Date;
+import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareTarget;
 
 /**
- * {@link DefaultDriveShareInfo}
+ * {@link DefaultDriveShareLink}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveShareInfo implements DriveShareInfo {
+public class DefaultDriveShareLink implements DriveShareLink {
 
-    private final ShareInfo shareInfo;
+    private final ShareLink shareLink;
     private final DriveShareTarget driveTarget;
 
-    public DefaultDriveShareInfo(ShareInfo shareInfo, DriveShareTarget driveTarget) {
+    public DefaultDriveShareLink(ShareLink shareLink, DriveShareTarget driveTarget) {
         super();
-        this.shareInfo = shareInfo;
+        this.shareLink = shareLink;
         this.driveTarget = driveTarget;
     }
 
     @Override
     public GuestInfo getGuest() {
-        return shareInfo.getGuest();
+        return shareLink.getGuest();
     }
 
     @Override
     public String getShareURL(HostData hostData) {
-        return shareInfo.getShareURL(hostData);
+        return shareLink.getShareURL(hostData);
     }
 
     @Override
@@ -89,7 +90,17 @@ public class DefaultDriveShareInfo implements DriveShareInfo {
 
     @Override
     public ShareTarget getDestinationTarget() {
-        return shareInfo.getDestinationTarget();
+        return shareLink.getDestinationTarget();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return shareLink.getTimestamp();
+    }
+
+    @Override
+    public boolean isNew() {
+        return shareLink.isNew();
     }
 
 }

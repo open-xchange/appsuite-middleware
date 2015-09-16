@@ -114,6 +114,21 @@ public interface UserService {
     void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param con A (writable) database connection to use
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     */
+    void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException;
+
+    /**
      * Checks if specified user is a guest.
      *
      * @param userId The user identifier
@@ -280,6 +295,17 @@ public interface UserService {
      * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
     User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Gets all guest users that were created by a specific user.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to load the created guests for
+     * @return The created guest users, or an empty array if there are none
+     * @throws OXException
+     */
+    User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to

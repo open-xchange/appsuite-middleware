@@ -49,26 +49,27 @@
 
 package com.openexchange.share;
 
+import java.util.Iterator;
+import java.util.List;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+
 /**
- * {@link PersonalizedShareTarget}
+ * {@link ShareUrl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class PersonalizedShareTarget {
+public class ShareTargetPath {
 
-    private int module;
-    private String folder;
-    private String item;
+    private final int module;
 
-    /**
-     * Initializes a new {@link PersonalizedShareTarget}.
-     *
-     * @param module The groupware module of the share's target folder
-     * @param folder The identifier of the share's folder
-     * @param item The identifier of the share's item or <code>null</code>
-     */
-    public PersonalizedShareTarget(int module, String folder, String item) {
+    private final String folder;
+
+    private final String item;
+
+    public ShareTargetPath(int module, String folder, String item) {
         super();
         this.module = module;
         this.folder = folder;
@@ -87,13 +88,95 @@ public class PersonalizedShareTarget {
         return item;
     }
 
-    /**
-     * Gets the relative path of this target to address it uniquely within an underlying share.
-     *
-     * @return The share-relative path to the target
-     */
-    public String getPath() {
-        return String.format("%08x", Integer.valueOf(hashCode()));
+    public boolean isFolder() {
+        return item == null;
+    }
+
+    public String get() {
+        StringBuilder sb = new StringBuilder(64).append("/");
+        String version = "1";
+        sb.append(version).append('/');
+        sb.append(module).append('/');
+        sb.append(encodeFolder(version, folder)).append('/');
+        if (item != null) {
+            sb.append(encodeItem(version, item)).append('/');
+        }
+        return sb.toString();
+    }
+
+    public static ShareTargetPath parse(String path) {
+        List<String> segments = Strings.splitAndTrim(path, "/");
+        Iterator<String> iterator = segments.iterator();
+        while (iterator.hasNext()) {
+            if (Strings.isEmpty(iterator.next())) {
+                iterator.remove();
+            }
+        }
+        return parse(segments);
+    }
+
+    public static ShareTargetPath parse(List<String> segments) {
+        try {
+            Iterator<String> it = segments.iterator();
+            String version = it.next();
+            int module = Integer.parseInt(it.next());
+            String folder = decodeFolder(version, it.next());
+            String item = null;
+            if (it.hasNext()) {
+                item = decodeItem(version, it.next());
+            }
+            if (!it.hasNext()) {
+                return new ShareTargetPath(module, folder, item);
+            }
+        } catch (Exception e) {
+
+        }
+
+        return null;
+    }
+
+    private static String encodeFolder(String version, String folder) {
+        if ("1".equals(version)) {
+            return base64(folder, true);
+        }
+
+        throw new IllegalArgumentException("Unknown encoding version: " + version);
+    }
+
+    private static String decodeFolder(String version, String folder) {
+        if ("1".equals(version)) {
+            return base64(folder, false);
+        }
+
+        throw new IllegalArgumentException("Unknown encoding version: " + version);
+    }
+
+    private static String encodeItem(String version, String item) {
+        if ("1".equals(version)) {
+            return base64(item, true);
+        }
+
+        throw new IllegalArgumentException("Unknown encoding version: " + version);
+    }
+
+    private static String decodeItem(String version, String item) {
+        if ("1".equals(version)) {
+            return base64(item, false);
+        }
+
+        throw new IllegalArgumentException("Unknown encoding version: " + version);
+    }
+
+    private static String base64(String input, boolean encode) {
+        if (input == null) {
+            return null;
+        }
+
+        if (encode) {
+            return BaseEncoding.base64Url().omitPadding().encode(input.getBytes(Charsets.UTF_8));
+        }
+
+        return new String(BaseEncoding.base64Url().omitPadding().decode(input), Charsets.UTF_8);
     }
 
     @Override
@@ -114,7 +197,7 @@ public class PersonalizedShareTarget {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PersonalizedShareTarget other = (PersonalizedShareTarget) obj;
+        ShareTargetPath other = (ShareTargetPath) obj;
         if (folder == null) {
             if (other.folder != null)
                 return false;
@@ -132,7 +215,7 @@ public class PersonalizedShareTarget {
 
     @Override
     public String toString() {
-        return "PersonalizedShareTarget [module=" + module + ", folder=" + folder + ", item=" + item + "]";
+        return "SharePath [module=" + module + ", folder=" + folder + ", item=" + item + "]";
     }
 
 }

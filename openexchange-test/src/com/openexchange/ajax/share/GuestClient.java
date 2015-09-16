@@ -336,10 +336,10 @@ public class GuestClient extends AJAXClient {
 
     private LoginResponse login(ResolveShareResponse shareResponse, ClientConfig config) throws Exception {
         LoginRequest loginRequest = null;
-        if ("guest".equals(shareResponse.getLoginType())) {
+        if ("guest".equals(shareResponse.getLoginType()) || "guest_password".equals(shareResponse.getLoginType())) {
             GuestCredentials credentials = new GuestCredentials(config.username, config.password);
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
-        } else if ("anonymous".equals(shareResponse.getLoginType())) {
+        } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());

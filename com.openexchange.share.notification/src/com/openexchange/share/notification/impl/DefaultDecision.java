@@ -61,7 +61,6 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -102,8 +101,7 @@ public class DefaultDecision implements NotifyDecision {
 
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
             ShareTarget target = share.getShareTarget();
-            TargetProxy proxy = moduleSupport.load(target, session);
-            if (proxy.isPublic()) {
+            if (moduleSupport.isPublic(target, session)) {
                 return false;
             }
         }
@@ -140,8 +138,7 @@ public class DefaultDecision implements NotifyDecision {
             boolean onlyPublics = true;
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
             for (ShareTarget target : targets) {
-                TargetProxy proxy = moduleSupport.load(target, session);
-                onlyPublics &= proxy.isPublic();
+                onlyPublics &= moduleSupport.isPublic(target, session);
             }
 
             if (onlyPublics) {

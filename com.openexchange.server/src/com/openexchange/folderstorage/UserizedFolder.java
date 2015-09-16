@@ -81,7 +81,7 @@ public interface UserizedFolder extends ParameterizedFolder, AltNameAwareFolder 
     /**
      * Gets the session.
      *
-     * @return The session
+     * @return The session or <code>null</code> if the folder was requested without a session
      */
     Session getSession();
 

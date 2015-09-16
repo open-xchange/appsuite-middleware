@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,69 @@
  *
  */
 
-package com.openexchange.share.storage.internal;
+package com.openexchange.share.impl;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import java.util.Date;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareLink;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link ShareStorageServiceLookup}
+ * {@link DefaultShareLink}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public final class ShareStorageServiceLookup {
+public class DefaultShareLink implements ShareLink {
+
+    private final ShareInfo delegate;
+    private final Date timestamp;
+    private final boolean isNew;
 
     /**
-     * Initializes a new {@link ShareStorageServiceLookup}.
+     * Initializes a new {@link DefaultShareLink}.
+     *
+     * @param delegate The underlying share link
+     * @param timestamp The target timestamp
+     * @param isNew <code>true</code> if the link was just created, <code>false</code>, otherwise
      */
-    private ShareStorageServiceLookup() {
+    public DefaultShareLink(ShareInfo delegate, Date timestamp, boolean isNew) {
         super();
+        this.delegate = delegate;
+        this.timestamp = timestamp;
+        this.isNew = isNew;
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    public ShareTarget getTarget() {
+        return delegate.getTarget();
     }
 
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    @Override
+    public ShareTarget getDestinationTarget() {
+        return delegate.getDestinationTarget();
     }
 
-    public static <S extends Object> S getService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        return service;
+    @Override
+    public GuestInfo getGuest() {
+        return delegate.getGuest();
     }
 
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        S service = getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
+    @Override
+    public String getShareURL(HostData hostData) {
+        return delegate.getShareURL(hostData);
     }
 
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
+    @Override
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
     }
 
 }

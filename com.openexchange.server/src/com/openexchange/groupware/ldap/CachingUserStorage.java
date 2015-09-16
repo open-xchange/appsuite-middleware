@@ -221,7 +221,37 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
-        return getUser(ctx, listAllUser(con, ctx, includeGuests, excludeUsers));
+        return getUser(ctx, listAllUser(con, ctx, includeGuests, excludeUsers), con);
+    }
+
+    @Override
+    public User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getUser(ctx, userIds, con);
+        }
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final TIntObjectMap<User> map = new TIntObjectHashMap<User>(userIds.length, 1);
+        final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
+        final int contextId = ctx.getContextId();
+        for (final int userId : userIds) {
+            final Object object = cache.get(cacheService.newCacheKey(contextId, userId));
+            if (object instanceof User) {
+                map.put(userId, (User) object);
+            } else {
+                toLoad.add(I(userId));
+            }
+        }
+        final User[] loaded = delegate.getUser(ctx, I2i(toLoad), con);
+        for (final User user : loaded) {
+            cache.put(cacheService.newCacheKey(contextId, user.getId()), user, false);
+            map.put(user.getId(), user);
+        }
+        final List<User> retval = new ArrayList<User>(userIds.length);
+        for (final int userId : userIds) {
+            retval.add(map.get(userId));
+        }
+        return retval.toArray(new User[retval.size()]);
     }
 
     @Override
@@ -340,6 +370,15 @@ public class CachingUserStorage extends UserStorage {
             delegate.setAttribute(name, value, userId, context);
             invalidateUserCache(context, userId);
         }
+    }
+
+    @Override
+    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
+        if (null == name) {
+            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
+        }
+        delegate.setAttribute(con, name, value, userId, context);
+        invalidateUserCache(context, userId);
     }
 
     @Override

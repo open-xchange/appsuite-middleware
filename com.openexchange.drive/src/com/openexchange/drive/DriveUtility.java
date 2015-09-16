@@ -53,6 +53,7 @@ import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.share.LinkUpdate;
 
 /**
  * {@link DriveUtility}
@@ -166,5 +167,13 @@ public interface DriveUtility {
      * @param parameters Additional parameters for the update
      */
     void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException;
+
+    DriveShareLink getLink(DriveSession session, DriveShareTarget target) throws OXException;
+
+    DriveShareLink optLink(DriveSession session, DriveShareTarget target) throws OXException;
+
+    DriveShareLink updateLink(DriveSession session, DriveShareTarget target, LinkUpdate linkUpdate) throws OXException;
+
+    void deleteLink(DriveSession session, DriveShareTarget target) throws OXException;
 
 }

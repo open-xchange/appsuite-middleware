@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
@@ -128,10 +127,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      */
     public UpdatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
-    }
-
-    public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        super(storageParameters, folderStorageDiscoverer);
     }
 
     /**
@@ -336,8 +331,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * prepare new shares for added guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
-                        processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions, transactionManager.getConnection());
+                        processAddedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions, transactionManager.getConnection());
                     }
                     if (cascadePermissions) {
                         /*
@@ -387,7 +381,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * delete existing shares for removed guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
-                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
+                        processRemovedGuestPermissions(comparedPermissions.getRemovedGuestPermissions());
                     }
                 } else if (changeSubscription) {
                     /*
@@ -475,7 +469,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
                 if (!ignoreWarnings) {
-                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), f.getName(), Integer.valueOf(context.getContextId()));
+                    int contextId;
+                    int userId;
+                    if (session == null) {
+                        contextId = context.getContextId();
+                        userId = user.getId();
+                    } else {
+                        contextId = session.getContextId();
+                        userId = session.getUserId();
+                    }
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(userId, f.getName(), Integer.valueOf(contextId));
                 }
             } else {
                 ids.add(f.getID());

@@ -49,8 +49,10 @@
 
 package com.openexchange.share.groupware;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 
 
 /**
@@ -76,13 +78,6 @@ public interface TargetProxy {
      * @return The objects parent folder ID
      */
     String getFolderID();
-
-    /**
-     * Gets the owner of this folder or item.
-     *
-     * @return The entity ID of the owner (i.e. a user or group ID)
-     */
-    int getOwner();
 
     /**
      * Gets the title of this folder or item.
@@ -134,12 +129,31 @@ public interface TargetProxy {
     TargetProxyType getProxyType();
 
     /**
-     * Gets whether the underlying object is either placed in a public folder or is a
-     * public folder itself.
+     * Gets a value indicating whether the underlying target permissions may be adjusted through this proxy or not.
      *
-     * @return <code>true</code> if this is a public target, <code>false</code> if it's a
-     * private one.
+     * @return <code>true</code> if it may be adjusted, <code>false</code>, otherwise
      */
-    boolean isPublic();
+    boolean mayAdjust();
+
+    /**
+     * Gets the last modification timestamp of the target.
+     *
+     * @return The timestamp
+     */
+    Date getTimestamp();
+
+    /**
+     * Gets the according share target from the view of the user via which it has been loaded.
+     *
+     * @return The target
+     */
+    ShareTarget getTarget();
+
+    /**
+     * Gets the path for generating links to the according share target.
+     *
+     * @return The path
+     */
+    ShareTargetPath getTargetPath();
 
 }

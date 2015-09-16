@@ -49,12 +49,11 @@
 
 package com.openexchange.drive.impl.internal;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
@@ -66,9 +65,8 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.LinkUpdate;
+import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -77,8 +75,6 @@ import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ShareHelper}
@@ -99,50 +95,64 @@ public class ShareHelper {
         this.session = session;
     }
 
-    /**
-     * Adds a share to a single target for a specific recipient.
-     *
-     * @param target The share target to add
-     * @param recipient The recipient for the share
-     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
-     * @return The created share
-     */
-    public DriveShareInfo addShare(DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
-        /*
-         * map drive target to plain share target & add the share
-         */
+    public DriveShareLink getLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
-        CreatedShare createdShare = getShareService().addShare(session.getServerSession(), shareTarget, recipient, meta);
-        /*
-         * convert & return appropriate drive share
-         */
-        return new DefaultDriveShareInfo(createdShare.getShareInfo(), target);
+        ShareLink shareLink = getShareService().getLink(session.getServerSession(), shareTarget);
+        return new DefaultDriveShareLink(shareLink, target);
     }
-    /**
-     * Gets all shares for a specific target.
-     *
-     * @param target The target to get the shares for
-     * @return The shares, or an empty list if there are none
-     */
-    public List<DriveShareInfo> getShares(DriveShareTarget target) throws OXException {
-        /*
-         * map drive target to plain share target & lookup shares
-         */
+
+    public DriveShareLink optLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
-        ServerSession serverSession = session.getServerSession();
-        List<ShareInfo> shareInfos = getShareService().getShares(serverSession, getShareModule(), shareTarget.getFolder(), shareTarget.getItem());
-        /*
-         * convert & return appropriate drive share
-         */
-        List<DriveShareInfo> driveShareInfos = new ArrayList<DriveShareInfo>(shareInfos.size());
-        ModuleSupport moduleSupport = DriveServiceLookup.getService(ModuleSupport.class);
-        for (ShareInfo shareInfo : shareInfos) {
-            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(shareTarget, serverSession.getContextId(), serverSession.getUserId());
-            DriveShareTarget driveTarget = new DriveShareTarget(shareTarget, personalizedTarget.getPath(), target.getName(), target.getChecksum());
-            driveShareInfos.add(new DefaultDriveShareInfo(shareInfo, driveTarget));
+        ShareLink shareLink = getShareService().optLink(session.getServerSession(), shareTarget);
+        return null != shareLink ? new DefaultDriveShareLink(shareLink, target) : null;
+    }
+
+    public DriveShareLink updateLink(DriveShareTarget driveTarget, LinkUpdate linkUpdate) throws OXException {
+        ShareLink shareLink;
+        if (driveTarget.isFolder()) {
+            FileStorageFolder folder = session.getStorage().getFolder(driveTarget.getDrivePath());
+            DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
+            if (false == driveTarget.getChecksum().equals(directoryChecksum.getChecksum())) {
+                throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(driveTarget.getDrivePath(), driveTarget.getChecksum());
+            }
+            ShareTarget shareTarget = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
+            shareLink = getShareService().updateLink(session.getServerSession(), shareTarget, linkUpdate, folder.getLastModifiedDate());
+        } else {
+            File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
+            if (null == file) {
+                throw DriveExceptionCodes.FILE_NOT_FOUND.create(driveTarget.getName(), driveTarget.getDrivePath());
+            }
+            if (false == ChecksumProvider.matches(session, file, driveTarget.getChecksum())) {
+                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(driveTarget.getName(), driveTarget.getChecksum(), driveTarget.getDrivePath());
+            }
+            ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+            shareLink = getShareService().updateLink(session.getServerSession(), shareTarget, linkUpdate, new Date(file.getSequenceNumber()));
         }
-        return driveShareInfos;
+        return new DefaultDriveShareLink(shareLink, driveTarget);
     }
+
+    public void deleteLink(DriveShareTarget driveTarget) throws OXException {
+        if (driveTarget.isFolder()) {
+            FileStorageFolder folder = session.getStorage().getFolder(driveTarget.getDrivePath());
+            DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
+            if (false == driveTarget.getChecksum().equals(directoryChecksum.getChecksum())) {
+                throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(driveTarget.getDrivePath(), driveTarget.getChecksum());
+            }
+            ShareTarget shareTarget = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
+            getShareService().deleteLink(session.getServerSession(), shareTarget, folder.getLastModifiedDate());
+        } else {
+            File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
+            if (null == file) {
+                throw DriveExceptionCodes.FILE_NOT_FOUND.create(driveTarget.getName(), driveTarget.getDrivePath());
+            }
+            if (false == ChecksumProvider.matches(session, file, driveTarget.getChecksum())) {
+                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(driveTarget.getName(), driveTarget.getChecksum(), driveTarget.getDrivePath());
+            }
+            ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+            getShareService().deleteLink(session.getServerSession(), shareTarget, new Date(file.getSequenceNumber()));
+        }
+    }
+
 
     /**
      * Gets the plain share target to a drive share target, throwing appropriate exceptions in case the target can't be looked up or it's

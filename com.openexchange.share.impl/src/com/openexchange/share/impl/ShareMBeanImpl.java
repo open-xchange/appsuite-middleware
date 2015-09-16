@@ -56,10 +56,9 @@ import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
@@ -86,8 +85,8 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public String listShares(int contextId, int userId) throws OXException {
-        return formatForCLT(shareService.getAllShares(contextId, userId));
+    public String listShares(int contextId, int guestId) throws OXException {
+        return formatForCLT(shareService.getAllShares(contextId, guestId));
     }
 
     @Override
@@ -123,8 +122,8 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
     }
 
     @Override
-    public int removeShares(int contextId, int userId) throws OXException {
-        return shareService.removeShares(contextId, userId);
+    public int removeShares(int contextId, int guestId) throws OXException {
+        return shareService.removeShares(contextId, guestId);
     }
 
     private String formatForCLT(List<ShareInfo> shareInfos) throws OXException {
@@ -134,14 +133,13 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
             return sb.toString();
         }
         for (ShareInfo info : shareInfos) {
-            Share share = info.getShare();
             GuestInfo guest = info.getGuest();
             int contextID = guest.getContextID();
-            int guestID = share.getGuest();
-            PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(info.getShare().getTarget(), contextID, guestID);
-            sb.append("Token: ").append(guest.getBaseToken() + '/' + personalizedTarget.getPath()).append(" ("); // TODO: don't generate token here
-            ShareTarget target = share.getTarget();
-            sb.append("Share [created by ").append(share.getCreatedBy()).append(" in context ").append(contextID).append(", guest=").append(guestID)
+            int guestID = guest.getGuestID();
+            ShareTargetPath targetPath = moduleSupport.getPath(info.getTarget(), contextID, guestID);
+            sb.append("Token: ").append(guest.getBaseToken() + '/' + targetPath.get()).append(" ("); // TODO: don't generate token here
+            ShareTarget target = info.getTarget();
+            sb.append("Share [guest created by ").append(guest.getCreatedBy()).append(" in context ").append(contextID).append(", guest=").append(guestID)
               .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
               .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
             sb.append("\n");

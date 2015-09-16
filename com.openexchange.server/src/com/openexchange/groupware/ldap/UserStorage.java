@@ -185,6 +185,17 @@ public abstract class UserStorage {
     public abstract User[] getUser(Context ctx, int[] userIds) throws OXException;
 
     /**
+     * Reads out the data from multiple users from the underlying persistent data storage.
+     *
+     * @param ctx The context
+     * @param userIds The identifiers of the users to get
+     * @param con a readable database connection.
+     * @return The users
+     * @throws OXException if an error occurs while reading from the persistent storage or one of the users doesn't exist
+     */
+    public abstract User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException;
+
+    /**
      * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
      * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
      *
@@ -359,6 +370,22 @@ public abstract class UserStorage {
      * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
      */
     public abstract void setAttribute(String name, String value, int userId, Context context) throws OXException;
+
+    /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param con a writable database connection
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
+     */
+    public abstract void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to

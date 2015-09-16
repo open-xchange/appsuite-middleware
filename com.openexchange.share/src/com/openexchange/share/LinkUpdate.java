@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,84 @@
  *
  */
 
-package com.openexchange.share.storage.mapping;
+package com.openexchange.share;
+
+import java.util.Date;
 
 /**
- * {@link ShareField}
+ * {@link LinkUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public enum ShareField {
+public class LinkUpdate {
 
-    CONTEXT_ID,
-    GUEST,
-    MODULE,
-    FOLDER,
-    ITEM,
-    OWNER,
-    EXPIRES,
-    CREATED,
-    CREATED_BY,
-    MODIFIED,
-    MODIFIED_BY,
-    META
-    ;
+    private Date expiryDate;
+    private String password;
+    private boolean containsExpiryDate;
+    private boolean containsPassword;
+
+    /**
+     * Initializes a new {@link LinkUpdate}.
+     */
+    public LinkUpdate() {
+        super();
+    }
+
+    /**
+     * Gets the expiryDate
+     *
+     * @return The expiryDate
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the expiryDate
+     *
+     * @param expiryDate The expiryDate to set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+        containsExpiryDate = true;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password
+     *
+     * @param password The password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+        containsPassword = true;
+    }
+
+    /**
+     * Gets the containsExpiryDate
+     *
+     * @return The containsExpiryDate
+     */
+    public boolean containsExpiryDate() {
+        return containsExpiryDate;
+    }
+
+    /**
+     * Gets the containsPassword
+     *
+     * @return The containsPassword
+     */
+    public boolean containsPassword() {
+        return containsPassword;
+    }
+
 }

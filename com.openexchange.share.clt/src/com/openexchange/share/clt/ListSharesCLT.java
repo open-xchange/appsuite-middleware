@@ -74,7 +74,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
 
     private String contextId;
 
-    private String userId;
+    private String guestId;
 
     private String token;
 
@@ -92,7 +92,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
             contextId = cmd.getOptionValue("c");
         }
         if (cmd.hasOption("i")) {
-            userId = cmd.getOptionValue("i");
+            guestId = cmd.getOptionValue("i");
         }
         if (cmd.hasOption("T")) {
             token = cmd.getOptionValue("T");
@@ -134,7 +134,7 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "The context id.");
-        options.addOption("i", "userid", true, "The user id.");
+        options.addOption("i", "userid", true, "The guest user id.");
         options.addOption("T", "token", true, "Token or URL.");
     }
 
@@ -153,8 +153,8 @@ public class ListSharesCLT extends AbstractMBeanCLI<Void> {
                 }
                 result = mbean.listShares(token);
             } else {
-                if (null != userId && !userId.isEmpty()) {
-                    result = mbean.listShares(Integer.parseInt(contextId), Integer.parseInt(userId));
+                if (null != guestId && !guestId.isEmpty()) {
+                    result = mbean.listShares(Integer.parseInt(contextId), Integer.parseInt(guestId));
                 } else {
                     result = mbean.listShares(Integer.parseInt(contextId));
                 }

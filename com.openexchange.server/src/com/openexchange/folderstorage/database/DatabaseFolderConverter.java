@@ -182,12 +182,16 @@ public final class DatabaseFolderConverter {
         final String key = "__ccf#";
         Integer ret = (Integer) session.getParameter(key);
         if (null == ret) {
-            Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
-            folderId = null == folderId ? Integer.valueOf(-1) : folderId;
+            Integer folderId = Integer.valueOf(getContactCollectorFolder(userId, contextId, con));
             session.setParameter(key, folderId);
             ret = folderId;
         }
         return ret.intValue();
+    }
+
+    private static int getContactCollectorFolder(final int userId, final int contextId, final Connection con) throws OXException {
+        Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
+        return null == folderId ? Integer.valueOf(-1) : folderId;
     }
 
     private static int getPublishedMailAttachmentsFolder(final Session session) {
@@ -272,6 +276,9 @@ public final class DatabaseFolderConverter {
                      */
                     final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
                     if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
+                        if (session == null) {
+                            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                        }
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             // Rename to default account name
@@ -351,38 +358,46 @@ public final class DatabaseFolderConverter {
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
-            } else if (folderId == getContactCollectorFolder(session, con)) {
-                // "Collected addresses" folder
-                retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-                retval.setDefault(true);
-                retval.setCacheable(true);
-                retval.setGlobal(false);
-            } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
-                retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
-                retval = new DatabaseFolder(fo);
-                /*-
-                 * If enabled performance need to be improved for:
-                 *
-                 * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
-                 */
-                final boolean checkIfVirtuallyReachable = false;
-                if (checkIfVirtuallyReachable) {
+                int contactCollectorFolder;
+                if (session != null) {
+                    contactCollectorFolder = getContactCollectorFolder(session, con);
+                } else {
+                    contactCollectorFolder = getContactCollectorFolder(user.getId(), ctx.getContextId(), con);
+                }
+                if (folderId == contactCollectorFolder) {
+                    // "Collected addresses" folder
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                    retval.setDefault(true);
+                    retval.setCacheable(true);
+                    retval.setGlobal(false);
+                } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
+                } else {
+                    retval = new DatabaseFolder(fo);
                     /*-
-                     * Does it appear below virtual folder?:
+                     * If enabled performance need to be improved for:
                      *
-                     * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                     * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                     * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
                      */
-                    final int virtualParent = getPossibleVirtualParent(fo);
-                    if (virtualParent > 0) {
-                        final String sFolderId = Integer.toString(folderId);
-                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userPermissionBits, ctx, con)) {
-                            if (sFolderId.equals(arr[0])) {
-                                retval.setParentID(Integer.toString(virtualParent));
-                                break;
+                    final boolean checkIfVirtuallyReachable = false;
+                    if (checkIfVirtuallyReachable) {
+                        /*-
+                         * Does it appear below virtual folder?:
+                         *
+                         * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                         * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                         */
+                        final int virtualParent = getPossibleVirtualParent(fo);
+                        if (virtualParent > 0) {
+                            final String sFolderId = Integer.toString(folderId);
+                            for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userPermissionBits, ctx, con)) {
+                                if (sFolderId.equals(arr[0])) {
+                                    retval.setParentID(Integer.toString(virtualParent));
+                                    break;
+                                }
                             }
                         }
                     }
@@ -442,6 +457,9 @@ public final class DatabaseFolderConverter {
             if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
                 boolean setChildren = true;
                 if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    if (session == null) {
+                        throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                    }
                     final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                     if (null != defaultAccount) {
                         /*
@@ -481,6 +499,9 @@ public final class DatabaseFolderConverter {
                 boolean setChildren = true;
                 if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
                     if (!InfostoreFacades.isInfoStoreAvailable()) {
+                        if (session == null) {
+                            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                        }
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             /*

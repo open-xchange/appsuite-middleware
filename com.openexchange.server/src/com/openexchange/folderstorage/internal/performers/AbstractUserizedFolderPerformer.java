@@ -97,6 +97,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
@@ -203,18 +204,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
 
         return false;
-    }
-
-    /**
-     * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     *
-     * @param storageParameters
-     * @param folderStorageDiscoverer
-     * @throws OXException
-     */
-    public AbstractUserizedFolderPerformer(StorageParameters storageParameters, FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        super(storageParameters, folderStorageDiscoverer);
-        this.decorator = storageParameters.getDecorator();
     }
 
     /**
@@ -522,7 +511,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check for equally named folder on same level
          */
         Set<String> conflictingNames = new HashSet<String>();
-        UserizedFolder[] existingFolders = new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, targetFolderId, true, true);
+        ListPerformer listPerformer;
+        if (session == null) {
+            listPerformer = new ListPerformer(user, context, null, folderStorageDiscoverer);
+        } else {
+            listPerformer = new ListPerformer(session, null, folderStorageDiscoverer);
+        }
+        UserizedFolder[] existingFolders = listPerformer.doList(treeId, targetFolderId, true, true);
         for (UserizedFolder existingFolder : existingFolders) {
             if (false == existingFolder.getID().equals(folderToSave.getID())) {
                 String conflictingName = existingFolder.getName().toLowerCase(getLocale());
@@ -573,52 +568,38 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Deletes shares that are no longer valid as a consequence of removed guest permission entities. This also includes deleting the
-     * corresponding guest user.
+     * Schedules cleanup tasks for removed guest permission entities.
      *
-     * @param folderID The ID of the parent folder
-     * @param contentType The content type / module of the parent folder
      * @param removedPermissions The removed permissions
-     * @param connection The database connection to use or <code>null</code>
      */
-    protected void processRemovedGuestPermissions(String folderID, ContentType contentType, List<Permission> removedPermissions, Connection connection) throws OXException {
+    protected void processRemovedGuestPermissions(List<Permission> removedPermissions) throws OXException {
         if (ignoreGuestPermissions()) {
             return;
         }
-
         List<Integer> guestIDs = new ArrayList<Integer>(removedPermissions.size());
         for (Permission permission : removedPermissions) {
-            guestIDs.add(permission.getEntity());
+            guestIDs.add(Integer.valueOf(permission.getEntity()));
         }
-
-        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-        boolean sessionParameterSet = false;
-        try {
-            if (false == session.containsParameter(Connection.class.getName() + '@' + Thread.currentThread().getId())) {
-                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
-                sessionParameterSet = true;
-            }
-            shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(contentType.getModule(), folderID)), guestIDs);
-        } finally {
-            if (sessionParameterSet) {
-                session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
-            }
-        }
+        FolderStorageServices.requireService(ShareService.class).scheduleGuestCleanup(getContextId(), Autoboxing.I2i(guestIDs));
     }
 
     /**
      * Adds share targets as a consequence of added guest permission entities. This also includes creating or resolving the corresponding
-     * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically.
+     * guest user. The supplied guest permissions are enriched by the matching guest user entities automatically. This method needs the
+     * session set on the according folder performer. If no session is set, this is a no-op.
      *
-     * @param ownedBy The identifier of the user considered as the owner of the folder
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
      * @param comparedPermissions The compared permissions
      * @param connection The database connection to use or <code>null</code>
      */
-    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, ComparedFolderPermissions comparedPermissions, Connection connection) throws OXException {
+    protected void processAddedGuestPermissions(String folderID, ContentType contentType, ComparedFolderPermissions comparedPermissions, Connection connection) throws OXException {
+        if (session == null) {
+            return;
+        }
+
         if (comparedPermissions.hasNewGuests()) {
-            Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, comparedPermissions.getNewGuestPermissions());
+            Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(folderID, contentType, comparedPermissions.getNewGuestPermissions());
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
 
             CreatedShares shares = null;
@@ -659,17 +640,15 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     /**
      * Gets the resulting share targets based on the supplied guest permissions.
      *
-     * @param ownedBy The identifier of the user considered as the owner of the share targets
      * @param folderID The folder ID to get the share targets for
      * @param contentType The content type of the folder
      * @param permissions The guest permissions
      * @return The share targets, each one mapped to the corresponding list of guest permissions
      */
-    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> permissions) {
+    private static Map<ShareTarget, List<GuestPermission>> getPermissionsPerTarget(String folderID, ContentType contentType, List<GuestPermission> permissions) {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
         for (GuestPermission permission : permissions) {
             ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
-            target.setOwnedBy(ownedBy);
             List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
             if (null == exitingPermissions) {
                 exitingPermissions = new ArrayList<GuestPermission>();
@@ -895,7 +874,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             final String id = visibleIds[0].getId();
                             final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
                             if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
+                                final Permission p;
+                                if (session == null) {
+                                    p = CalculatePermission.calculate(subfolder, user, context, getAllowedContentTypes());
+                                } else {
+                                    p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
+                                }
                                 if (p.isVisible()) {
                                     dummyId = id;
                                 }

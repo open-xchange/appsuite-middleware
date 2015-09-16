@@ -1109,6 +1109,62 @@ public final class OXFolderSQL {
     }
 
     /**
+     * Gets the identifiers of all permission entities belonging to one of the supplied folder identifiers.
+     *
+     * @param folderIDs The folder identifiers to get the permission entities for
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @param includeGroups <code>true</code> to also include group permissions, <code>false</code>, otherwise
+     * @return The entity IDs, or an empty list if none were found
+     */
+    public static List<Integer> getPermissionEntities(List<Integer> folderIDs, Connection readConnection, Context context, boolean includeGroups) throws OXException, SQLException {
+        /*
+         * build statement
+         */
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM oxfolder_permissions WHERE cid=? AND fuid");
+        if (1 == folderIDs.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < folderIDs.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        if (false == includeGroups) {
+            stringBuilder.append(" AND group_flag=0");
+        }
+        List<Integer> entityIDs = new ArrayList<Integer>();
+        boolean closeReadConnection = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            /*
+             * execute query
+             */
+            stmt = readConnection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, context.getContextId());
+            for (int i = 0; i < folderIDs.size(); i++) {
+                stmt.setInt(i + 2, folderIDs.get(i).intValue());
+            }
+            rs = executeQuery(stmt);
+            while (rs.next()) {
+                entityIDs.add(Integer.valueOf(rs.getInt(1)));
+            }
+        } finally {
+            closeResources(rs, stmt, closeReadConnection ? readConnection : null, true, context);
+        }
+        return entityIDs;
+    }
+
+    /**
      * Gets the identifiers of all parent folders in the tree down to the root folder.
      *
      * @param folderId The ID of the folder to get the path for

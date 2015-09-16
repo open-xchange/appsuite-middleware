@@ -180,8 +180,6 @@ import com.openexchange.sessionstorage.TestSessionStorageService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.internal.RdbShareStorage;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -1055,10 +1053,6 @@ public final class Init {
 
     public static void startAndInjectDefaultShareService() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(ShareService.class)) {
-            DatabaseService dbService = TestServiceRegistry.getInstance().getService(DatabaseService.class);
-            ShareStorage storage = new RdbShareStorage(dbService);
-            services.put(ShareStorage.class, storage);
-            TestServiceRegistry.getInstance().addService(ShareStorage.class, storage);
             DefaultShareService service = new DefaultShareService(LOOKUP, new GuestCleaner(LOOKUP));
             services.put(ShareService.class, service);
             TestServiceRegistry.getInstance().addService(ShareService.class, service);

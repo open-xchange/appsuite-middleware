@@ -96,7 +96,7 @@ public class CreatedShareImpl implements CreatedShare {
 
     @Override
     public ShareTarget getShareTarget() {
-        return shareInfo.getShare().getTarget();
+        return shareInfo.getTarget();
     }
 
     @Override

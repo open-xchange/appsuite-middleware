@@ -57,10 +57,12 @@ import com.openexchange.ajax.login.ShareLoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 
 
@@ -90,15 +92,15 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract boolean keepSession();
 
     /**
-     * Checks if this redirecting share handler fees responsible for passed share
+     * Checks if this redirecting share handler fees responsible for passed guest and target
      *
-     * @param share The share
+     * @param shareRequest The share request
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
-    protected abstract boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    protected abstract boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
     /**
      * Handles the given resolved share.
@@ -110,8 +112,8 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
     protected abstract void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException;
 
     @Override
-    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (false == handles(share, target, request, response)) {
+    public ShareHandlerReply handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (false == handles(shareRequest, request, response)) {
             return ShareHandlerReply.NEUTRAL;
         }
 
@@ -120,16 +122,18 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
             /*
              * get, authenticate and login as associated guest user
              */
+            GuestInfo guest = shareRequest.getGuest();
             ShareLoginConfiguration shareLoginConfig = ShareServletUtils.getShareLoginConfiguration();
-            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            ShareLoginMethod shareLoginMethod = getShareLoginMethod(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), shareLoginMethod);
+            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(guest);
+            ShareLoginMethod shareLoginMethod = getShareLoginMethod(guest);
+            LoginResult loginResult = ShareServletUtils.login(guest, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), shareLoginMethod);
             if (null == loginResult) {
                 shareLoginMethod.sendUnauthorized(request, response);
                 return ShareHandlerReply.DENY;
             }
             session = loginResult.getSession();
-            handleResolvedShare(new ResolvedShare(share, target, loginResult, loginConfig, request, response));
+
+            handleResolvedShare(new ResolvedShare(shareRequest, loginResult, loginConfig, request, response));
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());

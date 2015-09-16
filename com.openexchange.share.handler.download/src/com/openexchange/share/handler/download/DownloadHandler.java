@@ -69,8 +69,7 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
 import com.openexchange.tools.session.ServerSession;
@@ -104,8 +103,8 @@ public class DownloadHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return null != target && Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem() &&
+    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return shareRequest.hasTarget() && Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() &&
             (indicatesDownload(request) || indicatesRaw(request));
     }
 
@@ -115,7 +114,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
          * get document
          */
         ServerSession session = ServerSessionAdapter.valueOf(resolvedShare.getSession());
-        final String id = resolvedShare.getTarget().getItem();
+        final String id = resolvedShare.getShareRequest().getTarget().getItem();
         final String version = null; // as per com.openexchange.file.storage.FileStorageFileAccess.CURRENT_VERSION
         final IDBasedFileAccess fileAccess = Services.getService(IDBasedFileAccessFactory.class).createAccess(session);
         FileHolder fileHolder;

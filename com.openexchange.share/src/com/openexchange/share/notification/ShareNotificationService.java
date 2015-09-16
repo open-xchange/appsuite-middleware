@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShares;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -146,11 +146,11 @@ public interface ShareNotificationService {
      * Send a notification mail that requests a confirmation for a requested password reset from the user.
      *
      * @param transport The type of {@link Transport} to use when sending notifications
-     * @param guestShare The guest share
+     * @param guestInfo The guest info
      * @param confirmToken The confirm token to be part of the resulting link
      * @param hostData The host data to generate share links
      * @throws OXException
      */
-    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, HostData hostData) throws OXException;
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestInfo guestInfo, String confirmToken, HostData hostData) throws OXException;
 
 }

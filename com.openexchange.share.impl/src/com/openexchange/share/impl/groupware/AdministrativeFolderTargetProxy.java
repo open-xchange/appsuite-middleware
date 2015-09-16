@@ -52,12 +52,15 @@ package com.openexchange.share.impl.groupware;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -73,23 +76,25 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     private final FolderObject folder;
     private final Set<Integer> affectedUsers;
-    private final boolean isPublic;
+    private final ShareTarget target;
+    private final ShareTargetPath targetPath;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
      *
      * @param folder The underlying folder object
      */
-    public AdministrativeFolderTargetProxy(FolderObject folder, boolean isPublic) {
+    public AdministrativeFolderTargetProxy(FolderObject folder) {
         super();
         this.folder = folder;
-        this.affectedUsers = new HashSet<Integer>();
-        this.isPublic = isPublic;
+        affectedUsers = new HashSet<Integer>();
+        target = new ShareTarget(folder.getModule(), Integer.toString(folder.getObjectID()), null);
+        targetPath = new ShareTargetPath(folder.getModule(), Integer.toString(folder.getObjectID()), null);
     }
 
     @Override
     public String getID() {
-        return Integer.toString(folder.getObjectID());
+        return targetPath.getFolder();
     }
 
     @Override
@@ -97,7 +102,6 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         return Integer.toString(folder.getParentFolderID());
     }
 
-    @Override
     public int getOwner() {
         return folder.getCreatedBy();
     }
@@ -154,8 +158,13 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public boolean isPublic() {
-        return isPublic;
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    @Override
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
     /**
@@ -212,6 +221,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         }
 
         @Override
+        public boolean isSystem(OCLPermission permission) {
+            return permission.isSystem();
+        }
+
+        @Override
         public int getBits(OCLPermission permission) {
             return Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
                 permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin());
@@ -231,6 +245,16 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             return new TargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission));
         }
 
-    };
+    }
+
+    @Override
+    public boolean mayAdjust() {
+        return true;
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return folder.getLastModified();
+    }
 
 }

@@ -56,8 +56,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
 
 /**
  * {@link ResolvedShare}
@@ -68,8 +66,7 @@ import com.openexchange.share.PersonalizedShareTarget;
  */
 public class ResolvedShare {
 
-    private final GuestShare share;
-    private final PersonalizedShareTarget target;
+    private final AccessShareRequest shareRequest;
     private final Session session;
     private final User user;
     private final Context context;
@@ -81,8 +78,7 @@ public class ResolvedShare {
     /**
      * Initializes a new {@link ResolvedShare}.
      *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param shareRequest The share request
      * @param session The session
      * @param user The user
      * @param context The context
@@ -91,10 +87,9 @@ public class ResolvedShare {
      * @param request The request
      * @param response The response
      */
-    public ResolvedShare(GuestShare share, PersonalizedShareTarget target, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
+    public ResolvedShare(AccessShareRequest shareRequest, LoginResult loginResult, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) {
         super();
-        this.share = share;
-        this.target = target;
+        this.shareRequest = shareRequest;
         this.session = loginResult.getSession();
         this.user = loginResult.getUser();
         this.context = loginResult.getContext();
@@ -102,15 +97,6 @@ public class ResolvedShare {
         this.loginConfig = loginConfig;
         this.request = request;
         this.response = response;
-    }
-
-    /**
-     * Gets the associated share
-     *
-     * @return The share
-     */
-    public GuestShare getShare() {
-        return share;
     }
 
     /**
@@ -176,13 +162,13 @@ public class ResolvedShare {
         return response;
     }
 
-    /**
-     * Gets the share target.
-     *
-     * @return The share target within the share, or <code>null</code> if not addressed
-     */
-    public PersonalizedShareTarget getTarget() {
-        return target;
+    public AccessShareRequest getShareRequest() {
+        return shareRequest;
+    }
+
+    @Override
+    public String toString() {
+        return "ResolvedShare [context=" + context + ", user=" + user + ", shareRequest=" + shareRequest + "]";
     }
 
 }

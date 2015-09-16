@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,61 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.servlet.handler;
 
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 
 /**
- * {@link AdjustedShareTarget}
+ * Encapsulates data of requests targeting the share servlet.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class AdjustedShareTarget extends ShareTarget {
+public class AccessShareRequest {
 
-    private static final long serialVersionUID = -3613658055542304716L;
-    
-    private String adjustedFolder;
-    private String adjustedItem;
-    private ShareTarget originalTarget;
+    private final GuestInfo guest;
+
+    private final ShareTargetPath targetPath;
+
+    private final ShareTarget target;
+
+    private final boolean invalidTarget;
 
     /**
-     * Initializes a new {@link AdjustedShareTarget}, pretending the adjusted folder- and item identifiers, yet preserving the parent
-     * target's path.
-     *
-     * @param target The underlying target
-     * @param adjustedFolder The adjusted identifier of the folder
-     * @param adjustedItem The adjusted identifier of the item
+     * Initializes a new {@link AccessShareRequest}.
+     * @param guest
+     * @param targetPath
+     * @param target
+     * @param invalidTarget
      */
-    public AdjustedShareTarget(ShareTarget target, String adjustedFolder, String adjustedItem) {
-        super(target);
-        this.originalTarget = target;
-        this.adjustedFolder = adjustedFolder;
-        this.adjustedItem = adjustedItem;
-    }
-    
-    /**
-     * Gets the underlying original target with no adjustments.
-     * 
-     * @return The original target
-     */
-    public ShareTarget getOriginalTarget() {
-        return originalTarget;
+    public AccessShareRequest(GuestInfo guest, ShareTargetPath targetPath, ShareTarget target, boolean invalidTarget) {
+        super();
+        this.guest = guest;
+        this.targetPath = targetPath;
+        this.target = target;
+        this.invalidTarget = invalidTarget;
     }
 
-    @Override
-    public String getFolder() {
-        return adjustedFolder;
+    public GuestInfo getGuest() {
+        return guest;
     }
 
-    @Override
-    public void setFolder(String folder) {
-        this.adjustedFolder = folder;
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
-    @Override
-    public String getItem() {
-        return adjustedItem;
+    public ShareTarget getTarget() {
+        return target;
     }
 
-    @Override
-    public void setItem(String item) {
-        this.adjustedItem = item;
+    public boolean isInvalidTarget() {
+        return invalidTarget;
+    }
+
+    public boolean hasTarget() {
+        return target != null;
     }
 
 }

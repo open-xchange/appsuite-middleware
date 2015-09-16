@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.meta;
+package com.openexchange.share;
 
-import java.util.Set;
-
+import java.util.Date;
 
 /**
- * {@link MetaContributorRegistry} - The registry for contributors.
+ * {@link ShareLink}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public interface MetaContributorRegistry {
+public interface ShareLink extends ShareInfo {
 
     /**
-     * Gets the meta contributors for topic-covered entities.
-     * <ul>
-     * <li>"ox/common/task"</li>
-     * <li>"ox/common/contact"</li>
-     * <li>"ox/common/folder"</li>
-     * <li>"ox/common/appointment"</li>
-     * <li>"ox/common/freebusy"</li>
-     * <li>"ox/mail/account"</li>
-     * </ul>
+     * The timestamp of the underlying share target to catch concurrent modifications.
      *
-     * @param topic The topic of the entities to consider
-     * @return The contributors that apply to specified topic
+     * @return The timestamp
      */
-    Set<MetaContributor> getMetaContributors(String topic);
+    Date getTimestamp();
+
+    /**
+     * Gets a value indicating whether the share link was just created or if it existed before.
+     *
+     * @return <code>true</code> if the link is new, <code>false</code>, otherwise
+     */
+    boolean isNew();
 
 }

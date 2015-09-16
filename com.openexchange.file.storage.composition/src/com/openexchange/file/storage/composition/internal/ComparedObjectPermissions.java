@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -247,6 +248,11 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
 
         @Override
         public ShareTarget getLinkTarget() {
+            return null;
+        }
+
+        @Override
+        public Date getExpiryDate() {
             return null;
         }
     };

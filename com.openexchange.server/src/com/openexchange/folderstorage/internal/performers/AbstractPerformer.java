@@ -72,7 +72,6 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractPerformer} - Abstract action.
@@ -117,17 +116,6 @@ public abstract class AbstractPerformer {
      */
     protected AbstractPerformer(final ServerSession session) throws OXException {
         this(session, FolderStorageRegistry.getInstance());
-    }
-
-    /**
-     * Initializes a new {@link AbstractPerformer} from given {@link StorageParameters}.
-     *
-     * @param storageParameters The {@link StorageParameters}. Must not be <code>null</code> and must contain a valid session.
-     * @param folderStorageDiscoverer The folder storage discoverer
-     * @throws OXException If passed parameters are invalid
-     */
-    protected AbstractPerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
-        this(ServerSessionAdapter.valueOf(storageParameters.getSession()), storageParameters, folderStorageDiscoverer);
     }
 
     /**
@@ -425,7 +413,7 @@ public abstract class AbstractPerformer {
     /**
      * Gets the session.
      *
-     * @return The session
+     * @return The session or <code>null</code>
      */
     public ServerSession getSession() {
         return session;

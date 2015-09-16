@@ -68,6 +68,11 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
      */
     public static final String NOT_FOUND = "not_found";
 
+    /**
+     * Status for "not found, but continue to see other shares"
+     */
+    public static final String NOT_FOUND_CONTINUE = "not_found_continue";
+
     private final String path;
     private final Map<String, String> parameters;
     private final int statusCode;

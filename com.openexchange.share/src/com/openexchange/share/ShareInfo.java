@@ -60,11 +60,18 @@ import com.openexchange.groupware.notify.hostname.HostData;
 public interface ShareInfo {
 
     /**
-     * Gets the underlying share.
+     * Gets the share target from the sharing users point of view.
      *
-     * @return The share
+     * @return The share target
      */
-    Share getShare();
+    ShareTarget getTarget();
+
+    /**
+     * Gets the share target from the recipients point of view.
+     *
+     * @return The share target
+     */
+    ShareTarget getDestinationTarget();
 
     /**
      * Gets additional information about the guest user the share is associated with.

@@ -62,6 +62,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -341,6 +342,25 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If retrieval fails
      */
     TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException;
+
+    /**
+     * Gets the documents in a specific folder as seen by a user.
+     * <p/>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param folderId The folder identifier
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive)
+     * @param end The end index (exclusive)
+     * @param context The context
+     * @param user The user
+     * @param permissionBits The user permission bits
+     * @return The documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException;
 
     /**
      * Gets the sorted folder's documents.

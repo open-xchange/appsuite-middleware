@@ -61,8 +61,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
-import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.interception.OXExceptionInterceptor;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorTracker;
@@ -93,7 +91,6 @@ public final class GlobalActivator implements BundleActivator {
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
-    private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
     private volatile ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
     private volatile ServiceRegistration<ThreadControlService> threadControlRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
@@ -123,9 +120,6 @@ public final class GlobalActivator implements BundleActivator {
             OXExceptionInterceptorRegistration.initInstance();
             trackers.add(new ServiceTracker<OXExceptionInterceptor, OXExceptionInterceptor>(context, OXExceptionInterceptor.class, new OXExceptionInterceptorTracker(context)));
 
-            final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
-            trackers.add(metaContributors);
-
             // Session inspector chain
             {
                 ServiceSet<SessionInspectorService> serviceSet = new ServiceSet<SessionInspectorService>(context);
@@ -137,8 +131,6 @@ public final class GlobalActivator implements BundleActivator {
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
-
-            metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
 
             threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
 
@@ -251,12 +243,6 @@ public final class GlobalActivator implements BundleActivator {
             if (null != threadControlRegistration) {
                 this.threadControlRegistration = null;
                 threadControlRegistration.unregister();
-            }
-
-            ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
-            if (null != metaContributorsRegistration) {
-                this.metaContributorsRegistration = null;
-                metaContributorsRegistration.unregister();
             }
 
             ServiceRegistration<SessionInspectorChain> inspectorChainRegistration = this.inspectorChainRegistration;

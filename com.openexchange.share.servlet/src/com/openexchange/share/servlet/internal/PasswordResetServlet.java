@@ -73,12 +73,8 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -130,13 +126,12 @@ public class PasswordResetServlet extends AbstractShareServlet {
             }
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            GuestShare guestShare = shareService.resolveToken(token);
-            if (guestShare == null) {
+            GuestInfo guestInfo = shareService.resolveGuest(token);
+            if (guestInfo == null) {
                 sendInvalidRequest(translator, response);
                 return;
             }
 
-            GuestInfo guestInfo = guestShare.getGuest();
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 String redirectUrl = new LoginLocationBuilder()
                     .status("reset_password_info")
@@ -171,14 +166,14 @@ public class PasswordResetServlet extends AbstractShareServlet {
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
                  */
                 ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
-                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, hash, Tools.createHostData(request, contextID, guestID, storageUser.isGuest()));
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestInfo, hash, Tools.createHostData(request, contextID, guestID, storageUser.isGuest()));
 
                 /*
                  * Redirect after notification was sent.
                  */
                 String redirectUrl = new LoginLocationBuilder()
                     .status("reset_password_info")
-                    .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestShare.getGuest().getEmailAddress()))
+                    .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestInfo.getEmailAddress()))
                     .share(guestInfo.getBaseToken())
                     .build();
                 response.sendRedirect(redirectUrl);
@@ -186,7 +181,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
                 if (confirm.equals(hash)) {
                     LoginLocationBuilder redirectUrl = new LoginLocationBuilder()
                         .status("reset_password")
-                        .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestShare.getGuest().getEmailAddress()))
+                        .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestInfo.getEmailAddress()))
                         .parameter("confirm", confirm)
                         .share(guestInfo.getBaseToken());
                     response.sendRedirect(redirectUrl.build());
@@ -235,13 +230,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
             }
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            GuestShare guestShare = shareService.resolveToken(token);
-            if (guestShare == null) {
-                sendInvalidRequest(translator, response);
-                return;
-            }
-
-            GuestInfo guestInfo = guestShare.getGuest();
+            GuestInfo guestInfo = shareService.resolveGuest(token);
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
                 sendInvalidRequest(translator, response);
                 return;
@@ -256,12 +245,13 @@ public class PasswordResetServlet extends AbstractShareServlet {
             if (confirm.equals(hash)) {
                 Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
                 User updatedGuest = updatePassword(guestID, context, newPassword);
-                ShareTarget target = guestShare.getSingleTarget();
-                PersonalizedShareTarget personalizedTarget = null;
-                if (target != null) {
-                    personalizedTarget = ShareServiceLookup.getService(ModuleSupport.class).personalizeTarget(target, contextID, guestID);
-                }
-                if (!ShareServletUtils.createSessionAndRedirect(guestShare, personalizedTarget, request, response, loginMethod(updatedGuest, context))) {
+                // TODO: select a target
+//                ShareTarget target = guestShare.getSingleTarget();
+//                PersonalizedShareTarget personalizedTarget = null;
+//                if (target != null) {
+//                    personalizedTarget = ShareServiceLookup.getService(ModuleSupport.class).personalizeTarget(target, contextID, guestID);
+//                }
+                if (!ShareServletUtils.createSessionAndRedirect(guestInfo, null, request, response, loginMethod(updatedGuest, context))) {
                     sendInternalError(translator, response);
                 }
             } else {

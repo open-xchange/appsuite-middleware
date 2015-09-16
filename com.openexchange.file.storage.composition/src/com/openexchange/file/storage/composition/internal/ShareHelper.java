@@ -69,7 +69,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
@@ -87,10 +87,6 @@ import com.openexchange.tx.ConnectionHolder;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ShareHelper {
-
-    /** com.openexchange.groupware.container.FolderObject.INFOSTORE */
-    private static final int MODULE_FILE_STORAGE = 8;
-
 
     /**
      * Pre-processes the supplied document to extract added, modified or removed guest object permissions required for sharing support. Guest object
@@ -234,78 +230,6 @@ public class ShareHelper {
         }
     }
 
-    /**
-     * Removes all shares referencing any of the supplied document identifiers, usually after the corresponding files are deleted in the
-     * storage.
-     *
-     * @param session The session
-     * @param access The file access hosting the documents
-     * @param ids The identifiers of the files to remove the shares for
-     * @throws OXException
-     */
-    public static void removeShares(Session session, FileStorageFileAccess fileAccess, List<IDTuple> ids) throws OXException {
-        if (null != ids && 0 < ids.size() && supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
-            /*
-             * prepare share targets for removal
-             */
-            String serviceId = fileAccess.getAccountAccess().getService().getId();
-            String accountId = fileAccess.getAccountAccess().getAccountId();
-            List<ShareTarget> shareTargets = new ArrayList<ShareTarget>(ids.size());
-            for (IDTuple tuple : ids) {
-                String folderID = new FolderID(serviceId, accountId, tuple.getFolder()).toUniqueID();
-                String fileID = new FileID(serviceId, accountId, tuple.getFolder(), tuple.getId()).toUniqueID();
-                shareTargets.add(new ShareTarget(MODULE_FILE_STORAGE, folderID, fileID));
-            }
-            /*
-             * remove all shares targeting the documents
-             */
-            ShareService service = Services.getService(ShareService.class);
-            if (null != service) {
-                Connection connection = ConnectionHolder.CONNECTION.get();
-                try {
-                    session.setParameter(Connection.class.getName(), connection);
-                    service.deleteTargets(session, shareTargets, null);
-                } finally {
-                    session.setParameter(Connection.class.getName(), null);
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes all shares referencing any of the supplied document identifiers, usually after the corresponding files are deleted in the
-     * storage.
-     *
-     * @param session The session
-     * @param access The file access hosting the documents
-     * @param folderID The identifiers of the folder to remove the shares for
-     * @throws OXException
-     */
-    public static void removeShares(Session session, FileStorageFileAccess fileAccess, String folderID) throws OXException {
-        if (null != folderID && supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
-            /*
-             * prepare share target for removal
-             */
-            String serviceId = fileAccess.getAccountAccess().getService().getId();
-            String accountId = fileAccess.getAccountAccess().getAccountId();
-            String uniqueID = new FolderID(serviceId, accountId, folderID).toUniqueID();
-            ShareTarget shareTarget = new ShareTarget(MODULE_FILE_STORAGE, uniqueID);
-            /*
-             * remove all shares targeting the documents in the folder
-             */
-            ShareService service = Services.getService(ShareService.class);
-            if (null != service) {
-                Connection connection = ConnectionHolder.CONNECTION.get();
-                try {
-                    session.setParameter(Connection.class.getName(), connection);
-                    service.deleteTargets(session, Collections.singletonList(shareTarget), true);
-                } finally {
-                    session.setParameter(Connection.class.getName(), null);
-                }
-            }
-        }
-    }
-
     private static List<FileStorageObjectPermission> handleGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
         List<FileStorageObjectPermission> updatedPermissions = null;
         if (null != comparedPermissions) {
@@ -313,52 +237,16 @@ public class ShareHelper {
                 updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions);
             }
             if (comparedPermissions.hasRemovedGuests()) {
-                ShareHelper.handleRemovedObjectPermissions(session, fileAccess, document, comparedPermissions.getRemovedGuestPermissions());
+                /*
+                 * extract affected guest entities & schedule cleanup tasks
+                 */
+                List<Integer> affectedUserIDs = getAffectedUserIDs(comparedPermissions.getRemovedGuestPermissions());
+                if (0 < affectedUserIDs.size()) {
+                    Services.getService(ShareService.class).scheduleGuestCleanup(session.getContextId(), Autoboxing.I2i(affectedUserIDs));
+                }
             }
         }
         return updatedPermissions;
-    }
-
-    /**
-     * Removes shares referencing a document to reflect the removal of object permissions previously assigned to the document.
-     *
-     * @param session The session
-     * @param fileAccess The file access
-     * @param document The document where the permissions are removed
-     * @param removedPermissions The permissions that are removed
-     * @return <code>true</code> if shares were removed, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    private static boolean handleRemovedObjectPermissions(Session session, FileStorageFileAccess fileAccess, File document, List<FileStorageObjectPermission> removedPermissions) throws OXException {
-        /*
-         * extract affected user entities
-         */
-        List<Integer> affectedUserIDs = getAffectedUserIDs(removedPermissions);
-        if (0 == affectedUserIDs.size()) {
-            return false;
-        }
-        /*
-         * prepare share target representing the document
-         */
-        String service = fileAccess.getAccountAccess().getService().getId();
-        String account = fileAccess.getAccountAccess().getAccountId();
-        String folderID = new FolderID(service, account, document.getFolderId()).toUniqueID();
-        String fileID = new FileID(service, account, document.getFolderId(), document.getId()).toUniqueID();
-        ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
-        /*
-         * remove shares targeting the document for all affected users
-         */
-        ShareService shareService = Services.getService(ShareService.class);
-        if (null != shareService) {
-            Connection connection = ConnectionHolder.CONNECTION.get();
-            try {
-                session.setParameter(Connection.class.getName(), connection);
-                shareService.deleteTargets(session, Collections.singletonList(shareTarget), affectedUserIDs);
-            } finally {
-                session.setParameter(Connection.class.getName(), null);
-            }
-        }
-        return true;
     }
 
     private static List<FileStorageObjectPermission> handleNewGuestPermissions(Session session, FileStorageFileAccess access, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
@@ -377,17 +265,11 @@ public class ShareHelper {
                 if (null == shareService) {
                     throw ServiceExceptionCode.absentService(ShareService.class);
                 }
-                int owner = document.getCreatedBy();
-                if (0 >= owner) {
-                    owner = access.getFileMetadata(
-                        document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION).getCreatedBy();
-                }
                 String service = access.getAccountAccess().getService().getId();
                 String account = access.getAccountAccess().getAccountId();
                 String folderID = new FolderID(service, account, document.getFolderId()).toUniqueID();
                 String fileID = new FileID(service, account, document.getFolderId(), document.getId()).toUniqueID();
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
-                shareTarget.setOwnedBy(owner);
                 CreatedShares shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (FileStorageGuestObjectPermission permission : newGuestPermissions) {
                     CreatedShare share = shares.getShare(permission.getRecipient());

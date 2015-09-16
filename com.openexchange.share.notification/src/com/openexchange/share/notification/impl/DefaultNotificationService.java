@@ -77,11 +77,9 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -195,16 +193,17 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 user = userService.getUser(userId, session.getContextId());
                 CreatedShare share = sharesByUser.get(userId);
-                PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(share.getShareTarget(), context.getContextId(), user.getId());
                 String shareUrl;
+                ShareTarget target = share.getShareTarget();
                 if (user.isGuest()) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                    // FIXME: ensure the target is always personalized
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
                         collectedAddresses.add(new QuotedInternetAddress(mail));
                     }
                 } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
                 }
 
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, share.getShareTarget(), message, shareUrl, session, hostData);
@@ -250,8 +249,19 @@ public class DefaultNotificationService implements ShareNotificationService {
             InternetAddress transportInfo = null;
             try {
                 transportInfo = (InternetAddress) transportInfoObj;
-                Share share = link.getShare();
-                LinkCreatedNotification<InternetAddress> notification = MailNotifications.linkCreated().setTransportInfo(transportInfo).setContextID(session.getContextId()).setGuestID(guestInfo.getGuestID()).setLocale(guestInfo.getLocale()).setSession(session).setTarget(share.getTarget()).setMessage(message).setHostData(hostData).setShareUrl(link.getShareURL(hostData)).setExpiryDate(share.getExpiryDate()).setPassword(guestInfo.getPassword()).build();
+                LinkCreatedNotification<InternetAddress> notification = MailNotifications.linkCreated()
+                    .setTransportInfo(transportInfo)
+                    .setContextID(session.getContextId())
+                    .setGuestID(guestInfo.getGuestID())
+                    .setLocale(guestInfo.getLocale())
+                    .setSession(session)
+                    .setTarget(link.getTarget())
+                    .setMessage(message)
+                    .setHostData(hostData)
+                    .setShareUrl(link.getShareURL(hostData))
+                    .setExpiryDate(guestInfo.getExpiryDate())
+                    .setPassword(guestInfo.getPassword())
+                    .build();
                 send(notification);
             } catch (Exception e) {
                 String mailAddress = null;
@@ -266,21 +276,20 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, HostData hostData) throws OXException {
+    public void sendPasswordResetConfirmationNotification(Transport transport, GuestInfo guestInfo, String confirmToken, HostData hostData) throws OXException {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
 
         try {
             UserService userService = serviceLookup.getService(UserService.class);
-            GuestInfo guestInfo = guestShare.getGuest();
             String mailAddress = guestInfo.getEmailAddress();
             String displayName = guestInfo.getDisplayName();
             if (null == displayName) {
                 displayName = mailAddress;
             }
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-            String baseToken = guestShare.getGuest().getBaseToken();
+            String baseToken = guestInfo.getBaseToken();
 
             ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm().setTransportInfo(new QuotedInternetAddress(mailAddress, displayName, "UTF-8")).setContextID(guestInfo.getContextID()).setGuestID(guestInfo.getGuestID()).setLocale(guest.getLocale()).setHostData(hostData).setShareUrl(ShareLinks.generateExternal(hostData, baseToken, null)).setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(hostData, baseToken, confirmToken)).build();
 
@@ -410,16 +419,15 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 user = usersById.get(userId);
                 String shareUrl;
-                boolean isGuest = user.isGuest();
-                PersonalizedShareTarget personalizedTarget = moduleSupport.personalizeTarget(target, context.getContextId(), user.getId());
-                if (isGuest) {
-                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), personalizedTarget);
+                if (user.isGuest()) {
+                    // FIXME: ensure the target is always personalized
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem()));
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
                         collectedAddresses.add(new QuotedInternetAddress(mail));
                     }
                 } else {
-                    shareUrl = ShareLinks.generateInternal(hostData, personalizedTarget);
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
                 }
                 ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, target, message, shareUrl, session, hostData);
                 send(shareNotification);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.meta;
+package com.openexchange.drive;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
+import com.openexchange.share.ShareLink;
 
 /**
- * {@link MetaContributor} - Possibly extends a given entity's meta information.
+ * {@link DriveShareLink}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public interface MetaContributor {
+public interface DriveShareLink extends ShareLink, DriveShareInfo {
 
     /**
-     * Contributes to given meta information.
+     * Gets the underlying share target.
      *
-     * @param meta The meta information
-     * @param id The associated entities identifier
-     * @param session The session
-     * @throws OXException If contribute operation fails
-     * @see MetaContributionConstants#CONTRIBUTOR_TOPIC
+     * @return The share target
      */
-    void contributeTo(Map<String, Object> meta, String id, Session session) throws OXException;
+    @Override
+    DriveShareTarget getTarget();
 
 }

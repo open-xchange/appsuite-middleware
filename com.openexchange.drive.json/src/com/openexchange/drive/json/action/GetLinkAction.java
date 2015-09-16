@@ -50,19 +50,14 @@
 package com.openexchange.drive.json.action;
 
 import java.util.Date;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -73,42 +68,25 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class GetLinkAction extends AbstractDriveAction {
 
-    /** The default permission bits to use for anonymous link shares */
-    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
-
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
-         * parse target
+         * parse target & get or create the share link
          */
         DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
+        DriveShareLink shareLink = getDriveService().getUtility().getLink(session, target);
         /*
-         * reuse existing or create a new anonymous share as needed
-         */
-        boolean isNew = false;
-        DriveShareInfo shareInfo = discoverLink(session, target);
-        if (null == shareInfo) {
-            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            shareInfo = getDriveService().addShare(session, target, recipient, null);
-            isNew = true;
-        }
-        /*
-         * return appropriate JSON result
+         * return appropriate result
          */
         try {
             JSONObject jsonResult = new JSONObject();
-            jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
-            jsonResult.put("is_new", isNew);
-            Date expiryDate = shareInfo.getShare().getExpiryDate();
+            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
+            jsonResult.put("is_new", shareLink.isNew());
+            Date expiryDate = shareLink.getGuest().getExpiryDate();
             if (null != expiryDate) {
                 jsonResult.put("expiry_date", expiryDate.getTime());
             }
-            jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
-            Map<String, Object> meta = shareInfo.getShare().getMeta();
-            if (null != meta) {
-                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
-            }
+            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
             return new AJAXRequestResult(jsonResult, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

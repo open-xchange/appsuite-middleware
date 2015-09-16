@@ -54,7 +54,6 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONException;
@@ -77,7 +76,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -152,29 +150,6 @@ public class ShareUtils {
     }
 
     /**
-     * Prepares a new share.
-     *
-     * @param contextID The context ID
-     * @param sharingUser The sharing user
-     * @param guestUserID The guest user ID
-     * @param target The share target
-     * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
-     * @return The share
-     */
-    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, Date expiryDate) {
-        Date now = new Date();
-        Share share = new Share();
-        share.setTarget(target);
-        share.setCreated(now);
-        share.setModified(now);
-        share.setCreatedBy(sharingUser.getId());
-        share.setModifiedBy(sharingUser.getId());
-        share.setGuest(guestUserID);
-        share.setExpiryDate(expiryDate);
-        return share;
-    }
-
-    /**
      * Prepares a guest user instance based on the supplied share recipient.
      *
      * @param sharingUser The sharing user
@@ -243,6 +218,10 @@ public class ShareUtils {
             guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
         } else {
             guestUser.setPasswordMech("");
+        }
+        if (null != recipient.getExpiryDate()) {
+            String expiryDateValue = String.valueOf(recipient.getExpiryDate().getTime());
+            ShareTool.assignUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
         }
         try {
             ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());

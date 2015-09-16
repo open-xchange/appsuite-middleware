@@ -51,9 +51,10 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 
@@ -85,42 +86,29 @@ public abstract class AbstractTargetProxy implements TargetProxy {
 
         int getBits(T permission);
 
+        boolean isSystem(T permission);
+
         T convert(TargetPermission permission);
 
         TargetPermission convert(T permission);
 
     }
 
-    protected static <T> List<T> removePermissions(List<T> origPermissions, List<TargetPermission> permissions, PermissionConverter<T> converter) {
+    protected static <T> List<T> removePermissions(List<T> origPermissions, List<TargetPermission> toRemove, PermissionConverter<T> converter) {
         if (origPermissions == null || origPermissions.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<T> newPermissions = new ArrayList<T>(origPermissions.size());
-        Map<Integer, T> permissionsByUser = new HashMap<Integer, T>();
-        Map<Integer, T> permissionsByGroup = new HashMap<Integer, T>();
-        for (T permission : origPermissions) {
-            if (converter.isGroup(permission)) {
-                permissionsByGroup.put(converter.getEntity(permission), permission);
-            } else {
-                permissionsByUser.put(converter.getEntity(permission), permission);
+        List<T> newPermissions = new ArrayList<T>(origPermissions);
+        Iterator<T> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            T permission = it.next();
+            for (TargetPermission removable : toRemove) {
+                if (converter.isGroup(permission) == removable.isGroup() && converter.getEntity(permission) == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
             }
-        }
-
-        for (TargetPermission permission : permissions) {
-            if (permission.isGroup()) {
-                permissionsByGroup.remove(permission.getEntity());
-            } else {
-                permissionsByUser.remove(permission.getEntity());
-            }
-        }
-
-        for (T permission : permissionsByUser.values()) {
-            newPermissions.add(permission);
-        }
-
-        for (T permission : permissionsByGroup.values()) {
-            newPermissions.add(permission);
         }
 
         return newPermissions;
@@ -137,8 +125,8 @@ public abstract class AbstractTargetProxy implements TargetProxy {
                 newPermissions.add(converter.convert(permission));
             }
         } else {
-            Map<Integer, T> permissionsByUser = new HashMap<Integer, T>();
-            Map<Integer, T> permissionsByGroup = new HashMap<Integer, T>();
+            ListMultimap<Integer, T> permissionsByUser = ArrayListMultimap.create();
+            ListMultimap<Integer, T> permissionsByGroup = ArrayListMultimap.create();
             for (T permission : origPermissions) {
                 if (converter.isGroup(permission)) {
                     permissionsByGroup.put(converter.getEntity(permission), permission);
@@ -147,16 +135,28 @@ public abstract class AbstractTargetProxy implements TargetProxy {
                 }
             }
 
+            /*
+             * Keep potentially modified permissions
+             */
             for (TargetPermission permission : permissions) {
+                List<T> removed;
                 if (permission.isGroup()) {
-                    permissionsByGroup.remove(permission.getEntity());
+                    removed = permissionsByGroup.removeAll(permission.getEntity());
                 } else {
-                    permissionsByUser.remove(permission.getEntity());
+                    removed = permissionsByUser.removeAll(permission.getEntity());
                 }
 
                 newPermissions.add(converter.convert(permission));
+                for (T r : removed) {
+                    if (converter.isSystem(r)) {
+                        newPermissions.add(r);
+                    }
+                }
             }
 
+            /*
+             * Add new permissions
+             */
             for (T permission : permissionsByUser.values()) {
                 newPermissions.add(permission);
             }

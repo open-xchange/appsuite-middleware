@@ -582,6 +582,14 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException {
+        if (0 == userIds.length) {
+            return new User[0];
+        }
+        return getUser(ctx, con, userIds);
+    }
+
     private static void loadLoginInfo(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
             final TIntIterator iter = users.keySet().iterator();
@@ -920,6 +928,15 @@ public class RdbUserStorage extends UserStorage {
         setAttributeAndReturnUser(name, value, userId, context, false);
     }
 
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (value == null) {
+            deleteAttribute(name, userId, context, con);
+        } else {
+            insertOrUpdateAttribute(name, value, userId, context, con);
+        }
+    }
+
     /**
      * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>
@@ -938,20 +955,34 @@ public class RdbUserStorage extends UserStorage {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-
+        User retval = null;
         Connection con = DBPool.pickupWriteable(context);
+        boolean rollback = false;
         try {
+            Databases.startTransaction(con);
+            rollback = true;
             if (value == null) {
                 deleteAttribute(name, userId, context, con);
             } else {
                 insertOrUpdateAttribute(name, value, userId, context, con);
             }
-            return returnUser ? getUser(context, con, new int[] { userId })[0] : null;
-        } finally {
-            if (con != null) {
-                DBPool.closeWriterSilent(context, con);
+            if (returnUser) {
+                retval = getUser(context, con, new int[] { userId })[0];
             }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+            DBPool.closeWriterSilent(context, con);
         }
+        return retval;
     }
 
     private static void deleteAttribute(String name, int userId, Context context, Connection con) throws OXException {
@@ -973,10 +1004,7 @@ public class RdbUserStorage extends UserStorage {
         int contextId = context.getContextId();
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
         try {
-            Databases.startTransaction(con);
-            rollback = true;
             stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -1017,18 +1045,12 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
             }
-            con.commit();
-            rollback = false;
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw OXExceptions.general(OXExceptionStrings.MESSAGE, e);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(con);
         }
     }
 

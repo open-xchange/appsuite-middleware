@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.ajax.share.tests;
+package com.openexchange.ajax.share.bugs;
 
-import java.util.Date;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -58,49 +57,36 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link ExpiredSharesTest}
+ * {@link Bug40993Test}
+ *
+ * Guest unable to login if initial permission is revoked
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ExpiredSharesTest extends ShareTest {
+public class Bug40993Test extends ShareTest {
 
     /**
-     * Initializes a new {@link ExpiredSharesTest}.
+     * Initializes a new {@link Bug40993Test}.
      *
      * @param name The test name
      */
-    public ExpiredSharesTest(String name) {
+    public Bug40993Test(String name) {
         super(name);
     }
 
-    public void testAccessExpiredShareRandomly() throws Exception {
-        testAccessExpiredShare(randomFolderAPI(), randomModule());
+    public void testAccessSubfolderRandomly() throws Exception {
+        int module = randomModule();
+        testAccessSubfolder(randomFolderAPI(), module, randomGuestPermission(RecipientType.GUEST, module));
     }
 
-    public void noTestAccessExpiredShareExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            for (int module : TESTED_MODULES) {
-                testAccessExpiredShare(api, module);
-            }
-        }
+    private void testAccessSubfolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
+        testAccessSubfolder(api, module, getDefaultFolder(module), guestPermission);
     }
 
-    private void testAccessExpiredShare(EnumAPI api, int module) throws Exception {
-        testAccessExpiredShare(api, module, getDefaultFolder(module));
-    }
-
-    private void testAccessExpiredShare(EnumAPI api, int module, int parent) throws Exception {
-        /*
-         * apply expiration time to permission
-         */
-        long expirationTime = 10000L; // 10 seconds
-        Date expires = new Date(System.currentTimeMillis() + expirationTime);
-        OCLGuestPermission guestPermission = createAnonymousGuestPermission();
-        ((AnonymousRecipient) guestPermission.getRecipient()).setExpiryDate(expires);
+    private void testAccessSubfolder(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
         /*
          * create folder shared to guest user
          */
@@ -108,11 +94,13 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check permissions
          */
+        OCLPermission adminPermission = null;
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
                 matchingPermission = permission;
-                break;
+            } else {
+                adminPermission = permission;
             }
         }
         assertNotNull("No matching permission in created folder found", matchingPermission);
@@ -125,50 +113,68 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * check access to share
          */
-        String shareURL = discoverShareURL(guest);
-        GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
+        String folderShareURL = discoverShareURL(guest);
+        GuestClient guestClient = resolveShare(folderShareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
-         * wait some time until the share is expired
+         * create a subfolder, inheriting the permissions from the parent
          */
-        Thread.sleep(expirationTime);
+        FolderObject subfolder = insertSharedFolder(api, module, folder.getObjectID(), matchingPermission);
         /*
-         * check if share link still accessible
+         * check permissions
          */
-        GuestClient revokedGuestClient = new GuestClient(shareURL, guestPermission.getRecipient(), false);
-        ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-        assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
+        matchingPermission = null;
+        for (OCLPermission permission : subfolder.getPermissions()) {
+            if (permission.getEntity() != client.getValues().getUserId()) {
+                matchingPermission = permission;
+                break;
+            }
+        }
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
         /*
-         * check permissions of previously shared folder
+         * discover & check guest
          */
-        folder = getFolder(api, folder.getObjectID());
+        guest = discoverGuestEntity(api, module, subfolder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check access to share
+         */
+        String subfolderShareURL = discoverShareURL(guest);
+        guestClient = resolveShare(subfolderShareURL, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+        /*
+         * revoke guest permission for parent folder
+         */
+        folder.setLastModified(futureTimestamp());
+        folder.setPermissionsAsArray(new OCLPermission[] { adminPermission });
+        folder = updateFolder(api, folder);
+        /*
+         * check permissions
+         */
         for (OCLPermission permission : folder.getPermissions()) {
             assertTrue("Guest permission still present", permission.getEntity() != matchingPermission.getEntity());
         }
-        /*
-         * check guest entity
-         */
         guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
         assertNull("guest entity still found", guest);
         /*
-         * check guest access to share
+         * check share URL to subfolder
          */
-        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType()) &&
-            null == ((AnonymousRecipient) guestPermission.getRecipient()).getPassword()) {
-            //TODO: apply cookie expiry also for anonymous_password authentication
-            /*
-             * for anonymous guest user, check access with previous guest session (after waiting some time until background operations took place)
-             */
-            checkGuestUserDeleted(matchingPermission.getEntity());
-            guestClient.checkSessionAlive(true);
-        } else {
-            /*
-             * check if share target no longer accessible for non-anonymous guest user, since session may still be alive
-             */
-            guestClient.checkFolderNotAccessible(String.valueOf(folder.getObjectID()));
-            guestClient.logout();
-        }
+        guestClient = resolveShare(subfolderShareURL, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+        guestClient.checkFolderAccessible(String.valueOf(subfolder.getObjectID()), guestPermission);
+        guestClient.checkFolderNotAccessible(String.valueOf(folder.getObjectID()));
+        /*
+         * check share url to parent folder
+         */
+        guestClient = resolveShare(folderShareURL, guestPermission.getRecipient());
+        assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND_CONTINUE, guestClient.getShareResolveResponse().getStatus());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkFolderAccessible(String.valueOf(subfolder.getObjectID()), guestPermission);
+        guestClient.checkFolderNotAccessible(String.valueOf(folder.getObjectID()));
     }
 
 }

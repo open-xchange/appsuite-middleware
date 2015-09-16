@@ -61,18 +61,16 @@ import com.openexchange.java.Strings;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.user.UserService;
 
@@ -101,62 +99,94 @@ public class WebUIShareHandler extends AbstractShareHandler {
     }
 
     @Override
-    public ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        AuthenticationMode authMode = share.getGuest().getAuthentication();
+    public ShareHandlerReply handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        GuestInfo guest = shareRequest.getGuest();
+        AuthenticationMode authMode = guest.getAuthentication();
         switch (authMode) {
             case ANONYMOUS:
             case GUEST:
-                ShareLoginMethod shareLoginMethod = getShareLoginMethod(share);
-                if (ShareServletUtils.createSessionAndRedirect(share, target, request, response, shareLoginMethod)) {
+            {
+                if (shareRequest.isInvalidTarget()) {
+                    return redirectToLoginPage(shareRequest, request, response);
+                }
+
+                ShareLoginMethod shareLoginMethod = getShareLoginMethod(guest);
+                if (ShareServletUtils.createSessionAndRedirect(guest, shareRequest.getTarget(), request, response, shareLoginMethod)) {
                     return ShareHandlerReply.ACCEPT;
                 }
 
                 return ShareHandlerReply.DENY;
+            }
             case ANONYMOUS_PASSWORD:
             case GUEST_PASSWORD:
-                return redirectToLoginPage(share, target, request, response);
+                return redirectToLoginPage(shareRequest, request, response);
             default:
                 return ShareHandlerReply.NEUTRAL;
         }
     }
 
-    private ShareHandlerReply redirectToLoginPage(GuestShare share, PersonalizedShareTarget personalizedTarget, HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private ShareHandlerReply redirectToLoginPage(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
         try {
-            GuestInfo guestInfo = share.getGuest();
+            GuestInfo guestInfo = shareRequest.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
             ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
             TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class, true);
             Translator translator = factory.translatorFor(guestInfo.getLocale());
 
-            StringBuilder message = new StringBuilder();
+            ShareTargetPath targetPath = shareRequest.getTargetPath();
+            if (shareRequest.isInvalidTarget()) {
+                LoginLocationBuilder location;
+                if (guestInfo.getAuthentication() == AuthenticationMode.GUEST) {
+                    location = new LoginLocationBuilder()
+                        .status("not_found_continue")
+                        .share(guestInfo.getBaseToken())
+                        .loginType(guestInfo.getAuthentication())
+                        .target(targetPath)
+                        .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_CONTINUE))
+                        .loginName(guestInfo.getEmailAddress());
+                } else {
+                    location = new LoginLocationBuilder()
+                        .status("not_found_continue")
+                        .share(guestInfo.getBaseToken())
+                        .loginType(guestInfo.getAuthentication())
+                        .target(targetPath)
+                        .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_LOG_IN));
+                    if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
+                        location.loginName(guestInfo.getEmailAddress());
+                    }
+                }
+
+                response.sendRedirect(location.build());
+                return ShareHandlerReply.ACCEPT;
+            }
+
+            String message;
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
-            ShareTarget target = null;
             TargetProxy proxy = null;
-            if (personalizedTarget != null) {
-                target = share.resolveTarget(personalizedTarget);
-                proxy = moduleSupport.loadAsAdmin(target, guestInfo.getContextID());
+            if (targetPath != null) {
+                proxy = moduleSupport.loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), guestInfo.getContextID());
             }
             if (null == proxy) {
-                displayName = displayName(share);
+                displayName = displayName(guestInfo);
                 if (Strings.isEmpty(displayName)) {
-                    message.append(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET));
+                    message = translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET);
                 } else {
-                    message.append(String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName));
+                    message = String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName);
                 }
             } else {
-                String type = target.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
-                message.append(String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle()));
+                String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
+                message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
             }
 
             LoginLocationBuilder location = new LoginLocationBuilder()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())
-                .message(MessageType.INFO, message.toString());
+                .message(MessageType.INFO, message);
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getEmailAddress());
             }
-            if (personalizedTarget != null) {
-                location.target(personalizedTarget);
+            if (targetPath != null) {
+                location.target(targetPath);
             }
 
             response.sendRedirect(location.build());
@@ -168,13 +198,13 @@ public class WebUIShareHandler extends AbstractShareHandler {
         }
     }
 
-    private String displayName(GuestShare share) throws OXException {
+    private String displayName(GuestInfo guest) throws OXException {
         ShareService service = ShareServiceLookup.getService(ShareService.class, true);
-        Set<Integer> users = service.getSharingUsersFor(share.getGuest().getContextID(), share.getGuest().getGuestID());
+        Set<Integer> users = service.getSharingUsersFor(guest.getContextID(), guest.getGuestID());
         if (users.size() != 1) {
             return null;
         }
-        User sharingUser = ShareServiceLookup.getService(UserService.class).getUser(users.iterator().next(), share.getGuest().getContextID());
-        return FullNameBuilder.buildFullName(sharingUser, ShareServiceLookup.getService(TranslatorFactory.class).translatorFor(share.getGuest().getLocale()));
+        User sharingUser = ShareServiceLookup.getService(UserService.class).getUser(users.iterator().next(), guest.getContextID());
+        return FullNameBuilder.buildFullName(sharingUser, ShareServiceLookup.getService(TranslatorFactory.class).translatorFor(guest.getLocale()));
     }
 }
