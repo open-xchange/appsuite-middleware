@@ -759,7 +759,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
         if (null != originalPermissions && 0 < originalPermissions.size()) {
             for (Permission originalPermission : originalPermissions) {
-                if (false == originalPermission.isGroup()) {
+                if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission)) {
                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
                     if (null != guestInfo && isAnonymous(guestInfo)) {
                         return true;
