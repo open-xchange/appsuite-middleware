@@ -61,6 +61,7 @@ import com.openexchange.ajax.share.bugs.Bug40722Test;
 import com.openexchange.ajax.share.bugs.Bug40826Test;
 import com.openexchange.ajax.share.bugs.Bug40993Test;
 import com.openexchange.ajax.share.bugs.Bug41184Test;
+import com.openexchange.ajax.share.bugs.Bug41287Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AddGuestUserToGroupTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
@@ -148,6 +149,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(PasswordResetServletTest.class);
         tests.addTestSuite(Bug40993Test.class);
         tests.addTestSuite(Bug41184Test.class);
+        tests.addTestSuite(Bug41287Test.class);
         return tests;
     }
 
