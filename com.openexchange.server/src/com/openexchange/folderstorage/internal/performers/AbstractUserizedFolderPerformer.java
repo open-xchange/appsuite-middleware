@@ -803,7 +803,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     private static boolean isReadOnlySharing(Folder folder) {
         ContentType contentType = folder.getContentType();
-        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType);
+        return CalendarContentType.getInstance().equals(contentType) || TaskContentType.getInstance().equals(contentType) ||
+            ContactContentType.getInstance().equals(contentType);
     }
 
     /**

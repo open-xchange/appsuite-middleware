@@ -82,6 +82,10 @@ public class Bug40826Test extends ShareTest {
         testShareToAuthor(FolderObject.TASK);
     }
 
+    public void testShareContactsToAuthor() throws Exception {
+        testShareToAuthor(FolderObject.CONTACT);
+    }
+
     private void testShareToAuthor(int module) throws Exception {
         OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest");
         /*

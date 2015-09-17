@@ -145,10 +145,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
 
-    protected static final String[] TESTED_MODULES_NAMES = new String[] {
-        Module.CONTACTS.getName(), Module.INFOSTORE.getName(), Module.TASK.getName(), Module.CALENDAR.getName()
-    };
-
     protected static final Random random = new Random();
     protected static final int CLEANUP_DELAY = 30000;
 
@@ -1149,7 +1145,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return <code>true</code> if the module may be used for "read-only" sharing to guest users only, <code>false</code>, otherwise
      */
     protected static boolean isReadOnlySharing(int module) {
-        return FolderObject.CALENDAR == module || FolderObject.TASK == module;
+        return FolderObject.CALENDAR == module || FolderObject.TASK == module || FolderObject.CONTACT == module;
     }
 
     /**
