@@ -105,21 +105,15 @@ public interface ModuleSupport {
     TargetProxy load(ShareTarget target, Session session) throws OXException;
 
     /**
-     * Loads the groupware item for the given share target and returns an according {@link TargetProxy} instance.
-     * The item is loaded using administrative access to the underlying module services. This method must only
-     * be used for administrative tasks when no session object is available.
+     * Resolves the underlying groupware item for the given share target and returns an according {@link TargetProxy} instance. The item
+     * is loaded using administrative access to the underlying module services. This method must only be used for administrative tasks
+     * when no session object is available.
      *
-     * @param module The module
-     * @param folder The folder ID; must be globally valid - not personalized in terms of the passed guest user ID
-     * @param item The item ID or <code>null</code>; must be globally valid - not personalized in terms of the passed guest user ID
-     * @param contextID The context identifier
-     * @param guestID The guests ID from whose point of view the target shall be loaded. May be <code>&lt;= 0</code> to load it
-     * from a global perspective
-     * @return The proxy
+     * @param targetPath The share target path
+     * @param contextId The context identifier
+     * @param guestId The identifier of the guest user to resolve the target for
+     * @return The target proxy
      */
-    TargetProxy loadAsAdmin(int module, String folder, String item, int contextID, int guestID) throws OXException;
-
-
     TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException;
 
     /**

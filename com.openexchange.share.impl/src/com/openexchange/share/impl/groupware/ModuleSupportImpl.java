@@ -205,29 +205,6 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public TargetProxy loadAsAdmin(int module, String folderId, String item, int contextID, int guestID) throws OXException {
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        if (Module.getForFolderConstant(module) == null) {
-            return new VirtualTargetProxy(module, folderId, item, "virtual");
-        }
-
-        int folderID;
-        try {
-            folderID = Integer.valueOf(folderId);
-        } catch (NumberFormatException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-
-        OXFolderAccess folderAccess = new OXFolderAccess(context);
-        FolderObject folder = folderAccess.getFolderObject(folderID);
-        if (item == null) {
-            return new AdministrativeFolderTargetProxy(folder);
-        } else {
-            return handlers.get(module).loadTarget(folderId, item, context, guestID);
-        }
-    }
-
-    @Override
     public TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException {
         TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId, guestId);
         return proxy;
@@ -366,6 +343,28 @@ public class ModuleSupportImpl implements ModuleSupport {
             shareTargets.addAll(handler.listTargets(context.getContextId(), user.getId()));
         }
         return shareTargets;
+    }
+
+    private TargetProxy loadAsAdmin(int module, String folderId, String item, int contextID, int guestID) throws OXException {
+        Context context = services.getService(ContextService.class).getContext(contextID);
+        if (Module.getForFolderConstant(module) == null) {
+            return new VirtualTargetProxy(module, folderId, item, "virtual");
+        }
+
+        int folderID;
+        try {
+            folderID = Integer.valueOf(folderId);
+        } catch (NumberFormatException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+        OXFolderAccess folderAccess = new OXFolderAccess(context);
+        FolderObject folder = folderAccess.getFolderObject(folderID);
+        if (item == null) {
+            return new AdministrativeFolderTargetProxy(folder);
+        } else {
+            return handlers.get(module).loadTarget(folderId, item, context, guestID);
+        }
     }
 
 }
