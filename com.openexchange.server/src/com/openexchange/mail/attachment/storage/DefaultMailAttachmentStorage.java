@@ -71,6 +71,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
@@ -442,7 +443,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         // Generate publication for current attachment
         final Publication publication = new Publication();
         publication.setModule("infostore/object");
-        publication.setEntityId(String.valueOf(id));
+        publication.setEntityId(new FileID(id).getFileId());
         publication.setContext(getContext(session));
         publication.setUserId(session.getUserId());
 
