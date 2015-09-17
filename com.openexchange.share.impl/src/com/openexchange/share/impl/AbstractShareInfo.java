@@ -49,55 +49,58 @@
 
 package com.openexchange.share.impl;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.ShareTargetPath;
-import com.openexchange.share.core.tools.ShareLinks;
-import com.openexchange.share.core.tools.ShareTool;
 
 /**
- * {@link DefaultShareInfo}
+ * {@link AbstractShareInfo}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class DefaultShareInfo extends AbstractShareInfo {
+public abstract class AbstractShareInfo implements ShareInfo {
 
-    private final DefaultGuestInfo guestInfo;
-    private final ShareTargetPath targetPath;
+    private final ShareTarget srcTarget;
+    private final ShareTarget dstTarget;
 
     /**
-     * Creates a list of extended share info objects for the supplied shares.
+     * Initializes a new {@link AbstractShareInfo}.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
      * @param srcTarget The share target from the sharing users point of view
      * @param dstTarget The share target from the recipients point of view
-     * @param targetPath The target path
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget srcTarget, ShareTarget dstTarget, ShareTargetPath targetPath) throws OXException {
-        super(srcTarget, dstTarget);
-        if (ShareTool.isAnonymousGuest(guestUser)) {
-            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, srcTarget);
-        } else {
-            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
+    protected AbstractShareInfo(ShareTarget srcTarget, ShareTarget dstTarget) {
+        super();
+        this.srcTarget = srcTarget;
+        this.dstTarget = dstTarget;
+    }
+
+    @Override
+    public ShareTarget getTarget() {
+        return srcTarget;
+    }
+
+    @Override
+    public ShareTarget getDestinationTarget() {
+        return dstTarget;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("Share");
+        ShareTarget target = getTarget();
+        if (null != target) {
+            stringBuilder.append(" [module=").append(target.getModule())
+                .append(", folder=").append(target.getFolder()).append(", item=").append(target.getItem()).append(']');
         }
-        this.targetPath = targetPath;
-    }
-
-    @Override
-    public GuestInfo getGuest() {
-        return guestInfo;
-    }
-
-    @Override
-    public String getShareURL(HostData hostData) {
-        return ShareLinks.generateExternal(hostData, guestInfo.getBaseToken(), targetPath);
+        GuestInfo guest = getGuest();
+        if (null != guest) {
+            stringBuilder.append(" [recipient=").append(guest.getRecipientType())
+                .append(", id=").append(guest.getGuestID()).append(", context=").append(guest.getContextID())
+                .append(", email=").append(guest.getEmailAddress()).append(", name=").append(guest.getDisplayName()).append(']');
+        }
+        return stringBuilder.toString();
     }
 
 }

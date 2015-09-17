@@ -55,7 +55,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
@@ -66,12 +65,10 @@ import com.openexchange.share.recipient.RecipientType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class InternalUserShareInfo implements ShareInfo {
+public class InternalUserShareInfo extends AbstractShareInfo {
 
     private final int contextID;
     private final User user;
-    private final ShareTarget srcTarget;
-    private final ShareTarget dstTarget;
 
     /**
      * Initializes a new {@link InternalUserShareInfo}.
@@ -82,26 +79,14 @@ public class InternalUserShareInfo implements ShareInfo {
      * @param dstTarget The share target from the recipients point of view
      */
     public InternalUserShareInfo(int contextID, User user, ShareTarget srcTarget, ShareTarget dstTarget) {
-        super();
+        super(srcTarget, dstTarget);
         this.contextID = contextID;
         this.user = user;
-        this.srcTarget = srcTarget;
-        this.dstTarget = dstTarget;
-    }
-
-    @Override
-    public ShareTarget getTarget() {
-        return srcTarget;
-    }
-
-    @Override
-    public ShareTarget getDestinationTarget() {
-        return dstTarget;
     }
 
     @Override
     public String getShareURL(HostData hostData) {
-        return ShareLinks.generateInternal(hostData, dstTarget);
+        return ShareLinks.generateInternal(hostData, getDestinationTarget());
     }
 
     @Override
@@ -123,7 +108,7 @@ public class InternalUserShareInfo implements ShareInfo {
 
             @Override
             public Locale getLocale() {
-                return null;
+                return user.getLocale();
             }
 
             @Override
