@@ -86,20 +86,6 @@ public class AutocompleteAction extends AbstractFindAction {
         List<ActiveFacet> activeFactes = request.getActiveFacets();
         Map<String, String> options = request.getOptions();
 
-        // Determine whether facet check is supposed to happen or not
-        boolean check = true;
-        {
-            String name = "check";
-            String value = request.getRequest().getParameter(name);
-            if (null == value) {
-                value = options.get(name);
-            }
-
-            if (null != value) {
-                check = AJAXRequestDataTools.parseBoolParameter(value);
-            }
-        }
-
         // Do the auto-complete
         AutocompleteResult result = searchService.autocomplete(
             new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0),
