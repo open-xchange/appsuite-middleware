@@ -441,6 +441,7 @@ public class MailNotificationTest extends ShareTest {
     public void testAnonymousGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate) throws Exception {
         OCLGuestPermission permission = createAnonymousGuestPermission();
         ((AnonymousRecipient) permission.getRecipient()).setPassword(password);
+        ((AnonymousRecipient) permission.getRecipient()).setExpiryDate(expiryDate);
         share(testFolder, file, permission, shareMessage);
         ShareTarget target = new ShareTarget(
             testFolder.getModule(),
