@@ -137,8 +137,8 @@ public class ShareServlet extends AbstractShareServlet {
             // Switch language for errors if appropriate
             translator = translatorFactory.translatorFor(determineLocale(request, guest));
 
+            TargetProxy targetProxy = null;
             ShareTargetPath targetPath = null;
-            ShareTarget target = null;
             boolean invalidTarget = false;
             int contextId = guest.getContextID();
             int guestId = guest.getGuestID();
@@ -152,8 +152,7 @@ public class ShareServlet extends AbstractShareServlet {
                     String f = targetPath.getFolder();
                     String i = targetPath.getItem();
                     if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
-                        TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
-                        target = targetProxy.getTarget();
+                        targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
                     } else {
                         invalidTarget = true;
                     }
@@ -166,16 +165,20 @@ public class ShareServlet extends AbstractShareServlet {
                         return;
                     }
 
-                    TargetProxy targetProxy = otherTargets.iterator().next();
+                    targetProxy = applyFallbackPathMatching(otherTargets, paths.get(1));
+                    if (targetProxy == null) {
+                        targetProxy = otherTargets.iterator().next();
+                    } else {
+                        invalidTarget = false;
+                    }
                     targetPath = targetProxy.getTargetPath();
-                    target = targetProxy.getTarget();
                 }
             }
 
             /*
              * Determine appropriate ShareHandler and handle the share
              */
-            if (false == handle(new AccessShareRequest(guest, targetPath, target, invalidTarget), request, response)) {
+            if (false == handle(new AccessShareRequest(guest, targetPath, targetProxy, invalidTarget), request, response)) {
                 // No appropriate ShareHandler available
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
@@ -227,6 +230,22 @@ public class ShareServlet extends AbstractShareServlet {
             .build();
         response.sendRedirect(redirectUrl);
         return;
+    }
+
+    private TargetProxy applyFallbackPathMatching(List<TargetProxy> targets, String path) {
+        final int prime = 31;
+        for (TargetProxy proxy : targets) {
+            ShareTarget target = proxy.getTarget();
+            int hashCode = 1;
+            hashCode = prime * hashCode + ((target.getFolder() == null) ? 0 : target.getFolder().hashCode());
+            hashCode = prime * hashCode + ((target.getItem() == null) ? 0 : target.getItem().hashCode());
+            hashCode = prime * hashCode + target.getModule();
+            if (String.format("%08x", Integer.valueOf(hashCode)).equals(path)) {
+                return proxy;
+            }
+        }
+
+        return null;
     }
 
 }

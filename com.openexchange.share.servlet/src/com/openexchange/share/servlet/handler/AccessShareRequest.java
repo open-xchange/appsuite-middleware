@@ -52,6 +52,7 @@ package com.openexchange.share.servlet.handler;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.groupware.TargetProxy;
 
 /**
  * Encapsulates data of requests targeting the share servlet.
@@ -65,7 +66,7 @@ public class AccessShareRequest {
 
     private final ShareTargetPath targetPath;
 
-    private final ShareTarget target;
+    private final TargetProxy targetProxy;
 
     private final boolean invalidTarget;
 
@@ -73,14 +74,14 @@ public class AccessShareRequest {
      * Initializes a new {@link AccessShareRequest}.
      * @param guest
      * @param targetPath
-     * @param target
+     * @param targetProxy
      * @param invalidTarget
      */
-    public AccessShareRequest(GuestInfo guest, ShareTargetPath targetPath, ShareTarget target, boolean invalidTarget) {
+    public AccessShareRequest(GuestInfo guest, ShareTargetPath targetPath, TargetProxy targetProxy, boolean invalidTarget) {
         super();
         this.guest = guest;
         this.targetPath = targetPath;
-        this.target = target;
+        this.targetProxy = targetProxy;
         this.invalidTarget = invalidTarget;
     }
 
@@ -93,15 +94,15 @@ public class AccessShareRequest {
     }
 
     public ShareTarget getTarget() {
-        return target;
+        return targetProxy.getTarget();
+    }
+
+    public TargetProxy getTargetProxy() {
+        return targetProxy;
     }
 
     public boolean isInvalidTarget() {
         return invalidTarget;
-    }
-
-    public boolean hasTarget() {
-        return target != null;
     }
 
 }

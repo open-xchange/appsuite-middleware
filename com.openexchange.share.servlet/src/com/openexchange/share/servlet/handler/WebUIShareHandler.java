@@ -57,14 +57,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.java.Strings;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
@@ -129,7 +127,6 @@ public class WebUIShareHandler extends AbstractShareHandler {
         try {
             GuestInfo guestInfo = shareRequest.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
-            ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
             TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class, true);
             Translator translator = factory.translatorFor(guestInfo.getLocale());
 
@@ -160,23 +157,10 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 return ShareHandlerReply.ACCEPT;
             }
 
-            String message;
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
-            TargetProxy proxy = null;
-            if (targetPath != null) {
-                proxy = moduleSupport.loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), guestInfo.getContextID(), guestInfo.getGuestID());
-            }
-            if (null == proxy) {
-                displayName = displayName(guestInfo);
-                if (Strings.isEmpty(displayName)) {
-                    message = translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET);
-                } else {
-                    message = String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName);
-                }
-            } else {
-                String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
-                message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
-            }
+            TargetProxy proxy = shareRequest.getTargetProxy();
+            String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
+            String message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
 
             LoginLocationBuilder location = new LoginLocationBuilder()
                 .share(guestInfo.getBaseToken())

@@ -104,7 +104,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     @Override
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return shareRequest.hasTarget() && Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() &&
+        return Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() &&
             (indicatesDownload(request) || indicatesRaw(request));
     }
 
