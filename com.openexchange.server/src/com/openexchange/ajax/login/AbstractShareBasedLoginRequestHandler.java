@@ -56,6 +56,7 @@ import static com.openexchange.ajax.LoginServlet.getShareCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
@@ -97,6 +98,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -217,31 +219,17 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
 
                 // Generate the login result
                 LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
-
                     @Override
                     protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                        int module = -1;
-                        String folder = null;
-                        String item = null;
-                        if (target == null) {
-                            // FIXME
-                            module = 8;
-                            folder = "10";
-                        } else {
-                            module = target.getModule();
-                            folder = target.getFolder();
-                            item = target.getItem();
-                        }
-                        if (module > 0) {
-                            String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(module);
+                        if (target.getModule() > 0) {
+                            String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(target.getModule());
                             if ("infostore".equals(folderModule)) {
-                                //TODO: check
                                 folderModule = "files";
                             }
                             jLoginResult.put("module", folderModule);
                         }
-                        jLoginResult.putOpt("folder", folder);
-                        jLoginResult.putOpt("item", item);
+                        jLoginResult.putOpt("folder", target.getFolder());
+                        jLoginResult.putOpt("item", target.getItem());
                     }
                 };
                 retval.setContext(context);
@@ -321,25 +309,33 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
 
-        ModuleSupport moduleSupport = ServerServiceRegistry.getInstance().getService(ModuleSupport.class);
         String targetPathParam = httpRequest.getParameter("target");
+        if (targetPathParam == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
+        ShareTargetPath targetPath = ShareTargetPath.parse(targetPathParam);
+        if (targetPath == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+
+        ModuleSupport moduleSupport = ServerServiceRegistry.getInstance().getService(ModuleSupport.class);
+        int contextId = guest.getContextID();
+        int guestId = guest.getGuestID();
+        int m = targetPath.getModule();
+        String f = targetPath.getFolder();
+        String i = targetPath.getItem();
         ShareTarget target = null;
-        if (targetPathParam != null) {
-            ShareTargetPath targetPath = ShareTargetPath.parse(targetPathParam);
-            if (targetPath != null) {
-                int contextId = guest.getContextID();
-                int guestId = guest.getGuestID();
-                int m = targetPath.getModule();
-                String f = targetPath.getFolder();
-                String i = targetPath.getItem();
-                if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
-                    //TODO: shouldn't the target proxy adjust the target?
-                    //TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
-                    //target = targetProxy.getTarget();
-                    ShareTarget srcTarget = new ShareTarget(m, f, i);
-                    target = moduleSupport.adjustTarget(srcTarget, contextId, guestId, guestId);
-                }
+        if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
+            TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+            target = targetProxy.getTarget();
+        } else {
+            List<TargetProxy> otherTargets = moduleSupport.listTargets(contextId, guestId);
+            if (otherTargets.isEmpty()) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
+
+            target = otherTargets.get(0).getTarget();
         }
 
         final LoginConfiguration conf = this.conf.getLoginConfig(guest);

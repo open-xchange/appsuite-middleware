@@ -50,7 +50,6 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -61,7 +60,6 @@ import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -182,13 +180,4 @@ public class WebUIShareHandler extends AbstractShareHandler {
         }
     }
 
-    private String displayName(GuestInfo guest) throws OXException {
-        ShareService service = ShareServiceLookup.getService(ShareService.class, true);
-        Set<Integer> users = service.getSharingUsersFor(guest.getContextID(), guest.getGuestID());
-        if (users.size() != 1) {
-            return null;
-        }
-        User sharingUser = ShareServiceLookup.getService(UserService.class).getUser(users.iterator().next(), guest.getContextID());
-        return FullNameBuilder.buildFullName(sharingUser, ShareServiceLookup.getService(TranslatorFactory.class).translatorFor(guest.getLocale()));
-    }
 }
