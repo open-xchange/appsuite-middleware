@@ -56,7 +56,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * Marker service that signals the availability of the HTTP API - i.e. that the servlet container is started
  * and serving requests.
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Grüdelbach</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.1
  */
 @SingletonService
