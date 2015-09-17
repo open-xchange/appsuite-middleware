@@ -65,7 +65,12 @@ import com.openexchange.passwordmechs.mechs.UnixCrypt;
  */
 public enum PasswordMech implements IPasswordMech {
 
-    CRYPT("{CRYPT}", new Encoder() {
+    /**
+     * Encoder for CRYPT<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.CRYPT)
+     */
+    CRYPT(IPasswordMech.CRYPT, new Encoder() {
 
         @Override
         public String encode(String str) throws OXException {
@@ -94,7 +99,12 @@ public enum PasswordMech implements IPasswordMech {
             }
         }
     }),
-    SHA("{SHA}", new Encoder() {
+    /**
+     * Encoder for SHA<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.SHA)
+     */
+    SHA(IPasswordMech.SHA, new Encoder() {
 
         @Override
         public String encode(String str) throws OXException {
@@ -123,7 +133,12 @@ public enum PasswordMech implements IPasswordMech {
             }
         }
     }),
-    BCRYPT("{BCRYPT}", new Encoder() {
+    /**
+     * Encoder for BCRYPT<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.BCRYPT)
+     */
+    BCRYPT(IPasswordMech.BCRYPT, new Encoder() {
 
         @Override
         public String encode(String str) {
@@ -159,7 +174,6 @@ public enum PasswordMech implements IPasswordMech {
         this.identifier = identifier;
         this.encoder = encoder;
     }
-
 
     /**
      * {@inheritDoc}

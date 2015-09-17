@@ -59,6 +59,12 @@ import com.openexchange.exception.OXException;
  */
 public interface IPasswordMech {
 
+    public static final String CRYPT = "{CRYPT}";
+
+    public static final String SHA = "{SHA}";
+
+    public static final String BCRYPT = "{BCRYPT}";
+
     /**
      * Returns the string representation of the password mechanism identifier
      *

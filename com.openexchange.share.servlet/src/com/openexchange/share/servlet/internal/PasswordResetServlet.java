@@ -70,7 +70,8 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
@@ -278,8 +279,11 @@ public class PasswordResetServlet extends AbstractShareServlet {
         UserService userService = ShareServiceLookup.getService(UserService.class, true);
         User guest = userService.getUser(userId, context);
         UserImpl user = new UserImpl(guest);
-        user.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        user.setUserPassword(PasswordMech.BCRYPT.encode(newPassword));
+
+        PasswordMechFactory passwordMechFactory = ShareServiceLookup.getService(PasswordMechFactory.class, true);
+        IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
+        user.setPasswordMech(iPasswordMech.getIdentifier());
+        user.setUserPassword(iPasswordMech.encode(newPassword));
         userService.updatePassword(user, context);
         userService.invalidateUser(context, userId);
         return userService.getUser(userId, context);

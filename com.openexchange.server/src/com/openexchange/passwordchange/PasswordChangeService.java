@@ -77,8 +77,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -324,27 +322,6 @@ public abstract class PasswordChangeService {
                 // Ignore
             }
         }
-    }
-
-    /**
-     * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     *
-     * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
-     * @param newPassword The new password to encode
-     * @return The encoded password
-     * @throws OXException If encoding the new password fails
-     */
-    protected static final String getEncodedPassword(final String mech, final String newPassword) throws OXException {
-        PasswordMechFactory factory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
-        IPasswordMech iPasswordMech = factory.get(mech);
-        if (iPasswordMech == null) {
-            throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
-        }
-        final String cryptedPassword = iPasswordMech.encode(newPassword);
-        if (null == cryptedPassword) {
-            throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
-        }
-        return cryptedPassword;
     }
 
     /*-
