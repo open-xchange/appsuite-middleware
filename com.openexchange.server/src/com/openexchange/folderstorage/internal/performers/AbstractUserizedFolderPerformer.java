@@ -712,7 +712,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  * check guest permission
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
-                Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
+                Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
                 checkGuestPermission(folder, guestPermission, guestInfo);
             }
         }
