@@ -79,7 +79,23 @@ public class FileTargetProxy extends AbstractTargetProxy {
     private final ShareTarget target;
     private final ShareTargetPath targetPath;
 
+    /**
+     * Initializes a new {@link FileTargetProxy}.
+     *
+     * @param file The file
+     */
     public FileTargetProxy(File file) {
+        this(file, new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+    }
+
+    /**
+     * Initializes a new {@link FileTargetProxy}. The share target returned by {@link #getTarget()} will
+     * be overridden by the passed one.
+     *
+     * @param file The file
+     * @param target The target
+     */
+    public FileTargetProxy(File file, ShareTarget target) {
         super();
         this.file = file;
         if (file instanceof UserizedFile) {
@@ -88,17 +104,17 @@ public class FileTargetProxy extends AbstractTargetProxy {
         } else {
             targetPath = new ShareTargetPath(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
         }
-        target = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+        this.target = target;
     }
 
     @Override
     public String getID() {
-        return file.getId();
+        return target.getItem();
     }
 
     @Override
     public String getFolderID() {
-        return file.getFolderId();
+        return target.getFolder();
     }
 
     @Override

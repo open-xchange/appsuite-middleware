@@ -93,10 +93,12 @@ public interface ModuleHandler {
      * @param item The item
      * @param isPublic <code>true</code> if the items parent folder is public
      * @param context The context
+     * @param guestID The guests ID from whose point of view the target shall be loaded. May be <code>&lt;= 0</code> to load it
+     * from a global perspective
      * @return The proxy
      * @throws OXException
      */
-    TargetProxy loadTarget(String folder, String item, Context context) throws OXException;
+    TargetProxy loadTarget(String folder, String item, Context context, int guestID) throws OXException;
 
     boolean canShare(TargetProxy proxy, HandlerParameters parameters);
 

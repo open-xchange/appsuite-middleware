@@ -199,14 +199,19 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public TargetProxy loadTarget(String folderId, String item, Context context) throws OXException {
+    public TargetProxy loadTarget(String folderId, String item, Context context, int guestID) throws OXException {
         FileID fileID = new FileID(item);
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(new FolderID(folderId).getFolderId());
         }
 
         IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
-        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+        File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+        ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+        if (guestID > 0) {
+            shareTarget = adjustTarget(shareTarget, context.getContextId(), context.getMailadmin(), guestID);
+        }
+        return new FileTargetProxy(file, shareTarget);
     }
 
     @Override

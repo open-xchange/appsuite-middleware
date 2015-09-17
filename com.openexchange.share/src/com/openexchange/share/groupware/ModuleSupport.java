@@ -113,9 +113,14 @@ public interface ModuleSupport {
      * @param folder The folder ID; must be globally valid - not personalized in terms of the passed guest user ID
      * @param item The item ID or <code>null</code>; must be globally valid - not personalized in terms of the passed guest user ID
      * @param contextID The context identifier
+     * @param guestID The guests ID from whose point of view the target shall be loaded. May be <code>&lt;= 0</code> to load it
+     * from a global perspective
      * @return The proxy
      */
-    TargetProxy loadAsAdmin(int module, String folder, String item, int contextID) throws OXException;
+    TargetProxy loadAsAdmin(int module, String folder, String item, int contextID, int guestID) throws OXException;
+
+
+    TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException;
 
     /**
      * Resolves the module id to module name
@@ -198,8 +203,6 @@ public interface ModuleSupport {
      * @return The identifiers of the modules the guest user has access to, or an empty set if there are none
      */
     Collection<Integer> getAccessibleModules(int contextID, int guestID) throws OXException;
-
-    TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException;
 
     /**
      * Gets the path for a given target and session. The target must contain IDs from the session users point of view.

@@ -164,7 +164,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
             TargetProxy proxy = null;
             if (targetPath != null) {
-                proxy = moduleSupport.loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), guestInfo.getContextID());
+                proxy = moduleSupport.loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), guestInfo.getContextID(), guestInfo.getGuestID());
             }
             if (null == proxy) {
                 displayName = displayName(guestInfo);

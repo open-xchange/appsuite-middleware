@@ -152,11 +152,8 @@ public class ShareServlet extends AbstractShareServlet {
                     String f = targetPath.getFolder();
                     String i = targetPath.getItem();
                     if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
-                        //TODO: shouldn't the target proxy adjust the target?
-                        //TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
-                        //target = targetProxy.getTarget();
-                        ShareTarget srcTarget = new ShareTarget(m, f, i);
-                        target = moduleSupport.adjustTarget(srcTarget, contextId, guestId, guestId);
+                        TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+                        target = targetProxy.getTarget();
                     } else {
                         invalidTarget = true;
                     }

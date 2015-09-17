@@ -205,7 +205,7 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public TargetProxy loadAsAdmin(int module, String folderId, String item, int contextID) throws OXException {
+    public TargetProxy loadAsAdmin(int module, String folderId, String item, int contextID, int guestID) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextID);
         if (Module.getForFolderConstant(module) == null) {
             return new VirtualTargetProxy(module, folderId, item, "virtual");
@@ -223,13 +223,13 @@ public class ModuleSupportImpl implements ModuleSupport {
         if (item == null) {
             return new AdministrativeFolderTargetProxy(folder);
         } else {
-            return handlers.get(module).loadTarget(folderId, item, context);
+            return handlers.get(module).loadTarget(folderId, item, context, guestID);
         }
     }
 
     @Override
     public TargetProxy resolveTarget(ShareTargetPath targetPath, int contextId, int guestId) throws OXException {
-        TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId);
+        TargetProxy proxy = loadAsAdmin(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem(), contextId, guestId);
         return proxy;
     }
 
