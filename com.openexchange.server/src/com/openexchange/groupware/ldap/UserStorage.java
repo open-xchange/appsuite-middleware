@@ -230,6 +230,17 @@ public abstract class UserStorage {
     public abstract User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
+     * Gets all guest users that were created by a specific user.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to load the created guests for
+     * @return The created guest users, or an empty array if there are none
+     * @throws OXException
+     */
+    public abstract User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException;
+
+    /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
      * <p>

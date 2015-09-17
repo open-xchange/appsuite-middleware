@@ -285,6 +285,19 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException {
+        User[] loaded = delegate.getGuestsCreatedBy(connection, context, userId);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            Cache cache = cacheService.getCache(REGION_NAME);
+            for (User user : loaded) {
+                cache.put(cacheService.newCacheKey(context.getContextId(), user.getId()), user, false);
+            }
+        }
+        return loaded;
+    }
+
+    @Override
     protected void updateUserInternal(final Connection con, final User user, final Context context) throws OXException {
         // First try to detect some lousy client writing the same values all the time.
         boolean doUpdate = false;

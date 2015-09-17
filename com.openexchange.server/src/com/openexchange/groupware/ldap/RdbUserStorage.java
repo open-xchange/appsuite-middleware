@@ -590,6 +590,28 @@ public class RdbUserStorage extends UserStorage {
         return getUser(ctx, con, userIds);
     }
 
+    @Override
+    public User[] getGuestsCreatedBy(Connection con, Context context, int userId) throws OXException {
+        int[] userIds;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
+            stmt.setInt(1, context.getContextId());
+            result = stmt.executeQuery();
+            TIntList tmp = new TIntArrayList();
+            while (result.next()) {
+                tmp.add(result.getInt(1));
+            }
+            userIds = tmp.toArray();
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return getUser(context, con, userIds);
+    }
+
     private static void loadLoginInfo(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
             final TIntIterator iter = users.keySet().iterator();
