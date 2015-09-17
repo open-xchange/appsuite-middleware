@@ -52,10 +52,10 @@ package com.openexchange.ajax.share.tests;
 import static org.junit.Assert.assertArrayEquals;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -72,6 +72,7 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.actions.SendLinkRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.user.actions.GetRequest;
@@ -83,8 +84,10 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.impl.NotificationStrings;
+import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
 
 /**
@@ -106,7 +109,6 @@ public class MailNotificationTest extends ShareTest {
     private Contact clientContact;
     private String clientFullName, clientEmail;
     private final String clientShareMessage = "Hey there, i've got some shares for you!";
-    private Date shareExpireDate = null;
     DateFormat dateFormat = null;
     UserValues userValues;
 
@@ -129,7 +131,6 @@ public class MailNotificationTest extends ShareTest {
         image1 = getFile(createFile(testFolder1, IMAGENAME1, IMAGETYPE1).getId());
         file1 = getFile(createFile(testFolder1, FILENAME1, FILETYPE1).getId());
         initUserConfig();
-        shareExpireDate = new SimpleDateFormat("yyyy-MM-dd", userValues.getLocale()).parse("2048-12-02");
         dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, userValues.getLocale());
     }
 
@@ -281,9 +282,7 @@ public class MailNotificationTest extends ShareTest {
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
             NotificationStrings.VIEW_IMAGE,
-            null,
-            shareExpireDate
-            );
+            null);
     }
 
     public void testUserGotAnImageAndMessage() throws Exception {
@@ -293,8 +292,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
         		NotificationStrings.VIEW_IMAGE,
-        		clientShareMessage,
-        		shareExpireDate);
+        		clientShareMessage);
     }
 
     //---FILES------------------------------------------------------------------------------------------------------------------------------
@@ -306,8 +304,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		null,
-        		shareExpireDate);
+        		null);
     }
 
     public void testUserGotAFileAndMessage() throws Exception {
@@ -317,8 +314,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		clientShareMessage,
-        		shareExpireDate);
+        		clientShareMessage);
     }
 
     //---FOLDER-----------------------------------------------------------------------------------------------------------------------------
@@ -330,8 +326,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		null,
-        		shareExpireDate);
+        		null);
     }
 
     public void testUserGotAFolderAndMessage() throws Exception {
@@ -341,8 +336,19 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		clientShareMessage,
-        		shareExpireDate);
+        		clientShareMessage);
+    }
+
+    public void testAnonymousGotAFolder() throws Exception {
+        testAnonymousGotA(
+                testFolder1,
+                null,
+                String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
+                String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
+                NotificationStrings.VIEW_FOLDER,
+                null,
+                randomUID(),
+                new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
     }
 
     public void testDontNotifyInternalsOnPublicFolderShare() throws Exception {
@@ -421,11 +427,36 @@ public class MailNotificationTest extends ShareTest {
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
 
-    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, Date expiryDate) throws Exception {
-        //      System.out.println("Expiry date: " + expiryDate + " in Timezone:" + userValues.getTimeZone());
-        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null);
-        share(testFolder, file, guestPermission, shareMessage);
+    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage) throws Exception {
+        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null), shareMessage);
+        assertGotA(
+            initialSubject,
+            hasSharedString,
+            viewItemString,
+            shareMessage,
+            null,
+            null);
+    }
 
+    public void testAnonymousGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate) throws Exception {
+        OCLGuestPermission permission = createAnonymousGuestPermission();
+        ((AnonymousRecipient) permission.getRecipient()).setPassword(password);
+        share(testFolder, file, permission, shareMessage);
+        ShareTarget target = new ShareTarget(
+            testFolder.getModule(),
+            Integer.toString(testFolder.getObjectID()),
+            file == null ? null : file.getId());
+        client.execute(new SendLinkRequest(target, randomUID() + "@example.com", shareMessage));
+        assertGotA(
+            initialSubject,
+            hasSharedString,
+            viewItemString,
+            shareMessage,
+            password,
+            expiryDate);
+    }
+
+    public void assertGotA(String initialSubject, String hasSharedString, String viewItemString, final String shareMessage, String password, Date expiryDate) throws Exception {
         Message message = assertAndGetMessage();
         Document document = message.requireHtml();
         assertSubject(message.getMimeMessage(), initialSubject);
@@ -438,6 +469,14 @@ public class MailNotificationTest extends ShareTest {
 
         assertSignatureText(document, "");
         assertSignatureImage(message);
+
+        if (password != null) {
+            assertPassword(document, password);
+        }
+
+        if (expiryDate != null) {
+            assertExpiryDate(document, expiryDate);
+        }
     }
 
     private void share(FolderObject testFolder, File file, OCLPermission guestPermission, final String shareMessage) throws Exception {
@@ -525,6 +564,10 @@ public class MailNotificationTest extends ShareTest {
 
     private void assertExpiryDate(Document document, Date expiryDate) {
         assertEquals(String.format(NotificationStrings.LINK_EXPIRE, dateFormat.format(expiryDate)), document.getElementById("will_expire").ownText());
+    }
+
+    private void assertPassword(Document document, String password) {
+        assertEquals(NotificationStrings.USE_PASSWORD + " " + password, document.getElementById("use_password").ownText());
     }
 
     private void assertSignatureText(Document document, String expected) {

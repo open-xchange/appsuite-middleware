@@ -512,7 +512,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         }
         UpdateInfostoreResponse updateInfostoreResponse = getClient().execute(updateInfostoreRequest);
         assertFalse(updateInfostoreResponse.hasError());
-        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(file.getId());
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(updateInfostoreResponse.getID());
         getInfostoreRequest.setFailOnError(true);
         GetInfostoreResponse getInfostoreResponse = getClient().execute(getInfostoreRequest);
         return getInfostoreResponse.getDocumentMetadata();
