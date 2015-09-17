@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -143,7 +144,7 @@ public class ICalHandler extends HttpAuthShareHandler {
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
         return shareRequest.hasTarget() &&
             (Module.CALENDAR.getFolderConstant() == shareRequest.getTarget().getModule() || Module.TASK.getFolderConstant() == shareRequest.getTarget().getModule()) &&
-            (acceptsICal(request) || indicatesICalClient(request));
+            (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request));
     }
 
     @Override
@@ -308,6 +309,13 @@ public class ICalHandler extends HttpAuthShareHandler {
             userAgentHeader.contains("Google-Calendar-Importer") ||
             userAgentHeader.contains("org.dmfs.caldav.lib")
         );
+    }
+
+    protected static boolean indicatesForcedICal(HttpServletRequest request) {
+        return "ics".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
+            isTrue(AJAXUtility.sanitizeParam(request.getParameter("ics"))) ||
+            "ical".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
+            isTrue(AJAXUtility.sanitizeParam(request.getParameter("ical")));
     }
 
     /**
