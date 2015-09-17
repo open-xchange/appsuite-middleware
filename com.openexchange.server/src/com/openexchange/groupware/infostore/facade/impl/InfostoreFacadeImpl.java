@@ -165,7 +165,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
@@ -1303,11 +1302,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             FilenameReserver filenameReserver = new FilenameReserverImpl(session.getContext(), this);
             try {
                 readConnection = getReadConnection(context);
-                boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(readConnection, context).getFolderObject((int) destinationFolderID).getType();
                 List<DocumentMetadata> tombstoneDocuments = new ArrayList<DocumentMetadata>(numberOfDocuments);
                 List<DocumentMetadata> documentsToUpdate = new ArrayList<DocumentMetadata>(numberOfDocuments);
                 List<DocumentMetadata> versionsToUpdate = new ArrayList<DocumentMetadata>();
-                List<DocumentMetadata> objectPermissionsToCreate = new ArrayList<DocumentMetadata>();
                 List<DocumentMetadata> objectPermissionsToDelete = new ArrayList<DocumentMetadata>();
                 for (DocumentMetadata document : sourceDocuments) {
                     /*
@@ -1330,9 +1327,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      */
                     if (null != document.getObjectPermissions() && 0 < document.getObjectPermissions().size()) {
                         objectPermissionsToDelete.add(document);
-                        if (false == moveToTrash) {
-                            objectPermissionsToCreate.add(documentToUpdate);
-                        }
                     }
                 }
                 /*
@@ -1374,11 +1368,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (0 < objectPermissionsToDelete.size()) {
                     perform(new DeleteObjectPermissionAction(this, context, objectPermissionsToDelete), true);
                     rememberForGuestCleanup(context.getContextId(), objectPermissionsToDelete);
-                }
-                if (0 < objectPermissionsToCreate.size()) {
-                    for (DocumentMetadata document : objectPermissionsToCreate) {
-                        perform(new CreateObjectPermissionAction(this, context, document), true);
-                    }
                 }
                 /*
                  * perform version update (only required in case of adjusted filenames)
