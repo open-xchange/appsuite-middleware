@@ -943,6 +943,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 tombstoneDocument.setLastModified(document.getLastModified());
                 tombstoneDocument.setModifiedBy(document.getModifiedBy());
                 perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, tombstoneDocument, session), true);
+
+                // remove any object permissions upon move
+                document.setObjectPermissions(null);
+                updatedCols.add(Metadata.OBJECT_PERMISSIONS_LITERAL);
             } else if (isRename) {
                 // this is a rename - reserve in current folder
                 DocumentMetadata placeHolder = new DocumentMetadataImpl(oldDocument.getId());
@@ -999,6 +1003,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
             // Update object permissions as needed
             if (updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+                rememberForGuestCleanup(context.getContextId(), Collections.singletonList(oldDocument));
                 perform(new UpdateObjectPermissionAction(this, context, document, oldDocument), true);
             }
             return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
