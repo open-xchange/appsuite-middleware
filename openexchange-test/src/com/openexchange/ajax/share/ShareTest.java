@@ -260,9 +260,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
+        return insertPrivateFolder(client, api, module, parent, name);
+    }
+
+    protected static FolderObject insertPrivateFolder(AJAXClient client, EnumAPI api, int module, int parent, String name) throws Exception {
         FolderObject privateFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId());
         privateFolder.setParentFolderID(parent);
-        return insertFolder(api, privateFolder);
+        return insertFolder(client, api, privateFolder);
     }
 
     /**
@@ -276,6 +280,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent) throws Exception {
         return insertPrivateFolder(api, module, parent, randomUID());
+    }
+
+    protected static FolderObject insertPrivateFolder(AJAXClient client, EnumAPI api, int module, int parent) throws Exception {
+        return insertPrivateFolder(client, api, module, parent, randomUID());
     }
 
     /**
@@ -544,7 +552,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The folder
      * @throws Exception
      */
-    protected FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
+    protected static FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
         GetResponse getResponse = client.execute(new GetRequest(api, objectID));
         FolderObject folder = getResponse.getFolder();
         folder.setLastModified(getResponse.getTimestamp());
@@ -552,15 +560,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
+        FolderObject createdFolder = insertFolder(client, api, folder);
+        assertNotNull(createdFolder);
+        assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
+        return createdFolder;
+    }
+
+    protected static FolderObject insertFolder(AJAXClient client, EnumAPI api, FolderObject folder) throws Exception {
         InsertRequest insertRequest = new InsertRequest(api, folder, client.getValues().getTimeZone());
         insertRequest.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(folder);
-        remember(folder);
-        FolderObject createdFolder = getFolder(api, folder.getObjectID());
-        assertNotNull(createdFolder);
-        assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
-        return createdFolder;
+        return getFolder(api, folder.getObjectID(), client);
     }
 
     /**
