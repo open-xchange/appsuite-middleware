@@ -164,6 +164,6 @@ public class Quota {
      * @return true if UNLIMITED, otherwise false
      */
     public boolean isUnlimited() {
-        return limit == UNLIMITED;
+        return limit <= UNLIMITED;
     }
 }
