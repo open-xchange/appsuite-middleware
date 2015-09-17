@@ -91,7 +91,8 @@ public class AdminListTest extends AbstractMailFilterTest {
         adminClient = new AJAXClient(User.OXAdmin);
         Context ctx = new Context(adminClient.getValues().getContextId());
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
-        Credentials credentials = new Credentials("oxadminmaster", "secret");
+
+        Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
         OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
         ctxInterface.change(ctx, credentials);
 
@@ -108,7 +109,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         try {
             Context ctx = new Context(adminClient.getValues().getContextId());
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
-            Credentials credentials = new Credentials("oxadminmaster", "secret");
+            Credentials credentials = new Credentials(AJAXConfig.getProperty(Property.OX_ADMIN_MASTER), AJAXConfig.getProperty(Property.OX_ADMIN_MASTER_PWD));
             OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
             iface.change(ctx, credentials);
 
