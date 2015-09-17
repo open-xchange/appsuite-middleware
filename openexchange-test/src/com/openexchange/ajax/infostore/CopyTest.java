@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
@@ -71,15 +72,16 @@ public class CopyTest extends InfostoreAJAXTest {
     }
 
     private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(
-            Metadata.ID_LITERAL.getName(),
-            Metadata.CREATION_DATE_LITERAL.getName(),
-            Metadata.LAST_MODIFIED_LITERAL.getName(),
-            Metadata.LAST_MODIFIED_UTC_LITERAL.getName(),
-            Metadata.VERSION_LITERAL.getName(),
-            Metadata.CURRENT_VERSION_LITERAL.getName(),
-            Metadata.SEQUENCE_NUMBER_LITERAL.getName(),
-            Metadata.CONTENT_LITERAL.getName()
-    ));
+        Metadata.ID_LITERAL.getName(),
+        Metadata.CREATION_DATE_LITERAL.getName(),
+        Metadata.LAST_MODIFIED_LITERAL.getName(),
+        Metadata.LAST_MODIFIED_UTC_LITERAL.getName(),
+        Metadata.VERSION_LITERAL.getName(),
+        Metadata.CURRENT_VERSION_LITERAL.getName(),
+        Metadata.SEQUENCE_NUMBER_LITERAL.getName(),
+        Metadata.CONTENT_LITERAL.getName(),
+        new ResourceIDField().getColumnName()
+        ));
 
     public void testCopy() throws Exception {
         final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m());
@@ -172,7 +174,7 @@ public class CopyTest extends InfostoreAJAXTest {
         for(final Iterator keys = orig.keys(); keys.hasNext();) {
             final String key = keys.next().toString();
             if(!skipKeys.contains(key) && !key.equals("title")) {
-                assertEquals(orig.get(key).toString(), copy.get(key).toString());
+                assertEquals(key + " seems to have a wrong value", orig.get(key).toString(), copy.get(key).toString());
             } else if (key.equals("title")) {
                 assertEquals("copy",copy.get(key));
             }
