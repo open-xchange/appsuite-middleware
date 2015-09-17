@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl;
 
+import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -91,14 +92,28 @@ public abstract class AbstractShareInfo implements ShareInfo {
         StringBuilder stringBuilder = new StringBuilder("Share");
         ShareTarget target = getTarget();
         if (null != target) {
-            stringBuilder.append(" [module=").append(target.getModule())
-                .append(", folder=").append(target.getFolder()).append(", item=").append(target.getItem()).append(']');
+            stringBuilder.append(" [module=").append(target.getModule()).append(", folder=").append(target.getFolder());
+            if (null != target.getItem()) {
+                stringBuilder.append(", item=").append(target.getItem());
+            }
+            stringBuilder.append(']');
         }
         GuestInfo guest = getGuest();
         if (null != guest) {
-            stringBuilder.append(" [recipient=").append(guest.getRecipientType())
-                .append(", id=").append(guest.getGuestID()).append(", context=").append(guest.getContextID())
-                .append(", email=").append(guest.getEmailAddress()).append(", name=").append(guest.getDisplayName()).append(']');
+            stringBuilder.append(" [recipient=").append(guest.getRecipientType()).append(", id=").append(guest.getGuestID()).append(", context=").append(guest.getContextID());
+            if (Strings.isNotEmpty(guest.getEmailAddress())) {
+                stringBuilder.append(", email=").append(guest.getEmailAddress());
+            }
+            if (Strings.isNotEmpty(guest.getDisplayName())) {
+                stringBuilder.append(", name=").append(guest.getDisplayName());
+            }
+            if (0 < guest.getCreatedBy()) {
+                stringBuilder.append(", createdBy=").append(guest.getCreatedBy());
+            }
+            if (Strings.isNotEmpty(guest.getBaseToken())) {
+                stringBuilder.append(", token=").append(guest.getBaseToken());
+            }
+            stringBuilder.append(']');
         }
         return stringBuilder.toString();
     }

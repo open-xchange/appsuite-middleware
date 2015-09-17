@@ -55,10 +55,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
@@ -133,16 +130,7 @@ public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
             return sb.toString();
         }
         for (ShareInfo info : shareInfos) {
-            GuestInfo guest = info.getGuest();
-            int contextID = guest.getContextID();
-            int guestID = guest.getGuestID();
-            ShareTargetPath targetPath = moduleSupport.getPath(info.getTarget(), contextID, guestID);
-            sb.append("Token: ").append(guest.getBaseToken() + '/' + targetPath.get()).append(" ("); // TODO: don't generate token here
-            ShareTarget target = info.getTarget();
-            sb.append("Share [guest created by ").append(guest.getCreatedBy()).append(" in context ").append(contextID).append(", guest=").append(guestID)
-              .append(", target=").append("ShareTarget [module=").append(target.getModule()).append(", folder=").append(target.getFolder())
-              .append((null != target.getItem() ? (", item=" + target.getItem()) : "") + "]").append("]").append(")");
-            sb.append("\n");
+            sb.append(info).append('\n');
         }
         return sb.toString();
     }
