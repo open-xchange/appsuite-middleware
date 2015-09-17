@@ -52,6 +52,7 @@ package com.openexchange.share.servlet.handler;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.ShareLoginConfiguration;
 import com.openexchange.exception.OXException;
@@ -59,10 +60,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
-import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 
 
@@ -144,6 +142,15 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
                 ShareServletUtils.logout(session);
             }
         }
+    }
+
+    protected static boolean indicatesDownload(HttpServletRequest request) {
+        return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
+            isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
+    }
+
+    protected static boolean isTrue(String value) {
+        return "1".equals(value) || "yes".equalsIgnoreCase(value) || Boolean.valueOf(value).booleanValue();
     }
 
 }

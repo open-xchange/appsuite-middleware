@@ -175,18 +175,9 @@ public class DownloadHandler extends HttpAuthShareHandler {
         renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
     }
 
-    private static boolean indicatesDownload(HttpServletRequest request) {
-        return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
-            isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
-    }
-
     private static boolean indicatesRaw(HttpServletRequest request) {
         return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
             isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
-    }
-
-    private static boolean isTrue(String value) {
-        return "1".equals(value) || "yes".equalsIgnoreCase(value) || Boolean.valueOf(value).booleanValue();
     }
 
 }
