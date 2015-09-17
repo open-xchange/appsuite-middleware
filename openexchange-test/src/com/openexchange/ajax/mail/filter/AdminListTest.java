@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.mail.filter;
 
+import java.rmi.Naming;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -58,6 +65,8 @@ import com.openexchange.ajax.mail.filter.comparison.IsComparison;
 import com.openexchange.ajax.mail.filter.test.HeaderTest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 public class AdminListTest extends AbstractMailFilterTest {
@@ -76,11 +85,49 @@ public class AdminListTest extends AbstractMailFilterTest {
         super(name);
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        adminClient = new AJAXClient(User.OXAdmin);
+        Context ctx = new Context(adminClient.getValues().getContextId());
+        ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
+        Credentials credentials = new Credentials("oxadminmaster", "secret");
+        OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
+        ctxInterface.change(ctx, credentials);
+
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
+        Set<String> cap = new HashSet<String>(1);
+        cap.add("webmail");
+        Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
+        OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, null, null, userCreds);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            Context ctx = new Context(adminClient.getValues().getContextId());
+            ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
+            Credentials credentials = new Credentials("oxadminmaster", "secret");
+            OXContextInterface iface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
+            iface.change(ctx, credentials);
+
+            com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(adminClient.getValues().getUserId());
+            Set<String> cap = new HashSet<String>(1);
+            cap.add("webmail");
+            Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
+            OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+            usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, null, cap, null, userCreds);
+
+            adminClient = null;
+        } finally {
+            super.tearDown();
+        }
+    }
+
     public void testUserHasAccessToOtherUsersRules() throws Exception {
         userClient = getClient();
         userSession = userClient.getSession();
-
-        adminClient = new AJAXClient(User.OXAdmin);
         adminSession = adminClient.getSession();
 
         // Insert new rule as user
