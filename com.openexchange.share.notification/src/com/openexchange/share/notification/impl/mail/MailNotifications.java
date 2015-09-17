@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.group.Group;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -121,13 +122,13 @@ public class MailNotifications {
 
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
-            checkGreaterZero(guestID, "guestID");
+            checkGreaterZero(userID, "userID");
             checkNotNull(shareUrl, "shareUrl");
             checkNotNull(pwResetUrl, "pwResetUrl");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<>(Transport.MAIL);
             notification.apply(this);
-            notification.setGuestID(guestID);
+            notification.setGuestID(userID);
             notification.setShareUrl(shareUrl);
             notification.setConfirmPasswordResetUrl(pwResetUrl);
             return notification;
@@ -140,9 +141,21 @@ public class MailNotifications {
         private String message;
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
         private String shareUrl;
+        private Group group;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
+        }
+
+        /**
+         * Sets the group of the recipient user in cases where the group was added as permission entity and not
+         * the user itself.
+         *
+         * @param group The group or <code>null</code> if the target was shared directly to the user
+         */
+        public ShareCreatedBuilder setTargetGroup(Group group) {
+            this.group = group;
+            return this;
         }
 
         /**
@@ -205,10 +218,11 @@ public class MailNotifications {
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setSession(session);
-            notification.setTargetUserID(guestID);
+            notification.setTargetUserID(userID);
             notification.setTargets(targets);
             notification.setMessage(message);
             notification.setShareUrl(shareUrl);
+            notification.setTargetGroup(group);
             return notification;
         }
 
@@ -298,7 +312,7 @@ public class MailNotifications {
             DefaultLinkCreatedNotification<InternetAddress> notification = new DefaultLinkCreatedNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setSession(session);
-            notification.setTargetUserID(guestID);
+            notification.setTargetUserID(userID);
             notification.setTarget(target);
             notification.setMessage(message);
             notification.setShareUrl(shareUrl);

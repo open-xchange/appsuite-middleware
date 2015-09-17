@@ -65,6 +65,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
+import com.openexchange.notification.mail.MailData.Builder;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -138,18 +139,22 @@ public class ShareCreatedMail extends ShareNotificationMail {
             context.getContextId());
 
         Map<String, Object> vars = prepareShareCreatedVars(data);
-        MailData mailData = MailData.newBuilder()
+        Builder mailData = MailData.newBuilder()
             .setSendingUser(sharingUser)
             .setRecipient(notification.getTransportInfo())
-            .setSubject(textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values()))
             .setHtmlTemplate("notify.share.create.mail.html.tmpl")
             .setTemplateVars(vars)
             .setMailConfig(serverConfig.getNotificationMailConfig())
             .setContext(context)
             .addMailHeader("X-Open-Xchange-Share-Type", notification.getType().getId())
-            .addMailHeader("X-Open-Xchange-Share-URL", notification.getShareUrl())
-            .build();
-        return new ShareCreatedMail(mailData, services);
+            .addMailHeader("X-Open-Xchange-Share-URL", notification.getShareUrl());
+        if (data.notification.getTargetGroup() == null) {
+            mailData.setSubject(textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values()));
+        } else {
+            mailData.setSubject(textSnippets.shareStatementGroupShort(data.shareOwnerName, data.notification.getTargetGroup().getDisplayName(), data.targetProxies.values()));
+        }
+
+        return new ShareCreatedMail(mailData.build(), services);
     }
 
     /**
@@ -170,7 +175,13 @@ public class ShareCreatedMail extends ShareNotificationMail {
         String email = data.sharingUser.getMail();
         String fullName = data.shareOwnerName;
 
-        vars.put(HAS_SHARED_ITEMS, data.textSnippets.shareStatementLong(fullName, email, data.targetProxies.values(), hasMessage));
+        String shareStatementLong;
+        if (data.notification.getTargetGroup() == null) {
+            shareStatementLong = data.textSnippets.shareStatementLong(fullName, email, data.targetProxies.values(), hasMessage);
+        } else {
+            shareStatementLong = data.textSnippets.shareStatementGroupLong(fullName, email, data.notification.getTargetGroup().getDisplayName(), data.targetProxies.values(), hasMessage);
+        }
+        vars.put(HAS_SHARED_ITEMS, shareStatementLong);
         if (hasMessage) {
             vars.put(USER_MESSAGE, data.notification.getMessage());
         }

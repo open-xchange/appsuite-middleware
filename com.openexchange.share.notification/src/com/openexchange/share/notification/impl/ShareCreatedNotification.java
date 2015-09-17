@@ -50,6 +50,7 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.List;
+import com.openexchange.group.Group;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 
@@ -96,5 +97,13 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      * @return The URL
      */
     String getShareUrl();
+
+    /**
+     * Gets the group of the recipient user in cases where the group was added as permission entity and not
+     * the user itself.
+     *
+     * @return group The group or <code>null</code> if the target was shared directly to the user
+     */
+    Group getTargetGroup();
 
 }

@@ -71,7 +71,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
 
     protected int contextID;
 
-    protected int guestID;
+    protected int userID;
 
     protected Locale locale;
 
@@ -103,12 +103,12 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     }
 
     /**
-     * Sets the guestID.
+     * Sets the ID of the recipient user.
      *
-     * @param guestID
+     * @param userID
      */
-    public B setGuestID(int guestID) {
-        this.guestID = guestID;
+    public B setUserID(int userID) {
+        this.userID = userID;
         return (B) this;
     }
 
@@ -141,7 +141,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     public N build() {
         checkNotNull(transportInfo, "transportInfo");
         checkNotZero(contextID, "contextID");
-        checkNotZero(guestID, "guestID");
+        checkNotZero(userID, "guestID");
         checkNotNull(locale, "locale");
         checkNotNull(hostData, "hostData");
         return doBuild();
