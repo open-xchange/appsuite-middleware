@@ -131,7 +131,7 @@ public class LoginScreenTest extends ShareTest {
          */
         guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("guest", resolveResponse.getLoginType());
+        assertEquals("guest_password", resolveResponse.getLoginType());
         assertEquals("INFO", resolveResponse.getMessageType());
         assertNotNull(resolveResponse.getMessage());
     }
@@ -153,7 +153,7 @@ public class LoginScreenTest extends ShareTest {
         GuestClient guestClient = resolveShare(shareLink.getShareURL(), null, newPW);
         guestClient.checkSessionAlive(false);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("anonymous", resolveResponse.getLoginType());
+        assertEquals("anonymous_password", resolveResponse.getLoginType());
         assertEquals("INFO", resolveResponse.getMessageType());
         assertNotNull(resolveResponse.getMessage());
     }
