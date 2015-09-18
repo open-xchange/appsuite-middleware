@@ -50,7 +50,6 @@
 package com.openexchange.user.internal;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -168,15 +167,7 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException {
-        //TODO: dedicated method in storage
-        List<User> createdGuests = new ArrayList<User>();
-        User[] allGuests = UserStorage.getInstance().getUser(connection, context, true, false);
-        for (User guest : allGuests) {
-            if (userId == guest.getCreatedBy()) {
-                createdGuests.add(guest);
-            }
-        }
-        return createdGuests.toArray(new User[createdGuests.size()]);
+        return UserStorage.getInstance().getGuestsCreatedBy(connection, context, userId);
     }
 
     @Override
