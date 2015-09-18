@@ -56,7 +56,6 @@ import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
@@ -68,12 +67,16 @@ import com.openexchange.share.impl.mbean.ShareMBean;
 public class ShareMBeanImpl extends StandardMBean implements ShareMBean {
 
     private final DefaultShareService shareService;
-    private final ModuleSupport moduleSupport;
 
-    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService, ModuleSupport moduleSupport) throws NotCompliantMBeanException {
+    /**
+     * Initializes a new {@link ShareMBeanImpl}.
+     *
+     * @param mbeanInterface The MBean's interface class
+     * @param shareService A reference to the share service
+     */
+    public ShareMBeanImpl(Class<?> mbeanInterface, DefaultShareService shareService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.shareService = shareService;
-        this.moduleSupport = moduleSupport;
     }
 
     @Override
