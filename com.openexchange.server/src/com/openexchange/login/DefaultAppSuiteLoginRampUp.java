@@ -151,6 +151,9 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (false == session.getUserConfiguration().hasWebMail()) {
+                    return null;
+                }
                 JSONObject folder = new JSONObject(3);
                 try {
                     folder.put("1", ox.perform(request().session(session).module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest), null, session).getResultObject());
@@ -208,6 +211,9 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (session.isAnonymous() || session.getUser().isGuest()) {
+                    return null;
+                }
                 JSONObject oauth = new JSONObject(3);
 
                 try {
