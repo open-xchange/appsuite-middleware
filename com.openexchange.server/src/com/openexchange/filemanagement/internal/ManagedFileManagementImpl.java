@@ -153,13 +153,20 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
                 Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
-                File directory = tmpDirReference.get();
-                if (!directory.canRead()) {
-                    logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
-                    return;
-                }
-                for (File tmpFile : directory.listFiles(defaultPrefixFilter)) {
-                    existentFiles.put(tmpFile.getName(), tmpFile);
+                {
+                    File directory = tmpDirReference.get();
+                    if (!directory.canRead()) {
+                        logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
+                        return;
+                    }
+                    File[] listedFiles = directory.listFiles(defaultPrefixFilter);
+                    if (listedFiles.length == 0) {
+                        // No files available at the moment
+                        return;
+                    }
+                    for (File tmpFile : listedFiles) {
+                        existentFiles.put(tmpFile.getName(), tmpFile);
+                    }
                 }
 
                 // Check for expired files
