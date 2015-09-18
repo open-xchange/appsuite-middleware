@@ -23,5 +23,4 @@ Import-Package: com.google.common.base,
 Export-Package: com.openexchange.share,
  com.openexchange.share.groupware,
  com.openexchange.share.notification,
- com.openexchange.share.recipient,
- com.openexchange.share.tools
+ com.openexchange.share.recipient
