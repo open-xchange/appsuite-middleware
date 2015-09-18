@@ -65,12 +65,10 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String FOLDER = "folder";
 
+    // John Doe has shared the folder "Photos" with you. Please log in to view it.
     public static final String SHARE_WITH_TARGET = "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. ";
 
-    public static final String SHARE_WITHOUT_TARGET = "Files have been shared with you. Please log in to view them. ";
-
-    public static final String SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME = "%1$s has shared some files with you. ";
-
+    // We sent a message to john.doe@example.com with further instructions on how to set a new password.
     public static final String RESET_PASSWORD = "We sent a message to %1$s with further instructions on how to set a new password.";
 
     public static final String CHOOSE_PASSWORD = "Please set a new password to regain access.";

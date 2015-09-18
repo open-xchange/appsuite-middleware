@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,6 +76,8 @@ import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -240,15 +243,14 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
             String hash = getHash(storageUser.getUserPassword());
             if (confirm.equals(hash)) {
+                ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class, true);
+                List<TargetProxy> possibleTargets = moduleSupport.listTargets(contextID, guestID);
+                if (possibleTargets.isEmpty()) {
+                    sendInvalidRequest(translator, response);
+                }
                 Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
                 User updatedGuest = updatePassword(guestID, context, newPassword);
-                // TODO: select a target
-//                ShareTarget target = guestShare.getSingleTarget();
-//                PersonalizedShareTarget personalizedTarget = null;
-//                if (target != null) {
-//                    personalizedTarget = ShareServiceLookup.getService(ModuleSupport.class).personalizeTarget(target, contextID, guestID);
-//                }
-                if (!ShareServletUtils.createSessionAndRedirect(guestInfo, null, request, response, loginMethod(updatedGuest, context))) {
+                if (!ShareServletUtils.createSessionAndRedirect(guestInfo, possibleTargets.get(0).getTarget(), request, response, loginMethod(updatedGuest, context))) {
                     sendInternalError(translator, response);
                 }
             } else {

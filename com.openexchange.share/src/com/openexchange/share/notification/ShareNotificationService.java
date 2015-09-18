@@ -128,6 +128,17 @@ public interface ShareNotificationService {
      */
     List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData);
 
+    /**
+     * Sends out notifications about a link to multiple recipients,
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param transportInfos The transport information for each recipient. The type must be chosen in accordance to the transport.
+     * @param The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param link Share info of to the link to notify about
+     * @param session The session of the notifying user
+     * @param hostData The host data to generate share links
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
     List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, HostData hostData);
 
     /**

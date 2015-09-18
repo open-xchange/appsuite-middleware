@@ -58,6 +58,10 @@ package com.openexchange.share.core;
  */
 public class ShareConstants {
 
+    /**
+     * Path of the share servlet, relative to the servlet prefix. Without
+     * leading or trailing slashes.
+     */
     public static final String SHARE_SERVLET = "share";
 
     /**

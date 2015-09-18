@@ -56,7 +56,9 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
- * {@link ShareUrl}
+ * Encapsulates the path to a shared folder or item that is used to generate
+ * share links for guests. All contained IDs are valid from a global perspective,
+ * i.e. are physical IDs that can be addressed without impersonating a certain user.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -69,6 +71,12 @@ public class ShareTargetPath {
 
     private final String item;
 
+    /**
+     * Initializes a new {@link ShareTargetPath}.
+     * @param module The module ID.
+     * @param folder The folder ID. Must be a full-qualified global identifier.
+     * @param item The item ID or <code>null</code>, if a folder is addressed. Must be a full-qualified global identifier.
+     */
     public ShareTargetPath(int module, String folder, String item) {
         super();
         this.module = module;
@@ -76,22 +84,48 @@ public class ShareTargetPath {
         this.item = item;
     }
 
+    /**
+     * Gets the module ID.
+     *
+     * @return The module
+     */
     public int getModule() {
         return module;
     }
 
+    /**
+     * Gets the folder ID.
+     *
+     * @return The folder
+     */
     public String getFolder() {
         return folder;
     }
 
+    /**
+     * Gets the item ID.
+     *
+     * @return The item
+     */
     public String getItem() {
         return item;
     }
 
+    /**
+     * Gets whether this path denotes a folder or item.
+     *
+     * @return <code>true</code> for a folder
+     */
     public boolean isFolder() {
         return item == null;
     }
 
+    /**
+     * Gets the path representation with a leading slash.
+     * Example: /1/8/NzYxMjE.
+     *
+     * @return The path
+     */
     public String get() {
         StringBuilder sb = new StringBuilder(64).append("/");
         String version = "1";
@@ -104,6 +138,14 @@ public class ShareTargetPath {
         return sb.toString();
     }
 
+    /**
+     * Parses the path of a share URL. The path must start at the version
+     * segment. Input example: /1/8/NzYxMjE.
+     *
+     * @param path The path
+     * @return A {@link ShareTargetPath} instance or <code>null</code>, if
+     * the passed input is no valid path.
+     */
     public static ShareTargetPath parse(String path) {
         List<String> segments = Strings.splitAndTrim(path, "/");
         Iterator<String> iterator = segments.iterator();
@@ -115,6 +157,14 @@ public class ShareTargetPath {
         return parse(segments);
     }
 
+    /**
+     * Parses a list of path segments. The first segment must be the version
+     * segment and the last one the folder or item segment.
+     *
+     * @param segments The segments
+     * @return A {@link ShareTargetPath} instance or <code>null</code>, if
+     * the passed input is no valid path.
+     */
     public static ShareTargetPath parse(List<String> segments) {
         try {
             Iterator<String> it = segments.iterator();
@@ -215,7 +265,7 @@ public class ShareTargetPath {
 
     @Override
     public String toString() {
-        return "SharePath [module=" + module + ", folder=" + folder + ", item=" + item + "]";
+        return get();
     }
 
 }

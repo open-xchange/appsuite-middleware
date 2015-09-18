@@ -100,8 +100,22 @@ public interface ModuleHandler {
      */
     TargetProxy loadTarget(String folder, String item, Context context, int guestID) throws OXException;
 
+    /**
+     * Gets whether the passed target proxy may be shared by the user who requested to load it.
+     *
+     * @param proxy The proxy
+     * @param parameters The parameters
+     * @return <code>true</code> if sharing is allowed
+     */
     boolean canShare(TargetProxy proxy, HandlerParameters parameters);
 
+    /**
+     * Writes all changes made to the passed target proxies to the underlying module-specific storage.
+     *
+     * @param modified The modified target proxies
+     * @param parameters The parameters
+     * @throws OXException
+     */
     void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
 
     /**

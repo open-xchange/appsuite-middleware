@@ -65,10 +65,13 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public interface NotifyDecision {
 
     /**
-     * Checks whether a 'share created' notification should be sent.
+     * Checks whether a 'share created' notification should be sent to a certain user.
      *
      * @param transport The transport
-     * @param share The created share
+     * @param user The potential mail recipient
+     * @param asGroupMember Whether the recipient is part of a group permission
+     * @param bits The share permission bits as folder bit mask
+     * @param targetPath The path of the share target
      * @param session The session used for creating the share
      * @return <code>true</code> if a notification should be sent
      * @throws OXException
