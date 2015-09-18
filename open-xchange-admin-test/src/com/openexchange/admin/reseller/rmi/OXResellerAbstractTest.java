@@ -79,11 +79,11 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static final String CHANGEDNAME = "changedchangedagain";
     protected static final String TESTRESTRICTIONUSER = "testwithrestriction";
     protected static final String TESTRESTCHANGERICTIONUSER = "testchangewithrestriction";
-    
+
     protected static Credentials ResellerFooCredentials() {
         return new Credentials("foo", "secret");
     }
-    
+
     protected static Credentials TestUserCredentials() {
         return new Credentials(TESTUSER, "secret");
     }
@@ -107,7 +107,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static ResellerAdmin TestAdminUser() {
         return TestAdminUser(TESTUSER, "Test Reseller Admin");
     }
-    
+
     protected static ResellerAdmin TestAdminUser(final String name) {
         return TestAdminUser(name, "Test Display Name");
     }
@@ -118,7 +118,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         adm.setPassword("secret");
         return adm;
     }
-    
+
     protected static Restriction MaxContextRestriction() {
         return new Restriction(Restriction.MAX_CONTEXT_PER_SUBADMIN,"2");
     }
@@ -126,7 +126,7 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
     protected static Restriction MaxContextQuotaRestriction() {
         return new Restriction(Restriction.MAX_OVERALL_CONTEXT_QUOTA_PER_SUBADMIN,"1000");
     }
-    
+
     protected static Restriction MaxUserPerContextRestriction() {
         return new Restriction(Restriction.MAX_USER_PER_CONTEXT,"3");
     }
@@ -154,7 +154,15 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         Context ctx = new Context();
         ctx.setMaxQuota(100000L);
 
-        return oxctx.create(ctx, oxadmin, auth);
+        Context create = oxctx.create(ctx, oxadmin, auth);
+        try {
+            // wait to ensure the context is available for further operations
+            // FIXME when master-slave setup for configdb is available remove the line below
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // should not happen
+        }
+        return create;
     }
 
     protected static Context createContextNoQuota(final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
@@ -163,9 +171,18 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         User oxadmin = ContextAdmin();
         Context ctx = new Context();
 
-        return oxctx.create(ctx, oxadmin, auth);
+        Context create = oxctx.create(ctx, oxadmin, auth);
+        try {
+            // wait to ensure the context is available for further operations
+            // FIXME when master-slave setup for configdb is available remove the line below
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            // should not happen
+        }
+
+        return create;
     }
-    
+
     protected static User createUser(final Context ctx, final Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         return createUser(ctx, null, auth);
     }
@@ -184,9 +201,8 @@ public abstract class OXResellerAbstractTest extends AbstractTest {
         oxuser.setPassword("secret");
         if( access == null ) {
             return oxusr.create(ctx, oxuser, auth);
-        } else {
-            return oxusr.create(ctx, oxuser, access, auth);
         }
+        return oxusr.create(ctx, oxuser, access, auth);
     }
 
     protected static void deleteContext(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException, MalformedURLException, NotBoundException {
