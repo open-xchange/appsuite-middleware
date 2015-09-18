@@ -14,7 +14,7 @@ BuildRequires:  java7-devel
 BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,6 +58,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Sep 18 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Mon Sep 07 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Third candidate for 7.8.0 release
 * Fri Aug 21 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

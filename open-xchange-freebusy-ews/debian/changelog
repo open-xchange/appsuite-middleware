@@ -1,3 +1,9 @@
+open-xchange-freebusy-ews (7.8.0-4) stable; urgency=medium
+
+  * Fourth candidate for 7.8.0 release
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Fri, 18 Sep 2015 11:06:11 +0200
+
 open-xchange-freebusy-ews (7.8.0-3) stable; urgency=medium
 
   * Third candidate for 7.8.0 release
