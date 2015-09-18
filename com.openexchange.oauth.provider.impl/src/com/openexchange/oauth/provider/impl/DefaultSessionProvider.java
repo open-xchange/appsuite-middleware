@@ -60,6 +60,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
@@ -210,6 +211,11 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
         boolean forceHTTPS = com.openexchange.tools.servlet.http.Tools.considerSecure(httpRequest, forceHTTPS());
         Cookie[] cookies = getCookies(httpRequest);
         Map<String, List<String>> headers = getHeaders(httpRequest);
+        HttpSession session = httpRequest.getSession(false);
+        String route = null;
+        if (session != null) {
+            route = com.openexchange.tools.servlet.http.Tools.getRoute(session.getId());
+        }
         LoginRequestImpl req = new LoginRequestImpl(
             user.getLoginInfo(),
             null,                                   /* password */
@@ -225,7 +231,7 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
             forceHTTPS,
             httpRequest.getServerName(),
             httpRequest.getServerPort(),
-            com.openexchange.tools.servlet.http.Tools.getRoute(httpRequest.getSession(true).getId()));
+            route);
         req.setTransient(true);
 
         return req;
