@@ -97,9 +97,9 @@ public class ShareTargetPath {
         String version = "1";
         sb.append(version).append('/');
         sb.append(module).append('/');
-        sb.append(encodeFolder(version, folder)).append('/');
+        sb.append(encodeFolder(version, folder));
         if (item != null) {
-            sb.append(encodeItem(version, item)).append('/');
+            sb.append('/').append(encodeItem(version, item)).append('/');
         }
         return sb.toString();
     }
