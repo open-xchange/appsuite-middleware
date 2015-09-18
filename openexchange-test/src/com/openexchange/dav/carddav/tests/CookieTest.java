@@ -80,8 +80,7 @@ public class CookieTest extends CardDAVTest {
         PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
                 DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         try {
-            Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS,
-                getWebDAVClient().getHttpClient().executeMethod(propFind));
+            Assert.assertEquals("unexpected http status", StatusCodes.SC_MULTISTATUS, getWebDAVClient().executeMethod(propFind));
         } finally {
             release(propFind);
         }
