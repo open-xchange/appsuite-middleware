@@ -95,7 +95,7 @@ public class RdbContactQuotaProvider implements QuotaProvider {
     static Quota getAmountQuota(Session session, Executor executor, Connection connection) throws SQLException, OXException {
         long limit = AmountQuotas.getLimit(session, MODULE_ID,
             RdbServiceLookup.getService(ConfigViewFactory.class), connection);
-        if (Quota.UNLIMITED == limit) {
+        if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         }
         long usage = executor.count(connection, Table.CONTACTS, session.getContextId());

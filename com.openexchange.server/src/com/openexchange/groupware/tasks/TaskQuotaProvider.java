@@ -99,7 +99,7 @@ public class TaskQuotaProvider implements QuotaProvider {
         Connection connection = dbService.getReadOnly(contextID);
         try {
             long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
-            if (limit == Quota.UNLIMITED) {
+            if (limit <= Quota.UNLIMITED) {
                 return Quota.UNLIMITED_AMOUNT;
             }
 

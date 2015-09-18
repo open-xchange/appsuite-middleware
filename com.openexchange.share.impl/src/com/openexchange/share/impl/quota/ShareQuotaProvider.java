@@ -108,7 +108,7 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
-        if (false == "0".equals(accountID)) {
+        if (!"0".equals(accountID)) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
         }
         Quota amountQuota;
@@ -139,7 +139,7 @@ public abstract class ShareQuotaProvider implements QuotaProvider {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         long limit = AmountQuotas.getLimit(session, getModuleID(), viewFactory, connectionHelper.getConnection(), getDefaultLimit());
-        if (limit == Quota.UNLIMITED) {
+        if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         }
         UserService userService = services.getService(UserService.class);

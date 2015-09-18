@@ -96,8 +96,8 @@ public class QuotaTest extends ShareTest {
         foldersToDelete = new HashMap<Integer, FolderObject>();
         client2 = new AJAXClient(User.User2);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        user.setUserAttribute("config", "com.openexchange.quota.share_links", "1");
-        user.setUserAttribute("config", "com.openexchange.quota.invite_guests", "1");
+        user.setUserAttribute("config", "com.openexchange.quota.share_links", "0");
+        user.setUserAttribute("config", "com.openexchange.quota.invite_guests", "0");
         Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         iface.change(new Context(client2.getValues().getContextId()), user, credentials);

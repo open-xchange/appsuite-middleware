@@ -63,7 +63,7 @@ import com.openexchange.share.core.tools.ShareTool;
  */
 public class InviteGuestsQuotaProvider extends ShareQuotaProvider {
 
-    private static final long DEFAULT_INVITE_GUESTS_QUOTA_LIMIT = 150;
+    private static final long DEFAULT_INVITE_GUESTS_QUOTA_LIMIT = 100;
     private static final String MODULE_ID = "invite_guests";
 
     /**
