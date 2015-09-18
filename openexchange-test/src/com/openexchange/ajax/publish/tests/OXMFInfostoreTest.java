@@ -94,7 +94,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
         String website = getWebsite(pubUrl);
 
-        Pattern urlPattern = Pattern.compile("href=\"(.+?/publications/files/.+?/"+data.getId()+"/.+?)\"");
+        Pattern urlPattern = Pattern.compile("href=\"(.+?/publications/files/.+?/" + getObjectId(data) + "/.+?)\"");
         Matcher matcher = urlPattern.matcher(website);
         boolean found = matcher.find();
         assertTrue("Should contain reference to a published infostore item", found);
@@ -102,7 +102,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         assertSameStream(new FileInputStream(upload), getDownload(downloadUrl));
     }
 
-    public void testLifeCycleOfInfostoreItemPublication() throws Exception{
+    public void testLifeCycleOfInfostoreItemPublication() throws Exception {
         InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject folder = createDefaultInfostoreFolder();
 
@@ -118,7 +118,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
 
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
 
-        Publication publication = generateInfostoreItemPublication(String.valueOf(data.getId()), pubDiscovery);
+        Publication publication = generateInfostoreItemPublication(String.valueOf(getObjectId(data)), pubDiscovery);
         PublicationTestManager pubMgr = getPublishManager();
 
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
@@ -127,6 +127,10 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         String pubUrl = (String) publication.getConfiguration().get("url");
 
         assertSameStream("Comparing uploaded files", new FileInputStream(upload), getDownload((pubUrl)));
+    }
+
+    private String getObjectId(File data) {
+        return data.getId().split("/")[1];
     }
 
 }
