@@ -128,7 +128,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         }
         assertNull("Share was not deleted", guestEntity);
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
-        assertNull("Permission was not deleted", objectPermissions);
+        assertTrue("Permission was not deleted", objectPermissions.isEmpty());
     }
 
     @Override
