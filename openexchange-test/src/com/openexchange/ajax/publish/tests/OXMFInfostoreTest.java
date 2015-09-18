@@ -129,8 +129,4 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         assertSameStream("Comparing uploaded files", new FileInputStream(upload), getDownload((pubUrl)));
     }
 
-    private String getObjectId(File data) {
-        return data.getId().split("/")[1];
-    }
-
 }
