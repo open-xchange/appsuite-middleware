@@ -726,7 +726,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     /*
                      * allow only one anonymous permission with "read-only" permission bits
                      */
-                    checkReadOnly(folder, guestPermission);
+                    checkIsLinkPermission(folder, guestPermission);
                     if (null == newAnonymousPermission) {
                         newAnonymousPermission = guestPermission;
                     } else {
@@ -783,7 +783,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
-            checkReadOnly(folder, permission);
+            checkIsLinkPermission(folder, permission);
             if (isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
                 throw invalidPermissions(folder, permission);
             }
@@ -824,6 +824,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
         boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
         if (writeFolder || writeItems || deleteItems) {
+            throw invalidPermissions(folder, p);
+        }
+    }
+
+    private static void checkIsLinkPermission(Folder folder, Permission p) throws OXException {
+        if (p.isAdmin() || p.isGroup() || p.getFolderPermission() != Permission.READ_FOLDER || p.getReadPermission() != Permission.READ_ALL_OBJECTS ||
+            p.getWritePermission() != Permission.NO_PERMISSIONS || p.getDeletePermission() != Permission.NO_PERMISSIONS) {
             throw invalidPermissions(folder, p);
         }
     }

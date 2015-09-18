@@ -363,7 +363,7 @@ public class DefaultShareService implements ShareService {
         if (null != permissions && 0 < permissions.size()) {
             List<Integer> entities = new ArrayList<Integer>(permissions.size());
             for (TargetPermission permission : permissions) {
-                if (false == permission.isGroup()) { //TODO: quick check for "read-only" beforehand
+                if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
                     entities.add(I(permission.getEntity()));
                 }
             }

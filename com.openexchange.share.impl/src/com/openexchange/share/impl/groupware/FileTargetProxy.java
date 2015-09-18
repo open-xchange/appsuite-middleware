@@ -200,7 +200,7 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
         @Override
         public int getBits(FileStorageObjectPermission permission) {
-            return permission.getPermissions();
+            return ObjectPermission.toFolderPermissionBits(new ObjectPermission(permission.getEntity(), permission.isGroup(), permission.getPermissions()));
         }
 
         @Override
