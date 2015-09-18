@@ -598,6 +598,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
             stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
             result = stmt.executeQuery();
             TIntList tmp = new TIntArrayList();
             while (result.next()) {
