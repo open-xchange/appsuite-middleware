@@ -58,7 +58,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -95,9 +95,9 @@ public class NotifyAction extends AbstractWriteAction {
         if (null == notificationService) {
             throw ServiceExceptionCode.absentService(ShareNotificationService.class);
         }
-        ShareTarget target = new ShareTarget(8, metadata.getFolderId(), metadata.getId());
+        ShareTargetPath targetPath = new ShareTargetPath(8, metadata.getFolderId(), metadata.getId());
         List<OXException> warnings = notificationService.sendShareNotifications(
-            transport, entities, message, target, request.getSession(), request.getRequestData().getHostData());
+            transport, entities, message, targetPath, request.getSession(), request.getRequestData().getHostData());
         /*
          * return empty response in case of success, including any warnings that occurred during notification transport
          */

@@ -62,6 +62,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.file.storage.infostore.InfostoreFile;
 import com.openexchange.file.storage.infostore.osgi.Services;
@@ -69,7 +71,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -158,6 +163,15 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
     public boolean canDelete(String folderId, String id, int userId) throws OXException {
         User user = Services.getService(UserService.class).getUser(userId, context);
         return getInfostore(folderId).hasDocumentAccess(ID(id), InfostoreFacade.AccessPermission.DELETE, user, context);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
+        User user = Services.getService(UserService.class).getUser(userId, context);
+        UserPermissionBits permissionBits = Services.getService(UserPermissionService.class).getUserPermissionBits(userId, context);
+        TimedResult<DocumentMetadata> timedResult = getInfostore(folderId).getDocuments(ID(folderId), FieldMapping.getMatching(fields),
+            FieldMapping.getMatching(sort), FieldMapping.getSortDirection(order), null != range ? range.from : -1, null != range ? range.to : -1, context, user, permissionBits);
+        return new InfostoreTimedResult(timedResult);
     }
 
 }

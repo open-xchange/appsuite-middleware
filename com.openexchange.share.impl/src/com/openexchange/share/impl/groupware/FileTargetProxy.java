@@ -51,12 +51,17 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -71,27 +76,55 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     private File file;
     private TargetProxyType proxyType;
-    private final boolean isPublic;
+    private final ShareTarget target;
+    private final ShareTargetPath targetPath;
 
-    public FileTargetProxy(File file, boolean isPublic) {
+    /**
+     * Initializes a new {@link FileTargetProxy}.
+     *
+     * @param file The file
+     */
+    public FileTargetProxy(File file) {
+        this(file, new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId()));
+    }
+
+    /**
+     * Initializes a new {@link FileTargetProxy}. The share target returned by {@link #getTarget()} will
+     * be overridden by the passed one.
+     *
+     * @param file The file
+     * @param target The target
+     */
+    public FileTargetProxy(File file, ShareTarget target) {
         super();
         this.file = file;
-        this.isPublic = isPublic;
+        if (file instanceof UserizedFile) {
+            UserizedFile uFile = (UserizedFile) file;
+            targetPath = new ShareTargetPath(FolderObject.INFOSTORE, uFile.getOriginalFolderId(), uFile.getOriginalId());
+        } else {
+            targetPath = new ShareTargetPath(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
+        }
+        this.target = target;
     }
 
     @Override
     public String getID() {
-        return file.getId();
+        return target.getItem();
     }
 
     @Override
     public String getFolderID() {
-        return file.getFolderId();
+        return target.getFolder();
     }
 
     @Override
-    public int getOwner() {
-        return file.getCreatedBy();
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    @Override
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
     @Override
@@ -139,10 +172,14 @@ public class FileTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public boolean isPublic() {
-        return isPublic;
+    public boolean mayAdjust() {
+        return file.isShareable();
     }
 
+    @Override
+    public Date getTimestamp() {
+        return new Date(file.getSequenceNumber());
+    }
 
     private static final PermissionConverter<FileStorageObjectPermission> CONVERTER = new PermissionConverter<FileStorageObjectPermission>() {
 
@@ -157,8 +194,13 @@ public class FileTargetProxy extends AbstractTargetProxy {
         }
 
         @Override
+        public boolean isSystem(FileStorageObjectPermission permission) {
+            return false;
+        }
+
+        @Override
         public int getBits(FileStorageObjectPermission permission) {
-            return permission.getPermissions();
+            return ObjectPermission.toFolderPermissionBits(new ObjectPermission(permission.getEntity(), permission.isGroup(), permission.getPermissions()));
         }
 
         @Override

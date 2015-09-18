@@ -63,8 +63,8 @@ public class AutocompleteRequest extends AbstractFindRequest {
     private static final long serialVersionUID = -5927763265822552092L;
 
     private final String prefix;
+
     private final int limit;
-    private final boolean check;
 
 
     /**
@@ -75,22 +75,11 @@ public class AutocompleteRequest extends AbstractFindRequest {
      * @param activeFacets The list of currently active facets; must not be <code>null</code>
      * @param options A map containing client and module specific options; must not be <code>null</code>
      * @param limit The maximum number of values per facet to return, or <code>0</code> if unlimited
-     * @param check
      */
-    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int limit, boolean check) {
+    public AutocompleteRequest(final String prefix, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int limit) {
         super(activeFacets, options);
         this.prefix = prefix;
         this.limit = limit;
-        this.check = check;
-    }
-
-    /**
-     * Signals whether to check for mandatory facets.
-     *
-     * @return <code>true</code> to check for mandatory facets; otherwise <code>false</code>
-     */
-    public boolean isCheck() {
-        return check;
     }
 
     /**
@@ -122,26 +111,20 @@ public class AutocompleteRequest extends AbstractFindRequest {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (!super.equals(obj)) {
+        if (!super.equals(obj))
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         AutocompleteRequest other = (AutocompleteRequest) obj;
-        if (limit != other.limit) {
+        if (limit != other.limit)
             return false;
-        }
         if (prefix == null) {
-            if (other.prefix != null) {
+            if (other.prefix != null)
                 return false;
-            }
-        } else if (!prefix.equals(other.prefix)) {
+        } else if (!prefix.equals(other.prefix))
             return false;
-        }
         return true;
     }
 

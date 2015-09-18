@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceLookup;
@@ -176,6 +177,9 @@ public abstract class OAuthEndpoint extends HttpServlet {
         String language = request.getParameter(OAuthProviderConstants.PARAM_LANGUAGE);
         if (language != null) {
             locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(language));
+        }
+        if (Strings.isNotEmpty(request.getHeader("Accept-Language"))) {
+            return request.getLocale();
         }
         return locale;
     }

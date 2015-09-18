@@ -62,8 +62,8 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -83,7 +83,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ShareService.class, UserService.class, ContextService.class, SessiondService.class, ShareCryptoService.class,
+            ShareService.class, UserService.class, ContextService.class, SessiondService.class, PasswordMechFactory.class,
             ConfigurationService.class, ModuleSupport.class, GuestService.class, TranslatorFactory.class, BasicPasswordChangeService.class };
     }
 

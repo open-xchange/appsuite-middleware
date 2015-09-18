@@ -57,8 +57,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +68,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMech;
 
 /**
@@ -95,7 +95,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Create an {@link Option} with the {@link OptionBuilder}
-     * 
+     *
      * @param shortName short name of the option
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
@@ -157,7 +157,7 @@ public class GenerateMasterPasswordCLT {
             builder.append("Saved password for user '").append(parameters.get(Parameter.adminuser)).append("' and encryption '").append(parameters.get(Parameter.encryption)).append("' in '").append(parameters.get(Parameter.mpasswdfile)).append("'.");
             System.out.println(builder.toString());
             System.exit(0);
-        } catch (ParseException | NoSuchAlgorithmException | IllegalArgumentException e) {
+        } catch (ParseException | IllegalArgumentException | OXException e) {
             exceptionMessage = e.getMessage();
             printUsage = true;
         } catch (IOException e) {
@@ -173,7 +173,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Invoke
-     * 
+     *
      * @param parameters
      * @throws IOException
      * @throws FileNotFoundException
@@ -213,21 +213,20 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Encrypt the specified password
-     * 
+     *
      * @param encryption The encryption algorithm
      * @param password The plain-text password to encrypt
      * @return The encrypted password
-     * @throws UnsupportedEncodingException If the encoding is not supported
-     * @throws NoSuchAlgorithmException If the specified encryption algorithm is not found.
+     * @throws OXException
      */
-    private static String encryptPassword(final String encryption, final String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        PasswordMech pm = PasswordMech.getPasswordMechFor(encryption);
+    private static String encryptPassword(final String encryption, final String password) throws OXException {
+        IPasswordMech pm = getPasswordMechFor(encryption);
         return pm.encode(password);
     }
 
     /**
      * Initialise defaults
-     * 
+     *
      * @param parameters
      */
     private static void initParameters(Map<Parameter, String> parameters) {
@@ -239,7 +238,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Print usage
-     * 
+     *
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {
@@ -251,7 +250,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Get valid encryption/hashing algorithms
-     * 
+     *
      * @return
      */
     private static String getValidEncHashAlgos() {
@@ -263,4 +262,29 @@ public class GenerateMasterPasswordCLT {
         return builder.toString();
     }
 
+    /**
+     * Gets the password mechanism for given identifier
+     *
+     * @param identifier The identifier
+     * @return The password mechanism or <code>null</code>
+     */
+    public static IPasswordMech getPasswordMechFor(String identifier) {
+        if (Strings.isEmpty(identifier)) {
+            return null;
+        }
+        String id = Strings.toUpperCase(identifier);
+        if (false == id.startsWith("{")) {
+            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
+        }
+        if (false == id.endsWith("}")) {
+            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
+        }
+
+        for (IPasswordMech pm : PasswordMech.values()) {
+            if (id.equals(pm.getIdentifier())) {
+                return pm;
+            }
+        }
+        return null;
+    }
 }

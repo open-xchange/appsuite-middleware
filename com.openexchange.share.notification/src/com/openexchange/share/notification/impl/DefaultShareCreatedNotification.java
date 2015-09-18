@@ -50,6 +50,7 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.List;
+import com.openexchange.group.Group;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -68,6 +69,7 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     private String message;
     private int targetUserID;
     private String shareUrl;
+    private Group group;
 
     /**
      * Initializes a new {@link DefaultShareCreatedNotification}.
@@ -109,6 +111,11 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         return shareUrl;
     }
 
+    @Override
+    public Group getTargetGroup() {
+        return group;
+    }
+
     public void setTargets(List<ShareTarget> targets) {
         this.targets = targets;
     }
@@ -127,6 +134,10 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
+    }
+
+    public void setTargetGroup(Group group) {
+        this.group = group;
     }
 
 }

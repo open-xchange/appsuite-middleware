@@ -49,12 +49,9 @@
 
 package com.openexchange.share.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONException;
@@ -72,15 +69,15 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.Share;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -152,29 +149,6 @@ public class ShareUtils {
     }
 
     /**
-     * Prepares a new share.
-     *
-     * @param contextID The context ID
-     * @param sharingUser The sharing user
-     * @param guestUserID The guest user ID
-     * @param target The share target
-     * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
-     * @return The share
-     */
-    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, Date expiryDate) {
-        Date now = new Date();
-        Share share = new Share();
-        share.setTarget(target);
-        share.setCreated(now);
-        share.setModified(now);
-        share.setCreatedBy(sharingUser.getId());
-        share.setModifiedBy(sharingUser.getId());
-        share.setGuest(guestUserID);
-        share.setExpiryDate(expiryDate);
-        return share;
-    }
-
-    /**
      * Prepares a guest user instance based on the supplied share recipient.
      *
      * @param sharingUser The sharing user
@@ -215,13 +189,12 @@ public class ShareUtils {
         guestUser.setDisplayName(recipient.getDisplayName());
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
-        guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+
+        PasswordMechFactory passwordMechFactory = services.getService(PasswordMechFactory.class);
+        IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
+        guestUser.setPasswordMech(iPasswordMech.getIdentifier());
         if (Strings.isNotEmpty(recipient.getPassword())) {
-            try {
-                guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
-            }
+            guestUser.setUserPassword(iPasswordMech.encode(recipient.getPassword()));
         }
         return guestUser;
     }
@@ -239,10 +212,15 @@ public class ShareUtils {
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
         if (null != recipient.getPassword()) {
-            guestUser.setUserPassword(requireService(ShareCryptoService.class).encrypt(recipient.getPassword()));
-            guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+            String encodedPassword = services.getService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(recipient.getPassword());
+            guestUser.setUserPassword(encodedPassword);
+            guestUser.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
         } else {
             guestUser.setPasswordMech("");
+        }
+        if (null != recipient.getExpiryDate()) {
+            String expiryDateValue = String.valueOf(recipient.getExpiryDate().getTime());
+            ShareTool.assignUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue);
         }
         try {
             ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());

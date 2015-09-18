@@ -49,12 +49,10 @@
 
 package com.openexchange.share.notification.impl;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -67,16 +65,17 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public interface NotifyDecision {
 
     /**
-     * Checks whether a 'share created' notification should be sent.
+     * Checks whether a 'share created' notification should be sent to a certain user.
      *
      * @param transport The transport
-     * @param share The created share
+     * @param user The potential mail recipient
+     * @param asGroupMember Whether the recipient is part of a group permission
+     * @param bits The share permission bits as folder bit mask
+     * @param targetPath The path of the share target
      * @param session The session used for creating the share
      * @return <code>true</code> if a notification should be sent
      * @throws OXException
      */
-    boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException;
-
-    boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, List<ShareTarget> targets, Session session) throws OXException;
+    boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, ShareTargetPath targetPath, Session session) throws OXException;
 
 }

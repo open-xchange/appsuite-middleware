@@ -273,10 +273,6 @@ public final class FileStorageFolderStorage implements FolderStorage {
         fsFolder.setName(folder.getName());
         fsFolder.setSubscribed(folder.isSubscribed());
         // Permissions
-        final Session session = storageParameters.getSession();
-        if (null == session) {
-            throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-        }
         final Permission[] permissions = folder.getPermissions();
         if (null != permissions && permissions.length > 0) {
             final List<FileStoragePermission> fsPermissions = new ArrayList<FileStoragePermission>(permissions.length);
@@ -298,7 +294,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 final FileStoragePermission[] messagingPermissions = new FileStoragePermission[1];
                 {
                     final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
-                    fsPerm.setEntity(session.getUserId());
+                    fsPerm.setEntity(storageParameters.getUserId());
                     fsPerm.setAllPermissions(
                         MessagingPermission.MAX_PERMISSION,
                         MessagingPermission.MAX_PERMISSION,
@@ -415,7 +411,13 @@ public final class FileStorageFolderStorage implements FolderStorage {
         FileStorageFolder fsFolder = getFolderAccess(storageParameters).getFolder(fid);
         boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
         String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
-        FileStorageFolderImpl retval = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getSession(), altNames);
+        Session session = storageParameters.getSession();
+        FileStorageFolderImpl retval;
+        if (session == null) {
+            retval = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames);
+        } else {
+            retval = new FileStorageFolderImpl(fsFolder, accountID, session, altNames);
+        }
         boolean hasSubfolders = fsFolder.hasSubfolders();
         retval.setTreeID(treeId);
         retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
@@ -429,21 +431,6 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
-
-
-        final ServerSession session;
-        {
-            final Session s = storageParameters.getSession();
-            if (null == s) {
-                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-            }
-            if (s instanceof ServerSession) {
-                session = (ServerSession) s;
-            } else {
-                session = ServerSessionAdapter.valueOf(s);
-            }
-        }
-
         final IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
         if (null == folderAccess) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
@@ -457,9 +444,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
              *    Add primary only if not enabled
              * 2. Strip Unified-FileStorage account from obtained list
              */
+            Locale userLocale = null;
+            if (storageParameters.getSession() == null) {
+                userLocale = storageParameters.getUser().getLocale();
+            } else {
+                userLocale = ServerSessionAdapter.valueOf(storageParameters.getSession()).getUser().getLocale();
+            }
 
-            FileStorageFolder[] rootFolders = folderAccess.getRootFolders(session.getUser().getLocale());
-
+            FileStorageFolder[] rootFolders = folderAccess.getRootFolders(userLocale);
             int size = rootFolders.length;
             if (size <= 0) {
                 return new SortableId[0];

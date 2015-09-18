@@ -50,8 +50,10 @@
 package com.openexchange.share.impl.groupware;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -70,14 +72,16 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     private final String folderId;
     private final String item;
     private final String title;
-    private final int ownedBy;
+    private final ShareTarget target;
+    private final ShareTargetPath targetPath;
 
-    public VirtualTargetProxy(int ownedBy, String folderId, String item, String title) {
+    public VirtualTargetProxy(int module, String folderId, String item, String title) {
         super();
-        this.ownedBy = ownedBy;
         this.folderId = folderId;
         this.item = item;
         this.title = title;
+        target = new ShareTarget(module, folderId, item);
+        targetPath = new ShareTargetPath(module, folderId, item);
     }
 
     /**
@@ -86,17 +90,7 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
      * @param target The target
      */
     public VirtualTargetProxy(ShareTarget target) {
-        this(target.getOwnedBy(), target);
-    }
-
-    /**
-     * Initializes a new {@link VirtualTargetProxy}.
-     *
-     * @param ownedBy The identifier of the user that is considered as owner of the target
-     * @param target The target
-     */
-    public VirtualTargetProxy(int ownedBy, ShareTarget target) {
-        this(ownedBy, target.getFolder(), target.getItem(), getTitle(target));
+        this(target.getModule(), target.getFolder(), target.getItem(), getTitle(target));
     }
 
     @Override
@@ -110,8 +104,13 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public int getOwner() {
-        return ownedBy;
+    public ShareTarget getTarget() {
+        return target;
+    }
+
+    @Override
+    public ShareTargetPath getTargetPath() {
+        return targetPath;
     }
 
     @Override
@@ -144,8 +143,13 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     }
 
     @Override
-    public boolean isPublic() {
-        return false;
+    public boolean mayAdjust() {
+        return true;
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return new Date();
     }
 
 }

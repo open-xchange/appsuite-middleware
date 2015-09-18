@@ -49,16 +49,9 @@
 
 package com.openexchange.folder.json.writer;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -72,15 +65,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
-import com.openexchange.ajax.meta.MetaContributor;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.Tools;
-import com.openexchange.folder.json.services.MetaContributors;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
@@ -91,7 +81,11 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
@@ -559,9 +553,6 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 // Get meta map
                 Map<String, Object> map = folder.getMeta();
-                // Invoke contribution service
-                map = contributeTo(map, folder, folder.getSession());
-
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.META.getName() : null, null == map || map.isEmpty() ? JSONObject.NULL : JSONCoercion.coerceToJSON(map));
             }
 
@@ -588,28 +579,6 @@ public final class FolderWriter {
         }
         ALL_FIELDS = new int[j];
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
-    }
-
-    protected static Map<String, Object> contributeTo(final Map<String, Object> map, final UserizedFolder folder, final Session session) {
-        final String topic = "ox/common/folder";
-        final MetaContributorRegistry registry = MetaContributors.getRegistry();
-        if (null == registry) {
-            return map;
-        }
-        final Set<MetaContributor> contributors = registry.getMetaContributors(topic);
-        if (null != contributors && !contributors.isEmpty()) {
-            final Map<String, Object> m = null == map ? new LinkedHashMap<String, Object>(2) : map;
-            final String id = folder.getID();
-            for (final MetaContributor contributor : contributors) {
-                try {
-                    contributor.contributeTo(m, id, session);
-                } catch (final Exception e) {
-                    LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), id), e);
-                }
-            }
-            return m;
-        }
-        return map;
     }
 
     private static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {

@@ -52,8 +52,6 @@ package com.openexchange.share.servlet.handler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
 
 /**
  * {@link ShareHandler}
@@ -81,13 +79,12 @@ public interface ShareHandler {
      * <p>
      * In case this handler wants to abort further handling of the share, <code>{@link ShareHandlerReply#DENY}</code> is returned.
      *
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param shareRequest The share request
      * @param request The associated HTTP request
      * @param response The associated HTTP response
      * @return One of <code>{@link ShareHandlerReply#DENY}</code>, <code>{@link ShareHandlerReply#NEUTRAL}</code>, or <code>{@link ShareHandlerReply#ACCEPT}</code>.
      * @throws OXException If the attempt to resolve given share fails
      */
-    ShareHandlerReply handle(GuestShare share, PersonalizedShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    ShareHandlerReply handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException;
 
 }

@@ -207,7 +207,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
         return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
@@ -314,13 +314,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private FullnameArgument determineFolder(AbstractFindRequest request) throws OXException {
         String folderName = request.getFolderId();
-        if (invalidAllMessagesFolder && folderName == null) {
-            if (!(request instanceof AutocompleteRequest) || false != ((AutocompleteRequest) request).isCheck()) {
-                throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
-            }
-
-            // The special auto-complete to retrieve available facets
-            folderName = MailFolder.DEFAULT_FOLDER_ID;
+        if (folderName == null && invalidAllMessagesFolder) {
+            throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
         }
         if (folderName == null) {
             folderName = virtualAllMessagesFolder;

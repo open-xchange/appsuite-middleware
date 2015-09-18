@@ -60,4 +60,7 @@ public class FileStorageAccountConstants {
     public static final String FILE_STORAGE_SERVICE = "filestorageService";
     public static final String DISPLAY_NAME = "displayName";
     public static final String ID = "id";
+    public static final String QUALIFIED_ID = "qualifiedId";
+    public static final String ROOT_FOLDER = "rootFolder";
+    public static final String IS_DEFAULT_ACCOUNT = "isDefaultAccount";
 }

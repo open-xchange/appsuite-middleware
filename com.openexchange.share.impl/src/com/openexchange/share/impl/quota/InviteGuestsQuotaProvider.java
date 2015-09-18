@@ -50,9 +50,9 @@
 package com.openexchange.share.impl.quota;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.impl.ConnectionHelper;
-import com.openexchange.share.storage.ShareStorage;
+import com.openexchange.share.core.tools.ShareTool;
 
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.share.storage.ShareStorage;
  */
 public class InviteGuestsQuotaProvider extends ShareQuotaProvider {
 
-    private static final long DEFAULT_INVITE_GUESTS_QUOTA_LIMIT = 150;
+    private static final long DEFAULT_INVITE_GUESTS_QUOTA_LIMIT = 100;
     private static final String MODULE_ID = "invite_guests";
 
     /**
@@ -91,8 +91,14 @@ public class InviteGuestsQuotaProvider extends ShareQuotaProvider {
     }
 
     @Override
-    protected long getUsedQuota(ShareStorage storage, ConnectionHelper connectionHelper, int userID) throws OXException {
-        return storage.countGuests(connectionHelper.getContextID(), userID, connectionHelper.getParameters());
+    protected long getUsedQuota(User[] createdGuests) throws OXException {
+        long usage = 0;
+        for (User guest : createdGuests) {
+            if (false == ShareTool.isAnonymousGuest(guest)) {
+                usage++;
+            }
+        }
+        return usage;
     }
 
 }

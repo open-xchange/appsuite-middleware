@@ -91,7 +91,7 @@ public class SendLinkAction extends AbstractDriveAction {
         /*
          * lookup share
          */
-        DriveShareInfo shareInfo = discoverLink(session, target);
+        DriveShareInfo shareInfo = getDriveService().getUtility().optLink(session, target);
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }

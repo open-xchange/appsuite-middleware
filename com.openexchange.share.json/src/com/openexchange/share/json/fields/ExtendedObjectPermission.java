@@ -57,6 +57,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -103,9 +104,15 @@ public class ExtendedObjectPermission extends ExtendedPermission {
                     "Can't resolve user permission entity {} for file {}", permission.getEntity(), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
+                if (guest == null) {
+                    int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
+                    throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
+                        "It might have been deleted in the mean time or is in an inconsistent state.");
+                }
+
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getShare(file, permission.getEntity()));
+                    addShareInfo(requestData, jsonObject, resolver.getLink(file, permission.getEntity()));
                 } else {
                     addUserInfo(requestData, jsonObject, user);
                 }

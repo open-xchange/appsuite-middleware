@@ -82,6 +82,7 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
 public class AggregateSharesTest extends ShareTest {
 
     private java.util.Map<AJAXClient, List<Integer>> clientsAndFolders;
+    private AJAXClient client2;
 
     /**
      * Initializes a new {@link AggregateSharesTest}.
@@ -95,7 +96,7 @@ public class AggregateSharesTest extends ShareTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        AJAXClient client2 = new AJAXClient(User.User2);
+        client2 = new AJAXClient(User.User2);
         client2.execute(new StartSMTPRequest());
         clientsAndFolders = new HashMap<AJAXClient, List<Integer>>();
         clientsAndFolders.put(client, new ArrayList<Integer>());
@@ -132,6 +133,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
+//                            System.out.println("AggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -151,6 +153,7 @@ public class AggregateSharesTest extends ShareTest {
                 for (int module1 : TESTED_MODULES) {
                     for (AJAXClient client2 : ajaxClients) {
                         for (int module2 : TESTED_MODULES) {
+//                            System.out.println("RemoveAggregateShares API: " + api + ", Client 1: " + client1.getValues().getUserId() + ", Module 1: " + module1 + ", Client 2: " + client2.getValues().getUserId() + ", Module 2: " + module2);
                             testRemoveAggregateShares(api, client1, module1, client2, module2);
                         }
                     }
@@ -329,6 +332,7 @@ public class AggregateSharesTest extends ShareTest {
         guestClientA.checkModuleAvailable(module2);
         guestClientA.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
         guestClientA.checkFolderAccessible(String.valueOf(folderB.getObjectID()), guestPermission);
+        String folderATarget = guestClientA.getShareResolveResponse().getTarget();
         /*
          * check access to shares via link to folder B
          */
@@ -337,6 +341,7 @@ public class AggregateSharesTest extends ShareTest {
         guestClientB.checkModuleAvailable(module2);
         guestClientB.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
         guestClientB.checkFolderAccessible(String.valueOf(folderB.getObjectID()), guestPermission);
+        String folderBTarget = guestClientB.getShareResolveResponse().getTarget();
         /*
          * update folder A, revoke guest permissions
          */
@@ -369,10 +374,14 @@ public class AggregateSharesTest extends ShareTest {
         guestClientB.checkFolderNotAccessible(String.valueOf(folderA.getObjectID()));
         guestClientB.checkFolderAccessible(String.valueOf(folderB.getObjectID()), guestPermission);
         /*
-         * check if share link to folder A still accessible
+         * Check if share link to folder A still accessible. The response should result in a message, that the requested share
+         * is not available, but that others still are. The contained target must be one of those others - which can only be
+         * folder B in this case.
          */
         ResolveShareResponse shareResolveResponse = new GuestClient(shareURLA, guestPermission.getRecipient(), false).getShareResolveResponse();
-        assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
+        assertEquals("Login type wrong", "guest_password", shareResolveResponse.getLoginType());
+        assertEquals("Status wrong", "not_found_continue", shareResolveResponse.getStatus());
+        assertEquals("Target wrong", folderBTarget,  shareResolveResponse.getTarget());
         /*
          * check if share link to folder A still accessible
          */

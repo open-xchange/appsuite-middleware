@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.publish.tests;
 
+import com.openexchange.file.storage.File;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
@@ -65,7 +66,6 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
 
     protected PublicationTestManager pubMgr;
 
-
     public AbstractPublicationTest(String name) {
         super(name);
     }
@@ -76,6 +76,10 @@ public abstract class AbstractPublicationTest extends AbstractPubSubTest {
 
     public PublicationTestManager getPublishManager() {
         return pubMgr;
+    }
+
+    protected String getObjectId(File data) {
+        return data.getId().split("/")[1];
     }
 
     @Override

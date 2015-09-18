@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.actions;
 
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -100,7 +101,7 @@ public class SendLinkAction extends AbstractShareAction {
         /*
          * lookup share
          */
-        ShareInfo shareInfo = discoverLink(session, target);
+        ShareInfo shareInfo = getShareService().optLink(session, target);
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
@@ -113,7 +114,7 @@ public class SendLinkAction extends AbstractShareAction {
         /*
          * return empty result (including warnings) in case of success
          */
-        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), shareInfo.getShare().getModified(), "json");
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), new Date(), "json");
         result.addWarnings(warnings);
         return result;
     }

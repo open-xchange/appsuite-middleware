@@ -145,10 +145,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject.CONTACT, FolderObject.INFOSTORE, FolderObject.TASK, FolderObject.CALENDAR
     };
 
-    protected static final String[] TESTED_MODULES_NAMES = new String[] {
-        Module.CONTACTS.getName(), Module.INFOSTORE.getName(), Module.TASK.getName(), Module.CALENDAR.getName()
-    };
-
     protected static final Random random = new Random();
     protected static final int CLEANUP_DELAY = 30000;
 
@@ -264,9 +260,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
+        FolderObject createdFolder = insertPrivateFolder(client, api, module, parent, name);
+        assertNotNull(createdFolder);
+        remember(createdFolder);
+        assertEquals("Folder name wrong", name, createdFolder.getFolderName());
+        return createdFolder;
+    }
+
+    protected static FolderObject insertPrivateFolder(AJAXClient client, EnumAPI api, int module, int parent, String name) throws Exception {
         FolderObject privateFolder = Create.createPrivateFolder(name, module, client.getValues().getUserId());
         privateFolder.setParentFolderID(parent);
-        return insertFolder(api, privateFolder);
+        return insertFolder(client, api, privateFolder);
     }
 
     /**
@@ -280,6 +284,10 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent) throws Exception {
         return insertPrivateFolder(api, module, parent, randomUID());
+    }
+
+    protected static FolderObject insertPrivateFolder(AJAXClient client, EnumAPI api, int module, int parent) throws Exception {
+        return insertPrivateFolder(client, api, module, parent, randomUID());
     }
 
     /**
@@ -344,7 +352,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The inserted file
      * @throws Exception
      */
-    protected File insertSharedFile(int folderID, FileStorageGuestObjectPermission guestPermission) throws Exception {
+    protected File insertSharedFile(int folderID, FileStorageObjectPermission guestPermission) throws Exception {
         return insertSharedFile(folderID, randomUID(), guestPermission);
     }
 
@@ -508,7 +516,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
         }
         UpdateInfostoreResponse updateInfostoreResponse = getClient().execute(updateInfostoreRequest);
         assertFalse(updateInfostoreResponse.hasError());
-        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(file.getId());
+        GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(updateInfostoreResponse.getID());
         getInfostoreRequest.setFailOnError(true);
         GetInfostoreResponse getInfostoreResponse = getClient().execute(getInfostoreRequest);
         return getInfostoreResponse.getDocumentMetadata();
@@ -548,7 +556,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The folder
      * @throws Exception
      */
-    protected FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
+    protected static FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
         GetResponse getResponse = client.execute(new GetRequest(api, objectID));
         FolderObject folder = getResponse.getFolder();
         folder.setLastModified(getResponse.getTimestamp());
@@ -556,15 +564,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
+        FolderObject createdFolder = insertFolder(client, api, folder);
+        assertNotNull(createdFolder);
+        remember(createdFolder);
+        assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
+        return createdFolder;
+    }
+
+    protected static FolderObject insertFolder(AJAXClient client, EnumAPI api, FolderObject folder) throws Exception {
         InsertRequest insertRequest = new InsertRequest(api, folder, client.getValues().getTimeZone());
         insertRequest.setNotifyPermissionEntities(Transport.MAIL);
         InsertResponse insertResponse = client.execute(insertRequest);
         insertResponse.fillObject(folder);
-        remember(folder);
-        FolderObject createdFolder = getFolder(api, folder.getObjectID());
-        assertNotNull(createdFolder);
-        assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
-        return createdFolder;
+        return getFolder(api, folder.getObjectID(), client);
     }
 
     /**
@@ -800,14 +812,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return null;
     }
 
+    protected static Date futureTimestamp() {
+        return new Date(System.currentTimeMillis() + 1000000);
+    }
+
     protected static void deleteFoldersSilently(AJAXClient client, Map<Integer, FolderObject> foldersToDelete) throws Exception {
         deleteFoldersSilently(client, foldersToDelete.keySet());
     }
 
     protected static void deleteFoldersSilently(AJAXClient client, Collection<Integer> foldersIDs) throws Exception {
         if (null != client && null != foldersIDs && 0 < foldersIDs.size()) {
-            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
-            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp);
+            DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, Autoboxing.I2i(foldersIDs), futureTimestamp());
             deleteRequest.setHardDelete(Boolean.TRUE);
             client.execute(deleteRequest);
         }
@@ -815,14 +830,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
 
     protected static void deleteFilesSilently(AJAXClient client, Collection<File> files) throws Exception {
         if (null != client && null != files && 0 < files.size()) {
-            Date futureTimestamp = new Date(System.currentTimeMillis() + 1000000);
             List<String> folderIDs = new ArrayList<String>();
             List<String> fileIDs = new ArrayList<String>();
             for (File file : files) {
                 folderIDs.add(file.getFolderId());
                 fileIDs.add(file.getId());
             }
-            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp);
+            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileIDs, folderIDs, futureTimestamp());
             deleteInfostoreRequest.setHardDelete(Boolean.TRUE);
             client.execute(deleteInfostoreRequest);
         }
@@ -1064,11 +1078,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
-    protected static FileStorageGuestObjectPermission asObjectPermission(OCLGuestPermission guestPermission) {
+    protected static FileStorageGuestObjectPermission asObjectPermission(OCLPermission guestPermission) {
         DefaultFileStorageGuestObjectPermission objectPermission = new DefaultFileStorageGuestObjectPermission();
         objectPermission.setEntity(guestPermission.getEntity());
         objectPermission.setGroup(guestPermission.isGroupPermission());
-        objectPermission.setRecipient(guestPermission.getRecipient());
+        if (guestPermission instanceof OCLGuestPermission) {
+            objectPermission.setRecipient(((OCLGuestPermission)guestPermission).getRecipient());
+        }
         if (guestPermission.canWriteAllObjects()) {
             objectPermission.setPermissions(FileStorageObjectPermission.WRITE);
         } else if (guestPermission.canReadAllObjects()) {
@@ -1145,7 +1161,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return <code>true</code> if the module may be used for "read-only" sharing to guest users only, <code>false</code>, otherwise
      */
     protected static boolean isReadOnlySharing(int module) {
-        return FolderObject.CALENDAR == module || FolderObject.TASK == module;
+        return FolderObject.CALENDAR == module || FolderObject.TASK == module || FolderObject.CONTACT == module;
     }
 
     /**

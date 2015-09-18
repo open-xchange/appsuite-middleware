@@ -55,8 +55,12 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccounts;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FolderID;
 
 /**
  * Renders a FileStorageAccount in its JSON representation also using the dynamic form description of the parent file storage service.
@@ -77,15 +81,20 @@ public class FileStorageAccountWriter {
      * Writes given account into its JSON representation.
      *
      * @param account The account
+     * @param rootFolder The accounts root folder
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
+     * @throws OXException
      */
-    public JSONObject write(FileStorageAccount account) throws JSONException {
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder) throws JSONException, OXException {
         JSONObject accountJSON = new JSONObject(6);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
-        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         final FileStorageService fsService = account.getFileStorageService();
+        accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
+        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
+        accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
+        accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
         final DynamicFormDescription formDescription = fsService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
             final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
@@ -102,18 +111,18 @@ public class FileStorageAccountWriter {
      * @throws JSONException If writing JSON fails
      */
     public JSONObject write(FileStorageService service) throws JSONException {
-        JSONObject accountJSON = new JSONObject(6);
-        accountJSON.put(FileStorageAccountConstants.ID, service.getId());
-        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, service.getDisplayName());
+        JSONObject serviceJSON = new JSONObject(6);
+        serviceJSON.put(FileStorageAccountConstants.ID, service.getId());
+        serviceJSON.put(FileStorageAccountConstants.DISPLAY_NAME, service.getDisplayName());
 
         DynamicFormDescription formDescription = service.getFormDescription();
         if (null != formDescription) {
             JSONArray jFormDescription = new FormDescriptionWriter().write(formDescription);
             if (jFormDescription.length() > 0) {
-                accountJSON.put(FileStorageAccountConstants.CONFIGURATION, jFormDescription);
+                serviceJSON.put(FileStorageAccountConstants.CONFIGURATION, jFormDescription);
             }
         }
-        return accountJSON;
+        return serviceJSON;
     }
 
 }

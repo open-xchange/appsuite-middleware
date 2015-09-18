@@ -49,14 +49,16 @@
 
 package com.openexchange.share.impl;
 
+import static org.slf4j.LoggerFactory.getLogger;
+import java.util.Date;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
@@ -83,6 +85,7 @@ public class DefaultGuestInfo implements GuestInfo {
      * @param contextID The identifier of the context this guest user belongs to
      * @param linkTarget The link target if this guest is anonymous; otherwise <code>null</code>
      * @param guestUser The guest user
+     * @throws OXException If the guest users token is invalid
      */
     public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget linkTarget) throws OXException {
         this(services, guestUser, new ShareToken(contextID, guestUser), linkTarget);
@@ -143,12 +146,26 @@ public class DefaultGuestInfo implements GuestInfo {
             String cryptedPassword = guestUser.getUserPassword();
             if (false == Strings.isEmpty(cryptedPassword)) {
                 try {
-                    return services.getService(ShareCryptoService.class).decrypt(cryptedPassword);
+                    return services.getService(PasswordMechFactory.class).get(guestUser.getPasswordMech()).decode(cryptedPassword);
                 } catch (OXException e) {
-                    org.slf4j.LoggerFactory.getLogger(DefaultGuestInfo.class).error(
-                        "Error decrypting password '{}' for guest user {} in context {}",
+                    getLogger(DefaultGuestInfo.class).error("Error decrypting password '{}' for guest user {} in context {}",
                         cryptedPassword, Integer.valueOf(getGuestID()), Integer.valueOf(contextID), e);
                     return cryptedPassword;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        if (RecipientType.ANONYMOUS.equals(getRecipientType())) {
+            String expiryDateValue = ShareTool.getUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE);
+            if (Strings.isNotEmpty(expiryDateValue)) {
+                try {
+                    return new Date(Long.parseLong(expiryDateValue));
+                } catch (NumberFormatException e) {
+                    getLogger(DefaultGuestInfo.class).warn("Invalid value for {}: {}", ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, e);
                 }
             }
         }

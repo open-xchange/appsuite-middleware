@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -112,12 +113,22 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession sessions) throws OXException {
         throw virtualFolder();
     }
 
     @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
@@ -323,6 +334,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     @Override
     public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
         return false;
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return Results.emptyTimedResult();
     }
 
 }

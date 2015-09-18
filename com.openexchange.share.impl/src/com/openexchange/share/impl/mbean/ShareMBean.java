@@ -72,18 +72,18 @@ public interface ShareMBean {
     String listShares(int contextId) throws OXException;
 
     /**
-     * Lists all shares in supplied context created by supplied user.
+     * Lists all shares in supplied context for the supplied guest user id.
      *
      * @param contextId The contextId
-     * @param userId The userId
+     * @param guestId The guest user id
      * @return The shares
      * @throws OXException On error
      */
-    String listShares(int contextId, int userId) throws OXException;
+    String listShares(int contextId, int guestId) throws OXException;
 
     /**
      * List share identified by supplied token
-     * 
+     *
      * @param token The token
      * @return The share
      * @throws OXException On error
@@ -116,12 +116,12 @@ public interface ShareMBean {
     int removeShares(int contextId) throws OXException;
 
     /**
-     * Removes all shares in supplied context created by supplied user.
+     * Removes all shares in supplied context for the supplied guest user.
      *
      * @param contextId The contextId
-     * @param userId The userId
+     * @param guestId The guest user id
      * @throws OXException On error
      */
-    int removeShares(int contextId, int userId) throws OXException;
+    int removeShares(int contextId, int guestId) throws OXException;
 
 }

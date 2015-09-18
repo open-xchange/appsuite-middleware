@@ -67,6 +67,8 @@ public class SearchConfiguration implements Serializable {
 
     private boolean requiresFolder = false;
 
+    private boolean requiresAccount = false;
+
     public SearchConfiguration() {
         super();
     }
@@ -88,6 +90,15 @@ public class SearchConfiguration implements Serializable {
      */
     public boolean requiresFolder() {
         return requiresFolder;
+    }
+
+    public SearchConfiguration setRequiresAccount() {
+        requiresAccount  = true;
+        return this;
+    }
+
+    public boolean requiresAccount() {
+        return requiresAccount;
     }
 
 }

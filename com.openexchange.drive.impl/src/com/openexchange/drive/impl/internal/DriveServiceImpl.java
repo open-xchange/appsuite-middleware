@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
@@ -70,8 +69,6 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
@@ -109,7 +106,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link DriveServiceImpl}
@@ -519,16 +515,6 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return DriveUtilityImpl.getInstance();
-    }
-
-    @Override
-    public List<DriveShareInfo> getShares(DriveSession session, DriveShareTarget target) throws OXException {
-        return new ShareHelper(new SyncSession(session)).getShares(target);
-    }
-
-    @Override
-    public DriveShareInfo addShare(DriveSession session, DriveShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
-        return new ShareHelper(new SyncSession(session)).addShare(target, recipient, meta);
     }
 
 }

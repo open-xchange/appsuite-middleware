@@ -131,7 +131,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes(ServerSession session) {
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
         UserPermissionBits userPermissionBits = session.getUserPermissionBits();
         if (userPermissionBits.hasFullSharedFolderAccess()) {
             return ALL_FOLDER_TYPES;

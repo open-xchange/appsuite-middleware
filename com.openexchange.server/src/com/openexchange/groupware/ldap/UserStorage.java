@@ -49,18 +49,13 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -185,6 +180,17 @@ public abstract class UserStorage {
     public abstract User[] getUser(Context ctx, int[] userIds) throws OXException;
 
     /**
+     * Reads out the data from multiple users from the underlying persistent data storage.
+     *
+     * @param ctx The context
+     * @param userIds The identifiers of the users to get
+     * @param con a readable database connection.
+     * @return The users
+     * @throws OXException if an error occurs while reading from the persistent storage or one of the users doesn't exist
+     */
+    public abstract User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException;
+
+    /**
      * Reads the data of all user from the persistent data storage. This method is faster than getting each user information with the
      * {@link #getUser(int, Context)} method if nearly all users are needed from a context.
      *
@@ -222,6 +228,17 @@ public abstract class UserStorage {
      * @throws OXException if all user objects can not be loaded from the persistent storage.
      */
     public abstract User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Gets all guest users that were created by a specific user.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to load the created guests for
+     * @return The created guest users, or an empty array if there are none
+     * @throws OXException
+     */
+    public abstract User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException;
 
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
@@ -266,11 +283,11 @@ public abstract class UserStorage {
      * @param password The (encoded) password to set
      * @throws OXException if an error occurs.
      */
-    public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+    public void updatePassword(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
         updatePasswordInternal(connection, context, userId, mech, password);
     }
 
-    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException;
+    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException;
 
     /**
      * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
@@ -359,6 +376,22 @@ public abstract class UserStorage {
      * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
      */
     public abstract void setAttribute(String name, String value, int userId, Context context) throws OXException;
+
+    /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param con a writable database connection
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
+     */
+    public abstract void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to
@@ -569,62 +602,6 @@ public abstract class UserStorage {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
         }
-    }
-
-    private static interface PasswordCheck {
-
-        boolean checkPassword(String candidate, String userHash) throws OXException;
-    }
-
-    private static final Map<String, PasswordCheck> CHECKERS;
-
-    static {
-        final Map<String, PasswordCheck> m = new HashMap<String, UserStorage.PasswordCheck>(3);
-        m.put(PasswordMech.CRYPT.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.CRYPT.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        m.put(PasswordMech.SHA.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.SHA.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        m.put(PasswordMech.BCRYPT.getIdentifier(), new PasswordCheck() {
-
-            @Override
-            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
-                try {
-                    return PasswordMech.BCRYPT.check(candidate, userHash);
-                } catch (UnsupportedEncodingException e) {
-                    throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, "UTF-8");
-                } catch (NoSuchAlgorithmException e) {
-                    throw UserExceptionCode.HASHING.create(e, "SHA-1");
-                }
-            }
-        });
-        CHECKERS = Collections.unmodifiableMap(m);
-    }
-
-    public static final boolean authenticate(final User user, final String password) throws OXException {
-        final PasswordCheck check = CHECKERS.get(user.getPasswordMech());
-        return null == check ? false : check.checkPassword(password, user.getUserPassword());
     }
 
     /**

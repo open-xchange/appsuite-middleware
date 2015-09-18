@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -45,6 +45,11 @@ Requires:      mysql-client >= 5.0.0
 Requires:      mysql >= 5.0.0
 %endif
 Requires:      bzip2
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+Requires:      util-linux-ng
+%else
+Requires:      util-linux
+%endif
 
 %description
 This package installs the OSGi bundles to the backend that provide the RMI interface to administer the installation. This package contains
@@ -217,7 +222,7 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2535
     ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    
+
     # SoftwareChange_Request-2699
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
 fi
@@ -244,6 +249,8 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
 * Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>

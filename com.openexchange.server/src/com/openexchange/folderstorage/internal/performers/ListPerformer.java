@@ -284,7 +284,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             l = new ArrayList<SortableId>(Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters)));
             final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
             if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
-                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                final Set<String> pop3StorageFolders;
+                if (session == null) {
+                    pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(user, context);
+                } else {
+                    pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                }
                 for (final Iterator<SortableId> it = l.iterator(); it.hasNext();) {
                     if (pop3StorageFolders.contains(it.next().getId())) {
                         it.remove();
@@ -305,7 +310,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
             if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
                 final List<String> l = new ArrayList<String>(Arrays.asList(subfolderIds));
-                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                final Set<String> pop3StorageFolders;
+                if (session == null) {
+                    pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(user, context);
+                } else {
+                    pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                }
                 for (final Iterator<String> it = l.iterator(); it.hasNext();) {
                     if (pop3StorageFolders.contains(it.next())) {
                         it.remove();

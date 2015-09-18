@@ -53,11 +53,9 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.share.ShareTargetPath;
 
 /**
  * A service to notify arbitrary recipients about available shares.
@@ -108,25 +106,14 @@ public interface ShareNotificationService {
      * Sends notifications about one or more created shares to multiple recipients.
      *
      * @param transport The type of {@link Transport} to use when sending notifications
-     * @param shares A map from {@link ShareRecipient} to a list of {@link ShareInfos} iow. the recipients of the notifications and what they should be notified about
-     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
-     * @param session The session of the notifying user
-     * @param hostData The host data to generate share links
-     * @return Any exceptions occurred during notification, or an empty list if all was fine
-     */
-    List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, HostData hostData);
-
-    /**
-     * Sends notifications about one or more created shares to multiple recipients.
-     *
-     * @param transport The type of {@link Transport} to use when sending notifications
      * @param entities The entities to notify
      * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param targetPath The path to the share target
      * @param session The session of the notifying user
      * @param hostData The host data to generate share links
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData);
+    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData);
 
     /**
      * (Re-)Sends notifications about one or more shares to multiple recipients.
@@ -134,23 +121,35 @@ public interface ShareNotificationService {
      * @param transport The type of {@link Transport} to use when sending notifications
      * @param entities The entities to notify
      * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param targetPath The path to the share target
      * @param session The session of the notifying user
      * @param hostData The host data to generate share links
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData);
+    List<OXException> sendShareNotifications(Transport transport, Entities entities, String message, ShareTargetPath targetPath, Session session, HostData hostData);
 
+    /**
+     * Sends out notifications about a link to multiple recipients,
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param transportInfos The transport information for each recipient. The type must be chosen in accordance to the transport.
+     * @param The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param link Share info of to the link to notify about
+     * @param session The session of the notifying user
+     * @param hostData The host data to generate share links
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
     List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, HostData hostData);
 
     /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.
      *
      * @param transport The type of {@link Transport} to use when sending notifications
-     * @param guestShare The guest share
+     * @param guestInfo The guest info
      * @param confirmToken The confirm token to be part of the resulting link
      * @param hostData The host data to generate share links
      * @throws OXException
      */
-    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, HostData hostData) throws OXException;
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestInfo guestInfo, String confirmToken, HostData hostData) throws OXException;
 
 }

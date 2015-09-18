@@ -161,8 +161,38 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      *
      * @param fsFolder The underlying file storage folder
      * @param accountId The full-qualified file storage account ID
+     * @param session The requesting users session
+     * @param altNames If the client requested alternative names
      */
     public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final Session session, final boolean altNames) {
+        this(fsFolder, accountId, showPersonalBelowInfoStore(session, altNames));
+    }
+
+    /**
+     * Initializes a new {@link FileStorageFolderImpl} from given messaging folder.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor.
+     *
+     * @param fsFolder The underlying file storage folder
+     * @param accountId The full-qualified file storage account ID
+     * @param userId ID of the user requesting the folder
+     * @param contextId The context ID
+     * @param altNames If the client requested alternative names
+     */
+    public FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, int userId, int contextId, boolean altNames) {
+        this(fsFolder, accountId, showPersonalBelowInfoStore(userId, contextId, altNames));
+    }
+
+    /**
+     * Initializes a new {@link FileStorageFolderImpl} from given messaging folder.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor.
+     *
+     * @param fsFolder The underlying file storage folder
+     * @param accountId The full-qualified file storage account ID
+     * @param showPersonalBelowInfoStore If the users personal FS folder shall be shown below folder 9 instead below folder 10
+     */
+    private FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, boolean showPersonalBelowInfoStore) {
         super();
         id = fsFolder.getId();
         name = fsFolder.getName();
@@ -176,7 +206,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                 final FileStorageFolderType folderType = ((TypeAware) fsFolder).getType();
                 if (FileStorageFolderType.HOME_DIRECTORY.equals(folderType)) {
                     defaultFolderType = FileStorageDefaultFolderType.HOME_DIRECTORY;
-                    if (showPersonalBelowInfoStore(session, altNames)) {
+                    if (showPersonalBelowInfoStore) {
                         parentId = INFOSTORE;
                     } else {
                         parentId = INFOSTORE_USER;
@@ -246,18 +276,28 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         if (null != tmp) {
             return tmp.booleanValue();
         }
+
+        final boolean b = showPersonalBelowInfoStore(session.getUserId(), session.getContextId(), altNames);
+        if (session instanceof PutIfAbsent) {
+            ((PutIfAbsent) session).setParameterIfAbsent(paramName, b);
+        } else {
+            session.setParameter(paramName, b);
+        }
+        return b;
+    }
+
+    private static boolean showPersonalBelowInfoStore(int userId, int contextId, boolean altNames) {
+        if (!altNames) {
+            return false;
+        }
+        final String paramName = "com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore";
         final ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
         if (null == configViewFactory) {
             return false;
         }
         try {
-            final ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            final ConfigView view = configViewFactory.getView(userId, contextId);
             final Boolean b = view.opt(paramName, boolean.class, Boolean.FALSE);
-            if (session instanceof PutIfAbsent) {
-                ((PutIfAbsent) session).setParameterIfAbsent(paramName, b);
-            } else {
-                session.setParameter(paramName, b);
-            }
             return b.booleanValue();
         } catch (final OXException e) {
             org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);

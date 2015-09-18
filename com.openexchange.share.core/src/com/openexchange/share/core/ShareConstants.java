@@ -58,6 +58,14 @@ package com.openexchange.share.core;
  */
 public class ShareConstants {
 
+    /**
+     * Path of the share servlet, relative to the servlet prefix. Without
+     * leading or trailing slashes.
+     */
     public static final String SHARE_SERVLET = "share";
 
+    /**
+     * The password mechanism identifier used for the share crypto service.
+     */
+    public static final String PASSWORD_MECH_ID = "{CRYPTO_SERVICE}";
 }

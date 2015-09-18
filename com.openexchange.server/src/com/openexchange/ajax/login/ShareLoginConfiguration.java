@@ -57,7 +57,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.InitProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 
 /**
  * {@link ShareLoginConfiguration}
@@ -154,12 +154,12 @@ public class ShareLoginConfiguration {
     /**
      * Gets a custom login configuration suitable for the share, where cookie TTLs are adjusted as needed.
      *
-     * @param share The share to get the login configuration for
+     * @param guest The guest info to determine the session cookies expiry
      * @return The login configuration
      * @throws OXException
      */
-    public LoginConfiguration getLoginConfig(GuestShare share) throws OXException {
-        return adjustCookieTTL(getLoginConfig(), share);
+    public LoginConfiguration getLoginConfig(GuestInfo guest) throws OXException {
+        return adjustCookieTTL(getLoginConfig(), guest);
     }
 
     /**
@@ -268,11 +268,11 @@ public class ShareLoginConfiguration {
      * @return The possibly adjusted login configuration
      * @throws OXException
      */
-    private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, GuestShare share) {
+    private static LoginConfiguration adjustCookieTTL(LoginConfiguration loginConfig, GuestInfo guest) {
         /*
          * determine maximum expiry of all contained share targets (if all targets are decorated with an expiry date)
          */
-        Date effectiveExpiry = share.getExpiryDate();
+        Date effectiveExpiry = guest.getExpiryDate();
         if (null != effectiveExpiry) {
             int shareExpiry = (int) ((effectiveExpiry.getTime() - System.currentTimeMillis()) / 1000);
             if (0 <= shareExpiry && loginConfig.getCookieExpiry() > shareExpiry) {

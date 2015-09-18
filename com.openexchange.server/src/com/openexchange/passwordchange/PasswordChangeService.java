@@ -49,8 +49,6 @@
 
 package com.openexchange.passwordchange;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -323,30 +321,6 @@ public abstract class PasswordChangeService {
             } catch (final OXException e) {
                 // Ignore
             }
-        }
-    }
-
-    /**
-     * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     *
-     * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
-     * @param newPassword The new password to encode
-     * @return The encoded password
-     * @throws OXException If encoding the new password fails
-     */
-    protected static final String getEncodedPassword(final String mech, final String newPassword) throws OXException {
-        try {
-            final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
-            if (null == cryptedPassword) {
-                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
-            }
-            return cryptedPassword;
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Error encrypting password according to CRYPT mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        } catch (final NoSuchAlgorithmException e) {
-            LOG.error("Error encrypting password according to SHA mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
 

@@ -120,15 +120,6 @@ public class FindRequest {
     }
 
     /**
-     * Gets the associated request data
-     *
-     * @return The request data
-     */
-    public AJAXRequestData getRequest() {
-        return request;
-    }
-
-    /**
      * Gets the module associated with this request.
      *
      * @return The module

@@ -232,6 +232,11 @@ public class SimUserService implements UserService {
 
     }
 
+    @Override
+    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
+        // Nothing to do
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#searchUserByName(java.lang.String, com.openexchange.groupware.contexts.Context, int)
      */
@@ -311,6 +316,11 @@ public class SimUserService implements UserService {
     public void updateUser(Connection con, User user, Context context) throws OXException {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException {
+        return new User[0];
     }
 
     @Override

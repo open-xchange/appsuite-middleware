@@ -61,9 +61,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -128,17 +126,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      */
     public CreatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
-    }
-
-    /**
-     * Initializes a new {@link CreatePerformer}.
-     * @param storageParameters
-     * @param decorator
-     * @param registry
-     * @throws OXException
-     */
-    public CreatePerformer(StorageParameters storageParameters, CacheFolderStorageRegistry registry) throws OXException {
-        super(storageParameters, registry);
     }
 
     /**
@@ -322,7 +309,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users, enrich previously skipped guest permissions with real entities
              */
-            processAddedGuestPermissions(session.getUserId(), folderID, plainFolder.getContentType(), comparedPermissions, transactionManager.getConnection());
+            processAddedGuestPermissions(folderID, plainFolder.getContentType(), comparedPermissions, transactionManager.getConnection());
             /*
              * update with re-added guest permissions
              */

@@ -64,7 +64,8 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.share.ShareCryptoService;
+import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -220,14 +221,14 @@ public class ShareLoginMethod implements LoginMethodClosure {
     }
 
     /**
-     * Decrypts specified string value using {@link ShareCryptoService}.
+     * Decrypts specified string value using {@link ShareConstants.PASSWORD_MECH_ID} via PasswordMechFactory.
      *
      * @param value The value to decrypt
      * @return The decrypted value
      * @throws OXException If decryption fails
      */
     public static String decrypt(String value) throws OXException {
-        return ShareServiceLookup.getService(ShareCryptoService.class, true).decrypt(value);
+        return ShareServiceLookup.getService(PasswordMechFactory.class, true).get(ShareConstants.PASSWORD_MECH_ID).decode(value);
     }
 
     /**

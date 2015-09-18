@@ -131,6 +131,8 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      */
     MODULE_DISABLED("Searching in module \"%1$s\" is disabled for user %2$d in context %3$d.", Category.CATEGORY_PERMISSION_DENIED, 17, FindExceptionMessages.MODULE_DISABLED),
 
+    INVALID_ACCOUNT_ID("The account id \"%1$s\" is invalid for module \"%2$s\".", Category.CATEGORY_USER_INPUT, 18)
+
     ;
 
     public static final String PREFIX = "FIND";

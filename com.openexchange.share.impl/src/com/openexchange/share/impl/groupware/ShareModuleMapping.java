@@ -49,36 +49,42 @@
 
 package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.modules.Module;
-
 
 /**
  * {@link ShareModuleMapping}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public class ShareModuleMapping {
 
-    private static final ShareModuleMapping INSTANCE = new ShareModuleMapping();
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareModuleMapping.class);
-
     private static final Map<Integer, String> moduleMapping2String = new HashMap<Integer, String>();
     private static final Map<String, Integer> moduleMapping2Int = new HashMap<String, Integer>();
+    private static final Module[] GROUPWARE_MODULES = { Module.CALENDAR, Module.TASK, Module.CONTACTS, Module.INFOSTORE };
+
     private static boolean initizialed = false;
 
     /**
      * Initializes a new {@link ShareModuleMapping}.
      */
     private ShareModuleMapping() {
+        super();
     }
 
     public static void init(ConfigurationService configService) {
         if (!initizialed) {
+            /*
+             * map custom modules
+             */
             String mapping = configService.getProperty("com.openexchange.share.modulemapping");
             try {
                 if (null != mapping && !"".equals(mapping) && !mapping.isEmpty()) {
@@ -92,24 +98,32 @@ public class ShareModuleMapping {
             } catch (RuntimeException e) {
                 LOG.error("Invalid value for property \"com.openexchange.share.modulemapping\": {}", e);
             }
+            /*
+             * map available groupware modules
+             */
+            for (Module module : GROUPWARE_MODULES) {
+                moduleMapping2Int.put(module.getName(), I(module.getFolderConstant()));
+                moduleMapping2String.put(I(module.getFolderConstant()), module.getName());
+            }
             initizialed = true;
         }
     }
 
-    public static ShareModuleMapping getShareModuleMapping() {
-        return INSTANCE;
+    /**
+     * Gets a collection of the available share module identifiers.
+     *
+     * @return The module identifiers
+     */
+    public static Set<Integer> getModuleIDs() {
+        return Collections.unmodifiableSet(moduleMapping2String.keySet());
     }
 
     public static int moduleMapping2int(String moduleName) {
         if (!initizialed) {
             LOG.warn("share module mapping has not been initialized!");
         }
-        int mod = Module.getModuleInteger(moduleName);
-        if (-1 != mod) {
-            return mod;
-        }
         if (moduleMapping2Int.containsKey(moduleName)) {
-            return moduleMapping2Int.get(moduleName);
+            return i(moduleMapping2Int.get(moduleName));
         }
         return -1;
     }
@@ -118,12 +132,8 @@ public class ShareModuleMapping {
         if (!initizialed) {
             LOG.warn("share module mapping has not been initialized!");
         }
-        Module mod = Module.getForFolderConstant(module);
-        if (null != mod) {
-            return mod.getName();
-        }
-        if (moduleMapping2String.containsKey(module)) {
-            return moduleMapping2String.get(module);
+        if (moduleMapping2String.containsKey(I(module))) {
+            return moduleMapping2String.get(I(module));
         }
         return Module.UNBOUND.name();
     }

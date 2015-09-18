@@ -60,8 +60,6 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -79,7 +77,6 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -209,6 +206,7 @@ import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -219,7 +217,6 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
-import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -244,6 +241,8 @@ import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
@@ -295,7 +294,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class };
+        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class, PasswordMechFactory.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -492,30 +491,6 @@ public final class ServerActivator extends HousekeepingActivator {
             registerService(Remote.class, new RemoteAuthenticatorImpl(), props);
         }
 
-        // MetaContributors
-        {
-            class MetaContributorRegistryCustomizer extends RegistryCustomizer<MetaContributorRegistry> {
-
-                public MetaContributorRegistryCustomizer(final BundleContext context) {
-                    super(context, MetaContributorRegistry.class);
-                }
-
-                @Override
-                public MetaContributorRegistry addingService(final ServiceReference<MetaContributorRegistry> serviceReference) {
-                    final MetaContributorRegistry registry = super.addingService(serviceReference);
-                    MetaContributors.setRegistry(registry);
-                    return registry;
-                }
-
-                @Override
-                public void removedService(final ServiceReference<MetaContributorRegistry> serviceReference, final MetaContributorRegistry o) {
-                    MetaContributors.setRegistry(null);
-                    super.removedService(serviceReference, o);
-                }
-            }
-            track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
-        }
-
         /*
          * Register EventHandler
          */
@@ -599,7 +574,8 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
-        UserService userService = new UserServiceImpl(interceptorRegistry);
+
+        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         // Start up server the usual way

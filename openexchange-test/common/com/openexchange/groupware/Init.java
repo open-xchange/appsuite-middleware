@@ -165,6 +165,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -180,8 +181,6 @@ import com.openexchange.sessionstorage.TestSessionStorageService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.internal.RdbShareStorage;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -580,7 +579,7 @@ public final class Init {
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
                 }
-            });
+            }, new PasswordMechFactoryImpl());
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
@@ -1055,10 +1054,6 @@ public final class Init {
 
     public static void startAndInjectDefaultShareService() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(ShareService.class)) {
-            DatabaseService dbService = TestServiceRegistry.getInstance().getService(DatabaseService.class);
-            ShareStorage storage = new RdbShareStorage(dbService);
-            services.put(ShareStorage.class, storage);
-            TestServiceRegistry.getInstance().addService(ShareStorage.class, storage);
             DefaultShareService service = new DefaultShareService(LOOKUP, new GuestCleaner(LOOKUP));
             services.put(ShareService.class, service);
             TestServiceRegistry.getInstance().addService(ShareService.class, service);

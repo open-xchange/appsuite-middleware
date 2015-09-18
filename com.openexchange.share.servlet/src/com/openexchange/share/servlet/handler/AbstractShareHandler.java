@@ -53,7 +53,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -73,11 +73,11 @@ public abstract class AbstractShareHandler implements ShareHandler {
         super();
     }
 
-    protected ShareLoginMethod getShareLoginMethod(GuestShare share) throws OXException {
+    protected ShareLoginMethod getShareLoginMethod(GuestInfo guestInfo) throws OXException {
         ContextService contextService = ShareServiceLookup.getService(ContextService.class, true);
         UserService userService = ShareServiceLookup.getService(UserService.class, true);
-        Context context = contextService.getContext(share.getGuest().getContextID());
-        User guest = userService.getUser(share.getGuest().getGuestID(), context);
+        Context context = contextService.getContext(guestInfo.getContextID());
+        User guest = userService.getUser(guestInfo.getGuestID(), context);
         ShareLoginMethod shareLoginMethod = new ShareLoginMethod(context, guest);
         return shareLoginMethod;
     }

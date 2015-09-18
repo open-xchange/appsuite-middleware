@@ -482,6 +482,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 if (null != cacheService) {
                     try {
+                        final Cache jcs = cacheService.getCache("UserConfiguration");
+                        jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                    } catch (final OXException e) {
+                        log.error("", e);
+                    }
+                    try {
                         final Cache jcs = cacheService.getCache("CapabilitiesUser");
                         jcs.removeFromGroup(user.getId(), ctx.getId().toString());
                     } catch (final OXException e) {

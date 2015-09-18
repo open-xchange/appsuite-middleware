@@ -123,6 +123,56 @@ public class TextSnippets {
     }
 
     /**
+     * A short statement telling that somebody shared one or more folder(s)/image(s)/item(s) with a group. E.g.:
+     * <ul>
+     *  <li>John Doe has shared 3 items with the group "Sales Dept.".</li>
+     *  <li>Jane Doe has shared image "duckface.jpg" with the group "Sales Dept.".</li>
+     * </ul>
+     *
+     * @param somebody The replacement for the sharing person
+     * @param group The groups name
+     * @param targetProxies The collection of shared targets as {@link TargetProxy}s
+     * @return The translated and formatted string
+     */
+    public String shareStatementGroupShort(String somebody, String group, Collection<TargetProxy> targetProxies) {
+        int count = targetProxies.size();
+        Set<TargetProxyType> targetProxyTypes = determineTypes(targetProxies);
+        if (count > 1 && targetProxyTypes.size() > 1) {
+            return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS_GROUP), somebody, count, group);
+        } else {
+            TargetProxy targetProxy = targetProxies.iterator().next();
+            TargetProxyType targetProxyType = targetProxy.getProxyType();
+            String itemName = targetProxy.getTitle();
+            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE_GROUP), somebody, itemName, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES_GROUP), somebody, count, group);
+                }
+            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILE_GROUP), somebody, itemName, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES_GROUP), somebody, count, group);
+                }
+            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER_GROUP), somebody, itemName, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS_GROUP), somebody, count, group);
+                }
+            } else {
+                //fall back to item for other types
+                if (count == 1) {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEM_GROUP), somebody, itemName, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS_GROUP), somebody, group);
+                }
+            }
+        }
+    }
+
+    /**
      * A long statement telling that somebody shared one or more folder(s)/image(s)/item(s) with you. E.g.:
      * <ul>
      *  <li>John Doe (jd@example.com) has shared 3 items with you and left you a message:</li>
@@ -203,6 +253,93 @@ public class TextSnippets {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE), fullName, email, filename);
                 } else {
                     return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_NO_MESSAGE), fullName, email, filename);
+                }
+            }
+        }
+    }
+
+    /**
+     * A long statement telling that somebody shared one or more folder(s)/image(s)/item(s) with a group. E.g.:
+     * <ul>
+     *  <li>John Doe (jd@example.com) has shared 3 items with the group "Sales Dept." and left a message:</li>
+     *  <li>Jane Doe (jd@example.com) has shared the image "duckface.jpg" with the group "Sales Dept.".</li>
+     * </ul>
+     *
+     * @param fullName The replacement for the sharing person
+     * @param email The replacement for the sharing persons email address
+     * @param group The groups name
+     * @param targetProxies The collection of shared targets as {@link TargetProxy}s
+     * @param hasMessage Whether the sharing entity authored a personal message for the recipient
+     * @return The translated and formatted string
+     */
+    public String shareStatementGroupLong(String fullName, String email, String group, Collection<TargetProxy> targetProxies, boolean hasMessage) {
+        int count = targetProxies.size();
+        Set<TargetProxyType> targetProxyTypes = determineTypes(targetProxies);
+        if (count > 1) {
+            if (targetProxyTypes.size() > 1) {//multiple shares of different types
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                }
+            } else {//multiple shares of single type
+                TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
+                if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES_GROUP), fullName, email, count, group);
+                    }
+
+                } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE_GROUP), fullName, email, count, group);
+                    }
+                } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                    }
+                } else {
+                    //fall back to item for other types
+                    if (hasMessage) {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    } else {
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                    }
+                }
+            }
+        } else {
+            TargetProxy targetProxy = targetProxies.iterator().next();
+            TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
+            String filename = targetProxy.getTitle();
+            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE_GROUP), fullName, email, filename, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE_GROUP), fullName, email, filename, group);
+                }
+            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE_GROUP), fullName, email, filename, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE_GROUP), fullName, email, filename, group);
+                }
+            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE_GROUP), fullName, email, filename, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE_GROUP), fullName, email, filename, group);
+                }
+            } else {
+                //fall back to item for other types
+                if (hasMessage) {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE_GROUP), fullName, email, filename, group);
+                } else {
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_NO_MESSAGE_GROUP), fullName, email, filename, group);
                 }
             }
         }

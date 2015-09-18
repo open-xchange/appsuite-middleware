@@ -65,11 +65,9 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
-import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -123,16 +121,6 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
      */
     public DeletePerformer(final User user, final Context context, FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
-    }
-
-    /**
-     * Initializes a new {@link DeletePerformer}.
-     * @param storageParameters
-     * @param registry
-     * @throws OXException
-     */
-    public DeletePerformer(StorageParameters storageParameters, CacheFolderStorageRegistry registry) throws OXException {
-        super(storageParameters, registry);
     }
 
     /**
@@ -275,20 +263,9 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
 
     private void deleteRealFolder(Folder folder, FolderStorage storage, TransactionManager transactionManager) throws OXException {
         /*
-         * check for any present guest permissions
-         */
-        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, new Permission[0], folder.getPermissions(), shareService);
-        /*
          * delete folder
          */
         storage.deleteFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
-        /*
-         * process removed guest permissions
-         */
-        if (comparedPermissions.hasRemovedGuests()) {
-            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
-        }
     }
 
     private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws OXException {

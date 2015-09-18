@@ -62,6 +62,8 @@ import org.json.JSONObject;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveShareLink;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.UpdateParameters;
@@ -86,6 +88,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.session.Session;
+import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
 
@@ -379,6 +382,26 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
         jsonObject.put("checksum", serverVersion.getChecksum());
         return jsonObject;
+    }
+
+    @Override
+    public DriveShareLink getLink(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).getLink(target);
+    }
+
+    @Override
+    public DriveShareLink optLink(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).optLink(target);
+    }
+
+    @Override
+    public DriveShareLink updateLink(DriveSession session, DriveShareTarget target, LinkUpdate linkUpdate) throws OXException {
+        return new ShareHelper(new SyncSession(session)).updateLink(target, linkUpdate);
+    }
+
+    @Override
+    public void deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
+        new ShareHelper(new SyncSession(session)).deleteLink(target);
     }
 
 }

@@ -646,6 +646,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
 
+            if (null == dstFilestore) {
+                throw new InvalidDataException("Missing filestore parameter");
+            }
+
             if (!tool.existsStore(dstFilestore.getId().intValue())) {
                 throw new NoSuchFilestoreException();
             }
@@ -760,6 +764,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             if (null != storageUser.getFilestoreId() && storageUser.getFilestoreId().intValue() > 0) {
                 throw new StorageException("User " + storageUser.getId() + " already has a dedicate file storage set.");
+            }
+
+            if (null == dstFilestore) {
+                throw new InvalidDataException("Missing filestore parameter");
             }
 
             if (!tool.existsStore(dstFilestore.getId().intValue())) {

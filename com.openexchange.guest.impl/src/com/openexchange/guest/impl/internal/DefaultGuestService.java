@@ -64,13 +64,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.storage.GuestStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.user.UserService;
 
 /**
@@ -91,6 +92,8 @@ public class DefaultGuestService implements GuestService {
 
     private final ConfigViewFactory configViewFactory;
 
+    private final PasswordMechFactory passwordMechFactory;
+
     /**
      * Initializes a new {@link DefaultGuestService}.
      *
@@ -98,12 +101,14 @@ public class DefaultGuestService implements GuestService {
      * @param contextService
      * @param contactUserStorage
      * @param configViewFactory
+     * @param passwordMechFactory
      */
-    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory) {
+    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory, PasswordMechFactory passwordMechFactory) {
         this.userService = userService;
         this.contextService = contextService;
         this.contactUserStorage = contactUserStorage;
         this.configViewFactory = configViewFactory;
+        this.passwordMechFactory = passwordMechFactory;
     }
 
     /**
@@ -120,10 +125,10 @@ public class DefaultGuestService implements GuestService {
     @Override
     public boolean authenticate(final User user, int contextId, final String password) throws OXException {
         if (user.isGuest()) {
-
             User alignedUser = alignUserWithGuest(user, contextId);
 
-            return UserStorage.authenticate(alignedUser, password);
+            IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+            return iPasswordMech.check(password, alignedUser.getUserPassword());
         }
         return false;
     }

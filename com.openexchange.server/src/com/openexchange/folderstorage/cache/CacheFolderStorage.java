@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
@@ -100,7 +101,10 @@ import com.openexchange.folderstorage.internal.performers.StorageParametersProvi
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -116,6 +120,7 @@ import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.userconf.UserPermissionService;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectIntMap;
@@ -223,15 +228,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     }
 
     /**
-     * Clears this cache with respect to specified session.
-     *
-     * @param session The session
-     */
-    public void clear(Session session) {
-        clearCache(session.getUserId(), session.getContextId());
-    }
-
-    /**
      * Initializes this folder cache on available cache service.
      *
      * @throws OXException If initialization of this folder cache fails
@@ -311,7 +307,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         final String realTreeId = this.realTreeId;
         if (realTreeId.equals(treeId)) {
             try {
-                final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
+                final int contextId = storageParameters.getContextId();
+                final int userId = storageParameters.getUserId();
+                final UserPermissionBits userPermissionBits = FolderStorageServices.requireService(UserPermissionService.class).getUserPermissionBits(userId, contextId);
                 final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final RefusedExecutionBehavior<Object> behavior = AbortBehavior.getInstance();
@@ -325,13 +323,13 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                         try {
                             final StorageParameters params = newStorageParameters(storageParameters);
                             params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
-                            if (session.getUserPermissionBits().isMultipleMailAccounts()) {
+                            if (userPermissionBits.isMultipleMailAccounts()) {
                                 MailAccountStorageService storageService = serviceRegistry.getService(
                                     MailAccountStorageService.class,
                                     true);
                                 MailAccount[] accounts = storageService.getUserMailAccounts(
-                                    session.getUserId(),
-                                    session.getContextId());
+                                    userId,
+                                    contextId);
                                 /*
                                  * Gather tasks...
                                  */
@@ -432,7 +430,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (started) {
                 storage.rollback(storageParameters);
             }
-            clear(storageParameters.getSession());
+            clearCache(storageParameters.getUserId(), storageParameters.getContextId());
         }
     }
 
@@ -465,10 +463,54 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
 
     private PathPerformer newPathPerformer(StorageParameters storageParameters) throws OXException {
         Session session = storageParameters.getSession();
+        FolderServiceDecorator decorator = storageParameters.getDecorator();
+        PathPerformer performer;
         if (null == session) {
-            return new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), null, registry);
+            performer = new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), decorator, registry);
+        } else {
+            performer = new PathPerformer(ServerSessionAdapter.valueOf(session), decorator, registry);
         }
-        return new PathPerformer(storageParameters, registry);
+        performer.setStorageParameters(storageParameters);
+        return performer;
+    }
+
+    private CreatePerformer newCreatePerformer(StorageParameters storageParameters) throws OXException {
+        Session session = storageParameters.getSession();
+        FolderServiceDecorator decorator = storageParameters.getDecorator();
+        CreatePerformer performer;
+        if (null == session) {
+            performer = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), decorator, registry);
+        } else {
+            performer = new CreatePerformer(ServerSessionAdapter.valueOf(session), decorator, registry);
+        }
+        performer.setStorageParameters(storageParameters);
+        return performer;
+    }
+
+    private DeletePerformer newDeletePerformer(StorageParameters storageParameters) throws OXException {
+        Session session = storageParameters.getSession();
+        FolderServiceDecorator decorator = storageParameters.getDecorator();
+        DeletePerformer performer;
+        if (null == session) {
+            performer = new DeletePerformer(storageParameters.getUser(), storageParameters.getContext(), decorator, registry);
+        } else {
+            performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator, registry);
+        }
+        performer.setStorageParameters(storageParameters);
+        return performer;
+    }
+
+    private UpdatePerformer newUpdatePerformer(StorageParameters storageParameters) throws OXException {
+        Session session = storageParameters.getSession();
+        FolderServiceDecorator decorator = storageParameters.getDecorator();
+        UpdatePerformer performer;
+        if (null == session) {
+            performer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), decorator, registry);
+        } else {
+            performer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), decorator, registry);
+        }
+        performer.setStorageParameters(storageParameters);
+        return performer;
     }
 
     @Override
@@ -491,7 +533,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             /*
              * Perform create operation via non-cache storage
              */
-            CreatePerformer createPerformer = new CreatePerformer(storageParameters, registry);
+            CreatePerformer createPerformer = newCreatePerformer(storageParameters);
             createPerformer.setCheck4Duplicates(false);
             String folderId = createPerformer.doCreate(folder);
             created = true;
@@ -579,18 +621,18 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         if (folder.isGlobalID()) {
             globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder, invalidate);
         } else {
-            getFolderMapFor(storageParameters.getSession()).put(treeId, folder, storageParameters.getSession());
+            getFolderMapFor(storageParameters).put(treeId, folder, storageParameters.getSession());
         }
     }
 
     @Override
     public void invalidateSingle(String folderId, String treeId, Session session) throws OXException {
-        removeFromCache(folderId, treeId, true, session);
+        removeFromCache(folderId, treeId, true, null, null, session);
     }
 
     @Override
     public void invalidate(String folderId, String treeId, boolean includeParents, Session session) throws OXException {
-        removeFromCache(folderId, treeId, !includeParents, session);
+        removeFromCache(folderId, treeId, !includeParents, null, null, session);
     }
 
     /**
@@ -600,11 +642,11 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @param treeId The tree identifier
      * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
      *            path to root folder
-     * @param session The session providing user information
+     * @param session The session; never <code>null</code>
      * @throws OXException If removal fails
      */
     public void removeFromCache(String id, String treeId, boolean singleOnly, Session session) throws OXException {
-        removeFromCache(id, treeId, singleOnly, session, null);
+        removeFromCache(id, treeId, singleOnly, null, null, session, null);
     }
 
     /**
@@ -614,28 +656,61 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
      * @param treeId The tree identifier
      * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
      *            path to root folder
-     * @param session The session providing user information
+     * @param user The user or <code>null</code>, if a session is given
+     * @param context The context or <code>null</code>, if a session is given
+     * @param optSession The session or <code>null</code>, then user and context must be given
+     * @throws OXException If removal fails
+     */
+    public void removeFromCache(String id, String treeId, boolean singleOnly, User user, Context context, Session optSession) throws OXException {
+        removeFromCache(id, treeId, singleOnly, user, context, optSession, null);
+    }
+
+    /**
+     * Removes specified folder and all of its predecessor folders from cache.
+     *
+     * @param id The folder identifier
+     * @param treeId The tree identifier
+     * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
+     *            path to root folder
+     * @param user The user or <code>null</code>, if a session is given
+     * @param context The context or <code>null</code>, if a session is given
+     * @param optSession The session or <code>null</code>, then user and context must be given
      * @param folderPath The folderPath to <code>rootFolder</code>, if known
      * @throws OXException If removal fails
      */
-    public void removeFromCache(String id, String treeId, boolean singleOnly, Session session, List<String> folderPath) throws OXException {
+    public void removeFromCache(String id, String treeId, boolean singleOnly, User user, Context context, Session optSession, List<String> folderPath) throws OXException {
+        int userId;
+        int contextId;
+        if (optSession == null) {
+            userId = user.getId();
+            contextId = context.getContextId();
+        } else {
+            userId = optSession.getUserId();
+            contextId = optSession.getContextId();
+        }
         if (singleOnly) {
-            removeSingleFromCache(Collections.singletonList(id), treeId, session.getUserId(), session, true);
+            removeSingleFromCache(Collections.singletonList(id), treeId, userId, contextId, true, null);
         } else {
             if (null != folderPath) {
-                removeFromCache(id, treeId, session, null, folderPath);
+                removeFromCache(id, treeId, userId, contextId, null, folderPath);
             } else {
-                removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
+                PathPerformer pathPerformer;
+                if (optSession == null) {
+                    pathPerformer = new PathPerformer(ServerSessionAdapter.valueOf(optSession), null, registry);
+                } else {
+                    pathPerformer = new PathPerformer(user, context, null, registry);
+                }
+                removeFromCache(id, treeId, userId, contextId, pathPerformer);
             }
 
         }
     }
 
-    private void removeFromCache(String id, String treeId, Session session, PathPerformer pathPerformer) throws OXException {
-        removeFromCache(id, treeId, session, pathPerformer, null);
+    private void removeFromCache(String id, String treeId, int userId, int contextId, PathPerformer pathPerformer) throws OXException {
+        removeFromCache(id, treeId, userId, contextId, pathPerformer, null);
     }
 
-    private void removeFromCache(String id, String treeId, Session session, PathPerformer pathPerformer, List<String> folderPath) throws OXException {
+    private void removeFromCache(String id, String treeId, int userId, int contextId, PathPerformer pathPerformer, List<String> folderPath) throws OXException {
         if (null == id) {
             return;
         }
@@ -676,8 +751,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             } else {
                 ids = folderPath;
             }
-            int contextId = session.getContextId();
-            int userId = session.getUserId();
             Cache cache = globalCache;
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             if (realTreeId.equals(treeId)) {
@@ -950,7 +1023,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Perform delete
          */
-        new DeletePerformer(storageParameters, registry).doDelete(
+        newDeletePerformer(storageParameters).doDelete(
             treeId,
             folderId,
             storageParameters.getTimeStamp());
@@ -958,17 +1031,19 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
          * Refresh
          */
         if (null != realParentId && !ROOT_ID.equals(realParentId)) {
-            removeFromCache(realParentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
+            if (session == null) {
+                removeFromCache(realParentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            } else {
+                removeFromCache(realParentId, treeId, session.getUserId(), session.getContextId(), newPathPerformer(storageParameters));
+            }
         }
         if (!ROOT_ID.equals(parentId)) {
-            removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
+            if (session == null) {
+                removeFromCache(parentId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
+            } else {
+                removeFromCache(parentId, treeId, session.getUserId(), session.getContextId(), newPathPerformer(storageParameters));
+            }
         }
-    }
-
-    private void removeFromSubfolders(String treeId, String parentId, String contextId, Session session) throws OXException {
-        registry.clearCaches(session.getUserId(), session.getContextId());
-        globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
-        FolderMapManagement.getInstance().dropFor(parentId, treeId, session.getUserId(), session.getContextId(), session);
     }
 
     @Override
@@ -1094,7 +1169,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Invalidate cache entry
          */
-        removeFromCache(folderId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
+        removeFromCache(folderId, treeId, storageParameters.getUserId(), storageParameters.getContextId(), newPathPerformer(storageParameters));
     }
 
     @Override
@@ -1431,7 +1506,6 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     @Override
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         String treeId = folder.getTreeID();
-        Session session = storageParameters.getSession();
         /*
          * Perform update operation via non-cache storage
          */
@@ -1443,7 +1517,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         boolean isMove = null != folder.getParentID();
         String oldParentId = storageVersion.getParentID();
         {
-            UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
+            UpdatePerformer updatePerformer = newUpdatePerformer(storageParameters);
             updatePerformer.setCheck4Duplicates(false);
             updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
 
@@ -1869,8 +1943,8 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
     }
 
-    private static FolderMap getFolderMapFor(Session session) {
-        return FolderMapManagement.getInstance().getFor(session);
+    private static FolderMap getFolderMapFor(StorageParameters parameters) {
+        return FolderMapManagement.getInstance().getFor(parameters.getContextId(), parameters.getUserId());
     }
 
     private static FolderMap optFolderMapFor(StorageParameters parameters) {

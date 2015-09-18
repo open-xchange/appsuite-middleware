@@ -64,25 +64,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class FolderTools {
 
-    public static final class FolderHolder<T> {
-        private final T folder;
-        private final boolean isPublic;
-
-        public FolderHolder(T folder, boolean isPublic) {
-            super();
-            this.folder = folder;
-            this.isPublic = isPublic;
-        }
-
-        public T getFolder() {
-            return folder;
-        }
-
-        public boolean isPublic() {
-            return isPublic;
-        }
-    }
-
     /**
      * Determines if the given folder is public folder based on its id, type and parent hierarchy.
      * @param folder The folder

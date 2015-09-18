@@ -102,7 +102,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class,
     com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class,
     com.openexchange.mail.json.parser.MessageParserTest.class,
-    OAuthDispatcherServletTest.class
+    OAuthDispatcherServletTest.class,
+    com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class
 })
 public class UnitTests {
 

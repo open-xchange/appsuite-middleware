@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-09 15:41+0200\n"
+"PO-Revision-Date: 2015-09-17 16:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -4496,7 +4496,6 @@ msgstr ""
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Sinulla ei ole tarvittavia valtuuksia kansion \"%1$s\" katsomiseen."
 
@@ -8184,52 +8183,51 @@ msgstr "Annetulta resurssilta puuttuu pakollinen kenttä tai kenttiä."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Sinulla ei ole tarvittavia valtuuksia moduuliin \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Sinulla ei ole asianmukaisia lupia kansion katselemiseen."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Jaetut kansiot eivät ole käytössä tilillesi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia julkiseen kansioon \"%2$s\"."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Sinulla ei ole asianmukaisia lupia julkiseen kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Sinulla ei ole tarvittavia valtuuksia alikansioiden luomiseen kansiossa "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Sinulla ei ole asianmukaisia lupia alakansioiden luomiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Kansiota \"%1$s\" ei ole olemassa."
+msgid "Such a folder does not exist."
+msgstr "Tällaista kansiota ei ole olemassa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
-msgstr ""
-"Kansiota \"%1$s\" on sillä välin muutettu Päivitä näkymä ja yritä uudelleen."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
+msgstr "Kansiota on muutettu. Lataa näkymä uudelleen ja yritä uudelleen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Toiminto vaatii hallinnointioikeuksia kansioon \"%2$s\"."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Toiminto vaatii ylläpito-oikeuksia kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Kansio \"%1$s\" on oletuskansio, eikä sen nimeä voi muuttaa."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Kansio on oletuskansio eikä sitä voi nimetä uudelleen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Kansio \"%1$s\" sisältää jo kansion nimeltä \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "Kansio sisältää jo samannimisen kansion.l"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Kansiota tyypiltään \"%2$s\" ei voi luoda \"%1$s\" alle."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Tyyppiä \"%2$s\"  olevia kansiota ei voida luoda tämän kansion alle."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Moduulin \"%2$s\" kansioita ei voi luoda \"%1$s\" alle."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Moduulin \"%2$s\" kansioita ei voida luoda tämän kansion alle."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8251,64 +8249,54 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Vähintään yhdellä käyttäjällä pitää olla hallinnointioikeudet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "\"%1$s\" on oletuskansio, eikä sitä voi siirtää."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Kansio on oletuskansio eikä sitä voi siirtää."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "\"%1$s\" on jaettu kansio, eikä sitä voi siirtää."
+msgid "The folder is shared and cannot be moved."
+msgstr "Kansio on jaettu eikä sitä voi siirtää."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Kansiota ei voi siirtää jaettuun kansioon \"%1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Kansiota ei voida siirtää jaettuun kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "\"%1$s\" on järjestelmäkansio, eikä sitä voi siirtää."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Kansio on järjestelmäkansio eikä sitä voi siirtää."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
+msgid "The private folder can only be moved to another private folder."
 msgstr ""
-"Yksityisen kansion \"%1$s\" voi siirtää vain toiseen yksityiseen kansioon."
+"Yksityisen kansion voi siirtää ainoastaan toiseen yksityiseen kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "Julkisen kansion \"%1$s\" voi siirtää vain toiseen julkiseen kansioon."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Julkisen kansion voi siirtää ainoastaan toiseen julkiseen kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Kohdekansio on sama kuin lähdekansio."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
 msgstr ""
-"Sinulla ei ole tarvittavia valtuuksia siirtää kaikkia alikansioita kansioon "
-"\"%2$s\"."
+"Sinulla ei ole asiaankuuluvia lupia kaikkien alakansioiden siirtämiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr ""
-"Sinulla ei ole tarvittavia valtuuksia jaetun kansion \"%2$s\" poistamiseen."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Sinulla ei ole asiaankuuluvia lupia jaetun kansion poistamiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "\"%1$s\" on oletuskansio, eikä sitä voi poistaa."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Kansio on oletuskansio eikä sitä voi poistaa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr ""
-"Sinulla ei ole tarvittavia valtuuksia poistaa kaikkia kohteita kansiosta "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Sinulla ei ole asiaankuuluvia lupia kaikkien kohteiden poistamiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "Kansiota \"%1$s\" ei saa siirtää yhteen omista alikansioistaan."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Kansiota ei voida siirtää yhteen sen alakansioista."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8316,8 +8304,8 @@ msgid ""
 msgstr "Moduulin \"%1$s\" kansioita ei saa siirtää moduulin \"%2$s\" kansioon."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Jaettua kansiota \"%1$s\" ei voida päivittää."
+msgid "The shared folder cannot be updated."
+msgstr "Jaettua kansiota ei voi päivittää."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8337,44 +8325,41 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
-msgstr ""
-"Vain ylemmän jaetun kansion \"%4$s\" omistajalla voi olla hallinnointioikeus."
+msgstr "Vain jaetun emokansion omistajalla on ylläpito-oikeudet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
-msgstr "Oletuskansion \"%2$s\" omistajalla täytyy olla hallinnointioikeus."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
+msgstr ""
+"Kansio on oletuskansio. Siksi sen omistajalla täytyy olla ylläpito-oikeudet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Sinulla ei ole tarvittavia valtuuksia kansion \"%2$s\" jakamiseen."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Sinulla ei ole asiaankuuluvia lupia kansion jakamiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
 msgstr ""
-"Koska käyttäjän \"%1$s\" valtuudet ovat rajoitetut, ei kansioon\"%2$s\" "
-"voida tehdä muutoksia."
+"Ei ole mahdollista toteuttaa muutoksia rajoitettujen oikeuksien vuoksi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Kansiota \"%1$s\" ei voida poistaa, koska se sisältää piilotetun alikansion, "
-"johon sinulla ei ole tarvittavia valtuiuksia."
+"Kansiota ei voida poistaa, koska se sisältää piilotetun alakansion, johon "
+"sinulla ei ole tarvittavia oikeuksia."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Kansio \"%2$s\" sisältää jo kansion nimeltä \"%1$s\". Ole hyvä ja valitse "
-"toinen nimi ja yritä uudelleen."
+"Kansio sisältää jo samannimisen kansion. Valitse toinen nimi ja yritä "
+"uudelleen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8391,63 +8376,46 @@ msgstr ""
 "hyvä ja uudelleen nimeä kansio ennen kuin jaat sen tämän käyttäjän kanssa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Käyttäjälle \"%1$s\" on määritelty päällekkäiset oikeudet. Sallitaan vain "
-"yksi oikeus käyttäjää kohden."
+"Kaksoislupa on määritelty. Kutakin käyttäjää kohti sallitaan vain yksi lupa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Ryhmälle \"%1$s\" on määritelty päällekkäiset oikeudet. Sallitaan vain yksi "
-"oikeus ryhmää kohden."
+"Kaksoislupa on määritelty. Kutakin ryhmää kohti sallitaan vain yksi lupa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "Vain kansion näkyvyyden oikeutta voi muuttaa kansiolle \"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Vain kansion näkyvyysoikeutta voidaan muuttaa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
-msgstr ""
-"Vain käyttäjäkohtaiset oikeudet, eivät ryhmäkohtaiset, ovat sallittuja "
-"kansiolle \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "Vain yksittäisten käyttäjien luvat, ei ryhmäluvat, sallitaan."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "Käyttäjäkohtaiset oikeudet eivät ole sallittuja kansiolle \"%1$s\"."
+msgid "No individual user permissions are allowed."
+msgstr "Lupia yksittäisille käyttäjille ei sallita."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr ""
-"Sinulla ei ole tarvittavia valtuuksia kansion \"%2$s\" uudelleen nimeämiseen."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Sinulla ei ole tarvittavia oikeuksia kansion uudelleennimeämiseen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"Kansiota \"%1$s\" ei voida poistaa, koska se sisältää lukittuja asiakirjoja."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Kansiota ei voida poistaa, koska se sisältää lukittuja asiakirjoja."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Toiminnon voi suorittaa vain kontekstin ylläpitäjä."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Kansiota %1$s ei voi poistaa."
+msgid "The folder cannot be deleted."
+msgstr "Kansiota ei voida poistaa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Omistajan \"%1$s\" hallinnointioikeudet palautettiin kansiolle \"%2$s\"."
+msgid "The administrative permissions were restored."
+msgstr "Ylläpito-oikeudet on palautettu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -11455,6 +11423,182 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Sinulla ei ole tarvittavia valtuuksia julkiseen kansioon \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia valtuuksia alikansioiden luomiseen kansiossa "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Kansiota \"%1$s\" ei ole olemassa."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Kansiota \"%1$s\" on sillä välin muutettu Päivitä näkymä ja yritä "
+#~ "uudelleen."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "Toiminto vaatii hallinnointioikeuksia kansioon \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Kansio \"%1$s\" on oletuskansio, eikä sen nimeä voi muuttaa."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Kansio \"%1$s\" sisältää jo kansion nimeltä \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Kansiota tyypiltään \"%2$s\" ei voi luoda \"%1$s\" alle."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Moduulin \"%2$s\" kansioita ei voi luoda \"%1$s\" alle."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "\"%1$s\" on oletuskansio, eikä sitä voi siirtää."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "\"%1$s\" on jaettu kansio, eikä sitä voi siirtää."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Kansiota ei voi siirtää jaettuun kansioon \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "\"%1$s\" on järjestelmäkansio, eikä sitä voi siirtää."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Yksityisen kansion \"%1$s\" voi siirtää vain toiseen yksityiseen kansioon."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Julkisen kansion \"%1$s\" voi siirtää vain toiseen julkiseen kansioon."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia valtuuksia siirtää kaikkia alikansioita "
+#~ "kansioon \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia valtuuksia jaetun kansion \"%2$s\" "
+#~ "poistamiseen."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "\"%1$s\" on oletuskansio, eikä sitä voi poistaa."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia valtuuksia poistaa kaikkia kohteita kansiosta "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "Kansiota \"%1$s\" ei saa siirtää yhteen omista alikansioistaan."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Jaettua kansiota \"%1$s\" ei voida päivittää."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Vain ylemmän jaetun kansion \"%4$s\" omistajalla voi olla "
+#~ "hallinnointioikeus."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr "Oletuskansion \"%2$s\" omistajalla täytyy olla hallinnointioikeus."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Sinulla ei ole tarvittavia valtuuksia kansion \"%2$s\" jakamiseen."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Koska käyttäjän \"%1$s\" valtuudet ovat rajoitetut, ei kansioon\"%2$s\" "
+#~ "voida tehdä muutoksia."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Kansiota \"%1$s\" ei voida poistaa, koska se sisältää piilotetun "
+#~ "alikansion, johon sinulla ei ole tarvittavia valtuiuksia."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Kansio \"%2$s\" sisältää jo kansion nimeltä \"%1$s\". Ole hyvä ja valitse "
+#~ "toinen nimi ja yritä uudelleen."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Käyttäjälle \"%1$s\" on määritelty päällekkäiset oikeudet. Sallitaan vain "
+#~ "yksi oikeus käyttäjää kohden."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Ryhmälle \"%1$s\" on määritelty päällekkäiset oikeudet. Sallitaan vain "
+#~ "yksi oikeus ryhmää kohden."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr "Vain kansion näkyvyyden oikeutta voi muuttaa kansiolle \"%1$s\"."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Vain käyttäjäkohtaiset oikeudet, eivät ryhmäkohtaiset, ovat sallittuja "
+#~ "kansiolle \"%1$s\"."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "Käyttäjäkohtaiset oikeudet eivät ole sallittuja kansiolle \"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Sinulla ei ole tarvittavia valtuuksia kansion \"%2$s\" uudelleen "
+#~ "nimeämiseen."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Kansiota \"%1$s\" ei voida poistaa, koska se sisältää lukittuja "
+#~ "asiakirjoja."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Kansiota %1$s ei voi poistaa."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Omistajan \"%1$s\" hallinnointioikeudet palautettiin kansiolle \"%2$s\"."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

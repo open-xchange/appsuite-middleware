@@ -171,6 +171,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         }
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
+        guestPermission.setEntity(matchingPermission.getEntity());
         /*
          * discover & check guest
          */

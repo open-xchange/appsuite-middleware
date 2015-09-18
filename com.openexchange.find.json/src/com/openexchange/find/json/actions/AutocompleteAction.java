@@ -51,7 +51,6 @@ package com.openexchange.find.json.actions;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -87,23 +86,9 @@ public class AutocompleteAction extends AbstractFindAction {
         List<ActiveFacet> activeFactes = request.getActiveFacets();
         Map<String, String> options = request.getOptions();
 
-        // Determine whether facet check is supposed to happen or not
-        boolean check = true;
-        {
-            String name = "check";
-            String value = request.getRequest().getParameter(name);
-            if (null == value) {
-                value = options.get(name);
-            }
-
-            if (null != value) {
-                check = AJAXRequestDataTools.parseBoolParameter(value);
-            }
-        }
-
         // Do the auto-complete
         AutocompleteResult result = searchService.autocomplete(
-            new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0, check),
+            new AutocompleteRequest(prefix, activeFactes, options, limit > 0 ? limit : 0),
             request.requireModule(),
             request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());

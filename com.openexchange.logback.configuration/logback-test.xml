@@ -102,4 +102,6 @@
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
 
+    <logger name="com.openexchange.webdav" level="ALL"/>
+
 </configuration>

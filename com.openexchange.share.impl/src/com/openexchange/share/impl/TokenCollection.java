@@ -56,15 +56,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.PersonalizedShareTarget;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.StorageParameters;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.user.UserService;
 
 /**
  * {@link TokenCollection}
@@ -141,32 +143,36 @@ public class TokenCollection {
      * @return The shares
      * @throws OXException
      */
-    public List<Share> loadShares(StorageParameters parameters) throws OXException {
-        List<Share> shares = new ArrayList<Share>();
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
+    public List<ShareInfo> loadShares() throws OXException {
+        List<ShareInfo> shares = new ArrayList<ShareInfo>();
+        UserService userService = services.getService(UserService.class);
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         /*
          * gather all shares for guest users with base token only
          */
         for (ShareToken baseToken : baseTokensOnly) {
-            shares.addAll(shareStorage.loadSharesForGuest(contextID, baseToken.getUserID(), parameters));
+            User guestUser = userService.getUser(baseToken.getUserID(), contextID);
+            List<TargetProxy> targetProxies = moduleSupport.listTargets(contextID, guestUser.getId());
+            for (TargetProxy proxy : targetProxies) {
+                ShareTargetPath targetPath = proxy.getTargetPath();
+                ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+                ShareTarget dstTarget = proxy.getTarget();
+                shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
+            }
         }
         /*
          * pick specific shares for guest users with base tokens and paths
          */
         for (Map.Entry<ShareToken, Set<String>> entry : pathsPerBaseToken.entrySet()) {
-            int guestID = entry.getKey().getUserID();
-            List<Share> sharesForGuest = shareStorage.loadSharesForGuest(contextID, guestID, parameters);
-            Map<PersonalizedShareTarget, Share> personalizedTargets = new HashMap<>(sharesForGuest.size() * 2);
-            for (Share share : sharesForGuest) {
-                personalizedTargets.put(moduleSupport.personalizeTarget(share.getTarget(), contextID, guestID), share);
-            }
-
+            User guestUser = userService.getUser(entry.getKey().getUserID(), contextID);
             for (String path : entry.getValue()) {
-                for (PersonalizedShareTarget personalizedTarget : personalizedTargets.keySet()) {
-                    if (path.equals(personalizedTarget.getPath())) {
-                        shares.add(personalizedTargets.get(personalizedTarget));
-                        break;
+                ShareTargetPath targetPath = ShareTargetPath.parse(path);
+                if (targetPath != null) {
+                    TargetProxy proxy = moduleSupport.resolveTarget(targetPath, contextID, guestUser.getId());
+                    if (proxy != null) {
+                        ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
+                        ShareTarget dstTarget = proxy.getTarget();
+                        shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
                     }
                 }
             }

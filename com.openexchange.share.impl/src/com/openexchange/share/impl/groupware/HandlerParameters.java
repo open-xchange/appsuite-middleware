@@ -132,9 +132,7 @@ public class HandlerParameters {
      *         {@link HandlerParameters#getSession()} will return <code>null</code> in this case.
      */
     public boolean isAdministrative() {
-        return session == null; // TODO: more visible through boolean flag or the like?
+        return session == null;
     }
-
-
 
 }

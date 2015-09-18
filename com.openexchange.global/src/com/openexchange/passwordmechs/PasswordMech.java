@@ -52,6 +52,7 @@ package com.openexchange.passwordmechs;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import com.damienmiller.BCrypt;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.mechs.SHACrypt;
 import com.openexchange.passwordmechs.mechs.UnixCrypt;
@@ -62,17 +63,27 @@ import com.openexchange.passwordmechs.mechs.UnixCrypt;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public enum PasswordMech {
+public enum PasswordMech implements IPasswordMech {
 
-    CRYPT("{CRYPT}", new Encoder() {
+    /**
+     * Encoder for CRYPT<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.CRYPT)
+     */
+    CRYPT(IPasswordMech.CRYPT, new Encoder() {
 
         @Override
-        public String encode(String str) throws UnsupportedEncodingException {
-            return UnixCrypt.crypt(str);
+        public String encode(String str) throws OXException {
+            try {
+                return UnixCrypt.crypt(str);
+            } catch (UnsupportedEncodingException e) {
+                LOG.error("Error encrypting password according to CRYPT mechanism", e);
+                throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            }
         }
 
         @Override
-        public boolean check(String candidate, String encoded) throws UnsupportedEncodingException {
+        public boolean check(String candidate, String encoded) throws OXException {
             if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return true;
             } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
@@ -80,18 +91,33 @@ public enum PasswordMech {
             } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return false;
             }
-            return UnixCrypt.matches(encoded, candidate);
+            try {
+                return UnixCrypt.matches(encoded, candidate);
+            } catch (UnsupportedEncodingException e) {
+                LOG.error("Error checking password according to CRYPT mechanism", e);
+                throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            }
         }
     }),
-    SHA("{SHA}", new Encoder() {
+    /**
+     * Encoder for SHA<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.SHA)
+     */
+    SHA(IPasswordMech.SHA, new Encoder() {
 
         @Override
-        public String encode(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-            return SHACrypt.makeSHAPasswd(str);
+        public String encode(String str) throws OXException {
+            try {
+                return SHACrypt.makeSHAPasswd(str);
+            } catch (NoSuchAlgorithmException e) {
+                LOG.error("Error encrypting password according to SHA mechanism", e);
+                throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            }
         }
 
         @Override
-        public boolean check(String candidate, String encoded) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        public boolean check(String candidate, String encoded) throws OXException {
             if ((Strings.isEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return true;
             } else if ((Strings.isEmpty(candidate)) && (Strings.isNotEmpty(encoded))) {
@@ -99,10 +125,20 @@ public enum PasswordMech {
             } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return false;
             }
-            return SHACrypt.makeSHAPasswd(candidate).equals(encoded);
+            try {
+                return SHACrypt.makeSHAPasswd(candidate).equals(encoded);
+            } catch (NoSuchAlgorithmException e) {
+                LOG.error("Error checking password according to SHA mechanism", e);
+                throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            }
         }
     }),
-    BCRYPT("{BCRYPT}", new Encoder() {
+    /**
+     * Encoder for BCRYPT<br>
+     * <br>
+     * Do not use this enumeration directly to encode and check. Instead get the {@link IPasswordMech} by using com.openexchange.passwordmechs.PasswordMechFactory.get(com.openexchange.passwordmechs.IPasswordMech.BCRYPT)
+     */
+    BCRYPT(IPasswordMech.BCRYPT, new Encoder() {
 
         @Override
         public String encode(String str) {
@@ -118,7 +154,6 @@ public enum PasswordMech {
             } else if ((Strings.isNotEmpty(candidate)) && (Strings.isEmpty(encoded))) {
                 return false;
             }
-
             return BCrypt.checkpw(candidate, encoded);
         }
     }),
@@ -126,6 +161,8 @@ public enum PasswordMech {
     ;
 
     // --------------------------------------------------------------------------------------- //
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordMech.class);
 
     private final Encoder encoder;
     private final String identifier;
@@ -139,23 +176,18 @@ public enum PasswordMech {
     }
 
     /**
-     * Gets the identifier
-     *
-     * @return The identifier
+     * {@inheritDoc}
      */
+    @Override
     public String getIdentifier() {
         return identifier;
     }
 
     /**
-     * Encodes the given string according to this password mechanism.
-     *
-     * @param str The string to encode
-     * @return The encoded string
-     * @throws UnsupportedEncodingException If encoding fails
-     * @throws NoSuchAlgorithmException If algorithm is unknown
+     * {@inheritDoc}
      */
-    public String encode(String str) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    @Override
+    public String encode(String str) throws OXException {
         if (null == str) {
             return null;
         }
@@ -163,54 +195,28 @@ public enum PasswordMech {
     }
 
     /**
-     * Checks if given string matches the encoded string according to this password mechanism.
-     *
-     * @param toCheck The string to check
-     * @param encoded The encoded string to check against
-     * @return <code>true</code> if string matches; otherwise <code>false</code>
-     * @throws NoSuchAlgorithmException If encoding fails
-     * @throws UnsupportedEncodingException If algorithm is unknown
+     * {@inheritDoc}
      */
-    public boolean check(String toCheck, String encoded) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    @Override
+    public boolean check(String toCheck, String encoded) throws OXException {
         return encoder.check(toCheck, encoded);
     }
 
-    // --------------------------------------------------------------------------------------- //
-
     /**
-     * Gets the password mechanism for given identifier
-     *
-     * @param identifier The identifier
-     * @return The password mechanism or <code>null</code>
+     * {@inheritDoc}
+     * {@link IPasswordMech}s within this class only provide one-way-enconding
      */
-    public static PasswordMech getPasswordMechFor(String identifier) {
-        if (Strings.isEmpty(identifier)) {
-            throw new IllegalArgumentException("The password mechanism identifier cannot be neither 'null' nor empty!");
-        }
-        String id = Strings.toUpperCase(identifier);
-        if (false == id.startsWith("{")) {
-            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
-        }
-        if (false == id.endsWith("}")) {
-            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
-        }
-
-        for (PasswordMech pm : PasswordMech.values()) {
-            if (id.equals(pm.identifier)) {
-                return pm;
-            }
-        }
-
-        throw new IllegalArgumentException("Unsupported password mechanism '" + identifier + "'");
+    @Override
+    public String decode(String encodedPassword) throws OXException {
+        throw PasswordMechExceptionCode.UNSUPPORTED_OPERATION.create(getIdentifier());
     }
 
     // --------------------------------------------------------------------------------------- //
 
     private static interface Encoder {
 
-        String encode(String str) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+        String encode(String str) throws OXException;
 
-        boolean check(String candidate, String encoded) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+        boolean check(String candidate, String encoded) throws OXException;
     }
-
 }

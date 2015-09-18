@@ -114,7 +114,7 @@ public class AttachmentQuotaProvider implements QuotaProvider {
         try {
             connection = dbService.getReadOnly(session.getContextId());
             long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
-            if (Quota.UNLIMITED == limit) {
+            if (limit <= Quota.UNLIMITED) {
                 return Quota.UNLIMITED_AMOUNT;
             }
 

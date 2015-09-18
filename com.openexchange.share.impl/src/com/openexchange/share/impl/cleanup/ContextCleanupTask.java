@@ -52,14 +52,11 @@ package com.openexchange.share.impl.cleanup;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.StorageParameters;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.user.UserService;
 
@@ -113,32 +110,12 @@ public class ContextCleanupTask extends AbstractTask<List<GuestCleanupTask>> {
             LOG.debug("No guest users found in context {}, skipping cleanup task.", I(contextID));
             return Collections.emptyList();
         }
-        /*
-         * cleanup any expired shares & prepare guest cleanup tasks for all guest users
-         */
-        cleanExpiredShares();
         LOG.debug("Found {} guest users in context {}, preparing corresponding cleanup tasks.", I(guestIDs.length), I(contextID));
         List<GuestCleanupTask> cleanupTasks = new ArrayList<GuestCleanupTask>(guestIDs.length);
         for (int guestID : guestIDs) {
             cleanupTasks.add(new GuestCleanupTask(services, contextID, guestID, guestExpiry));
         }
         return cleanupTasks;
-    }
-
-    /**
-     * Deletes all shares that are considered "expired" in a context.
-     *
-     * @return The number of deleted shares
-     */
-    private int cleanExpiredShares() throws OXException {
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        int expiredShares = shareStorage.deleteSharesExpiredAfter(contextID, new Date(), StorageParameters.NO_PARAMETERS);
-        if (0 < expiredShares) {
-            LOG.debug("Removed {} expired shares in context {}.", I(expiredShares), I(contextID));
-        } else {
-            LOG.debug("No expired shares detected in context {}.", I(contextID));
-        }
-        return expiredShares;
     }
 
     @Override

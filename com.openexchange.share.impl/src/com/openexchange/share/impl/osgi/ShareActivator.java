@@ -49,13 +49,10 @@
 
 package com.openexchange.share.impl.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
@@ -68,7 +65,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
@@ -78,20 +74,18 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.DefaultShareService;
-import com.openexchange.share.impl.ShareCryptoServiceImpl;
+import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
-import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
-import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -118,11 +112,11 @@ public class ShareActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            UserService.class, ContextService.class, TemplateService.class, ShareStorage.class, ConfigurationService.class,
+            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class,
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class };
     }
 
     @Override
@@ -138,8 +132,6 @@ public class ShareActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
-            private volatile ServiceRegistration<ShareCryptoService> cryptoRegistration;
-
             private volatile ServiceRegistration<ShareService> shareRegistration;
 
             private volatile ServiceRegistration<EventHandler> cleanUpRegistration;
@@ -148,17 +140,11 @@ public class ShareActivator extends HousekeepingActivator {
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
-                ShareCryptoServiceImpl shareCryptoService = new ShareCryptoServiceImpl(service, cryptKey);
-                addService(ShareCryptoService.class, shareCryptoService);
-                cryptoRegistration = context.registerService(ShareCryptoService.class, shareCryptoService, null);
-                shareRegistration = context.registerService(ShareService.class, shareService, null);
 
-                /*
-                 * Event handler for deleted files
-                 */
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.DELETE_TOPIC });
-                cleanUpRegistration = context.registerService(EventHandler.class, new FileStorageShareCleanUp(shareService), serviceProperties);
+                PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
+                SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
+                passwordMechFactory.register(sharePasswordMech);
+                shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }
 
@@ -174,11 +160,6 @@ public class ShareActivator extends HousekeepingActivator {
                     shareRegistration.unregister();
                     this.shareRegistration = null;
                 }
-                ServiceRegistration<ShareCryptoService> cryptoRegistration = this.cryptoRegistration;
-                if (null != cryptoRegistration) {
-                    cryptoRegistration.unregister();
-                    this.cryptoRegistration = null;
-                }
                 ServiceRegistration<EventHandler> cleanUpRegistration = this.cleanUpRegistration;
                 if (null != cleanUpRegistration) {
                     cleanUpRegistration.unregister();
@@ -189,13 +170,12 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        ModuleSupport moduleSupport = new ModuleSupportImpl(this);
-        registerService(ModuleSupport.class, moduleSupport);
+        registerService(ModuleSupport.class, new ModuleSupportImpl(this));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 
         trackService(ModuleSupport.class);
-        track(ManagementService.class, new ManagementServiceTracker(context, shareService, moduleSupport));
+        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);

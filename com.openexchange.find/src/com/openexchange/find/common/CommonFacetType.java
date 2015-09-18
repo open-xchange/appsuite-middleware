@@ -101,7 +101,8 @@ public enum CommonFacetType implements FacetType {
      * its value is expected to be such a custom time range. Modules are advised to use {@link TimeFrame#valueOf(String)}
      * to parse the input string.
      */
-    DATE(CommonStrings.DATE)
+    DATE(CommonStrings.DATE),
+    ACCOUNT(CommonStrings.ACCOUNT)
     ;
 
     private static final Map<String, CommonFacetType> typesById = new HashMap<String, CommonFacetType>();

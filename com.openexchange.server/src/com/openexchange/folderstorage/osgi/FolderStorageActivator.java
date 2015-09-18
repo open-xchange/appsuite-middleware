@@ -86,6 +86,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
@@ -207,7 +208,8 @@ public final class FolderStorageActivator implements BundleActivator {
         ShareService.class,
         ShareNotificationService.class,
         UserService.class,
-        DatabaseService.class
+        DatabaseService.class,
+        UserPermissionService.class
     };
 
     @Override

@@ -51,12 +51,13 @@ package com.openexchange.share.impl.cleanup;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,17 +68,17 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.impl.DefaultGuestInfo;
 import com.openexchange.share.impl.ShareUtils;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -90,7 +91,6 @@ import com.openexchange.userconf.UserPermissionService;
 public class GuestCleanupTask extends AbstractTask<Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestCleanupTask.class);
-    private static final boolean CHECK_FOR_STALE_TARGETS = false;
 
     protected final ServiceLookup services;
     protected final int contextID;
@@ -166,11 +166,26 @@ public class GuestCleanupTask extends AbstractTask<Void> {
 
     private void cleanGuest(ConnectionHelper connectionHelper, Context context, User guestUser) throws OXException {
         /*
-         * check to which modules the user has access to (if any)
+         * Check if entity is consistent
          */
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        Set<Integer> modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
+        ShareToken shareToken;
+        try {
+            shareToken = new ShareToken(contextID, guestUser);
+        } catch (OXException e) {
+            if (ShareExceptionCodes.INVALID_TOKEN.equals(e)) {
+                LOG.info("Found invalid guest entity {} in context {} without a valid base token. Guest user will be deleted...", guestID, contextID);
+                deleteGuest(connectionHelper.getConnection(), context, guestID);
+                return;
+            }
+
+            throw e;
+        }
+
+        /*
+         * check to which share targets the guest user has still access to (if any)
+         */
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guestUser, shareToken, null);
+        Collection<Integer> modules = services.getService(ModuleSupport.class).getAccessibleModules(contextID, guestID);
         if (0 == modules.size()) {
             /*
              * no shares remaining
@@ -208,15 +223,26 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             }
         } else {
             /*
-             * guest user still has shares, check for any stale references & adjust module permissions as needed
+             * guest user still has shares, check for an expired anonymous link first
              */
-            if (CHECK_FOR_STALE_TARGETS) {
-                if (checkForStaleTargets(contextID, guestID, connectionHelper)) {
-                    modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
+            if (RecipientType.ANONYMOUS == guestInfo.getRecipientType()) {
+                Date expiryDate = null;
+                String expiryDateValue = ShareTool.getUserAttribute(guestUser, ShareTool.EXPIRY_DATE_USER_ATTRIBUTE);
+                if (Strings.isNotEmpty(expiryDateValue)) {
+                    try {
+                        expiryDate = new Date(Long.parseLong(expiryDateValue));
+                    } catch (NumberFormatException e) {
+                        getLogger(DefaultGuestInfo.class).warn("Invalid value for {}: {}", ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, e);
+                    }
+                }
+                if (null != expiryDate && expiryDate.before(new Date())) {
+                    LOG.debug("Anonymous share for {} remaining, deleting guest user.", guestInfo);
+                    deleteGuest(connectionHelper.getConnection(), context, guestID);
+                    return;
                 }
             }
             /*
-             * guest user still has shares, adjust permissions as needed
+             * adjust permissions for remaining shares as needed
              */
             ShareUtils utils = new ShareUtils(services);
             int requiredPermissionBits = utils.getRequiredPermissionBits(guestUser, modules);
@@ -233,42 +259,6 @@ public class GuestCleanupTask extends AbstractTask<Void> {
              */
             GuestLastModifiedMarker.clearLastModified(services, context, guestUser);
         }
-    }
-
-    /**
-     * Checks and removes those shares that are no longer accessible by the guest user since they no longer exist or are no longer visible
-     * to the guest.
-     *
-     * @param contextID The context identifier
-     * @param guestID The guest identifier
-     * @param connectionHelper A (started) connection helper
-     * @return <code>true</code> if at least one stale share was removed, <code>false</code>, otherwise
-     */
-    private boolean checkForStaleTargets(int contextID, int guestID, ConnectionHelper connectionHelper) {
-        try {
-            ShareStorage shareStorage = services.getService(ShareStorage.class);
-            List<Share> shares = shareStorage.loadSharesForGuest(contextID, guestID, connectionHelper.getParameters());
-            if (null != shares && 0 < shares.size()) {
-                ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-                List<Share> sharesToRemove = new ArrayList<Share>();
-                for (Share share : shares) {
-                    ServerSession syntheticSession = ServerSessionAdapter.valueOf(guestID, contextID);
-                    if (false == moduleSupport.exists(share.getTarget(), syntheticSession)) {
-                        LOG.debug("Detected no longer existing share {}, marking for removal.", share);
-                        sharesToRemove.add(share);
-                    } else if (false == moduleSupport.isVisible(share.getTarget(), syntheticSession)) {
-                        LOG.debug("Share {} no longer visible for guest user, marking for removal.", share);
-                        sharesToRemove.add(share);
-                    }
-                }
-                if (0 < sharesToRemove.size()) {
-                    return 0 < shareStorage.deleteShares(contextID, sharesToRemove, connectionHelper.getParameters());
-                }
-            }
-        } catch (OXException e) {
-            LOG.warn("Unexpected error during check for stale targets for guest user {} in context {}", guestID, contextID, e);
-        }
-        return false;
     }
 
     /**

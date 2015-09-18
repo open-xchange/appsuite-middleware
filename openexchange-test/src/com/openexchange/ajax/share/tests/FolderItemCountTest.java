@@ -49,23 +49,15 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
-import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 
 
@@ -77,65 +69,50 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class FolderItemCountTest extends ShareTest {
 
-    private FolderObject folder;
-    private List<File> files;
-    private int folderCount;
-    private OCLGuestPermission perm;
-    private ExtendedPermissionEntity guest;
-
+    /**
+     * Initializes a new {@link FolderItemCountTest}.
+     *
+     * @param name The test name
+     */
     public FolderItemCountTest(String name) {
         super(name);
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        long now = System.currentTimeMillis();
-        InfostoreTestManager itm = new InfostoreTestManager(client);
-        perm = createNamedGuestPermission("testFolderItemCount" + now + "@example.org", "Test " + now);
-        folder = insertSharedFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder(), perm);
-        Random rnd = new Random(now);
-        folderCount = rnd.nextInt(10);
-        files = new ArrayList<File>();
-
-        for (int i = 0; i < folderCount; i++) {
-            DefaultFile file = new DefaultFile();
-            file.setFolderId(String.valueOf(folder.getObjectID()));
-            file.setTitle("FolderCountTest_" + now + "_" + i);
-            file.setDescription(file.getTitle());
-            itm.newAction(file);
-            files.add(file);
+    public void testFolderItemCount() throws Exception {
+        /*
+         * create shared folder with some files inside
+         */
+        OCLGuestPermission guestPermission = randomGuestPermission(FolderObject.INFOSTORE);
+        FolderObject folder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE), guestPermission);
+        int count = random.nextInt(10);
+        for (int i = 0; i < count; i++) {
+            insertFile(folder.getObjectID());
         }
-
-        OCLPermission matchingFolderPermission = null;
+        /*
+         * check permissions
+         */
+        OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingFolderPermission = permission;
+                matchingPermission = permission;
                 break;
             }
         }
-
-        assertNotNull("No matching permission in created folder found", matchingFolderPermission);
-        checkPermissions(perm, matchingFolderPermission);
-
-        guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingFolderPermission.getEntity());
-        checkGuestPermission(perm, guest);
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        deleteFilesSilently(client, files);
-        deleteFoldersSilently(client, Collections.singletonList(folder.getObjectID()));
-        super.tearDown();
-    }
-
-    public void testFolderItemCount() throws Exception {
-        GuestClient guestClient = resolveShare(guest, perm.getRecipient());
-        String folderId = guestClient.getFolder();
-        GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, folderId, new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 });
+        assertNotNull("No matching permission in created folder found", matchingPermission);
+        checkPermissions(guestPermission, matchingPermission);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check item count in shared folder
+         */
+        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
+        GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, guestClient.getFolder(), new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 });
         GetResponseNew res = guestClient.execute(req);
         Folder fo = res.getFolder();
-        assertEquals(folderCount, fo.getTotal());
+        assertEquals(count, fo.getTotal());
     }
 
 }

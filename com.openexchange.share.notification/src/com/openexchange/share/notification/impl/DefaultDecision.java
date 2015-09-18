@@ -50,20 +50,17 @@
 package com.openexchange.share.notification.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
-import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -82,38 +79,8 @@ public class DefaultDecision implements NotifyDecision {
     }
 
     @Override
-    public boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException {
-        if (share.isInternal()) {
-            boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
-            if (!notifyInternalUsers) {
-                return false;
-            }
-
-            /*
-             * If the/all target(s) are public internals shall only be notified if
-             *  - they are user entities, no groups
-             *  - they will be admins of any target
-             */
-            ShareRecipient recipient = share.getShareRecipient();
-            int[] permissionBits = Permissions.parsePermissionBits(recipient.getBits());
-            if (!recipient.toInternal().isGroup() && permissionBits[4] > 0) {
-                return true;
-            }
-
-            ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
-            ShareTarget target = share.getShareTarget();
-            TargetProxy proxy = moduleSupport.load(target, session);
-            if (proxy.isPublic()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, List<ShareTarget> targets, Session session) throws OXException {
-        if (targets.size() == 0) {
+    public boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, ShareTargetPath targetPath, Session session) throws OXException {
+        if (null == targetPath) {
             return false;
         }
 
@@ -137,16 +104,8 @@ public class DefaultDecision implements NotifyDecision {
                 return true;
             }
 
-            boolean onlyPublics = true;
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
-            for (ShareTarget target : targets) {
-                TargetProxy proxy = moduleSupport.load(target, session);
-                onlyPublics &= proxy.isPublic();
-            }
-
-            if (onlyPublics) {
-                return false;
-            }
+            return false == moduleSupport.isPublic(new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem()), session);
         }
 
         return true;

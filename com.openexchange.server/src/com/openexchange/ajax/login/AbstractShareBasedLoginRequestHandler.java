@@ -56,6 +56,7 @@ import static com.openexchange.ajax.LoginServlet.getShareCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
@@ -79,7 +80,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
@@ -92,11 +92,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.PersonalizedShareTarget;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 
@@ -108,6 +110,153 @@ import com.openexchange.tools.servlet.http.Cookies;
  * @since v7.8.0
  */
 public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLoginRequestHandler {
+
+    /**
+     * {@link ShareLoginClosure}
+     *
+     * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+     * @since v7.8.0
+     */
+    private final class ShareLoginClosure implements LoginClosure {
+
+        private final GuestInfo guest;
+        private final ShareTarget target;
+        private final LoginConfiguration conf;
+        private final HttpServletRequest httpRequest;
+
+        /**
+         * Initializes a new {@link ShareLoginClosure}.
+         * @param guest
+         * @param target
+         * @param conf
+         * @param httpRequest
+         */
+        private ShareLoginClosure(GuestInfo guest, ShareTarget target, LoginConfiguration conf, HttpServletRequest httpRequest) {
+            this.guest = guest;
+            this.target = target;
+            this.conf = conf;
+            this.httpRequest = httpRequest;
+        }
+
+        @Override
+        public LoginResult doLogin(final HttpServletRequest req) throws OXException {
+            try {
+                // Check for matching authentication mode
+                if (false == checkAuthenticationMode(guest.getAuthentication())) {
+                    throw INVALID_CREDENTIALS.create();
+                }
+
+                BasicAuthenticationService basicService = Authentication.getBasicService();
+                if (null == basicService) {
+                    throw ServiceExceptionCode.absentService(BasicAuthenticationService.class);
+                }
+
+                // Get the login info from HTTP request
+                LoginInfo loginInfo = getLoginInfoFrom(httpRequest);
+
+                // Resolve context
+                Context context;
+                {
+                    ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+                    if (null == contextService) {
+                        throw ServiceExceptionCode.absentService(ContextService.class);
+                    }
+
+                    context = contextService.getContext(guest.getContextID());
+                }
+
+                // Resolve & authenticate user
+                User user = authenticateUser(guest, loginInfo, context);
+
+                // Pass to basic authentication service in case more handling needed
+                Authenticated  authenticated = basicService.handleLoginInfo(guest.getGuestID(), guest.getContextID());
+                if (null == authenticated) {
+                    return null;
+                }
+
+                // Checks if something is deactivated.
+                AuthorizationService authService = Authorization.getService();
+                if (null == authService) {
+                    throw ServiceExceptionCode.absentService(AuthorizationService.class);
+                }
+                authService.authorizeUser(context, user);
+
+                // Parse & check the HTTP request
+                String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
+                String client = LoginTools.parseClient(httpRequest, false, conf.getDefaultClient());
+                LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false,
+                    client, conf.isCookieForceHTTPS(), false, additionalsForHash);
+                LoginPerformer.sanityChecks(request);
+                LoginPerformer.checkClient(request, user, context);
+
+                // Create session
+                Session session;
+                {
+                    SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                    if (null == sessiondService) {
+                        sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                        if (null == sessiondService) {
+                            // Giving up...
+                            throw ServiceExceptionCode.absentService(SessiondService.class);
+                        }
+                    }
+                    {
+                        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                        boolean tranzient = null == service || service.getBoolProperty("com.openexchange.share.transientSessions", true);
+                        request.setTransient(tranzient);
+                    }
+                    session = sessiondService.addSession(new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context));
+                    if (null == session) {
+                        // Session could not be created
+                        throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
+                    }
+                    session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
+                    if (SessionEnhancement.class.isInstance(authenticated)) {
+                        ((SessionEnhancement) authenticated).enhanceSession(session);
+                    }
+                    LogProperties.putSessionProperties(session);
+                }
+
+                // Generate the login result
+                LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
+                    @Override
+                    protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
+                        if (target.getModule() > 0) {
+                            String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(target.getModule());
+                            if ("infostore".equals(folderModule)) {
+                                folderModule = "files";
+                            }
+                            jLoginResult.put("module", folderModule);
+                        }
+                        jLoginResult.putOpt("folder", target.getFolder());
+                        jLoginResult.putOpt("item", target.getItem());
+                    }
+                };
+                retval.setContext(context);
+                retval.setUser(user);
+                retval.setRequest(request);
+                retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
+                retval.setSession(session);
+                if (authenticated instanceof ResponseEnhancement) {
+                    final ResponseEnhancement responseEnhancement = (ResponseEnhancement) authenticated;
+                    retval.setHeaders(responseEnhancement.getHeaders());
+                    retval.setCookies(responseEnhancement.getCookies());
+                    retval.setRedirect(responseEnhancement.getRedirect());
+                    final ResultCode code = responseEnhancement.getCode();
+                    retval.setCode(code);
+                    if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
+                        return retval;
+                    }
+                }
+
+                // Trigger registered login handlers
+                LoginPerformer.triggerLoginHandlers(retval);
+                return retval;
+            } catch (RuntimeException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
 
     /** The login configuration */
     protected final ShareLoginConfiguration conf;
@@ -142,7 +291,6 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @throws OXException If an Open-Xchange Server error occurs
      */
     protected void doLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException, OXException {
-
         // Get the share's token & target
         final String token = httpRequest.getParameter("share");
         if (null == token) {
@@ -155,146 +303,44 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             throw ServiceExceptionCode.absentService(ShareService.class);
         }
 
-        // Get the share
-        final GuestShare share = shareService.resolveToken(token);
-        if (null == share) {
+        // Get the guest
+        final GuestInfo guest = shareService.resolveGuest(token);
+        if (null == guest) {
             throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
         }
-        String targetPath = httpRequest.getParameter("target");
-        final PersonalizedShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolvePersonalizedTarget(targetPath);
 
-        final LoginConfiguration conf = this.conf.getLoginConfig(share);
-        LoginClosure loginClosure = new LoginClosure() {
+        String targetPathParam = httpRequest.getParameter("target");
+        if (targetPathParam == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
 
-            @Override
-            public LoginResult doLogin(final HttpServletRequest req) throws OXException {
-                try {
-                    // Check for matching authentication mode
-                    if (false == checkAuthenticationMode(share.getGuest().getAuthentication())) {
-                        throw INVALID_CREDENTIALS.create();
-                    }
+        ShareTargetPath targetPath = ShareTargetPath.parse(targetPathParam);
+        if (targetPath == null) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
 
-                    BasicAuthenticationService basicService = Authentication.getBasicService();
-                    if (null == basicService) {
-                        throw ServiceExceptionCode.absentService(BasicAuthenticationService.class);
-                    }
-
-                    // Get the login info from HTTP request
-                    LoginInfo loginInfo = getLoginInfoFrom(share, httpRequest);
-
-                    // Resolve context
-                    Context context;
-                    {
-                        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
-                        if (null == contextService) {
-                            throw ServiceExceptionCode.absentService(ContextService.class);
-                        }
-
-                        context = contextService.getContext(share.getGuest().getContextID());
-                    }
-
-                    // Resolve & authenticate user
-                    User user = authenticateUser(share, loginInfo, context);
-
-                    // Pass to basic authentication service in case more handling needed
-                    Authenticated  authenticated = basicService.handleLoginInfo(share.getGuest().getGuestID(), share.getGuest().getContextID());
-                    if (null == authenticated) {
-                        return null;
-                    }
-
-                    // Checks if something is deactivated.
-                    AuthorizationService authService = Authorization.getService();
-                    if (null == authService) {
-                        throw ServiceExceptionCode.absentService(AuthorizationService.class);
-                    }
-                    authService.authorizeUser(context, user);
-
-                    // Parse & check the HTTP request
-                    String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
-                    String client = LoginTools.parseClient(httpRequest, false, conf.getDefaultClient());
-                    LoginRequestImpl request = LoginTools.parseLogin(httpRequest, loginInfo.getUsername(), loginInfo.getPassword(), false,
-                        client, conf.isCookieForceHTTPS(), false, additionalsForHash);
-                    LoginPerformer.sanityChecks(request);
-                    LoginPerformer.checkClient(request, user, context);
-
-                    // Create session
-                    Session session;
-                    {
-                        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-                        if (null == sessiondService) {
-                            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                            if (null == sessiondService) {
-                                // Giving up...
-                                throw ServiceExceptionCode.absentService(SessiondService.class);
-                            }
-                        }
-                        {
-                            ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                            boolean tranzient = null == service || service.getBoolProperty("com.openexchange.share.transientSessions", true);
-                            request.setTransient(tranzient);
-                        }
-                        session = sessiondService.addSession(new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context));
-                        if (null == session) {
-                            // Session could not be created
-                            throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                        }
-                        session.setParameter(Session.PARAM_GUEST, Boolean.TRUE);
-                        if (SessionEnhancement.class.isInstance(authenticated)) {
-                            ((SessionEnhancement) authenticated).enhanceSession(session);
-                        }
-                        LogProperties.putSessionProperties(session);
-                    }
-
-                    // Generate the login result
-                    LoginResultImpl retval = new AbstractJsonEnhancingLoginResult() {
-
-                        @Override
-                        protected void doEnhanceJson(JSONObject jLoginResult) throws OXException, JSONException {
-                            int module = null != target ? target.getModule() : share.getCommonModule();
-                            if (0 != module) {
-                                String folderModule = ServerServiceRegistry.getInstance().getService(ModuleSupport.class).getShareModule(module);
-                                if ("infostore".equals(folderModule)) {
-                                    //TODO: check
-                                    folderModule = "files";
-                                }
-                                jLoginResult.put("module", folderModule);
-                            }
-                            String folder = null != target ? target.getFolder() : share.getCommonFolder();
-                            jLoginResult.putOpt("folder", folder);
-                            String item = null != target ? target.getItem() :
-                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
-                            jLoginResult.putOpt("item", item);
-                            jLoginResult.putOpt("meta", share.getMeta());
-                        }
-                    };
-                    retval.setContext(context);
-                    retval.setUser(user);
-                    retval.setRequest(request);
-                    retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
-                    retval.setSession(session);
-                    if (authenticated instanceof ResponseEnhancement) {
-                        final ResponseEnhancement responseEnhancement = (ResponseEnhancement) authenticated;
-                        retval.setHeaders(responseEnhancement.getHeaders());
-                        retval.setCookies(responseEnhancement.getCookies());
-                        retval.setRedirect(responseEnhancement.getRedirect());
-                        final ResultCode code = responseEnhancement.getCode();
-                        retval.setCode(code);
-                        if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
-                            return retval;
-                        }
-                    }
-
-                    // Trigger registered login handlers
-                    LoginPerformer.triggerLoginHandlers(retval);
-                    return retval;
-                } catch (RuntimeException e) {
-                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                }
+        ModuleSupport moduleSupport = ServerServiceRegistry.getInstance().getService(ModuleSupport.class);
+        int contextId = guest.getContextID();
+        int guestId = guest.getGuestID();
+        int m = targetPath.getModule();
+        String f = targetPath.getFolder();
+        String i = targetPath.getItem();
+        ShareTarget target = null;
+        if (moduleSupport.exists(m, f, i, contextId, guestId) && moduleSupport.isVisible(m, f, i, contextId, guestId)) {
+            TargetProxy targetProxy = moduleSupport.resolveTarget(targetPath, contextId, guestId);
+            target = targetProxy.getTarget();
+        } else {
+            List<TargetProxy> otherTargets = moduleSupport.listTargets(contextId, guestId);
+            if (otherTargets.isEmpty()) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
-        };
 
+            target = otherTargets.get(0).getTarget();
+        }
+
+        final LoginConfiguration conf = this.conf.getLoginConfig(guest);
+        LoginClosure loginClosure = new ShareLoginClosure(guest, target, conf, httpRequest);
         LoginCookiesSetter cookiesSetter = new LoginCookiesSetter() {
-
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
                 /*
@@ -302,7 +348,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                  */
                 response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
                 if (loginConfig.isSessiondAutoLogin()) {
-                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), share.getGuest().getBaseToken()), request, loginConfig));
+                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
                 }
                 /*
                  * set public session cookie if not yet present
@@ -334,22 +380,21 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
     /**
      * Gets the appropriate share's login information from given HTTP request
      *
-     * @param share The associated share
      * @param httpRequest The HTTP request
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(GuestShare share, HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
      *
-     * @param share The share
+     * @param guest The guest
      * @param loginInfo The login information
      * @param context The context associated with the share
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException;
 
 }

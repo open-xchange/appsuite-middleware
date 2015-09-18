@@ -69,6 +69,7 @@ import com.openexchange.ajax.share.actions.UpdateLinkResponse;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
@@ -204,7 +205,35 @@ public class GetALinkTest extends ShareTest {
         client.execute(new DeleteLinkRequest(target, updateLinkResponse.getTimestamp().getTime()));
         assertNull("Share was not deleted", discoverGuestEntity(file.getFolderId(), file.getId(), guestId));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
-        assertNull("Permission was not deleted", objectPermissions);
+        assertTrue("Permission was not deleted", null == objectPermissions || 0 == objectPermissions.size());
+    }
+
+    public void testMoveFileWithExistingLink() throws Exception {
+        /*
+         * We create a link for a file and then move it to another folder. Afterwards we expect the link to be removed, as
+         * it will not work anymore.
+         */
+        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
+        GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
+        String url = getLinkResponse.getShareLink().getShareURL();
+        /*
+         * Resolve the link and check read permission for file
+         */
+        GuestClient guestClient = resolveShare(url, null, null);
+        OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
+        expectedPermission.setEntity(guestClient.getValues().getUserId());
+        guestClient.checkFileAccessible(file.getId(), expectedPermission);
+        guestClient.logout();
+        /*
+         * Move to "My files"
+         */
+        DefaultFile toUpdate = new DefaultFile();
+        toUpdate.setId(file.getId());
+        toUpdate.setLastModified(new Date());
+        toUpdate.setFolderId(Integer.toString(client.getValues().getPrivateInfostoreFolder()));
+        File reloaded = updateFile(toUpdate, new Field[] { Field.FOLDER_ID });
+        assertTrue(reloaded.getObjectPermissions().isEmpty());
     }
 
 }

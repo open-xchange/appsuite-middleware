@@ -78,16 +78,6 @@ public class CreateSubfolderTest extends ShareTest {
         super(name);
     }
 
-    public void testCreateSubfolderWithoutAdminFlagRandomly() throws Exception {
-        testCreateSubfolderWithoutAdminFlag(randomFolderAPI(), FolderObject.CONTACT);
-    }
-
-    public void noTestCreateSubfolderWithoutAdminFlagExtensively() throws Exception {
-        for (EnumAPI api : TESTED_FOLDER_APIS) {
-            testCreateSubfolderWithoutAdminFlag(api, FolderObject.CONTACT);
-        }
-    }
-
     public void testCreateSubfolderWithAdminFlagRandomly() throws Exception {
         testCreateSubfolderWithAdminFlag(randomFolderAPI(), FolderObject.INFOSTORE);
     }
@@ -100,91 +90,6 @@ public class CreateSubfolderTest extends ShareTest {
 
     private void testCreateSubfolderWithAdminFlag(EnumAPI api, int module) throws Exception {
         testCreateSubfolderWithAdminFlag(api, module, getDefaultFolder(module));
-    }
-
-    private void testCreateSubfolderWithoutAdminFlag(EnumAPI api, int module) throws Exception {
-        testCreateSubfolderWithoutAdminFlag(api, module, getDefaultFolder(module));
-    }
-
-    private void testCreateSubfolderWithoutAdminFlag(EnumAPI api, int module, int parent) throws Exception {
-        /*
-         * create share with guest permissions that allow subfolder creation (yet no update/delete)
-         */
-        OCLGuestPermission guestPermission = createNamedAuthorPermission(randomUID() + "@example.com", randomUID());
-        guestPermission.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
-        guestPermission.setFolderAdmin(false);
-        /*
-         * create folder shared to guest user
-         */
-        FolderObject folder = insertSharedFolder(api, module, parent, guestPermission);
-        /*
-         * check permissions
-         */
-        OCLPermission matchingPermission = null;
-        for (OCLPermission permission : folder.getPermissions()) {
-            if (permission.getEntity() != client.getValues().getUserId()) {
-                matchingPermission = permission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created folder found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-        /*
-         * discover & check guest
-         */
-        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
-        checkGuestPermission(guestPermission, guest);
-        /*
-         * check access to share
-         */
-        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission);
-        /*
-         * create subfolder as guest
-         */
-        String originalName = randomUID();
-        FolderObject subfolder = new FolderObject();
-        subfolder.setFolderName(originalName);
-        subfolder.setModule(folder.getModule());
-        subfolder.setType(folder.getType());
-        subfolder.setParentFolderID(folder.getObjectID());
-        subfolder.setPermissionsAsArray(folder.getPermissionsAsArray());
-        InsertResponse insertResponse = guestClient.execute(new InsertRequest(api, subfolder));
-        insertResponse.fillObject(subfolder);
-        subfolder.setLastModified(insertResponse.getTimestamp());
-        /*
-         * verify folder as sharing user
-         */
-        FolderObject reloadedSubfolder = getFolder(api, subfolder.getObjectID());
-        assertNotNull(reloadedSubfolder);
-        super.remember(reloadedSubfolder);
-        assertEquals("Folder name wrong", originalName, reloadedSubfolder.getFolderName());
-        /*
-         * try to rename the folder as guest
-         */
-        subfolder.setFolderName(randomUID());
-        InsertResponse updateResponse = guestClient.execute(new UpdateRequest(api, subfolder, false));
-        assertTrue("No errors/warnings in response", updateResponse.hasError() || updateResponse.getResponse().hasWarnings());
-        /*
-         * verify folder is unchanged as sharing user
-         */
-        reloadedSubfolder = getFolder(api, subfolder.getObjectID());
-        assertNotNull(reloadedSubfolder);
-        super.remember(reloadedSubfolder);
-        assertEquals("Folder name wrong", originalName, reloadedSubfolder.getFolderName());
-        /*
-         * try to delete the folder as guest
-         */
-        CommonDeleteResponse deleteResponse = guestClient.execute(new DeleteRequest(api, true, subfolder));
-        assertTrue("No errors/warnings in response", deleteResponse.hasError() || deleteResponse.getResponse().hasWarnings());
-        /*
-         * verify folder is unchanged as sharing user
-         */
-        reloadedSubfolder = getFolder(api, subfolder.getObjectID());
-        assertNotNull(reloadedSubfolder);
-        super.remember(reloadedSubfolder);
-        assertEquals("Folder name wrong", originalName, reloadedSubfolder.getFolderName());
     }
 
     private void testCreateSubfolderWithAdminFlag(EnumAPI api, int module, int parent) throws Exception {

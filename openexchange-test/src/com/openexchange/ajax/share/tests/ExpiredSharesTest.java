@@ -132,7 +132,7 @@ public class ExpiredSharesTest extends ShareTest {
         /*
          * wait some time until the share is expired
          */
-        Thread.sleep(expirationTime * 2);
+        Thread.sleep(expirationTime);
         /*
          * check if share link still accessible
          */

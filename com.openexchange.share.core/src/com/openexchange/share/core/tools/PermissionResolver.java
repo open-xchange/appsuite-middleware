@@ -66,7 +66,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -82,6 +81,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -143,7 +143,7 @@ public class PermissionResolver {
      * @return The share, or <code>null</code> if not found
      */
     public ShareInfo getShare(FolderObject folder, int guestID) {
-        return getShare(folder.getModule(), String.valueOf(folder.getObjectID()), null, guestID);
+        return getLink(folder.getModule(), String.valueOf(folder.getObjectID()), null, guestID);
     }
 
     /**
@@ -154,7 +154,7 @@ public class PermissionResolver {
      * @return The share, or <code>null</code> if not found
      */
     public ShareInfo getShare(FileStorageFolder folder, int guestID) {
-        return getShare(FolderObject.INFOSTORE, folder.getId(), null, guestID);
+        return getLink(FolderObject.INFOSTORE, folder.getId(), null, guestID);
     }
 
     /**
@@ -164,18 +164,8 @@ public class PermissionResolver {
      * @param guestID The guest entity to get the share for
      * @return The share, or <code>null</code> if not found
      */
-    public ShareInfo getShare(File file, int guestID) {
-        String folderId;
-        String fileId;
-        if (file instanceof UserizedFile) {
-            UserizedFile uFile = (UserizedFile) file;
-            fileId = uFile.getOriginalId();
-            folderId = uFile.getOriginalFolderId();
-        } else {
-            fileId = file.getId();
-            folderId = file.getFolderId();
-        }
-        return getShare(FolderObject.INFOSTORE, folderId, fileId, guestID);
+    public ShareInfo getLink(File file, int guestID) {
+        return getLink(FolderObject.INFOSTORE, file.getFolderId(), file.getId(), guestID);
     }
 
     /**
@@ -187,20 +177,13 @@ public class PermissionResolver {
      * @param guestID The guest entity to get the share for
      * @return The share, or <code>null</code> if not found
      */
-    private ShareInfo getShare(int moduleID, String folder, String item, int guestID) {
+    private ShareInfo getLink(int moduleID, String folder, String item, int guestID) {
         String module = services.getService(ModuleSupport.class).getShareModule(moduleID);
-        List<ShareInfo> shares = null;
+        ShareTarget target = new ShareTarget(moduleID, folder, item);
         try {
-            shares = services.getService(ShareService.class).getShares(session, module, folder, item);
+            return services.getService(ShareService.class).optLink(session, target);
         } catch (OXException e) {
-            getLogger(PermissionResolver.class).error("Error shares for folder {}, item {} in module {}", folder, item, module, e);
-        }
-        if (null != shares && 0 < shares.size()) {
-            for (ShareInfo share : shares) {
-                if (share.getGuest().getGuestID() == guestID) {
-                    return share;
-                }
-            }
+            getLogger(PermissionResolver.class).error("Error getting share link for folder {}, item {} in module {}", folder, item, module, e);
         }
         return null;
     }

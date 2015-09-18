@@ -50,11 +50,9 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
  * {@link ShareLink}
@@ -68,7 +66,6 @@ public class ShareLink {
     private final String password;
     private final Date expiry;
     private final boolean isNew;
-    private final Map<String, Object> meta;
 
     /**
      * Initializes a new {@link ShareLink}.
@@ -91,11 +88,6 @@ public class ShareLink {
         } else {
             expiry = null;
         }
-        meta = (Map<String, Object>) JSONCoercion.coerceToNative(json.optJSONObject("meta"));
-    }
-
-    public Map<String, Object> getMeta() {
-        return meta;
     }
 
     public boolean isNew() {

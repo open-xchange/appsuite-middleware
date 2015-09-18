@@ -164,6 +164,15 @@ public abstract class AbstractFindRequest implements Serializable {
         return facets.get(0).getValueId();
     }
 
+    public String getAccountId() {
+        List<ActiveFacet> facets = facetMap.get(CommonFacetType.ACCOUNT);
+        if (facets == null || facets.isEmpty()) {
+            return null;
+        }
+
+        return facets.get(0).getValueId();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

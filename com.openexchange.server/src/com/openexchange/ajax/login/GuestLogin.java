@@ -71,7 +71,7 @@ import com.openexchange.login.LoginRampUpService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestShare;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
 
@@ -93,11 +93,11 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
 
     @Override
     protected boolean checkAuthenticationMode(AuthenticationMode authenticationMode) throws OXException {
-        return (AuthenticationMode.GUEST_PASSWORD == authenticationMode);
+        return (AuthenticationMode.GUEST_PASSWORD == authenticationMode || AuthenticationMode.GUEST == authenticationMode);
     }
 
     @Override
-    protected LoginInfo getLoginInfoFrom(GuestShare share, HttpServletRequest httpRequest) throws OXException {
+    protected LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException {
         try {
             final String login;
             final String pass;
@@ -115,13 +115,10 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
 
                 pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                if (Strings.isEmpty(pass)) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
-                }
             } else {
                 // By request body
                 JSONObject jBody = new JSONObject(body);
-                pass = jBody.getString("password");
+                pass = jBody.optString("password", null);
                 login = jBody.getString("login");
             }
 
@@ -148,10 +145,13 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException {
+    protected User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException {
         // Resolve the user
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        User user = userService.getUser(share.getGuest().getGuestID(), context);
+        User user = userService.getUser(guest.getGuestID(), context);
+        if (Strings.isEmpty(user.getUserPassword()) && Strings.isEmpty(loginInfo.getPassword())) {
+            return user;
+        }
 
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {

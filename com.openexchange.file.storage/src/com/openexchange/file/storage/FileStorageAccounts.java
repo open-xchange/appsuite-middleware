@@ -82,4 +82,14 @@ public class FileStorageAccounts {
         return IDMangler.mangle(serviceId, accountId);
     }
 
+    /**
+     * Checks whether the given account is the users default file storage account.
+     *
+     * @param account The account to get the ID for
+     * @return <code>true</code> if it's the default account
+     */
+    public static boolean isDefaultAccount(FileStorageAccount account) {
+        return "com.openexchange.infostore".equals(account.getFileStorageService().getId()) && "infostore".equals(account.getId());
+    }
+
 }

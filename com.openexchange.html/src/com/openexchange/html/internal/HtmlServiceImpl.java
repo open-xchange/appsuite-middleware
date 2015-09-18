@@ -58,6 +58,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.Normalizer;
@@ -78,6 +80,7 @@ import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -661,7 +664,31 @@ public final class HtmlServiceImpl implements HtmlService {
             prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
-            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            Renderer renderer = new Renderer(new Segment(new Source(prepared), 0, prepared.length())) {
+                @Override
+                public String renderHyperlinkURL(final StartTag startTag) {
+                    /*
+                     * The default returns the 'href' content in angle brackets, i.e.
+                     * <a href="http://www.example.com">Link</a> is transformed into
+                     * <http://www.example.com>. Some web mailers tend to remove text
+                     * within angle brackets in plain text modes, which leads to missing
+                     * links in plain text replies/forwards. We override this behavior
+                     * here, to return the href content as is as described in the JavaDoc
+                     * of Renderer().renderHyperlinkURL(StartTag).
+                     */
+                    final String href=startTag.getAttributeValue("href");
+                    if (href==null || href.startsWith("javascript:")) return null;
+                    try {
+                        URI uri=new URI(href);
+                        if (!uri.isAbsolute()) return null;
+                    } catch (URISyntaxException ex) {
+                        return null;
+                    }
+                    return href;
+                }
+            };
+            renderer.setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref);
+            String text = quoteText(renderer.toString());
             // Drop heading whitespaces
             text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
             // ... but keep enforced ones

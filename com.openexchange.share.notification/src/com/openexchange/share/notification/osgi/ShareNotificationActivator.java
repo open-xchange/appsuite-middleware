@@ -42,6 +42,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     protected void startBundle() throws Exception {
         // Initialize share notification service
         final DefaultNotificationService defaultNotificationService = new DefaultNotificationService(this);
@@ -51,7 +52,6 @@ public class ShareNotificationActivator extends HousekeepingActivator {
 
         // track additional share notification handlers
         track(ShareNotificationHandler.class, new ServiceTrackerCustomizer<ShareNotificationHandler, ShareNotificationHandler>() {
-
             @Override
             public ShareNotificationHandler addingService(ServiceReference<ShareNotificationHandler> reference) {
                 ShareNotificationHandler handler = context.getService(reference);

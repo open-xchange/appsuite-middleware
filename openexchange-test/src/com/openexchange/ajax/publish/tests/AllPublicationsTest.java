@@ -191,7 +191,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         infostorePublication.setDisplayName("My InfostoreFolder Publication");
         expectedPublications.add(infostorePublication);
 
-        Publication infostoreItemPublication = generateInfostoreItemPublication(String.valueOf(data.getId()), discovery);
+        Publication infostoreItemPublication = generateInfostoreItemPublication(getObjectId(data), discovery);
         expectedPublications.add(infostoreItemPublication);
 
         for (Publication p : expectedPublications) {

@@ -98,7 +98,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -582,6 +582,37 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public User[] getUser(final Context ctx, final int[] userIds, Connection con) throws OXException {
+        if (0 == userIds.length) {
+            return new User[0];
+        }
+        return getUser(ctx, con, userIds);
+    }
+
+    @Override
+    public User[] getGuestsCreatedBy(Connection con, Context context, int userId) throws OXException {
+        int[] userIds;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            result = stmt.executeQuery();
+            TIntList tmp = new TIntArrayList();
+            while (result.next()) {
+                tmp.add(result.getInt(1));
+            }
+            userIds = tmp.toArray();
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return getUser(context, con, userIds);
+    }
+
     private static void loadLoginInfo(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
             final TIntIterator iter = users.keySet().iterator();
@@ -847,7 +878,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
@@ -858,27 +889,25 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
         if (connection == null) {
             updatePasswordInternal(context, userId, mech, password);
             return;
         }
 
-        if (null != mech) {
-            PreparedStatement stmt = null;
-            try {
-                stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
-                int pos = 1;
-                stmt.setString(pos++, password);
-                stmt.setString(pos++, mech.getIdentifier());
-                stmt.setInt(pos++, context.getContextId());
-                stmt.setInt(pos++, userId);
-                stmt.execute();
-            } catch (SQLException e) {
-                throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(stmt);
-            }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL_UPDATE_PASSWORD_AND_MECH);
+            int pos = 1;
+            stmt.setString(pos++, password);
+            stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, userId);
+            stmt.execute();
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -920,6 +949,15 @@ public class RdbUserStorage extends UserStorage {
         setAttributeAndReturnUser(name, value, userId, context, false);
     }
 
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (value == null) {
+            deleteAttribute(name, userId, context, con);
+        } else {
+            insertOrUpdateAttribute(name, value, userId, context, con);
+        }
+    }
+
     /**
      * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>
@@ -938,20 +976,34 @@ public class RdbUserStorage extends UserStorage {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-
+        User retval = null;
         Connection con = DBPool.pickupWriteable(context);
+        boolean rollback = false;
         try {
+            Databases.startTransaction(con);
+            rollback = true;
             if (value == null) {
                 deleteAttribute(name, userId, context, con);
             } else {
                 insertOrUpdateAttribute(name, value, userId, context, con);
             }
-            return returnUser ? getUser(context, con, new int[] { userId })[0] : null;
-        } finally {
-            if (con != null) {
-                DBPool.closeWriterSilent(context, con);
+            if (returnUser) {
+                retval = getUser(context, con, new int[] { userId })[0];
             }
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != con) {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+            DBPool.closeWriterSilent(context, con);
         }
+        return retval;
     }
 
     private static void deleteAttribute(String name, int userId, Context context, Connection con) throws OXException {
@@ -973,10 +1025,7 @@ public class RdbUserStorage extends UserStorage {
         int contextId = context.getContextId();
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
         try {
-            Databases.startTransaction(con);
-            rollback = true;
             stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -1017,18 +1066,12 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
             }
-            con.commit();
-            rollback = false;
         } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw OXExceptions.general(OXExceptionStrings.MESSAGE, e);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(con);
         }
     }
 

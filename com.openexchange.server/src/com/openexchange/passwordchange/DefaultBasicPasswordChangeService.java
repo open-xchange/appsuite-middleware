@@ -55,7 +55,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -89,16 +90,7 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
         User user = userService.getUser(event.getSession().getUserId(), ctx);
         UserImpl updatedUser = new UserImpl(user);
 
-        if (Strings.isEmpty(event.getNewPassword())) {
-            updatedUser.setUserPassword(null);
-        } else {
-            if (Strings.isEmpty(user.getPasswordMech())) {
-                updatedUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-                updatedUser.setUserPassword(getEncodedPassword(PasswordMech.BCRYPT.getIdentifier(), event.getNewPassword()));
-            } else {
-                updatedUser.setUserPassword(getEncodedPassword(user.getPasswordMech(), event.getNewPassword()));
-            }
-        }
+        prepareUserUpdate(event, user, updatedUser);
 
         userService.updatePassword(updatedUser, ctx);
         userService.invalidateUser(ctx, event.getSession().getUserId());
@@ -108,6 +100,26 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             if (guestService != null) {
                 guestService.updateGuestUser(updatedUser, ctx.getContextId());
             }
+        }
+    }
+
+    /**
+     * @param event
+     * @param user
+     * @param updatedUser
+     * @throws OXException
+     */
+    protected void prepareUserUpdate(PasswordChangeEvent event, User user, UserImpl updatedUser) throws OXException {
+        if (Strings.isEmpty(event.getNewPassword())) {
+            updatedUser.setUserPassword(null);
+        } else {
+            PasswordMechFactory passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
+            IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
+            if (Strings.isNotEmpty(user.getPasswordMech())) {
+                iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+            }
+            updatedUser.setPasswordMech(iPasswordMech.getIdentifier());
+            updatedUser.setUserPassword(iPasswordMech.encode(event.getNewPassword()));
         }
     }
 }

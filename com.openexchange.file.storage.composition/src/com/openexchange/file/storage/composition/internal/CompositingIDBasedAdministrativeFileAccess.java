@@ -62,11 +62,14 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -182,6 +185,12 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
         FileID fileID = toFileID(id);
         AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
         return fileAccess.canDelete(fileID.getFolderId(), fileID.getFileId(), userId);
+    }
+
+    @Override
+    public TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        return requireFileAccess(folderID.getService(), folderID.getAccountId()).getDocuments(folderID.getFolderId(), userId, fields, sort, order, range);
     }
 
     private static FileID toFileID(String id) {
