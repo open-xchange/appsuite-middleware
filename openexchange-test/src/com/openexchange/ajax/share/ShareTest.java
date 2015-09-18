@@ -260,7 +260,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject insertPrivateFolder(EnumAPI api, int module, int parent, String name) throws Exception {
-        return insertPrivateFolder(client, api, module, parent, name);
+        FolderObject createdFolder = insertPrivateFolder(client, api, module, parent, name);
+        assertNotNull(createdFolder);
+        remember(createdFolder);
+        assertEquals("Folder name wrong", name, createdFolder.getFolderName());
+        return createdFolder;
     }
 
     protected static FolderObject insertPrivateFolder(AJAXClient client, EnumAPI api, int module, int parent, String name) throws Exception {
@@ -562,6 +566,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
         FolderObject createdFolder = insertFolder(client, api, folder);
         assertNotNull(createdFolder);
+        remember(createdFolder);
         assertEquals("Folder name wrong", folder.getFolderName(), createdFolder.getFolderName());
         return createdFolder;
     }
