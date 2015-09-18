@@ -141,7 +141,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
                 @Override
                 public boolean accept(File pathname) {
-                    return pathname.isFile() && pathname.getName().startsWith(defaultPrefix);
+                    return pathname.isFile() && pathname.getName().startsWith(defaultPrefix, 0);
                 }
             };
             this.logger = logger;
