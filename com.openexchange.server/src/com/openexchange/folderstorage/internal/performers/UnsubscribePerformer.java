@@ -165,16 +165,13 @@ public final class UnsubscribePerformer extends AbstractPerformer {
         /*
          * Unsubscribe contained folder
          */
-        final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
+        Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
         /*
          * Check folder permission
          */
-        final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+        Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
         if (!permission.isVisible()) {
-            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                getFolderInfo4Error(folder),
-                getUserInfo4Error(),
-                getContextInfo4Error());
+            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
         }
         /*
          * Check subfolders

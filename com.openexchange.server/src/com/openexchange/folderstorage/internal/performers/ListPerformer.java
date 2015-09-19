@@ -228,17 +228,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     private Folder checkParentFolder(String treeId, String parentId, Collection<FolderStorage> openedStorages) throws OXException {
         FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
         Folder parent = folderStorage.getFolder(treeId, parentId, storageParameters);
-        /*
-         * Check folder permission for parent folder
-         */
+
+        // Check folder permission for parent folder
         Permission parentPermission = CalculatePermission.calculate(parent, this, getAllowedContentTypes());
         if (!parentPermission.isVisible()) {
-            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                getFolderInfo4Error(parent),
-                getUserInfo4Error(),
-                getContextInfo4Error());
+            throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(parent), getUserInfo4Error(), getContextInfo4Error());
         }
-
         return parent;
     }
 

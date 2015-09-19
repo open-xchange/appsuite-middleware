@@ -125,32 +125,32 @@ public class ModuleSupportImpl implements ModuleSupport {
         if (target.isFolder()) {
             UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
             return new FolderTargetProxy(target.getModule(), folder);
-        } else {
-            return handlers.get(target.getModule()).loadTarget(target, session);
         }
+
+        return handlers.get(target.getModule()).loadTarget(target, session);
     }
 
     @Override
     public boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException {
-        if (item == null) {
-            if (null != Module.getForFolderConstant(module)) {
-                try {
-                    UserService userService = requireService(UserService.class, services);
-                    Context context = userService.getContext(contextID);
-                    User user = userService.getUser(guestID, context);
-                    requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
-                    return true;
-                } catch (OXException e) {
-                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                        return false;
-                    }
-                    throw e;
-                }
-            } else {
-                return true;
-            }
-        } else {
+        if (item != null) {
             return handlers.get(module).isVisible(folder, item, contextID, guestID);
+        }
+
+        if (null == Module.getForFolderConstant(module)) {
+            return true;
+        }
+
+        try {
+            UserService userService = requireService(UserService.class, services);
+            Context context = userService.getContext(contextID);
+            User user = userService.getUser(guestID, context);
+            requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null);
+            return true;
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                return false;
+            }
+            throw e;
         }
     }
 
@@ -159,48 +159,48 @@ public class ModuleSupportImpl implements ModuleSupport {
         if (null == target) {
             return false;
         }
-        if (target.isFolder()) {
-            if (null != Module.getForFolderConstant(target.getModule())) {
-                try {
-                    UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
-                    return folder.getOwnPermission().isAdmin();
-                } catch (OXException e) {
-                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                        return false;
-                    }
-                    throw e;
-                }
-            } else {
-                return true;
-            }
-        } else {
+        if (!target.isFolder()) {
             return handlers.get(target.getModule()).mayAdjust(target, session);
+        }
+
+        if (null == Module.getForFolderConstant(target.getModule())) {
+            return true;
+        }
+
+        try {
+            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            return folder.getOwnPermission().isAdmin();
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
+                return false;
+            }
+            throw e;
         }
     }
 
     @Override
     public boolean exists(int module, String folder, String item, int contextID, int guestID) throws OXException {
-        if (item == null) {
-            if (null != Module.getForFolderConstant(module)) {
-                try {
-                    UserService userService = requireService(UserService.class, services);
-                    Context context = userService.getContext(contextID);
-                    User user = userService.getUser(guestID, context);
-                    return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null));
-                } catch (OXException e) {
-                    if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
-                        return true;
-                    }
-                    if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                        return false;
-                    }
-                    throw e;
-                }
-            } else {
+        if (item != null) {
+            return handlers.get(module).exists(folder, item, contextID, guestID);
+        }
+
+        if (null == Module.getForFolderConstant(module)) {
+            return true;
+        }
+
+        try {
+            UserService userService = requireService(UserService.class, services);
+            Context context = userService.getContext(contextID);
+            User user = userService.getUser(guestID, context);
+            return (null != requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, folder, user, context, null));
+        } catch (OXException e) {
+            if (FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e)) {
                 return true;
             }
-        } else {
-            return handlers.get(module).exists(folder, item, contextID, guestID);
+            if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                return false;
+            }
+            throw e;
         }
     }
 
@@ -241,7 +241,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 user.getId(), user.getGroups(), permissionBits.getAccessibleModules(), Autoboxing.i(moduleID), context, true, null)) {
                 accessibleModules.add(moduleID);
             } else {
-                ModuleHandler handler = handlers.opt(moduleID);
+                ModuleHandler handler = handlers.opt(Autoboxing.i(moduleID));
                 if (null != handler && handler.hasTargets(contextID, guestID)) {
                     accessibleModules.add(moduleID);
                 }

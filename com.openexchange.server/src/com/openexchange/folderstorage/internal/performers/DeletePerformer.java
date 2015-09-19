@@ -201,27 +201,18 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
-            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+            Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
             if (!permission.isVisible()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    getFolderInfo4Error(folder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
             if (!permission.isAdmin()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    getFolderInfo4Error(folder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
             /*
              * Delete permissions
              */
             if (!canDeleteAllObjects(permission, folderId, treeId, folderStorage)) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
-                    getFolderInfo4Error(folder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
