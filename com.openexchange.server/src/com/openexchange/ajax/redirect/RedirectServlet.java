@@ -74,14 +74,13 @@ public class RedirectServlet extends HttpServlet {
         req.getSession(true);
 
         String location = req.getParameter("location");
-
         if (location == null) {
-            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing \"location\" parameter");
             return;
         }
 
         if (!isRelative(location)) {
-            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Specified location must not be absolute.");
             return;
         }
 
@@ -90,17 +89,14 @@ public class RedirectServlet extends HttpServlet {
             return;
         }
 
-        final String referer = purgeHost(req.getHeader("referer"));
-
+        String referer = purgeHost(req.getHeader("referer"));
         if (referer == null) {
-            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, null);
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing \"referer\" header");
             return;
         }
 
         location = assumeRelative(referer, location);
-
         resp.sendRedirect(AJAXUtility.encodeUrl(location, true, true));
-
     }
 
     private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");
@@ -110,24 +106,26 @@ public class RedirectServlet extends HttpServlet {
         return !matcher.find();
     }
 
+    private static final Pattern HOST_PATTERN = Pattern.compile("^(\\w*:)?//\\w*/");
+
     private String purgeHost(final String location) {
         if (location == null) {
             return null;
         }
-        return location.replaceAll("^(\\w*:)?//\\w*/", "");
+        return HOST_PATTERN.matcher(location).replaceAll("");
     }
 
     private boolean isServerRelative(final String location) {
         return location.length() > 0 && location.charAt(0) == '/';
     }
 
-    private String assumeRelative(final String referer, final String location) {
-        if (referer.endsWith("/")) {
-            return "/" + referer + location;
+    private String assumeRelative(String referer, String location) {
+        int index = referer.lastIndexOf('/');
+        if (index >= 0) {
+            return "/" + referer.substring(0, index) + "/" + location;
         }
-        final int index = referer.lastIndexOf('/');
 
-        return "/" + referer.substring(0, index) + "/" + location;
+        return "/" + referer + "/" + location;
     }
 
 }
