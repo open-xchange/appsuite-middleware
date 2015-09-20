@@ -132,17 +132,14 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check folder permission for folder
              */
-            final Permission ownPermission;
+            Permission ownPermission;
             if (null == getSession()) {
                 ownPermission = CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
             } else {
                 ownPermission = CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
             }
             if (!ownPermission.isVisible()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    getFolderInfo4Error(folder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
             // TODO: All or only subscribed subfolders?
             final UserizedFolder userizedFolder =

@@ -284,12 +284,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Real tree is not capable to create a folder of an unsupported content type
              */
-            throw FolderExceptionErrorMessage.INVALID_CONTENT_TYPE.create(
-                parentId,
-                folderContentType.toString(),
-                treeId,
-                Integer.valueOf(user.getId()),
-                Integer.valueOf(context.getContextId()));
+            throw FolderExceptionErrorMessage.INVALID_CONTENT_TYPE.create(parentId, folderContentType.toString(), treeId, Integer.valueOf(user.getId()), Integer.valueOf(context.getContextId()));
         }
 
         /*

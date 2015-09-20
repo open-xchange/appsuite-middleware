@@ -219,15 +219,8 @@ public abstract class AbstractPerformer {
      * @return The context information for an error message.
      */
     protected String getContextInfo4Error() {
-        final Context context = this.context == null ? session.getContext() : this.context;
-        if (null == context) {
-            return "";
-        }
-        final String name = context.getName();
-        if (null == name || 0 == name.length()) {
-            return String.valueOf(context.getContextId());
-        }
-        return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+        Context context = this.context == null ? session.getContext() : this.context;
+        return null == context ? "" : Integer.toString(context.getContextId());
     }
 
     /**
@@ -236,15 +229,8 @@ public abstract class AbstractPerformer {
      * @return The user information for an error message.
      */
     protected String getUserInfo4Error() {
-        final User user = this.user == null ? session.getUser() : this.user;
-        if (null == user) {
-            return "";
-        }
-        final String name = user.getDisplayName();
-        if (null == name || 0 == name.length()) {
-            return String.valueOf(user.getId());
-        }
-        return new StringBuilder(16).append(name).append(" (").append(user.getId()).append(')').toString();
+        User user = this.user == null ? session.getUser() : this.user;
+        return null == user ? "" : Integer.toString(user.getId());
     }
 
     /**
@@ -252,15 +238,8 @@ public abstract class AbstractPerformer {
      *
      * @return The folder information for an error message.
      */
-    protected String getFolderInfo4Error(final Folder folder) {
-        if (null == folder) {
-            return "";
-        }
-        final String name = folder.getLocalizedName(user == null ? session.getUser().getLocale() : user.getLocale());
-        if (null == name || 0 == name.length()) {
-            return folder.getID();
-        }
-        return new StringBuilder(16).append(name).append(" (").append(folder.getID()).append(')').toString();
+    protected String getFolderInfo4Error(Folder folder) {
+        return null == folder ? "" : folder.getID();
     }
 
     /**

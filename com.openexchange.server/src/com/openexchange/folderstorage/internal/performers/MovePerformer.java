@@ -178,12 +178,9 @@ final class MovePerformer extends AbstractPerformer {
          * Check permission on folder
          */
         {
-            final Permission permission = effectivePermission(storageFolder);
+            Permission permission = effectivePermission(storageFolder);
             if (!permission.isAdmin()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                    getFolderInfo4Error(storageFolder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(getFolderInfo4Error(storageFolder), getUserInfo4Error(), getContextInfo4Error());
             }
         }
         /*
@@ -248,13 +245,10 @@ final class MovePerformer extends AbstractPerformer {
          * Check permission on destination folder
          */
         {
-            final Folder destFolder = virtualStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
-            final Permission permission = effectivePermission(destFolder);
+            Folder destFolder = virtualStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
+            Permission permission = effectivePermission(destFolder);
             if (permission.getFolderPermission() < Permission.CREATE_SUB_FOLDERS) {
-                throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(
-                    getUserInfo4Error(),
-                    getFolderInfo4Error(destFolder),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(getUserInfo4Error(), getFolderInfo4Error(destFolder), getContextInfo4Error());
             }
         }
         /*
@@ -416,7 +410,7 @@ final class MovePerformer extends AbstractPerformer {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
                  */
-                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(folder.getName());
+                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
         }
     }
@@ -429,17 +423,14 @@ final class MovePerformer extends AbstractPerformer {
         /*
          * Iterate subfolders
          */
-        for (final SortableId id : subfolders) {
-            final String subfolderId = id.getId();
-            final FolderInfo subfolder;
+        for (SortableId id : subfolders) {
+            String subfolderId = id.getId();
+            FolderInfo subfolder;
             if (check) {
-                final Folder f = storage.getFolder(treeId, subfolderId, params);
-                final Permission permission = effectivePermission(f);
+                Folder f = storage.getFolder(treeId, subfolderId, params);
+                Permission permission = effectivePermission(f);
                 if (!permission.isAdmin()) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                        getFolderInfo4Error(f),
-                        getUserInfo4Error(),
-                        getContextInfo4Error());
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(getFolderInfo4Error(f), getUserInfo4Error(), getContextInfo4Error());
                 }
                 subfolder = new FolderInfo(subfolderId, f.getName());
             } else {

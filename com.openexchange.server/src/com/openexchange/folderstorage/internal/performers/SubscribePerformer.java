@@ -182,10 +182,7 @@ public final class SubscribePerformer extends AbstractPerformer {
              * Check folder permission
              */
             if (!CalculatePermission.calculate(sourceFolder, this, ALL_ALLOWED).isVisible()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                    getFolderInfo4Error(sourceFolder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(sourceFolder), getUserInfo4Error(), getContextInfo4Error());
             }
             /*
              * Determine parent in target tree
