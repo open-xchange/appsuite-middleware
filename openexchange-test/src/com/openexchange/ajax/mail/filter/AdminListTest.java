@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.filter;
 
 import java.rmi.Naming;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -80,6 +81,7 @@ public class AdminListTest extends AbstractMailFilterTest {
     private AJAXSession adminSession;
 
     private Rule rule;
+    private String rid = null;
 
     public AdminListTest(final String name) {
         super(name);
@@ -101,7 +103,8 @@ public class AdminListTest extends AbstractMailFilterTest {
         cap.add("webmail");
         Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, null, null, userCreds);
+        Set<String> emptySet = Collections.emptySet();
+        usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
     }
 
     @Override
@@ -118,8 +121,11 @@ public class AdminListTest extends AbstractMailFilterTest {
             cap.add("webmail");
             Credentials userCreds = new Credentials(AJAXConfig.getProperty(User.OXAdmin.getLogin()), AJAXConfig.getProperty(User.OXAdmin.getPassword()));
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-            usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, null, cap, null, userCreds);
-
+            Set<String> emptySet = Collections.emptySet();
+            usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
+            if (rid != null) {
+                deleteRule(rid, null, userClient.getSession());
+            }
             adminClient = null;
         } finally {
             super.tearDown();
@@ -139,7 +145,7 @@ public class AdminListTest extends AbstractMailFilterTest {
         final IsComparison isComp = new IsComparison();
         rule.setTest(new HeaderTest(isComp, new String[] { "testheader" }, new String[] { "testvalue" }));
 
-        final String rid = insertRule(rule, null, userSession);
+        rid = insertRule(rule, null, userSession);
 
         // Get rules of user
         final Rule[] userRules = listRules(userSession);

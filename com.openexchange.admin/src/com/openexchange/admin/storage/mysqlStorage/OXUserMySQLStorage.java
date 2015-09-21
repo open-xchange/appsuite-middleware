@@ -483,7 +483,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (null != cacheService) {
                     try {
                         final Cache jcs = cacheService.getCache("UserConfiguration");
-                        jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                        CacheKey key = jcs.newCacheKey(ctx.getId(), user.getId().toString(), String.valueOf(false));
+                        jcs.remove(key);
                     } catch (final OXException e) {
                         log.error("", e);
                     }
