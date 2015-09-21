@@ -3129,7 +3129,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         RecurringResultsInterface resultsOld = calculateRecurringIgnoringExceptions(edao, 0, 0, 0);
         RecurringResultInterface lastOccurrenceOld = resultsOld.getRecurringResult(resultsOld.size() - 1);
         if (lastOccurrenceNew.getEnd() != lastOccurrenceOld.getEnd()) {
-            LOG.debug(cdao.getObjectID() + ": End changed (" + lastOccurrenceNew.getStart() + ")->(" + lastOccurrenceOld.getStart() + ")");
+            LOG.debug(cdao.getObjectID() + ": End changed (" + lastOccurrenceNew.getEnd() + ")->(" + lastOccurrenceOld.getEnd() + ")");
             return true;
         }
         return false;
