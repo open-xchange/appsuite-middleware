@@ -1741,7 +1741,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             infostoreFacade.commit();
         } catch (final OXException x) {
             infostoreFacade.rollback();
-            if (InfostoreExceptionCodes.ALREADY_LOCKED.equals(x)) {
+            if (InfostoreExceptionCodes.CURRENTLY_LOCKED.equals(x)) {
                 throw OXFolderExceptionCode.DELETE_FAILED_LOCKED_DOCUMENTS.create(x, Integer.valueOf(folderID), Integer.valueOf(ctx.getContextId()));
             }
             throw x;

@@ -83,7 +83,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG_DISPLAY = "You do not have the appropriate permissions to delete this version.";
 
     // The document is already locked. Please try again later.
-    public static final String ALREADY_LOCKED_MSG_DISPLAY = "The document is already locked. Please try again later.";
+    public static final String CURRENTLY_LOCKED_MSG_DISPLAY = "The document is currently locked. Please try again later.";
 
     // You do not have the appropriate permissions to unlock the document.
     public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG_DISPLAY = "You do not have the appropriate permissions to unlock the document.";
