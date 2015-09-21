@@ -5918,7 +5918,7 @@ msgstr ""
 
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
-msgid "The document is already locked. Please try again later."
+msgid "The document is currently locked. Please try again later."
 msgstr ""
 
 #. You do not have the appropriate permissions to unlock the document.
