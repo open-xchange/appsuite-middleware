@@ -1,4 +1,53 @@
 /*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -17,190 +66,28 @@
 
 package com.openexchange.osgi;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
-
-
 /**
- * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
+ * This class exists for compatibility reasons. Consider using {@link com.openexchange.exception.ExceptionUtils}
+ * instead.
+ *
+ * @see com.openexchange.exception.ExceptionUtils
  */
 public class ExceptionUtils {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
-
     /**
-     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     *
-     * @param t The <tt>Throwable</tt> to check
+     * Delegates to {@link com.openexchange.exception.ExceptionUtils#handleThrowable(Throwable)}.
+     * @see com.openexchange.exception.ExceptionUtils#handleThrowable(Throwable)
      */
     public static void handleThrowable(final Throwable t) {
-        if (t instanceof ThreadDeath) {
-            String marker = " ---=== /!\\ ===--- ";
-            LOG.error("{}Thread death{}", marker, marker, t);
-            throw (ThreadDeath) t;
-        }
-        if (t instanceof OutOfMemoryError) {
-            OutOfMemoryError oom = (OutOfMemoryError) t;
-            handleOOM(oom);
-            throw oom;
-        }
-        if (t instanceof VirtualMachineError) {
-            String marker = " ---=== /!\\ ===--- ";
-            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, t);
-            throw (VirtualMachineError) t;
-        }
+        com.openexchange.exception.ExceptionUtils.handleThrowable(t);
     }
 
     /**
-     * Handles given OutOfMemoryError instance
-     * <p>
-     * <b><i>Does not re-throw given OutOfMemoryError instance</i></b>
-     *
-     * @param oom The OutOfMemoryError instance
+     * Delegates to {@link com.openexchange.exception.ExceptionUtils#handleOOM(OutOfMemoryError)}.
+     * @see com.openexchange.exception.ExceptionUtils#handleOOM(OutOfMemoryError)
      */
     public static void handleOOM(OutOfMemoryError oom) {
-        String message = oom.getMessage();
-        if ("unable to create new native thread".equalsIgnoreCase(message)) {
-            if (!Boolean.TRUE.equals(System.getProperties().get("__thread_dump_created"))) {
-                System.getProperties().put("__thread_dump_created", Boolean.TRUE);
-                boolean error = true;
-                try {
-                    // Dump all the threads to the log
-                    Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-                    String ls = Strings.getLineSeparator();
-                    LOG.info("{}Threads: {}", ls, threads.size());
-                    StringBuilder sb = new StringBuilder(2048);
-                    for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
-                        Thread thread = mapEntry.getKey();
-                        sb.setLength(0);
-                        sb.append("        Thread: ").append(thread).append(" java.lang.Thread.State: ").append(thread.getState().name()).append(ls);
-                        for (StackTraceElement elem : mapEntry.getValue()) {
-                            sb.append(elem).append(ls);
-                        }
-                        LOG.info(sb.toString());
-                    }
-                    sb = null; // Might help GC
-                    LOG.info("{}    Thread dump finished{}", ls, ls);
-                    error = false;
-                } finally {
-                    if (error) {
-                        System.getProperties().remove("__thread_dump_created");
-                    }
-                }
-            }
-        } else if ("Java heap space".equalsIgnoreCase(message)) {
-            try {
-                MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-
-                Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
-
-                // Is HeapDumpOnOutOfMemoryError enabled?
-                if (!heapDumpArgs.getFirst().booleanValue() && !Boolean.TRUE.equals(System.getProperties().get("__heap_dump_created"))) {
-                    System.getProperties().put("__heap_dump_created", Boolean.TRUE);
-                    boolean error = true;
-                    try {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
-                        String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
-                        String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
-                        String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
-                        server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
-                        LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
-                        error = false;
-                    } finally {
-                        if (error) {
-                            System.getProperties().remove("__heap_dump_created");
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                // Failed for any reason...
-            }
-        }
-        String marker = " ---=== /!\\ ===--- ";
-        LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", marker, marker, oom);
-    }
-
-    /**
-     * Truncates given {@link Throwable}'s stack trace.
-     *
-     * @param t The {@code Throwable} instance
-     * @return The truncated {@code Throwable} instance
-     */
-    public static Throwable truncateThrowable(Throwable t) {
-        if (null == t) {
-            return t;
-        }
-
-        StackTraceElement[] stackTrace = t.getStackTrace();
-        int threshold = 20;
-        int length = stackTrace.length;
-        if (length <= threshold) {
-            return t;
-        }
-
-        List<StackTraceElement> truncatedStackTrace = new LinkedList<StackTraceElement>();
-        for (int i = 0; i < length; i++) {
-            if (i <= threshold) {
-                truncatedStackTrace.add(stackTrace[i]);
-            } else {
-                String prefix = "com.openexchange.http.grizzly.service.http";
-                String className = stackTrace[i].getClassName();
-                if (!className.startsWith(prefix)) {
-                    truncatedStackTrace.add(stackTrace[i]);
-                }
-            }
-        }
-
-        FastThrowable ft = new FastThrowable(t.getMessage(), t.getCause());
-        ft.setStackTrace(truncatedStackTrace.toArray(new StackTraceElement[truncatedStackTrace.size()]));
-        return ft;
-    }
-
-    private static Pair<Boolean, String> checkHeapDumpArguments() {
-        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-        List<String> arguments = runtimeMxBean.getInputArguments();
-        boolean heapDumpOnOOm = false;
-        String path = null;
-        for (String argument : arguments) {
-            if ("-XX:+HeapDumpOnOutOfMemoryError".equals(argument)) {
-                heapDumpOnOOm = true;
-            } else if (argument.startsWith("-XX:HeapDumpPath=")) {
-                path = argument.substring(17).trim();
-                File file = new File(path);
-                if (!file.exists() || !file.canWrite()) {
-                   path = null;
-                }
-            }
-        }
-        return new Pair<Boolean, String>(Boolean.valueOf(heapDumpOnOOm), path);
-    }
-
-    // ----------------------------------------------------------------------------- //
-
-    static final class FastThrowable extends Throwable {
-
-        FastThrowable(String message, Throwable cause) {
-            super(null == message ? "<unknkown>" : message);
-        }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
+        com.openexchange.exception.ExceptionUtils.handleOOM(oom);
     }
 
 }
