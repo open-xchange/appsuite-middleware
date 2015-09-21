@@ -126,6 +126,7 @@ public class AdminListTest extends AbstractMailFilterTest {
             if (rid != null) {
                 deleteRule(rid, null, userClient.getSession());
             }
+            adminClient.logout();
             adminClient = null;
         } finally {
             super.tearDown();
@@ -169,9 +170,6 @@ public class AdminListTest extends AbstractMailFilterTest {
             }
             assertTrue("Did not find rule.", foundRule);
         }
-
-        deleteRule(rid, null, userSession);
-        adminClient.logout();
     }
 
 }
