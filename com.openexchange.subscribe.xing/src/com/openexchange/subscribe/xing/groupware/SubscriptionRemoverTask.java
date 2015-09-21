@@ -61,7 +61,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.subscribe.xing.Services;
 
@@ -107,7 +106,7 @@ public abstract class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
     }
 
     @Override

@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
@@ -126,8 +126,8 @@ public final class UpdateTaskToolkit {
      * @param contextId The context identifier
      * @throws OXException If update task cannot be performed
      */
-    private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws OXException {
-        final List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
+    private static void forceUpdateTask0(final UpdateTaskV2 task, final int contextId) throws OXException {
+        final List<UpdateTaskV2> taskList = new ArrayList<UpdateTaskV2>(1);
         taskList.add(task);
         new UpdateExecutor(getSchema(contextId), contextId, taskList).execute();
     }
@@ -141,7 +141,7 @@ public final class UpdateTaskToolkit {
     public static void forceUpdateTaskOnAllSchemas(final String className) throws OXException {
         synchronized (LOCK) {
             // Get update task by class name
-            final UpdateTask updateTask = getUpdateTask(className);
+            final UpdateTaskV2 updateTask = getUpdateTask(className);
             // Get all available schemas
             final Map<String, Set<Integer>> map = getSchemasAndContexts();
             // ... and iterate them
@@ -284,9 +284,9 @@ public final class UpdateTaskToolkit {
      * @return the update task class.
      * @throws OXException if the update task class can not be determined.
      */
-    private static UpdateTask getUpdateTask(final String className) throws OXException {
-        final List<UpdateTask> taskList = DynamicList.getInstance().getTaskList();
-        for (final UpdateTask task : taskList) {
+    private static UpdateTaskV2 getUpdateTask(final String className) throws OXException {
+        final List<UpdateTaskV2> taskList = DynamicList.getInstance().getTaskList();
+        for (final UpdateTaskV2 task : taskList) {
             if (task.getClass().getName().equals(className)) {
                 return task;
             }

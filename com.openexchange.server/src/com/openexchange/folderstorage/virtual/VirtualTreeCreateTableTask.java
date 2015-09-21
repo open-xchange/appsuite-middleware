@@ -59,14 +59,14 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support virtual folder trees.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class VirtualTreeCreateTableTask implements UpdateTask {
+public class VirtualTreeCreateTableTask implements UpdateTaskV2 {
 
     /**
      * Initializes a new {@link VirtualTreeCreateTableTask}.

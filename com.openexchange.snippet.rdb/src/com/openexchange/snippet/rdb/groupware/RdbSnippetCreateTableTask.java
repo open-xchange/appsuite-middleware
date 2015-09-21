@@ -62,7 +62,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
@@ -150,7 +149,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
     }
 
     @Override

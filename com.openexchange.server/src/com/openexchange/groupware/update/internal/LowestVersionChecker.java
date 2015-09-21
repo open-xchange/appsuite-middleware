@@ -50,8 +50,8 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTask.UpdateTaskPriority;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.UpdateTaskV2.UpdateTaskPriority;
 
 /**
  * Checks if the current task has the lowest version number and the highest priority in the list of tasks to execute.
@@ -65,14 +65,14 @@ public class LowestVersionChecker implements DependencyChecker {
     }
 
     @Override
-    public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
+    public boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute) {
         // Tasks without a version can not be sorted by this dependency checker.
         if (Schema.NO_VERSION == task.addedWithVersion()) {
             return false;
         }
         boolean retval = true;
         for (int i = 0; i < toExecute.length && retval; i++) {
-            UpdateTask other = toExecute[i];
+            UpdateTaskV2 other = toExecute[i];
             UpdateTaskPriority priority = UpdateTaskPriority.getInstance(task.getPriority());
             UpdateTaskPriority otherPriority = UpdateTaskPriority.getInstance(other.getPriority());
             retval = Schema.NO_VERSION == other.addedWithVersion() || task.addedWithVersion() < other.addedWithVersion() || (task.addedWithVersion() == other.addedWithVersion() && priority.equalOrHigher(otherPriority));

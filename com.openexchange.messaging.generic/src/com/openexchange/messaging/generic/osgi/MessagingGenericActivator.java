@@ -60,7 +60,7 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask;
@@ -134,8 +134,8 @@ public class MessagingGenericActivator extends HousekeepingActivator {
             final MessagingGenericCreateTableTask createTableTask = new MessagingGenericCreateTableTask();
             registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
                 @Override
-                public Collection<UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTask) createTableTask));
+                public Collection<UpdateTaskV2> getUpdateTasks() {
+                    return Arrays.asList(((UpdateTaskV2) createTableTask));
                 }
             });
             registerService(CreateTableService.class, createTableTask, null);

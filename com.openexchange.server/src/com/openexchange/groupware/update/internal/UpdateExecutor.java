@@ -69,7 +69,6 @@ import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -89,10 +88,10 @@ public final class UpdateExecutor {
 
     private SchemaUpdateState state;
     private final int contextId;
-    private final List<UpdateTask> tasks;
+    private final List<UpdateTaskV2> tasks;
     private SeparatedTasks separatedTasks;
 
-    public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTask> tasks) {
+    public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTaskV2> tasks) {
         super();
         this.state = state;
         this.contextId = contextId;
@@ -155,7 +154,7 @@ public final class UpdateExecutor {
             if (blocking) {
                 removeContexts();
             }
-            final List<UpdateTask> scheduled = new ArrayList<UpdateTask>();
+            final List<UpdateTaskV2> scheduled = new ArrayList<UpdateTaskV2>();
             if (null == separatedTasks) {
                 state = store.getSchema(contextId);
                 // Get filtered & sorted list of update tasks
@@ -166,7 +165,7 @@ public final class UpdateExecutor {
             final int poolId = Database.resolvePool(contextId, true);
 
             // Perform updates
-            for (final UpdateTask task : scheduled) {
+            for (final UpdateTaskV2 task : scheduled) {
                 final String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
@@ -174,7 +173,7 @@ public final class UpdateExecutor {
                     if (task instanceof UpdateTaskV2) {
                         final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
                         final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
-                        ((UpdateTaskV2) task).perform(params);
+                        task.perform(params);
                     } else {
                         task.perform(state, contextId);
                     }

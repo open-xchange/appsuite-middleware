@@ -61,8 +61,8 @@ import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreatePositionsTableTask;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTable;
 import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTableTask;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -107,7 +107,7 @@ public class UWAWidgetActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
-            public Collection<? extends UpdateTask> getUpdateTasks() {
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(updateTask1, updateTask2);
             }
 

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link ExecutedFilter}
@@ -64,7 +64,7 @@ public class ExecutedFilter implements Filter {
     }
 
     @Override
-    public boolean mustBeExecuted(SchemaUpdateState state, UpdateTask task) {
+    public boolean mustBeExecuted(SchemaUpdateState state, UpdateTaskV2 task) {
         return !state.isExecuted(task.getClass().getName());
     }
 }

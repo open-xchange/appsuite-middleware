@@ -58,7 +58,7 @@ import java.util.List;
  */
 public interface SeparatedTasks {
 
-    List<UpdateTask> getBlocking();
+    List<UpdateTaskV2> getBlocking();
 
     List<UpdateTaskV2> getBackground();
 

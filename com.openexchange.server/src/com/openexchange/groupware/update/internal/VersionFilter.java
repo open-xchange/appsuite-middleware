@@ -51,7 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link VersionFilter}
@@ -65,7 +65,7 @@ public final class VersionFilter implements Filter {
     }
 
     @Override
-    public boolean mustBeExecuted(SchemaUpdateState schema, UpdateTask task) {
+    public boolean mustBeExecuted(SchemaUpdateState schema, UpdateTaskV2 task) {
         return task.addedWithVersion() > schema.getDBVersion() || task.addedWithVersion() == Schema.NO_VERSION;
     }
 }

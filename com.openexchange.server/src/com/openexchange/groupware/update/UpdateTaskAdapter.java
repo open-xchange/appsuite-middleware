@@ -82,9 +82,8 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
 
     @Override
     public int getPriority() {
-        @SuppressWarnings("deprecation")
         final
-        int priority = UpdateTask.UpdateTaskPriority.NORMAL.priority;
+        int priority = UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
         return priority;
     }
 

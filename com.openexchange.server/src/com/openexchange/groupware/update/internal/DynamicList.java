@@ -53,14 +53,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link DynamicList} - Registry for {@link UpdateTask update tasks}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DynamicList implements UpdateTaskList<UpdateTask> {
+public final class DynamicList implements UpdateTaskList<UpdateTaskV2> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicList.class);
 
@@ -79,7 +79,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
      * -------------------------------- Member section --------------------------------
      */
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
+    private final ConcurrentMap<Class<? extends UpdateTaskV2>, UpdateTaskV2> taskList = new ConcurrentHashMap<Class<? extends UpdateTaskV2>, UpdateTaskV2>();
 
     /**
      * Initializes a new {@link DynamicList}.
@@ -88,7 +88,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
         super();
     }
 
-    public boolean addUpdateTask(final UpdateTask updateTask) {
+    public boolean addUpdateTask(final UpdateTaskV2 updateTask) {
         final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
         if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
@@ -103,8 +103,8 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
      *
      * @param updateTask The update task
      */
-    public void removeUpdateTask(final UpdateTask updateTask) {
-        final UpdateTask removed = taskList.remove(updateTask.getClass());
+    public void removeUpdateTask(final UpdateTaskV2 updateTask) {
+        final UpdateTaskV2 removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
             LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
         } else {
@@ -113,8 +113,8 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
     }
 
     @Override
-    public List<UpdateTask> getTaskList() {
-        final List<UpdateTask> retval = new ArrayList<UpdateTask>(taskList.size());
+    public List<UpdateTaskV2> getTaskList() {
+        final List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>(taskList.size());
         retval.addAll(taskList.values());
         return retval;
     }
