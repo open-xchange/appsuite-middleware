@@ -62,8 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -79,8 +77,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskToolkit {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
 
     private static final Object LOCK = new Object();
 
@@ -236,16 +232,4 @@ public final class UpdateTaskToolkit {
         return SchemaStore.getInstance().getSchema(contextId);
     }
 
-    private static void lockSchema(final Schema schema, final int contextId) throws OXException {
-        SchemaStore.getInstance().lockSchema(schema, contextId, false);
-    }
-
-    private static void unlockSchema(final Schema schema, final int contextId) throws OXException {
-        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
-    }
-
-    private static void removeContexts(final int contextId) throws OXException, OXException {
-        final int[] contextIds = Database.getContextsInSameSchema(contextId);
-        ContextStorage.getInstance().invalidateContexts(contextIds);
-    }
 }

@@ -65,7 +65,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@SuppressWarnings("deprecation")
 public abstract class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
     private final BundleContext context;

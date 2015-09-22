@@ -54,8 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.databaseold.Database;
@@ -81,8 +79,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public final class UpdateExecutor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateExecutor.class);
-
-    private static final ConcurrentMap<String, SchemaUpdateState> LOCKED_SCHEMAS = new ConcurrentHashMap<String, SchemaUpdateState>();
 
     private static final SchemaStore store = SchemaStore.getInstance();
 
@@ -170,13 +166,9 @@ public final class UpdateExecutor {
                 boolean success = false;
                 try {
                     LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
-                    if (task instanceof UpdateTaskV2) {
-                        final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
-                        final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
-                        task.perform(params);
-                    } else {
-                        task.perform(state, contextId);
-                    }
+                    final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
+                    final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
+                    task.perform(params);
                     success = true;
                 } catch (final OXException e) {
                     LOG.error("", e);
