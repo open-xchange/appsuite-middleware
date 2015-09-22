@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask;
+import com.openexchange.groupware.update.tasks.DropVersionTableTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -570,6 +571,10 @@ public final class InternalList {
 
         // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.1 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new DropVersionTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
