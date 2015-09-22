@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,44 @@
  *
  */
 
-package com.openexchange.http.client.apache;
+package com.openexchange.imap.util;
 
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpState;
+import java.util.concurrent.atomic.AtomicLong;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
-import com.openexchange.http.client.builder.HTTPGetRequestBuilder;
-import com.openexchange.http.client.builder.HTTPMultipartPostRequestBuilder;
-import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
-import com.openexchange.http.client.builder.HTTPPutRequestBuilder;
-import com.openexchange.http.client.builder.HTTPRequestBuilder;
-import com.openexchange.http.client.internal.AbstractBuilder;
+/**
+ * {@link Counter} - Counter to acquire incremental positive <code>long</code> values.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public class Counter {
 
-public class ApacheClientRequestBuilder extends AbstractBuilder implements
-		HTTPRequestBuilder {
+    private final AtomicLong count;
 
-	private HttpState state;
+    /**
+     * Initializes a new {@link RunLoopManager.RoundRobinLoadBalancer}.
+     */
+    public Counter() {
+        super();
+        count = new AtomicLong();
+    }
 
-	private final ManagedFileManagement fileManager;
-
-	private final ApacheHTTPClient client;
-
-	public ApacheClientRequestBuilder(ManagedFileManagement mgmt, ApacheHTTPClient client) {
-		fileManager = mgmt;
-		this.client = client;
-	}
-
-	@Override
-    public HTTPPutRequestBuilder put() {
-		return new ApachePutRequestBuilder(this);
-	}
-
-	@Override
-    public HTTPPostRequestBuilder post() {
-		return new ApachePostRequestBuilder(this);
-	}
-
-	@Override
-    public HTTPMultipartPostRequestBuilder multipartPost() {
-		return new ApacheMultipartPostRequestBuilder(this, fileManager);
-	}
-
-	@Override
-    public HTTPGetRequestBuilder get() {
-		return new ApacheGetRequestBuilder(this);
-	}
-
-	@Override
-    public HTTPDeleteRequestBuilder delete() {
-		return new ApacheDeleteRequestBuilder(this);
-	}
-
-	public <R> R extractPayload(HttpMethodBase method, Class<R> type) throws OXException {
-		return client.extractPayload(method, type);
-	}
-
-	HttpState getState() {
-		return state;
-	}
-
-	void setState(HttpState state) {
-		this.state = state;
-	}
-
-
+    /**
+     * Gets the next positive <code>long</code> value
+     *
+     * @return The next <code>long</code> value
+     */
+    public long nextLong() {
+        long cur;
+        long next;
+        do {
+            cur = count.get();
+            next = cur + 1;
+            if (next < 0) {
+                next = 0;
+            }
+        } while (!count.compareAndSet(cur, next));
+        return next;
+    }
 
 }
