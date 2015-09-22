@@ -576,7 +576,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         if (lockManager.isLocked(document.getId(), session.getContext(), session.getUser())) {
-            throw InfostoreExceptionCodes.ALREADY_LOCKED.create();
+            throw InfostoreExceptionCodes.CURRENTLY_LOCKED.create();
         }
     }
 

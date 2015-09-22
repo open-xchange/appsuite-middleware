@@ -202,8 +202,14 @@ if [ ${1:-0} -eq 2 ]; then
                 IFS=":"
                 PARTS=( $LINE )
                 unset IFS
-                echo ${PARTS[0]}:crypt:${PARTS[1]}
-                ;;
+                # only modify matching lines
+                if [ -n "${PARTS[0]}" ] && [ -n "${PARTS[1]}" ]
+                then
+                    echo ${PARTS[0]}:crypt:${PARTS[1]}
+                else 
+                    echo $LINE
+                fi  
+                ;;  
         esac
     done < /opt/open-xchange/etc/mpasswd >$TMPFILE
     cat $TMPFILE > /opt/open-xchange/etc/mpasswd

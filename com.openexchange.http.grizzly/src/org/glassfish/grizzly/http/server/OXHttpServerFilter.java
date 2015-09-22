@@ -128,12 +128,12 @@ import org.glassfish.grizzly.monitoring.jmx.JmxMonitoringAware;
 import org.glassfish.grizzly.monitoring.jmx.JmxObject;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * Filter implementation to provide high-level HTTP request/response processing.

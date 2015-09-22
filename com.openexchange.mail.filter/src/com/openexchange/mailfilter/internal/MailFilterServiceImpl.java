@@ -290,6 +290,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 List<Rule> rules = clientrulesandrequire.getRules();
                 RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
+                if(deletedrule == null) {
+                    throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                }
                 rules.remove(deletedrule.position);
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeScript(sieveHandler, activeScript, writeback);

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.provider.DBProvider;
@@ -93,7 +94,7 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements Enti
 
 	@Override
     public boolean isLocked(final int entity, final Context ctx, final User user) throws OXException {
-		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx);
+		return existsLockForEntity(Collections.singletonList(Integer.valueOf(entity)), ctx);
 	}
 
 	@Override

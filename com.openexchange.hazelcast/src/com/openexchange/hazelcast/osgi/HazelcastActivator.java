@@ -68,11 +68,11 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.OutOfMemoryHandler;
 import com.hazelcast.instance.OutOfMemoryErrorDispatcher;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.ExceptionUtils;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)

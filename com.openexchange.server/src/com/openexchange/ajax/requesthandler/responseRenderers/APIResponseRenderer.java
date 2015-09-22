@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -155,7 +156,12 @@ public class APIResponseRenderer implements ResponseRenderer {
         if (null == session) {
             return Locale.US;
         }
-        return session.getUser().getLocale();
+        User user = session.getUser();
+        if (user == null) {
+            return Locale.US;
+        }
+
+        return user.getLocale();
     }
 
     /**

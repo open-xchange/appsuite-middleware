@@ -113,7 +113,11 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * This document is locked.
      */
-    ALREADY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.ALREADY_LOCKED_MSG_DISPLAY),
+    CURRENTLY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.CURRENTLY_LOCKED_MSG_DISPLAY),
+    /**
+     * This document is locked.
+     */
+    ALREADY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.CURRENTLY_LOCKED_MSG_DISPLAY), // Copy for legacy reasons
     /**
      * You cannot unlock this document.
      */
