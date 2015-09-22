@@ -55,11 +55,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.update.WorkingLevel;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
@@ -70,37 +70,13 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class DropVersionTableTask implements UpdateTaskV2 {
+public class DropVersionTableTask extends UpdateTaskAdapter {
 
     private final String TABLE = "version";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask.class.getName() };
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND);
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(Schema schema, int contextId) throws OXException {
+        int contextId = params.getContextId();
         Connection con = null;
         DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
@@ -115,6 +91,16 @@ public class DropVersionTableTask implements UpdateTaskV2 {
                 ds.backForUpdateTask(contextId, con);
             }
         }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask.class.getName() };
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
     }
 
 }
