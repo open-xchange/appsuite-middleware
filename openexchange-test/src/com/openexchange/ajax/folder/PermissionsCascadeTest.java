@@ -268,7 +268,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         int doe = client3.getValues().getUserId();
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, client);
+        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, client);
         assertPermissions(leaf, new int[] { owner, guest }, new int[] { doe }, client);
         assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
 
@@ -277,7 +277,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         client.execute(setCascadePermissions);
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, client);
+        assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, client);
         assertPermissions(leaf, new int[] { owner, doe }, new int[] { guest }, client);
         assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
     }
