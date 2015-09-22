@@ -1321,10 +1321,8 @@ public class UserTest extends AbstractTest {
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
 
-        if (context != null) {
-            usr.setFilestoreId(context.getFilestoreId());
-            usr.setFilestore_name(context.getFilestore_name());
-        }
+        usr.setFilestoreId(null);
+        usr.setFilestore_name(null);
 
         final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
