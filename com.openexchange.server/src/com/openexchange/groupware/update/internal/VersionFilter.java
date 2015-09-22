@@ -66,6 +66,6 @@ public final class VersionFilter implements Filter {
 
     @Override
     public boolean mustBeExecuted(SchemaUpdateState schema, UpdateTaskV2 task) {
-        return task.addedWithVersion() > schema.getDBVersion() || task.addedWithVersion() == Schema.NO_VERSION;
+        return task.addedWithVersion() == Schema.NO_VERSION;
     }
 }

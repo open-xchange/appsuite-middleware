@@ -186,10 +186,6 @@ public class SchemaStoreImpl extends SchemaStore {
             con.setAutoCommit(false); // BEGIN
             // Insert lock
             insertLock(con, schema, background ? BACKGROUND : LOCKED);
-            // Setting old version table to locked
-            if (Tools.tableExists(con, "version") && !background) {
-                lockOldVersionTable(con, schema);
-            }
             // Everything went fine. Schema is marked as locked
             con.commit();
         } catch (final OXException e) {
@@ -271,41 +267,6 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void lockOldVersionTable(final Connection con, final Schema schema) throws OXException {
-        // Check for existing lock
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            // Try to obtain exclusive lock on table 'version'
-            stmt = con.prepareStatement("SELECT locked FROM version FOR UPDATE");
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
-            } else if (result.getBoolean(1)) {
-                // Schema is already locked by another update process
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        // Lock schema
-        try {
-            stmt = con.prepareStatement("UPDATE version SET locked=?");
-            stmt.setBoolean(1, true);
-            if (stmt.executeUpdate() == 0) {
-                // Schema could not be locked
-                throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
-            }
-            // Everything went fine. Schema is marked as locked
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
     @Override
     public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
@@ -335,10 +296,6 @@ public class SchemaStoreImpl extends SchemaStore {
             con.setAutoCommit(false);
             // Delete lock
             deleteLock(con, schema, background ? BACKGROUND : LOCKED);
-            // Unlock old version table
-            if (Tools.tableExists(con, "version") && !background) {
-                unlockOldVersionTable(con, schema);
-            }
             // Everything went fine. Schema is marked as unlocked
             con.commit();
         } catch (final SQLException e) {
@@ -384,94 +341,18 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void unlockOldVersionTable(final Connection con, final Schema schema) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            // Try to obtain exclusive lock on table 'version'
-            stmt = con.prepareStatement("SELECT locked FROM version FOR UPDATE");
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
-            } else if (!result.getBoolean(1)) {
-                // Schema is NOT locked by update process
-                throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        try {
-            // Update & unlock schema
-            stmt = con.prepareStatement("UPDATE version SET version=?,locked=?");
-            stmt.setInt(1, UpdateTaskCollection.getInstance().getHighestVersion());
-            stmt.setBoolean(2, false);
-            if (stmt.executeUpdate() == 0) {
-                // Schema could not be unlocked
-                throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    /**
-     * Loads the old schema version information from the database.
-     * @param con connection to the master in transaction state.
-     * @param schema schema object to put the information to.
-     * @throws OXException if loading fails.
-     */
-    private static void loadOldVersionTable(final Connection con, final SchemaImpl schema) throws OXException {
-        final String sql = "SELECT version,locked,gw_compatible,admin_compatible,server FROM version FOR UPDATE";
-        Statement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.createStatement();
-            result = stmt.executeQuery(sql);
-            if (result.next()) {
-                int pos = 1;
-                schema.setDBVersion(result.getInt(pos++));
-                // Use locked information from updateTask before using locked information from version table
-                if (!schema.isLocked()) {
-                    schema.setBlockingUpdatesRunning(result.getBoolean(pos++));
-                }
-                schema.setGroupwareCompatible(result.getBoolean(pos++));
-                schema.setAdminCompatible(result.getBoolean(pos++));
-                schema.setServer(result.getString(pos++));
-                schema.setSchema(con.getCatalog());
-            } else {
-                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
-            }
-            if (result.next()) {
-                throw SchemaExceptionCodes.MULTIPLE_VERSION_ENTRY.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
     /**
      * @param con connection to the master in transaction mode.
      */
     private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
         loadUpdateTasks(con, retval);
-        if (Tools.tableExists(con, "version")) {
-            loadOldVersionTable(con, retval);
-        } else {
-            retval.setDBVersion(Schema.FINAL_VERSION);
-            retval.setBlockingUpdatesRunning(false);
-            retval.setBackgroundUpdatesRunning(false);
-            retval.setGroupwareCompatible(true);
-            retval.setAdminCompatible(true);
-            retval.setServer(Database.getServerName());
-            retval.setSchema(con.getCatalog());
-        }
+        retval.setBlockingUpdatesRunning(false);
+        retval.setBackgroundUpdatesRunning(false);
+        retval.setGroupwareCompatible(true);
+        retval.setAdminCompatible(true);
+        retval.setServer(Database.getServerName());
+        retval.setSchema(con.getCatalog());
         return retval;
     }
 

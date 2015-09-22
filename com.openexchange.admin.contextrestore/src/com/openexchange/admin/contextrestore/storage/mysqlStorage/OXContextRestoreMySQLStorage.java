@@ -64,15 +64,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
-import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
-import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException.Code;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.storage.sqlStorage.OXContextRestoreSQLStorage;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -190,75 +186,6 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 } catch (final Exception e) {
                     // Ignore
                 }
-            }
-        }
-    }
-
-    @Override
-    public void checkVersion(final PoolIdSchemaAndVersionInfo infoObject) throws SQLException, OXContextRestoreException, StorageException {
-        final VersionInformation versionInfo = infoObject.getVersionInformation();
-        if (null != versionInfo) {
-            Connection connection = null;
-            PreparedStatement prepareStatement = null;
-            ResultSet result = null;
-            final int poolId = infoObject.getPoolId();
-            try {
-                connection = Database.get(poolId, infoObject.getSchema());
-                prepareStatement =
-                    connection.prepareStatement("SELECT `version`, `locked`, `gw_compatible`, `admin_compatible`, `server` FROM `version`");
-
-                result = prepareStatement.executeQuery();
-                if (!result.next()) {
-                    // Error there must be at least one row
-                    throw new OXContextRestoreException(Code.NO_ENTRIES_IN_VERSION_TABLE);
-                }
-                final VersionInformation versionInformation2 =
-                    new VersionInformation(result.getInt(4), result.getInt(3), result.getInt(2), result.getString(5), result.getInt(1));
-                if (!versionInformation2.equals(versionInfo)) {
-                    throw new OXContextRestoreException(Code.VERSION_TABLES_INCOMPATIBLE);
-                }
-
-            } catch (final OXException e) {
-                throw new StorageException(new PoolException(e.getMessage(), e));
-            } finally {
-                closeSQLStuff(result, prepareStatement);
-                if (null != connection) {
-                    Database.back(poolId, connection);
-                }
-            }
-        }
-        final UpdateTaskInformation updateTaskInfo = infoObject.getUpdateTaskInformation();
-        if (null != updateTaskInfo) {
-            Connection connection = null;
-            PreparedStatement prepareStatement = null;
-            ResultSet result = null;
-            final int poolId = infoObject.getPoolId();
-            final UpdateTaskInformation current = new UpdateTaskInformation();
-            try {
-                connection = Database.get(poolId, infoObject.getSchema());
-                prepareStatement = connection.prepareStatement("SELECT cid, taskName, successful, lastModified FROM `updateTask`");
-
-                result = prepareStatement.executeQuery();
-                if (!result.next()) {
-                    throw new OXContextRestoreException(Code.NO_ENTRIES_IN_UPDATE_TASK_TABLE);
-                }
-                do {
-                    final int contextId = result.getInt(1);
-                    if (contextId <= 0 || contextId == infoObject.getContextId()) {
-                        current.add(new UpdateTaskEntry(contextId, result.getString(2), result.getInt(3) > 0, result.getLong(4)));
-                    }
-                } while (result.next());
-            } catch (final OXException e) {
-                throw new StorageException(new PoolException(e.getMessage(), e));
-            } finally {
-                closeSQLStuff(result, prepareStatement);
-                if (null != connection) {
-                    Database.back(poolId, connection);
-                }
-            }
-
-            if (!updateTaskInfo.equalTo(current)) {
-                throw new OXContextRestoreException(Code.UPDATE_TASK_TABLES_INCOMPATIBLE);
             }
         }
     }

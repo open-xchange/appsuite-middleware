@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -159,16 +158,12 @@ class UpdateTaskCollection {
 
     private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTaskV2> tasks) {
         final SchemaUpdateState retval;
-        if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
-            retval = new SchemaUpdateStateImpl(schema);
-            Filter filter = new VersionFilter();
-            for (UpdateTaskV2 task : tasks) {
-                if (!filter.mustBeExecuted(schema, task)) {
-                    retval.addExecutedTask(task.getClass().getName());
-                }
+        retval = new SchemaUpdateStateImpl(schema);
+        Filter filter = new VersionFilter();
+        for (UpdateTaskV2 task : tasks) {
+            if (!filter.mustBeExecuted(schema, task)) {
+                retval.addExecutedTask(task.getClass().getName());
             }
-        } else {
-            retval = schema;
         }
         return retval;
     }
@@ -215,9 +210,6 @@ class UpdateTaskCollection {
     }
 
     boolean needsUpdate(SchemaUpdateState state) {
-        if (getHighestVersion() > state.getDBVersion()) {
-            return true;
-        }
         List<UpdateTaskV2> tasks = getListWithoutExcludes();
         for (UpdateTaskV2 task : tasks) {
             if (!state.isExecuted(task.getClass().getName())) {

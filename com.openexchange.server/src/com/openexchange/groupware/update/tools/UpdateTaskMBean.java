@@ -54,8 +54,6 @@ import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -76,7 +74,6 @@ import javax.management.openmbean.TabularType;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -111,23 +108,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
             "java.lang.String",
             "A valid context identifier contained in target schema or a schema name") };
         operations.add(new MBeanOperationInfo("runUpdate", "Runs the schema's update.", tparams, "void", MBeanOperationInfo.ACTION));
-        // Reset version operation
-        final MBeanParameterInfo[] params = {
-            new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
-            new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
-        operations.add(new MBeanOperationInfo(
-            "resetVersion",
-            "Resets the schema's version number to given value.",
-            params,
-            "void",
-            MBeanOperationInfo.ACTION));
-        // Schemas and versions operation
-        operations.add(new MBeanOperationInfo(
-            "schemasAndVersions",
-            "Gets all schemas with versions.",
-            null,
-            "java.lang.String",
-            MBeanOperationInfo.INFO));
         // Force re-run operation
         final MBeanParameterInfo[] forceParams = {
             new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
@@ -237,55 +217,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
             }
             // Void
             return null;
-        } else if (actionName.equals("resetVersion")) {
-            try {
-                final int versionNumber = ((Integer) params[0]).intValue();
-                final Object secParam = params[1];
-                if (secParam instanceof Integer) {
-                    UpdateTaskToolkit.resetVersion(versionNumber, ((Integer) secParam).intValue());
-                } else {
-                    final String sParam = secParam.toString();
-                    final int parsed = parsePositiveInt(sParam);
-                    if (parsed >= 0) {
-                        UpdateTaskToolkit.resetVersion(versionNumber, parsed);
-                    } else {
-                        UpdateTaskToolkit.resetVersion(versionNumber, sParam);
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
-                throw new MBeanException(wrapMe);
-            } catch (final RuntimeException e) {
-                LOG.error("", e);
-                throw e;
-            } catch (final Error e) {
-                LOG.error("", e);
-                throw e;
-            }
-            // Void
-            return null;
-        } else if (actionName.equals("schemasAndVersions")) {
-            try {
-                final Map<String, Schema> map = UpdateTaskToolkit.getSchemasAndVersions();
-                final List<Object[]> rows = new ArrayList<Object[]>(map.size());
-                for (final Entry<String, Schema> entry : map.entrySet()) {
-                    final Schema schema = entry.getValue();
-                    rows.add(new Object[] { entry.getKey(), Integer.valueOf(schema.getDBVersion()), Boolean.valueOf(schema.isLocked()) });
-                }
-
-                return Utility.toTable(rows, new String[] { "schema", "version", "locked" }, false);
-            } catch (final OXException e) {
-                LOG.error("", e);
-                final Exception wrapMe = new Exception(e.getMessage());
-                throw new MBeanException(wrapMe);
-            } catch (final RuntimeException e) {
-                LOG.error("", e);
-                throw e;
-            } catch (final Error e) {
-                LOG.error("", e);
-                throw e;
-            }
         } else if (actionName.equals("force")) {
             try {
                 final Object secParam = params[1];
