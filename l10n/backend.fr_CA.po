@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-06 16:53+0900\n"
+"PO-Revision-Date: 2015-09-16 20:15+0900\n"
 "Last-Translator: Sandrine <sandrine@bureau-cornavin.com>\n"
 "Language-Team: French <>\n"
 "Language: fr_CA\n"
@@ -1779,7 +1779,7 @@ msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
 "folder \"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour créer un sous-dossier en dessous "
+"Vous n'avez pas les droits requis pour créer un sous-dossier en dessous "
 "du dossier « %1$s »."
 
 #. In order to accomplish the search, %1$d or more characters are required.
@@ -2661,7 +2661,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to login with client \"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour vous connecter avec le client "
+"Vous n'avez pas les droits requis pour vous connecter avec le client "
 "« %1$s »."
 
 #. This message is thrown when the login request with a HTTP authorization header contains a authorization method that is not supported.
@@ -3788,7 +3788,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to access the mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour accéder au dossier de courrier "
+"Vous n'avez pas les droits requis pour accéder au dossier de courrier "
 "%1$s"
 
 #. *
@@ -3797,7 +3797,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
 msgid "You do not have the appropriate permissions to read mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour lire le dossier de courrier %1$s"
+"Vous n'avez pas les droits requis pour lire le dossier de courrier %1$s"
 
 #. *
 #. * No delete access on mail folder %1$s
@@ -3805,7 +3805,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer le dossier de courrier "
+"Vous n'avez pas les droits requis pour supprimer le dossier de courrier "
 "%1$s"
 
 #. *
@@ -3815,7 +3815,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to insert to mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour ajouter dans le dossier de "
+"Vous n'avez pas les droits requis pour ajouter dans le dossier de "
 "courrier %1$s"
 
 #. *
@@ -3825,7 +3825,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to administer mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour administrer le dossier de "
+"Vous n'avez pas les droits requis pour administrer le dossier de "
 "courrier %1$s"
 
 #. *
@@ -3835,7 +3835,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour écrire dans le dossier POP3 %1$s"
+"Vous n'avez pas les droits requis pour écrire dans le dossier POP3 %1$s"
 
 #. *
 #. * No keep-seen access on mail folder %1$s
@@ -3845,7 +3845,7 @@ msgid ""
 "You do not have the appropriate permissions for a Read/Unread access in the "
 "mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour un accès lecture / écriture au "
+"Vous n'avez pas les droits requis pour un accès lecture / écriture au "
 "dossier de courrier %1$s"
 
 #. *
@@ -4041,7 +4041,7 @@ msgid ""
 "You do not have the appropriate permissions to open folder %1$s due to "
 "missing read access"
 msgstr ""
-"Vous n'avez pas les droits appropriés pour ouvrir le dossier %1$s, il manque "
+"Vous n'avez pas les droits requis pour ouvrir le dossier %1$s, il manque "
 "l'accès en écriture"
 
 #. *
@@ -4654,9 +4654,8 @@ msgstr "Vous n'avez pas de session valide. Veuillez vous reconnecter."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
-msgstr "Vous n'avez pas les droits appropriés pour voir le dossier « %1$s »."
+msgstr "Vous n'avez pas les droits requis pour voir le dossier « %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:67
 msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
@@ -4681,15 +4680,13 @@ msgstr "Il n'est pas permis de déplacer le dossier « %1$s »."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:83
 msgid ""
 "You do not have the appropriate permissions to delete the folder \"%1$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer le dossier « %1$s »."
+msgstr "Vous n'avez pas les droits requis pour supprimer le dossier « %1$s »."
 
 #. You do not have the appropriate permissions to move the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:86
 msgid ""
 "You do not have the appropriate permissions to move the folder \"%1$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour déplacer le dossier « %1$s »."
+msgstr "Vous n'avez pas les droits requis pour déplacer le dossier « %1$s »."
 
 #. It is not allowed to create a mail folder allowed below a public folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
@@ -4875,7 +4872,7 @@ msgid ""
 "You do not have the appropriate permissions to read appointments in folder "
 "%1$d."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour lire les rendez-vous dans le "
+"Vous n'avez pas les droits requis pour lire les rendez-vous dans le "
 "dossier %1$d."
 
 #. *
@@ -4994,28 +4991,28 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:153
 msgid "You do not have the appropriate permissions to modify this object."
-msgstr "Vous n'avez pas les droits appropriés pour modifier cet objet."
+msgstr "Vous n'avez pas les droits requis pour modifier cet objet."
 
 #. *
 #. * You do not have the appropriate permissions to move this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
 msgid "You do not have the appropriate permissions to move this object."
-msgstr "Vous n'avez pas les droits appropriés pour déplacer cet objet."
+msgstr "Vous n'avez pas les droits requis pour déplacer cet objet."
 
 #. *
 #. * You do not have the appropriate permissions to read this object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:163
 msgid "You do not have the appropriate permissions to read this object."
-msgstr "Vous n'avez pas les droits appropriés pour lire cet objet."
+msgstr "Vous n'avez pas les droits requis pour lire cet objet."
 
 #. *
 #. * You do not have the appropriate permissions to create an object.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:168
 msgid "You do not have the appropriate permissions to create an object."
-msgstr "Vous n'avez pas les droits appropriés pour créer un objet."
+msgstr "Vous n'avez pas les droits requis pour créer un objet."
 
 #. *
 #. * You are trying to create a new recurring appointment from an exception. This is not possible.
@@ -5120,7 +5117,7 @@ msgid ""
 "You do not have the appropriate permission to access objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour accéder aux objets dans le "
+"Vous n'avez pas les droits requis pour accéder aux objets dans le "
 "dossier « %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
@@ -5136,7 +5133,7 @@ msgid ""
 "You do not have the appropriate permission to create objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour créer des objets dans le dossier "
+"Vous n'avez pas les droits requis pour créer des objets dans le dossier "
 "« %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:75
@@ -5213,7 +5210,7 @@ msgid ""
 "You do not have the appropriate permission to delete objects from the folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer des objets du dossier "
+"Vous n'avez pas les droits requis pour supprimer des objets du dossier "
 "« %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
@@ -6812,7 +6809,7 @@ msgstr ""
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
 msgid "You do not have the appropriate permissions to read the document."
-msgstr "Vous n'avez pas les droits appropriés pour lire le document."
+msgstr "Vous n'avez pas les droits requis pour lire le document."
 
 #. You do not have the appropriate permissions to create a document in this folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:74
@@ -6820,12 +6817,12 @@ msgid ""
 "You do not have the appropriate permissions to create a document in this "
 "folder."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour créer un document dans ce dossier."
+"Vous n'avez pas les droits requis pour créer un document dans ce dossier."
 
 #. You do not have the appropriate permissions to update the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:77
 msgid "You do not have the appropriate permissions to update the document."
-msgstr "Vous n'avez pas les droits appropriés pour mettre à jour le document."
+msgstr "Vous n'avez pas les droits requis pour mettre à jour le document."
 
 #. Unable to delete all documents. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:80
@@ -6835,7 +6832,7 @@ msgstr "Impossible de supprimer tous les documents. Veuillez réessayer."
 #. You do not have the appropriate permissions to delete this version.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:83
 msgid "You do not have the appropriate permissions to delete this version."
-msgstr "Vous n'avez pas les droits appropriés pour supprimer cette version."
+msgstr "Vous n'avez pas les droits requis pour supprimer cette version."
 
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
@@ -6845,17 +6842,17 @@ msgstr "Ce document est déjà verrouillé. Veuillez réessayer plus tard."
 #. You do not have the appropriate permissions to unlock the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
 msgid "You do not have the appropriate permissions to unlock the document."
-msgstr "Vous n'avez pas les droits appropriés pour déverrouiller le document."
+msgstr "Vous n'avez pas les droits requis pour déverrouiller le document."
 
 #. You do not have the appropriate permissions to lock a document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:92
 msgid "You do not have the appropriate permissions to lock a document."
-msgstr "Vous n'avez pas les droits appropriés pour verrouiller un document."
+msgstr "Vous n'avez pas les droits requis pour verrouiller un document."
 
 #. You do not have the appropriate permissions to move the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:95
 msgid "You do not have the appropriate permissions to move the document."
-msgstr "Vous n'avez pas les droits appropriés pour déplacer le document."
+msgstr "Vous n'avez pas les droits requis pour déplacer le document."
 
 #. The document name \"%1$s\" already exists. Please choose another.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:101
@@ -6865,7 +6862,7 @@ msgstr "Le nom de document « %1$s » existe déjà. Veuillez en choisir un au
 #. You do not have the appropriate permissions to delete a document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:104
 msgid "You do not have the appropriate permissions to delete a document."
-msgstr "Vous n'avez pas les droits appropriés pour supprimer un document."
+msgstr "Vous n'avez pas les droits requis pour supprimer un document."
 
 #. In order to accomplish the search, %1$s or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
@@ -7364,7 +7361,7 @@ msgstr "Erreur en dressant la liste des tâches."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:79
 msgid "You do not have the appropriate permissions to delete the task."
-msgstr "Vous n'avez pas les droits appropriés pour supprimer la tâche."
+msgstr "Vous n'avez pas les droits requis pour supprimer la tâche."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:81
 msgid "Date range in search must contain 2 and not %d values."
@@ -7376,7 +7373,7 @@ msgid ""
 "You do not have the appropriate permissions to read the contents of folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour lire le contenu du dossier "
+"Vous n'avez pas les droits requis pour lire le contenu du dossier "
 "« %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
@@ -7388,12 +7385,12 @@ msgid ""
 "You do not have the appropriate permissions to create tasks in folder \"%1$s"
 "\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour créer des tâches dans le dossier "
+"Vous n'avez pas les droits requis pour créer des tâches dans le dossier "
 "« %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
-msgstr "Vous n'avez pas les droits appropriés pour déléguer des tâches."
+msgstr "Vous n'avez pas les droits requis pour déléguer des tâches."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:91
 msgid "Tasks with private flag cannot be delegated."
@@ -7415,7 +7412,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour modifier des tâches dans le "
+"Vous n'avez pas les droits requis pour modifier des tâches dans le "
 "dossier « %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
@@ -7472,7 +7469,7 @@ msgid ""
 "You do not have the appropriate permisson to see the task %1$d in folder "
 "%2$s."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour voir la tâche %1$d dans le "
+"Vous n'avez pas les droits requis pour voir la tâche %1$d dans le "
 "dossier %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
@@ -8144,7 +8141,7 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour modifier le contenu du dossier "
+"Vous n'avez pas les droits requis pour modifier le contenu du dossier "
 "« %1$s »."
 
 #. *
@@ -8155,7 +8152,7 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\" on mail server %2$s."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour modifier le contenu du dossier « "
+"Vous n'avez pas les droits requis pour modifier le contenu du dossier « "
 "%1$s » sur le serveur de courrier %2$s."
 
 #. *
@@ -8309,7 +8306,7 @@ msgid ""
 "You do not have the appropriate permissions to delete the default mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer le compte de courrier "
+"Vous n'avez pas les droits requis pour supprimer le compte de courrier "
 "par défaut."
 
 #. You do not have the appropriate permissions to update the default mail account.
@@ -8318,7 +8315,7 @@ msgid ""
 "You do not have the appropriate permissions to update the default mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour mettre à jour le compte de "
+"Vous n'avez pas les droits requis pour mettre à jour le compte de "
 "courrier par défaut."
 
 #. The default mail account already exists.
@@ -8349,7 +8346,7 @@ msgid ""
 "You do not have the appropriate permissions to create more than one mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour créer plus d'un compte de "
+"Vous n'avez pas les droits requis pour créer plus d'un compte de "
 "courrier."
 
 #. A mail account with the given E-Mail address already exists.
@@ -8453,7 +8450,7 @@ msgstr ""
 #. You do not have the appropriate permissions to modify resources.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:81
 msgid "You do not have the appropriate permissions to modify resources."
-msgstr "Vous n'avez pas les droits appropriés pour modifier des ressources."
+msgstr "Vous n'avez pas les droits requis pour modifier des ressources."
 
 #. The provided resource identifier \"%1$s\" contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:84
@@ -8488,57 +8485,56 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
-msgstr "Vous n'avez pas les droits appropriés pour le module « %2$s »."
+msgstr "Vous n'avez pas les droits requis pour le module « %2$s »."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Vous n'avez pas les droits requis pour voir le dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Les dossiers partagés ne sont pas disponibles avec votre compte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Vous n'avez pas les droits appropriés pour le dossier public « %2$s »."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Vous n'avez pas les droits requis pour le dossier public."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour créer des sous-dossiers dans le "
-"dossier « %2$s »."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Vous n'avez pas les droits requis pour créer des sous-dossiers."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Le dossier « %1$s » n'existe pas."
+msgid "Such a folder does not exist."
+msgstr "Il n'existe pas de dossier de ce type."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Le dossier « %1$s » a changé entre-temps. Veuillez actualiser l'affichage et "
+"Le dossier a changé entre-temps. Veuillez actualiser l'affichage et "
 "essayer à nouveau."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr ""
-"Cette opération nécessite des droits administratifs sur le dossier « %2$s »."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Cette opération nécessite des droits administratifs sur le dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr ""
-"Le dossier « %1$s » est un dossier par défaut et ne peut pas être renommé."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Le dossier est un dossier par défaut et ne peut pas être renommé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Un dossier nommé « %1$s » contient déjà un dossier nommé « %3$s »."
+msgid "The folder already contains a folder with such a name."
+msgstr "Le dossier contient déjà un dossier portant ce nom."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Les dossiers de type « %2$s » ne peuvent pas être créés sous « %1$s »."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr ""
+"Les dossiers de type « %2$s » ne peuvent pas être créés sous ce dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "On ne peut pas créer les dossiers du module « %2$s » sous « %1$s »."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Impossible de créer des dossiers du module « %2$s » sous ce dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8565,34 +8561,31 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Il faut qu'au moins un utilisateur ait des droits administratifs."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr ""
-"Le dossier « %1$s » est un dossier par défaut et ne peut pas être déplacé."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Le dossier est un dossier par défaut et ne peut pas être déplacé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Le dossier « %1$s » est partagé et ne peut pas être déplacé."
+msgid "The folder is shared and cannot be moved."
+msgstr "Le dossier est partagé et ne peut pas être déplacé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Le dossier ne peut pas être déplacé vers le dossier partagé « %1$s »."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Le dossier ne peut pas être déplacé vers un dossier partagé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr ""
-"Le dossier « %1$s » est un dossier système et ne peut pas être déplacé."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Le dossier est un dossier système et ne peut pas être déplacé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
+msgid "The private folder can only be moved to another private folder."
 msgstr ""
-"Le dossier privé « %1$s » ne peut être déplacé que vers un autre dossier "
+"Le dossier privé ne peut être déplacé que vers un autre dossier "
 "privé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
+msgid "The public folder can only be moved to another public folder."
 msgstr ""
-"Le dossier public « %1$s » ne peut être déplacé que vers un autre dossier "
+"Le dossier public ne peut être déplacé que vers un autre dossier "
 "public."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
@@ -8600,37 +8593,27 @@ msgid "The destination folder is the same as the source folder."
 msgstr "Le dossier destination est le même que le dossier source."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour déplacer tous les sous-dossiers "
-"du dossier « %2$s »."
+"Vous n'avez pas les droits requis pour déplacer tous les sous-dossiers."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer le dossier partagé "
-"« %2$s »."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Vous n'avez pas les droits requis pour supprimer le dossier partagé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr ""
-"Le dossier « %2$s » est un dossier par défaut et ne peut pas être supprimé."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Le dossier est un dossier par défaut et ne peut pas être supprimé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour supprimer tous les éléments "
-"contenu dans le dossier « %2$s »."
+"Vous n'avez pas les droits requis pour supprimer tous les éléments "
+"contenus."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr ""
-"Le dossier « %1$s » ne peut pas être déplacé vers un de ses sous-dossiers."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Le dossier ne peut pas être déplacé vers un de ses sous-dossiers."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8640,8 +8623,8 @@ msgstr ""
 "dossiers du module « %2$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Le dossier partagé « %1$s » ne peut pas être mis à jour."
+msgid "The shared folder cannot be updated."
+msgstr "Le dossier partagé ne peut pas être mis à jour."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8661,47 +8644,43 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Seul le propriétaire du dossier partagé parent « %4$s » peut détenir les "
+"Seul le propriétaire du dossier partagé parent peut détenir les "
 "droits administratifs."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Le dossier « %2$s » est un dossier par défaut dont le propriétaire doit "
+"Le dossier est un dossier par défaut . Par conséquent, son propriétaire doit "
 "détenir les droits administratifs."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour partager le dossier « %2$s »."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Vous n'avez pas les droits requis pour partager le dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
 msgstr ""
-"Comme les droits de l'utilisateur « %1$s » sont limités, il n'est pas "
-"possible d'appliquer les modifications au dossier « %2$s »."
+"Il n'est pas possible d'appliquer les modifications du fait de droits limités."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Le dossier « %1$s » ne peut pas être supprimé, car il contient un sous-"
-"dossier caché sur lequel vous n'avez pas les droits appropriés."
+"Le dossier ne peut pas être supprimé, car il contient un sous-"
+"dossier caché sur lequel vous n'avez pas les droits requis."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Le dossier « %2$s » contient déjà un dossier nommé « %1$s ». Veuillez "
+"Le dossier contient déjà un dossier portant ce nom. Veuillez "
 "choisir un autre nom et réessayer."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
@@ -8720,51 +8699,36 @@ msgstr ""
 "de le partager avec cet utilisateur."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Droit dupliqué défini pour l'utilisateur « %1$s ». Un seul droit par "
-"utilisateur est autorisé."
+"Doublon sur les droits définis. Un seul droit est autorisé par utilisateur."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
-msgstr ""
-"Droits dupliqués définis pour le groupe « %1$s ». Un seul droit par groupe "
-"est autorisé."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "Doublon sur les droits définis. Un seul droit est autorisé par groupe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr ""
-"On ne peut modifier que le droit de voir le dossier pour le dossier « %1$s »."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Seul le droit de voir le dossier peut être modifié."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Le dossier « %1$s » ne permet que des droits utilisateurs individuels, pas "
-"de droits de groupe."
+"Seuls les droits d'utilisateurs individuels sont autorisés, aucun droit de "
+"groupe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr ""
-"On ne peut pas définir de droits utilisateurs individuels sur le dossier "
-"« %1$s »."
+msgid "No individual user permissions are allowed."
+msgstr "Aucun droit d'utilisateurs individuels autorisé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr ""
-"Vous n'avez pas les droits appropriés pour renommer le dossier « %2$s »."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Vous n'avez pas les droits requis pour renommer le dossier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+msgid "The folder cannot be deleted as it contains locked documents."
 msgstr ""
-"Le dossier « %1$s » ne peut pas être supprimé, car il contient des documents "
+"Le dossier ne peut pas être supprimé car il contient des documents "
 "verrouillés."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
@@ -8773,16 +8737,12 @@ msgstr ""
 "L'opération peut être effectuée uniquement pour l'administrateur de contexte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Le dossier « %1$s » ne peut pas être supprimé."
+msgid "The folder cannot be deleted."
+msgstr "Le dossier ne peut pas être supprimé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Les droits administratifs du propriétaire « %1$s » dans le dossier « %2$s » "
-"ont été restaurés."
+msgid "The administrative permissions were restored."
+msgstr "Les droits administratifs ont été restaurés."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8800,7 +8760,7 @@ msgstr "L'opération demandée est désactivée."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:64
 msgid "You do not have appropriate permissions for module %1$s."
-msgstr "Vous n'avez pas les droits appropriés pour le module %1$s."
+msgstr "Vous n'avez pas les droits requis pour le module %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:65
 msgid ""
@@ -8954,8 +8914,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) a partagé %3$s fichiers avec vous. Veuillez cliquer sur le bouton "
-"ci-dessous pour les afficher."
+"%1$s (%2$s) a partagé %3$s fichiers avec vous. Veuillez cliquer sur le "
+"bouton ci-dessous pour les afficher."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
@@ -9008,8 +8968,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) a partagé %3$s dossiers avec vous. Veuillez cliquer sur le bouton "
-"ci-dessous pour les afficher."
+"%1$s (%2$s) a partagé %3$s dossiers avec vous. Veuillez cliquer sur le "
+"bouton ci-dessous pour les afficher."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -9246,16 +9206,16 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
 msgid "You don't have sufficient permissions to delete the share."
-msgstr "Vous n'avez pas les droits appropriés pour supprimer le partage."
+msgstr "Vous n'avez pas les droits requis pour supprimer le partage."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
 msgid "You don't have sufficient permissions to edit the share."
-msgstr "Vous n'avez pas les droits appropriés pour modifier le partage."
+msgstr "Vous n'avez pas les droits requis pour modifier le partage."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
 msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
 msgstr ""
-"Vous n'avez pas les droits appropriés pour partager le dossier ou l'élément "
+"Vous n'avez pas les droits requis pour partager le dossier ou l'élément "
 "« %2$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
@@ -9276,11 +9236,11 @@ msgstr "Vous ne pouvez pas partager avec vous-même."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:88
 msgid "You don't have sufficient permissions to share a link."
-msgstr "Vous n'avez pas les droits appropriés pour partager un lien."
+msgstr "Vous n'avez pas les droits requis pour partager un lien."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:90
 msgid "You don't have sufficient permissions to invite guests."
-msgstr "Vous n'avez pas les droits appropriés pour inviter des utilisateurs."
+msgstr "Vous n'avez pas les droits requis pour inviter des utilisateurs."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:92
 msgid "You can't create links for multiple targets."
@@ -9409,7 +9369,7 @@ msgstr "Le paramètre %1$s est manquant."
 #. The message displayed if the user misses some permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
 msgid "You do not have the appropriate permissions to complete this operation."
-msgstr "Vous n'avez pas les droits appropriés pour terminer cette opération."
+msgstr "Vous n'avez pas les droits requis pour terminer cette opération."
 
 #. The message displayed if a non valid email address is inserted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
@@ -11831,6 +11791,202 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour le dossier public « %2$s »."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour créer des sous-dossiers dans "
+#~ "le dossier « %2$s »."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Le dossier « %1$s » n'existe pas."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Le dossier « %1$s » a changé entre-temps. Veuillez actualiser l'affichage "
+#~ "et essayer à nouveau."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Cette opération nécessite des droits administratifs sur le dossier « "
+#~ "%2$s »."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr ""
+#~ "Le dossier « %1$s » est un dossier par défaut et ne peut pas être renommé."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Un dossier nommé « %1$s » contient déjà un dossier nommé « %3$s »."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr ""
+#~ "Les dossiers de type « %2$s » ne peuvent pas être créés sous « %1$s »."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "On ne peut pas créer les dossiers du module « %2$s » sous « %1$s »."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr ""
+#~ "Le dossier « %1$s » est un dossier par défaut et ne peut pas être déplacé."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Le dossier « %1$s » est partagé et ne peut pas être déplacé."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr ""
+#~ "Le dossier ne peut pas être déplacé vers le dossier partagé « %1$s »."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr ""
+#~ "Le dossier « %1$s » est un dossier système et ne peut pas être déplacé."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Le dossier privé « %1$s » ne peut être déplacé que vers un autre dossier "
+#~ "privé."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Le dossier public « %1$s » ne peut être déplacé que vers un autre dossier "
+#~ "public."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour déplacer tous les sous-"
+#~ "dossiers du dossier « %2$s »."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour supprimer le dossier partagé "
+#~ "« %2$s »."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr ""
+#~ "Le dossier « %2$s » est un dossier par défaut et ne peut pas être "
+#~ "supprimé."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour supprimer tous les éléments "
+#~ "contenu dans le dossier « %2$s »."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr ""
+#~ "Le dossier « %1$s » ne peut pas être déplacé vers un de ses sous-dossiers."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Le dossier partagé « %1$s » ne peut pas être mis à jour."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Seul le propriétaire du dossier partagé parent « %4$s » peut détenir les "
+#~ "droits administratifs."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Le dossier « %2$s » est un dossier par défaut dont le propriétaire doit "
+#~ "détenir les droits administratifs."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour partager le dossier « %2$s »."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Comme les droits de l'utilisateur « %1$s » sont limités, il n'est pas "
+#~ "possible d'appliquer les modifications au dossier « %2$s »."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Le dossier « %1$s » ne peut pas être supprimé, car il contient un sous-"
+#~ "dossier caché sur lequel vous n'avez pas les droits appropriés."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Le dossier « %2$s » contient déjà un dossier nommé « %1$s ». Veuillez "
+#~ "choisir un autre nom et réessayer."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Droit dupliqué défini pour l'utilisateur « %1$s ». Un seul droit par "
+#~ "utilisateur est autorisé."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Droits dupliqués définis pour le groupe « %1$s ». Un seul droit par "
+#~ "groupe est autorisé."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "On ne peut modifier que le droit de voir le dossier pour le dossier "
+#~ "« %1$s »."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Le dossier « %1$s » ne permet que des droits utilisateurs individuels, "
+#~ "pas de droits de groupe."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "On ne peut pas définir de droits utilisateurs individuels sur le dossier "
+#~ "« %1$s »."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits appropriés pour renommer le dossier « %2$s »."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Le dossier « %1$s » ne peut pas être supprimé, car il contient des "
+#~ "documents verrouillés."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Le dossier « %1$s » ne peut pas être supprimé."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Les droits administratifs du propriétaire « %1$s » dans le dossier "
+#~ "« %2$s » ont été restaurés."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

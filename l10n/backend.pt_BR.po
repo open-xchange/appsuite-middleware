@@ -6,8 +6,8 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-03 16:01-0300\n"
-"Last-Translator: Aracele Torres <aracele@bureau-cornavin.com >\n"
+"PO-Revision-Date: 2015-09-15 14:33-0300\n"
+"Last-Translator: Aracele Torres <aracele@bureau-cornavin.com>\n"
 "Language-Team: Brazilian Portuguese <>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
@@ -4551,7 +4551,6 @@ msgstr "Você não tem uma sessão válida. Faça o login novamente."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr ""
 "Você não tem as permissões apropriadas para visualizar a pasta \"%1$s\"."
@@ -6817,8 +6816,7 @@ msgid ""
 "terminate."
 msgstr ""
 "Tentativa de escrita simultânea. Por favor, aguarde a operação anterior de "
-"salvamento"
-"terminar."
+"salvamentoterminar."
 
 #. A document's description
 #. Task attribute name
@@ -8309,53 +8307,54 @@ msgstr "Falta campo(s) obrigatório(s) no recurso indicado."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Você não tem as permissões apropriadas para o módulo \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Você não tem as permissões apropriadas para visualizar a pasta."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Pasta compartilhada não está disponível para sua conta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Você não tem as permissões apropriadas para a pasta pública \"%2$s\"."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Você não tem permissões apropriadas para a pasta pública."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Você não tem as permissões apropriadas para criar subpastas na pasta \"%2$s"
-"\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Você não tem permissões apropriadas para criar subpastas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "A pasta \"%1$s\" não existe."
+msgid "Such a folder does not exist."
+msgstr "Essa pasta não existe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"A pasta \"%1$s\" tem sido alterada neste meio tempo. Por favor recarregue a "
-"visualização e tente novamente."
+"A pasta foi alterada neste meio tempo. Por favor, recarregue a visualização e "
+"tente "
+"novamente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Esta operação requer permissões administrativas para a pasta \"%2$s\"."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Esta operação requer permissões administrativas para a pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "A pasta \"%1$s\" é uma pasta padrão e não pode ser renomeada."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "A pasta é uma pasta padrão e não pode ser renomeada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "A pasta \"%1$s\" já contém uma pasta nomeada \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "A pasta já contém uma pasta com esse nome."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Pastas de tipo \"%2$s\" não podem ser criadas abaixo \"%1$s\"."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Pastas do tipo \"%2$s\" não podem ser criadas abaixo desta pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Pastas do módulo \"%2$s\" não podem ser criadas abaixo \"%1$s\"."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Pastas do módulo \"%2$s\" não podem ser criadas abaixo desta pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8381,64 +8380,54 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Pelo menos um usuário com permissões administrativas é requerido."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "A pasta \"%1$s\" é uma pasta padrão e não pode ser movida."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "A pasta é uma pasta padrão e não pode ser movida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "A pasta \"%1$s\" é compartilhada e não pode ser movida."
+msgid "The folder is shared and cannot be moved."
+msgstr "A pasta é compartilhada e não pode ser movida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "A pasta não pode ser movida para a pasta compartilhada %1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "A pasta não pode ser movida para uma pasta compartilhada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "A pasta \"%1$s\" é uma pasta de sistema e não pode ser movida."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "A pasta é uma pasta do sistema e não pode ser movida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "A pasta privada \"%1$s\" só pode ser movida para outra pasta privada."
+msgid "The private folder can only be moved to another private folder."
+msgstr "A pasta privada só pode ser movida para outra pasta privada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "A pasta pública \"%1$s\" só pode ser movida para outra pasta pública."
+msgid "The public folder can only be moved to another public folder."
+msgstr "A pasta pública só pode ser movida para outra pasta pública."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "A pasta de destino é a mesma que a pasta de origem."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr ""
-"Você não tem as permissões apropriadas para mover todas as subpastas da "
-"pasta \"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "Você não tem permissões apropriadas para mover todas as subpastas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
+msgid "You do not have appropriate permissions to delete the shared folder."
 msgstr ""
-"Você não tem as permissões apropriadas para excluir a pasta compartilhada "
-"\"%2$s\"."
+"Você não tem permissões apropriadas para excluir a pasta compartilhada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "A pasta \"%2$s\" é uma pasta padrão e não pode ser excluída."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "A pasta é uma pasta padrão e não pode ser excluída."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
 msgstr ""
-"Você não tem permissão apropriada para excluir todos os ítens contidos na "
-"pasta \"%2$s\"."
+"Você não tem permissões apropriadas para excluir todos os itens contidos."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "A pasta \"%1$s\" não pode ser movida para uma de suas subpastas."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "A pasta não pode ser movida para uma de suas subpastas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8448,8 +8437,8 @@ msgstr ""
 "\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "A pasta compartilhada \"%1$s\" não pode ser atualizada."
+msgid "The shared folder cannot be updated."
+msgstr "A pasta compartilhada não pode ser atualizada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8469,47 +8458,44 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Somente o proprietário da pasta pai compartilhada \"%4$s\" pode manter "
-"permissões administrativas."
+"Somente o proprietário da pasta pai compartilhada pode possuir permissões "
+"administrativas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"A pasta \"%2$s\" é uma pasta padrão onde seu proprietário precisa manter "
-"permissões administrativas."
+"A pasta é uma pasta padrão. Assim, o seu proprietário precisa possuir "
+"permissões "
+"administrativas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr ""
-"Você não tem as permissões apropriadas para compartilhar a pasta \"%2$s\"."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Você não tem permissões apropriadas para compartilhar a pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr ""
-"Devido as permissões limitadas do usuário \"%1$s\", não é possível aplicar "
-"as alterações para a pasta \"%2$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "Não é possível aplicar as alterações devido a permissões limitadas"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"A pasta \"%1$s\" não pode ser excluída, uma vez que esta contém uma subpasta "
-"oculta sobre a qual você não tem permissões apropriadas."
+"A pasta não pode ser excluída, uma vez que contém uma subpasta oculta você "
+"não "
+"tem as permissões apropriadas para fazê-lo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"A pasta \"%2$s\" já contém uma pasta nomeada \"%1$s\". Por favor, escolha um "
+"A pasta já contém uma pasta com esse nome. Por favor, escolha um"
 "nome diferente e tente novamente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
@@ -8528,67 +8514,46 @@ msgstr ""
 "usuário."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Definida permissão duplicada para o usuário \"%1$s\". Somente uma permissão "
-"por usuário é permitida."
+"Duplicar permissão definida. Apenas uma permissão por usuário é permitida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Definida permissão duplicada para o grupo \"%1$s\". Somente uma permissão "
-"por grupo é permitida."
+"Duplicar permissão definida. Apenas uma permissão por grupo é permitida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr ""
-"Apenas a permissão de visibilidade de pasta é permitida a ser alterada para "
-"a pasta \"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Apenas a permissão de visibilidade da pasta pode ser alterada."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
-msgstr ""
-"Apenas permissões de usuário individual, mas nenhuma permissão de grupo é "
-"permitida para a pasta \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "São permitidas apenas permissões de usuário individual, não de grupo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr ""
-"Nenhuma permissão de usuário individual é permitida para a pasta \"%1$s\"."
+msgid "No individual user permissions are allowed."
+msgstr "Nenhuma permissão de usuário individuai é permitida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Você não tem as permissões apropriadas para renomear a pasta \"%2$s\"."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Você não tem permissões apropriadas para renomear a pasta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"A pasta compartilhada \"%1$s\" não pôde ser excluída, pois ela contém "
-"documentos bloqueados."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "A pasta não pode ser excluída, já que contém documentos bloqueados."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "A operação só pode ser realizada por um administrador do contexto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "A pasta \"%1$s\" não pode ser excluída."
+msgid "The folder cannot be deleted."
+msgstr "A pasta não pode ser excluída."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"As permissões administrativas do proprietário \"%1$s\" na pasta \"%2$s\" "
-"foram restauradas."
+msgid "The administrative permissions were restored."
+msgstr "As permissões administrativas foram restauradas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8751,8 +8716,7 @@ msgid ""
 "below to view it."
 msgstr ""
 "%1$s (%2$s) compartilhou o arquivo \"%3$s\" com você. Por favor, clique no "
-"botão "
-"abaixo para visualizá-lo."
+"botão abaixo para visualizá-lo."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
@@ -8761,8 +8725,7 @@ msgid ""
 "view them."
 msgstr ""
 "%1$s (%2$s) compartilhou %3$s arquivos com você. Por favor, clique no botão "
-"abaixo "
-"para visualizá-los."
+"abaixo para visualizá-los."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
@@ -8771,8 +8734,7 @@ msgid ""
 "below to view it."
 msgstr ""
 "%1$s (%2$s) compartilhou a imagem \"%3$s\" com você. Por favor, clique no "
-"botão "
-"abaixo para visualizá-la."
+"botão abaixo para visualizá-la."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
@@ -8781,8 +8743,7 @@ msgid ""
 "to view them."
 msgstr ""
 "%1$s (%2$s) compartilhou %3$s imagens com você. Por favor, clique no botão "
-"abaixo "
-"para visualizá-las."
+"abaixo para visualizá-las."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
@@ -8790,8 +8751,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) compartilhou o item \"%3$s\" com você. Por favor, clique no botão "
-"abaixo para visualizá-lo."
+"%1$s (%2$s) compartilhou o item \"%3$s\" com você. Por favor, clique no "
+"botão abaixo para visualizá-lo."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
@@ -8800,8 +8761,7 @@ msgid ""
 "view them."
 msgstr ""
 "%1$s (%2$s) compartilhou %3$s itens com você. Por favor, clique no botão "
-"abaixo "
-"para visualizá-los."
+"abaixo para visualizá-los."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
@@ -8810,8 +8770,7 @@ msgid ""
 "below to view it."
 msgstr ""
 "%1$s (%2$s) compartilhou a pasta \"%3$s\" com você. Por favor, clique no "
-"botão "
-"abaixo para visualizá-la."
+"botão abaixo para visualizá-la."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
@@ -8820,8 +8779,7 @@ msgid ""
 "to view them."
 msgstr ""
 "%1$s (%2$s) compartilhou %3$s pastas com você. Por favor, clique no botão "
-"abaixo "
-"para visualizá-las."
+"abaixo para visualizá-las."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -11616,6 +11574,190 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para a pasta pública \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para criar subpastas na pasta "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "A pasta \"%1$s\" não existe."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "A pasta \"%1$s\" tem sido alterada neste meio tempo. Por favor recarregue "
+#~ "a visualização e tente novamente."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Esta operação requer permissões administrativas para a pasta \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "A pasta \"%1$s\" é uma pasta padrão e não pode ser renomeada."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "A pasta \"%1$s\" já contém uma pasta nomeada \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Pastas de tipo \"%2$s\" não podem ser criadas abaixo \"%1$s\"."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Pastas do módulo \"%2$s\" não podem ser criadas abaixo \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "A pasta \"%1$s\" é uma pasta padrão e não pode ser movida."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "A pasta \"%1$s\" é compartilhada e não pode ser movida."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "A pasta não pode ser movida para a pasta compartilhada %1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "A pasta \"%1$s\" é uma pasta de sistema e não pode ser movida."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "A pasta privada \"%1$s\" só pode ser movida para outra pasta privada."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "A pasta pública \"%1$s\" só pode ser movida para outra pasta pública."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para mover todas as subpastas da "
+#~ "pasta \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para excluir a pasta compartilhada "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "A pasta \"%2$s\" é uma pasta padrão e não pode ser excluída."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem permissão apropriada para excluir todos os ítens contidos na "
+#~ "pasta \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "A pasta \"%1$s\" não pode ser movida para uma de suas subpastas."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "A pasta compartilhada \"%1$s\" não pode ser atualizada."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Somente o proprietário da pasta pai compartilhada \"%4$s\" pode manter "
+#~ "permissões administrativas."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "A pasta \"%2$s\" é uma pasta padrão onde seu proprietário precisa manter "
+#~ "permissões administrativas."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para compartilhar a pasta \"%2$s\"."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Devido as permissões limitadas do usuário \"%1$s\", não é possível "
+#~ "aplicar as alterações para a pasta \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "A pasta \"%1$s\" não pode ser excluída, uma vez que esta contém uma "
+#~ "subpasta oculta sobre a qual você não tem permissões apropriadas."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "A pasta \"%2$s\" já contém uma pasta nomeada \"%1$s\". Por favor, escolha "
+#~ "um nome diferente e tente novamente."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Definida permissão duplicada para o usuário \"%1$s\". Somente uma "
+#~ "permissão por usuário é permitida."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Definida permissão duplicada para o grupo \"%1$s\". Somente uma permissão "
+#~ "por grupo é permitida."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Apenas a permissão de visibilidade de pasta é permitida a ser alterada "
+#~ "para a pasta \"%1$s\"."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Apenas permissões de usuário individual, mas nenhuma permissão de grupo é "
+#~ "permitida para a pasta \"%1$s\"."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Nenhuma permissão de usuário individual é permitida para a pasta \"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Você não tem as permissões apropriadas para renomear a pasta \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "A pasta compartilhada \"%1$s\" não pôde ser excluída, pois ela contém "
+#~ "documentos bloqueados."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "A pasta \"%1$s\" não pode ser excluída."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "As permissões administrativas do proprietário \"%1$s\" na pasta \"%2$s\" "
+#~ "foram restauradas."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"
