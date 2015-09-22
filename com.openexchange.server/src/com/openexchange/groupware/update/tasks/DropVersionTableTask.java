@@ -68,7 +68,7 @@ import com.openexchange.tools.update.Tools;
  * {@link DropVersionTableTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class DropVersionTableTask implements UpdateTaskV2 {
 
