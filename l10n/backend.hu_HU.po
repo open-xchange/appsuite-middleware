@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-07 21:58+0200\n"
+"PO-Revision-Date: 2015-09-14 09:35+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@bureau-cornavin.com>\n"
 "Language-Team: Hungarian <hu@bureau-cornavin.com>\n"
 "Language: hu\n"
@@ -184,44 +184,44 @@ msgstr "Nap"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "hétfő"
+msgstr "Hétfő"
 
 #. Tuesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
-msgstr "kedd"
+msgstr "Kedd"
 
 #. Wednesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
-msgstr "szerda"
+msgstr "Szerda"
 
 #. Thursday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
-msgstr "csütörtök"
+msgstr "Csütörtök"
 
 #. Friday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
-msgstr "péntek"
+msgstr "Péntek"
 
 #. Saturday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
-msgstr "szombat"
+msgstr "Szombat"
 
 #. Sunday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
-msgstr "vasárnap"
+msgstr "Vasárnap"
 
 #. -
 #. * Months
@@ -338,7 +338,7 @@ msgstr "%1$s alkalommal"
 #. E.g. "Until Wednesday, July 11, 2012"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:135
 msgid "Until %1$s"
-msgstr "eddig: %1$s"
+msgstr "Eddig: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
 msgid "No end"
@@ -939,7 +939,7 @@ msgstr "Házastárs neve"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:79
 msgid "Comment"
-msgstr "Megjegyzések"
+msgstr "Megjegyzés"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:80
 msgid "Company"
@@ -4209,7 +4209,6 @@ msgstr "Nincs érvényes munkamenet. Jelentkezzen be újra."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Nincs megfelelő jogosultsága a(z) %1$s mappa megjelenítéséhez."
 
@@ -7335,49 +7334,51 @@ msgstr "Kötelező mezők hiányoznak a megadott erőforrásban."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” modulhoz."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa megjelenítéséhez."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "A megosztott mappák nem érhetők el a fiókjához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” nyilvános mappához."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Nincs megfelelő jogosultsága a nyilvános mappához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr "Nincs megfelelő jogosultsága almappák létrehozásához a(z) „%2$s” mappában."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Nincs megfelelő jogosultsága almappák létrehozásához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "A(z) „%1$s” mappa nem létezik."
+msgid "Such a folder does not exist."
+msgstr "Nem létezik ilyen mappa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
-msgstr "A(z) „%1$s” mappa időközben megváltozott. Töltse újra a nézetet, és próbálja újra."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
+msgstr "A mappa időközben megváltozott. Töltse újra a nézetet, és próbálja újra."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Ez a művelet adminisztrátori jogosultságot igényel a(z) „%2$s” mappához."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Ez a művelet adminisztrátori jogosultságot igényel mappához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "A(z) „%1$s” mappa alapértelmezett mappa és nem nevezhető át."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "A mappa alapértelmezett és nem nevezhető át."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Már létezik „%3$s” nevű mappa a(z) „%1$s” mappa alatt."
+msgid "The folder already contains a folder with such a name."
+msgstr "A mappában ezzel a névvel már van egy mappa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "„%2$s” típusú mappák nem hozhatók létre „%1$s” alatt."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "\"%2$s\" típusú mappák nem hozhatók létre ebben a mappában."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "„%2$s” modul mappái nem hozhatók létre „%1$s” alatt."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "\"%2$s\" modul mappái nem hozhatók létre ebben a mappában."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -7398,58 +7399,52 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Legalább egy, adminisztrációs jogosultságokkal rendelkező felhasználó szükséges."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "A(z) „%1$s” mappa alapértelmezett mappa és nem mozgatható."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "A mappa alapértelmezett és nem mozgatható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "A(z) „%1$s” mappa megosztott mappa és nem mozgatható."
+msgid "The folder is shared and cannot be moved."
+msgstr "A mappa megosztott és nem mozgatható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "A mappa nem mozgatható a megosztott „%1$s” mappába."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "A mappa nem mozgatható megosztott mappába."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "A(z) „%1$s” mappa rendszermappa és nem mozgatható."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "A mappa rendszermappa és nem mozgatható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr "A(z) „%1$s” személyes mappa csak másik személyes mappába mozgatható."
+msgid "The private folder can only be moved to another private folder."
+msgstr "A személyes mappa csak másik személyes mappába mozgatható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "A nyilvános „%1$s” mappa csak másik nyilvános mappába mozgatható."
+msgid "The public folder can only be moved to another public folder."
+msgstr "A nyilvános mappa csak másik nyilvános mappába mozgatható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "A célmappa ugyanaz, mint a forrásmappa."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa összes almappájának mozgatásához."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "Nincs megfelelő jogosultsága az összes almappa mozgatásához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a megosztott „%2$s” mappa törléséhez."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Nincs megfelelő jogosultsága megosztott mappa törléséhez."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "A(z) „%2$s” mappa alapértelmezett mappa és nem törölhető."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "A mappa alapértelmezett és nem törölhető."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa által tartalmazott összes elem törléséhez."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Nincs megfelelő jogosultsága az összes elem törléséhez."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "A(z) „%1$s” mappa nem mozgatható az egyik almappájába."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "A mappa nem mozgatható az egyik almappájába."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -7457,8 +7452,8 @@ msgid ""
 msgstr "A(z) „%1$s” modul mappái nem mozgathatók a(z) „%2$s” modul mappáiba."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "A megosztott „%1$s” mappa nem frissíthető."
+msgid "The shared folder cannot be updated."
+msgstr "A megosztott mappa nem frissíthető."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -7474,37 +7469,35 @@ msgstr "A megadott mappanév meghaladja a(z) %2$d karakteres korlátot. Rövidí
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
-msgstr "Csak egy szülő megosztott „%4$s” mappa tulajdonosa rendelkezhet adminisztrációs jogosultságokkal."
+msgstr "Csak egy szülő megosztott mappájának tulajdonosa rendelkezhet adminisztrációs jogosultságokkal."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
-msgstr "A(z) „%2$s” alapértelmezett mappa, amely tulajdonosának adminisztrációs jogosultsággal kell rendelkeznie."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
+msgstr "A mappa az alapértelmezett mappa, amely tulajdonosának adminisztrációs jogosultsággal kell rendelkeznie."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa megosztásához."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa megosztásához."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr "A(z) „%1$s” felhasználó korlátozott jogosultságai miatt nem lehet a változásokat alkalmazni a(z) „%2$s” mappára."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "A változások alkalmazása nem lehetséges a korlátozott jogosultságok miatt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
-msgstr "A(z) „%1$s” mappa nem törölhető, mivel olyan rejtett almappát tartalmaz, amelyhez nincs megfelelő jogosultsága."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
+msgstr "A mappa nem törölhető, mert olyan rejtett almappát tartalmaz, amelyhez nincs megfelelő jogosultsága."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
-msgstr "Már létezik „%1$s” nevű mappa a(z) „%2$s” mappa alatt. Válasszon másik nevet, és próbálja újra."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
+msgstr "A mappában ezzel a névvel már van egy mappa. Válasszon egy másik nevet és próbálja újra."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -7518,54 +7511,44 @@ msgid ""
 msgstr "Már megoszt egy „%1$s” nevű személyes mappát ugyanezzel a felhasználóval. Nem oszthat meg két teljesen azonos nevű mappát ugyanazzal a felhasználóval. Nevezze át a mappát, mielőtt megosztaná a felhasználóval."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
-msgstr "A(z) „%1$s” felhasználó jogosultsága többször szerepel. Felhasználónként csak egy jogosultság engedélyezett."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
+msgstr "Többszörös jogosultság került beállításra. Felhasználónként csak egy jogosultság engedélyezett."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
-msgstr "A(z) „%1$s” csoport jogosultsága többször szerepel. Csoportonként csak egy jogosultság engedélyezett."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
+msgstr "Többszörös jogosultság került beállításra. Csoportonként csak egy jogosultság engedélyezett."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "Csak a mappa láthatósági jogosultsága módosítható a(z) „%1$s” mappán."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Csak a mappa láthatósági jogosultsága módosítható."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
-msgstr "Csak az egyéni felhasználói jogosultságok engedélyezettek a(z) „%1$s” mappára, a csoportjogosultságok nem."
+msgid "Only individual user permissions, but no group permissions are allowed."
+msgstr "Csak egyéni felhasználói jogosultságok engedélyezettek, a csoportjogosultságok nem."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "Nem engedélyezettek az egyéni felhasználói jogosultságok a(z) „%1$s” mappán."
+msgid "No individual user permissions are allowed."
+msgstr "Egyéni felhasználói jogosultságok nem engedélyezettek."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa átnevezéséhez."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa átnevezéséhez."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "A(z) „%1$s” mappa nem törölhető, mert zárolt dokumentumokat tartalmaz."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "A mappa nem törölhető, mert zárolt dokumentumokat tartalmaz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Lehetséges, hogy a műveletet csak a contex adminisztrátor végezheti el."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "A(z) „%1$s” mappa nem törölhető."
+msgid "The folder cannot be deleted."
+msgstr "A mappa nem törölhető."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr "„%1$s” tulajdonos adminisztrációs jogosultságai helyre lettek állítva a(z) „%2$s” mappán."
+msgid "The administrative permissions were restored."
+msgstr "Az adminisztrátori jogosultságok visszaállítása megtörtént."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -10512,6 +10495,182 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” nyilvános mappához."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nincs megfelelő jogosultsága almappák létrehozásához a(z) „%2$s” mappában."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "A(z) „%1$s” mappa nem létezik."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "A(z) „%1$s” mappa időközben megváltozott. Töltse újra a nézetet, és "
+#~ "próbálja újra."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Ez a művelet adminisztrátori jogosultságot igényel a(z) „%2$s” mappához."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "A(z) „%1$s” mappa alapértelmezett mappa és nem nevezhető át."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Már létezik „%3$s” nevű mappa a(z) „%1$s” mappa alatt."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "„%2$s” típusú mappák nem hozhatók létre „%1$s” alatt."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "„%2$s” modul mappái nem hozhatók létre „%1$s” alatt."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "A(z) „%1$s” mappa alapértelmezett mappa és nem mozgatható."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "A(z) „%1$s” mappa megosztott mappa és nem mozgatható."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "A mappa nem mozgatható a megosztott „%1$s” mappába."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "A(z) „%1$s” mappa rendszermappa és nem mozgatható."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "A(z) „%1$s” személyes mappa csak másik személyes mappába mozgatható."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr "A nyilvános „%1$s” mappa csak másik nyilvános mappába mozgatható."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nincs megfelelő jogosultsága a(z) „%2$s” mappa összes almappájának "
+#~ "mozgatásához."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr "Nincs megfelelő jogosultsága a megosztott „%2$s” mappa törléséhez."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "A(z) „%2$s” mappa alapértelmezett mappa és nem törölhető."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nincs megfelelő jogosultsága a(z) „%2$s” mappa által tartalmazott összes "
+#~ "elem törléséhez."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "A(z) „%1$s” mappa nem mozgatható az egyik almappájába."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "A megosztott „%1$s” mappa nem frissíthető."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Csak egy szülő megosztott „%4$s” mappa tulajdonosa rendelkezhet "
+#~ "adminisztrációs jogosultságokkal."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "A(z) „%2$s” alapértelmezett mappa, amely tulajdonosának adminisztrációs "
+#~ "jogosultsággal kell rendelkeznie."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa megosztásához."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "A(z) „%1$s” felhasználó korlátozott jogosultságai miatt nem lehet a "
+#~ "változásokat alkalmazni a(z) „%2$s” mappára."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "A(z) „%1$s” mappa nem törölhető, mivel olyan rejtett almappát tartalmaz, "
+#~ "amelyhez nincs megfelelő jogosultsága."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Már létezik „%1$s” nevű mappa a(z) „%2$s” mappa alatt. Válasszon másik "
+#~ "nevet, és próbálja újra."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "A(z) „%1$s” felhasználó jogosultsága többször szerepel. Felhasználónként "
+#~ "csak egy jogosultság engedélyezett."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "A(z) „%1$s” csoport jogosultsága többször szerepel. Csoportonként csak "
+#~ "egy jogosultság engedélyezett."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Csak a mappa láthatósági jogosultsága módosítható a(z) „%1$s” mappán."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Csak az egyéni felhasználói jogosultságok engedélyezettek a(z) „%1$s” "
+#~ "mappára, a csoportjogosultságok nem."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Nem engedélyezettek az egyéni felhasználói jogosultságok a(z) „%1$s” "
+#~ "mappán."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” mappa átnevezéséhez."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "A(z) „%1$s” mappa nem törölhető, mert zárolt dokumentumokat tartalmaz."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "A(z) „%1$s” mappa nem törölhető."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "„%1$s” tulajdonos adminisztrációs jogosultságai helyre lettek állítva "
+#~ "a(z) „%2$s” mappán."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

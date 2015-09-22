@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.openexchange.imap.util.Counter;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
@@ -99,10 +100,12 @@ public enum IMAPClientParameters {
 
     // --------------------------------------------------------------------------------------------------------------------
 
+    private static final Counter COUNTER = new Counter();
+
     /**
      * Generates the session information.
      * <pre>
-     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;store-hash&gt;
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;next-long&gt;
      *
      *  Example:
      *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
@@ -117,7 +120,7 @@ public enum IMAPClientParameters {
         buf.append(session.getSessionID());
         buf.append('-').append(session.getUserId());
         buf.append('-').append(session.getContextId());
-        buf.append('-').append(imapStore.hashCode());
+        buf.append('-').append(COUNTER.nextLong());
         return buf.toString();
     }
 

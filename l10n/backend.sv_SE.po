@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-03 06:39+0200\n"
+"PO-Revision-Date: 2015-09-13 09:34+0200\n"
 "Last-Translator: Arve Eriksson\n"
 "Language-Team: Swedish <ox@bureau-cornavin.com>\n"
 "Language: sv\n"
@@ -4469,7 +4469,6 @@ msgstr "Din session är ogiltig. Logga in på nytt."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Du har inte tillräckliga rättigheter för att visa mappen \"%1$s\"."
 
@@ -8169,53 +8168,51 @@ msgstr "Saknar obligatoriskt fält i angiven resurs."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Du har inte tillräckliga rättigheter för modulen \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Du har inte lämpliga rättigheter för att visa mappen."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Delade mappar är inte tillgängliga för ditt konto."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr ""
-"Du har inte tillräckliga rättigheter för den offentliga mappen \"%2$s\"."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Du har inte lämpliga rättigheter för den offentliga mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Du har inte tillräckliga rättigheter för att skapa underliggande mappar i "
-"mappen \"%2$s\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Du har inte lämpliga rättigheter för att skapa underliggande mappar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Mappen \"%1$s\" finns inte."
+msgid "Such a folder does not exist."
+msgstr "En sådan mapp finns inte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
-msgstr ""
-"Mappen \"%1$s\" har ändrats under tiden. Uppdatera vyn och försök igen."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
+msgstr "Mappen ändrades under tiden. Ladda om vyn och försök igen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Den här åtgärden kräver administratörsrättigheter för mappen \"%2$s\"."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Åtgärden kräver administratörsrättigheter för mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Mappen \"%1$s\" är en standardmapp och får inte döpas om."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Mappen är en standardmapp och kan inte döpas om."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Mappen \"%1$s\" innehåller redan en mapp med namnet \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "Mappen innehåller redan en mapp med det namnet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Mappar av typen \"%2$s\" kan inte skapas under \"%1$s\"."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Mappar av typen \"%2$s\" kan inte skapas under den här mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Mappar för modulen \"%2$s\" kan inte skapas under \"%1$s\"."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Mappar för modulen \"%2$s\" kan inte skapas under den här mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8237,67 +8234,54 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Åtminstone en användare måste ha administratörsrättigheter."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "Mappen \"%1$s\" är en standardmapp och får inte flyttas."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Mappen är en standardmapp och kan inte flyttas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Mappen \"%1$s\" är delad och får inte flyttas."
+msgid "The folder is shared and cannot be moved."
+msgstr "Mappen är delad och kan inte flyttas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Mappen får inte flyttas till den delade mappen \"%1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Mappen kan inte flyttas till en delad mapp."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "Mappen \"%1$s\" är en systemmapp och får inte flyttas."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Mappen är en systemmapp och kan inte flyttas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"Den privata mappen \"%1$s\" kan endast flyttas till en annan privat mapp."
+msgid "The private folder can only be moved to another private folder."
+msgstr "Den privata mappen kan bara flyttas till en annan privat mapp."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr ""
-"Den offentliga mappen \"%1$s\" kan endast flyttas till en annan offentlig "
-"mapp."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Den offentliga mappen kan bara flyttas till en annan offentlig mapp."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Målmappen är samma som källmappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
 msgstr ""
-"Du har inte tillräckliga rättigheter för att flytta alla underliggande "
-"mappar i mappen \"%2$s\"."
+"Du har inte lämpliga rättigheter för att flytta alla underliggande mappar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr ""
-"Du har inte tillräckliga rättigheter för att radera den delade mappen \"%2$s"
-"\"."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Du har inte lämpliga rättigheter för att ta bort den delade mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "Mappen \"%2$s\" är en standardmapp och får inte raderas."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Mappen är en standardmapp och kan inte tas bort."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
 msgstr ""
-"Du har inte tillräckliga rättigheter för att ta bort alla objekt i mappen "
-"\"%2$s\"."
+"Du har inte lämpliga rättigheter för att ta bort alla befintliga objekt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr "Mappen \"%1$s\" får inte flyttas till en av dess undermappar."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Mappen kan inte flyttas till en av dess underliggande mappar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8307,8 +8291,8 @@ msgstr ""
 "\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Den delade mappen \"%1$s\" får inte uppdateras."
+msgid "The shared folder cannot be updated."
+msgstr "Den delade mappen kan inte uppdateras."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8328,46 +8312,44 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Bara ägaren av den översta delade mappen \"%4$s\" får ha "
+"Endast ägaren av den överliggande delade mappen får ha "
 "administratörsrättigheter."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Mappen \"%2$s\" är en standardmapp vars ägare måste ha "
+"Mappen är en standardmapp. Därför måste dess ägare ha "
 "administratörsrättigheter."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Du har inte tillräckliga rättigheter för att dela mappen \"%2$s\"."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Du har inte lämpliga rättigheter för att dela ut mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
 msgstr ""
-"På grund av begränsade rättigheter för användaren \"%1$s\" är det inte "
-"möjligt att tillämpa ändringarna för mappen \"%2$s\"."
+"Det är inte möjligt att verkställa ändringarna på grund av "
+"begränsade rättigheter"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Mappen \"%1$s\" kan inte raderas eftersom den innehåller en dold "
-"underliggande mapp som du inte har de nödvändiga rättigheterna för."
+"Mappen kan inte raderas eftersom den innehåller en dold undermapp som "
+"du inte har lämpliga rättigheter för."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Mappen \"%2$s\" innehåller redan en mapp med namnet \"%1$s\". Välj ett annat "
+"Mappen innehåller redan en mapp med det namnet. Välj ett annat "
 "namn och försök igen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
@@ -8385,64 +8367,47 @@ msgstr ""
 "innan du delar den med den här användaren."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Dubbla rättigheter är definierade för användaren \"%1$s\". Endast en "
-"rättighet per användare är tillåten."
+"Dubblerad rättighet definierad. Endast en rättighet per användare tillåts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Dubbla rättigheter är definierade för gruppen \"%1$s\". Endast en rättighet "
-"per grupp är tillåten."
+"Dubblerad rättighet definierad. Endast ett tillstånd per grupp tillåts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr "Bara visningstillståndet får ändras för mappen \"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Endast rättigheten för mappsynlighet tillåts att ändras."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Endast individuella användarrättigheter, inga grupprättigheter tillåts för "
-"mappen \"%1$s\"."
+"Endast individuella användarrättigheter, men inte grupprättigheter, tillåts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "Inga individuella användarrättigheter tillåts för mappen \"%1$s\"."
+msgid "No individual user permissions are allowed."
+msgstr "Inga individuella användarrättigheter tillåts."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Du har inte tillräckliga rättigheter för att döpa om mappen \"%2$s\"."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Du har inte lämpliga rättigheter för att döpa om mappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"Den delade mappen \"%1$s\" kan inte raderas eftersom den innehåller låsta "
-"dokument."
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Mappen kan inte tas bort eftersom den innehåller låsta dokument."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Åtgärden får bara utföras för kontextens administratör."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Mappen \"%1$s\" kan inte raderas."
+msgid "The folder cannot be deleted."
+msgstr "Mappen kan inte tas bort."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Administratörsrättigheterna för ägaren \"%1$s\" i mappen \"%2$s\" "
-"återställdes."
+msgid "The administrative permissions were restored."
+msgstr "Administratörsrättigheter återställdes."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -8599,8 +8564,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) har delat filen \"%3$s\" med dig. Klicka på knappen "
-"nedanför för att visa den."
+"%1$s (%2$s) har delat filen \"%3$s\" med dig. Klicka på knappen nedanför för "
+"att visa den."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
@@ -8608,8 +8573,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) har delat %3$s filer med dig. Klicka på knappen nedanför för "
-"att visa dem."
+"%1$s (%2$s) har delat %3$s filer med dig. Klicka på knappen nedanför för att "
+"visa dem."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
@@ -8626,8 +8591,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) har delat %3$s bilder med dig. Klicka på knappen nedanför för att "
-"visa dem."
+"%1$s (%2$s) har delat %3$s bilder med dig. Klicka på knappen nedanför för "
+"att visa dem."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
@@ -8662,8 +8627,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) har delat %3$s mappar med dig. Klicka på knappen nedanför "
-"för att visa dem."
+"%1$s (%2$s) har delat %3$s mappar med dig. Klicka på knappen nedanför för "
+"att visa dem."
 
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
@@ -11452,6 +11417,186 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för den offentliga mappen \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att skapa underliggande mappar i "
+#~ "mappen \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Mappen \"%1$s\" finns inte."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Mappen \"%1$s\" har ändrats under tiden. Uppdatera vyn och försök igen."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Den här åtgärden kräver administratörsrättigheter för mappen \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Mappen \"%1$s\" är en standardmapp och får inte döpas om."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Mappen \"%1$s\" innehåller redan en mapp med namnet \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Mappar av typen \"%2$s\" kan inte skapas under \"%1$s\"."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Mappar för modulen \"%2$s\" kan inte skapas under \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "Mappen \"%1$s\" är en standardmapp och får inte flyttas."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Mappen \"%1$s\" är delad och får inte flyttas."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Mappen får inte flyttas till den delade mappen \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "Mappen \"%1$s\" är en systemmapp och får inte flyttas."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Den privata mappen \"%1$s\" kan endast flyttas till en annan privat mapp."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Den offentliga mappen \"%1$s\" kan endast flyttas till en annan offentlig "
+#~ "mapp."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att flytta alla underliggande "
+#~ "mappar i mappen \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att radera den delade mappen "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "Mappen \"%2$s\" är en standardmapp och får inte raderas."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att ta bort alla objekt i mappen "
+#~ "\"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr "Mappen \"%1$s\" får inte flyttas till en av dess undermappar."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Den delade mappen \"%1$s\" får inte uppdateras."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Bara ägaren av den översta delade mappen \"%4$s\" får ha "
+#~ "administratörsrättigheter."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Mappen \"%2$s\" är en standardmapp vars ägare måste ha "
+#~ "administratörsrättigheter."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Du har inte tillräckliga rättigheter för att dela mappen \"%2$s\"."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "På grund av begränsade rättigheter för användaren \"%1$s\" är det inte "
+#~ "möjligt att tillämpa ändringarna för mappen \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Mappen \"%1$s\" kan inte raderas eftersom den innehåller en dold "
+#~ "underliggande mapp som du inte har de nödvändiga rättigheterna för."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Mappen \"%2$s\" innehåller redan en mapp med namnet \"%1$s\". Välj ett "
+#~ "annat namn och försök igen."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Dubbla rättigheter är definierade för användaren \"%1$s\". Endast en "
+#~ "rättighet per användare är tillåten."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Dubbla rättigheter är definierade för gruppen \"%1$s\". Endast en "
+#~ "rättighet per grupp är tillåten."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr "Bara visningstillståndet får ändras för mappen \"%1$s\"."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Endast individuella användarrättigheter, inga grupprättigheter tillåts "
+#~ "för mappen \"%1$s\"."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr "Inga individuella användarrättigheter tillåts för mappen \"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Du har inte tillräckliga rättigheter för att döpa om mappen \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Den delade mappen \"%1$s\" kan inte raderas eftersom den innehåller låsta "
+#~ "dokument."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Mappen \"%1$s\" kan inte raderas."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Administratörsrättigheterna för ägaren \"%1$s\" i mappen \"%2$s\" "
+#~ "återställdes."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

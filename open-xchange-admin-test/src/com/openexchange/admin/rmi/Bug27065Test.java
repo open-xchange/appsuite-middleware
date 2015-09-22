@@ -90,8 +90,8 @@ public final class Bug27065Test extends AbstractTest {
         superAdmin = DummyMasterCredentials();
         url = getRMIHostUrl();
         contextIface = (OXContextInterface) Naming.lookup(url + OXContextInterface.RMI_NAME);
-        contextAdmin = UserTest.getTestUserObject("admin","secret");
         context = ContextTest.getTestContextObject(ContextTest.createNewContextID(superAdmin), 10l);
+        contextAdmin = UserTest.getTestUserObject("admin","secret", context);
     }
 
     @After

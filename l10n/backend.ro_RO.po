@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-07 00:19+0100\n"
+"PO-Revision-Date: 2015-09-14 08:11+0100\n"
 "Last-Translator: daiana <xdaiana@yahoo.com>\n"
 "Language-Team: Romanian <ro@bureau-cornavin.com>\n"
 "Language: ro\n"
@@ -4528,7 +4528,6 @@ msgstr "Nu aveți nicio sesiune corectă. Încercați din nou."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "Nu aveți permisiunile necesare pentru a vizualiza dosarul \"%1$s\"."
 
@@ -8272,53 +8271,53 @@ msgstr "Lipsesc unul sau mai multe câmpuri obligatorii în resursa dată."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Nu aveți permisiunile necesare pentru modulul \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Nu aveți permisiunile necesare pentru a vizualiza dosarul."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Dosarele partajate nu sunt disponibile pentru contul dumneavoastră."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "Nu aveți permisiunile necesare pentru dosarul public \"%2$s\"."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "Nu aveți permisiunile necesare pentru dosarul public."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"Nu aveți permisiunile necesare pentru a crea dosare subordonate în dosarul "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "Nu aveți permisiunile necesare pentru a crea dosare subordonate."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "Dosarul \"%1$s\" nu există."
+msgid "Such a folder does not exist."
+msgstr "Dosarul nu există."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Dosarul \"%1$s\" a fost modificat între timp. Actualizați vederea și "
-"încercați din nou."
+"Dosarul a fost modificat între timp. Reîncărcați vederea și încercați din "
+"nou."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Operația necesită permisiuni de administrare pentru dosarul \"%2$s\"."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Operația necesită permisiuni de administrare pentru dosar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "Dosarul \"%1$s\" este un dosar implicit și nu poate fi redenumit."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "Dosarul este un dosar implicit și nu poate fi redenumit."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "Dosarul \"%1$s\" conține deja un dosar cu numele \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "Dosarul conține deja un dosar cu acest nume."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Dosarele de tipul \"%2$s\" nu pot fi create sub \"%1$s\"."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Nu se pot crea dosare de tipul \"%2$s\" subordonate acestui dosar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Dosarele modulului \"%2$s\" nu pot fi subordonate \"%1$s\"."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
+msgstr "Nu se pot crea dosare în modulul \"%2$s\" subordonate acestui dosar."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8344,66 +8343,53 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Este necesar cel putin un utilizator cu permisiuni de administrare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "Dosarul \"%1$s\" este un dosar implicit și nu poate fi mutat."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "Dosarul este un dosar implicit și nu poate fi mutat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "Dosarul \"%1$s\" este un dosar partajat și nu poate fi mutat."
+msgid "The folder is shared and cannot be moved."
+msgstr "Dosarul este partajat și nu poate fi mutat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "Dosarul nu poate fi mutat în dosarul partajat \"%1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "Dosarul nu poate fi mutat într-un dosar partajat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "Dosarul \"%1$s\" este un dosar sistem și nu poate fi mutat."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "Dosarul este un dosar al sistemului și nu poate fi mutat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"Dosarul personal \"%1$s\" poate fi mutat doar într-un alt dosar personal."
+msgid "The private folder can only be moved to another private folder."
+msgstr "Dosarul personal poate fi mutat doar într-un alt dosar personal."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
-msgstr "Dosarul public \"%1$s\" poate fi mutat doar într-un alt dosar public."
+msgid "The public folder can only be moved to another public folder."
+msgstr "Dosarul public poate fi mutat doar într-un alt dosar public."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "Dosarul de destinație și dosarul sursă sunt identice."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to move all subfolders."
 msgstr ""
-"Nu aveți permisiunile necesare pentru a muta toate dosarele subordonate "
-"dosarului \"%2$s\"."
+"Nu aveți permisiunile necesare pentru a muta toate dosarele subordonate."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr ""
-"Nu aveți permisiunile necesare pentru a șterge dosarul partajat \"%2$s\"."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "Nu aveți permisiunile necesare pentru a șterge dosarul partajat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "Dosarul \"%2$s\" este un dosar implicit și nu poate fi șters."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "Dosarul este un dosar implicit și nu poate fi șters."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
-msgstr ""
-"Nu aveți permisiunile necesare pentru a șterge toate elementele din dosarul "
-"\"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
+msgstr "Nu aveți permisiunile necesare pentru a șterge toate elementele."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr ""
-"Dosarul \"%1$s\" nu poate fi mutat într-unul dintre dosarele sale "
-"subordonate."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "Dosarul nu poate fi mutat într-unul din dosarele sale subordonate."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8412,8 +8398,8 @@ msgstr ""
 "Dosarele modulului \"%1$s\" nu pot fi mutate în dosarele modulului \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "Dosarul partajat  \"%1$s\" nu poate fi actualizat."
+msgid "The shared folder cannot be updated."
+msgstr "Dosarul partajat nu poate fi actualizat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8433,47 +8419,43 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Doar proprietarul dosarului partajat părinte \"%4$s\" poate avea permisiuni "
-"de administrare."
+"Doar proprietarul dosarului partajat părinte poate avea permisiuni de "
+"administrare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"Dosarul \"%2$s\" este un dosar implicit pentru care proprietarul trebuie să "
+"Dosarul este un dosar implicit. În consecință, proprietarul său trebuie să "
 "dețină permisiuni de administrare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "Nu aveți permisiunile necesare pentru a partaja dosarul \"%2$s\"."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "Nu aveți permisiunile necesare pentru a partaja dosarul."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
-msgstr ""
-"Modificările pentru dosarul \"%2$s\" nu pot fi aplicate din cauza "
-"permisiunilor restrânse ale utilizatorului \"%1$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
+msgstr "Nu se pot aplica modificările din cauza permisiunilor limitate"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"Dosarul \"%1$s\" nu poate fi șters deoarece conține un dosar subordonat "
-"ascuns pentru care nu aveți permisiunile adecvate."
+"Dosarul nu poate fi șters deoarece conține un dosar subordonat ascuns pentru "
+"care nu aveți permisiunile necesare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"Dosarul \"%2$s\" conține deja un dosar cu numele \"%1$s\". Alegeți alt nume "
-"și încercați din nou."
+"Dosarul conține deja un dosar cu acest nume. Alegeți un alt nume și "
+"încercați din nou."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8490,65 +8472,50 @@ msgstr ""
 "Redenumiți dosarul înainte de a-l partaja cu acest utilizator."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"A fost definită o permisiune duplicat pentru utilizatorul \"%1$s\". Se "
-"acceptă doar o permisiune pentru fiecare utilizator."
+"Permisiuni duble definite. Este acceptată o singură permisiune pentru "
+"fiecare utilizator."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"A fost definită o permisiune duplicat pentru grupul \"%1$s\". Se acceptă "
-"doar o permisiune pentru fiecare grup."
+"Permisiuni duble definite. Este acceptată o singură permisiune pentru "
+"fiecare grup."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr ""
-"Se permite doar modificarea permisiunilor de vizibilitate pentru dosarul "
-"\"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Doar permisiunile pentru vizibilitatea dosarului pot fi modificate."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
-"Pentru dosarul \"%1$s\" se acceptă doar permisiuni pentru utilizatori "
-"individuali, nu și pentru grupuri."
+"Sunt acceptate doar permisiunile pentru utilizatorii individuali, nu și cele "
+"de grup."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr ""
-"Nu se acceptă permisiuni individuale de utilizator pentru dosarul \"%1$s\"."
+msgid "No individual user permissions are allowed."
+msgstr "Nu sunt acceptate permisiunile pentru utilizatorii individuali."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "Nu aveți permisiunile necesare pentru a redenumi dosarul \"%2$s\"."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "Nu aveți permisiunile necesare pentru a redenumi dosarul."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr "Dosarul \"%1$s\" nu poate fi șters deoarece conține documente blocate"
+msgid "The folder cannot be deleted as it contains locked documents."
+msgstr "Dosarul nu poate fi șters deoarece conține documente blocate."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Operația se poate efectua numai pentru administratorul de context."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "Dosarul \"%1$s\" nu poate fi șters."
+msgid "The folder cannot be deleted."
+msgstr "Dosarul nu poate fi șters."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"Permisiunile de administrare ale proprietarului \"%1$s\" în dosarul \"%2$s\" "
-"au fost restabilite."
+msgid "The administrative permissions were restored."
+msgstr "Permisiunile de administrare au fost restabilite."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -11569,6 +11536,188 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "Nu aveți permisiunile necesare pentru dosarul public \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a crea dosare subordonate în "
+#~ "dosarul \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "Dosarul \"%1$s\" nu există."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Dosarul \"%1$s\" a fost modificat între timp. Actualizați vederea și "
+#~ "încercați din nou."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Operația necesită permisiuni de administrare pentru dosarul \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "Dosarul \"%1$s\" este un dosar implicit și nu poate fi redenumit."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "Dosarul \"%1$s\" conține deja un dosar cu numele \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Dosarele de tipul \"%2$s\" nu pot fi create sub \"%1$s\"."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Dosarele modulului \"%2$s\" nu pot fi subordonate \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "Dosarul \"%1$s\" este un dosar implicit și nu poate fi mutat."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "Dosarul \"%1$s\" este un dosar partajat și nu poate fi mutat."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "Dosarul nu poate fi mutat în dosarul partajat \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "Dosarul \"%1$s\" este un dosar sistem și nu poate fi mutat."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "Dosarul personal \"%1$s\" poate fi mutat doar într-un alt dosar personal."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "Dosarul public \"%1$s\" poate fi mutat doar într-un alt dosar public."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a muta toate dosarele subordonate "
+#~ "dosarului \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a șterge dosarul partajat \"%2$s\"."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "Dosarul \"%2$s\" este un dosar implicit și nu poate fi șters."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "Nu aveți permisiunile necesare pentru a șterge toate elementele din "
+#~ "dosarul \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr ""
+#~ "Dosarul \"%1$s\" nu poate fi mutat într-unul dintre dosarele sale "
+#~ "subordonate."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "Dosarul partajat  \"%1$s\" nu poate fi actualizat."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Doar proprietarul dosarului partajat părinte \"%4$s\" poate avea "
+#~ "permisiuni de administrare."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Dosarul \"%2$s\" este un dosar implicit pentru care proprietarul trebuie "
+#~ "să dețină permisiuni de administrare."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "Nu aveți permisiunile necesare pentru a partaja dosarul \"%2$s\"."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Modificările pentru dosarul \"%2$s\" nu pot fi aplicate din cauza "
+#~ "permisiunilor restrânse ale utilizatorului \"%1$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "Dosarul \"%1$s\" nu poate fi șters deoarece conține un dosar subordonat "
+#~ "ascuns pentru care nu aveți permisiunile adecvate."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "Dosarul \"%2$s\" conține deja un dosar cu numele \"%1$s\". Alegeți alt "
+#~ "nume și încercați din nou."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "A fost definită o permisiune duplicat pentru utilizatorul \"%1$s\". Se "
+#~ "acceptă doar o permisiune pentru fiecare utilizator."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "A fost definită o permisiune duplicat pentru grupul \"%1$s\". Se acceptă "
+#~ "doar o permisiune pentru fiecare grup."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Se permite doar modificarea permisiunilor de vizibilitate pentru dosarul "
+#~ "\"%1$s\"."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Pentru dosarul \"%1$s\" se acceptă doar permisiuni pentru utilizatori "
+#~ "individuali, nu și pentru grupuri."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Nu se acceptă permisiuni individuale de utilizator pentru dosarul \"%1$s"
+#~ "\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "Nu aveți permisiunile necesare pentru a redenumi dosarul \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "Dosarul \"%1$s\" nu poate fi șters deoarece conține documente blocate"
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "Dosarul \"%1$s\" nu poate fi șters."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "Permisiunile de administrare ale proprietarului \"%1$s\" în dosarul \"%2$s"
+#~ "\" au fost restabilite."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"

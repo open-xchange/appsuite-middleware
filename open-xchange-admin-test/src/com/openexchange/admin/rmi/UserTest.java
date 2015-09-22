@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
@@ -91,14 +92,14 @@ public class UserTest extends AbstractTest {
 
     public final static String NAMED_ACCESS_COMBINATION_BASIC = "all";
     // list of chars that must be valid
-//    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
+    //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // global setting for stored password
     protected static final String pass = "foo-user-pass";
 
-    protected static OXUserInterface getUserClient() throws Exception{
-        return (OXUserInterface) Naming.lookup(getRMIHostUrl()+ OXUserInterface.RMI_NAME);
+    protected static OXUserInterface getUserClient() throws Exception {
+        return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
 
     public static junit.framework.Test suite() {
@@ -114,13 +115,12 @@ public class UserTest extends AbstractTest {
         ret.setContacts(true);
 
         final Class clazz = ret.getClass();
-        for(final Method m : clazz.getMethods() ) {
+        for (final Method m : clazz.getMethods()) {
             final String name = m.getName();
-            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties")
-                && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get")) ) {
+            if (!name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get"))) {
                 //System.out.println("*******" + name);
-                boolean res = (Boolean)m.invoke(ret, null);
-                if( name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
+                boolean res = (Boolean) m.invoke(ret, null);
+                if (name.endsWith("Webmail") || name.endsWith("Contacts") || name.endsWith("GlobalAddressBookDisabled")) {
                     assertTrue(name + " must return true", res);
                 } else {
                     assertFalse(name + " must return false", res);
@@ -139,15 +139,15 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
     }
@@ -167,15 +167,15 @@ public class UserTest extends AbstractTest {
 
         // create new user
         final OXUserInterface oxu = getUserClient();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, cred);
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
     }
@@ -189,15 +189,15 @@ public class UserTest extends AbstractTest {
 
         // create new user
         final OXUserInterface oxu = getUserClient();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,NAMED_ACCESS_COMBINATION_BASIC,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, NAMED_ACCESS_COMBINATION_BASIC, cred);
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
     }
@@ -212,15 +212,15 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUserMandatory(createduser,srv_loaded);
-        }else{
+            compareUserMandatory(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
@@ -233,15 +233,13 @@ public class UserTest extends AbstractTest {
 
         assertEquals("username not equal", a.getName(), b.getName());
         assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
-        assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());
+        assertEquals("primaryemail not equal", a.getPrimaryEmail(), b.getPrimaryEmail());
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
 
     }
 
-
-
-    @Test(expected=NoSuchUserException.class)
+    @Test(expected = NoSuchUserException.class)
     public void testDelete() throws Exception {
 
         // get context to create an user
@@ -252,11 +250,11 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, id( createduser ), cred);
+        oxu.delete(ctx, id(createduser), cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -278,17 +276,17 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
         oxu.delete(ctx, createduser, cred);
 
         // create same user again, this failes as described in the bug
-        createduser = oxu.create(ctx,urs,access,cred);
+        createduser = oxu.create(ctx, urs, access, cred);
     }
 
-    @Test(expected=InvalidDataException.class)
+    @Test(expected = InvalidDataException.class)
     public void testDeleteEmptyUserList() throws Exception {
 
         // get context to create an user
@@ -299,11 +297,11 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, new User[0] ,cred);
+        oxu.delete(ctx, new User[0], cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -321,14 +319,14 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, createduser, cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
-        }else{
+        } else {
             fail("Expected to get user data");
         }
     }
@@ -343,7 +341,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         final User usernameuser = new User();
@@ -351,10 +349,10 @@ public class UserTest extends AbstractTest {
 
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, usernameuser, cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data");
         }
     }
@@ -372,7 +370,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
         access.setPublicFolderEditable(true);
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         User createduser;
         try {
             createduser = oxu.create(ctx, usr, access, cred);
@@ -433,7 +431,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         final User usernameuser = new User();
@@ -442,10 +440,10 @@ public class UserTest extends AbstractTest {
         final Credentials usercred = new Credentials(urs.getName(), urs.getPassword());
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, usernameuser, usercred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data");
         }
     }
@@ -460,7 +458,7 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
 
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         final User iduser = new User();
@@ -468,10 +466,10 @@ public class UserTest extends AbstractTest {
 
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, iduser, cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data");
         }
     }
@@ -486,14 +484,14 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,client_access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, client_access, cred);
 
         // get module access
         final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
 
         // test if module access was set correctly
-        compareUserAccess(client_access,srv_response);
+        compareUserAccess(client_access, srv_response);
 
     }
 
@@ -507,14 +505,14 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,client_access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, client_access, cred);
 
         // get module access
         final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
 
         // test if module access was set correctly
-        compareUserAccess(client_access,srv_response);
+        compareUserAccess(client_access, srv_response);
 
         // now change server loaded module access and submit changes to the server
         srv_response.setCalendar(!srv_response.getCalendar());
@@ -552,21 +550,21 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,client_access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, client_access, cred);
 
         final User[] srv_response = oxu.list(ctx, "*", cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
         boolean founduser = false;
-        for(final User element: srv_response){
+        for (final User element : srv_response) {
             if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
         }
 
-        assertTrue("Expected to find added user in user list",founduser);
+        assertTrue("Expected to find added user in user list", founduser);
     }
 
     @Test
@@ -579,21 +577,21 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,client_access,cred);
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, client_access, cred);
 
         final User[] srv_response = oxu.listAll(ctx, cred);
 
         assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
         boolean founduser = false;
-        for(final User element: srv_response){
+        for (final User element : srv_response) {
             if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
         }
 
-        assertTrue("Expected to find added user in user list",founduser);
+        assertTrue("Expected to find added user in user list", founduser);
     }
 
     @Test
@@ -606,10 +604,10 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -617,14 +615,13 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         }
 
-
         // now change data
         srv_loaded = createChangeUserData(srv_loaded);
         // submit changes
-        oxu.change(ctx,srv_loaded,cred);
+        oxu.change(ctx, srv_loaded, cred);
 
         // load again
-        final User user_changed_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
+        final User user_changed_loaded = oxu.getData(ctx, id(srv_loaded), cred);
         // set Username to old value for verification
         srv_loaded.setName(createduser.getName());
         // remove deleted dynamic attribute for verification
@@ -632,7 +629,7 @@ public class UserTest extends AbstractTest {
         if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
             //verify data
             compareUser(srv_loaded, user_changed_loaded);
-        }else{
+        } else {
             fail("Expected to get correct changed user data");
         }
     }
@@ -641,17 +638,17 @@ public class UserTest extends AbstractTest {
     public void testChangeSingleAttributeNull() throws Exception {
         // set single values to null in the user object and then call change, what happens?
 
-//      get context to create an user
+        //      get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -677,7 +674,7 @@ public class UserTest extends AbstractTest {
                 tmp_usr.setName(srv_loaded.getName());
             }
 
-            if(map_obj.getMethodParameterType().equals("java.lang.Integer")) {
+            if (map_obj.getMethodParameterType().equals("java.lang.Integer")) {
                 map_obj.getSetter().invoke(tmp_usr, new Object[] { Integer.valueOf(-1) });
 
                 System.out.println("Setting -1 via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
@@ -695,7 +692,7 @@ public class UserTest extends AbstractTest {
             oxu.change(ctx, tmp_usr, cred);
 
             // load from server and compare the single changed value
-            final User user_single_change_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
+            final User user_single_change_loaded = oxu.getData(ctx, id(srv_loaded), cred);
 
             if (!notallowed.contains(map_obj.getMethodName())) {
                 // local and remote must be null
@@ -713,22 +710,22 @@ public class UserTest extends AbstractTest {
      *
      * @throws Exception
      */
-    @Test(expected=InvalidDataException.class)
+    @Test(expected = InvalidDataException.class)
     public void testChangeAllAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
 
-// get context to create an user
+        // get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -747,7 +744,7 @@ public class UserTest extends AbstractTest {
                 // server must resolv by name
                 tmp_usr.setName(srv_loaded.getName());
             }
-            if(!map_obj.getMethodName().equals("setUserAttribute")) {
+            if (!map_obj.getMethodName().equals("setUserAttribute")) {
                 map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
                 System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
             }
@@ -755,10 +752,10 @@ public class UserTest extends AbstractTest {
         }
 
         // submit changes
-        oxu.change(ctx,tmp_usr,cred);
+        oxu.change(ctx, tmp_usr, cred);
 
         // load from server and compare the single changed value
-        final User user_single_change_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
+        final User user_single_change_loaded = oxu.getData(ctx, id(srv_loaded), cred);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -777,10 +774,10 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -811,10 +808,10 @@ public class UserTest extends AbstractTest {
         }
 
         // submit changes
-        oxu.change(ctx,tmp_usr,cred);
+        oxu.change(ctx, tmp_usr, cred);
 
         // load from server and compare the single changed value
-        final User user_single_change_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
+        final User user_single_change_loaded = oxu.getData(ctx, id(srv_loaded), cred);
 
         // TODO
         // special compare must be written that checks for special attributes like username etc which cannot be null
@@ -848,6 +845,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setPasswordMech");
         notallowed.add("setUserAttribute");
         notallowed.add("setFilestoreId");
+        notallowed.add("setFilestore_name");
         return notallowed;
     }
 
@@ -855,17 +853,17 @@ public class UserTest extends AbstractTest {
     public void testChangeSingleAttribute() throws Exception {
         // change only 1 attribute of user object per call
 
-//      get context to create an user
+        //      get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
 
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -891,17 +889,17 @@ public class UserTest extends AbstractTest {
         notallowed.add("setMail_folder_confirmed_spam_name");
         // #                                                                     #
 
-        notallowed.add("setId"); // we cannot change the id of a user, is a mandatory field for a change
-        notallowed.add("setPassword"); // server password is always different(crypted)
-        notallowed.add("setPasswordMech"); // server password is always different(crypted)
-        notallowed.add("setName"); // server does not support username change
+        notallowed.add("setId");// we cannot change the id of a user, is a mandatory field for a change
+        notallowed.add("setPassword");// server password is always different(crypted)
+        notallowed.add("setPasswordMech");// server password is always different(crypted)
+        notallowed.add("setName");// server does not support username change
 
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
         for (MethodMapObject map_obj : meth_objects) {
             if (!notallowed.contains(map_obj.getMethodName())) {
-                User tmp_usr  = new User(srv_loaded.getId());
+                User tmp_usr = new User(srv_loaded.getId());
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String") && map_obj.getGetter().getParameterTypes().length == 0) {
                     String oldvalue = (String) map_obj.getGetter().invoke(srv_loaded);
                     if (map_obj.getMethodName().equals("setLanguage")) {
@@ -926,14 +924,14 @@ public class UserTest extends AbstractTest {
                 if (map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")) {
                     Date oldvalue = (Date) map_obj.getGetter().invoke(srv_loaded);
                     // set date to current +1 day
-                    map_obj.getSetter().invoke(tmp_usr, new Date(oldvalue.getTime()+(24*60*60*1000)));
+                    map_obj.getSetter().invoke(tmp_usr, new Date(oldvalue.getTime() + (24 * 60 * 60 * 1000)));
                     //System.out.println("Setting Date via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
 
                 //  submit changes
-                oxu.change(ctx,tmp_usr,cred);
+                oxu.change(ctx, tmp_usr, cred);
                 // load from server and compare the single changed value
-                final User user_single_change_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
+                final User user_single_change_loaded = oxu.getData(ctx, id(srv_loaded), cred);
 
                 // compare both string values , server and local copy must be same, else, the change was unsuccessfull
                 if (map_obj.getGetter().getParameterTypes().length == 0) {
@@ -945,7 +943,7 @@ public class UserTest extends AbstractTest {
         }
     }
 
-    public  MethodMapObject[] getSetableAttributeMethods(final Class clazz){
+    public MethodMapObject[] getSetableAttributeMethods(final Class clazz) {
 
         Method[] theMethods = clazz.getMethods();
         List<MethodMapObject> tmplist = new ArrayList<MethodMapObject>();
@@ -954,13 +952,10 @@ public class UserTest extends AbstractTest {
 
         // first fill setter and other infos in map object
         for (Method method : theMethods) {
-            String method_name =  method.getName();
-            if(method_name.startsWith("set")){
+            String method_name = method.getName();
+            if (method_name.startsWith("set")) {
                 // check if it is a type we support
-                if(method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String")
-                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer")
-                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date")
-                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")){
+                if (method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date") || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")) {
 
                     map_obj = new MethodMapObject();
                     map_obj.setMethodName(method_name);
@@ -972,12 +967,12 @@ public class UserTest extends AbstractTest {
             }
         }
 
-        for(MethodMapObject obj_map : tmplist){
+        for (MethodMapObject obj_map : tmplist) {
             String obj_method_name = obj_map.getMethodName();
-            for (Method method : theMethods)  {
-                String meth_name =  method.getName();
-                if(meth_name.startsWith("get")){
-                    if(meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))){
+            for (Method method : theMethods) {
+                String meth_name = method.getName();
+                if (meth_name.startsWith("get")) {
+                    if (meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))) {
                         obj_map.setGetter(method);
                         break;
                     }
@@ -990,53 +985,62 @@ public class UserTest extends AbstractTest {
         return tmplist.toArray(new MethodMapObject[tmplist.size()]);
     }
 
-    private class MethodMapObject{
+    private class MethodMapObject {
+
         private Method getter = null;
         private Method setter = null;
         private String methodParameterType = null;
         private String methodName = null;
+
         /**
          * @return the getter
          */
         public Method getGetter() {
             return getter;
         }
+
         /**
          * @param getter the getter to set
          */
         public void setGetter(Method getter) {
             this.getter = getter;
         }
+
         /**
          * @return the methodName
          */
         public String getMethodName() {
             return methodName;
         }
+
         /**
          * @param methodName the methodName to set
          */
         public void setMethodName(String methodName) {
             this.methodName = methodName;
         }
+
         /**
          * @return the methodType
          */
         public String getMethodParameterType() {
             return methodParameterType;
         }
+
         /**
          * @param methodType the methodType to set
          */
         public void setMethodParameterType(String methodType) {
             this.methodParameterType = methodType;
         }
+
         /**
          * @return the setter
          */
         public Method getSetter() {
             return setter;
         }
+
         /**
          * @param setter the setter to set
          */
@@ -1045,11 +1049,8 @@ public class UserTest extends AbstractTest {
         }
     }
 
-
-
-
     @Test
-    public void testChangeWithEmptyUserIdentifiedByID() throws Exception{
+    public void testChangeWithEmptyUserIdentifiedByID() throws Exception {
         // test a change with no data set only id set and compare the data aftewards
 
         // 1. create user
@@ -1058,7 +1059,6 @@ public class UserTest extends AbstractTest {
         // 4. load user again from server and compare with 1st created user
         //     must be equal, because we changed nothing
 
-
         // STEP 1
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -1067,40 +1067,38 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
-
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
         // STEP 3
         User emptyusr = new User(srv_loaded.getId());
-        oxu.change(ctx,emptyusr,cred);
+        oxu.change(ctx, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded2.getId())){
+        final User srv_loaded2 = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
     }
 
     @Test
-    public void testChangeWithEmptyUserIdentifiedByName() throws Exception{
+    public void testChangeWithEmptyUserIdentifiedByName() throws Exception {
         // test a change with no data set ONLY username set and compare the data aftewards
-
 
         // STEP 1
         // get context to create an user
@@ -1110,41 +1108,39 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
-
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
         // STEP 3
         User emptyusr = new User();
         emptyusr.setName(srv_loaded.getName());
-        oxu.change(ctx,emptyusr,cred);
+        oxu.change(ctx, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded2.getId())){
+        final User srv_loaded2 = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
     }
 
     @Test
-    public void testChangeIdentifiedByName() throws Exception{
+    public void testChangeIdentifiedByName() throws Exception {
         // test a change with data set  but identified by username and compare the data aftewards
-
 
         // STEP 1
         // get context to create an user
@@ -1154,42 +1150,40 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
-
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
         // STEP 3
 
         User emptyusr = createChangeUserData(srv_loaded);
-        emptyusr.setId(null); // reset id, server must ident the user by username
-        oxu.change(ctx,emptyusr,cred);
+        emptyusr.setId(null);// reset id, server must ident the user by username
+        oxu.change(ctx, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded2.getId())){
+        final User srv_loaded2 = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
     }
 
     @Test
-    public void testChangeIdentifiedByID() throws Exception{
+    public void testChangeIdentifiedByID() throws Exception {
         // test a change with data set but identified by id and compare the data afterwards
-
 
         // STEP 1
         // get context to create an user
@@ -1199,17 +1193,16 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,urs,access,cred);
-
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, urs, access, cred);
 
         // STEP 2
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
@@ -1220,21 +1213,21 @@ public class UserTest extends AbstractTest {
         final Field field = emptyusr.getClass().getDeclaredField("name");
         field.setAccessible(true);
         field.set(emptyusr, null);
-        oxu.change(ctx,emptyusr,cred);
+        oxu.change(ctx, emptyusr, cred);
 
         // STEP 4
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded2 = oxu.getData(ctx,id( createduser ),cred);
-        if(createduser.getId().equals(srv_loaded2.getId())){
+        final User srv_loaded2 = oxu.getData(ctx, id(createduser), cred);
+        if (createduser.getId().equals(srv_loaded2.getId())) {
             //verify data
-            compareUser(createduser,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data for added user");
         }
 
     }
 
-    @Test(expected=InvalidDataException.class)
+    @Test(expected = InvalidDataException.class)
     public void testChangeWithoutIdAndName() throws Exception {
 
         // get context to create an user
@@ -1244,10 +1237,10 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();
-        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx,usr,access,cred);
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        final User createduser = oxu.create(ctx, usr, access, cred);
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx, id( createduser ), cred);
+        User srv_loaded = oxu.getData(ctx, id(createduser), cred);
         if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
             compareUser(createduser, srv_loaded);
@@ -1255,13 +1248,12 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         }
 
-
         // now change data
         srv_loaded = createChangeUserData(srv_loaded);
         srv_loaded.setId(null);
         srv_loaded.setName(null);
         // submit changes
-        oxu.change(ctx,srv_loaded,cred);
+        oxu.change(ctx, srv_loaded, cred);
     }
 
     // This test is used to check how the change method deals with changing values which are null before changing
@@ -1296,8 +1288,6 @@ public class UserTest extends AbstractTest {
         compareUser(usr, usr2);
     }
 
-
-
     public static User getTestUserMandatoryFieldsObject(final String ident, final String password) {
         final User usr = new User();
 
@@ -1307,7 +1297,7 @@ public class UserTest extends AbstractTest {
         usr.setMailenabled(true);
 
         usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
-        usr.setEmail1("primaryemail-"+ident+"@"+AbstractTest.TEST_DOMAIN);
+        usr.setEmail1("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setDisplay_name("Displayname " + ident);
         usr.setGiven_name(ident);
         usr.setSur_name("Lastname " + ident);
@@ -1315,7 +1305,7 @@ public class UserTest extends AbstractTest {
         return usr;
     }
 
-    public static User getTestUserObject(final String ident, final String password) {
+    public static User getTestUserObject(final String ident, final String password, final Context context) {
         final User usr = new User();
         usr.setName(ident);
         usr.setPassword(password);
@@ -1327,9 +1317,12 @@ public class UserTest extends AbstractTest {
         usr.setLanguage("de_DE");
         // new for testing
 
-        usr.setEmail1("primaryemail-"+ident+"@"+AbstractTest.TEST_DOMAIN);
+        usr.setEmail1("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail2("email2-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail3("email3-" + ident + "@" + AbstractTest.TEST_DOMAIN);
+
+        usr.setFilestoreId(null);
+        usr.setFilestore_name(null);
 
         final HashSet<String> aliase = new HashSet<String>();
         aliase.add("alias1-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -1441,25 +1434,23 @@ public class UserTest extends AbstractTest {
         usr.setUserfield19("Userfield19");
         usr.setUserfield20("Userfield20");
 
-
         usr.setUserAttribute("com.openexchange.test", "simpleValue", "12");
         usr.setUserAttribute("com.openexchange.test", "staticValue", "42");
         usr.setUserAttribute("com.openexchange.test", "deleteMe", "23");
-
 
         return usr;
     }
 
     public static User getTestUserObject() {
-        return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange");
+        return getTestUserObject(VALID_CHAR_TESTUSER, "open-xchange", null);
     }
 
-//    private static int getContextID() throws Exception {
-//        final Credentials cred = DummyCredentials();
-//        final Context ctx = ContextTest.getTestContextObject(ContextTest.createNewContextID(cred), 10);
-//        final int id = ContextTest.addContext(ctx, getRMIHostUrl(), cred);
-//        return id;
-//    }
+    //    private static int getContextID() throws Exception {
+    //        final Credentials cred = DummyCredentials();
+    //        final Context ctx = ContextTest.getTestContextObject(ContextTest.createNewContextID(cred), 10);
+    //        final int id = ContextTest.addContext(ctx, getRMIHostUrl(), cred);
+    //        return id;
+    //    }
 
     public static void compareUser(final User a, final User b) {
         System.out.println("USERA" + a.toString());
@@ -1467,7 +1458,7 @@ public class UserTest extends AbstractTest {
 
         assertEquals("username not equal", a.getName(), b.getName());
         assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
-        assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());
+        assertEquals("primaryemail not equal", a.getPrimaryEmail(), b.getPrimaryEmail());
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
         assertEquals("lastname not equal", a.getSur_name(), b.getSur_name());
@@ -1476,7 +1467,6 @@ public class UserTest extends AbstractTest {
         assertEquals(a.getAliases(), b.getAliases());
         compareNonCriticFields(a, b);
 
-
     }
 
     private static void compareUserSpecialForNulledAttributes(final User a, final User b) {
@@ -1484,13 +1474,13 @@ public class UserTest extends AbstractTest {
         System.out.println("USERB" + b.toString());
 
         // all these attributes cannot be null | cannot changed by server to null/empty
-        assertNotNull("username cannot be null",b.getName());
-        assertNotNull("enabled cannot be null",b.getMailenabled());
-        assertNotNull("primaryemail cannot be null",b.getPrimaryEmail());
-        assertNotNull("display name cannot be null",b.getDisplay_name());
-        assertNotNull("firstname name cannot be null",b.getGiven_name());
-        assertNotNull("lastname name cannot be null",b.getSur_name());
-        assertNotNull("language name cannot be null",b.getLanguage());
+        assertNotNull("username cannot be null", b.getName());
+        assertNotNull("enabled cannot be null", b.getMailenabled());
+        assertNotNull("primaryemail cannot be null", b.getPrimaryEmail());
+        assertNotNull("display name cannot be null", b.getDisplay_name());
+        assertNotNull("firstname name cannot be null", b.getGiven_name());
+        assertNotNull("lastname name cannot be null", b.getSur_name());
+        assertNotNull("language name cannot be null", b.getLanguage());
 
         // can alias be null?
         //assertEquals(a.getAliases(), b.getAliases());
@@ -1606,11 +1596,11 @@ public class UserTest extends AbstractTest {
         final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-//          for (int i = 0; i < aexts.size(); i++) {
-//          final OXCommonExtensionInterface aext = aexts.get(i);
-//          final OXCommonExtensionInterface bext = bexts.get(i);
-//          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-//          }
+            //          for (int i = 0; i < aexts.size(); i++) {
+            //          final OXCommonExtensionInterface aext = aexts.get(i);
+            //          final OXCommonExtensionInterface bext = bexts.get(i);
+            //          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+            //          }
         }
 
         assertEquals("User Attributes not equal", a.getUserAttributes(), b.getUserAttributes());
@@ -1635,15 +1625,15 @@ public class UserTest extends AbstractTest {
     public static User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
         // create new user
         final OXUserInterface oxu = getUserClient();
-        return oxu.create(ctx,usr,access,DummyCredentials());
+        return oxu.create(ctx, usr, access, DummyCredentials());
     }
 
     //Uncomment this to use another context that 1
-//    public static Context getTestContextObject(final Credentials cred) {
-//        return getTestContextObject(1, 50);
-//    }
+    //    public static Context getTestContextObject(final Credentials cred) {
+    //        return getTestContextObject(1, 50);
+    //    }
 
-    private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException{
+    private User createChangeUserData(final User usr) throws CloneNotSupportedException, URISyntaxException {
 
         // change all fields of the user
 
@@ -1660,9 +1650,9 @@ public class UserTest extends AbstractTest {
         retval.setEmail2(getChangedEmailAddress(usr.getEmail2(), change_suffix));
         retval.setEmail3(getChangedEmailAddress(usr.getEmail3(), change_suffix));
 
-        retval.setDisplay_name(usr.getDisplay_name()+change_suffix);
-        retval.setGiven_name(usr.getGiven_name()+change_suffix);
-        retval.setSur_name(usr.getSur_name()+change_suffix);
+        retval.setDisplay_name(usr.getDisplay_name() + change_suffix);
+        retval.setGiven_name(usr.getGiven_name() + change_suffix);
+        retval.setSur_name(usr.getSur_name() + change_suffix);
         retval.setLanguage("en_US");
         // new for testing
 
@@ -1676,101 +1666,101 @@ public class UserTest extends AbstractTest {
         retval.setAliases(lAliases);
 
         // set the dates to the actual + 1 day
-        retval.setBirthday(new Date(usr.getBirthday().getTime()+(24*60*60*1000)));
-        retval.setAnniversary(new Date(usr.getAnniversary().getTime()+(24*60*60*1000)));
-        retval.setAssistant_name(usr.getAssistant_name()+change_suffix);
-        retval.setBranches(usr.getBranches()+change_suffix);
-        retval.setBusiness_category(usr.getBusiness_category()+change_suffix);
-        retval.setCity_business(usr.getCity_business()+change_suffix);
-        retval.setCountry_business(usr.getCountry_business()+change_suffix);
-        retval.setPostal_code_business(usr.getPostal_code_business()+change_suffix);
-        retval.setState_business(usr.getState_business()+change_suffix);
-        retval.setStreet_business(usr.getStreet_business()+change_suffix);
-        retval.setTelephone_callback(usr.getTelephone_callback()+change_suffix);
-        retval.setCity_home(usr.getCity_home()+change_suffix);
-        retval.setCommercial_register(usr.getCommercial_register()+change_suffix);
-        retval.setCompany(usr.getCompany()+change_suffix);
-        retval.setCountry_home(usr.getCountry_home()+change_suffix);
-        retval.setDepartment(usr.getDepartment()+change_suffix);
-        retval.setEmployeeType(usr.getEmployeeType()+change_suffix);
-        retval.setFax_business(usr.getFax_business()+change_suffix);
-        retval.setFax_home(usr.getFax_home()+change_suffix);
-        retval.setFax_other(usr.getFax_other()+change_suffix);
+        retval.setBirthday(new Date(usr.getBirthday().getTime() + (24 * 60 * 60 * 1000)));
+        retval.setAnniversary(new Date(usr.getAnniversary().getTime() + (24 * 60 * 60 * 1000)));
+        retval.setAssistant_name(usr.getAssistant_name() + change_suffix);
+        retval.setBranches(usr.getBranches() + change_suffix);
+        retval.setBusiness_category(usr.getBusiness_category() + change_suffix);
+        retval.setCity_business(usr.getCity_business() + change_suffix);
+        retval.setCountry_business(usr.getCountry_business() + change_suffix);
+        retval.setPostal_code_business(usr.getPostal_code_business() + change_suffix);
+        retval.setState_business(usr.getState_business() + change_suffix);
+        retval.setStreet_business(usr.getStreet_business() + change_suffix);
+        retval.setTelephone_callback(usr.getTelephone_callback() + change_suffix);
+        retval.setCity_home(usr.getCity_home() + change_suffix);
+        retval.setCommercial_register(usr.getCommercial_register() + change_suffix);
+        retval.setCompany(usr.getCompany() + change_suffix);
+        retval.setCountry_home(usr.getCountry_home() + change_suffix);
+        retval.setDepartment(usr.getDepartment() + change_suffix);
+        retval.setEmployeeType(usr.getEmployeeType() + change_suffix);
+        retval.setFax_business(usr.getFax_business() + change_suffix);
+        retval.setFax_home(usr.getFax_home() + change_suffix);
+        retval.setFax_other(usr.getFax_other() + change_suffix);
         URI uri = new URI(usr.getImapServerString());
         retval.setImapServer(new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost() + change_suffix, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment()).toString());
-        retval.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
-        retval.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
-        retval.setTelephone_ip(usr.getTelephone_ip()+change_suffix);
-        retval.setTelephone_isdn(usr.getTelephone_isdn()+change_suffix);
-        retval.setMail_folder_drafts_name(usr.getMail_folder_drafts_name()+change_suffix);
-        retval.setMail_folder_sent_name(usr.getMail_folder_sent_name()+change_suffix);
-        retval.setMail_folder_spam_name(usr.getMail_folder_spam_name()+change_suffix);
-        retval.setMail_folder_trash_name(usr.getMail_folder_trash_name()+change_suffix);
-        retval.setManager_name(usr.getManager_name()+change_suffix);
-        retval.setMarital_status(usr.getMarital_status()+change_suffix);
-        retval.setCellular_telephone1(usr.getCellular_telephone1()+change_suffix);
-        retval.setCellular_telephone2(usr.getCellular_telephone2()+change_suffix);
-        retval.setInfo(usr.getInfo()+change_suffix);
-        retval.setNickname(usr.getNickname()+change_suffix);
-        retval.setNote(usr.getNote()+change_suffix);
-        retval.setNumber_of_children(usr.getNumber_of_children()+change_suffix);
-        retval.setNumber_of_employee(usr.getNumber_of_employee()+change_suffix);
-        retval.setTelephone_pager(usr.getTelephone_pager()+change_suffix);
+        retval.setInstant_messenger1(usr.getInstant_messenger1() + change_suffix);
+        retval.setInstant_messenger2(usr.getInstant_messenger2() + change_suffix);
+        retval.setTelephone_ip(usr.getTelephone_ip() + change_suffix);
+        retval.setTelephone_isdn(usr.getTelephone_isdn() + change_suffix);
+        retval.setMail_folder_drafts_name(usr.getMail_folder_drafts_name() + change_suffix);
+        retval.setMail_folder_sent_name(usr.getMail_folder_sent_name() + change_suffix);
+        retval.setMail_folder_spam_name(usr.getMail_folder_spam_name() + change_suffix);
+        retval.setMail_folder_trash_name(usr.getMail_folder_trash_name() + change_suffix);
+        retval.setManager_name(usr.getManager_name() + change_suffix);
+        retval.setMarital_status(usr.getMarital_status() + change_suffix);
+        retval.setCellular_telephone1(usr.getCellular_telephone1() + change_suffix);
+        retval.setCellular_telephone2(usr.getCellular_telephone2() + change_suffix);
+        retval.setInfo(usr.getInfo() + change_suffix);
+        retval.setNickname(usr.getNickname() + change_suffix);
+        retval.setNote(usr.getNote() + change_suffix);
+        retval.setNumber_of_children(usr.getNumber_of_children() + change_suffix);
+        retval.setNumber_of_employee(usr.getNumber_of_employee() + change_suffix);
+        retval.setTelephone_pager(usr.getTelephone_pager() + change_suffix);
         retval.setPassword_expired(!usr.getPassword_expired());
-        retval.setTelephone_assistant(usr.getTelephone_assistant()+change_suffix);
-        retval.setTelephone_business1(usr.getTelephone_business1()+change_suffix);
-        retval.setTelephone_business2(usr.getTelephone_business2()+change_suffix);
-        retval.setTelephone_car(usr.getTelephone_car()+change_suffix);
-        retval.setTelephone_company(usr.getTelephone_company()+change_suffix);
-        retval.setTelephone_home1(usr.getTelephone_home1()+change_suffix);
-        retval.setTelephone_home2(usr.getTelephone_home2()+change_suffix);
-        retval.setTelephone_other(usr.getTelephone_other()+change_suffix);
-        retval.setPosition(usr.getPosition()+change_suffix);
-        retval.setPostal_code_home(usr.getPostal_code_home()+change_suffix);
-        retval.setProfession(usr.getProfession()+change_suffix);
-        retval.setTelephone_radio(usr.getTelephone_radio()+change_suffix);
-        retval.setRoom_number(usr.getRoom_number()+change_suffix);
-        retval.setSales_volume(usr.getSales_volume()+change_suffix);
-        retval.setCity_other(usr.getCity_other()+change_suffix);
-        retval.setCountry_other(usr.getCountry_other()+change_suffix);
-        retval.setMiddle_name(usr.getMiddle_name()+change_suffix);
-        retval.setPostal_code_other(usr.getPostal_code_other()+change_suffix);
-        retval.setState_other(usr.getState_other()+change_suffix);
-        retval.setStreet_other(usr.getStreet_other()+change_suffix);
+        retval.setTelephone_assistant(usr.getTelephone_assistant() + change_suffix);
+        retval.setTelephone_business1(usr.getTelephone_business1() + change_suffix);
+        retval.setTelephone_business2(usr.getTelephone_business2() + change_suffix);
+        retval.setTelephone_car(usr.getTelephone_car() + change_suffix);
+        retval.setTelephone_company(usr.getTelephone_company() + change_suffix);
+        retval.setTelephone_home1(usr.getTelephone_home1() + change_suffix);
+        retval.setTelephone_home2(usr.getTelephone_home2() + change_suffix);
+        retval.setTelephone_other(usr.getTelephone_other() + change_suffix);
+        retval.setPosition(usr.getPosition() + change_suffix);
+        retval.setPostal_code_home(usr.getPostal_code_home() + change_suffix);
+        retval.setProfession(usr.getProfession() + change_suffix);
+        retval.setTelephone_radio(usr.getTelephone_radio() + change_suffix);
+        retval.setRoom_number(usr.getRoom_number() + change_suffix);
+        retval.setSales_volume(usr.getSales_volume() + change_suffix);
+        retval.setCity_other(usr.getCity_other() + change_suffix);
+        retval.setCountry_other(usr.getCountry_other() + change_suffix);
+        retval.setMiddle_name(usr.getMiddle_name() + change_suffix);
+        retval.setPostal_code_other(usr.getPostal_code_other() + change_suffix);
+        retval.setState_other(usr.getState_other() + change_suffix);
+        retval.setStreet_other(usr.getStreet_other() + change_suffix);
         uri = new URI(usr.getSmtpServerString());
         retval.setSmtpServer(new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost() + change_suffix, uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment()).toString());
-        retval.setSpouse_name(usr.getSpouse_name()+change_suffix);
-        retval.setState_home(usr.getState_home()+change_suffix);
-        retval.setStreet_home(usr.getStreet_home()+change_suffix);
-        retval.setSuffix(usr.getSuffix()+change_suffix);
-        retval.setTax_id(usr.getTax_id()+change_suffix);
-        retval.setTelephone_telex(usr.getTelephone_telex()+change_suffix);
+        retval.setSpouse_name(usr.getSpouse_name() + change_suffix);
+        retval.setState_home(usr.getState_home() + change_suffix);
+        retval.setStreet_home(usr.getStreet_home() + change_suffix);
+        retval.setSuffix(usr.getSuffix() + change_suffix);
+        retval.setTax_id(usr.getTax_id() + change_suffix);
+        retval.setTelephone_telex(usr.getTelephone_telex() + change_suffix);
         retval.setTimezone(usr.getTimezone());
-        retval.setTitle(usr.getTitle()+change_suffix);
-        retval.setTelephone_ttytdd(usr.getTelephone_ttytdd()+change_suffix);
-        retval.setUrl(usr.getUrl()+change_suffix);
-        retval.setUserfield01(usr.getUserfield01()+change_suffix);
-        retval.setUserfield02(usr.getUserfield02()+change_suffix);
-        retval.setUserfield03(usr.getUserfield03()+change_suffix);
-        retval.setUserfield04(usr.getUserfield04()+change_suffix);
-        retval.setUserfield05(usr.getUserfield05()+change_suffix);
-        retval.setUserfield06(usr.getUserfield06()+change_suffix);
-        retval.setUserfield07(usr.getUserfield07()+change_suffix);
-        retval.setUserfield08(usr.getUserfield08()+change_suffix);
-        retval.setUserfield09(usr.getUserfield09()+change_suffix);
-        retval.setUserfield10(usr.getUserfield10()+change_suffix);
-        retval.setUserfield11(usr.getUserfield11()+change_suffix);
-        retval.setUserfield12(usr.getUserfield12()+change_suffix);
-        retval.setUserfield13(usr.getUserfield13()+change_suffix);
-        retval.setUserfield14(usr.getUserfield14()+change_suffix);
-        retval.setUserfield15(usr.getUserfield15()+change_suffix);
-        retval.setUserfield16(usr.getUserfield16()+change_suffix);
-        retval.setUserfield17(usr.getUserfield17()+change_suffix);
-        retval.setUserfield18(usr.getUserfield18()+change_suffix);
-        retval.setUserfield19(usr.getUserfield19()+change_suffix);
-        retval.setUserfield20(usr.getUserfield20()+change_suffix);
+        retval.setTitle(usr.getTitle() + change_suffix);
+        retval.setTelephone_ttytdd(usr.getTelephone_ttytdd() + change_suffix);
+        retval.setUrl(usr.getUrl() + change_suffix);
+        retval.setUserfield01(usr.getUserfield01() + change_suffix);
+        retval.setUserfield02(usr.getUserfield02() + change_suffix);
+        retval.setUserfield03(usr.getUserfield03() + change_suffix);
+        retval.setUserfield04(usr.getUserfield04() + change_suffix);
+        retval.setUserfield05(usr.getUserfield05() + change_suffix);
+        retval.setUserfield06(usr.getUserfield06() + change_suffix);
+        retval.setUserfield07(usr.getUserfield07() + change_suffix);
+        retval.setUserfield08(usr.getUserfield08() + change_suffix);
+        retval.setUserfield09(usr.getUserfield09() + change_suffix);
+        retval.setUserfield10(usr.getUserfield10() + change_suffix);
+        retval.setUserfield11(usr.getUserfield11() + change_suffix);
+        retval.setUserfield12(usr.getUserfield12() + change_suffix);
+        retval.setUserfield13(usr.getUserfield13() + change_suffix);
+        retval.setUserfield14(usr.getUserfield14() + change_suffix);
+        retval.setUserfield15(usr.getUserfield15() + change_suffix);
+        retval.setUserfield16(usr.getUserfield16() + change_suffix);
+        retval.setUserfield17(usr.getUserfield17() + change_suffix);
+        retval.setUserfield18(usr.getUserfield18() + change_suffix);
+        retval.setUserfield19(usr.getUserfield19() + change_suffix);
+        retval.setUserfield20(usr.getUserfield20() + change_suffix);
 
-        retval.setUserAttribute("com.openexchange.test", "simpleValue", usr.getUserAttribute("com.openexchange.test", "simpleValue")+change_suffix);
+        retval.setUserAttribute("com.openexchange.test", "simpleValue", usr.getUserAttribute("com.openexchange.test", "simpleValue") + change_suffix);
         retval.setUserAttribute("com.openexchange.test", "newValue", change_suffix);
         retval.setUserAttribute("com.openexchange.test", "deleteMe", null);
         // Remove value
@@ -1787,10 +1777,10 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
 
-        final User exists = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User exists = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         User notexists = new User();
         notexists.setName("Rumpelstilz");
-        final User createduser = oxu.create(ctx,exists,cred);
+        final User createduser = oxu.create(ctx, exists, cred);
 
         boolean existingexists = false;
         try {
@@ -1802,12 +1792,12 @@ public class UserTest extends AbstractTest {
         oxu.delete(ctx, createduser, cred);
 
         try {
-            assertFalse("nonexisting user must not exist",oxu.exists(ctx, notexists, cred));
+            assertFalse("nonexisting user must not exist", oxu.exists(ctx, notexists, cred));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        assertTrue("created user does not exist",existingexists);
+        assertTrue("created user does not exist", existingexists);
     }
 
 }

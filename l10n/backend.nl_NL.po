@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-05 15:31+0200\n"
+"PO-Revision-Date: 2015-09-14 23:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "Language: nl_NL\n"
@@ -905,8 +905,8 @@ msgid ""
 "The LDAP search in distribution lists for specific attributes is not "
 "supported."
 msgstr ""
-"De LDAP zoekactie in distributielijsten voor specifieke attributen wordt niet "
-"ondersteund."
+"De LDAP zoekactie in distributielijsten voor specifieke attributen wordt "
+"niet ondersteund."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
@@ -4554,7 +4554,6 @@ msgstr "U heeft geen geldige sessie. Meld u alstublieft opnieuw aan."
 
 #. You do not have appropriate permissions to view the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
 msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 msgstr "U heeft niet de juiste rechten om de map \"%1$s\" te lezen."
 
@@ -8361,53 +8360,54 @@ msgstr "Verplicht(e) veld(en) ontbreken in de gegeven bron."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "U heeft niet de juiste rechten voor module \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "U heeft niet de juiste rechten om de map te lezen"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Gedeelte mappen zijn niet beschikbaar voor uw account."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
-msgid "You do not have appropriate permissions for the public folder \"%2$s\"."
-msgstr "U heeft niet de juiste rechten voor de publieke map \"%2$s\"."
+msgid "You do not have appropriate permissions for the public folder."
+msgstr "U heeft niet de juiste rechten voor de publieke map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
-msgid ""
-"You do not have appropriate permissions to create subfolders in folder \"%2$s"
-"\"."
-msgstr ""
-"U heeft niet de juiste rechten om een submap aan te maken in de map \"%2$s\"."
+msgid "You do not have appropriate permissions to create subfolders."
+msgstr "U heeft niet de juiste rechten om submappen aan te maken."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:74
-msgid "The folder \"%1$s\" does not exist."
-msgstr "De map \"%1$s\" bestaat niet."
+msgid "Such a folder does not exist."
+msgstr "Een dergelijke map bestaat niet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid ""
-"The folder \"%1$s\" has been changed in the meantime. Please reload the view "
-"and try again."
+"The folder has been changed in the meantime. Please reload the view and try "
+"again."
 msgstr ""
-"Het map \"%1$s\" is in de tussentijd gewijzigd. Ververs het overzicht en "
-"probeer opnieuw."
+"Het map is in de tussentijd gewijzigd. Ververs het overzicht en probeer "
+"opnieuw."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
-msgid "This operation requires administrative permissions for folder \"%2$s\"."
-msgstr "Deze actie heeft beheerdersrechten nodig voor de map \"%2$s\"."
+msgid "This operation requires administrative permissions for the folder."
+msgstr "Deze actie heeft beheerdersrechten nodig voor de map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
-msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
-msgstr "De map \"%1$s\" is een standaardmap en kan niet worden hernoemd."
+msgid "The folder is a default folder and cannot be renamed."
+msgstr "De map is een standaardmap en kan niet worden hernoemd."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
-msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
-msgstr "De map \"%1$s\" bevat al een map met de naam \"%3$s\"."
+msgid "The folder already contains a folder with such a name."
+msgstr "De map bevat al een map met deze naam."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
-msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
-msgstr "Map van het type \"%2$s\" kan niet gemaakt worden onder \"%1$s\"."
+msgid "Folders of type \"%2$s\" can't be created below this folder."
+msgstr "Map van het type \"%2$s\" kan niet gemaakt worden onder deze map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:80
-msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+msgid "Folders of module \"%2$s\" can't be created below this folder."
 msgstr ""
-"Mapen van de module \"%2$s\" kunnen niet gemaakt worden onder \"%1$s\"."
+"Mappen van module \"%2$s\" kunnen niet aangemaakt worden onder deze map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid ""
@@ -8428,67 +8428,54 @@ msgid "At least one user with administrative permissions is required."
 msgstr "Minstens één gebruiker moet beheerdersrechten hebben."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
-msgid "The folder \"%1$s\" is a default folder and cannot be moved."
-msgstr "De map \"%1$s\" is een standaardmap en kan niet verplaatst worden."
+msgid "The folder is a default folder and cannot be moved."
+msgstr "De map is een standaardmap en kan niet verplaatst worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
-msgid "The folder \"%1$s\" is shared and cannot be moved."
-msgstr "De map \"%1$s\" is een gedeelde map en kan niet verplaatst worden."
+msgid "The folder is shared and cannot be moved."
+msgstr "De map is een gedeelde map en kan niet verplaatst worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:87
-msgid "The folder cannot be moved to the shared folder \"%1$s\"."
-msgstr "De map mag niet verplaatst worden naar de gedeelde map \"%1$s\"."
+msgid "The folder cannot be moved to a shared folder."
+msgstr "De map mag niet verplaatst worden naar een gedeelde map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
-msgid "The folder \"%1$s\" is a system folder and cannot be moved."
-msgstr "De map \"%1$s\" is een systeemmap en kan niet verplaatst worden."
+msgid "The folder is a system folder and cannot be moved."
+msgstr "De map is een systeemmap en kan niet verplaatst worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
-msgid ""
-"The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"De privémap \"%1$s\" kan allen verplaatst worden naar een andere privémap."
+msgid "The private folder can only be moved to another private folder."
+msgstr "De privémap kan allen verplaatst worden naar een andere privémap."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
-msgid "The public folder \"%1$s\" can only be moved to another public folder."
+msgid "The public folder can only be moved to another public folder."
 msgstr ""
-"De publiekemap \"%1$s\" kan allen verplaatst worden naar een andere "
-"publiekemap."
+"De publieke map kan allen verplaatst worden naar een andere publieke map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
 msgstr "De doelmap en is de zelfde als de oorsprong."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:92
-msgid ""
-"You do not have appropriate permissions to move all subfolders of folder "
-"\"%2$s\"."
-msgstr ""
-"U heeft niet de juiste rechten om alle submappen van de map \"%2$s\" te "
-"verplaatsen."
+msgid "You do not have appropriate permissions to move all subfolders."
+msgstr "U heeft niet de juiste rechten om alle submappen te verplaatsen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:93
-msgid ""
-"You do not have appropriate permissions to delete the shared folder \"%2$s\"."
-msgstr ""
-"U heeft niet de juiste rechten om de gedeelte map \"%2$s\" te verwijderen."
+msgid "You do not have appropriate permissions to delete the shared folder."
+msgstr "U heeft niet de juiste rechten om de gedeelte map te verwijderen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
-msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
-msgstr "De map \"%2$s\" is een standaardmap en kan niet verwijderd worden."
+msgid "The folder is a default folder and cannot be deleted."
+msgstr "De map is een standaardmap en kan niet verwijderd worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
-msgid ""
-"You do not have appropriate permissions to delete all contained items in the "
-"folder \"%2$s\"."
+msgid "You do not have appropriate permissions to delete all contained items."
 msgstr ""
-"U heeft niet de juiste rechten om alle elementen uit de map \"%2$s\" te "
-"verwijderen."
+"U heeft niet de juiste rechten om alle elementen uit de map te verwijderen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
-msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
-msgstr ""
-"De map \"%1$s\" kan niet verplaatst worden naar één van haar submappen."
+msgid "The folder cannot be be moved to one of its subfolders."
+msgstr "De map kan niet verplaatst worden naar één van haar submappen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:97
 msgid ""
@@ -8498,8 +8485,8 @@ msgstr ""
 "\"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
-msgid "The shared folder \"%1$s\" cannot be updated."
-msgstr "De gedeeldemap \"%1$s\" kan niet bijgewerkt worden."
+msgid "The shared folder cannot be updated."
+msgstr "De gedeelde map kan niet bijgewerkt worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid ""
@@ -8519,47 +8506,43 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
-"Only the owner of the parent shared folder \"%4$s\" may hold administrative "
+"Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Alleen de eigenaar van de bovenliggende gedeelde map \"%4$s\" kan "
-"beheersrechten hebben."
+"Alleen de eigenaar van de bovenliggende gedeelde map kan beheersrechten "
+"hebben."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
-"The folder \"%2$s\" is a default folder where its owner needs to hold "
-"administrative permissions."
+"The folder is a default folder. Hence its owner needs to hold administrative "
+"permissions."
 msgstr ""
-"De map \"%2$s\" is een standaard map waarop de eigenaar beheerdersrechten "
-"moet hebben."
+"De map is een standaard map. Daarom heeft de eigenaar er beheerdersrechten op."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
-msgid "You do not have appropriate permissions to share the folder \"%2$s\"."
-msgstr "U heeft niet de juiste rechten om de map \"%1$s\" te delen."
+msgid "You do not have appropriate permissions to share the folder."
+msgstr "U heeft niet de juiste rechten om de map te delen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
-msgid ""
-"Due to limited permissions of user \"%1$s\", it is not possible to apply the "
-"changes for folder \"%2$s\"."
+msgid "It is not possible to apply the changes due to limited permissions"
 msgstr ""
-"Door de beperkte rechten van gebruiker \"%1$s\", is het niet mogelijk de "
-"wijzigingen toe te passen op de map \"%2$s\"."
+"Door de beperkte rechten is het niet mogelijk de wijzigingen toe te passen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
-"The folder \"%1$s\" cannot be deleted since it contains a hidden subfolder "
-"you don't have the appropriate permissions for."
+"The folder cannot be deleted since it contains a hidden subfolder you don't "
+"have the appropriate permissions for."
 msgstr ""
-"De map \"%1$s\" kan niet worden verwijderd omdat deze een verborgen submap "
-"heeft waarvoor u niet de juiste rechten heeft."
+"De map kan niet worden verwijderd omdat deze een verborgen submap heeft "
+"waarvoor u niet de juiste rechten heeft."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
-"The folder \"%2$s\" already contains a folder named \"%1$s\". Please choose "
-"a different name and try again."
+"The folder already contains a folder with such a name. Please choose a "
+"different name and try again."
 msgstr ""
-"De map \"%2$s\" bevat al een map met de naam \"%1$s\". Kies alstublieft een "
-"andere naam en probeer opnieuw."
+"De map bevat al een map met deze naam. Kies alstublieft een andere naam en "
+"probeer opnieuw."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8576,65 +8559,50 @@ msgstr ""
 "te delen met deze gebruiker."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
-msgid ""
-"Duplicate permission defined for user \"%1$s\". Only one permission per user "
-"is allowed."
+msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
-"Dubbele rechten gedefinieerd voor gebruiker \"%1$s\". Slechts één "
-"bevoegdheid toegestaan per gebruiker."
+"Dubbele rechten gedefinieerd. Slechts één bevoegdheid toegestaan per "
+"gebruiker."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
-msgid ""
-"Duplicate permission defined for group \"%1$s\". Only one permission per "
-"group is allowed."
+msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
-"Dubbele rechten gedefinieerd voor de groep \"%1$s\". Slechts één bevoegdheid "
-"per groep is toegestaan."
+"Dubbele rechten gedefinieerd. Slechts één bevoegdheid per groep is toegestaan."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
-msgid ""
-"Only the folder visibility permission is allowed to be changed for folder "
-"\"%1$s\"."
-msgstr ""
-"Alleen de zichtbaarheid mag veranderd worden door voor de map \"%1$s\"."
+msgid "Only the folder visibility permission is allowed to be changed."
+msgstr "Alleen de zichtbaarheid van de map mag veranderd worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
-msgid ""
-"Only individual user permissions, but no group permissions are allowed for "
-"folder \"%1$s\"."
+msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
 "Alleen individuele gebruikersrechten, maar geen groepsrechten, zijn "
-"toegestaan voor de map \"%1$\"s."
+"toegestaan voor de map."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
-msgid "No individual user permissions are allowed for folder \"%1$s\"."
-msgstr "Individuele gebruikersrechten zijn niet toegestaan voor map \"%1$s\"."
+msgid "No individual user permissions are allowed."
+msgstr "Individuele gebruikersrechten zijn niet toegestaan."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
-msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
-msgstr "U heeft niet de juiste rechten om de map %1$s te hernoemen."
+msgid "You do not have appropriate permissions to rename the folder."
+msgstr "U heeft niet de juiste rechten om de map te hernoemen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
-msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+msgid "The folder cannot be deleted as it contains locked documents."
 msgstr ""
-"De map \"%1$s\" kan niet worden verwijderd omdat deze vergrendelde "
-"documenten bevat."
+"De map kan niet worden verwijderd omdat deze vergrendelde documenten bevat."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
 msgstr "Deze taak kan alleen uitgevoerd worden door de context beheerder."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
-msgid "The folder \"%1$s\" cannot be deleted."
-msgstr "De map \"%1$s\" kan niet verwijderd worden."
+msgid "The folder cannot be deleted."
+msgstr "De map kan niet verwijderd worden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
-msgid ""
-"The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" were "
-"restored."
-msgstr ""
-"De administratieve rechten van de eigenaar \"%1$s\" in map \"%2$s\" zijn "
-"hersteld."
+msgid "The administrative permissions were restored."
+msgstr "De administratieve rechten zijn hersteld."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
@@ -11663,6 +11631,187 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid ""
+#~ "You do not have appropriate permissions for the public folder \"%2$s\"."
+#~ msgstr "U heeft niet de juiste rechten voor de publieke map \"%2$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to create subfolders in folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "U heeft niet de juiste rechten om een submap aan te maken in de map \"%2$s"
+#~ "\"."
+
+#~ msgid "The folder \"%1$s\" does not exist."
+#~ msgstr "De map \"%1$s\" bestaat niet."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" has been changed in the meantime. Please reload the "
+#~ "view and try again."
+#~ msgstr ""
+#~ "Het map \"%1$s\" is in de tussentijd gewijzigd. Ververs het overzicht en "
+#~ "probeer opnieuw."
+
+#~ msgid ""
+#~ "This operation requires administrative permissions for folder \"%2$s\"."
+#~ msgstr "Deze actie heeft beheerdersrechten nodig voor de map \"%2$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be renamed."
+#~ msgstr "De map \"%1$s\" is een standaardmap en kan niet worden hernoemd."
+
+#~ msgid "The folder \"%1$s\" already contains a folder named \"%3$s\"."
+#~ msgstr "De map \"%1$s\" bevat al een map met de naam \"%3$s\"."
+
+#~ msgid "Folders of type \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr "Map van het type \"%2$s\" kan niet gemaakt worden onder \"%1$s\"."
+
+#~ msgid "Folders of module \"%2$s\" can't be created below \"%1$s\"."
+#~ msgstr ""
+#~ "Mapen van de module \"%2$s\" kunnen niet gemaakt worden onder \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a default folder and cannot be moved."
+#~ msgstr "De map \"%1$s\" is een standaardmap en kan niet verplaatst worden."
+
+#~ msgid "The folder \"%1$s\" is shared and cannot be moved."
+#~ msgstr "De map \"%1$s\" is een gedeelde map en kan niet verplaatst worden."
+
+#~ msgid "The folder cannot be moved to the shared folder \"%1$s\"."
+#~ msgstr "De map mag niet verplaatst worden naar de gedeelde map \"%1$s\"."
+
+#~ msgid "The folder \"%1$s\" is a system folder and cannot be moved."
+#~ msgstr "De map \"%1$s\" is een systeemmap en kan niet verplaatst worden."
+
+#~ msgid ""
+#~ "The private folder \"%1$s\" can only be moved to another private folder."
+#~ msgstr ""
+#~ "De privémap \"%1$s\" kan allen verplaatst worden naar een andere privémap."
+
+#~ msgid ""
+#~ "The public folder \"%1$s\" can only be moved to another public folder."
+#~ msgstr ""
+#~ "De publiekemap \"%1$s\" kan allen verplaatst worden naar een andere "
+#~ "publiekemap."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to move all subfolders of folder "
+#~ "\"%2$s\"."
+#~ msgstr ""
+#~ "U heeft niet de juiste rechten om alle submappen van de map \"%2$s\" te "
+#~ "verplaatsen."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
+#~ "\"."
+#~ msgstr ""
+#~ "U heeft niet de juiste rechten om de gedeelte map \"%2$s\" te verwijderen."
+
+#~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
+#~ msgstr "De map \"%2$s\" is een standaardmap en kan niet verwijderd worden."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to delete all contained items in "
+#~ "the folder \"%2$s\"."
+#~ msgstr ""
+#~ "U heeft niet de juiste rechten om alle elementen uit de map \"%2$s\" te "
+#~ "verwijderen."
+
+#~ msgid "The folder \"%1$s\" cannot be be moved to one of its subfolders."
+#~ msgstr ""
+#~ "De map \"%1$s\" kan niet verplaatst worden naar één van haar submappen."
+
+#~ msgid "The shared folder \"%1$s\" cannot be updated."
+#~ msgstr "De gedeeldemap \"%1$s\" kan niet bijgewerkt worden."
+
+#~ msgid ""
+#~ "Only the owner of the parent shared folder \"%4$s\" may hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "Alleen de eigenaar van de bovenliggende gedeelde map \"%4$s\" kan "
+#~ "beheersrechten hebben."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" is a default folder where its owner needs to hold "
+#~ "administrative permissions."
+#~ msgstr ""
+#~ "De map \"%2$s\" is een standaard map waarop de eigenaar beheerdersrechten "
+#~ "moet hebben."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to share the folder \"%2$s\"."
+#~ msgstr "U heeft niet de juiste rechten om de map \"%1$s\" te delen."
+
+#~ msgid ""
+#~ "Due to limited permissions of user \"%1$s\", it is not possible to apply "
+#~ "the changes for folder \"%2$s\"."
+#~ msgstr ""
+#~ "Door de beperkte rechten van gebruiker \"%1$s\", is het niet mogelijk de "
+#~ "wijzigingen toe te passen op de map \"%2$s\"."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted since it contains a hidden "
+#~ "subfolder you don't have the appropriate permissions for."
+#~ msgstr ""
+#~ "De map \"%1$s\" kan niet worden verwijderd omdat deze een verborgen "
+#~ "submap heeft waarvoor u niet de juiste rechten heeft."
+
+#~ msgid ""
+#~ "The folder \"%2$s\" already contains a folder named \"%1$s\". Please "
+#~ "choose a different name and try again."
+#~ msgstr ""
+#~ "De map \"%2$s\" bevat al een map met de naam \"%1$s\". Kies alstublieft "
+#~ "een andere naam en probeer opnieuw."
+
+#~ msgid ""
+#~ "Duplicate permission defined for user \"%1$s\". Only one permission per "
+#~ "user is allowed."
+#~ msgstr ""
+#~ "Dubbele rechten gedefinieerd voor gebruiker \"%1$s\". Slechts één "
+#~ "bevoegdheid toegestaan per gebruiker."
+
+#~ msgid ""
+#~ "Duplicate permission defined for group \"%1$s\". Only one permission per "
+#~ "group is allowed."
+#~ msgstr ""
+#~ "Dubbele rechten gedefinieerd voor de groep \"%1$s\". Slechts één "
+#~ "bevoegdheid per groep is toegestaan."
+
+#~ msgid ""
+#~ "Only the folder visibility permission is allowed to be changed for folder "
+#~ "\"%1$s\"."
+#~ msgstr ""
+#~ "Alleen de zichtbaarheid mag veranderd worden door voor de map \"%1$s\"."
+
+#~ msgid ""
+#~ "Only individual user permissions, but no group permissions are allowed "
+#~ "for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Alleen individuele gebruikersrechten, maar geen groepsrechten, zijn "
+#~ "toegestaan voor de map \"%1$\"s."
+
+#~ msgid "No individual user permissions are allowed for folder \"%1$s\"."
+#~ msgstr ""
+#~ "Individuele gebruikersrechten zijn niet toegestaan voor map \"%1$s\"."
+
+#~ msgid ""
+#~ "You do not have appropriate permissions to rename the folder \"%2$s\"."
+#~ msgstr "U heeft niet de juiste rechten om de map %1$s te hernoemen."
+
+#~ msgid ""
+#~ "The folder \"%1$s\" cannot be deleted as it contains locked documents."
+#~ msgstr ""
+#~ "De map \"%1$s\" kan niet worden verwijderd omdat deze vergrendelde "
+#~ "documenten bevat."
+
+#~ msgid "The folder \"%1$s\" cannot be deleted."
+#~ msgstr "De map \"%1$s\" kan niet verwijderd worden."
+
+#~ msgid ""
+#~ "The administrative permissions of the owner \"%1$s\" in folder \"%2$s\" "
+#~ "were restored."
+#~ msgstr ""
+#~ "De administratieve rechten van de eigenaar \"%1$s\" in map \"%2$s\" zijn "
+#~ "hersteld."
 
 #~ msgid "/servlet/dav/caldav"
 #~ msgstr "/servlet/dav/caldav"
