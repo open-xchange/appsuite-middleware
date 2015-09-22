@@ -108,7 +108,9 @@ public class ICalHandler extends HttpAuthShareHandler {
         FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, CommonObject.PRIVATE_FLAG, CommonObject.COLOR_LABEL, CalendarObject.TITLE,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_ID,
         CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.LOCATION,
-        Appointment.FULL_TIME, Appointment.SHOWN_AS, Appointment.TIMEZONE };
+        Appointment.FULL_TIME, Appointment.SHOWN_AS, Appointment.TIMEZONE, Appointment.UID, Appointment.INTERVAL,
+        Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.RECURRENCE_COUNT, Appointment.UNTIL
+    };
 
     /**
      * The task properties being exported
@@ -120,7 +122,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         CalendarObject.UNTIL, CalendarObject.PARTICIPANTS, Task.ACTUAL_COSTS, Task.ACTUAL_DURATION, CalendarObject.ALARM,
         Task.BILLING_INFORMATION, CommonObject.CATEGORIES, Task.COMPANIES, Task.CURRENCY, Task.DATE_COMPLETED, Task.IN_PROGRESS,
         Task.PERCENT_COMPLETED, Task.PRIORITY, Task.STATUS, Task.TARGET_COSTS, Task.TARGET_DURATION, Task.TRIP_METER,
-        CommonObject.COLOR_LABEL
+        CommonObject.COLOR_LABEL, Task.UID
     };
 
     /**
@@ -191,7 +193,6 @@ public class ICalHandler extends HttpAuthShareHandler {
         ArrayList<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>();
         SearchIterator<Appointment> searchIterator = null;
         try {
-
             searchIterator = factory.createAppointmentSql(share.getSession()).getAppointmentsBetweenInFolder(
                 Integer.valueOf(target.getFolder()), APPOINTMENT_FIELDS, getIntervalStart(), getIntervalEnd(),
                 CalendarObject.START_DATE, Order.ASCENDING);
