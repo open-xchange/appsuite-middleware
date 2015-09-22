@@ -468,7 +468,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			readCon = provider.getReadConnection(ctx);
 			if(FolderCacheManager.isEnabled()) {
-				folder = FolderCacheManager.getInstance().getFolderObject(id, false, ctx, readCon); // FIXME be smarter here
+				folder = FolderCacheManager.getInstance().getFolderObject(id, true, ctx, readCon); // FIXME be smarter here
 			} else {
 
 				folder = FolderObject.loadFolderObjectFromDB(id, ctx, readCon);
