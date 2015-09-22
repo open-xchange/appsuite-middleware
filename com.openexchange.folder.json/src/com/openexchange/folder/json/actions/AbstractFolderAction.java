@@ -85,6 +85,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
@@ -501,6 +502,10 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected List<OXException> sendNotifications(NotificationData notificationData, UserizedFolder original, UserizedFolder modified, ServerSession session, HostData hostData) {
         if (hostData == null) {
             return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("HostData was not available"));
+        }
+
+        if (modified.getContentType().getModule() == FolderObject.MAIL) {
+            return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Notifications are not supported for module mail"));
         }
 
         Permission[] oldPermissions = original == null ? new Permission[0] : original.getPermissions();
