@@ -70,7 +70,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.Updater;
 
 public class OXUtilMySQLStorageCommon {
@@ -251,10 +251,10 @@ public class OXUtilMySQLStorageCommon {
     }
 
     private static void initUpdateTaskTable(final Connection con, final int poolId, final String schema) throws StorageException {
-        final UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
+        final UpdateTaskV2[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         final SchemaStore store = SchemaStore.getInstance();
         try {
-            for (final UpdateTask task : tasks) {
+            for (final UpdateTaskV2 task : tasks) {
                 store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
             }
         } catch (final OXException e) {

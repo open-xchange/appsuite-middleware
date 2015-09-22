@@ -92,7 +92,7 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { MailAccountCreateTablesTask.class.getName() };
+        return new String[] {};
     }
 
     @Override

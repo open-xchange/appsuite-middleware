@@ -107,7 +107,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     @Override
     public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.HIGH.priority;
+        return UpdateTaskV2.UpdateTaskPriority.HIGH.priority;
     }
 
     @Override

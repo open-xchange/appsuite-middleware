@@ -75,7 +75,7 @@ public class FolderTreeSelectionTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { TaskCreateUserSettingServer.class.getName() };
+        return new String[] {};
     }
 
     @Override
