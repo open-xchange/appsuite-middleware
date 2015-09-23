@@ -158,6 +158,11 @@ public class DefaultShareService implements ShareService {
         try {
             guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
             shareToken.verifyGuest(contextID, guestUser);
+
+            GuestService guestService = services.getService(GuestService.class);
+            if (guestService != null) {
+                guestUser = guestService.alignUserWithGuest(guestUser, contextID);
+            }
         } catch (OXException e) {
             if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
