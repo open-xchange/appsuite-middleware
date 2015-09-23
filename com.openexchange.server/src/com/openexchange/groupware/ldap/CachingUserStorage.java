@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -67,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.lock.LockService;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
@@ -104,14 +106,27 @@ public class CachingUserStorage extends UserStorage {
         }
 
         Cache cache = cacheService.getCache(REGION_NAME);
-        Object object = cache.get(cacheService.newCacheKey(contextId, userId));
+        CacheKey key = cacheService.newCacheKey(contextId, userId);
+        Object object = cache.get(key);
         if (object instanceof User) {
             return ((User) object).isGuest();
         }
 
-        User user = delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
-        cache.put(cacheService.newCacheKey(contextId, userId), user, false);
-        return user.isGuest();
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("User-").append(contextId).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof User) {
+                return ((User) object).isGuest();
+            }
+
+            User user = delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
+            cache.put(key, user, false);
+            return user.isGuest();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -122,14 +137,27 @@ public class CachingUserStorage extends UserStorage {
         }
 
         Cache cache = cacheService.getCache(REGION_NAME);
-        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), userId));
+        CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
+        Object object = cache.get(key);
         if (object instanceof User) {
             return ((User) object).isGuest();
         }
 
-        User user = delegate.getUser(userId, context);
-        cache.put(cacheService.newCacheKey(context.getContextId(), userId), user, false);
-        return user.isGuest();
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("User-").append(context.getContextId()).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof User) {
+                return ((User) object).isGuest();
+            }
+
+            User user = delegate.getUser(userId, context);
+            cache.put(key, user, false);
+            return user.isGuest();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -146,9 +174,21 @@ public class CachingUserStorage extends UserStorage {
             return (User) object;
         }
 
-        User user = delegate.getUser(uid, context);
-        cache.put(key, user, false);
-        return user;
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("User-").append(context.getContextId()).append('-').append(uid).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof User) {
+                return (User) object;
+            }
+
+            User user = delegate.getUser(uid, context);
+            cache.put(key, user, false);
+            return user;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -157,14 +197,29 @@ public class CachingUserStorage extends UserStorage {
         if (cacheService == null) {
             return delegate.getUser(userId, context);
         }
+
         Cache cache = cacheService.getCache(REGION_NAME);
-        Object object = cache.get(cacheService.newCacheKey(context.getContextId(), userId));
+        CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
+        Object object = cache.get(key);
         if (object instanceof User) {
             return (User) object;
         }
-        User user = delegate.getUser(context, userId, con);
-        cache.put(cacheService.newCacheKey(context.getContextId(), userId), user, false);
-        return user;
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("User-").append(context.getContextId()).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof User) {
+                return (User) object;
+            }
+
+            User user = delegate.getUser(context, userId, con);
+            cache.put(key, user, false);
+            return user;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -185,7 +240,7 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(final int userId, final int contextId) throws OXException {
+    public User getUser(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(userId, ContextStorage.getInstance().getContext(contextId));
@@ -197,15 +252,27 @@ public class CachingUserStorage extends UserStorage {
             return (User) object;
         }
 
-        Context context = ContextStorage.getInstance().getContext(contextId);
-        User user = delegate.getUser(userId, context);
-        cache.put(cacheService.newCacheKey(contextId, userId), user, false);
-        return user;
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("User-").append(contextId).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(cacheService.newCacheKey(contextId, userId));
+            if (object instanceof User) {
+                return (User) object;
+            }
+
+            Context context = ContextStorage.getInstance().getContext(contextId);
+            User user = delegate.getUser(userId, context);
+            cache.put(cacheService.newCacheKey(contextId, userId), user, false);
+            return user;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(ctx, userId, con);
         }

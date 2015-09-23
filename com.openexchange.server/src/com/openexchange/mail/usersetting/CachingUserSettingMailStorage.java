@@ -58,6 +58,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -65,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -168,7 +170,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
-            final Cache cache = getCache();
+
+            Cache cache = getCache();
             if (null != cache) {
                 /*
                  * Put clone into cache
@@ -215,7 +218,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
-            final Cache cache = getCache();
+
+            Cache cache = getCache();
             if (null != cache) {
                 /*
                  * Put clone into cache
@@ -277,7 +281,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
-                final Cache cache = getCache();
+
+                Cache cache = getCache();
                 if (null != cache) {
                     /*
                      * Remove from cache
@@ -309,61 +314,73 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     @Override
     public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
         try {
-            final Cache cache = getCache();
+            Cache cache = getCache();
             UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user));
             if (null != usm) {
                 return usm.clone();
             }
-            usm = new UserSettingMail(user, ctx.getContextId());
-            Connection readCon = readConArg;
-            boolean closeCon = false;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
+
+            LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+            Lock lock = null == lockService || null == cache ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("UserSettingMail-").append(ctx.getContextId()).append('-').append(user).toString());
+            lock.lock();
             try {
-                if (readCon == null) {
-                    readCon = DBPool.pickup(ctx);
-                    closeCon = true;
+                usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user));
+                if (null != usm) {
+                    return usm.clone();
                 }
-                stmt = readCon.prepareStatement(SQL_LOAD);
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, user);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(
-                        Integer.valueOf(user),
-                        Integer.valueOf(ctx.getContextId()));
-                }
-                usm.parseBits(rs.getInt(1));
-                usm.setSendAddr(rs.getString(2));
-                usm.setReplyToAddr(rs.getString(3));
-                usm.setMsgFormat(rs.getInt(4));
-                setDisplayMsgHeadersString(usm, rs.getString(5));
-                usm.setAutoLinebreak(rs.getInt(6) >= 0 ? rs.getInt(6) : 0);
-                usm.setStdTrashName(rs.getString(7));
-                usm.setStdSentName(rs.getString(8));
-                usm.setStdDraftsName(rs.getString(9));
-                usm.setStdSpamName(rs.getString(10));
-                usm.setUploadQuota(rs.getLong(11));
-                usm.setUploadQuotaPerFile(rs.getLong(12));
-                usm.setConfirmedSpam(rs.getString(13));
-                usm.setConfirmedHam(rs.getString(14));
-                loadSignatures(usm, user, ctx, readCon);
-                usm.setModifiedDuringSession(false);
-                if (null != cache) {
-                    /*
-                     * Put into cache
-                     */
-                    usm.setNoSave(false);
-                    try {
-                        cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
-                    } catch (final OXException e) {
-                        LOG.error("UserSettingMail could not be put into cache", e);
+
+                usm = new UserSettingMail(user, ctx.getContextId());
+                Connection readCon = readConArg;
+                boolean closeCon = false;
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    if (readCon == null) {
+                        readCon = DBPool.pickup(ctx);
+                        closeCon = true;
                     }
+                    stmt = readCon.prepareStatement(SQL_LOAD);
+                    stmt.setInt(1, ctx.getContextId());
+                    stmt.setInt(2, user);
+                    rs = stmt.executeQuery();
+                    if (!rs.next()) {
+                        throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(Integer.valueOf(user), Integer.valueOf(ctx.getContextId()));
+                    }
+                    usm.parseBits(rs.getInt(1));
+                    usm.setSendAddr(rs.getString(2));
+                    usm.setReplyToAddr(rs.getString(3));
+                    usm.setMsgFormat(rs.getInt(4));
+                    setDisplayMsgHeadersString(usm, rs.getString(5));
+                    usm.setAutoLinebreak(rs.getInt(6) >= 0 ? rs.getInt(6) : 0);
+                    usm.setStdTrashName(rs.getString(7));
+                    usm.setStdSentName(rs.getString(8));
+                    usm.setStdDraftsName(rs.getString(9));
+                    usm.setStdSpamName(rs.getString(10));
+                    usm.setUploadQuota(rs.getLong(11));
+                    usm.setUploadQuotaPerFile(rs.getLong(12));
+                    usm.setConfirmedSpam(rs.getString(13));
+                    usm.setConfirmedHam(rs.getString(14));
+                    loadSignatures(usm, user, ctx, readCon);
+                    usm.setModifiedDuringSession(false);
+
+                    if (null != cache) {
+                        /*
+                         * Put into cache
+                         */
+                        usm.setNoSave(false);
+                        try {
+                            cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
+                        } catch (final OXException e) {
+                            LOG.error("UserSettingMail could not be put into cache", e);
+                        }
+                    }
+                } finally {
+                    closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
                 }
+                return usm.clone();
             } finally {
-                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+                lock.unlock();
             }
-            return usm.clone();
         } catch (final SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
