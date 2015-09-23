@@ -662,8 +662,8 @@ public class InfostoreQueryCatalog {
         final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
             contextId).append(SQL_CHUNK05).append(since);
-        if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        if (null != sort && Table.DEL_INFOSTORE.getFieldSet().contains(sort)) {
+            builder.append(STR_ORDER_BY).append(sort.doSwitch(Table.DEL_INFOSTORE.getFieldSwitcher())).append(' ').append(order(order));
         }
         return builder.toString();
     }
