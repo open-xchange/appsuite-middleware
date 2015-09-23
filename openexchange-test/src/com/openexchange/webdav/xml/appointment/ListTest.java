@@ -77,6 +77,8 @@ public class ListTest extends AppointmentTest {
 
         final Appointment[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
 
+        assertTrue("Returned list of appointments only contains " + appointmentArray.length + " appointments", appointmentArray.length >= 2);
+
         boolean found1 = false;
         boolean found2 = false;
 
