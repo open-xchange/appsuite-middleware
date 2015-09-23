@@ -49,59 +49,58 @@
 
 package com.openexchange.drive.json.action;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.NotificationParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.json.JsonDirectoryVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link UpdateFolderAction}
+ * {@link NotifyAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class UpdateFolderAction extends AbstractDriveAction {
+public class NotifyAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
-         * parse parameters & directory metadata
+         * parse parameters & target
          */
-        String path = requestData.getParameter("path");
-        if (Strings.isEmpty(path)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
-        }
-        String checksum = requestData.getParameter("checksum");
-        if (Strings.isEmpty(checksum)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
-        }
-
         JSONObject json = (JSONObject) requestData.requireData();
+        DriveShareTarget target = getShareParser().parseTarget(json);
         NotificationParameters parameters = new NotificationParameters();
-        JSONObject jsonFolder;
+        int[] entityIDs;
         try {
-            jsonFolder = json.getJSONObject("folder");
-            if (null == jsonFolder) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
+            JSONArray jsonArray = json.getJSONArray("entities");
+            if (null == jsonArray || 0 == jsonArray.length()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entities");
+            }
+            entityIDs = new int[jsonArray.length()];
+            for (int i = 0; i < jsonArray.length(); i++) {
+                entityIDs[i] = jsonArray.getInt(i);
             }
             JSONObject jsonNotification = json.optJSONObject("notification");
             if (null != jsonNotification) {
                 parameters.setNotificationTransport(getShareParser().parseNotificationTransport(jsonNotification));
                 parameters.setNotificationMessage(jsonNotification.optString("message", null));
+            } else {
+                parameters.setNotificationTransport(Transport.MAIL);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*
-         * update the directory, return empty result in case of success
+         * notify entities, return empty result in case of success
          */
-        getDriveService().getUtility().updateDirectory(session, new JsonDirectoryVersion(checksum, path), jsonFolder, parameters);
+        getDriveService().getUtility().notify(session, target, entityIDs, parameters);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
         if (null != parameters.getWarnings()) {
             result.addWarnings(parameters.getWarnings());

@@ -55,12 +55,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
- * {@link UpdateParameters}
+ * {@link NotificationParameters}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class UpdateParameters {
+public class NotificationParameters {
 
     private Transport notificationTransport;
     private String notificationMessage;

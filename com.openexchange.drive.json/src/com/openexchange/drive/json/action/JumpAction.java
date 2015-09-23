@@ -85,8 +85,6 @@ import com.openexchange.tools.servlet.http.AuthCookie;
  */
 public class JumpAction extends AbstractDriveAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JumpAction.class);
-
     public JumpAction() {
         super();
     }

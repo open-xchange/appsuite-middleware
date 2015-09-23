@@ -154,9 +154,9 @@ public interface DriveUtility {
      * @param path The path to the file's parent folder, relative to the root folder
      * @param fileVersion The file version of the file to update
      * @param jsonObject The updated metadata
-     * @param parameters Additional parameters for the update
+     * @param parameters Additional notification parameters for the update
      */
-    void updateFile(DriveSession session, String path, FileVersion fileVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException;
+    void updateFile(DriveSession session, String path, FileVersion fileVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException;
 
     /**
      * Updates metadata of a directory. This currently only includes adjusting the directory's permissions.
@@ -164,16 +164,54 @@ public interface DriveUtility {
      * @param session The session
      * @param directoryVersion The directory version of the directory to update
      * @param jsonObject The updated metadata
-     * @param parameters Additional parameters for the update
+     * @param parameters Additional notification parameters for the update
      */
-    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException;
+    void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException;
 
+    /**
+     * Gets an existing or creates a new share link for a specific file or folder.
+     *
+     * @param session The session
+     * @param target The target
+     * @return The share link
+     */
     DriveShareLink getLink(DriveSession session, DriveShareTarget target) throws OXException;
 
+    /**
+     * Optionally gets the share link for a specific file or folder if one exists.
+     *
+     * @param session The session
+     * @param target The target
+     * @return The share link, or <code>null</code> if no link exists
+     */
     DriveShareLink optLink(DriveSession session, DriveShareTarget target) throws OXException;
 
+    /**
+     * Updates an existing share link for a specific file or folder.
+     *
+     * @param session The session
+     * @param target The target
+     * @param linkUpdate The link update
+     * @return The updated share link
+     */
     DriveShareLink updateLink(DriveSession session, DriveShareTarget target, LinkUpdate linkUpdate) throws OXException;
 
+    /**
+     * Deletes an existing share link for a specific file or folder.
+     *
+     * @param session The session
+     * @param target The target
+     */
     void deleteLink(DriveSession session, DriveShareTarget target) throws OXException;
+
+    /**
+     * (Re-)Sends a notification message tom one or more existing entities of a shared file or folder.
+     *
+     * @param session The session The target
+     * @param target The target
+     * @param entityIDs The user- or group identifiers to notify
+     * @param parameters The notification parameters
+     */
+    void notify(DriveSession session, DriveShareTarget target, int[] entityIDs, NotificationParameters parameters) throws OXException;
 
 }

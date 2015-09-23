@@ -66,7 +66,7 @@ import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.UpdateParameters;
+import com.openexchange.drive.NotificationParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
@@ -232,7 +232,7 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException {
+    public void updateFile(DriveSession session, final String path, final FileVersion fileVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
         List<Field> fields = new ArrayList<Field>();
         final File metadata = FileMetadataParser.parse(jsonObject, fields);
         if (fields.isEmpty()) {
@@ -284,7 +284,7 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, UpdateParameters parameters) throws OXException {
+    public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
         final FileStorageFolder folder = DirectoryMetadataParser.parse(jsonObject);
         final SyncSession syncSession = new SyncSession(session);
         final boolean notify = null != parameters.getNotificationTransport();
@@ -402,6 +402,12 @@ public class DriveUtilityImpl implements DriveUtility {
     @Override
     public void deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
         new ShareHelper(new SyncSession(session)).deleteLink(target);
+    }
+
+    @Override
+    public void notify(DriveSession session, DriveShareTarget target, int[] entityIDs, NotificationParameters parameters) throws OXException {
+        ShareHelper shareHelper = new ShareHelper(new SyncSession(session));
+        parameters.addWarnings(shareHelper.notifyEntities(target, parameters.getNotificationTransport(), parameters.getNotificationMessage(), entityIDs));
     }
 
 }
