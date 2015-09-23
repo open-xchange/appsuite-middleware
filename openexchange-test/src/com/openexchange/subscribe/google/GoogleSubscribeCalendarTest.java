@@ -169,13 +169,13 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
     }
     
     public void testYearlyRecurrenceAppointment() throws OXException, IOException, JSONException {
-        final String title = "Yearly recurrence appointment | 14 March 2014 - 14 March 2016";
+        final String title = "Yearly recurrence appointment | 14 March 2014 - 14 March 2024";
         Appointment appointment = fetchAppointment(getDateTime(14, 3, 2014, 19, 00), getDateTime(14, 3, 2014, 20, 30), title, true);
 
         assertNotNull("Appointment: '" + title + "' not found", appointment);
         assertFieldNotNull("user id", 1, appointment.getUid());
         assertFieldIsNull("location", appointment.getLocation());
-        assertNotNullAndEquals("note", "Yearly recurrence appointment | 14 March 2014 - 14 March 2016", appointment.getNote());
+        assertNotNullAndEquals("note", "Yearly recurrence appointment | 14 March 2014 - 14 March 2024", appointment.getNote());
         assertNotNullAndEquals("start date", getDateTime(14, 3, 2014, 19, 00, 00, TimeZone.getTimeZone("UTC")), appointment.getStartDate());
         assertEquals("timezone", client.getValues().getTimeZone().getID(), appointment.getTimezone());
         assertNotNullAndEquals("end date", getDateTime(14, 3, 2014, 20, 30, 00, TimeZone.getTimeZone("UTC")), appointment.getEndDate());
@@ -186,7 +186,7 @@ public class GoogleSubscribeCalendarTest extends AbstractGoogleSubscribeTest {
         assertNotNullAndEquals("recurrence type", CalendarObject.YEARLY, appointment.getRecurrenceType());
         assertEquals("days", 0, appointment.getDays());
         assertNotNullAndEquals("interval", 1, appointment.getInterval());
-        assertNotNullAndEquals("occurrence", 2, appointment.getOccurrence());
+        assertNotNullAndEquals("occurrence", 10, appointment.getOccurrence());
         assertNotNullAndEquals("day in month", 14, appointment.getDayInMonth());
         assertNotNullAndEquals("month", 2, appointment.getMonth());
 
