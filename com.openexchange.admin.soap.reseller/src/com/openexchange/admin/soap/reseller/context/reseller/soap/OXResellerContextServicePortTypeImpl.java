@@ -669,10 +669,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess access,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccess(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess access,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
             com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
@@ -749,10 +749,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     }
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccessByName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,java.lang.String accessCombinationName,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext createModuleAccessByName(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,java.lang.String accessCombinationName,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
             com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();

@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import com.openexchange.admin.soap.context.dataobjects.Context;
 import com.openexchange.admin.soap.context.dataobjects.Credentials;
+import com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.soap.context.dataobjects.User;
 import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
-
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
@@ -19,16 +19,17 @@ import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
  *
  * <pre>
  * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
- *         &lt;element name="admin_user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
- *         &lt;element name="access" type="{http://dataobjects.soap.admin.openexchange.com/xsd}UserModuleAccess" minOccurs="0"/>
- *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
+ * &lt;complexContent>
+ * &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ * &lt;sequence>
+ * &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
+ * &lt;element name="admin_user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
+ * &lt;element name="access" type="{http://dataobjects.soap.admin.openexchange.com/xsd}UserModuleAccess" minOccurs="0"/>
+ * &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ * &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}SchemaSelectStrategy" minOccurs="0"/>
+ * &lt;/sequence>
+ * &lt;/restriction>
+ * &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  *
@@ -39,7 +40,8 @@ import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
     "ctx",
     "adminUser",
     "access",
-    "auth"
+    "auth",
+    "schemaSelectStrategy"
 })
 @XmlRootElement(name = "createModuleAccess")
 public class CreateModuleAccess {
@@ -52,13 +54,14 @@ public class CreateModuleAccess {
     protected UserModuleAccess access;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(name = "schema_select_strategy", nillable = true)
+    private SchemaSelectStrategy schemaSelectStrategy;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link Context }
+     *         possible object is {@link Context }
      *
      */
     public Context getCtx() {
@@ -69,8 +72,7 @@ public class CreateModuleAccess {
      * Legt den Wert der ctx-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link Context }
+     *            allowed object is {@link Context }
      *
      */
     public void setCtx(Context value) {
@@ -81,8 +83,7 @@ public class CreateModuleAccess {
      * Ruft den Wert der adminUser-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link User }
+     *         possible object is {@link User }
      *
      */
     public User getAdminUser() {
@@ -93,8 +94,7 @@ public class CreateModuleAccess {
      * Legt den Wert der adminUser-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link User }
+     *            allowed object is {@link User }
      *
      */
     public void setAdminUser(User value) {
@@ -105,8 +105,7 @@ public class CreateModuleAccess {
      * Ruft den Wert der access-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link UserModuleAccess }
+     *         possible object is {@link UserModuleAccess }
      *
      */
     public UserModuleAccess getAccess() {
@@ -117,8 +116,7 @@ public class CreateModuleAccess {
      * Legt den Wert der access-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link UserModuleAccess }
+     *            allowed object is {@link UserModuleAccess }
      *
      */
     public void setAccess(UserModuleAccess value) {
@@ -129,8 +127,7 @@ public class CreateModuleAccess {
      * Ruft den Wert der auth-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link Credentials }
+     *         possible object is {@link Credentials }
      *
      */
     public Credentials getAuth() {
@@ -141,12 +138,29 @@ public class CreateModuleAccess {
      * Legt den Wert der auth-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link Credentials }
+     *            allowed object is {@link Credentials }
      *
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    /**
+     * Returns the schema select strategy.
+     * 
+     * @return The {@link SchemaSelectStrategy}
+     */
+    public SchemaSelectStrategy getSchemaSelectStrategy() {
+        return schemaSelectStrategy;
+    }
+
+    /**
+     * Sets the schema select strategy.
+     * 
+     * @param schemaSelectStrategy The {@link SchemaSelectStrategy}
+     */
+    public void setSchemaSelectStrategy(SchemaSelectStrategy schemaSelectStrategy) {
+        this.schemaSelectStrategy = schemaSelectStrategy;
     }
 
 }

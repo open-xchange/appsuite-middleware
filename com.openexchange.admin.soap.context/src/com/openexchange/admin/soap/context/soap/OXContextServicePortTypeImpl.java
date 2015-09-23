@@ -509,10 +509,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context createModuleAccess(final Context ctx, final User adminUser, final UserModuleAccess access, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
+    public Context createModuleAccess(final Context ctx, final User adminUser, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
@@ -571,10 +571,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context createModuleAccessByName(final Context ctx, final User adminUser, final java.lang.String accessCombinationName, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
+    public Context createModuleAccessByName(final Context ctx, final User adminUser, final java.lang.String accessCombinationName, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();

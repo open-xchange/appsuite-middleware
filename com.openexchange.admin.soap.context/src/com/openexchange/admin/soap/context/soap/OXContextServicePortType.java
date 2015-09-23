@@ -142,7 +142,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -166,7 +168,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
