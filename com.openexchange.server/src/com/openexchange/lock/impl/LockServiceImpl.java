@@ -49,6 +49,8 @@
 
 package com.openexchange.lock.impl;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
@@ -85,16 +87,17 @@ public class LockServiceImpl implements LockService {
     }
 
     @Override
-    public Lock getLockFor(final String identifier) throws OXException {
-        final Cache cache = getCache();
+    public Lock getLockFor(String identifier) throws OXException {
+        Cache cache = getCache();
 
         Object object = cache.get(identifier);
         if (object instanceof Lock) {
+            // Already present
             return (Lock) object;
         }
 
         try {
-            final ReentrantLock newLock = new ReentrantLock();
+            ReentrantLock newLock = new ReentrantLock();
             cache.putSafe(identifier, newLock);
             return newLock;
         } catch (final OXException e) {
@@ -110,7 +113,33 @@ public class LockServiceImpl implements LockService {
     }
 
     @Override
-    public void removeLockFor(final String identifier) {
+    public Lock getSelfCleaningLockFor(String identifier) throws OXException {
+        Cache cache = getCache();
+
+        Object object = cache.get(identifier);
+        if (object instanceof Lock) {
+            // Already present
+            return (Lock) object;
+        }
+
+        try {
+            ReentrantLock newLock = new ReentrantLock();
+            cache.putSafe(identifier, newLock);
+            return new SelfCleaningLock(newLock, identifier, this);
+        } catch (final OXException e) {
+            // Already present
+            object = cache.get(identifier);
+            if (object instanceof Lock) {
+                return (Lock) object;
+            }
+        }
+
+        // Failed...
+        throw OXException.general("Could not create lock for identifier: " + identifier);
+    }
+
+    @Override
+    public void removeLockFor(String identifier) {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
@@ -118,6 +147,53 @@ public class LockServiceImpl implements LockService {
             } catch (final Exception e) {
                 // Ignore
             }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private static class SelfCleaningLock implements Lock {
+
+        private final Lock lock;
+        private final LockServiceImpl lockServiceImpl;
+        private final String identifier;
+
+        SelfCleaningLock(Lock lock, String identifier, LockServiceImpl lockServiceImpl) {
+            super();
+            this.lock = lock;
+            this.identifier = identifier;
+            this.lockServiceImpl = lockServiceImpl;
+        }
+
+        @Override
+        public void lock() {
+            lock.lock();
+        }
+
+        @Override
+        public void lockInterruptibly() throws InterruptedException {
+            lock.lockInterruptibly();
+        }
+
+        @Override
+        public boolean tryLock() {
+            return lock.tryLock();
+        }
+
+        @Override
+        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+            return lock.tryLock(time, unit);
+        }
+
+        @Override
+        public void unlock() {
+            lock.unlock();
+            lockServiceImpl.removeLockFor(identifier);
+        }
+
+        @Override
+        public Condition newCondition() {
+            return lock.newCondition();
         }
     }
 

@@ -49,6 +49,9 @@
 
 package com.openexchange.lock;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 
@@ -62,6 +65,80 @@ import com.openexchange.exception.OXException;
  */
 public interface LockService {
 
+    static final Condition EMPTY_CONDITION = new Condition() {
+
+        @Override
+        public void signalAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public void signal() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean awaitUntil(Date deadline) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+            // Nothing to do
+        }
+
+        @Override
+        public long awaitNanos(long nanosTimeout) throws InterruptedException {
+            return 0;
+        }
+
+        @Override
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void await() throws InterruptedException {
+            // Nothing to do
+        }
+    };
+
+    /**
+     * The empty lock, doing nothing on invocations.
+     */
+    public static final Lock EMPTY_LOCK = new Lock() {
+
+        @Override
+        public void unlock() {
+            // ignore
+        }
+
+        @Override
+        public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public boolean tryLock() {
+            return true;
+        }
+
+        @Override
+        public Condition newCondition() {
+            return EMPTY_CONDITION;
+        }
+
+        @Override
+        public void lockInterruptibly() throws InterruptedException {
+            // ignore
+        }
+
+        @Override
+        public void lock() {
+            // ignore
+        }
+    };
+
     /**
      * Gets the (volatile) lock for given identifier.
      *
@@ -70,6 +147,17 @@ public interface LockService {
      * @throws OXException If lock cannot be returned
      */
     Lock getLockFor(String identifier) throws OXException;
+
+    /**
+     * Gets the (self-cleaning) lock for given identifier.
+     * <p>
+     * When invoking {@link Lock#unlock()} the lock instance will be removed from this lock service.
+     *
+     * @param identifier The identifier
+     * @return The associated lock
+     * @throws OXException If lock cannot be returned
+     */
+    Lock getSelfCleaningLockFor(String identifier) throws OXException;
 
     /**
      * Removes the lock for given identifier.
