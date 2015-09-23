@@ -52,6 +52,7 @@ package com.openexchange.cache.impl;
 import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.lock.LockService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -89,24 +91,9 @@ public final class FolderCacheManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCacheManager.class);
 
-    private static volatile FolderCacheManager instance;
-
     private static final String REGION_NAME = "OXFolderCache";
 
-    private volatile Cache folderCache;
-
-    private final Lock cacheLock;
-
-    /**
-     * Initializes a new {@link FolderCacheManager}.
-     *
-     * @throws OXException If initialization fails
-     */
-    private FolderCacheManager() throws OXException {
-        super();
-        cacheLock = new ReentrantLock();
-        initCache();
-    }
+    private static volatile FolderCacheManager instance;
 
     /**
      * Checks if folder cache has been initialized.
@@ -169,7 +156,8 @@ public final class FolderCacheManager {
             synchronized (FolderCacheManager.class) {
                 if (instance != null) {
                     instance = null;
-                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+
+                    CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
                     if (null != cacheService) {
                         try {
                             cacheService.freeCache(REGION_NAME);
@@ -180,6 +168,23 @@ public final class FolderCacheManager {
                 }
             }
         }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private volatile Cache folderCache;
+
+    private final Lock cacheLock;
+
+    /**
+     * Initializes a new {@link FolderCacheManager}.
+     *
+     * @throws OXException If initialization fails
+     */
+    private FolderCacheManager() throws OXException {
+        super();
+        cacheLock = new ReentrantLock();
+        initCache();
     }
 
     /**
@@ -208,20 +213,16 @@ public final class FolderCacheManager {
         this.folderCache = null;
     }
 
-    CacheKey getCacheKey(final int cid, final int objectId) {
+    CacheKey getCacheKeyUsing(int cid, int objectId, Cache folderCache) {
         return folderCache.newCacheKey(cid, objectId);
     }
 
-    Lock getCacheLock() {
-        return cacheLock;
-    }
-
     public void clearFor(final Context ctx, final boolean async) {
-        final Runnable task = new Runnable() {
+        Runnable task = new Runnable() {
 
             @Override
             public void run() {
-                final int contextId = ctx.getContextId();
+                int contextId = ctx.getContextId();
                 Connection con = null;
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -281,7 +282,7 @@ public final class FolderCacheManager {
             throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
         }
 
-        CacheKey cacheKey = getCacheKey(ctx.getContextId(), objectId);
+        CacheKey cacheKey = getCacheKeyUsing(ctx.getContextId(), objectId, folderCache);
         if (fromCache) {
             // Look-up cache
             Object object = folderCache.get(cacheKey);
@@ -317,13 +318,10 @@ public final class FolderCacheManager {
     }
 
     /**
-     * <p>
      * Fetches <code>FolderObject</code> which matches given object id.
-     * </p>
      * <p>
      * <b>NOTE:</b> This method returns a clone of cached <code>FolderObject</code> instance. Thus any modifications made to the referenced
      * object will not affect cached version
-     * </p>
      *
      * @return The matching <code>FolderObject</code> instance else <code>null</code>
      */
@@ -332,14 +330,12 @@ public final class FolderCacheManager {
         if (null == folderCache) {
             return null;
         }
-        Object tmp = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
-        FolderObject retval;
+
+        Object tmp = folderCache.get(getCacheKeyUsing(ctx.getContextId(), objectId, folderCache));
         if (tmp instanceof FolderObject) {
-            retval = ((FolderObject) tmp);
-        } else {
-            retval = null;
+            return ((FolderObject) tmp).clone();
         }
-        return null == retval ? retval : retval.clone();
+        return null;
     }
 
     /**
@@ -362,7 +358,7 @@ public final class FolderCacheManager {
         List<FolderObject> ret = new ArrayList<FolderObject>(objectIds.length);
         int contextId = ctx.getContextId();
         for (int objectId : objectIds) {
-            Object tmp = folderCache.get(getCacheKey(contextId, objectId));
+            Object tmp = folderCache.get(getCacheKeyUsing(contextId, objectId, folderCache));
             // Refresher uses Condition objects to prevent multiple threads loading same folder.
             if (tmp instanceof FolderObject) {
                 ret.add(((FolderObject) tmp).clone());
@@ -381,11 +377,16 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon) throws OXException {
-        final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
-        final Cache folderCache = this.folderCache;
+        Cache folderCache = this.folderCache;
+        if (null == folderCache) {
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+        }
+
+        CacheKey key = getCacheKeyUsing(ctx.getContextId(), folderId, folderCache);
         if (folderCache.isReplicated()) {
-            final Lock writeLock = cacheLock;
-            writeLock.lock();
+            LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+            Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(ctx.getContextId()).append('-').append(folderId).toString());
+            lock.lock();
             try {
                 final Object tmp = folderCache.get(key);
                 if (tmp instanceof FolderObject) {
@@ -403,37 +404,22 @@ public final class FolderCacheManager {
                     }
                 }
             } finally {
-                writeLock.unlock();
+                lock.unlock();
             }
         }
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
+
         // Return element
-        final Object object = folderCache.get(key);
+        Object object = folderCache.get(key);
         if (object instanceof FolderObject) {
             return ((FolderObject) object).clone();
         }
-        final FolderObject fo = loadFolderObjectInternal(folderId, ctx, readCon);
+
+        FolderObject fo = loadFolderObjectInternal(folderId, ctx, readCon);
         putFolderObject(fo, ctx, true, null);
         return fo.clone();
-    }
-
-    /**
-     * Loads the folder object from underlying database storage whose id matches given parameter <code>folderId</code>.
-     * <p>
-     *
-     * @param folderId The folder ID
-     * @param ctx The context
-     * @param readCon A readable connection (<b>optional</b>), pass <code>null</code> to fetch a new one from connection pool
-     * @return The object loaded from DB.
-     * @throws OXException If folder object could not be loaded or a caching error occurs
-     */
-    FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon) throws OXException {
-        if (folderId <= 0) {
-            throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
-        }
-        return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
     }
 
     /**
@@ -449,24 +435,31 @@ public final class FolderCacheManager {
      * @throws OXException If put-if-absent operation fails
      */
     public FolderObject putIfAbsent(final FolderObject folderObj, final Context ctx, final ElementAttributes elemAttribs) throws OXException {
-        if (null == folderCache) {
-            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
-        }
         if (!folderObj.containsObjectID()) {
             throw OXFolderExceptionCode.MISSING_FOLDER_ATTRIBUTE.create(DataFields.ID, I(-1), I(ctx.getContextId()));
         }
 
-        return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs, getCacheKey(ctx.getContextId(), folderObj.getObjectID()));
+        Cache folderCache = this.folderCache;
+        if (null == folderCache) {
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+        }
+
+        return putIfAbsentInternal(new InstanceFolderProvider(folderObj.clone()), ctx, elemAttribs, getCacheKeyUsing(ctx.getContextId(), folderObj.getObjectID(), folderCache));
     }
 
     private FolderObject putIfAbsentInternal(FolderProvider folderProvider, Context ctx, ElementAttributes elemAttribs, CacheKey cacheKey) throws OXException {
-        CacheKey key = null == cacheKey ? getCacheKey(ctx.getContextId(), folderProvider.getObjectID()) : cacheKey;
+        Cache folderCache = this.folderCache;
+        if (null == folderCache) {
+            throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create();
+        }
+
+        CacheKey key = null == cacheKey ? getCacheKeyUsing(ctx.getContextId(), folderProvider.getObjectID(), folderCache) : cacheKey;
         FolderObject retval;
 
-        Lock writeLock = cacheLock;
-        writeLock.lock();
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(ctx.getContextId()).append('-').append(folderProvider.getObjectID()).toString());
+        lock.lock();
         try {
-            Cache folderCache = this.folderCache;
             Object tmp = folderCache.get(key);
             if (tmp instanceof FolderObject) {
                 // Already in cache
@@ -489,7 +482,7 @@ public final class FolderCacheManager {
                 retval = null;
             }
         } finally {
-            writeLock.unlock();
+            lock.unlock();
         }
         return null == retval ? retval : retval.clone();
     }
@@ -537,24 +530,22 @@ public final class FolderCacheManager {
             return null;
         }
         if (null != elemAttribs) {
-            /*
-             * Ensure isLateral is set to false
-             */
+            // Ensure isLateral is set to false
             elemAttribs.setIsLateral(false);
         }
-        /*
-         * Put clone of new object into cache.
-         */
-        CacheKey key = getCacheKey(ctx.getContextId(), folderProvider.getObjectID());
-        Lock writeLock = cacheLock;
-        writeLock.lock();
+
+        // Put clone of new object into cache.
+        CacheKey key = getCacheKeyUsing(ctx.getContextId(), folderProvider.getObjectID(), folderCache);
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(ctx.getContextId()).append('-').append(folderProvider.getObjectID()).toString());
+        lock.lock();
         try {
-            final Object tmp = folderCache.get(key);
+            Object currentFromCache = folderCache.get(key);
 
             // If there is currently an object associated with this key in the region it is replaced.
             Condition cond = null;
             if (overwrite) {
-                if (tmp instanceof FolderObject) {
+                if (currentFromCache instanceof FolderObject) {
                     // Remove to distribute PUT as REMOVE
                     folderCache.remove(key);
                     // Dirty hack
@@ -568,15 +559,15 @@ public final class FolderCacheManager {
                             LOG.warn("", e);
                         }
                     }
-                } else if (tmp instanceof Condition) {
-                    cond = (Condition) tmp;
+                } else if (currentFromCache instanceof Condition) {
+                    cond = (Condition) currentFromCache;
                 }
             } else {
                 // Another thread made a PUT in the meantime. Return because we must not overwrite.
-                if (tmp instanceof FolderObject) {
-                    return returnFolder ? ((FolderObject) tmp).clone() : null;
-                } else if (tmp instanceof Condition) {
-                    cond = (Condition) tmp;
+                if (currentFromCache instanceof FolderObject) {
+                    return returnFolder ? ((FolderObject) currentFromCache).clone() : null;
+                } else if (currentFromCache instanceof Condition) {
+                    cond = (Condition) currentFromCache;
                 }
             }
 
@@ -593,7 +584,7 @@ public final class FolderCacheManager {
             }
             return returnFolder ? clone : null;
         } finally {
-            writeLock.unlock();
+            lock.unlock();
         }
     }
 
@@ -605,30 +596,33 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObject(final int folderId, final Context ctx) throws OXException {
-        final Cache folderCache = this.folderCache;
+        Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         }
+
         // Remove object from cache if exist
         if (folderId > 0) {
-            final CacheKey cacheKey = getCacheKey(ctx.getContextId(), folderId);
-            final Lock writeLock = cacheLock;
-            writeLock.lock();
+            CacheKey cacheKey = getCacheKeyUsing(ctx.getContextId(), folderId, folderCache);
+            LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+            Lock lock = null == lockService ? cacheLock : lockService.getSelfCleaningLockFor(new StringBuilder(32).append(REGION_NAME).append('-').append(ctx.getContextId()).append('-').append(folderId).toString());
+            lock.lock();
             try {
                 final Object tmp = folderCache.get(cacheKey);
                 if (!(tmp instanceof Condition)) {
                     folderCache.remove(cacheKey);
                 }
             } finally {
-                writeLock.unlock();
+                lock.unlock();
             }
         }
+
         // Dirty hack
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
+                Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                 globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
             } catch (final OXException e) {
                 LOG.warn("", e);
@@ -644,43 +638,35 @@ public final class FolderCacheManager {
      * @throws OXException If a caching error occurs
      */
     public void removeFolderObjects(final int[] folderIds, final Context ctx) throws OXException {
-        final Cache folderCache = this.folderCache;
+        if (folderIds == null || folderIds.length == 0) {
+            return;
+        }
+
+        Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
-        } else if (folderIds == null || folderIds.length == 0) {
-            return;
         }
-        final List<CacheKey> cacheKeys = new ArrayList<CacheKey>();
-        for (final int key : folderIds) {
+
+        List<Serializable> cacheKeys = new ArrayList<Serializable>(folderIds.length);
+        for (int key : folderIds) {
             if (key > 0) {
-                cacheKeys.add(getCacheKey(ctx.getContextId(), key));
+                cacheKeys.add(getCacheKeyUsing(ctx.getContextId(), key, folderCache));
             }
         }
-        /*
-         * Remove objects from cache
-         */
-        final Lock writeLock = cacheLock;
-        writeLock.lock();
-        try {
-            for (final CacheKey cacheKey : cacheKeys) {
-                final Object tmp = folderCache.get(cacheKey);
-                if (!(tmp instanceof Condition)) {
-                    folderCache.remove(cacheKey);
-                }
-            }
-        } finally {
-            writeLock.unlock();
-        }
+
+        // Remove objects from cache
+        folderCache.remove(cacheKeys);
+
         // Dirty hack
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                for (final int key : folderIds) {
-                    final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(key));
+                Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                for (int key : folderIds) {
+                    CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(key));
                     globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                 }
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("", e);
             }
         }
@@ -692,18 +678,19 @@ public final class FolderCacheManager {
      * @throws OXException If folder cache cannot be cleared
      */
     public void clearAll() throws OXException {
-        final Cache folderCache = this.folderCache;
+        Cache folderCache = this.folderCache;
         if (null == folderCache) {
             return;
         }
         folderCache.clear();
+
         // Dirty hack
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                final Cache globalCache = cacheService.getCache("GlobalFolderCache");
+                Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 globalCache.clear();
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.warn("", e);
             }
         }
@@ -725,6 +712,8 @@ public final class FolderCacheManager {
          */
         return folderCache.getDefaultElementAttributes();
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
 
     private static interface FolderProvider {
 
@@ -769,16 +758,29 @@ public final class FolderCacheManager {
 
         @Override
         public FolderObject getFolderObject() throws OXException {
-            if (folderId <= 0) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(I(folderId), I(ctx.getContextId()));
-            }
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
+            return loadFolderObjectInternal(folderId, ctx, readCon);
         }
 
         @Override
         public int getObjectID() {
             return folderId;
         }
+    }
+
+    /**
+     * Loads the folder object from underlying database storage whose id matches given parameter <code>folderId</code>.
+     *
+     * @param folderId The folder ID
+     * @param ctx The context
+     * @param readCon A readable connection (<b>optional</b>), pass <code>null</code> to fetch a new one from connection pool
+     * @return The object loaded from DB.
+     * @throws OXException If folder object could not be loaded or a caching error occurs
+     */
+    static FolderObject loadFolderObjectInternal(int folderId, Context ctx, Connection readCon) throws OXException {
+        if (folderId <= 0) {
+            throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
+        }
+        return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
     }
 
 }
