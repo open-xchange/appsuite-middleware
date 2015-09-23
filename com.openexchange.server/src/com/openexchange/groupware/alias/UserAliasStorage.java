@@ -129,5 +129,14 @@ public interface UserAliasStorage {
      * @return <code>true</code> if delete operation was successful; otherwise <code>false</code>
      * @throws OXException If delete attempt fails
      */
-    boolean deleteAliase(Connection con, int contextId, int userId) throws OXException;
+    boolean deleteAliases(Connection con, int contextId, int userId) throws OXException;
+
+    /**
+     * Invalidates possibly cached aliases.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @throws OXException If invalidation fails
+     */
+    void invalidateAliases(int contextId, int userId) throws OXException;
 }

@@ -796,7 +796,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                aliasStorage.deleteAliase(con, contextId, userId);
+                aliasStorage.deleteAliases(con, contextId, userId);
 
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
@@ -821,7 +821,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                aliasStorage.deleteAliase(con, contextId, userId);
+                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if(usrdata.isUserAttributesset()) {
@@ -2872,7 +2872,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 //Delete aliases
                 UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-                aliasStorage.deleteAliase(write_ox_con, contextId, userId);
+                aliasStorage.deleteAliases(write_ox_con, contextId, userId);
 
                 log.info("Deleted user {}({}) ...", user.getId(), ctx.getId());
 
