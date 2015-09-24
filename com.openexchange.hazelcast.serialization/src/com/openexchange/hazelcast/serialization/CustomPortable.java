@@ -142,13 +142,16 @@ public interface CustomPortable extends Portable {
      * <li><code>  104</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallable</li>
      * <li><code>  105</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallable</li>
      * <li><code>  106</code>: com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwner</li>
+     * <li><code>  109</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropAllPermanentListenerCallable</li>
+     * <li><code>  110</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallable</li>
      * <li><code>  107</code>: com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken</li>
      * <li><code>  108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
      *
      * <li><code>  300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
      * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
-     *
+     * 
      * <li><code>  400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
+     * <li><code>  401</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp</li>>
      * </ul>
      *
      * @return The class ID

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.mbean;
 
+import java.util.List;
 import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
 
@@ -65,12 +66,20 @@ public interface PushMBean {
     public static final String DOMAIN = "com.openexchange.push";
 
     /**
-     * Lists permanent push users running on this node
+     * Lists push users running on this node
      *
-     * @return The permanent push users running on this node
-     * @throws MBeanException If push user cannot be returned
+     * @return The push users running on this node
+     * @throws MBeanException If push users cannot be returned
      */
-    String[] listPushUsers() throws MBeanException;
+    List<List<String>> listPushUsers() throws MBeanException;
+
+    /**
+     * Lists registered push users running on this node
+     *
+     * @return The registered push users running on this node
+     * @throws MBeanException If push users cannot be returned
+     */
+    List<List<String>> listRegisteredPushUsers() throws MBeanException;
 
     /**
      * Unregisters the permanent listener for specified push user

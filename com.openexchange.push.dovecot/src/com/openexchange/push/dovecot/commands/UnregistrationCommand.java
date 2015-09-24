@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,80 +47,60 @@
  *
  */
 
-package com.openexchange.push.console;
+package com.openexchange.push.dovecot.commands;
 
-import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.cli.OutputHelper;
-import com.openexchange.push.mbean.PushMBean;
-
+import org.slf4j.Logger;
+import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.util.ImapUtility;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link UnregistrationCommand} - Issues the special SETMETADATA command to un-register a push listener at Dovecot.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
+public class UnregistrationCommand implements ProtocolCommand {
 
-    public static void main(String[] args) {
-        new ListPushUsers().execute(args);
-    }
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(UnregistrationCommand.class);
+
+    private final IMAPFolder imapFolder;
 
     /**
-     * Initializes a new {@link ListPushUsers}.
+     * Initializes a new {@link UnregistrationCommand}.
+     *
+     * @param imapFolder The IMAP folder
      */
-    public ListPushUsers() {
+    public UnregistrationCommand(IMAPFolder imapFolder) {
         super();
+        this.imapFolder = imapFolder;
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
+    public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+        // Craft IMAP command
+        String command = "SETMETADATA \"\" (/private/vendor/vendor.dovecot/http-notify NIL)";
 
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
-
-        List<List<String>> data = pushMBean.listPushUsers();
-        if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
+        // Issue command
+        Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
+        Response response = r[r.length - 1];
+        if (response.isOK()) {
+            LOGGER.info("Unregistered push notification for {} using: {}", imapFolder.getStore(), command);
+            return Boolean.TRUE;
+        } else if (response.isBAD()) {
+            throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+        } else if (response.isNO()) {
+            throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
         } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
+            protocol.handleResult(response);
         }
-
-        return null;
+        return Boolean.FALSE;
     }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // Nothing
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
-    }
-
-    @Override
-    protected String getName() {
-        return "listpushusers";
-    }
-
 }

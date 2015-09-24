@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,80 +47,21 @@
  *
  */
 
-package com.openexchange.push.console;
-
-import java.util.List;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.cli.OutputHelper;
-import com.openexchange.push.mbean.PushMBean;
+package com.openexchange.mail;
 
 
 /**
- * {@link ListPushUsers} - The command-line tool to list push users.
+ * {@link MailProviderRegistration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class ListPushUsers extends AbstractMBeanCLI<Void> {
-
-    public static void main(String[] args) {
-        new ListPushUsers().execute(args);
-    }
+public interface MailProviderRegistration {
 
     /**
-     * Initializes a new {@link ListPushUsers}.
+     * Gets the protocol name of the registered provider
+     *
+     * @return The protocol name of the registered provider
      */
-    public ListPushUsers() {
-        super();
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // Nothing
-    }
-
-    @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
-
-        List<List<String>> data = pushMBean.listPushUsers();
-        if (null == data || data.isEmpty()) {
-            System.out.println("No running push users on this node.");
-        } else {
-            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
-        }
-
-        return null;
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // Nothing
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected String getFooter() {
-        return "Command-line tool to list currently active push users on this node";
-    }
-
-    @Override
-    protected String getName() {
-        return "listpushusers";
-    }
-
+    String getRegisteredProvider();
 }
