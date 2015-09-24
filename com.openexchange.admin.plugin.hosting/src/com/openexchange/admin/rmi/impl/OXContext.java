@@ -1073,7 +1073,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         Context retval = null;
 
