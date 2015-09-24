@@ -1,0 +1,17 @@
+open-xchange-mobile-push-restricted (7.6.2-2) stable; urgency=medium
+
+  * Build for patch 2015-09-01 (2726)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 02 Sep 2015 11:04:14 +0200
+
+open-xchange-mobile-push-restricted (7.6.2-1) stable; urgency=low
+
+  * First candidate for the 7.6.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 14 Jul 2015 09:38:57 +0200
+
+open-xchange-mobile-push-restricted (7.6.2-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Jun 2015 11:49:57 +0200
