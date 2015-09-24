@@ -416,9 +416,11 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private void handleFailedWebDAVLogin(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
+            LOG.debug("WebDAV login failed", e);
             addUnauthorizedHeader(req, resp);
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
         } else if (LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
+            LOG.debug("WebDAV login failed", e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
         } else {
             LOG.error("WebDAV login failed", e);

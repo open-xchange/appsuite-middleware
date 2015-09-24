@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +61,7 @@ import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -154,6 +156,40 @@ public class ShareHelper {
         }
     }
 
+    public List<OXException> notifyEntities(DriveShareTarget driveTarget, Transport transport, String message, int[] entityIDs) throws OXException {
+        if (null == entityIDs || 0 == entityIDs.length) {
+            return Collections.emptyList();
+        }
+        Entities entities;
+        ShareTarget target;
+        if (driveTarget.isFolder()) {
+            FileStorageFolder folder = session.getStorage().getFolder(driveTarget.getDrivePath());
+            DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
+            if (false == driveTarget.getChecksum().equals(directoryChecksum.getChecksum())) {
+                throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(driveTarget.getDrivePath(), driveTarget.getChecksum());
+            }
+            target = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
+            entities = filterFolderEntities(entityIDs, folder.getPermissions());
+        } else {
+            List<Field> fields = new ArrayList<Field>(DriveConstants.FILE_FIELDS);
+            fields.add(Field.OBJECT_PERMISSIONS);
+            File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName(), fields, false);
+            if (null == file) {
+                throw DriveExceptionCodes.FILE_NOT_FOUND.create(driveTarget.getName(), driveTarget.getDrivePath());
+            }
+            if (false == ChecksumProvider.matches(session, file, driveTarget.getChecksum())) {
+                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(driveTarget.getName(), driveTarget.getChecksum(), driveTarget.getDrivePath());
+            }
+            target = new ShareTarget(DriveConstants.FILES_MODULE, file.getFolderId(), file.getId());
+            entities = filterFileEntities(entityIDs, file.getObjectPermissions());
+        }
+        ShareNotificationService notificationService = DriveServiceLookup.getService(ShareNotificationService.class);
+        if (null == notificationService) {
+            return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("ShareNotificationService was absent"));
+        }
+        ShareTargetPath targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
+        return notificationService.sendShareCreatedNotifications(transport, entities, message, targetPath, session.getServerSession(), session.getHostData());
+    }
 
     /**
      * Gets the plain share target to a drive share target, throwing appropriate exceptions in case the target can't be looked up or it's
@@ -316,6 +352,56 @@ public class ShareHelper {
 
     private static ShareService getShareService() {
         return DriveServiceLookup.getService(ShareService.class);
+    }
+
+    private static Entities filterFileEntities(int[] entityIDs, List<FileStorageObjectPermission> permissions) throws OXException {
+        Entities entities = new Entities();
+        for (Integer entityID : entityIDs) {
+            FileStorageObjectPermission matchingPermission = null;
+            if (null != permissions) {
+                for (FileStorageObjectPermission permission : permissions) {
+                    if (permission.getEntity() == entityID.intValue()) {
+                        matchingPermission = permission;
+                        break;
+                    }
+                }
+            }
+            if (null == matchingPermission) {
+                throw OXException.notFound(entityID.toString());
+            }
+            if (matchingPermission.isGroup()) {
+                entities.addGroup(matchingPermission.getEntity(), PermissionType.OBJECT, matchingPermission.getPermissions());
+            } else {
+                entities.addUser(matchingPermission.getEntity(), PermissionType.OBJECT, matchingPermission.getPermissions());
+            }
+        }
+        return entities;
+    }
+
+    private static Entities filterFolderEntities(int[] entityIDs, List<FileStoragePermission> permissions) throws OXException {
+        Entities entities = new Entities();
+        for (Integer entityID : entityIDs) {
+            FileStoragePermission matchingPermission = null;
+            if (null != permissions) {
+                for (FileStoragePermission permission : permissions) {
+                    if (permission.getEntity() == entityID.intValue()) {
+                        matchingPermission = permission;
+                        break;
+                    }
+                }
+            }
+            if (null == matchingPermission) {
+                throw OXException.notFound(entityID.toString());
+            }
+            int permissionBits = Permissions.createPermissionBits(matchingPermission.getFolderPermission(), matchingPermission.getReadPermission(),
+                matchingPermission.getWritePermission(), matchingPermission.getDeletePermission(), matchingPermission.isAdmin());
+            if (matchingPermission.isGroup()) {
+                entities.addGroup(matchingPermission.getEntity(), PermissionType.FOLDER, permissionBits);
+            } else {
+                entities.addUser(matchingPermission.getEntity(), PermissionType.FOLDER, permissionBits);
+            }
+        }
+        return entities;
     }
 
 }

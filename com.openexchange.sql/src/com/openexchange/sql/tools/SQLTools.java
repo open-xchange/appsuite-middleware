@@ -53,7 +53,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.sql.grammar.Expression;
 import com.openexchange.sql.grammar.LIST;
@@ -90,7 +92,7 @@ public class SQLTools {
                 }
             }
         }
-        if(sqle != null) {
+        if (sqle != null) {
             throw sqle;
         }
     }
@@ -101,5 +103,16 @@ public class SQLTools {
             list.add(expression);
         }
         return new LIST(list);
+    }
+
+    /**
+     * Creates a java.sql.Timestamp object with truncated milliseconds to avoid bad rounding in MySQL versions >= 7.6.4.
+     * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
+     * 
+     * @param date
+     * @return
+     */
+    public static Timestamp toTimestamp(Date date) {
+        return new Timestamp((date.getTime() / 1000) * 1000);
     }
 }

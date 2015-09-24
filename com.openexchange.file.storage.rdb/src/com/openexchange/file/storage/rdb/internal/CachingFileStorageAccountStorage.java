@@ -54,6 +54,7 @@ import gnu.trove.procedure.TIntProcedure;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -172,18 +174,32 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
 
     @Override
     public FileStorageAccount getAccount(final String serviceId, final int id, final Session session) throws OXException {
-        final CacheService cacheService = serviceRegistry.getService(CacheService.class);
+        CacheService cacheService = serviceRegistry.getService(CacheService.class);
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        Object object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
         if (object instanceof FileStorageAccount) {
             return (FileStorageAccount) object;
         }
-        final FileStorageAccount account = delegatee.getAccount(serviceId, id, session);
-        cache.put(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()), account, false);
-        return account;
+
+        LockService lockService = Services.getOptionalService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("fsaccount-").append(session.getContextId()).append('-').append(session.getUserId()).append('-').append(id).append('-').append(serviceId).toString());
+        lock.lock();
+        try {
+            object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
+            if (object instanceof FileStorageAccount) {
+                return (FileStorageAccount) object;
+            }
+
+            FileStorageAccount account = delegatee.getAccount(serviceId, id, session);
+            cache.put(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()), account, false);
+            return account;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

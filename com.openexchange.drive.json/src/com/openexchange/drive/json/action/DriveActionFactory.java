@@ -91,6 +91,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("getFile", new GetFileAction());
         actions.put("getFolder", new GetFolderAction());
         actions.put("shares", new SharesAction());
+        actions.put("notify", new NotifyAction());
     }
 
     @Override

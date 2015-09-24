@@ -63,7 +63,11 @@ import org.json.JSONException;
 import org.jsoup.nodes.Document;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
+import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -86,6 +90,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.test.TestInit;
@@ -145,6 +150,56 @@ public class MailNotificationTest extends ShareTest {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    public void testNoMailsButWarningForSharedMailFolderOnCreate() throws Exception {
+        /*
+         * Create a new mail folder
+         */
+        FolderObject sharedFolder = Create.createPrivateFolder(randomUID(), FolderObject.MAIL, client.getValues().getUserId());
+        sharedFolder.setFullName(client.getValues().getInboxFolder() + "/" + sharedFolder.getFolderName());
+        InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OX_NEW, sharedFolder);
+        client.execute(insertFolderReq);
+        remember(sharedFolder);
+
+        /*
+         * Share it to another user and 'accidentally' request a notification message
+         */
+        AJAXClient client2 = new AJAXClient(User.User2);
+        List<OCLPermission> newPermissions = new ArrayList<>(sharedFolder.getPermissions());
+        newPermissions.add(Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER,
+            OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS));
+        FolderObject toUpdate = new FolderObject();
+        toUpdate.setModule(FolderObject.MAIL);
+        toUpdate.setFullName(sharedFolder.getFullName());
+        toUpdate.setPermissions(newPermissions);
+        toUpdate.setLastModified(new Date());
+        UpdateRequest updateReq = new UpdateRequest(EnumAPI.OX_NEW, toUpdate);
+        updateReq.setNotifyPermissionEntities(Transport.MAIL, "Look at this!");
+        InsertResponse updateResp = client.execute(updateReq);
+
+        /*
+         * Assert warning about notification
+         */
+        assertTrue(updateResp.getResponse().hasWarnings());
+        OXException warning = updateResp.getResponse().getWarnings().get(0);
+        assertEquals(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.getPrefix(), warning.getPrefix());
+        assertEquals(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.getNumber(), warning.getCode());
+
+
+        /*
+         * Assert user 2 can see folder
+         */
+        GetResponse reloadResponse = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, sharedFolder.getFullName()));
+        assertFalse(reloadResponse.hasError());
+        FolderObject reloadedFolder = reloadResponse.getFolder();
+        assertNotNull(reloadedFolder);
+
+        /*
+         * Assert no mail was sent
+         */
+        List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
+        assertEquals(0, messages.size());
     }
 
     //    TODO: Adapt tests and NotifyAction once they are used, e.g. add own com.openexchange.share.notification.ShareNotification.NotificationType

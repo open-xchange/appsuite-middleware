@@ -53,7 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.UpdateParameters;
+import com.openexchange.drive.NotificationParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
@@ -87,7 +87,7 @@ public class UpdateFileAction extends AbstractDriveAction {
         }
         JSONObject json = (JSONObject) requestData.requireData();
         JSONObject jsonFile;
-        UpdateParameters parameters = new UpdateParameters();
+        NotificationParameters parameters = new NotificationParameters();
         try {
             jsonFile = json.getJSONObject("file");
             if (null == jsonFile) {
@@ -106,7 +106,7 @@ public class UpdateFileAction extends AbstractDriveAction {
          */
         getDriveService().getUtility().updateFile(session, path, new JsonFileVersion(checksum, name), jsonFile, parameters);
         AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-        if (null != result.getWarnings()) {
+        if (null != parameters.getWarnings()) {
             result.addWarnings(parameters.getWarnings());
         }
         return result;

@@ -110,6 +110,8 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
         createSubscription(getAccountId(), CONTACT_SOURCE_ID, FolderObject.CONTACT, privateContactFolder, userId);
 
         // Give the asynchronous tasks a few seconds to finish
-        Thread.sleep(5000);
+        System.out.print("Give the asynchronous tasks a few seconds to finish... ");
+        Thread.sleep(15000);
+        System.out.println("OK, proceeding with tests.");
     }
 }

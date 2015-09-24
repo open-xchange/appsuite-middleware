@@ -95,10 +95,8 @@ public class GuestImplActivator extends HousekeepingActivator {
         GuestStorageServiceLookup.set(this);
 
         GuestService guestService = new DefaultGuestService(getService(UserService.class), getService(ContextService.class), getService(ContactUserStorage.class), getService(ConfigViewFactory.class), getService(PasswordMechFactory.class));
-        registerService(GuestService.class, guestService, 2);
-
         GuestService delegateGuestService = new DelegateGuestService(guestService, getService(ConfigurationService.class));
-        registerService(GuestService.class, delegateGuestService, 5);
+        registerService(GuestService.class, delegateGuestService);
 
         registerService(DeleteListener.class, new GuestDeleteListenerImpl(delegateGuestService));
         registerService(DeleteContextGroupListener.class, new GuestDeleteContextGroupListener(delegateGuestService));

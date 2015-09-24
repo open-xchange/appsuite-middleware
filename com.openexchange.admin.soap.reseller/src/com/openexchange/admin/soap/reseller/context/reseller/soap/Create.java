@@ -11,7 +11,6 @@ import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.User;
 
-
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
  *
@@ -19,15 +18,16 @@ import com.openexchange.admin.soap.reseller.context.soap.dataobjects.User;
  *
  * <pre>
  * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="ctx" type="{http://dataobjects.soap.reseller.admin.openexchange.com/xsd}ResellerContext" minOccurs="0"/>
- *         &lt;element name="admin_user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
- *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
+ * &lt;complexContent>
+ * &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ * &lt;sequence>
+ * &lt;element name="ctx" type="{http://dataobjects.soap.reseller.admin.openexchange.com/xsd}ResellerContext" minOccurs="0"/>
+ * &lt;element name="admin_user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
+ * &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ * &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}SchemaSelectStrategy" minOccurs="0"/>
+ * &lt;/sequence>
+ * &lt;/restriction>
+ * &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  *
@@ -56,8 +56,7 @@ public class Create {
      * Ruft den Wert der ctx-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link ResellerContext }
+     *         possible object is {@link ResellerContext }
      *
      */
     public ResellerContext getCtx() {
@@ -68,8 +67,7 @@ public class Create {
      * Legt den Wert der ctx-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link ResellerContext }
+     *            allowed object is {@link ResellerContext }
      *
      */
     public void setCtx(ResellerContext value) {
@@ -80,8 +78,7 @@ public class Create {
      * Ruft den Wert der adminUser-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link User }
+     *         possible object is {@link User }
      *
      */
     public User getAdminUser() {
@@ -92,8 +89,7 @@ public class Create {
      * Legt den Wert der adminUser-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link User }
+     *            allowed object is {@link User }
      *
      */
     public void setAdminUser(User value) {
@@ -104,8 +100,7 @@ public class Create {
      * Ruft den Wert der auth-Eigenschaft ab.
      *
      * @return
-     *     possible object is
-     *     {@link Credentials }
+     *         possible object is {@link Credentials }
      *
      */
     public Credentials getAuth() {
@@ -116,8 +111,7 @@ public class Create {
      * Legt den Wert der auth-Eigenschaft fest.
      *
      * @param value
-     *     allowed object is
-     *     {@link Credentials }
+     *            allowed object is {@link Credentials }
      *
      */
     public void setAuth(Credentials value) {

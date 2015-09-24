@@ -71,12 +71,6 @@ public class ConfigJSlobReloadable implements Reloadable {
         this.configJSlobService = configJSlobService;
     }
 
-    private static final String UPSELL_CONFIG_FILE = "upsell-appsuite.properties";
-
-    private static final String APPSUITE_CONFIG_FILE = "appsuite.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
-
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
@@ -89,9 +83,9 @@ public class ConfigJSlobReloadable implements Reloadable {
 
     @Override
     public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(UPSELL_CONFIG_FILE, PROPERTIES);
-        map.put(APPSUITE_CONFIG_FILE, PROPERTIES);
+        Map<String, String[]> map = new HashMap<String, String[]>(4);
+        map.put("upsell-appsuite.properties", new String[] { "all properties in file" });
+        map.put("appsuite.properties", new String[] { "all properties in file" });
         return map;
     }
 }

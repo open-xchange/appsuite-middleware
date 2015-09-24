@@ -145,6 +145,7 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.ISNULL;
 import com.openexchange.sql.grammar.OR;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -1747,7 +1748,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
             handleUid(cdao, so, !notify);
 
-            pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
+            pst.setTimestamp(i++, SQLTools.toTimestamp(cdao.getCreationDate()));
             if (!cdao.containsLastModified()) {
                 cdao.setLastModified(cdao.getCreationDate());
             }

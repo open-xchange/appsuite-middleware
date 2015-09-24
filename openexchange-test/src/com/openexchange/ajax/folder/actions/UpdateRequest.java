@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -93,8 +94,12 @@ public class UpdateRequest extends InsertRequest {
     @Override
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
-        params.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())));
-        params.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())));
+        if (FolderObject.MAIL == folder.getModule() && folder.getFullName() != null) {
+            params.add(new Parameter(FolderFields.ID, folder.getFullName()));
+        } else {
+            params.add(new Parameter(FolderFields.ID, folder.getObjectID()));
+            params.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())));
+        }
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())));
         if (handDown) {
             params.add(new Parameter("permissions", "inherit"));

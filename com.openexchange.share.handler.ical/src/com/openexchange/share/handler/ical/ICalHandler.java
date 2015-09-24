@@ -108,8 +108,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, CommonObject.PRIVATE_FLAG, CommonObject.COLOR_LABEL, CalendarObject.TITLE,
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_ID,
         CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.LOCATION,
-        Appointment.FULL_TIME, Appointment.SHOWN_AS, Appointment.TIMEZONE, Appointment.UID, Appointment.INTERVAL,
-        Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.RECURRENCE_COUNT, Appointment.UNTIL
+        Appointment.FULL_TIME, Appointment.SHOWN_AS, Appointment.TIMEZONE, Appointment.UID
     };
 
     /**

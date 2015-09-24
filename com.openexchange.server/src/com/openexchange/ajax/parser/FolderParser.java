@@ -60,6 +60,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -139,7 +140,12 @@ public class FolderParser {
             }
         }
         if (jsonObj.has(FolderChildFields.FOLDER_ID)) {
-            fo.setParentFolderID(jsonObj.getInt(FolderChildFields.FOLDER_ID));
+            Object folderId = jsonObj.get(FolderChildFields.FOLDER_ID);
+            if (folderId instanceof String) {
+                fo.setFullName((String) folderId);
+            } else {
+                fo.setParentFolderID(jsonObj.getInt(FolderChildFields.FOLDER_ID));
+            }
         }
         if (jsonObj.has(FolderFields.TITLE)) {
             fo.setFolderName(jsonObj.getString(FolderFields.TITLE));
