@@ -278,7 +278,7 @@ public class AdminDaemon implements AdminDaemonService {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug("{0} changed to {}", event.getBundle().getSymbolicName(), event.getType());
+                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), event.getType());
             }
         };
         context.addBundleListener(bl);
