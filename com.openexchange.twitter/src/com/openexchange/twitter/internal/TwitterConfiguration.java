@@ -64,9 +64,6 @@ public final class TwitterConfiguration implements Reloadable {
 
     private static final TwitterConfiguration INSTANCE = new TwitterConfiguration();
 
-    private static final String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
-        "com.openexchange.twitter.consumerSecret"};
-
     /**
      * Gets the instance.
      *
@@ -104,17 +101,17 @@ public final class TwitterConfiguration implements Reloadable {
     public void configure(final ConfigurationService configurationService) {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterConfiguration.class);
         {
-            final String property = configurationService.getProperty("com.openexchange.twitter.consumerKey");
+            final String property = configurationService.getProperty("com.openexchange.oauth.twitter.apiKey");
             if (null == property) {
-                log.error("Missing property \"com.openexchange.twitter.consumerKey\"");
+                log.error("Missing property \"com.openexchange.oauth.twitter.apiKey\"");
             } else {
                 consumerKey.set(property);
             }
         }
         {
-            final String property = configurationService.getProperty("com.openexchange.twitter.consumerSecret");
+            final String property = configurationService.getProperty("com.openexchange.oauth.twitter.apiSecret");
             if (null == property) {
-                log.error("Missing property \"com.openexchange.twitter.consumerSecret\"");
+                log.error("Missing property \"com.openexchange.oauth.twitter.apiSecret\"");
             } else {
                 consumerSecret.set(property);
             }
@@ -145,7 +142,7 @@ public final class TwitterConfiguration implements Reloadable {
     @Override
     public Map<String, String[]> getConfigFileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("twitter.properties", PROPERTIES);
+        map.put("twitter.properties", new String[] {"com.openexchange.oauth.twitter.apiKey", "com.openexchange.oauth.twitter.apiSecret"});
         return map;
     }
 
