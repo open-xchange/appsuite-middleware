@@ -130,7 +130,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public Quota[] listQuotas(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, ctx);
