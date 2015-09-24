@@ -52,7 +52,7 @@ package com.openexchange.admin.daemons;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link AdminDaemonService} - The admin daemon service.
+ * {@link AdminDaemonService} - A marker service to signal successful start-up for admin daemon.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
