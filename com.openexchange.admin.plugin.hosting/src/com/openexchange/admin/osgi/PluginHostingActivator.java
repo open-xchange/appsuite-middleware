@@ -50,6 +50,7 @@
 package com.openexchange.admin.osgi;
 
 import com.openexchange.admin.PluginStarter;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -152,6 +153,6 @@ public class PluginHostingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
 }

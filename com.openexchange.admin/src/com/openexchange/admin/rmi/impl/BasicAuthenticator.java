@@ -127,13 +127,19 @@ public class BasicAuthenticator extends OXCommonImpl {
      *
      * @param plugInAware Whether the authenticator should respect possibly registered {@link BasicAuthenticatorPluginInterface} instances.
      */
-    private BasicAuthenticator(boolean plugInAware) {
+    private BasicAuthenticator(boolean plugInAware) throws StorageException {
         super();
         this.plugInAware = plugInAware;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
         oxtool = OXToolStorageInterface.getInstance();
         cache = ClientAdminThread.cache;
+        if (null == cache) {
+            // Obviously not properly initialized.
+            StorageException e = new StorageException("Open-Xchange Admin not properly initialized.");
+            LOG.error("Probably start-up of bundle \"com.openexchange.admin\" failed. Please check log files and/or bundle status via \"/opt/open-xchange/sbin/listbundles\" command-line tool.", e);
+            throw e;
+        }
     }
 
     /**

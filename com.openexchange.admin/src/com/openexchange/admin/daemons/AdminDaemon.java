@@ -78,7 +78,12 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 
-public class AdminDaemon {
+/**
+ * {@link AdminDaemon} - The admin daemon.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AdminDaemon implements AdminDaemonService {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
