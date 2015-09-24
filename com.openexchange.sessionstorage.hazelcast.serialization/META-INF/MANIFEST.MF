@@ -21,6 +21,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.session,
+ com.openexchange.sessiond,
  com.openexchange.sessionstorage,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
@@ -30,6 +31,7 @@ Import-Package: com.hazelcast.config,
  org.apache.commons.lang.exception,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.sessionstorage.hazelcast.serialization
 Bundle-Activator: com.openexchange.sessionstorage.hazelcast.serialization.osgi.PortableSessionActivator

@@ -54,10 +54,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.database.DatabaseService;
@@ -65,6 +65,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserClient;
 import com.openexchange.push.impl.osgi.Services;
 
 /**
@@ -181,6 +182,57 @@ public class PushDbUtils {
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the available push client registrations
+     *
+     * @return The push client registrations
+     * @throws OXException If push client registrations cannot be returned
+     */
+    public static List<PushUserClient> getPushClientRegistrations() throws OXException {
+        DatabaseService service = Services.requireService(DatabaseService.class);
+
+        // Query context2push_registration table
+        Set<Integer> contextIds = getContextsWithPushRegistrations(service);
+        if (contextIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<PushUserClient> clientSet = new HashSet<PushUserClient>(64);
+        for (Integer contextId : contextIds) {
+            addPushClientRegistrationsFromAssociatedSchema(contextId.intValue(), clientSet, service);
+        }
+
+        List<PushUserClient> lclients = new ArrayList<PushUserClient>(clientSet);
+        Collections.sort(lclients);
+        return lclients;
+    }
+
+    private static void addPushClientRegistrationsFromAssociatedSchema(int contextId, Set<PushUserClient> clientSet, DatabaseService service) throws OXException {
+        Connection con = service.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user, client FROM registeredPush ORDER BY cid, user");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return;
+            }
+
+            do {
+                clientSet.add(new PushUserClient(new PushUser(rs.getInt(2), rs.getInt(1)), rs.getString(3)));
+            } while (rs.next());
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            service.backReadOnly(contextId, con);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * Gets the available push registrations
      *
      * @return The push registrations
@@ -195,15 +247,17 @@ public class PushDbUtils {
             return Collections.emptyList();
         }
 
-        List<PushUser> users = new LinkedList<PushUser>();
+        Set<PushUser> userSet = new HashSet<PushUser>(64);
         for (Integer contextId : contextIds) {
-            addPushRegistrationsFromAssociatedSchema(contextId.intValue(), users, service);
+            addPushRegistrationsFromAssociatedSchema(contextId.intValue(), userSet, service);
         }
-        Collections.sort(users);
-        return users;
+
+        List<PushUser> lusers = new ArrayList<PushUser>(userSet);
+        Collections.sort(lusers);
+        return lusers;
     }
 
-    private static void addPushRegistrationsFromAssociatedSchema(int contextId, List<PushUser> users, DatabaseService service) throws OXException {
+    private static void addPushRegistrationsFromAssociatedSchema(int contextId, Set<PushUser> userSet, DatabaseService service) throws OXException {
         Connection con = service.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -215,9 +269,7 @@ public class PushDbUtils {
             }
 
             do {
-                int currentContextId = rs.getInt(1);
-                int currentUserId = rs.getInt(2);
-                users.add(new PushUser(currentUserId, currentContextId));
+                userSet.add(new PushUser(rs.getInt(2), rs.getInt(1)));
             } while (rs.next());
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -311,20 +363,7 @@ public class PushDbUtils {
 
     private static boolean insertPushRegistration(int userId, int contextId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=? AND client=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, clientId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return false;
-            }
-
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-
             stmt = con.prepareStatement("INSERT INTO registeredPush (cid,user,client) VALUES (?,?,?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -333,14 +372,17 @@ public class PushDbUtils {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                return false;
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -354,7 +396,10 @@ public class PushDbUtils {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                return false;
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());

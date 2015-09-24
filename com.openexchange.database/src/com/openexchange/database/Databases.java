@@ -71,8 +71,9 @@ import java.util.regex.Pattern;
  */
 public final class Databases {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
 
+    /** The default limit for SQL-IN expressions */
     public static final int IN_LIMIT = 1000;
 
     private Databases() {
@@ -80,16 +81,42 @@ public final class Databases {
     }
 
     /**
-     * Closes the ResultSet.
+     * Closes the {@link ResultSet} instances.
      *
-     * @param result <code>null</code> or a ResultSet to close.
+     * @param results The instances to close.
      */
-    public static void closeSQLStuff(final ResultSet result) {
+    public static void closeSQLStuff(ResultSet... results) {
+        if (results != null) {
+            for (ResultSet result : results) {
+                closeSQLStuff(result);
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link ResultSet} instance.
+     *
+     * @param result <code>null</code> or a {@link ResultSet} to close.
+     */
+    public static void closeSQLStuff(ResultSet result) {
         if (result != null) {
             try {
                 result.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link Statement} instances.
+     *
+     * @param stmts The statements to close.
+     */
+    public static void closeSQLStuff(Statement... stmts) {
+        if (null != stmts) {
+            for (Statement stmt : stmts) {
+                closeSQLStuff(stmt);
             }
         }
     }
@@ -99,11 +126,11 @@ public final class Databases {
      *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
-    public static void closeSQLStuff(final Statement stmt) {
+    public static void closeSQLStuff(Statement stmt) {
         if (null != stmt) {
             try {
                 stmt.close();
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 LOG.error("", e);
             }
         }
@@ -115,22 +142,35 @@ public final class Databases {
      * @param result <code>null</code> or a ResultSet to close.
      * @param stmt <code>null</code> or a Statement to close.
      */
-    public static void closeSQLStuff(final ResultSet result, final Statement stmt) {
+    public static void closeSQLStuff(ResultSet result, Statement stmt) {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
     }
 
-    public static String getStatement(final Statement stmt) {
+    /**
+     * Gets the <code>toString()</code> representation for given <code>Statement</code> instance.
+     *
+     * @param stmt The statement
+     * @return The <code>toString()</code> representation or an empty string if <code>null</code>
+     */
+    public static String getStatement(Statement stmt) {
         return stmt == null ? "" : stmt.toString();
     }
 
-    public static String getStatement(final PreparedStatement stmt, final String query) {
+    /**
+     * Gets the SQL statement from given <code>PreparedStatement</code> instance.
+     *
+     * @param stmt The <code>PreparedStatement</code> instance
+     * @param query The optional query to return
+     * @return The SQL statement
+     */
+    public static String getStatement(PreparedStatement stmt, String query) {
         if (stmt == null) {
             return query;
         }
         try {
             return stmt.toString();
-        } catch (final Exception x) {
+        } catch (Exception x) {
             return query;
         }
     }
@@ -161,7 +201,7 @@ public final class Databases {
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
      */
-    public static void startTransaction(final Connection con) throws SQLException {
+    public static void startTransaction(Connection con) throws SQLException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -177,7 +217,7 @@ public final class Databases {
      *
      * @param con connection to roll back.
      */
-    public static void rollback(final Connection con) {
+    public static void rollback(Connection con) {
         if (null == con) {
             return;
         }
@@ -185,7 +225,7 @@ public final class Databases {
             if (!con.isClosed()) {
                 con.rollback();
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -195,7 +235,7 @@ public final class Databases {
      *
      * @param con connection that should go into autocommit mode.
      */
-    public static void autocommit(final Connection con) {
+    public static void autocommit(Connection con) {
         if (null == con) {
             return;
         }
@@ -203,7 +243,7 @@ public final class Databases {
             if (!con.isClosed()) {
                 con.setAutoCommit(true);
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
         }
     }
@@ -218,9 +258,9 @@ public final class Databases {
      * @param e DataTruncation exception to parse.
      * @return a string array containing all truncated field from the exception.
      */
-    public static String[] parseTruncatedFields(final DataTruncation trunc) {
-        final Matcher matcher = PAT_TRUNCATED_IDS.matcher(trunc.getMessage());
-        final List<String> retval = new ArrayList<String>();
+    public static String[] parseTruncatedFields(DataTruncation trunc) {
+        Matcher matcher = PAT_TRUNCATED_IDS.matcher(trunc.getMessage());
+        List<String> retval = new ArrayList<String>();
         if (matcher.find()) {
             for (int i = 2; i < matcher.groupCount(); i++) {
                 retval.add(matcher.group(i));
@@ -236,8 +276,8 @@ public final class Databases {
      * @param length number of entries.
      * @return the ready to use SQL statement.
      */
-    public static String getIN(final String sql, final int length) {
-        final StringBuilder retval = new StringBuilder(sql);
+    public static String getIN(String sql, int length) {
+        StringBuilder retval = new StringBuilder(sql);
         for (int i = 0; i < length; i++) {
             retval.append("?,");
         }
@@ -255,9 +295,9 @@ public final class Databases {
      * @return the size or <code>-1</code> if the column is not found.
      * @throws SQLException if some exception occurs reading from database.
      */
-    public static int getColumnSize(final Connection con, final String table, final String column) throws SQLException {
-        final DatabaseMetaData metas = con.getMetaData();
-        final ResultSet result = metas.getColumns(null, null, table, column);
+    public static int getColumnSize(Connection con, String table, String column) throws SQLException {
+        DatabaseMetaData metas = con.getMetaData();
+        ResultSet result = metas.getColumns(null, null, table, column);
         int retval = -1;
         if (result.next()) {
             retval = result.getInt("COLUMN_SIZE");
@@ -272,9 +312,9 @@ public final class Databases {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static Set<String> existingTables(final Connection con, final String... tablesToCheck) throws SQLException {
-        final Set<String> tables = new HashSet<String>();
-        for (final String table : tablesToCheck) {
+    public static Set<String> existingTables(Connection con, String... tablesToCheck) throws SQLException {
+        Set<String> tables = new HashSet<String>();
+        for (String table : tablesToCheck) {
             if(tableExists(con, table)) {
                 tables.add(table);
             }
@@ -289,8 +329,8 @@ public final class Databases {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static boolean tablesExist(final Connection con, final String... tablesToCheck) throws SQLException {
-        for (final String table : tablesToCheck) {
+    public static boolean tablesExist(Connection con, String... tablesToCheck) throws SQLException {
+        for (String table : tablesToCheck) {
             if(!tableExists(con, table)) {
                 return false;
             }
@@ -305,8 +345,8 @@ public final class Databases {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
+    public static boolean tableExists(Connection con, String table) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
         boolean retval = false;
         try {
@@ -316,6 +356,49 @@ public final class Databases {
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a PRIMARY KEY conflict.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @return <code>true</code> if given {@link SQLException} instance denotes a PRIMARY KEY conflict; otherwise <code>false</code>
+     */
+    public static boolean isPrimaryKeyConflictInMySQL(SQLException e) {
+        return isKeyConflictInMySQL(e, "PRIMARY");
+    }
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a conflict caused by the specified key.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @param keyName The name of the key causing the integrity constraint violation
+     * @return <code>true</code> if given {@link SQLException} instance denotes a conflict caused by the specified ke; otherwise <code>false</code>
+     */
+    public static boolean isKeyConflictInMySQL(SQLException e, String keyName) {
+        if (null == e || null == keyName) {
+            return false;
+        }
+
+        /*
+         * SQLState 23000: Integrity Constraint Violation
+         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
+         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
+         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'some-data' for key 'key-name'
+         * Message: Duplicate entry '%s' for key '%s'
+         */
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            if (1062 == errorCode || 1586 == errorCode) {
+                Matcher matcher = DUPLICATE_KEY.matcher(e.getMessage());
+                if (matcher.matches() && keyName.equals(matcher.group(2))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
