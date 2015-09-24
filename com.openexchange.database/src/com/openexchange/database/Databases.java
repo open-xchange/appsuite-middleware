@@ -55,6 +55,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -226,6 +227,7 @@ public final class Databases {
     /**
      * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
      * statement to ensure isolation levels for the current connection.
+     *
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
      */
@@ -335,6 +337,7 @@ public final class Databases {
 
     /**
      * Filters a given list of tablenames. Returns only those that also exist
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -343,7 +346,7 @@ public final class Databases {
     public static Set<String> existingTables(Connection con, String... tablesToCheck) throws SQLException {
         Set<String> tables = new HashSet<String>();
         for (String table : tablesToCheck) {
-            if(tableExists(con, table)) {
+            if (tableExists(con, table)) {
                 tables.add(table);
             }
         }
@@ -352,6 +355,7 @@ public final class Databases {
 
     /**
      * Finds out whether all tables listed exist in the given database
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -359,7 +363,7 @@ public final class Databases {
      */
     public static boolean tablesExist(Connection con, String... tablesToCheck) throws SQLException {
         for (String table : tablesToCheck) {
-            if(!tableExists(con, table)) {
+            if (!tableExists(con, table)) {
                 return false;
             }
         }
@@ -368,6 +372,7 @@ public final class Databases {
 
     /**
      * Finds out whether a table listed exist in the given database
+     *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -427,6 +432,32 @@ public final class Databases {
             }
         }
         return false;
+    }
+
+    public static void close(Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.close();
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public static void rollback(Connection con, Savepoint savePoint) {
+        if (null == con || null == savePoint) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.rollback(savePoint);
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
 }
