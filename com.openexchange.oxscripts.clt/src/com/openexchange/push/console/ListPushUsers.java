@@ -49,12 +49,14 @@
 
 package com.openexchange.push.console;
 
+import java.util.List;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.cli.OutputHelper;
 import com.openexchange.push.mbean.PushMBean;
 
 
@@ -79,7 +81,7 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        // Nothing
+        authenticator.doAuthentication(login, password);
     }
 
     @Override
@@ -91,8 +93,11 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
         PushMBean pushMBean = getMBean(mbsc, PushMBean.class, com.openexchange.push.mbean.PushMBean.DOMAIN);
 
-        for (String infoLine : pushMBean.listPushUsers()) {
-            System.out.println(infoLine);
+        List<List<String>> data = pushMBean.listPushUsers();
+        if (null == data || data.isEmpty()) {
+            System.out.println("No running push users on this node.");
+        } else {
+            OutputHelper.doOutput(new String[] { "r", "l", "l" }, new String[] { "Context", "User", "Permanent" }, data);
         }
 
         return null;
@@ -105,7 +110,7 @@ public class ListPushUsers extends AbstractMBeanCLI<Void> {
 
     @Override
     protected boolean requiresAdministrativePermission() {
-        return false;
+        return true;
     }
 
     @Override

@@ -1,3 +1,7 @@
+* 2015-08-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 40769: Added transitional package open-xchange-mobile-push-restricted to ensure upgrade path to package open-xchange-module-push-certificates which is versioned with 1.0.0.
+
 * 2015-08-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 40235: Avoid possible OOM when reading an IMAP server's capabilities
