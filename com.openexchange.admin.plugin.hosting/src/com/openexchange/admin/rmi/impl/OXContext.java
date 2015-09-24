@@ -194,9 +194,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
-
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -207,6 +204,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -277,9 +276,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
-
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -290,6 +286,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
