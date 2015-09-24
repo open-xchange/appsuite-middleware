@@ -59,6 +59,7 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
@@ -162,7 +163,15 @@ public class OAuthMailNotificationService {
     }
 
     private String getSettingsUrl(HttpServletRequest request) throws OXException, URISyntaxException {
-        String uiWebPath = Services.requireService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite/");
+        String clientID = Services.requireService(ConfigurationService.class).getProperty(Property.HTTP_AUTH_CLIENT.getPropertyName(), Property.HTTP_AUTH_CLIENT.getDefaultValue());
+        com.openexchange.ajax.Client client = com.openexchange.ajax.Client.getClientByID(clientID);
+        String uiWebPath;
+        if (client != null) {
+            uiWebPath = client.getUIWebPath();
+        }
+        else {
+            uiWebPath = "/appsuite";
+        }
         URI settingsURI = new URIBuilder()
             .setScheme("https")
             .setHost(URLHelper.getHostname(request))

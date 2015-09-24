@@ -182,7 +182,7 @@ public class JumpAction extends AbstractDriveAction {
 
     private String getClient() throws OXException {
         ConfigurationService configService = getConfigService();
-        return configService.getProperty(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName(), ConfigurationProperty.HTTP_AUTH_CLIENT.getDefaultValue());
+        return configService.getProperty(Property.HTTP_AUTH_CLIENT.getPropertyName(), Property.HTTP_AUTH_CLIENT.getDefaultValue());
     }
 
     private boolean forceHTTPS() throws OXException {

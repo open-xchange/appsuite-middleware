@@ -68,15 +68,6 @@ public enum ConfigurationProperty implements InitProperty {
     HTTP_AUTH_AUTOLOGIN("com.openexchange.ajax.login.http-auth.autologin", Boolean.FALSE.toString()),
 
     /**
-     * Every client tells the backend through the client parameter on the login request his identy. This is not possible when using the HTTP
-     * Authorization Header based login. So the client identifier for that request is defined here. It must be the same identifier that the
-     * web frontend uses, if you set com.openexchange.cookie.hash to calculate and want the previously configured autologin to work.
-     * <p>
-     * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
-     */
-    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "open-xchange-appsuite"),
-
-    /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version
      * because a different version can be used to distinguish logins through HTTP Authorization Header and normal login request.
      */

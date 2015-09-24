@@ -49,6 +49,10 @@
 
 package com.openexchange.ajax;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.tools.images.osgi.Services;
+
 /**
  * {@link Client} - An enumeration for known clients accessing the AJAX HTTP-API.
  *
@@ -60,67 +64,70 @@ public enum Client {
     /**
      * The client for OX6 UI: <code>"com.openexchange.ox.gui.dhtml"</code>
      */
-    OX6_UI("com.openexchange.ox.gui.dhtml"),
+    OX6_UI("com.openexchange.ox.gui.dhtml", "/ox6/index.html"),
     /**
      * The client for App Suite UI: <code>"open-xchange-appsuite"</code>
      */
-    APPSUITE_UI("open-xchange-appsuite"),
+    APPSUITE_UI("open-xchange-appsuite", "/appsuite/"),
     /**
      * The client for Mobile Mail App: <code>"open-xchange-mailapp"</code>
      */
-    MOBILE_APP("open-xchange-mailapp"),
+    MOBILE_APP("open-xchange-mailapp", null),
     /**
      * The client for USM/EAS: <code>"USM-EAS"</code>
      */
-    USM_EAS("USM-EAS"),
+    USM_EAS("USM-EAS", null),
     /**
      * The client for USM/JSON (OLOX): <code>"USM-JSON"</code>
      */
-    USM_JSON("USM-JSON"),
+    USM_JSON("USM-JSON", null),
     /**
      * The client for Outlook OXtender2 AddIn: <code>"OpenXchange.HTTPClient.OXAddIn"</code>
      */
-    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn"),
+    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn", null),
     /**
      * The client for OX Notifier: <code>"OpenXchange.HTTPClient.OXNotifier"</code>
      */
-    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier"),
+    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier", null),
     /**
      * The client for Outlook Update 1: <code>"com.open-xchange.updater.olox1"</code>
      */
-    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1"),
+    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1", null),
     /**
      * The client for Outlook Update 2: <code>"com.open-xchange.updater.olox2"</code>
      */
-    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2"),
+    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2", null),
     /**
      * The client for CardDAV: <code>"CARDDAV"</code>
      */
-    CARDDAV("CARDDAV"),
+    CARDDAV("CARDDAV", null),
     /**
      * The client for CalDAV: <code>"CALDAV"</code>
      */
-    CALDAV("CALDAV"),
+    CALDAV("CALDAV", null),
     /**
      * The client for WebDAV iCal: <code>"WEBDAV_ICAL"</code>
      */
-    WEBDAV_ICAL("WEBDAV_ICAL"),
+    WEBDAV_ICAL("WEBDAV_ICAL", null),
     /**
      * The client for WebDav InfoStore: <code>"WEBDAV_INFOSTORE"</code>
      */
-    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE"),
+    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE", null),
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD");
+    WEBDAV_VCARD("WEBDAV_VCARD", null);
 
     private final String clientId;
+    private final String uiWebPath;
+    private final String DEFAULT_UIWebPath = "client-defined";
 
     /**
      * Initializes a new {@link Client}.
      */
-    private Client(String clientId) {
+    private Client(String clientId, String uiWebPath) {
         this.clientId = clientId;
+        this.uiWebPath = uiWebPath;
     }
 
     /**
@@ -132,9 +139,48 @@ public enum Client {
         return clientId;
     }
 
+    /**
+     * Gets the UIWebPath for this client.
+     * 
+     * @return the UIWebPath
+     */
+    public String getUIWebPath() {
+        ConfigurationService confService = Services.getService(ConfigurationService.class);
+        if (confService == null)
+        {
+            return uiWebPath;
+        }
+        String prop = confService.getProperty(Property.UI_WEB_PATH.getPropertyName());
+        if (prop.contentEquals(DEFAULT_UIWebPath)) {
+            return uiWebPath;
+        }
+        else
+        {
+            return prop;
+        }
+    }
+
     @Override
     public String toString() {
         return getClientId();
+    }
+
+    /**
+     * Gets the Client with the given clientID
+     * 
+     * @param clientID
+     * @return the Client
+     */
+    public static Client getClientByID(String clientID) {
+        Client[] clients = Client.values();
+        for (Client clt : clients)
+        {
+            if (clt.clientId.contentEquals(clientID))
+            {
+                return clt;
+            }
+        }
+        return null;
     }
 
 }

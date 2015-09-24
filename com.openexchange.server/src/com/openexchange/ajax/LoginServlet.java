@@ -628,11 +628,19 @@ public class LoginServlet extends AJAXServlet {
     @Override
     public void init(final ServletConfig config) throws ServletException {
         super.init(config);
-        final String uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
+
+        final String defaultClient = config.getInitParameter(Property.HTTP_AUTH_CLIENT.getPropertyName());
+        Client client = Client.getClientByID(defaultClient);
+        String uiWebPath;
+        if (client != null) {
+            uiWebPath = client.getUIWebPath();
+        }
+        else {
+            uiWebPath = "/appsuite/";
+        }
         final boolean sessiondAutoLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName()));
         final CookieHashSource hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
         final String httpAuthAutoLogin = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_AUTOLOGIN.getPropertyName());
-        final String defaultClient = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_CLIENT.getPropertyName());
         final String clientVersion = config.getInitParameter(ConfigurationProperty.HTTP_AUTH_VERSION.getPropertyName());
         final String templateFileLocation = config.getInitParameter(ConfigurationProperty.ERROR_PAGE_TEMPLATE.getPropertyName());
         String errorPageTemplate;
