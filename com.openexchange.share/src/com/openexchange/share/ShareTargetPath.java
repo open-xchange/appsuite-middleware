@@ -133,7 +133,7 @@ public class ShareTargetPath {
         sb.append(module).append('/');
         sb.append(encodeFolder(version, folder));
         if (item != null) {
-            sb.append('/').append(encodeItem(version, item)).append('/');
+            sb.append('/').append(encodeItem(version, item));
         }
         return sb.toString();
     }
