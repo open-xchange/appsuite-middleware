@@ -49,7 +49,6 @@
 
 package com.openexchange.database;
 
-import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -113,7 +112,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
             // e.printStackTrace();
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -146,7 +145,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
             rs = metaData.getTables(null, null, table, new String[] { TABLE });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }
@@ -159,7 +158,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
             rs = metaData.getProcedures(null, null, procedure);
             retval = (rs.next() && rs.getString("PROCEDURE_NAME").equalsIgnoreCase(procedure));
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }

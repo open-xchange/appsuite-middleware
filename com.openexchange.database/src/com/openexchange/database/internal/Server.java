@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

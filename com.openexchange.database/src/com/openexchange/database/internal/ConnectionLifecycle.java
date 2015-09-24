@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
@@ -63,6 +62,7 @@ import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
@@ -111,7 +111,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         } catch (final SQLException e) {
             retval = false;
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return retval;
     }
@@ -147,7 +147,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public void destroy(final Connection obj) {
-        DBUtils.close(obj);
+        Databases.close(obj);
     }
 
     private static void addTrace(final OXException dbe,

@@ -323,7 +323,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             try {
                 pools.getPool(poolId).back(con);
             } catch (final PoolingException e1) {
-                DBUtils.close(con);
+                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
@@ -347,7 +347,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             try {
                 pools.getPool(poolId).back(con);
             } catch (final PoolingException e1) {
-                DBUtils.close(con);
+                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
@@ -420,7 +420,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).back(con);
         } catch (final PoolingException e) {
-            DBUtils.close(con);
+            Databases.close(con);
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error("", e2);
         } catch (final OXException e) {
@@ -502,7 +502,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             if (rollback) {
                 Databases.rollback(con);
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (con != null) {
                 Databases.autocommit(con);
                 back(writePoolId, con);

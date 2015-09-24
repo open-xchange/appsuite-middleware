@@ -49,9 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.autocommit;
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
-import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
@@ -62,6 +59,7 @@ import java.sql.Savepoint;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
@@ -282,7 +280,7 @@ public class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
-                DBUtils.close(con);
+                Databases.close(con);
                 final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
                 LOG.error("", e1);
             }
@@ -305,7 +303,7 @@ public class ReplicationMonitor {
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return retval;
     }
@@ -331,7 +329,7 @@ public class ReplicationMonitor {
                 LOG.error("Updating transaction for replication monitor failed for context {}.", I(contextId));
             }
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -344,7 +342,7 @@ public class ReplicationMonitor {
         } catch (SQLException e) {
             if (1213 != e.getErrorCode()) {
                 // In case of a transaction deadlock MySQL already rolled the transaction back. Then the savepoint does not exist anymore.
-                rollback(con, save);
+                Databases.rollback(con, save);
             }
             throw e;
         }
@@ -356,7 +354,7 @@ public class ReplicationMonitor {
             increaseCounter(assign, con);
             con.commit();
         } catch (SQLException e) {
-            rollback(con);
+            Databases.rollback(con);
             if (1146 == e.getErrorCode()) {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
                     lastLogged = System.currentTimeMillis();
@@ -368,7 +366,7 @@ public class ReplicationMonitor {
                 LOG.error("", e1);
             }
         } finally {
-            autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

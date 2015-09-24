@@ -52,6 +52,7 @@ package com.openexchange.database.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
@@ -113,7 +114,7 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
                 try {
                     pool.back(retval);
                 } catch (PoolingException e1) {
-                    DBUtils.close(retval);
+                    Databases.close(retval);
                     LOG.error(e1.getMessage(), e1);
                 }
                 throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
