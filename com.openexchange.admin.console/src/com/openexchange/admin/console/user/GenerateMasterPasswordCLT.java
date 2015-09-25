@@ -138,7 +138,7 @@ public class GenerateMasterPasswordCLT {
                 Console console = System.console();
                 char[] passwd;
                 if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
-                    clearPassword = Arrays.toString(passwd);
+                    clearPassword = new String(passwd);
                 } else {
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     clearPassword = bufferRead.readLine();
