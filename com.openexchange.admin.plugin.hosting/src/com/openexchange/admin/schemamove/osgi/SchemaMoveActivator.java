@@ -54,6 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.schemamove.SchemaMoveService;
 import com.openexchange.admin.schemamove.internal.SchemaMoveImpl;
 import com.openexchange.admin.schemamove.internal.SchemaMoveRemoteImpl;
@@ -78,7 +79,7 @@ public class SchemaMoveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ConfigurationService.class };
+        return new Class[]{ ConfigurationService.class, AdminDaemonService.class };
     }
 
     @Override
