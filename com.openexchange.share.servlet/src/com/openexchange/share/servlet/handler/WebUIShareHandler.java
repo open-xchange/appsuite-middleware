@@ -106,7 +106,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                     return redirectToLoginPage(shareRequest, request, response);
                 }
 
-                ShareLoginMethod shareLoginMethod = getShareLoginMethod(guest);
+                ShareLoginMethod shareLoginMethod = getShareLoginMethod(shareRequest);
                 if (ShareServletUtils.createSessionAndRedirect(guest, shareRequest.getTarget(), request, response, shareLoginMethod)) {
                     return ShareHandlerReply.ACCEPT;
                 }

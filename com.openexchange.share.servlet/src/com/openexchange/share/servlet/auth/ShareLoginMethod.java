@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.GuestAuthenticated;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -128,17 +129,20 @@ public class ShareLoginMethod implements LoginMethodClosure {
 
     private final Context context;
     private final User user;
+    private final SessionEnhancement enhancement;
 
     /**
      * Initializes a new {@link ShareLoginMethod}.
      *
      * @param context The context
      * @param user The user
+     * @param enhancement The session enhancement, or <code>null</code> if not applicable
      */
-    public ShareLoginMethod(Context context, User user) {
+    public ShareLoginMethod(Context context, User user, SessionEnhancement enhancement) {
         super();
         this.context = context;
         this.user = user;
+        this.enhancement = enhancement;
     }
 
     @Override
@@ -152,7 +156,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
                 /*
                  * ... without password
                  */
-                authenticated = new ShareAuthenticated(user, context);
+                authenticated = new ShareAuthenticated(user, context, enhancement);
             } else {
                 /*
                  * ... with password
@@ -164,7 +168,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
                 /*
                  * ... without password
                  */
-                authenticated = new ShareAuthenticated(user, context);
+                authenticated = new ShareAuthenticated(user, context, enhancement);
             } else {
                 /*
                  * ... with password
@@ -217,7 +221,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         }
 
         // Successfully authenticated
-        return new ShareAuthenticated(user, context);
+        return new ShareAuthenticated(user, context, enhancement);
     }
 
     /**

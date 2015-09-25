@@ -123,19 +123,24 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         private final ShareTarget target;
         private final LoginConfiguration conf;
         private final HttpServletRequest httpRequest;
+        private final ShareTargetPath targetPath;
 
         /**
          * Initializes a new {@link ShareLoginClosure}.
+         *
          * @param guest
          * @param target
+         * @param targetPath The share target path
          * @param conf
          * @param httpRequest
+         * @param enhancement The session enhancement, or <code>null</code> if not applicable
          */
-        private ShareLoginClosure(GuestInfo guest, ShareTarget target, LoginConfiguration conf, HttpServletRequest httpRequest) {
+        private ShareLoginClosure(GuestInfo guest, ShareTarget target, ShareTargetPath targetPath, LoginConfiguration conf, HttpServletRequest httpRequest) {
             this.guest = guest;
             this.target = target;
             this.conf = conf;
             this.httpRequest = httpRequest;
+            this.targetPath = targetPath;
         }
 
         @Override
@@ -205,7 +210,20 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                         boolean tranzient = null == service || service.getBoolProperty("com.openexchange.share.transientSessions", true);
                         request.setTransient(tranzient);
                     }
-                    session = sessiondService.addSession(new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context));
+                    AddSessionParameterImpl sessionToAdd = new AddSessionParameterImpl(loginInfo.getUsername(), request, user, context);
+                    final Map<String, String> additionals = null != targetPath ? targetPath.getAdditionals() : null;
+                    if (null != additionals && 0 < additionals.size()) {
+                        sessionToAdd.setEnhancement(new SessionEnhancement() {
+
+                            @Override
+                            public void enhanceSession(Session session) {
+                                for (Map.Entry<String, String> entry : additionals.entrySet()) {
+                                    session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                                }
+                            }
+                        });
+                    }
+                    session = sessiondService.addSession(sessionToAdd);
                     if (null == session) {
                         // Session could not be created
                         throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -334,12 +352,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
             if (otherTargets.isEmpty()) {
                 throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
             }
-
             target = otherTargets.get(0).getTarget();
         }
 
         final LoginConfiguration conf = this.conf.getLoginConfig(guest);
-        LoginClosure loginClosure = new ShareLoginClosure(guest, target, conf, httpRequest);
+        LoginClosure loginClosure = new ShareLoginClosure(guest, target, targetPath, conf, httpRequest);
         LoginCookiesSetter cookiesSetter = new LoginCookiesSetter() {
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {

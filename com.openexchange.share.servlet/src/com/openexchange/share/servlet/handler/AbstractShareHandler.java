@@ -49,11 +49,13 @@
 
 package com.openexchange.share.servlet.handler;
 
+import java.util.Map;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.GuestInfo;
+import com.openexchange.session.Session;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -73,13 +75,30 @@ public abstract class AbstractShareHandler implements ShareHandler {
         super();
     }
 
-    protected ShareLoginMethod getShareLoginMethod(GuestInfo guestInfo) throws OXException {
+    protected ShareLoginMethod getShareLoginMethod(AccessShareRequest shareRequest) throws OXException {
+        /*
+         * resolve context and guest
+         */
         ContextService contextService = ShareServiceLookup.getService(ContextService.class, true);
         UserService userService = ShareServiceLookup.getService(UserService.class, true);
-        Context context = contextService.getContext(guestInfo.getContextID());
-        User guest = userService.getUser(guestInfo.getGuestID(), context);
-        ShareLoginMethod shareLoginMethod = new ShareLoginMethod(context, guest);
-        return shareLoginMethod;
+        Context context = contextService.getContext(shareRequest.getGuest().getContextID());
+        User guest = userService.getUser(shareRequest.getGuest().getGuestID(), context);
+        /*
+         * add session enhancement as needed
+         */
+        final Map<String, String> additionals = null != shareRequest.getTargetPath() ? shareRequest.getTargetPath().getAdditionals() : null;
+        if (null != additionals && 0 < additionals.size()) {
+            return new ShareLoginMethod(context, guest, new SessionEnhancement() {
+
+                @Override
+                public void enhanceSession(Session session) {
+                    for (Map.Entry<String, String> entry : additionals.entrySet()) {
+                        session.setParameter("com.openexchange.share." + entry.getKey(), entry.getValue());
+                    }
+                }
+            });
+        }
+        return new ShareLoginMethod(context, guest, null);
     }
 
 }

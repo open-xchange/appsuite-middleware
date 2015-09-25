@@ -272,7 +272,7 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
-                return new ShareAuthenticated(user, context);
+                return new ShareAuthenticated(user, context, null);
             }
         };
     }

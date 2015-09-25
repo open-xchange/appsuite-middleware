@@ -49,8 +49,12 @@
 
 package com.openexchange.share;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
@@ -66,22 +70,35 @@ import com.openexchange.java.Strings;
 public class ShareTargetPath {
 
     private final int module;
-
     private final String folder;
-
     private final String item;
+    private Map<String, String> additionals;
 
     /**
      * Initializes a new {@link ShareTargetPath}.
+     *
      * @param module The module ID.
      * @param folder The folder ID. Must be a full-qualified global identifier.
      * @param item The item ID or <code>null</code>, if a folder is addressed. Must be a full-qualified global identifier.
      */
     public ShareTargetPath(int module, String folder, String item) {
+        this(module, folder, item, null);
+    }
+
+    /**
+     * Initializes a new {@link ShareTargetPath}.
+     *
+     * @param module The module ID.
+     * @param folder The folder ID. Must be a full-qualified global identifier.
+     * @param item The item ID or <code>null</code>, if a folder is addressed. Must be a full-qualified global identifier.
+     * @param additionals Additional arbitrary metadata, or <code>null</code> if not set
+     */
+    public ShareTargetPath(int module, String folder, String item, Map<String, String> additionals) {
         super();
         this.module = module;
         this.folder = folder;
         this.item = item;
+        this.additionals = additionals;
     }
 
     /**
@@ -112,6 +129,15 @@ public class ShareTargetPath {
     }
 
     /**
+     * Gets the additional metadata.
+     *
+     * @return The metadata, or <code>null</code> if not set
+     */
+    public Map<String, String> getAdditionals() {
+        return additionals;
+    }
+
+    /**
      * Gets whether this path denotes a folder or item.
      *
      * @return <code>true</code> for a folder
@@ -127,94 +153,149 @@ public class ShareTargetPath {
      * @return The path
      */
     public String get() {
-        StringBuilder sb = new StringBuilder(64).append("/");
-        String version = "1";
-        sb.append(version).append('/');
-        sb.append(module).append('/');
-        sb.append(encodeFolder(version, folder));
-        if (item != null) {
-            sb.append('/').append(encodeItem(version, item)).append('/');
+        int version;
+        List<String> segments;
+        if (null == additionals) {
+            version = 1;
+            segments = encodeV1Segments(this);
+        } else {
+            version = 2;
+            segments = encodeV2Segments(this);
         }
-        return sb.toString();
+        StringBuilder stringBuilder = new StringBuilder(64).append('/').append(version);
+        for (String segment : segments) {
+            stringBuilder.append('/').append(segment);
+        }
+        return stringBuilder.toString();
     }
 
     /**
-     * Parses the path of a share URL. The path must start at the version
-     * segment. Input example: /1/8/NzYxMjE.
+     * Parses the path of a share URL. The path must start at the version segment.
+     * <p/>
+     * Input examples:
+     * <ul>
+     * <li><code>/1/8/NzYxMjE</code></li>
+     * <li><code>/2/m8/fOTU0Mg/iOTU0Mi8zMjExMTA/ac8O2bmRlciUvw7xAXMOqemV-LmljaGVu~Z2VodCBhdWNoIQ.cmVjaXBpZW50~amFuLmZpbnNlbEBwcmVtaXVt.d3Vyc3Q~Z3V0</code></li>
+     * </ul>
      *
      * @param path The path
-     * @return A {@link ShareTargetPath} instance or <code>null</code>, if
-     * the passed input is no valid path.
+     * @return A {@link ShareTargetPath} instance or <code>null</code>, if the passed input is no valid path.
      */
     public static ShareTargetPath parse(String path) {
-        List<String> segments = Strings.splitAndTrim(path, "/");
+        return parse(Strings.splitAndTrim(path, "/"));
+    }
+
+    /**
+     * Parses a list of path segments. The first segment must be the version segment, all further segments are version-specific.
+     *
+     * @param segments The segments
+     * @return A {@link ShareTargetPath} instance or <code>null</code>, if the passed input is no valid path.
+     */
+    public static ShareTargetPath parse(List<String> segments) {
         Iterator<String> iterator = segments.iterator();
+        int version = -1;
         while (iterator.hasNext()) {
-            if (Strings.isEmpty(iterator.next())) {
+            String segment = iterator.next();
+            if (Strings.isEmpty(segment)) {
+                iterator.remove();
+            } else if (-1 == version) {
+                version = Integer.valueOf(segment);
                 iterator.remove();
             }
         }
-        return parse(segments);
-    }
-
-    /**
-     * Parses a list of path segments. The first segment must be the version
-     * segment and the last one the folder or item segment.
-     *
-     * @param segments The segments
-     * @return A {@link ShareTargetPath} instance or <code>null</code>, if
-     * the passed input is no valid path.
-     */
-    public static ShareTargetPath parse(List<String> segments) {
         try {
-            Iterator<String> it = segments.iterator();
-            String version = it.next();
-            int module = Integer.parseInt(it.next());
-            String folder = decodeFolder(version, it.next());
-            String item = null;
-            if (it.hasNext()) {
-                item = decodeItem(version, it.next());
+            switch (version) {
+                case 1:
+                    return decodeV1Segments(segments);
+                case 2:
+                    return decodeV2Segments(segments);
+                default:
+                    throw new IllegalArgumentException("Unknown path version: " + version);
             }
-            if (!it.hasNext()) {
-                return new ShareTargetPath(module, folder, item);
-            }
-        } catch (Exception e) {
-
+        } catch (RuntimeException e) {
+            org.slf4j.LoggerFactory.getLogger(ShareTargetPath.class).debug("Error parsing share target path: {}", e.getMessage(), e);
         }
-
         return null;
     }
 
-    private static String encodeFolder(String version, String folder) {
-        if ("1".equals(version)) {
-            return base64(folder, true);
+    private static List<String> encodeV1Segments(ShareTargetPath path) {
+        List<String> segments = new ArrayList<String>(3);
+        segments.add(String.valueOf(path.getModule()));
+        segments.add(base64(path.getFolder(), true));
+        if (null != path.getItem()) {
+            segments.add(base64(path.getItem(), true));
         }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
+        return segments;
     }
 
-    private static String decodeFolder(String version, String folder) {
-        if ("1".equals(version)) {
-            return base64(folder, false);
+    private static ShareTargetPath decodeV1Segments(List<String> segments) {
+        if (null == segments || 2 != segments.size() && 3 != segments.size()) {
+            throw new IllegalArgumentException("Unexpected number of path segments");
         }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
+        int module = Integer.parseInt(segments.get(0));
+        String folder = base64(segments.get(1), false);
+        String item = 3 == segments.size() ? base64(segments.get(2), false) : null;
+        return new ShareTargetPath(module, folder, item);
     }
 
-    private static String encodeItem(String version, String item) {
-        if ("1".equals(version)) {
-            return base64(item, true);
+    private static List<String> encodeV2Segments(ShareTargetPath path) {
+        List<String> segments = new ArrayList<String>(4);
+        segments.add('m' + String.valueOf(path.getModule()));
+        segments.add('f' + base64(path.getFolder(), true));
+        if (null != path.getItem()) {
+            segments.add('i' + base64(path.getItem(), true));
         }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
+        if (null != path.getAdditionals() && 0 < path.getAdditionals().size()) {
+            StringBuilder stringBuilder = new StringBuilder(64).append('a');
+            ArrayList<Entry<String, String>> entries = new ArrayList<Entry<String, String>>(path.getAdditionals().entrySet());
+            stringBuilder.append(base64(entries.get(0).getKey(), true)).append('~').append(base64(entries.get(0).getValue(), true));
+            for (int i = 1; i < entries.size(); i++) {
+                stringBuilder.append('.').append(base64(entries.get(i).getKey(), true)).append('~').append(base64(entries.get(i).getValue(), true));
+            }
+            segments.add(stringBuilder.toString());
+        }
+        return segments;
     }
 
-    private static String decodeItem(String version, String item) {
-        if ("1".equals(version)) {
-            return base64(item, false);
+    private static ShareTargetPath decodeV2Segments(List<String> segments) {
+        if (null == segments || 2 > segments.size()) {
+            throw new IllegalArgumentException("Unexpected number of path segments");
         }
-
-        throw new IllegalArgumentException("Unknown encoding version: " + version);
+        int module = -1;
+        String folder = null;
+        String item = null;
+        Map<String, String> meta = null;
+        for (String segment : segments) {
+            if (null == segment || 2 > segment.length()) {
+                throw new IllegalArgumentException("Unexpected segment length");
+            }
+            String value = segment.substring(1);
+            switch (segment.charAt(0)) {
+                case 'm':
+                    module = Integer.valueOf(value);
+                    break;
+                case 'f':
+                    folder = base64(value, false);
+                    break;
+                case 'i':
+                    item = base64(value, false);
+                    break;
+                case 'a':
+                    String[] entries = Strings.splitByDots(value);
+                    meta = new HashMap<String, String>(entries.length);
+                    for (String entry : Strings.splitByDots(value)) {
+                        int index = entry.indexOf('~');
+                        meta.put(base64(entry.substring(0, index), false), base64(entry.substring(index + 1), false));
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected path segment: " + segment);
+            }
+        }
+        if (-1 == module || null == folder) {
+            throw new IllegalArgumentException("Incomplete share target path");
+        }
+        return new ShareTargetPath(module, folder, item, meta);
     }
 
     private static String base64(String input, boolean encode) {
