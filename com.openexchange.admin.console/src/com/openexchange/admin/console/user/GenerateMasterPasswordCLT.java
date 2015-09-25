@@ -50,15 +50,19 @@
 package com.openexchange.admin.console.user;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -69,6 +73,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMech;
@@ -140,6 +145,10 @@ public class GenerateMasterPasswordCLT {
                 if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
                     clearPassword = Arrays.toString(passwd);
                 } else {
+                    BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out));
+                    bufferWrite.write(builder.toString());
+                    bufferWrite.flush();
+
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     clearPassword = bufferRead.readLine();
                 }
@@ -179,35 +188,40 @@ public class GenerateMasterPasswordCLT {
      * @throws FileNotFoundException
      */
     private static void invoke(Map<Parameter, String> parameters) throws IOException {
-        StringBuilder builder = new StringBuilder();
-        String mpasswdFilename = parameters.get(Parameter.mpasswdfile);
-        File file = new File(mpasswdFilename);
-
+        File file = new File(parameters.get(Parameter.mpasswdfile));
         if (!file.exists()) {
             file.createNewFile();
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
+        BufferedReader br = null;
+        PrintWriter writer = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+
+            List<String> lines = new LinkedList<String>();
             boolean updated = false;
-            while ((line = br.readLine()) != null) {
+            for (String line; (line = br.readLine()) != null;) {
                 if (!line.startsWith("#") && !Strings.isEmpty(line)) {
-                    builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
+                    lines.add(new StringBuilder(96).append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).toString());
                     updated = true;
                 } else {
-                    builder.append(line).append("\n");
+                    lines.add(line);
                 }
             }
 
             if (!updated) {
-                builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
+                lines.add(new StringBuilder(96).append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).toString());
             }
 
-            PrintWriter writer = new PrintWriter(file);
-            writer.println(builder.toString());
-            writer.close();
+            writer = new PrintWriter(file);
+            for (String line : lines) {
+                writer.println(line);
+            }
+            writer.flush();
         } catch (FileNotFoundException e) {
             throw e;
+        } finally {
+            Streams.close(br, writer);
         }
     }
 
