@@ -49,10 +49,6 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.tools.images.osgi.Services;
-
 /**
  * {@link Client} - An enumeration for known clients accessing the AJAX HTTP-API.
  *
@@ -145,17 +141,11 @@ public enum Client {
      * @return the UIWebPath
      */
     public String getUIWebPath() {
-        ConfigurationService confService = Services.getService(ConfigurationService.class);
-        if (confService == null)
-        {
-            return uiWebPath;
-        }
-        String prop = confService.getProperty(Property.UI_WEB_PATH.getPropertyName());
+        String prop = ClientUtil.getUIWebPathProperty();
         if (prop.contentEquals(DEFAULT_UIWebPath)) {
             return uiWebPath;
         }
-        else
-        {
+        else {
             return prop;
         }
     }
@@ -182,5 +172,4 @@ public enum Client {
         }
         return null;
     }
-
 }
