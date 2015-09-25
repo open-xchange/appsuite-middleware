@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -143,7 +142,7 @@ public class GenerateMasterPasswordCLT {
                 Console console = System.console();
                 char[] passwd;
                 if (console != null && (passwd = console.readPassword("[%s]", builder.toString())) != null) {
-                    clearPassword = Arrays.toString(passwd);
+                    clearPassword = new String(passwd);
                 } else {
                     BufferedWriter bufferWrite = new BufferedWriter(new OutputStreamWriter(System.out));
                     bufferWrite.write(builder.toString());
