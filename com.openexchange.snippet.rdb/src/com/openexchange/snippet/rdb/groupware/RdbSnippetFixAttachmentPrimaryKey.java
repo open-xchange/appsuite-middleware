@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,75 @@
  *
  */
 
-package com.openexchange.snippet.rdb;
+package com.openexchange.snippet.rdb.groupware;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.SnippetService;
-
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.snippet.rdb.Services;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link RdbSnippetService}
+ * {@link RdbSnippetFixAttachmentPrimaryKey}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetService implements SnippetService {
-
-    private final ServiceLookup services;
+public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link RdbSnippetService}.
+     * Initializes a new {@link RdbSnippetFixAttachmentPrimaryKey}.
      */
-    public RdbSnippetService(ServiceLookup services) {
+    public RdbSnippetFixAttachmentPrimaryKey() {
         super();
-        this.services = services;
+    }
+
+    private <S> S getService(final Class<? extends S> clazz) throws OXException {
+        try {
+            return Services.getService(clazz);
+        } catch (final RuntimeException e) {
+            throw new OXException(e);
+        }
     }
 
     @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
-        return new RdbSnippetManagement(session, services);
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        DatabaseService dbService = getService(DatabaseService.class);
+        Connection con = dbService.getForUpdateTask(cid);
+        boolean rollback = false;
+        try {
+            if (Tools.existsPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" })) {
+                return;
+            }
+
+            Databases.startTransaction(con);
+            rollback = true;
+            Tools.dropPrimaryKey(con, "snippetAttachment");
+            Tools.createPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" }, new int[] { 0, 0, 0, 64 });
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+            dbService.backForUpdateTask(cid, con);
+        }
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return null;
+    public String[] getDependencies() {
+        return new String[] { RdbSnippetCreateTableTask.class.getName() };
     }
 
 }

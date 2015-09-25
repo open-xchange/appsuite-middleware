@@ -57,15 +57,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.rdb.RdbSnippetManagement;
-import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -82,83 +79,81 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
         super();
     }
 
+    private TIntList getIds(int userId, int contextId, Connection writeCon) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (userId > 0) {
+                stmt = writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.GENCONF.getType());
+                stmt.setInt(2, userId);
+            } else {
+                stmt = writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND refType=" + ReferenceType.GENCONF.getType());
+            }
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+
+            TIntList ids = new TIntArrayList(4);
+            while (rs.next()) {
+                ids.add(Integer.parseInt(rs.getString(1)));
+            }
+            return ids;
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws com.openexchange.exception.OXException {
-        if (DeleteEvent.TYPE_USER != event.getType()) {
+        if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            try {
+                int contextId = event.getContext().getContextId();
+                RdbSnippetManagement.deleteForContext(contextId, writeCon);
+            } catch (final RuntimeException e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            }
             return;
         }
-        /*
-         * Writable connection
-         */
-        final int contextId = event.getContext().getContextId();
-        PreparedStatement stmt = null;
-        try {
-            final int userId = event.getId();
-            final TIntList ids;
-            {
-                ResultSet rs = null;
-                try {
-                    stmt =
-                        writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.GENCONF.getType());
-                    int pos = 1;
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, userId);
-                    rs = stmt.executeQuery();
-                    ids = new TIntArrayList(4);
-                    while (rs.next()) {
-                        ids.add(Integer.parseInt(rs.getString(1)));
-                    }
-                } finally {
-                    DBUtils.closeSQLStuff(rs);
-                }
-            }
-            DBUtils.closeSQLStuff(stmt);
-            stmt = null;
-            if (ids.isEmpty()) {
-                return;
-            }
-            /*
-             * Delete them
-             */
-            boolean supportsAttachments;
-            {
-                final ConfigViewFactory factory = Services.optService(ConfigViewFactory.class);
-                if (null == factory) {
-                    supportsAttachments = false;
-                } else {
-                    try {
-                        final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
-                        supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
-                    } catch (final Exception e) {
-                        supportsAttachments = false;
-                    }
-                }
-            }
-            final AtomicReference<OXException> error = new AtomicReference<OXException>();
-            final boolean supportsAttach = supportsAttachments;
-            ids.forEach(new TIntProcedure() {
 
-                @Override
-                public boolean execute(final int id) {
-                    try {
-                        RdbSnippetManagement.deleteSnippet(id, userId, contextId, supportsAttach, writeCon);
-                        return true;
-                    } catch (final OXException e) {
-                        error.set(e);
-                        return false;
-                    }
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            /*
+             * Writable connection
+             */
+            final int contextId = event.getContext().getContextId();
+            PreparedStatement stmt = null;
+            try {
+                final int userId = event.getId();
+                TIntList ids = getIds(userId, contextId, writeCon);
+                if (ids.isEmpty()) {
+                    return;
                 }
-            });
-            final OXException e = error.get();
-            if (null != e) {
-                throw e;
+                /*
+                 * Delete them
+                 */
+                final AtomicReference<OXException> error = new AtomicReference<OXException>();
+                ids.forEach(new TIntProcedure() {
+
+                    @Override
+                    public boolean execute(final int id) {
+                        try {
+                            RdbSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
+                            return true;
+                        } catch (final OXException e) {
+                            error.set(e);
+                            return false;
+                        }
+                    }
+                });
+                final OXException e = error.get();
+                if (null != e) {
+                    throw e;
+                }
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
             }
-        } catch (final SQLException e) {
-            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
         }
     }
 

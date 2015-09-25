@@ -65,27 +65,26 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link RdbSnippetCreateTableTask}
+ * {@link RdbSnippetAttachmentBinaryCreateTableTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
+public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     /**
-     * Initializes a new {@link RdbSnippetCreateTableTask}.
+     * Initializes a new {@link RdbSnippetAttachmentBinaryCreateTableTask}.
      */
-    public RdbSnippetCreateTableTask() {
+    public RdbSnippetAttachmentBinaryCreateTableTask() {
         super();
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), RdbSnippetTables.getSnippetContentTable(), RdbSnippetTables.getSnippetAttachmentTable(), RdbSnippetTables.getSnippetMiscTable() };
+        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryTable() };
     }
 
     @Override
@@ -95,24 +94,21 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] getDependencies() {
-        return NO_TABLES;
+        return new String[] { RdbSnippetCreateTableTask.class.getName() };
     }
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
+        int contextId = params.getContextId();
+        DatabaseService ds = getService(DatabaseService.class);
+        Connection writeCon = ds.getForUpdateTask(contextId);
         try {
-            createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
-            createTable(RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetContentTable(), writeCon);
-            createTable(RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetAttachmentTable(), writeCon);
-            createTable(RdbSnippetTables.getSnippetMiscName(), RdbSnippetTables.getSnippetMiscTable(), writeCon);
+            createTable(RdbSnippetTables.getSnippetAttachmentBinaryName(), RdbSnippetTables.getSnippetAttachmentBinaryTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
-        logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetAttachmentBinaryCreateTableTask.class);
+        logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetAttachmentBinaryCreateTableTask.class.getSimpleName());
     }
 
     private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {
@@ -165,7 +161,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetName(), RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetMiscName() };
+        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
