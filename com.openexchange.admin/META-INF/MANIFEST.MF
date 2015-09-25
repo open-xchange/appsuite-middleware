@@ -88,6 +88,7 @@ Import-Package: com.damienmiller,
  org.slf4j
 Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
+ com.openexchange.admin.osgi.util,
  com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi.impl,

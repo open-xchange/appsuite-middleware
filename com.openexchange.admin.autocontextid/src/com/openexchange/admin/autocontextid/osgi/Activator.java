@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.rmi.impl.OXAutoCIDContextImpl;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -106,6 +107,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
 }
