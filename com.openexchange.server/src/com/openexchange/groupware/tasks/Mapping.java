@@ -79,6 +79,7 @@ import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.tasks.mapping.TargetCosts;
 import com.openexchange.groupware.tasks.mapping.TargetDuration;
 import com.openexchange.groupware.tasks.mapping.UID;
+import com.openexchange.sql.tools.SQLTools;
 
 /**
  * This class contains the methods for mapping object attributes to database columns and vice versa.
@@ -160,8 +161,7 @@ public final class Mapping {
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
-                stmt.setTimestamp(pos, new Timestamp(task.getCreationDate()
-                    .getTime()));
+                stmt.setTimestamp(pos, SQLTools.toTimestamp(task.getCreationDate()));
             }
             @Override
             public void fromDB(final ResultSet result, final int pos,

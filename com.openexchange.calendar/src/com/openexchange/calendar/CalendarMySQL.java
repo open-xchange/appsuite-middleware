@@ -3837,7 +3837,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 try {
                     pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    pidm.setTimestamp(1, SQLTools.toTimestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, System.currentTimeMillis());
                     pidm.setInt(4, uid);
@@ -4477,7 +4477,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 final int folderType = ofa.getFolderType(fid, so.getUserId());
                 final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 try {
-                    pidm.setTimestamp(1, new Timestamp(lastModified));
+                    pidm.setTimestamp(1, SQLTools.toTimestamp(lastModified));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, lastModified);
                     pidm.setInt(4, 0);
