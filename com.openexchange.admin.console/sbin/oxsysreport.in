@@ -95,6 +95,7 @@ PROCS='
     listservices;
     mount;
     netstat -putane;
+    ox_java_vm_limits;
     ps -eLf;
     ps faux;
     readerengine_cache_overview;
@@ -114,6 +115,7 @@ EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
+OTHER_CONFIGS="/etc/security/limits.conf"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -161,6 +163,15 @@ collect_command_output() {
    done
    IFS=${OIFS}
    cd - > /dev/null 2>&1
+}
+
+ox_java_vm_limits() {
+    PROC_LIMITS="/proc/$(get_ox_java_pid)/limits";
+    if [ -f "${PROC_LIMITS}" ]; then
+        cat ${PROC_LIMITS};
+    else
+        echo "File does not exist: ${PROC_LIMITS}"
+    fi
 }
 
 collect_httpd_configs() {
