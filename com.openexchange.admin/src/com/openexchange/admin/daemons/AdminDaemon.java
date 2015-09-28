@@ -78,7 +78,12 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 
-public class AdminDaemon {
+/**
+ * {@link AdminDaemon} - The admin daemon.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AdminDaemon implements AdminDaemonService {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
@@ -273,7 +278,7 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug("{0} changed to {}", event.getBundle().getSymbolicName(), event.getType());
+                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), event.getType());
             }
         };
         context.addBundleListener(bl);

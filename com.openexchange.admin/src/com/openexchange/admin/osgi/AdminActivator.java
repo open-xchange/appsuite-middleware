@@ -57,6 +57,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -207,7 +208,11 @@ public class AdminActivator extends HousekeepingActivator {
         // Open trackers
         openTrackers();
 
+        // Initialize & register RMI interfaces
         daemon.initRMI(context);
+
+        // Signal admin daemon being successfully started
+        registerService(AdminDaemonService.class, daemon);
 
         {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();

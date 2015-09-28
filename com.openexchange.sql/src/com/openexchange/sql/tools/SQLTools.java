@@ -115,4 +115,15 @@ public class SQLTools {
     public static Timestamp toTimestamp(Date date) {
         return new Timestamp((date.getTime() / 1000) * 1000);
     }
+
+    /**
+     * Creates a java.sql.Timestamp object with truncated milliseconds to avoid bad rounding in MySQL versions >= 7.6.4.
+     * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
+     * 
+     * @param date
+     * @return
+     */
+    public static Timestamp toTimestamp(long date) {
+        return new Timestamp((date / 1000) * 1000);
+    }
 }

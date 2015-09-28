@@ -98,18 +98,49 @@ public class ShareHelper {
         this.session = session;
     }
 
+    /**
+     * Gets or creates an "anonymous" share link with read-only permissions for a specific target.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param target The share target from the session users point of view
+     * @return The share link
+     */
     public DriveShareLink getLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
         ShareLink shareLink = getShareService().getLink(session.getServerSession(), shareTarget);
         return new DefaultDriveShareLink(shareLink, target);
     }
 
+    /**
+     * Gets an existing "anonymous" share link with read-only permissions for a specific target if one exists.
+     *
+     * @param target The share target from the session users point of view
+     * @return The share link, or <code>null</code> if there is none
+     */
     public DriveShareLink optLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
         ShareLink shareLink = getShareService().optLink(session.getServerSession(), shareTarget);
         return null != shareLink ? new DefaultDriveShareLink(shareLink, target) : null;
     }
 
+    /**
+     * Updates the certain properties of a specific "anonymous" share link.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param target The share target from the session users point of view
+     * @param linkUpdate The link update holding the updated properties
+     * @return The share link
+     */
     public DriveShareLink updateLink(DriveShareTarget driveTarget, LinkUpdate linkUpdate) throws OXException {
         ShareLink shareLink;
         if (driveTarget.isFolder()) {
@@ -134,6 +165,20 @@ public class ShareHelper {
         return new DefaultDriveShareLink(shareLink, driveTarget);
     }
 
+    /**
+     * Deletes an existing "anonymous" share link.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
+     * of those for the caller</li>
+     * <li>Since the referenced share targets are updated accordingly, depending permissions checks are performed, especially
+     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
+     * permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param target The share to delete from the session users point of view
+     */
     public void deleteLink(DriveShareTarget driveTarget) throws OXException {
         if (driveTarget.isFolder()) {
             FileStorageFolder folder = session.getStorage().getFolder(driveTarget.getDrivePath());
@@ -156,6 +201,15 @@ public class ShareHelper {
         }
     }
 
+    /**
+     * Sends notifications about one or more existing shares to specific recipients, identified by their permission entity.
+     *
+     * @param target The share to notify about
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param entityIDs The entity identifiers to notify
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
     public List<OXException> notifyEntities(DriveShareTarget driveTarget, Transport transport, String message, int[] entityIDs) throws OXException {
         if (null == entityIDs || 0 == entityIDs.length) {
             return Collections.emptyList();

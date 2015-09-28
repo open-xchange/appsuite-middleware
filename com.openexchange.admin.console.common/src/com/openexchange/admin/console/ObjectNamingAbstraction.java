@@ -188,7 +188,9 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } else if (e instanceof NotBoundException) {
-            final NotBoundException exc = (NotBoundException) e;
+            NotBoundException origin = (NotBoundException) e;
+            Exception exc = new Exception("Look-up failed. Service \"" + origin.getMessage() + "\" is not available.");
+            exc.setStackTrace(origin.getStackTrace());
             printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof InvalidCredentialsException) {

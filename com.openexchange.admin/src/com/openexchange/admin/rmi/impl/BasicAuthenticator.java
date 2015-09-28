@@ -61,7 +61,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 
 /**
@@ -72,34 +71,75 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
+    /**
+     * Creates an authenticator that <b>ignores</b> possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     *
+     * @return The authenticator instance
+     * @throws StorageException If instantiation fails
+     */
+    public static BasicAuthenticator createNonPluginAwareAuthenticator() throws StorageException {
+        return new BasicAuthenticator(false);
+    }
+
+    /**
+     * Creates an authenticator that <b>respects</b> possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     *
+     * @return The authenticator instance
+     * @throws StorageException If instantiation fails
+     */
+    public static BasicAuthenticator createPluginAwareAuthenticator() throws StorageException {
+        return new BasicAuthenticator(true);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private final OXAuthStorageInterface sqlAuth;
     private final OXAuthStorageInterface fileAuth;
     private final OXToolStorageInterface oxtool;
     private final AdminCache cache;
-    private final BundleContext context;
+    private final boolean plugInAware;
 
     /**
-     * Use this constructor when additional bundles should be able to
-     * override login
-     * @throws StorageException  */
-    public BasicAuthenticator(final BundleContext context) throws StorageException {
-        super();
-        this.context = context;
-        sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
-        fileAuth = OXAuthStorageInterface.getInstanceFile();
-        oxtool = OXToolStorageInterface.getInstance();
-        cache = ClientAdminThread.cache;
+     * Use this constructor in case additional bundles should be able to override login
+     *
+     * @param context The bundle context; needed to mark the authenticator as plugIn-aware
+     * @throws StorageException If instantiation fails
+     * @deprecated Use {@link #createPluginAwareAuthenticator(BundleContext)}
+     */
+    @Deprecated
+    public BasicAuthenticator(BundleContext context) throws StorageException {
+        this(context != null);
     }
 
     /**
-     * @throws StorageException  */
+     * Use this constructor in case no additional bundles should be able to override login!
+     *
+     * @throws StorageException If instantiation fails
+     * @deprecated Use {@link #createNonPluginAwareAuthenticator()}
+     */
+    @Deprecated
     public BasicAuthenticator() throws StorageException {
+        this(false);
+    }
+
+    /**
+     * Initializes a new {@link BasicAuthenticator}.
+     *
+     * @param plugInAware Whether the authenticator should respect possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     */
+    private BasicAuthenticator(boolean plugInAware) throws StorageException {
         super();
-        this.context = null;
+        this.plugInAware = plugInAware;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
         oxtool = OXToolStorageInterface.getInstance();
         cache = ClientAdminThread.cache;
+        if (null == cache) {
+            // Obviously not properly initialized.
+            StorageException e = new StorageException("Open-Xchange Admin not properly initialized.");
+            LOG.error("Probably start-up of bundle \"com.openexchange.admin\" failed. Please check log files and/or bundle status via \"/opt/open-xchange/sbin/listbundles\" command-line tool.", e);
+            throw e;
+        }
     }
 
     /**
@@ -126,7 +166,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         }
         // only let other plugins authenticate, when we have the BundleContext
         // AND when
-        if( this.context != null && doPluginAuth) {
+        if( plugInAware && doPluginAuth) {
             // Trigger plugin extensions
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -168,7 +208,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if( ClientAdminThread.cache.isMasterAdmin(creds) ) {
             return true;
         }
-        if( this.context != null ) {
+        if( plugInAware ) {
             // Trigger plugin extensions
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -181,7 +221,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         }
         return false;
     }
-    
+
     /**
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!

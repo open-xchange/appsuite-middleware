@@ -51,6 +51,7 @@ package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
 import java.util.Hashtable;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -132,6 +133,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
 }

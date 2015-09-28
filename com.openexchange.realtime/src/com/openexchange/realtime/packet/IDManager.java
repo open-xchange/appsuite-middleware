@@ -190,6 +190,9 @@ public class IDManager extends AbstractRealtimeJanitor {
     @Override
     public void cleanupForId(ID id) {
         LockMap locksPerId = LOCKS.get(id);
+        if (locksPerId == null) {
+            return;
+        }
 
         synchronized (locksPerId) {
             if (false == locksPerId.hasOwners()) {

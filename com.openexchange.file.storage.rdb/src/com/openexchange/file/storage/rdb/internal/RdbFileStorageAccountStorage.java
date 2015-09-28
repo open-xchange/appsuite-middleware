@@ -333,7 +333,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = rc.prepareStatement(SQL_SELECT_ACCOUNTS);
+            stmt = rc.prepareStatement("SELECT account FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());

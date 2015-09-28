@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,50 @@
  *
  */
 
-package com.openexchange.admin.user.copy.osgi;
+package com.openexchange.admin.osgi.util;
 
 import com.openexchange.admin.daemons.AdminDaemonService;
-import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.copy.UserCopyService;
 
 /**
- * {@link Activator}
+ * {@link AdminBundleActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class Activator extends HousekeepingActivator {
+public abstract class AdminBundleActivator extends HousekeepingActivator {
 
-    public Activator() {
+    /**
+     * Initializes a new {@link AdminBundleActivator}.
+     */
+    public AdminBundleActivator() {
         super();
     }
 
-    @Override
-    public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
-        try {
-            AdminCache.compareAndSetBundleContext(null, context);
-            ConfigurationService configurationService = getService(ConfigurationService.class);
-            AdminCache.compareAndSetConfigurationService(null, configurationService);
-            track(UserCopyService.class, new RMIUserCopyRegisterer(context));
-            openTrackers();
-            log.info("Started bundle: com.openexchange.admin.user.copy");
-        } catch (final Exception e) {
-            log.error("Error starting bundle: com.openexchange.admin.user.copy", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
-        try {
-            closeTrackers();
-            cleanUp();
-            log.info("Stopped bundle: com.openexchange.admin.user.copy");
-        } catch (final Exception e) {
-            log.error("Error stopping bundle: com.openexchange.admin.user.copy", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
+    private Class<?>[] requires() {
         return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
+
+    @Override
+    protected final Class<?>[] getNeededServices() {
+        Class<?>[] required = requires();
+        Class<?>[] more = getMoreNeededServices();
+        if (null == more || 0 == more.length) {
+            return required;
+        }
+
+        Class<?>[] needed = new Class<?>[required.length + more.length];
+        System.arraycopy(required, 0, needed, 0, required.length);
+        System.arraycopy(more, 0, needed, required.length, more.length);
+        return needed;
+    }
+
+    /**
+     * Advertises more needed services beside <code>ConfigurationService</code> and <code>AdminDaemonService</code>.
+     *
+     * @return More needed services or <code>null</code>
+     */
+    protected abstract Class<?>[] getMoreNeededServices();
+
 }

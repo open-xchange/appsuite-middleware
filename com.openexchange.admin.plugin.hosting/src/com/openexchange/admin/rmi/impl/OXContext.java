@@ -130,7 +130,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public Quota[] listQuotas(Context ctx, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, ctx);
@@ -194,9 +194,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
-
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -207,6 +204,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -277,9 +276,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
-
             // Trigger plugin extensions
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
@@ -290,6 +286,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, capsToDrop, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -1075,7 +1073,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         Context retval = null;
 
