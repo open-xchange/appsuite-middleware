@@ -58,11 +58,13 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.ComparedPermissions;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -247,6 +249,11 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
 
         @Override
         public Date getExpiryDate() {
+            return null;
+        }
+
+        @Override
+        public String generateLink(HostData hostData, ShareTargetPath targetPath) {
             return null;
         }
     };

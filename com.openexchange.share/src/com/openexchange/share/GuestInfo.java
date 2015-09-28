@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -144,5 +145,14 @@ public interface GuestInfo {
      * @return The target or <code>null</code> if the guest is not anonymous
      */
     ShareTarget getLinkTarget();
+
+    /**
+     * Generates a share link to a specific target appropriate for the guest.
+     *
+     * @param hostData Host data
+     * @param targetPath The share target path to create the link for, or <code>null</code> to generate a "base" link only
+     * @return The share link
+     */
+    String generateLink(HostData hostData, ShareTargetPath targetPath);
 
 }

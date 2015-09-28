@@ -60,6 +60,8 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -122,6 +124,7 @@ import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.DistributedFileManagement;
@@ -242,8 +245,6 @@ import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
@@ -292,7 +293,7 @@ public final class ServerActivator extends HousekeepingActivator {
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
         JDOMParser.class, TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class,
         AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
-        IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
+        IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
         SearchService.class, DispatcherPrefixService.class, UserAgentParser.class, PasswordMechFactory.class };

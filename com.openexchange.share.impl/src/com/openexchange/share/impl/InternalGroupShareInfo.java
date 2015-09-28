@@ -56,6 +56,7 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -154,6 +155,11 @@ public class InternalGroupShareInfo extends AbstractShareInfo {
             @Override
             public Date getExpiryDate() {
                 return null;
+            }
+
+            @Override
+            public String generateLink(HostData hostData, ShareTargetPath targetPath) {
+                return ShareLinks.generateInternal(hostData, getDestinationTarget());
             }
         };
     }
