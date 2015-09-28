@@ -47,27 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 
 /**
- * {@link CheckParametersAction}
- *
+ * {@link CheckParametersAction} Check certain parameters
+ * 
+ * Influence the following IDataWrapper attributes:
+ * -delivery
+ * -contentType
+ * -contentTypeByParameter
+ * -contentDisposition
+ * 
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
 public class CheckParametersAction implements IFileResponseRendererAction {
 
+    private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
+
     @Override
     public void call(IDataWrapper data) throws IOException, FileResponseRendererActionException {
         // Check certain parameters
-        data.setDelivery(AJAXUtility.sanitizeParam(data.getRequest().getParameter(data.getDelivery())));
+        data.setDelivery(AJAXUtility.sanitizeParam(data.getRequest().getParameter(DELIVERY)));
         if (data.getDelivery() == null) {
             data.setDelivery(data.getFile().getDelivery());
         }

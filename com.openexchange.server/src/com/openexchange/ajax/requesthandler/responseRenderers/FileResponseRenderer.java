@@ -66,15 +66,15 @@ import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.CheckParametersAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.IDataWrapper;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.IFileResponseRendererAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.OutputBinaryContentAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.PrepareResponseHeaderAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.RemovePragmaHeaderAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.SetBinaryInputStreamAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.TransformImageAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.Actions.UpdateETagHeaderAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.CheckParametersAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.OutputBinaryContentAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.PrepareResponseHeaderAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.RemovePragmaHeaderAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.SetBinaryInputStreamAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.UpdateETagHeaderAction;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -97,9 +97,11 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private final AtomicReference<File> tmpDirReference;
 
-    private final IFileResponseRendererAction REGISTERED_ACTIONS[] = { new CheckParametersAction(), new TransformImageAction(), new SetBinaryInputStreamAction(), new PrepareResponseHeaderAction(), new RemovePragmaHeaderAction(), new UpdateETagHeaderAction(), new OutputBinaryContentAction() };
+    private static final TransformImageAction TRANSFORM_IMAGE_ACTION = new TransformImageAction();
 
-    private final TransformImageAction TRANSFORM_IMAGE_ACTION = (TransformImageAction) REGISTERED_ACTIONS[1];
+    private static final IFileResponseRendererAction REGISTERED_ACTIONS[] = { new CheckParametersAction(), TRANSFORM_IMAGE_ACTION, new SetBinaryInputStreamAction(), new PrepareResponseHeaderAction(), new RemovePragmaHeaderAction(), new UpdateETagHeaderAction(), new OutputBinaryContentAction() };
+
+
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
@@ -189,8 +191,18 @@ public class FileResponseRenderer implements ResponseRenderer {
         final long length = fileHolder.getLength();
         final List<Closeable> closeables = new LinkedList<Closeable>();
         final String fileContentType = fileHolder.getContentType();
-        DataWrapper data = new DataWrapper(null, null, null, false, null, length, fileHolder, req, fileContentType, fileName, requestData, resp, null, closeables, result, tmpDirReference);
-
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false)
+            .setLength(length)
+            .setFile(fileHolder)
+            .setRequest(req)
+            .setFileContentType(fileContentType)
+            .setFileName(fileName)
+            .setRequestData(requestData)
+            .setResponse(resp)
+            .setCloseAbles(closeables)
+            .setResult(result)
+            .setTmpDirReference(tmpDirReference);
+        
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
             for (IFileResponseRendererAction action : REGISTERED_ACTIONS) {
@@ -278,23 +290,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         private List<Closeable> closeables;
         private AtomicReference<File> tmpDirReference;
 
-        public DataWrapper(String delivery, String contentType, String contentDisposition, Boolean contentTypeByParameter, Readable documentData, long length, IFileHolder file, HttpServletRequest req, String fileContentType, String fileName, AJAXRequestData requestData, HttpServletResponse response, String userAgent, List<Closeable> closeables, AJAXRequestResult result, AtomicReference<File> tmpDirReference) {
-            this.delivery = delivery;
-            this.contentType = contentType;
-            this.contentDisposition = contentDisposition;
-            this.contentTypeByParameter = contentTypeByParameter;
-            this.documentData = documentData;
-            this.length = length;
-            this.file = file;
-            this.request = req;
-            this.fileContentType = fileContentType;
-            this.fileName = fileName;
-            this.requestData = requestData;
-            this.response = response;
-            this.userAgent = userAgent;
-            this.closeables = closeables;
-            this.result = result;
-            this.tmpDirReference = tmpDirReference;
+        public DataWrapper() {
+
         }
 
         @Override
@@ -303,8 +300,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setDelivery(String delivery) {
+        public IDataWrapper setDelivery(String delivery) {
             this.delivery = delivery;
+            return this;
         }
 
         @Override
@@ -313,8 +311,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setContentType(String contentType) {
+        public IDataWrapper setContentType(String contentType) {
             this.contentType = contentType;
+            return this;
         }
 
         @Override
@@ -323,8 +322,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setContentDisposition(String contentDisposition) {
+        public IDataWrapper setContentDisposition(String contentDisposition) {
             this.contentDisposition = contentDisposition;
+            return this;
         }
 
         @Override
@@ -333,8 +333,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setContentTypeByParameter(Boolean contentTypeByParameter) {
+        public IDataWrapper setContentTypeByParameter(Boolean contentTypeByParameter) {
             this.contentTypeByParameter = contentTypeByParameter;
+            return this;
         }
 
         @Override
@@ -343,8 +344,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setDocumentData(Readable documentData) {
+        public IDataWrapper setDocumentData(Readable documentData) {
             this.documentData = documentData;
+            return this;
         }
 
         @Override
@@ -353,8 +355,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setLength(long length) {
+        public IDataWrapper setLength(long length) {
             this.length = length;
+            return this;
         }
 
         @Override
@@ -363,8 +366,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setFile(IFileHolder file) {
+        public IDataWrapper setFile(IFileHolder file) {
             this.file = file;
+            return this;
         }
 
         @Override
@@ -373,8 +377,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setRequest(HttpServletRequest req) {
+        public IDataWrapper setRequest(HttpServletRequest req) {
             this.request = req;
+            return this;
         }
 
         @Override
@@ -383,8 +388,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setFileContentType(String fileContentType) {
+        public IDataWrapper setFileContentType(String fileContentType) {
             this.fileContentType = fileContentType;
+            return this;
         }
 
         @Override
@@ -393,8 +399,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setFileName(String fileName) {
+        public IDataWrapper setFileName(String fileName) {
             this.fileName = fileName;
+            return this;
         }
 
         @Override
@@ -403,8 +410,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setRequestData(AJAXRequestData requestData) {
+        public IDataWrapper setRequestData(AJAXRequestData requestData) {
             this.requestData = requestData;
+            return this;
         }
 
         @Override
@@ -413,8 +421,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setResponse(HttpServletResponse response) {
+        public IDataWrapper setResponse(HttpServletResponse response) {
             this.response = response;
+            return this;
         }
 
         @Override
@@ -423,18 +432,27 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setUserAgent(String userAgent) {
+        public IDataWrapper setUserAgent(String userAgent) {
             this.userAgent = userAgent;
+            return this;
         }
 
         @Override
         public void addCloseable(Closeable closeable) {
-            if (closeables == null) {
-                closeables = new ArrayList<Closeable>();
+            if (this.closeables == null) {
+                this.closeables = new ArrayList<Closeable>();
             }
 
             this.closeables.add(closeable);
         }
+
+        @Override
+        public IDataWrapper setCloseAbles(java.util.List<Closeable> closeables) {
+            if (closeables != null) {
+                this.closeables = closeables;
+            }
+            return this;
+        };
 
         @Override
         public List<Closeable> getCloseables() {
@@ -447,8 +465,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setResult(AJAXRequestResult result) {
+        public IDataWrapper setResult(AJAXRequestResult result) {
             this.result = result;
+            return this;
         }
 
         @Override
@@ -457,8 +476,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         @Override
-        public void setTmpDirReference(AtomicReference<File> tmpDirReference) {
+        public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference) {
             this.tmpDirReference = tmpDirReference;
+            return this;
         }
 
     }

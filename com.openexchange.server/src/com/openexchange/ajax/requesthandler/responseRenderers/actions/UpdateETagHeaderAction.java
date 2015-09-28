@@ -47,12 +47,15 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * {@link UpdateETagHeaderAction}
+ * {@link UpdateETagHeaderAction} updates the eTag header of the response
+ * 
+ * Influence the following IDataWrapper attributes:
+ * -response
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

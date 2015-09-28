@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
@@ -64,7 +64,14 @@ import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.mime.ContentType;
 
 /**
- * {@link PrepareResponseHeaderAction}
+ * {@link PrepareResponseHeaderAction} prepares the header of the response object
+ * 
+ * Influence the following IDataWrapper attributes:
+ * -response
+ * -length
+ * -closeables
+ * -documentData
+ * -contentType
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

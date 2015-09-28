@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -58,7 +58,10 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 
 /**
- * {@link SetBinaryInputStreamAction}
+ * {@link SetBinaryInputStreamAction} set the documentData as an binary InputStream
+ * 
+ * Influence the following IDataWrapper attributes:
+ * -documentData
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

@@ -47,33 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.http.Tools;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 /**
- * {@link RemovePragmaHeaderAction}
+ * {@link IFileResponseRendererAction} is an interface for actions used by the FileResponseRenderer
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class RemovePragmaHeaderAction implements IFileResponseRendererAction {
+public interface IFileResponseRendererAction {
 
-    @Override
-    public void call(IDataWrapper data) throws OXException {
-        /*
-         * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser.
-         * So removing Pragma header.
-         */
-        boolean keepCachingHeaders = false;
-        if (data.getRequestData().isSet("keepCachingHeaders")) {
-            keepCachingHeaders = data.getRequestData().getParameter("keepCachingHeaders", Boolean.class).booleanValue();
-        }
-        if (!keepCachingHeaders) {
-            Tools.removeCachingHeader(data.getResponse());
-        }
-
-    }
+    public void call(IDataWrapper data) throws Exception;
 
 }

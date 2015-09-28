@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.File;
@@ -70,6 +70,7 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -87,7 +88,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link TransformImageAction}
+ * {@link TransformImageAction} transforms the image if necessary
+ * 
+ * Influence the following IDataWrapper attributes:
+ * -File
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
@@ -102,7 +106,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         data.setFile(transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference()));
     }
 
-    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery, AtomicReference<File> tmpDirReference) throws IOException, OXException {
+    private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery, AtomicReference<File> tmpDirReference) throws IOException, OXException, FileResponseRendererActionException {
         /*
          * check input
          */
@@ -343,7 +347,14 @@ public class TransformImageAction implements IFileResponseRendererAction {
             } else {
                 LOG.error("Unable to transform image from {}", file.getName());
             }
-            return file.repetitive() ? file : null;
+
+            IFileHolder returnValue = file.repetitive() ? file : null;
+            if (returnValue == null) {
+                throw new FileResponseRenderer.FileResponseRendererActionException();
+            }
+            else {
+                return returnValue;
+            }
         }
     }
 

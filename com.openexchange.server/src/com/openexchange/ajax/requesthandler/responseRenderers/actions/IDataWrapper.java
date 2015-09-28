@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers.Actions;
+package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import java.io.Closeable;
 import java.io.File;
@@ -61,7 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 
 /**
- * {@link IDataWrapper}
+ * {@link IDataWrapper} is a wrapper for data used in implementations of {@link IFileResponseRendererAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
@@ -79,66 +79,68 @@ public interface IDataWrapper {
 
     public String getDelivery();
 
-    public void setDelivery(String delivery);
+    public IDataWrapper setDelivery(String delivery);
 
     public String getContentType();
 
-    public void setContentType(String contentType);
+    public IDataWrapper setContentType(String contentType);
 
     public String getContentDisposition();
 
-    public void setContentDisposition(String contentDisposition);
+    public IDataWrapper setContentDisposition(String contentDisposition);
 
     public Boolean getContentTypeByParameter();
 
-    public void setContentTypeByParameter(Boolean contentTypeByParameter);
+    public IDataWrapper setContentTypeByParameter(Boolean contentTypeByParameter);
 
     public Readable getDocumentData();
 
-    public void setDocumentData(Readable documentData);
+    public IDataWrapper setDocumentData(Readable documentData);
 
     public long getLength();
 
-    public void setLength(long length);
+    public IDataWrapper setLength(long length);
 
     public IFileHolder getFile();
 
-    public void setFile(IFileHolder file);
+    public IDataWrapper setFile(IFileHolder file);
 
     public HttpServletRequest getRequest();
 
-    public void setRequest(HttpServletRequest req);
+    public IDataWrapper setRequest(HttpServletRequest req);
 
     public String getFileContentType();
 
-    public void setFileContentType(String fileContentType);
+    public IDataWrapper setFileContentType(String fileContentType);
 
     public String getFileName();
 
-    public void setFileName(String fileName);
+    public IDataWrapper setFileName(String fileName);
 
     public AJAXRequestData getRequestData();
 
-    public void setRequestData(AJAXRequestData data);
+    public IDataWrapper setRequestData(AJAXRequestData data);
 
     public HttpServletResponse getResponse();
 
-    public void setResponse(HttpServletResponse response);
+    public IDataWrapper setResponse(HttpServletResponse response);
 
     public String getUserAgent();
 
-    public void setUserAgent(String userAgent);
+    public IDataWrapper setUserAgent(String userAgent);
 
     public void addCloseable(Closeable closeable);
+
+    public IDataWrapper setCloseAbles(List<Closeable> closeables);
 
     public List<Closeable> getCloseables();
 
     public AJAXRequestResult getResult();
 
-    public void setResult(AJAXRequestResult result);
+    public IDataWrapper setResult(AJAXRequestResult result);
 
     public AtomicReference<File> getTmpDirReference();
 
-    public void setTmpDirReference(AtomicReference<File> tmpDirReference);
+    public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference);
 
 }
