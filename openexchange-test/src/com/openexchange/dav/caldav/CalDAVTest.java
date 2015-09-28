@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.caldav;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -78,10 +80,10 @@ import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.Headers;
-import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -93,9 +95,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
 import com.openexchange.test.TaskTestManager;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
@@ -272,16 +271,29 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws Exception {
-        return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);
+    protected ICalResource get(String resourceName) throws Exception {
+        return get(getDefaultFolderID(), resourceName, null, null);
     }
 
-    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws Exception {
+    protected ICalResource get(String folderID, String resourceName) throws Exception {
+        return get(folderID, resourceName, null, null);
+    }
+
+    protected ICalResource get(String folderID, String resourceName, String ifMatchEtag) throws Exception {
+        return get(folderID, resourceName, null, ifMatchEtag);
+    }
+
+    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
         GetMethod get = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
             get = new GetMethod(getBaseUri() + href);
-            get.addRequestHeader(Headers.IF_NONE_MATCH, null != ifNoneMatchEtag ? ifNoneMatchEtag : "*");
+            if (null != ifNoneMatchEtag) {
+                get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
+            }
+            if (null != ifMatchEtag) {
+                get.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
             Assert.assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
             byte[] responseBody = get.getResponseBody();
             assertNotNull("got no response body", responseBody);

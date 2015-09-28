@@ -49,7 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -235,7 +239,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(publicFolderID, uid, iCalResource.getETag());
+        iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -325,7 +329,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(publicFolderID, uid, iCalResource.getETag());
+        iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -380,7 +384,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(publicFolderID, uid, iCalResource.getETag());
+        iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
@@ -413,7 +417,7 @@ public class Bug31453Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(publicFolderID, uid, iCalResource.getETag());
+        iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertNotNull("No ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
         assertEquals("ALARM wrong", "-PT20M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));

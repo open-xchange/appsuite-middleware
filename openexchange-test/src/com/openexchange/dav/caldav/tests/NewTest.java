@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -90,7 +92,7 @@ public class NewTest extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(uid, null);
+        ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
@@ -165,7 +167,7 @@ public class NewTest extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(uid, null);
+        ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
@@ -229,7 +231,7 @@ public class NewTest extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(resourceName, null);
+        ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
