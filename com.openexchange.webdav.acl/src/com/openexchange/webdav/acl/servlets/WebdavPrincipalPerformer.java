@@ -51,26 +51,15 @@ package com.openexchange.webdav.acl.servlets;
 
 import java.util.EnumMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.contact.ContactService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.acl.PrincipalWebdavFactory;
-import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
-import com.openexchange.webdav.action.ServletWebdavRequest;
-import com.openexchange.webdav.action.ServletWebdavResponse;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavCopyAction;
-import com.openexchange.webdav.action.WebdavDefaultHeaderAction;
 import com.openexchange.webdav.action.WebdavDeleteAction;
 import com.openexchange.webdav.action.WebdavExistsAction;
 import com.openexchange.webdav.action.WebdavGetAction;
@@ -78,238 +67,78 @@ import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavLockAction;
-import com.openexchange.webdav.action.WebdavLogAction;
 import com.openexchange.webdav.action.WebdavMkcolAction;
 import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
-import com.openexchange.webdav.action.WebdavRequestCycleAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.helpers.PropertyMixin;
+import com.openexchange.webdav.protocol.WebdavMethod;
+import com.openexchange.webdav.protocol.helpers.AbstractPerformer;
+import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * {@link WebdavPrincipalPerformer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WebdavPrincipalPerformer implements SessionHolder{
+public class WebdavPrincipalPerformer extends AbstractPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
-
-    private static volatile WebdavPrincipalPerformer instance;
-
-    /**
-     * Gets the instance of {@link WebdavPrincipalPerformer}.
-     *
-     * @return The instance of {@link WebdavPrincipalPerformer}.
-     * @throws IllegalStateException If class not yet orderly initialized
-     */
-    public static WebdavPrincipalPerformer getInstance() {
-        WebdavPrincipalPerformer tmp = instance;
-        if (null == tmp) {
-            synchronized (WebdavPrincipalPerformer.class) {
-                tmp = instance;
-                if (null == tmp) {
-                    tmp = new WebdavPrincipalPerformer();
-                    instance = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    private static volatile ServiceLookup services;
-
-    /**
-     * Sets the service look-up reference
-     *
-     * @param lookup The reference
-     */
-    public static void setServices(final ServiceLookup lookup){
-        services = lookup;
-    }
-
-    public static enum Action {
-        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT
-    }
+    private static final Protocol PROTOCOL = new PrincipalProtocol();
 
     private final PrincipalWebdavFactory factory;
+    private final Map<WebdavMethod, WebdavAction> actions;
 
-    private final Protocol protocol = new PrincipalProtocol();
-
-    private final Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
-
-    private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
-
-    private WebdavPrincipalPerformer() {
-
-        WebdavAction unlock;
-        WebdavAction propPatch;
-        WebdavAction propFind;
-        WebdavAction options;
-        WebdavAction move;
-        WebdavAction mkcol;
-        WebdavAction lock;
-        WebdavAction copy;
-        WebdavAction delete;
-        WebdavAction get;
-        WebdavAction head;
-        WebdavAction put;
-        WebdavAction trace;
-        WebdavAction report;
-
-
-        final ServiceLookup serviceLookup = services;
-        if (null == serviceLookup) {
-            final IllegalStateException x = new IllegalStateException("Failed initialization.");
-            LOG.error("Initialization of {} failed. Missing service look-up reference.", WebdavPrincipalPerformer.class.getSimpleName(), x);
-            throw x;
-        }
-
-        this.factory = new PrincipalWebdavFactory(serviceLookup.getService(UserService.class), serviceLookup.getService(ContactService.class), this);
-
-        unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
-        propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
-        propFind = prepare(new WebdavPropfindAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-        options = prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false));
-        move = prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true));
-        mkcol = prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false));
-        lock = prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false));
-        copy = prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true));
-        delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
-        get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-        head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-        report = prepare(new WebdavReportAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
-
-        final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
-        oxWebdavPut.setSessionHolder(this);
-
-        final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-
-        put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, false, false), oxWebdavMaxUploadSize);
-        trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
-
-        actions.put(Action.UNLOCK, unlock);
-        actions.put(Action.PROPPATCH, propPatch);
-        actions.put(Action.PROPFIND, propFind);
-        actions.put(Action.OPTIONS, options);
-        actions.put(Action.MOVE, move);
-        actions.put(Action.MKCOL, mkcol);
-        actions.put(Action.LOCK, lock);
-        actions.put(Action.COPY, copy);
-        actions.put(Action.DELETE, delete);
-        actions.put(Action.GET, get);
-        actions.put(Action.HEAD, head);
-        actions.put(Action.PUT, put);
-        actions.put(Action.TRACE, trace);
-        actions.put(Action.REPORT, report);
-
-        makeLockNullTolerant();
-
+    /**
+     * Initializes a new {@link WebdavPrincipalPerformer}.
+     *
+     * @param services A service lookup reference
+     */
+    public WebdavPrincipalPerformer(ServiceLookup services) {
+        super();
+        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class), services.getService(ContactService.class), this);
+        this.actions = initActions();
     }
 
-    private static volatile Action[] NULL_TOLERANT_ACTIONS;
-
-    private void makeLockNullTolerant() {
-        // Single-check-idiom to initialize constant
-        Action[] tmp = NULL_TOLERANT_ACTIONS;
-        if (null == tmp) {
-            NULL_TOLERANT_ACTIONS = tmp = new Action[] { Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT };
-        }
-        for (final Action action : tmp) {
-            WebdavAction webdavAction = actions.get(action);
-            while (webdavAction != null) {
-                if (webdavAction instanceof WebdavExistsAction) {
-                    ((WebdavExistsAction) webdavAction).setTolerateLockNull(true);
-                    webdavAction = null;
-                } else if (webdavAction instanceof AbstractAction) {
-                    webdavAction = ((AbstractAction) webdavAction).getNext();
-                } else {
-                    webdavAction = null;
-                }
-            }
-        }
-    }
-
-
-    private WebdavAction prepare(final AbstractAction action, final boolean logBody, final boolean logResponse, final AbstractAction... additionals) {
-        final WebdavLogAction logAction = new WebdavLogAction();
-        logAction.setLogRequestBody(logBody);
-        logAction.setLogResponseBody(logResponse);
-
-        final AbstractAction lifeCycle = new WebdavRequestCycleAction();
-        final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
-        final AbstractAction ifMatch = new WebdavIfMatchAction();
-
-        lifeCycle.setNext(logAction);
-        logAction.setNext(defaultHeader);
-        defaultHeader.setNext(ifMatch);
-
-        AbstractAction a = ifMatch;
-
-        for (final AbstractAction a2 : additionals) {
-            a.setNext(a2);
-            a = a2;
-        }
-
-        a.setNext(action);
-
-        return lifeCycle;
+    private EnumMap<WebdavMethod, WebdavAction> initActions() {
+        EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
+        actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
+        actions.put(WebdavMethod.MKCOL, prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
+        actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
+        OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
+        OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
+        actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, new WebdavIfMatchAction(), oxWebdavMaxUploadSize));
+        makeLockNullTolerant(actions);
+        return actions;
     }
 
     @Override
-    public ServerSession getSessionObject() {
-        sessionNotNull();
-        return session.get();
-    }
-
-    private void sessionNotNull() {
-        if (session.get() == null) {
-            final IllegalStateException exc = new IllegalStateException();
-            LOG.error("No session found in Session holder", exc.fillInStackTrace());
-        }
+    protected String getURLPrefix() {
+        return "/principals/users/";
     }
 
     @Override
-    public Context getContext() {
-        return session.get().getContext();
-    }
-
-    @Override
-    public User getUser() {
-        return session.get().getUser();
-    }
-
-    public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {
-        try {
-            final ServletWebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
-            webdavRequest.setUrlPrefix("/principals/users/");
-            final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
-
-            session.set(sess);
-            LOG.debug("Executing {}", action);
-            actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final WebdavProtocolException x) {
-            resp.setStatus(x.getStatus());
-        } catch (final OXException x) {
-            resp.setStatus(500);
-        } catch (final NullPointerException x) {
-            LOG.error("Null reference detected.", x);
-        } finally {
-            session.set(null);
-        }
-    }
-
-    public PrincipalWebdavFactory getFactory() {
+    protected AbstractWebdavFactory getFactory() {
         return factory;
     }
 
-    public void setGlobalMixins(final PropertyMixin...mixins) {
-        factory.setGlobalMixins(mixins);
+    @Override
+    protected WebdavAction getAction(WebdavMethod method) {
+        return actions.get(method);
     }
+
 }

@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer.Action;
+import com.openexchange.webdav.protocol.WebdavMethod;
 
 
 /**
@@ -74,6 +74,13 @@ public class WebdavPrincipalServlet extends OXServlet {
 
     private static final long serialVersionUID = 4646903712578496388L;
 
+    private final WebdavPrincipalPerformer performer;
+
+    public WebdavPrincipalServlet(WebdavPrincipalPerformer performer) {
+        super();
+        this.performer = performer;
+    }
+
     @Override
     protected Interface getInterface() {
         return Interface.WEBDAV_VCARD;
@@ -81,75 +88,75 @@ public class WebdavPrincipalServlet extends OXServlet {
 
     @Override
     protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.COPY);
+        doIt(req, resp, WebdavMethod.COPY);
     }
 
     @Override
     protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.LOCK);
+        doIt(req, resp, WebdavMethod.LOCK);
     }
 
     @Override
     protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MKCOL);
+        doIt(req, resp, WebdavMethod.MKCOL);
     }
 
     @Override
     protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MOVE);
+        doIt(req, resp, WebdavMethod.MOVE);
     }
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.OPTIONS);
+        doIt(req, resp, WebdavMethod.OPTIONS);
     }
 
     @Override
     protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPFIND);
+        doIt(req, resp, WebdavMethod.PROPFIND);
     }
 
     @Override
     protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPPATCH);
+        doIt(req, resp, WebdavMethod.PROPPATCH);
     }
 
     @Override
     protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.UNLOCK);
+        doIt(req, resp, WebdavMethod.UNLOCK);
     }
 
     @Override
     protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.DELETE);
+        doIt(req, resp, WebdavMethod.DELETE);
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.GET);
+        doIt(req, resp, WebdavMethod.GET);
     }
 
     @Override
     protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.HEAD);
+        doIt(req, resp, WebdavMethod.HEAD);
     }
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PUT);
+        doIt(req, resp, WebdavMethod.PUT);
     }
 
     @Override
     protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.TRACE);
+        doIt(req, resp, WebdavMethod.TRACE);
     }
 
     @Override
     protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.REPORT);
+        doIt(req, resp, WebdavMethod.REPORT);
     }
 
-    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
+    private void doIt(HttpServletRequest req, HttpServletResponse resp, WebdavMethod method) throws ServletException, IOException {
         ServerSession session = null;
         try {
             session = ServerSessionAdapter.valueOf(getSession(req));
@@ -161,7 +168,7 @@ public class WebdavPrincipalServlet extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        WebdavPrincipalPerformer.getInstance().doIt(req, resp, action, session);
+        performer.doIt(req, resp, method, session);
     }
 
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();

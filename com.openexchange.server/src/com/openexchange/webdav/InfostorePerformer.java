@@ -207,10 +207,7 @@ public final class InfostorePerformer implements SessionHolder {
         head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
 
         final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
-        oxWebdavPut.setSessionHolder(this);
-
         final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-
         put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, false, false), oxWebdavMaxUploadSize);
         trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
 
@@ -335,8 +332,6 @@ public final class InfostorePerformer implements SessionHolder {
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());
-        } catch (final OXException x) {
-            LOG.error("Error detected.", x);
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {

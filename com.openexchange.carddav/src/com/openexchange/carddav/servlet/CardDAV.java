@@ -69,6 +69,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
+import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
@@ -117,75 +118,75 @@ public class CardDAV extends OXServlet {
 
     @Override
     protected void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.COPY);
+        doIt(req, resp, WebdavMethod.COPY);
     }
 
     @Override
     protected void doLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.LOCK);
+        doIt(req, resp, WebdavMethod.LOCK);
     }
 
     @Override
     protected void doMkCol(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MKCOL);
+        doIt(req, resp, WebdavMethod.MKCOL);
     }
 
     @Override
     protected void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.MOVE);
+        doIt(req, resp, WebdavMethod.MOVE);
     }
 
     @Override
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.OPTIONS);
+        doIt(req, resp, WebdavMethod.OPTIONS);
     }
 
     @Override
     protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPFIND);
+        doIt(req, resp, WebdavMethod.PROPFIND);
     }
 
     @Override
     protected void doPropPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PROPPATCH);
+        doIt(req, resp, WebdavMethod.PROPPATCH);
     }
 
     @Override
     protected void doUnLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.UNLOCK);
+        doIt(req, resp, WebdavMethod.UNLOCK);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.DELETE);
+        doIt(req, resp, WebdavMethod.DELETE);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.GET);
+        doIt(req, resp, WebdavMethod.GET);
     }
 
     @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.HEAD);
+        doIt(req, resp, WebdavMethod.HEAD);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.PUT);
+        doIt(req, resp, WebdavMethod.PUT);
     }
 
     @Override
     protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.TRACE);
+        doIt(req, resp, WebdavMethod.TRACE);
     }
 
     @Override
     protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, Action.REPORT);
+        doIt(req, resp, WebdavMethod.REPORT);
     }
 
-    private void doIt(HttpServletRequest request, HttpServletResponse response, Action action) throws ServletException, IOException {
+    private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method) throws ServletException, IOException {
         /*
          * get server session from request & check permissions
          */
@@ -204,7 +205,7 @@ public class CardDAV extends OXServlet {
         /*
          * perform the action
          */
-        performer.doIt(request, response, action, session);
+        performer.doIt(request, response, method, session);
     }
 
     /**

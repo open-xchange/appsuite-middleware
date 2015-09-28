@@ -80,12 +80,11 @@ public class WebdavACLActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            WebdavPrincipalPerformer.setServices(this);
+            WebdavPrincipalPerformer performer = new WebdavPrincipalPerformer(this);
+            WebdavPrincipalServlet principalServlet = new WebdavPrincipalServlet(performer);
+            getService(HttpService.class).registerServlet("/servlet/dav/principals/users", principalServlet, null, null);
 
-            getService(HttpService.class).registerServlet("/servlet/dav/principals/users", new WebdavPrincipalServlet(), null, null);
-
-            final WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
+            OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
             registerService(PropertyMixin.class, new PrincipalCollectionSet());

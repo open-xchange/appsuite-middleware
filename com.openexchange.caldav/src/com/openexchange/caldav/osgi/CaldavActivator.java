@@ -119,12 +119,11 @@ public class CaldavActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             CalDAVServiceLookup.set(this);
-
+            CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
-            httpService.registerServlet(SERVLET_PATH, new CalDAV(), null, null);
+            httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
             httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
 
-            final CaldavPerformer performer = CaldavPerformer.getInstance();
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;

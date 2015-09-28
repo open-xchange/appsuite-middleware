@@ -50,11 +50,8 @@
 package com.openexchange.webdav.action;
 
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
-import com.openexchange.tools.session.SessionHolder;
 
 public class OXWebdavPutAction extends WebdavPutAction {
-
-	private SessionHolder sessionHolder;
 
 	@Override
 	public long getMaxSize() {
@@ -62,11 +59,7 @@ public class OXWebdavPutAction extends WebdavPutAction {
 		if (maxSize < 1) {
 			return -1;
 		}
-
 		return maxSize;
 	}
 
-	public void setSessionHolder(final SessionHolder holder) {
-		this.sessionHolder = holder;
-	}
 }
