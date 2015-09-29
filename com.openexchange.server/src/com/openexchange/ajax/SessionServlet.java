@@ -127,7 +127,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
@@ -180,7 +180,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
 
             // Invoke service() method
-            super.service(req, resp);
+            super.doService(req, resp, checkRateLimit);
         } catch (RateLimitedException e) {
             e.send(resp);
         } catch (final OXException e) {

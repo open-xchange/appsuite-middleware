@@ -703,6 +703,11 @@ public class LoginServlet extends AJAXServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, false);
+    }
+
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             Tools.checkNonExistence(req, PARAMETER_PASSWORD);

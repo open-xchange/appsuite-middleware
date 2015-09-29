@@ -488,6 +488,15 @@ public final class RateLimiter {
     /**
      * Removes the rate limit trace
      *
+     * @param httpRequest The HHTP request for which to delete the rate limit trace
+     */
+    public static void removeRateLimit(HttpServletRequest httpRequest) {
+        removeRateLimit(new Key(httpRequest));
+    }
+
+    /**
+     * Removes the rate limit trace
+     *
      * @param key The key associated with the rate limit trace
      */
     public static void removeRateLimit(Key key) {

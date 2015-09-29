@@ -260,6 +260,11 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doService(req, resp, false);
+    }
+
+    @Override
     protected SessionResult<ServerSession> initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
         ServerSession session = getSessionObject(req, true);
         if (null != session) {
@@ -427,15 +432,21 @@ public class DispatcherServlet extends SessionServlet {
         Dispatcher dispatcher = DISPATCHER.get();
         try {
             requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
-            /*
-             * Start dispatcher processing
-             */
-            state = dispatcher.begin();
-            /*
-             * Perform request
-             */
+
+            // Acquire session
             session = requestData.getSession();
+            if (null != session && false == session.isAnonymous()) {
+                // A non-anonymous session
+                enableRateLimitCheckFor(httpRequest);
+            }
+
+            // Start dispatcher processing
+            state = dispatcher.begin();
+
+            // Perform request
             AJAXRequestResult result = dispatcher.perform(requestData, state, requestData.getSession());
+
+            // Render the request's result
             if (renderResponse(requestData, result, httpRequest, httpResponse)) {
                 /*-
                  * A common result

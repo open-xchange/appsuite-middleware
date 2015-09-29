@@ -508,28 +508,40 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, true);
+    }
+
+    /**
+     * Receives standard HTTP requests from the public <code>service</code> method and dispatches them to the <code>do</code><i>XXX</i>
+     * methods defined in this class.
+     * <p>
+     * This method is an HTTP-specific version of the {@link javax.servlet.Servlet#service} method. There's no need to override this method.
+     *
+     * @param req The {@link HttpServletRequest} object that contains the request the client made of the servlet
+     * @param resp the {@link HttpServletResponse} object that contains the response the servlet returns to the client
+     * @param checkRateLimit Whether rate limit check is supposed to be performed
+     * @throws IOException If an input or output error occurs while the servlet is handling the HTTP request
+     * @throws ServletException If the HTTP request cannot be handled
+     * @see javax.servlet.Servlet#service
+     */
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         incrementRequests();
         // We already have a tracking id...
         // LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
-            /*
-             * Set 200 OK status code and JSON content by default
-             */
+
+            // Set 200 OK status code and JSON content by default
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            /*
-             * Check for possible upload
-             */
-            String contentType = Strings.asciiLowerCase(req.getContentType());
-            if (contentType != null && contentType.startsWith(CONTENTTYPE_UPLOAD, 0)) {
-                // An upload request
-                com.openexchange.tools.servlet.ratelimit.RateLimiter.checkRequest(req);
-                super.service(req, resp);
+
+            if (checkRateLimit) {
+                // Enable rate limit on request instance
+                super.service(enableRateLimitCheckFor(req), resp);
             } else {
-                // Common request
-                super.service(new CountingHttpServletRequest(req), resp);
+                // No rate limit check
+                super.service(req, resp);
             }
         } catch (RateLimitedException e) {
             e.send(resp);
@@ -544,6 +556,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             decrementRequests();
             LogProperties.removeProperty(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
+    }
+
+    /**
+     * Enables the rate limit check for specified request instance
+     *
+     * @param req The request instance
+     * @return The request instance with rate limit check enabled
+     */
+    protected HttpServletRequest enableRateLimitCheckFor(HttpServletRequest req) {
+        // Check for possible upload
+        String contentType = Strings.asciiLowerCase(req.getContentType());
+        if (contentType != null && contentType.startsWith(CONTENTTYPE_UPLOAD, 0)) {
+            // An upload request; thus do not return an instance of "CountingHttpServletRequest" since uploads have their own quota semantics.
+            com.openexchange.tools.servlet.ratelimit.RateLimiter.checkRequest(req);
+            return req;
+        }
+
+        // Common request
+        return new CountingHttpServletRequest(req);
     }
 
     /**
