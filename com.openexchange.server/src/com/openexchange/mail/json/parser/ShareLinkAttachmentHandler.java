@@ -247,16 +247,9 @@ public final class ShareLinkAttachmentHandler extends DefaultAttachmentHandler i
     }
 
     private List<String> saveAttachments(String folderID, List<MailPart> attachments) throws OXException {
-        IDBasedFileAccess fileAccess = ServerServiceRegistry.getServize(IDBasedFileAccessFactory.class).createAccess(session);
         List<String> createdFiles = new ArrayList<String>(attachments.size());
-        try {
-            fileAccess.startTransaction();
-            for (MailPart attachment : attachments) {
-                createdFiles.add(saveAttachment(fileAccess, folderID, attachment));
-            }
-            fileAccess.commit();
-        } finally {
-            fileAccess.finish();
+        for (MailPart attachment : attachments) {
+            createdFiles.add(saveAttachment(fileAccess, folderID, attachment));
         }
         return createdFiles;
     }
