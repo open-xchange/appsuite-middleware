@@ -273,78 +273,75 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.SEARCH_ERROR.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof com.sun.mail.smtp.SMTPSenderFailedException) {
                 SMTPSenderFailedException failedException = (SMTPSenderFailedException) e;
-                if ((failedException.getReturnCode() == 552) || (toLowerCase(failedException.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, getSmtpInfo(failedException));
+                SmtpInfo smtpInfo = getSmtpInfo(failedException);
+
+                // Message too large?
+                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
                 }
-                return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), getSmtpInfo(failedException));
+                return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), smtpInfo.toString());
             } else if (e instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
                 SMTPAddressFailedException failedException = (SMTPAddressFailedException) e;
-                if ((failedException.getReturnCode() == 552) || (toLowerCase(failedException.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, getSmtpInfo(failedException));
+                SmtpInfo smtpInfo = getSmtpInfo(failedException);
+
+                // Message too large?
+                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(failedException, smtpInfo.toString());
                 }
-                return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), getSmtpInfo(failedException));
+                return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(failedException, failedException.getMessage(), smtpInfo.toString());
             } else if (e instanceof com.sun.mail.smtp.SMTPSendFailedException) {
-                final SMTPSendFailedException sendFailedError = (SMTPSendFailedException) e;
-                if ((sendFailedError.getReturnCode() == 552) || (toLowerCase(sendFailedError.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(sendFailedError, getSmtpInfo(sendFailedError));
+                SMTPSendFailedException sendFailedError = (SMTPSendFailedException) e;
+                SmtpInfo smtpInfo = getSmtpInfo(sendFailedError);
+
+                // Message too large?
+                if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(sendFailedError, smtpInfo.toString());
                 }
-                final Exception nextException = sendFailedError.getNextException();
-                if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
-                    final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
-                    final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
-                    if (null == invalidAddresses || invalidAddresses.length == 0) {
-                        return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(sendFailedError, sendFailedError.getMessage(), getSmtpInfo(smtpExc));
-                    }
-                }
-                String serverInfo = getSmtpInfo(sendFailedError);
-                if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
-                    serverInfo = getSmtpInfo((com.sun.mail.smtp.SMTPAddressFailedException) nextException);
-                }
-                final Address[] addrs = sendFailedError.getInvalidAddresses();
+
+                Address[] addrs = sendFailedError.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available
-                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(sendFailedError, getSmtpInfo(sendFailedError));
+                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(sendFailedError, smtpInfo.toString());
                 }
-                return MimeMailExceptionCode.SEND_FAILED_EXT.create(sendFailedError, Arrays.toString(addrs), serverInfo);
+
+                return MimeMailExceptionCode.SEND_FAILED_EXT.create(sendFailedError, Arrays.toString(addrs), smtpInfo.toString());
             } else if (e instanceof javax.mail.SendFailedException) {
-                final SendFailedException exc = (SendFailedException) e;
-                int returnCode = 250;
-                String smtpInfo = null;
+                SendFailedException exc = (SendFailedException) e;
+                SmtpInfo smtpInfo = null;
                 Address[] invalidAddresses = exc.getInvalidAddresses();
                 {
                     final Exception nextException = exc.getNextException();
                     if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                         com.sun.mail.smtp.SMTPSendFailedException failedError = (com.sun.mail.smtp.SMTPSendFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        returnCode = failedError.getReturnCode();
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
                         }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPSenderFailedException) {
                         com.sun.mail.smtp.SMTPSenderFailedException failedError = (com.sun.mail.smtp.SMTPSenderFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        returnCode = failedError.getReturnCode();
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
                         }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
                         com.sun.mail.smtp.SMTPAddressFailedException failedError = (com.sun.mail.smtp.SMTPAddressFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
-                        returnCode = failedError.getReturnCode();
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
                         }
                     }
                 }
+
                 // Message too large?
-                if ((returnCode == 552) || (toLowerCase(exc.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(exc, null == smtpInfo ? exc.getMessage() : smtpInfo);
+                if (null != smtpInfo && ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1))) {
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(exc, smtpInfo.toString());
                 }
+
                 // Others...
                 if (null == invalidAddresses || invalidAddresses.length == 0) {
-                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, null == smtpInfo ? exc.getMessage() : smtpInfo);
+                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, null == smtpInfo ? exc.getMessage() : smtpInfo.toString());
                 }
-                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(invalidAddresses), null == smtpInfo ? exc.getMessage() : smtpInfo);
+                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(invalidAddresses), null == smtpInfo ? exc.getMessage() : smtpInfo.toString());
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(e, mailConfig.getServer(), mailConfig.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), EMPTY_ARGS);
@@ -656,16 +653,104 @@ public class MimeMailException extends OXException {
         return null != commandFailedError;
     }
 
-    private static String getSmtpInfo(SMTPSendFailedException sendFailedError) {
-        return null == sendFailedError ? "" : new StringBuilder(64).append(sendFailedError.getReturnCode()).append(" - ").append(sendFailedError.getMessage()).toString();
+    // ------------------------------------------------- SMTP error stuff ----------------------------------------------------------------
+
+    private static final class SmtpInfo {
+
+        final int retCode;
+        final String message;
+
+        SmtpInfo(int retCode, String message) {
+            super();
+            this.retCode = retCode;
+            this.message = message;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(64).append(retCode).append(" - ").append(message).toString();
+        }
     }
 
-    private static String getSmtpInfo(SMTPAddressFailedException sendFailedError) {
-        return null == sendFailedError ? "" : new StringBuilder(64).append(sendFailedError.getReturnCode()).append(" - ").append(sendFailedError.getMessage()).toString();
+    private static SmtpInfo getSmtpInfo(SMTPSendFailedException sendFailedError) {
+        if (null == sendFailedError) {
+            return null;
+        }
+
+        int retCode = sendFailedError.getReturnCode();
+        if ((retCode >= 400 && retCode <= 499) || (retCode >= 500 && retCode <= 599)) {
+            // An SMTP error
+            return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
+        }
+
+        // Check if nested exception reveals the actual SMTP error
+        SmtpInfo smtpInfo = optSmtpInfo(sendFailedError.getNextException());
+        if (null != smtpInfo) {
+            return smtpInfo;
+        }
+
+        // Return specified exception's SMTP info as last resort
+        return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
     }
 
-    private static String getSmtpInfo(SMTPSenderFailedException sendFailedError) {
-        return null == sendFailedError ? "" : new StringBuilder(64).append(sendFailedError.getReturnCode()).append(" - ").append(sendFailedError.getMessage()).toString();
+    private static SmtpInfo getSmtpInfo(SMTPAddressFailedException sendFailedError) {
+        if (null == sendFailedError) {
+            return null;
+        }
+
+        int retCode = sendFailedError.getReturnCode();
+        if ((retCode >= 400 && retCode <= 499) || (retCode >= 500 && retCode <= 599)) {
+            // An SMTP error
+            return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
+        }
+
+        // Check if nested exception reveals the actual SMTP error
+        SmtpInfo smtpInfo = optSmtpInfo(sendFailedError.getNextException());
+        if (null != smtpInfo) {
+            return smtpInfo;
+        }
+
+        // Return specified exception's SMTP info as last resort
+        return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
+    }
+
+    private static SmtpInfo getSmtpInfo(SMTPSenderFailedException sendFailedError) {
+        if (null == sendFailedError) {
+            return null;
+        }
+
+        int retCode = sendFailedError.getReturnCode();
+        if ((retCode >= 400 && retCode <= 499) || (retCode >= 500 && retCode <= 599)) {
+            // An SMTP error
+            return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
+        }
+
+        // Check if nested exception reveals the actual SMTP error
+        SmtpInfo smtpInfo = optSmtpInfo(sendFailedError.getNextException());
+        if (null != smtpInfo) {
+            return smtpInfo;
+        }
+
+        // Return specified exception's SMTP info as last resort
+        return new SmtpInfo(sendFailedError.getReturnCode(), sendFailedError.getMessage());
+    }
+
+    private static SmtpInfo optSmtpInfo(Exception possibleSmtpException) {
+        if (null == possibleSmtpException) {
+            return null;
+        }
+
+        if (possibleSmtpException instanceof SMTPSendFailedException) {
+            return getSmtpInfo((SMTPSendFailedException) possibleSmtpException);
+        }
+        if (possibleSmtpException instanceof SMTPAddressFailedException) {
+            return getSmtpInfo((SMTPAddressFailedException) possibleSmtpException);
+        }
+        if (possibleSmtpException instanceof SMTPSenderFailedException) {
+            return getSmtpInfo((SMTPSenderFailedException) possibleSmtpException);
+        }
+
+        return null;
     }
 
     /** ASCII-wise to lower-case */
