@@ -156,13 +156,23 @@ public class RootPrincipal extends AbstractCollection {
              */
             int userID = -1;
             try {
-                userID = users.getUserId(name, factory.getContext());
-            } catch (OXException e) {
-                if (LdapExceptionCode.USER_NOT_FOUND.equals(e) && false == name.equals(url.name())) {
-                    // try full login name, too
-                    userID = users.getUserId(url.name(), factory.getContext());
-                } else {
-                    throw e;
+                userID = Integer.valueOf(name);
+            } catch (NumberFormatException e) {
+                // no numerical user id
+            }
+            if (-1 == userID) {
+                /*
+                 * resolve login name
+                 */
+                try {
+                    userID = users.getUserId(name, factory.getContext());
+                } catch (OXException e) {
+                    if (LdapExceptionCode.USER_NOT_FOUND.equals(e) && false == name.equals(url.name())) {
+                        // try full login name, too
+                        userID = users.getUserId(url.name(), factory.getContext());
+                    } else {
+                        throw e;
+                    }
                 }
             }
             if (-1 == userID) {

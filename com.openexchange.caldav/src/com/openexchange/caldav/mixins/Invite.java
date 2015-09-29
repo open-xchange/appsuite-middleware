@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -112,17 +113,27 @@ public class Invite extends SingleXMLPropertyMixin {
     }
 
     private String getEntityElements(Permission permission) throws OXException {
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         if (permission.isGroup()) {
             Group group = CalDAVServiceLookup.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
-            StringBuilder.append("<D:href>/principals/groups/").append(group.getIdentifier())
+            stringBuilder.append("<D:href>/principals/groups/").append(group.getIdentifier())
                 .append("/</D:href><CS:common-name> + ").append(group.getDisplayName()).append("</CS:common-name>");
         } else {
             User user = factory.resolveUser(permission.getEntity());
-            StringBuilder.append("<D:href>/principals/users/").append(user.getLoginInfo())
-                .append("/</D:href><CS:common-name>").append(user.getDisplayName()).append("</CS:common-name>");
+            String href = user.getLoginInfo();
+            if (Strings.isEmpty(href)) {
+                href = String.valueOf(user.getId());
+            }
+            String commonName = user.getDisplayName();
+            if (Strings.isEmpty(commonName)) {
+                commonName = user.getMail();
+                if (Strings.isEmpty(commonName)) {
+                    commonName = "User " + user.getId();
+                }
+            }
+            stringBuilder.append("<D:href>/principals/users/").append(href).append("/</D:href><CS:common-name>").append(commonName).append("</CS:common-name>");
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
 }
