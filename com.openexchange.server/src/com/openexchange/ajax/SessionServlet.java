@@ -50,17 +50,21 @@
 package com.openexchange.ajax;
 
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONException;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -126,7 +130,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
@@ -178,7 +182,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
 
             // Invoke service() method
-            super.service(req, resp);
+			super.doService(req, resp, checkRateLimit);
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
             if(e.getRetryAfter() > 0) {

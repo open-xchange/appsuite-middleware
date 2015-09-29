@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler;
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -66,9 +67,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Client;
 import com.openexchange.ajax.LoginServlet;
@@ -253,6 +256,11 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doService(req, resp, false);
+    }
+
+    @Override
     protected SessionResult<ServerSession> initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
         ServerSession session = getSessionObject(req, true);
         if (null != session) {
@@ -414,6 +422,10 @@ public class DispatcherServlet extends SessionServlet {
                 String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
                 String action = requestDataTools.getAction(httpRequest);
                 session = getSession(httpRequest, dispatcher, module, action);
+                if (null != session && false == session.isAnonymous()) {
+                    // A non-anonymous session
+                    enableRateLimitCheckFor(httpRequest);
+                }
                 /*
                  * Parse AJAXRequestData
                  */

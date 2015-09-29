@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,95 +47,104 @@
  *
  */
 
-package com.openexchange.tools.servlet.ratelimit.impl;
+package com.openexchange.mail.json.parser;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import com.google.common.util.concurrent.RateLimiter;
-import com.openexchange.tools.servlet.ratelimit.Rate;
-
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.mail.attachment.storage.StoreOperation;
 
 /**
- * {@link GoogleRate}
+ * {@link AttachmentHandlerProperties}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class GoogleRate implements Rate {
+public class AttachmentHandlerProperties {
 
-    private final AtomicLong lastLogStamp;
-    private final AtomicLong lastAccessTime;
-    private volatile RateLimiter googleRateLimiter;
-    private volatile boolean deprecated;
-    private final int permits;
-    private volatile long millis;
+    private final StoreOperation storeOperation;
+    private final Map<String, Object> properties;
 
     /**
-     * Initializes a new {@link GoogleRate}.
+     * Initializes a new {@link AttachmentHandlerProperties}.
      */
-    public GoogleRate(int numberCalls, int timeLength, TimeUnit timeUnit) {
+    public AttachmentHandlerProperties(StoreOperation storeOperation) {
         super();
-        permits = numberCalls;
-        millis = TimeUnit.SECONDS.convert(timeLength, timeUnit);
-        double rate = ((double) numberCalls) / ((double) millis);
-        googleRateLimiter = RateLimiter.create(rate);
-        lastLogStamp = new AtomicLong(0L);
-        lastAccessTime = new AtomicLong(Long.MIN_VALUE);
-        deprecated = false;
+        this.storeOperation = storeOperation;
+        properties = new HashMap<String, Object>(6, 0.9F);
     }
 
-    @Override
-    public AtomicLong getLastLogStamp() {
-        return lastLogStamp;
+    /**
+     * Gets the store operation
+     *
+     * @return The store operation
+     */
+    public StoreOperation getStoreOperation() {
+        return storeOperation;
     }
 
-    @Override
-    public long lastAccessTime() {
-        return lastAccessTime.get();
+    /**
+     * Gets the number of properties
+     *
+     * @return The number of properties
+     */
+    public int size() {
+        return properties.size();
     }
 
-    @Override
-    public boolean isDeprecated() {
-        return deprecated;
+    /**
+     * Checks if there are no properties
+     *
+     * @return <code>true</code> if there are no properies; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return properties.isEmpty();
     }
 
-    @Override
-    public boolean markDeprecatedIfElapsed(long threshold) {
-        synchronized (googleRateLimiter) {
-            if (lastAccessTime.get() > threshold) {
-                return false;
-            }
-            deprecated = true;
-            return true;
-        }
+    /**
+     * Checks if specified property is contained.
+     *
+     * @param name The property name
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsProperty(Object name) {
+        return properties.containsKey(name);
     }
 
-    @Override
-    public Result consume(long now) {
-        synchronized (googleRateLimiter) {
-            lastAccessTime.set(now);
-            if (deprecated) {
-                return Result.DEPRECATED;
-            }
-        }
-        boolean permitted = googleRateLimiter.tryAcquire(1);
-        return permitted ? Rate.Result.SUCCESS : Rate.Result.FAILED;
+    /**
+     * Gets the denoted property
+     *
+     * @param name The property name
+     * @return The property value or <code>null</code> if there is no such property
+     */
+    public Object getProperty(String name) {
+        return properties.get(name);
     }
 
-    @Override
-    public void setTimeInMillis(long timeInMillis) {
-        millis = timeInMillis;
-        double rate = ((double) permits) / ((double) timeInMillis);
-        googleRateLimiter = RateLimiter.create(rate);
+    /**
+     * Puts specified property.
+     *
+     * @param name The property name
+     * @param value The property value
+     */
+    public void putProperty(String name, Object value) {
+        properties.put(name, value);
     }
 
-    @Override
-    public int getPermits() {
-        return permits;
+    /**
+     * Removes denoted property.
+     *
+     * @param name The property name
+     * @return The removed property or <code>null</code>
+     */
+    public Object removeProperty(String name) {
+        return properties.remove(name);
     }
 
-    @Override
-    public long getTimeInMillis() {
-        return millis;
+    /**
+     * Clears all properties.
+     */
+    public void clear() {
+        properties.clear();
     }
 
 }
