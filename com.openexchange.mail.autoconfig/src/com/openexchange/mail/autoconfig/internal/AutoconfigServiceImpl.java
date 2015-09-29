@@ -53,7 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -118,8 +117,8 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     private static final Pattern PATTERN_SPLIT = Pattern.compile("@");
 
-    private String getDomain(final QuotedInternetAddress internetAddress) {
-        return PATTERN_SPLIT.split(IDNA.toIDN(internetAddress.getAddress()))[1];
+    protected String getDomain(final QuotedInternetAddress internetAddress) {
+        return PATTERN_SPLIT.split(internetAddress.getAddress())[1];
     }
 
     private String getLocalPart(final QuotedInternetAddress internetAddress) {

@@ -156,7 +156,7 @@ public final class SnippetUtils {
 
     /**
      * Get the image identifier stored in the misc JSONObject of the snippet.
-     * 
+     *
      * @param misc The misc JSONObject of the snippet
      * @return The image identifier or null
      * @throws OXException
