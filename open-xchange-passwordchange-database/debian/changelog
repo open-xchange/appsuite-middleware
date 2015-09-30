@@ -4,6 +4,12 @@ open-xchange-passwordchange-database (7.6.3-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 25 Mar 2015 11:26:53 +0100
 
+open-xchange-passwordchange-database (7.6.2-33) stable; urgency=medium
+
+  * Build for patch 2015-09-28  (2767)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 25 Sep 2015 19:17:51 +0200
+
 open-xchange-passwordchange-database (7.6.2-32) stable; urgency=medium
 
   * Build for patch 2015-09-14 (2732)

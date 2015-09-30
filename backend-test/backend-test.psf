@@ -39,6 +39,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.logback.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.logging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.mail.filter.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.messaging"/>

@@ -4,6 +4,12 @@ open-xchange-datamining (7.6.3-0) unstable; urgency=medium
 
  -- Karsten Will <karsten.will@open-xchange.com>  Wed, 25 Mar 2015 11:26:26 +0100
 
+open-xchange-datamining (7.6.2-33) stable; urgency=medium
+
+  * Build for patch 2015-09-28  (2767)
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Fri, 25 Sep 2015 19:17:15 +0200
+
 open-xchange-datamining (7.6.2-32) stable; urgency=medium
 
   * Build for patch 2015-09-14 (2732)
