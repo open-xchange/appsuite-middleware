@@ -241,7 +241,7 @@ public class LoginTest extends AbstractLoginTest {
     /**
      * If a login response lacks the random token the associated login actions (redeem and redirect) have to be unusable, too (even with an
      * otherwise valid random token).
-     *  
+     *
      * @throws Exception
      */
     public void testSessionRandomMissingAndUnusable() throws Exception {
@@ -274,13 +274,14 @@ public class LoginTest extends AbstractLoginTest {
             assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
         }
     }
-    
+
     @Test
     public void testCookieHashSalt() throws Exception {
         rawLogin(USER1);
         HttpClient client = currentClient.getClient();
         String agent = (String) client.getParams().getParameter("http.useragent");
         String salt = "replaceMe1234567890";
+        System.out.println("Agent: " + agent);
         Cookie[] cookies = client.getState().getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith("open-xchange-secret")) {
@@ -295,7 +296,7 @@ public class LoginTest extends AbstractLoginTest {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().hasKey(key));
     }
-    
+
     private void assertResponseLacks(String key) throws Exception {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().lacksKey(key));
