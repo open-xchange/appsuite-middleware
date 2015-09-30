@@ -11,13 +11,10 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.mail.MessagingException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -34,6 +31,7 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.rest.services.OXRESTService;
 import com.openexchange.rest.services.annotations.PUT;
 import com.openexchange.rest.services.annotations.ROOT;
@@ -105,7 +103,7 @@ public class DovecotPushRESTService extends OXRESTService<Void> {
                     String folder = data.getString("folder");
                     long uid = data.getLong("imap-uid");
 
-                    SessiondService sessiondService = services.getService(SessiondService.class);
+                    SessiondService sessiondService = Services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
                         @Override
@@ -124,8 +122,8 @@ public class DovecotPushRESTService extends OXRESTService<Void> {
                     }
 
                     if (null == session) {
-                        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-                        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+                        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
+                        ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
                         if (null != hzInstance && null != obfuscatorService) {
                             Cluster cluster = hzInstance.getCluster();
 
