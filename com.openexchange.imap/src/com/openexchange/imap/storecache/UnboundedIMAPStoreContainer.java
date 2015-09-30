@@ -134,7 +134,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
         // Grab associated IMAP session identifier (as advertised via "ID" command)
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-        LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
 
         // Should we set properties from passed session?
         // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());

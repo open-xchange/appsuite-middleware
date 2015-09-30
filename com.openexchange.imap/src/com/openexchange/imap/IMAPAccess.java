@@ -969,6 +969,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
             doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
+
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
+
         return imapStore;
     }
 
