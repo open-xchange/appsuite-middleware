@@ -777,7 +777,7 @@ public final class ServerActivator extends HousekeepingActivator {
             final String regionName = "GenLocks";
             final byte[] ccf = ("jcs.region." + regionName + "=\n" +
                 "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region." + regionName + ".cacheattributes.MaxObjects=20000000\n" +
                 "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
                 "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" +
                 "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
