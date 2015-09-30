@@ -134,8 +134,11 @@ public class Bug7377Test extends AbstractTaskTest {
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final RangeResponse rResponse = client1.execute(new RangeRequest(remindDate));
-            final ReminderObject reminder = rResponse.getReminderByTarget(tz1, task.getObjectID());
+            
+            ReminderObject[] reminder2 = rResponse.getReminder(tz1);
+            assertEquals("Wrong number of reminder for given timezone", 1, reminder2.length);
 
+            final ReminderObject reminder = rResponse.getReminderByTarget(tz1, task.getObjectID());
             assertNotNull("Can't find reminder for task.", reminder);
             assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0), Integer.valueOf(reminder.getFolder()));
         } finally {
