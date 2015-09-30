@@ -137,7 +137,13 @@ public class ExpiredSharesTest extends ShareTest {
          * check if share link still accessible
          */
         GuestClient revokedGuestClient = new GuestClient(shareURL, guestPermission.getRecipient(), false);
+        System.out.println("Share url for revoked guest: " + shareURL);
         ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
+        System.out.println("Share resolve response error messages: " + shareResolveResponse.getErrorMessage());
+        System.out.println("Share resolve response conflicts: " + shareResolveResponse.getConflicts().size());
+        System.out.println("Share resolve response conflicts: " + shareResolveResponse.getConflicts().size());
+        System.out.println("Share resolve response exception: " + shareResolveResponse.getException().getMessage());
+        System.out.println("Share resolve response content: " + shareResolveResponse.getResponse().getJSON());
         assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         /*
          * check permissions of previously shared folder
