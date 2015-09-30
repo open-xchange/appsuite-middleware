@@ -281,7 +281,6 @@ public class LoginTest extends AbstractLoginTest {
         HttpClient client = currentClient.getClient();
         String agent = (String) client.getParams().getParameter("http.useragent");
         String salt = "replaceMe1234567890";
-        System.out.println("Agent: " + agent);
         Cookie[] cookies = client.getState().getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith("open-xchange-secret")) {
@@ -317,7 +316,7 @@ public class LoginTest extends AbstractLoginTest {
     private String getHash(String agent, String salt) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(agent.getBytes(Charsets.UTF_8));
-        md.update("com.openexchange.ox.gui.dhtml".getBytes(Charsets.UTF_8));
+        md.update("open-xchange-appsuite".getBytes(Charsets.UTF_8));
         md.update(salt.getBytes());
         return Pattern.compile("\\W").matcher(Base64.encode(md.digest())).replaceAll("");
     }
