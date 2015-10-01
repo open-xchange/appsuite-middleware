@@ -943,7 +943,7 @@ public class RoundtripTest extends AbstractRMITest {
 
         @Override
         public int compare(final FolderObject o1, final FolderObject o2) {
-            return o1.getObjectID() - o2.getObjectID();
+            return o1.getFolderName().compareTo(o2.getFolderName());
         }
 
     }
