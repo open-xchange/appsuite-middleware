@@ -604,7 +604,7 @@ public class OXContextMySQLStorageCommon {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             if (Databases.isPrimaryKeyConflictInMySQL(e)) {
-                throw new ContextExistsException("Context already exists!");
+                throw new ContextExistsException("Context " + ctx.getId().intValue() + " already exists!");
             }
             if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
                 throw new InvalidDataException("Context " + name + " already exists!");
