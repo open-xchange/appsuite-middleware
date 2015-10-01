@@ -125,6 +125,8 @@ public class SchemaInfo {
     public void clear() {
         deprecated = true;
         stamp = 0;
+        queue.clear();
+        inUse.clear();
     }
 
     /**
@@ -136,9 +138,14 @@ public class SchemaInfo {
      * @param modCount The modification count
      */
     public void initializeWith(Map<String, Integer> contextCountPerSchema) {
-        // Clear, increase modification count and refill queue
+        // Clear, ...
         queue.clear();
+        inUse.clear();
+
+        // Increase modification count and ...
         modCount++;
+
+        // ... refill queue
         for (Map.Entry<String, Integer> entry : contextCountPerSchema.entrySet()) {
             queue.offer(new SchemaCount(entry.getKey(), entry.getValue().intValue(), modCount));
         }
@@ -173,10 +180,9 @@ public class SchemaInfo {
                     // May be used for at least one more context
                     nextSchema.incrementCount();
 
-                    // Put into in-use collection if suitable to hold another context
-                    if (nextSchema.count < maxContexts) {
-                        inUse.put(nextSchema.name, nextSchema);
-                    }
+                    // Put into in-use collection
+                    inUse.put(nextSchema.name, nextSchema);
+
                     return nextSchema;
                 }
             }
@@ -205,12 +211,14 @@ public class SchemaInfo {
                 return;
             }
 
-            SchemaCount usedSchemaCount = inUse.get(schemaName);
+            SchemaCount usedSchemaCount = inUse.remove(schemaName);
             if (null != usedSchemaCount) {
                 // Decrement counter and make it re-available
                 if (decrement) {
                     usedSchemaCount.decrementCount();
                 }
+
+                // Re-offer
                 queue.offer(usedSchemaCount);
             }
         } finally {

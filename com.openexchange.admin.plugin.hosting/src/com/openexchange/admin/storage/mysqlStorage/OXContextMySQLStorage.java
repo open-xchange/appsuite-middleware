@@ -201,23 +201,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void delete(final Context ctx) throws StorageException {
         LOG.debug("Fetching connection and scheme for context {}", ctx.getId());
-        // groupware context must be loaded before entry from user_setting_admin table is removed.
+
+        // Groupware context must be loaded before entry from "user_setting_admin" table is removed.
         com.openexchange.groupware.contexts.Context gwCtx = null;
         try {
-            final ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
+            ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
             gwCtx = service.getContext(ctx.getId().intValue());
         } catch (final OXException e) {
             LOG.error("", e);
         } catch (final ServiceException e) {
             LOG.error("", e);
         }
-        final Connection conForConfigDB;
-        try {
-            conForConfigDB = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
+
+        AdminCacheExtended adminCache = cache;
+
+        Connection conForConfigDB = null;
+        boolean rollbackConfigDB = false;
         try {
             // Fetch filestores for associated context
             List<com.openexchange.filestore.QuotaFileStorage> storages;
@@ -240,7 +239,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     try {
                         quotaFileStorage.remove();
                         iter.remove();
-                    } catch (final OXException e) {
+                    } catch (OXException e) {
                         simpleDelete = true;
                         LOG.error("File storage implementation failed to remove the file storage '{}'. Trying to hard-delete the file storage contents.", quotaFileStorage.getUri(), e);
                     }
@@ -250,82 +249,101 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 for (Iterator<com.openexchange.filestore.QuotaFileStorage> iter = storages.iterator(); iter.hasNext();) {
                     com.openexchange.filestore.QuotaFileStorage quotaFileStorage = iter.next();
                     URI storageURI = quotaFileStorage.getUri();
-                    if ("file".equalsIgnoreCase(storageURI.getScheme())) {
-                        FileUtils.deleteDirectory(new File(storageURI));
-                    } else {
+                    if (!"file".equalsIgnoreCase(storageURI.getScheme())) {
                         throw new StorageException("Can't hard-delete non-local file store at \"" + storageURI + "\"");
                     }
+                    FileUtils.deleteDirectory(new File(storageURI));
                 }
             }
             LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());
 
-            // we need the right connection and scheme for this context
-            final int poolId;
-            final Connection conForContext;
+            // Get connection for ConfigDB
+            conForConfigDB = adminCache.getConnectionForConfigDB();
+
+            // Get connection and scheme for given context
+            int poolId;
+            Connection conForContext;
             try {
-                poolId = cache.getDBPoolIdForContextId(ctx.getId().intValue());
-                final String scheme = cache.getSchemeForContextId(ctx.getId().intValue());
-                conForContext = cache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
+                poolId = adminCache.getDBPoolIdForContextId(ctx.getId().intValue());
+                final String scheme = adminCache.getSchemeForContextId(ctx.getId().intValue());
+                conForContext = adminCache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
                 LOG.debug("Connection and scheme fetched for context {}", ctx.getId());
             } catch (final PoolException e) {
                 LOG.error("Pool Error", e);
                 throw new StorageException(e);
             }
-            final List<TableObject> sorted_tables;
-            try {
-                // fetch tables which can contain context data and sort these tables magically by foreign keys
-                LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-                final List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-                LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
-                // sort the tables by references (foreign keys)
-                sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
-                LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
-                // loop through tables and execute delete statements on each table
-                deleteContextData(ctx, conForContext, sorted_tables);
-            } catch (final SQLException e) {
-                LOG.error("SQL Error", e);
-                throw new StorageException(e);
-            } catch (final StorageException e) {
-                throw new StorageException(e.getMessage());
-            } finally {
-                // must be pushed back here, because in the "deleteContextFromConfigDB" the connection is "reset" in the pool.
-                // else we would get an not nice error in the logfile from the dbpool
-                try {
-                    cache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
-                } catch (final PoolException e) {
-                    LOG.error("Pool Error", e);
-                }
-            }
 
-            // Execute delete context from configdb AND the drop database command if this context is the last one
-            conForConfigDB.setAutoCommit(false);
-            contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
-            // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
-            conForConfigDB.commit();
             // Force to re-initialize schema cache on next access
             SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
             if (null != schemaCache) {
                 schemaCache.clearFor(poolId);
             }
+
+            // Delete context data from context-associated schema
+            try {
+                // Fetch tables which can contain context data and sort these tables magically by foreign keys
+                LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
+                List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
+                LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
+
+                // Sort the tables by references (foreign keys)
+                List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
+                LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
+
+                // Loop through tables and execute delete statements on each table (using transaction)
+                deleteContextData(ctx, conForContext, sorted_tables);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } catch (StorageException e) {
+                throw new StorageException(e.getMessage());
+            } finally {
+                // Needs to be pushed back here, because in the "deleteContextFromConfigDB()" the connection is "reset" in the pool.
+                try {
+                    adminCache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                    conForContext = null;
+                } catch (PoolException e) {
+                    LOG.error("Pool Error", e);
+                }
+            }
+
+            // Start transaction on ConfigDB
+            conForConfigDB.setAutoCommit(false);
+            rollbackConfigDB = true;
+
+            // Execute to delete context on Configdb AND to drop associated database if this context is the last one
+            contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
+
+            // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
+            conForConfigDB.commit();
+            rollbackConfigDB = false;
+
             LOG.info("Context {} deleted.", ctx.getId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             throw new StorageException(e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             LOG.error("", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             LOG.error("", e);
-            rollback(conForConfigDB);
             throw new StorageException(e);
         } catch (StorageException e) {
-            rollback(conForConfigDB);
             throw e;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
         } finally {
-            try {
-                cache.pushConnectionForConfigDB(conForConfigDB);
-            } catch (final PoolException exp) {
-                LOG.error("Pool Error", exp);
+            if (null != conForConfigDB) {
+                if (rollbackConfigDB) {
+                    rollback(conForConfigDB);
+                }
+
+                try {
+                    adminCache.pushConnectionForConfigDB(conForConfigDB);
+                } catch (PoolException exp) {
+                    LOG.error("Pool Error", exp);
+                }
             }
         }
 
@@ -353,37 +371,53 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void deleteContextData(final Context ctx, final Connection con, final List<TableObject> sorted_tables) throws StorageException {
+    private void deleteContextData(Context ctx, Connection con, List<TableObject> sorted_tables) throws StorageException {
         LOG.debug("Now deleting data for context {}", ctx.getId());
-        PreparedStatement dynamicAttrDel = null;
+
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
-            // first delete everything with OSGi DeleteListener services.
-            try {
-                final DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
-                DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-            } catch (final OXException e) {
-                LOG.error(
-                    "Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.",
-                    e);
-            }
-            // now go through tables and delete the remainders
-            for (int i = sorted_tables.size() - 1; i >= 0; i--) {
-                deleteTableData(ctx, con, sorted_tables.get(i));
-            }
-            // commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
-            dynamicAttrDel = con.prepareStatement("DELETE FROM contextAttribute WHERE cid = ?");
-            dynamicAttrDel.setInt(1, ctx.getId().intValue());
-            dynamicAttrDel.executeUpdate();
+            rollback = true;
+
+            fireDeleteEventAndDeleteTableData(ctx, con, sorted_tables);
+
             con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
+            rollback = false;
+        } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(dynamicAttrDel);
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
         }
+
         LOG.debug("Data delete for context {} completed!", ctx.getId());
+    }
+
+    private void fireDeleteEventAndDeleteTableData(Context ctx, Connection con, List<TableObject> sorted_tables) throws SQLException {
+        // First delete everything with OSGi DeleteListener services.
+        try {
+            DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
+            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+        } catch (OXException e) {
+            LOG.error("Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.", e);
+        }
+
+        // Now go through tables and delete the remainders
+        for (int i = sorted_tables.size() - 1; i >= 0; i--) {
+            deleteTableData(ctx, con, sorted_tables.get(i));
+        }
+
+        // Commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM contextAttribute WHERE cid = ?");
+            stmt.setInt(1, ctx.getId().intValue());
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     private void deleteTableData(final Context ctx, final Connection con, final TableObject to) throws SQLException {
@@ -1170,18 +1204,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (null != cacheFinalize) {
                     try {
                         cacheFinalize.finalize(contextCreated);
-                    } catch (Exception x) { /* Ignore */
+                    } catch (Exception x) {
+                        // Ignore
                     }
                 }
 
-                if (automaticStrategyUsed) {
-                    if (rollback) {
+                if (rollback) {
+                    // Perform the roll-back dependent on utilized strategy
+                    if (automaticStrategyUsed) {
                         // A commit on configDb connection is guaranteed that is has not been performed
                         rollback(configCon);
                         OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
-                    }
-                } else {
-                    if (rollback) {
+                    } else {
                         // Either commit on configDb connection or writeContext() invocation failed
                         // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
                         rollback(configCon);
