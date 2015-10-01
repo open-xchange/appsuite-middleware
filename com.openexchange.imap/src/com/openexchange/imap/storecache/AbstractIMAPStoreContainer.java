@@ -53,6 +53,7 @@ import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -111,6 +112,12 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             imapStore = (IMAPStore) imapSession.getStore(name);
             doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
+
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
+
         return imapStore;
     }
 

@@ -272,6 +272,7 @@ public class IMAPStore extends Store
     private boolean enableImapEvents = false;
     private String propagateClientIpAddress = null;
     private Map<String, String> clientParameters = null;
+    private ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
     private int authTimeout = -1;
     private final String guid;			// for Yahoo! Mail IMAP
@@ -764,6 +765,15 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Sets the external ID generator
+     *
+     * @param externalIdGenerator The generator to set
+     */
+    public void setExternalIdGenerator(ExternalIdGenerator externalIdGenerator) {
+        this.externalIdGenerator = externalIdGenerator;
+    }
+
+    /**
      * Sets the client parameters
      *
      * @param clientParameters The client parameters to set
@@ -1014,11 +1024,31 @@ public class IMAPStore extends Store
     }
 
 	/*
-	 * Advertise client parameters
+	 * Advertise client parameters (if any)
 	 */
     {
-        Map<String, String> clientParams = clientParameters;
-        if (null != clientParams && p.hasCapability("ID")) {
+        Map<String, String> clientParams = null;
+        {
+            ExternalIdGenerator generator = this.externalIdGenerator;
+            if (null == generator) {
+                if (null != this.clientParameters && p.hasCapability("ID")) {
+                    clientParams = this.clientParameters;
+                }
+            } else if (p.hasCapability("ID")) {
+                // Generate external identifier & add to client parameters
+                String generatedExternalId = generator.generateExternalId();
+                clientParams = new LinkedHashMap<String, String>(6);
+                if (null == this.clientParameters) {
+                    clientParams.put("x-session-ext-id", generatedExternalId);
+                } else {
+                    // Overwrite "x-session-ext-id" client parameter with the generated one
+                    this.clientParameters.put("x-session-ext-id", generatedExternalId);
+                    clientParams.putAll(clientParameters);
+                }
+            }
+        }
+        
+        if (null != clientParams) {
             try {
                 p.id(clientParams);
             } catch (CommandFailedException cex) {

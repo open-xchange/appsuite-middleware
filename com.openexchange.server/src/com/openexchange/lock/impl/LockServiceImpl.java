@@ -100,16 +100,18 @@ public class LockServiceImpl implements LockService {
             ReentrantLock newLock = new ReentrantLock();
             cache.putSafe(identifier, newLock);
             return newLock;
-        } catch (final OXException e) {
-            // Already present
+        } catch (OXException e) {
+            // Already present?
             object = cache.get(identifier);
             if (object instanceof Lock) {
                 return (Lock) object;
             }
+            // Failed...
+            throw OXException.general("Could not create lock for identifier: " + identifier, e);
+        } catch (RuntimeException e) {
+            // Failed...
+            throw OXException.general("Could not create lock for identifier: " + identifier, e);
         }
-
-        // Failed...
-        throw OXException.general("Could not create lock for identifier: " + identifier);
     }
 
     @Override
@@ -126,16 +128,18 @@ public class LockServiceImpl implements LockService {
             ReentrantLock newLock = new ReentrantLock();
             cache.putSafe(identifier, newLock);
             return new SelfCleaningLock(newLock, identifier, this);
-        } catch (final OXException e) {
-            // Already present
+        } catch (OXException e) {
+            // Already present?
             object = cache.get(identifier);
             if (object instanceof Lock) {
                 return (Lock) object;
             }
+            // Failed...
+            throw OXException.general("Could not create lock for identifier: " + identifier, e);
+        } catch (RuntimeException e) {
+            // Failed...
+            throw OXException.general("Could not create lock for identifier: " + identifier, e);
         }
-
-        // Failed...
-        throw OXException.general("Could not create lock for identifier: " + identifier);
     }
 
     @Override

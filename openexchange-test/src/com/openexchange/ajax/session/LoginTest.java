@@ -241,7 +241,7 @@ public class LoginTest extends AbstractLoginTest {
     /**
      * If a login response lacks the random token the associated login actions (redeem and redirect) have to be unusable, too (even with an
      * otherwise valid random token).
-     *  
+     *
      * @throws Exception
      */
     public void testSessionRandomMissingAndUnusable() throws Exception {
@@ -274,7 +274,7 @@ public class LoginTest extends AbstractLoginTest {
             assertEquals("action=redeem shouldn't work when randomToken is disabled", 400, redeemMethod.getStatusCode());
         }
     }
-    
+
     @Test
     public void testCookieHashSalt() throws Exception {
         rawLogin(USER1);
@@ -295,7 +295,7 @@ public class LoginTest extends AbstractLoginTest {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().hasKey(key));
     }
-    
+
     private void assertResponseLacks(String key) throws Exception {
         rawLogin(USER1);
         assertRaw(new JSONAssertion().isObject().lacksKey(key));
@@ -316,7 +316,7 @@ public class LoginTest extends AbstractLoginTest {
     private String getHash(String agent, String salt) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(agent.getBytes(Charsets.UTF_8));
-        md.update("com.openexchange.ox.gui.dhtml".getBytes(Charsets.UTF_8));
+        md.update("open-xchange-appsuite".getBytes(Charsets.UTF_8));
         md.update(salt.getBytes());
         return Pattern.compile("\\W").matcher(Base64.encode(md.digest())).replaceAll("");
     }

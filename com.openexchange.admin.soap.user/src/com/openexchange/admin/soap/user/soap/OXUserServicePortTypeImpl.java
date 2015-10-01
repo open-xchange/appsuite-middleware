@@ -2117,6 +2117,13 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setFaxHome(user.getFax_home());
         soapUser.setFaxOther(user.getFax_other());
         soapUser.setFolderTree(user.getFolderTree());
+
+        // File storage / quota information
+        soapUser.setFilestoreId(user.getFilestoreId());
+        soapUser.setFilestoreName(user.getFilestore_name());
+        soapUser.setMaxQuota(user.getMaxQuota());
+        soapUser.setUsedQuota(user.getUsedQuota());
+
         soapUser.setGivenName(user.getGiven_name());
         soapUser.setGuiPreferencesForSoap(map2Soap(user.getGuiPreferences()));
         soapUser.setId(user.getId());
