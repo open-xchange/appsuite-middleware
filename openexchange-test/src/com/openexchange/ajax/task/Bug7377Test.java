@@ -149,7 +149,7 @@ public class Bug7377Test extends AbstractTaskTest {
             	
             
             ReminderObject[] reminder2 = rResponse.getReminder(tz1);
-            assertEquals("Wrong number of reminder for given timezone", 1, reminder2.length);
+            assertTrue("Found no reminders for given timezone", 0 < reminder2.length);
 
             final ReminderObject reminder = rResponse.getReminderByTarget(tz1, task.getObjectID());
             assertNotNull("Can't find reminder for task.", reminder);
