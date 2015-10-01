@@ -78,6 +78,7 @@ import com.openexchange.java.BoolReference;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MimeMailException;
@@ -157,21 +158,60 @@ public class IMAPDefaultFolderChecker {
     }
 
     /**
-     * Checks if given full name denotes a default folder.
+     * Checks if given full name denotes a default folder (w/o considering archive folder).
      *
      * @param folderFullName The full name to check
      * @return <code>true</code> if given full name denotes a default folder; otherwise <code>false</code>
      * @throws OXException If check for default folder fails
      */
     public boolean isDefaultFolder(String folderFullName) throws OXException {
-        boolean isDefaultFolder = false;
-        isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
-        for (int index = 0; (index < 6) && !isDefaultFolder; index++) {
+        return isDefaultFolder(folderFullName, false);
+    }
+
+    /**
+     * Checks if given full name denotes a default folder.
+     *
+     * @param folderFullName The full name to check
+     * @param checkArchive Whether the archive folder should also be checked
+     * @return <code>true</code> if given full name denotes a default folder; otherwise <code>false</code>
+     * @throws OXException If check for default folder fails
+     */
+    public boolean isDefaultFolder(String folderFullName, boolean checkArchive) throws OXException {
+        if (folderFullName.equalsIgnoreCase(INBOX)) {
+            return true;
+        }
+
+        for (int index = 6; index-- > 0;) {
             if (folderFullName.equalsIgnoreCase(getDefaultFolder(index))) {
                 return true;
             }
         }
-        return isDefaultFolder;
+
+        if (checkArchive) {
+            MailAccountStorageService storageService = com.openexchange.imap.services.Services.getService(MailAccountStorageService.class);
+            MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            String archiveFullName = optArchiveFullName(mailAccount, imapAccess);
+            if (null != archiveFullName && archiveFullName.equals(folderFullName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
+        if (null == mailAccount) {
+            return null;
+        }
+        String fn = mailAccount.getArchiveFullname();
+        if (null == fn) {
+            String name = mailAccount.getArchive();
+            if (null == name) {
+                return null;
+            }
+            fn = mailAccess.getFolderStorage().getDefaultFolderPrefix() + name;
+        }
+        return fn;
     }
 
     /**
