@@ -34,6 +34,12 @@ open-xchange-contact-storage-ldap (7.8.0-0) unstable; urgency=medium
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 05 Nov 2014 09:40:46 +0100
 
+open-xchange-contact-storage-ldap (7.6.2-33) stable; urgency=medium
+
+  * Build for patch 2015-09-28  (2767)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Fri, 25 Sep 2015 19:17:15 +0200
+
 open-xchange-contact-storage-ldap (7.6.2-32) stable; urgency=medium
 
   * Build for patch 2015-09-14 (2732)
