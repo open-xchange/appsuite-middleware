@@ -141,7 +141,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
-            return stmt.execute();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -168,7 +168,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, oldAlias);
-            return stmt.execute();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -194,7 +194,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
-            return stmt.execute();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -219,7 +219,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
-            return stmt.execute();
+            return stmt.executeUpdate() != 0;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

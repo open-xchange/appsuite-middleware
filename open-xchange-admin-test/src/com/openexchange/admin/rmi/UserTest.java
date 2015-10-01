@@ -846,6 +846,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setUserAttribute");
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestore_name");
+        notallowed.add("setFilestoreOwner");
         return notallowed;
     }
 
@@ -894,6 +895,9 @@ public class UserTest extends AbstractTest {
         notallowed.add("setPasswordMech");// server password is always different(crypted)
         notallowed.add("setName");// server does not support username change
 
+        notallowed.add("setFilestoreId");
+        notallowed.add("setFilestoreOwner");
+        notallowed.add("setFilestore_name");
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
@@ -1282,6 +1286,8 @@ public class UserTest extends AbstractTest {
         field.setAccessible(true);
         field.set(usr, null);
         System.out.println(usr.isCompanyset());
+        usr.setFilestoreId(null);
+        usr.setMaxQuota(null);
         user.change(ctx, usr, cred);
         usr.setName(username);
         final User usr2 = oxl.login2User(ctx, cred);
@@ -1638,6 +1644,7 @@ public class UserTest extends AbstractTest {
         // change all fields of the user
 
         final User retval = (User) usr.clone();
+        retval.setFilestoreId(null);
         //retval.setName(null); // INFO: Commented because the server does not throw any exception if username is sent!
         retval.setPasswordMech(null);
         retval.setMailenabled(!usr.getMailenabled());

@@ -1239,6 +1239,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
             rollback = false;
 
+            //invalidate alias cache
+            aliasStorage.invalidateAliases(contextId, userId);
+
             /*-
              *
             try {
