@@ -135,11 +135,15 @@ public class Bug7377Test extends AbstractTaskTest {
             // Check reminder
             final RangeResponse rResponse = client1.execute(new RangeRequest(remindDate));
             
-            System.out.println("Response has got " + rResponse.getConflicts().size() + " conflicts");
+            if (rResponse.hasConflicts()) {
+                System.out.println("Response has got " + rResponse.getConflicts().size() + " conflicts");
+            }
             if (rResponse.getResponse() != null) {
             	System.out.println("There is a response!");
             	System.out.println("Response is " + rResponse.getResponse().getJSON());
-            	System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
+                if (rResponse.hasError()) {
+                    System.out.println("Response has got " + rResponse.getProblematics().length + " problematics");
+                }
             	System.out.println("Response has got " + rResponse.getException() + " exceptions");
             }
             	
