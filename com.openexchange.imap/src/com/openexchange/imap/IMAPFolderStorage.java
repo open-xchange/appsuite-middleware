@@ -1449,8 +1449,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
                     }
                 }
-                if (getChecker().isDefaultFolder(fullName)) {
-                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, renameMe.getFullName());
+                if (getChecker().isDefaultFolder(fullName, true)) {
+                    throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, fullName);
                 }
                 /*
                  * Notify message storage about outstanding rename
@@ -1648,7 +1648,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                      * Perform move operation
                      */
                     final String oldFullname = moveMe.getFullName();
-                    if (getChecker().isDefaultFolder(oldFullname)) {
+                    if (getChecker().isDefaultFolder(oldFullname, true)) {
                         throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
                     }
                     IMAPFolder destFolder;
@@ -1714,7 +1714,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * Perform rename operation
                      */
-                    if (getChecker().isDefaultFolder(moveMe.getFullName())) {
+                    if (getChecker().isDefaultFolder(moveMe.getFullName(), true)) {
                         throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, moveMe.getFullName());
                     } else if (imapConfig.isSupportsACLs() && ((moveMe.getType() & Folder.HOLDS_MESSAGES) > 0)) {
                         try {
@@ -1897,22 +1897,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              * Default folder is affected, check if owner still holds full rights
                              */
                             final ACLExtension aclExtension = imapConfig.getACLExtension();
-                            if (getChecker().isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(
-                                updateMe,
-                                newACLs,
-                                aclExtension)) {
-                                throw IMAPException.create(
-                                    IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE,
-                                    imapConfig,
-                                    session,
-                                    updateMe.getFullName());
+                            if (getChecker().isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(updateMe, newACLs, aclExtension)) {
+                                throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, updateMe.getFullName());
                             }
                             if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
-                                throw IMAPException.create(
-                                    IMAPException.Code.NO_ADMINISTER_ACCESS,
-                                    imapConfig,
-                                    session,
-                                    updateMe.getFullName());
+                                throw IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS, imapConfig, session, updateMe.getFullName());
                             }
                             /*
                              * Check new ACLs
@@ -2720,7 +2709,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private void deleteFolder(final IMAPFolder deleteMe) throws OXException, MessagingException {
         final String fullName = deleteMe.getFullName();
-        if (getChecker().isDefaultFolder(fullName)) {
+        if (getChecker().isDefaultFolder(fullName, true)) {
             throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_DELETE, imapConfig, session, fullName);
         } else if (!doesExist(deleteMe, false)) {
             throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);

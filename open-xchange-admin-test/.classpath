@@ -23,6 +23,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.infostore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage.json"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
