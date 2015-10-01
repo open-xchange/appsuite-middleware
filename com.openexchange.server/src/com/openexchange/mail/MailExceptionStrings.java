@@ -181,6 +181,8 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG = "The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.";
 
+    public static final String NO_DEFAULT_FOLDER_UPDATE_MSG = "Default folder must not be updated";
+
     // The client request is not permitted.
     public static final String REQUEST_NOT_PERMITTED_MSG = "The client request is not permitted.";
 
