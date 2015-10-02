@@ -71,8 +71,6 @@ class UpdateTaskCollection {
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 
-    private int version;
-
     private final AtomicBoolean versionDirty = new AtomicBoolean(true);
 
     private UpdateTaskCollection() {
@@ -92,13 +90,11 @@ class UpdateTaskCollection {
 
     private final List<UpdateTaskV2> getFilteredUpdateTasks(SchemaUpdateState schema) {
         List<UpdateTaskV2> tasks = getListWithoutExcludes();
-        // Simulate executed list based on schema version if necessary.
-        final SchemaUpdateState state = addExecutedBasedOnVersion(schema, tasks);
         // Filter
         Filter filter = new ExecutedFilter();
         List<UpdateTaskV2> filtered = new ArrayList<UpdateTaskV2>();
         for (UpdateTaskV2 task : tasks) {
-            if (filter.mustBeExecuted(state, task)) {
+            if (filter.mustBeExecuted(schema, task)) {
                 filtered.add(task);
             }
         }
@@ -149,42 +145,10 @@ class UpdateTaskCollection {
             }
             retval.addAll(tasks.getBackground());
         }
-        final SchemaUpdateState simulatedState = addExecutedBasedOnVersion(schema, getListWithoutExcludes());
         // And sort them. Sorting this way prerequisites that every blocking task can be executed before any background task is scheduled.
         // Said in other words: Blocking tasks can not depend on background tasks.
-        retval = new UpdateTaskSorter().sort(simulatedState.getExecutedList(), retval);
+        retval = new UpdateTaskSorter().sort(schema.getExecutedList(), retval);
         return retval;
-    }
-
-    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTaskV2> tasks) {
-        final SchemaUpdateState retval;
-        retval = new SchemaUpdateStateImpl(schema);
-        Filter filter = new VersionFilter();
-        for (UpdateTaskV2 task : tasks) {
-            if (!filter.mustBeExecuted(schema, task)) {
-                retval.addExecutedTask(task.getClass().getName());
-            }
-        }
-        return retval;
-    }
-
-    /**
-     * Iterates all implementations of <code>UpdateTask</code> and determines the highest version number indicated through method
-     * <code>UpdateTask.addedWithVersion()</code>.
-     *
-     * @return The highest version number
-     */
-    final int getHighestVersion() {
-        if (versionDirty.get()) {
-            List<UpdateTaskV2> tasks = getListWithoutExcludes();
-            int vers = 0;
-            for (UpdateTaskV2 task : tasks) {
-                vers = Math.max(vers, task.addedWithVersion());
-            }
-            version = vers;
-            versionDirty.set(true);
-        }
-        return version;
     }
 
     List<UpdateTaskV2> getListWithoutExcludes() {

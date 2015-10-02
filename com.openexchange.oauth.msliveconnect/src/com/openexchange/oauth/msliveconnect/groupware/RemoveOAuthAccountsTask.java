@@ -57,7 +57,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -74,18 +73,8 @@ public class RemoveOAuthAccountsTask implements UpdateTaskV2 {
     private static final String SUBSCRIPTION_ID = "com.openexchange.oauth.msn";
 
     @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getPriority() {
-        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(Schema schema, int contextId) throws OXException {
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
         final DatabaseService ds = Services.getService(DatabaseService.class);
         final Connection con = ds.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
@@ -105,11 +94,6 @@ public class RemoveOAuthAccountsTask implements UpdateTaskV2 {
                 ds.backForUpdateTask(contextId, con);
             }
         }
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
     }
 
     @Override

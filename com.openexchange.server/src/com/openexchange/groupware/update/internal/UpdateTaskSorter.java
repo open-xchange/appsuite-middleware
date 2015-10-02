@@ -64,7 +64,7 @@ import com.openexchange.java.Strings;
  */
 public class UpdateTaskSorter {
 
-    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker(), new LowestVersionChecker() };
+    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker() };
 
     public UpdateTaskSorter() {
         super();

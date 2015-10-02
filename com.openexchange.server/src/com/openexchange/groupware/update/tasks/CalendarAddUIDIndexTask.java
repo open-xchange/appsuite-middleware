@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -76,12 +75,6 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
      */
     public CalendarAddUIDIndexTask() {
         super();
-    }
-
-    @Override
-    public int getPriority() {
-        final int priority = UpdateTaskV2.UpdateTaskPriority.HIGH.priority;
-        return priority;
     }
 
     @Override
@@ -131,10 +124,6 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
                 log.error("Problem adding index \"{}\" on table {}.", name, table, e);
             }
         }
-    }
-
-    private OXException createSQLError(final SQLException e) {
-        return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
     }
 
 }

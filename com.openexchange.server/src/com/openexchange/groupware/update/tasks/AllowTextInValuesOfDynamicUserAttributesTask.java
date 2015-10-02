@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.SortableId.Priority;
 import com.openexchange.groupware.update.ChangeColumnTypeUpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -74,16 +73,6 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
     @Override
     public String[] getDependencies() {
         return new String[0];
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return Priority.NORMAL.ordinal();
     }
 
     @Override

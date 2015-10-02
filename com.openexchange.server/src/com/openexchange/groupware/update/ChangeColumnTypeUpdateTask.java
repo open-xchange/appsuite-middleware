@@ -91,15 +91,9 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         return new Attributes();
     }
 
-
     @Override
     public void perform(PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-
-    @Override
-    public void perform(Schema schema, int contextId) throws OXException {
+        int contextId = params.getContextId();
         Connection con = null;
         try {
             con = getDatabaseService().getForUpdateTask(contextId);
@@ -121,7 +115,7 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         return dbService;
     }
 
-    protected void before(Connection con) throws SQLException{
+    protected void before(Connection con) throws SQLException {
         // May be overridden
     }
 

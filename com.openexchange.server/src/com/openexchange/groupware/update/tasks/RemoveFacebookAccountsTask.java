@@ -61,7 +61,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -81,18 +80,8 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
     private static final String MESSAGING_ID = "com.openexchange.messaging.facebook";
 
     @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public int getPriority() {
-        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(Schema schema, int contextId) throws OXException {
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = ds.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
@@ -202,11 +191,6 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
 
     private OXException createSQLError(final SQLException e) {
         return UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
     }
 
     @Override

@@ -58,10 +58,8 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.tools.update.Tools;
 
@@ -71,16 +69,6 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskPriority.NORMAL.priority;
-    }
 
     private static String getCreateMailUUIDTable() {
         return "CREATE TABLE mailUUID (" +
@@ -132,11 +120,6 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

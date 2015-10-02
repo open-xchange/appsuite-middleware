@@ -58,34 +58,6 @@ import com.openexchange.exception.OXException;
  */
 public interface UpdateTaskV2 {
 
-    static final int NO_VERSION = Schema.NO_VERSION;
-
-    /**
-     * Priorities for update tasks.
-     */
-    public static enum UpdateTaskPriority {
-        HIGHEST(0), HIGH(1), NORMAL(3), LOW(4), LOWEST(5);
-
-        public final int priority;
-
-        private UpdateTaskPriority(final int priority) {
-            this.priority = priority;
-        }
-
-        public static UpdateTaskPriority getInstance(final int priority) {
-            for (final UpdateTaskPriority test : values()) {
-                if (test.priority == priority) {
-                    return test;
-                }
-            }
-            throw new IllegalArgumentException();
-        }
-
-        public boolean equalOrHigher(final UpdateTaskPriority otherPriority) {
-            return this.ordinal() <= otherPriority.ordinal();
-        }
-    }
-
     /**
      * Performs the database schema upgrade. Once this method returns either successful or unsuccessful, this task is written as executed
      * successful or unsuccessful in the schemas updateTask table. This can not be changed afterwards automatically.
@@ -122,42 +94,4 @@ public interface UpdateTaskV2 {
      */
     TaskAttributes getAttributes();
 
-    /**
-     * Returns the database schema version of this update task.
-     * <p>
-     * For statically added update tasks an even number is supposed to be used, whereby an uneven number is supposed to be used by
-     * dynamically added update tasks. Thus version always increments by 2 for stable releases.
-     * <p>
-     * This version is compared with the schema version of the database. This update will only be applied if the database schema version is
-     * lower than this version. Remember to register your update task in the configuration file for update tasks or to publish it as an OSGi
-     * service.
-     *
-     * @return The schema version with which this update task was introduced.
-     */
-    int addedWithVersion();
-
-    /**
-     * Gets this update task's priority.
-     * <p>
-     * Returned value is supposed to be provided by one of the {@link UpdateTaskPriority} constants:
-     *
-     * <pre>
-     * public int getPriority() {
-     * return UpdateTask.UpdateTaskPriority.NORMAL.priority;
-     * }
-     * </pre>
-     *
-     * @return The update task's priority
-     */
-    int getPriority();
-
-    /**
-     * This method is called to apply the changes to the database schema. Performed changes must not destroy any information in the
-     * database. This ensures that update tasks can be executed twice if a task failed.
-     *
-     * @param schema The schema meta data
-     * @param contextId The context ID which is used to fetch database connections from the pool.
-     * @throws OXException if applying the changes fails.
-     */
-    void perform(Schema schema, int contextId) throws OXException;
 }

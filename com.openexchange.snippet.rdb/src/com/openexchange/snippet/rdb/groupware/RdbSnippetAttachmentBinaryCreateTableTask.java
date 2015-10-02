@@ -59,10 +59,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
@@ -136,21 +134,6 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
             DBUtils.closeSQLStuff(rs);
         }
         return retval;
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws com.openexchange.exception.OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

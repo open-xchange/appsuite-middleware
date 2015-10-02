@@ -64,27 +64,10 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         super();
     }
 
-    @Override
-    public final void perform(final Schema schema, final int contextId) throws OXException {
-        perform(this, schema, contextId);
-    }
-
     public static final void perform(final UpdateTaskV2 task, final Schema schema, final int contextId) throws OXException {
         final ProgressState logger = new ProgressStatusImpl(task.getClass().getName(), schema.getSchema());
         final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
         task.perform(params);
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        final
-        int priority = UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-        return priority;
     }
 
     @Override

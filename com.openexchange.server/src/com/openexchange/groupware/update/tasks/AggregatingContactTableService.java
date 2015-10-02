@@ -59,10 +59,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -107,21 +105,6 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AggregatingContactTableService.class);
         logger.info("UpdateTask ''{}'' successfully performed!", AggregatingContactTableService.class.getSimpleName());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

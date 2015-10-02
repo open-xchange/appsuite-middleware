@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -65,16 +64,6 @@ public class DependenciesResolvedChecker implements DependencyChecker {
 
     @Override
     public boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute) {
-        if (Schema.NO_VERSION != task.addedWithVersion()) {
-            // Task has a version defined and must be sorted by the {@link LowestVersionChecker}.
-            return false;
-        }
-        // Only V2 tasks having the version not defined should be in the list to be scheduled.
-        for (UpdateTaskV2 other : toExecute) {
-            if (Schema.NO_VERSION != other.addedWithVersion()) {
-                return false;
-            }
-        }
         // Check all dependencies.
         for (String dependency : task.getDependencies()) {
             if (!dependencyFulfilled(dependency, executed, enqueued)) {

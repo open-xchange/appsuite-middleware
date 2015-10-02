@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -76,12 +75,6 @@ public final class ContactAddOutlookAddressFieldsTask extends UpdateTaskAdapter 
      */
     public ContactAddOutlookAddressFieldsTask() {
         super();
-    }
-
-    @Override
-    public int getPriority() {
-        final int priority = UpdateTaskV2.UpdateTaskPriority.HIGH.priority;
-        return priority;
     }
 
     @Override

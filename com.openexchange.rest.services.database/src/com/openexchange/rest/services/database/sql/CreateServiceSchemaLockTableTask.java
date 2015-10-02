@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.CreateTableUpdateTask;
 public class CreateServiceSchemaLockTableTask extends CreateTableUpdateTask {
 
     public CreateServiceSchemaLockTableTask(DatabaseService databaseService) {
-        super(new CreateServiceSchemaLockTable(), new String[0], NO_VERSION, databaseService);
+        super(new CreateServiceSchemaLockTable(), new String[0], databaseService);
     }
 
 }

@@ -49,9 +49,6 @@
 
 package com.openexchange.subscribe.xing.groupware;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Schema;
-
 
 
 /**
@@ -66,11 +63,6 @@ public class XingCrawlerSubscriptionsRemoverTask extends SubscriptionRemoverTask
      */
     public XingCrawlerSubscriptionsRemoverTask() {
         super("com.openexchange.subscribe.xing");
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
-        // Do nothing at all ! ! !
     }
 
 }

@@ -59,7 +59,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -84,11 +83,6 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
     private static final int DESIRED_SIZE = 320;
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    @Override
     public String[] getDependencies() {
         return new String[] {};
     }
@@ -99,20 +93,8 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
     }
 
     @Override
-    public int addedWithVersion() {
-        return 33;
-    }
-
-    @Override
-    public int getPriority() {
-        /*
-         * Modification on database: highest priority.
-         */
-        return UpdateTaskV2.UpdateTaskPriority.HIGHEST.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
         LOG.info("Starting {}", CalendarExtendDNColumnTaskV2.class.getSimpleName());
         modifyColumnInTable("prg_date_rights", contextId);
         modifyColumnInTable("del_date_rights", contextId);
