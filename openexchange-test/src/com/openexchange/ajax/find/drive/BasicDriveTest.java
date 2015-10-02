@@ -91,6 +91,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -459,8 +460,8 @@ public class BasicDriveTest extends AbstractFindTest {
         deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
         folderManager.deleteFolderOnServer(deletedFolder);
-        FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();
-        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentFolderID())).getFolder();
+        Folder reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
+        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
         assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
 
         List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle());
@@ -473,7 +474,7 @@ public class BasicDriveTest extends AbstractFindTest {
         ActiveFacet fileNameFacet = createActiveFacet((SimpleFacet) findByType(DriveFacetType.FILE_NAME, autocompleteResponse));
         List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(fileNameFacet);
-        facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getObjectID(), Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getID(), Filter.NO_FILTER));
         List<PropDocument> documents = query(client, facets);
         assertEquals("Wrong number of documents", 1, documents.size());
         assertEquals("Wrong document", deletedDocument.getTitle(), (String) documents.get(0).getProps().get("title"));
