@@ -387,23 +387,27 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         return delegate.isUserInRole(arg0);
     }
 
+    /**
+     * com.openexchange.ajax.Multiple accesses reequest objects concurrently
+     * so we have to prevent concurrent modifications
+     */
     @Override
-    public void removeAttribute(String arg0) {
+    public synchronized void removeAttribute(String arg0) {
         delegate.removeAttribute(arg0);
     }
 
     @Override
-    public void setAttribute(String arg0, Object arg1) {
+    public synchronized void setAttribute(String arg0, Object arg1) {
         delegate.setAttribute(arg0, arg1);
     }
 
     @Override
-    public void setCharacterEncoding(String arg0) throws UnsupportedEncodingException {
+    public synchronized void setCharacterEncoding(String arg0) throws UnsupportedEncodingException {
         delegate.setCharacterEncoding(arg0);
     }
 
     @Override
-    public void putParameter(String name, String value) {
+    public synchronized void putParameter(String name, String value) {
         Request internalRequest = ServletUtils.getInternalRequest(delegate);
         internalRequest.putParameter(name, value);
     }
