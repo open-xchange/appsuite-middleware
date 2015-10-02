@@ -66,7 +66,8 @@ import com.openexchange.http.grizzly.util.RequestToolsTest;
 @SuiteClasses({
     RemoteIPFinderTest.class,
     ServletFilterRegistrationTest.class,
-    RequestToolsTest.class
+    RequestToolsTest.class,
+    WrapperModificationTest.class
 })
 public class UnitTests {
 
