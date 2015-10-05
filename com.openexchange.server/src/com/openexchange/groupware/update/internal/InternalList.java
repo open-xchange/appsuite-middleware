@@ -100,6 +100,7 @@ import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
@@ -575,6 +576,9 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.8.1 starts here. +++++++++++++++++++++++++++++++++
 
         list.add(new DropVersionTableTask());
+
+        // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
+        list.add(new RemoveAliasInUserAttributesTable());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
