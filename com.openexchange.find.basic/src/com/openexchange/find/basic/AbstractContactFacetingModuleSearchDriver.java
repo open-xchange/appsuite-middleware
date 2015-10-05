@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -234,6 +235,11 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If contact search fails
      */
     private List<Contact> searchContacts(ServerSession session, String prefix, AutocompleteParameters parameters, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (Strings.isEmpty(prefix) || prefix.length() < minimumSearchCharacters) {
+            return Collections.emptyList();
+        }
+
         SortOptions sortOptions = new SortOptions(SORT_ORDER);
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
         SearchIterator<Contact> searchIterator = null;
