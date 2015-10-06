@@ -365,6 +365,37 @@ public final class RateLimiter {
     private static final String LINE_SEP = System.getProperty("line.separator");
     private static final long LAST_RATE_LIMIT_LOG_THRESHOLD = 60000L;
 
+    private static AtomicLong processedRequests = new AtomicLong();
+
+    /**
+     * Gets the number of requests that have been processed in the rate limiter.
+     *
+     * @return The processed requests
+     */
+    public static long getProcessedRequests() {
+        return processedRequests.get();
+    }
+
+    /**
+     * Gets the number of currently tracked rate limit slots held in the internal bucket map.
+     *
+     * @return The slot count
+     */
+    public static long getSlotCount() {
+        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        return null == bucketMap ? 0L : bucketMap.size();
+    }
+
+    /**
+     * Clears the internal bucket map.
+     */
+    public static void clear() {
+        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        if (null != bucketMap) {
+            bucketMap.clear();
+        }
+    }
+
     /**
      * Checks given request if possibly rate limited.
      *
@@ -438,6 +469,7 @@ public final class RateLimiter {
             // Not yet fully initialized
             return false;
         }
+        processedRequests.incrementAndGet();
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
