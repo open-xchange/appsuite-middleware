@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -74,6 +75,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
+
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
@@ -150,6 +152,9 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final char OPT_NIO_BUFFER_STATS_SHORT = 'n';
     private static final String OPT_NIO_BUFFER_STATS_LONG = "niobufferstats";
+
+    private static final char OPT_RT_BUFFER_STATS_SHORT= 'R';
+    private static final String OPT_RT_BUFFER_STATS_LONG = "rtstats";
 
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
@@ -604,6 +609,7 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(showGeneralMonitor(con));
         sb.append(showMailInterfaceMonitor(con));
         sb.append(showPooling(con));
+        sb.append(showRateLimiterMonitor(con));
         return sb.toString();
     }
 
@@ -625,6 +631,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static StringBuffer showAJPv13ServerThreadsMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
         return getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor");
+    }
+
+    private static StringBuffer showRateLimiterMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=RateLimiterMonitor");
     }
 
     private static StringBuffer showCallMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
@@ -911,6 +921,35 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
         .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
         .toString();
+    }
+
+    static String showRtData(final MBeanServerConnection mbeanServerConnection) {
+        String runLoopFillSum = "RunLoopFillSum";
+        StringBuilder sb = new StringBuilder();
+        try {
+            final ObjectName objectName = new ObjectName("com.openexchange.realtime:name=RunLoopManager");
+            Object fillSum = mbeanServerConnection.getAttribute(objectName, runLoopFillSum);
+            if (fillSum instanceof Map) {
+                Map<?, ?> fillSums = Map.class.cast(fillSum);
+                for (Map.Entry<?, ?> entry : fillSums.entrySet()) {
+                    sb.append(objectName);
+                    sb.append(',');
+                    sb.append(runLoopFillSum);
+                    sb.append(',');
+                    sb.append(entry.getKey());
+                    sb.append(" = ");
+                    sb.append(entry.getValue());
+                    sb.append(LINE_SEPARATOR);
+                }
+            }
+        } catch (final Exception e) {
+            sb.append("com.openexchange.realtime");
+            sb.append(" = ");
+            sb.append('[');
+            sb.append(e.toString());
+            sb.append(']');
+        }
+        return sb.toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {
