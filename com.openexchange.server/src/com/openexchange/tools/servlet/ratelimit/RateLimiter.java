@@ -255,7 +255,7 @@ public final class RateLimiter {
                     tmp = tmp2;
                     bucketMap = tmp;
 
-                    final int delay = 300000; // Delay of 5 minutes
+                    final int delay = maxRateTimeWindow(); // delay of window size (default: 5 minutes)
                     final Runnable r = new Runnable() {
 
                         @Override
@@ -382,8 +382,31 @@ public final class RateLimiter {
      * @return The slot count
      */
     public static long getSlotCount() {
+        return getSlotCount(false);
+    }
+
+    /**
+     * Gets the number of currently tracked rate limit slots held in the internal bucket map.
+     *
+     * @param purge <code>true</code> to trigger pending cleanup operations prior getting the size, <code>false</code>, otherwise
+     * @return The slot count
+     */
+    static long getSlotCount(boolean purge) {
         ConcurrentMap<Key, Rate> bucketMap = bucketMap();
-        return null == bucketMap ? 0L : bucketMap.size();
+        if (null == bucketMap) {
+            return 0L;
+        }
+        if (purge) {
+            long mark = System.currentTimeMillis() - 2 * maxRateTimeWindow(); // Older than doubled delay -- (default: 10 minutes);
+            for (Iterator<Entry<Key, Rate>> iterator = bucketMap.entrySet().iterator(); iterator.hasNext();) {
+                Entry<Key, Rate> entry = iterator.next();
+                if (false == entry.getValue().markDeprecatedIfElapsed(mark)) {
+                    break;
+                }
+                iterator.remove();
+            }
+        }
+        return bucketMap.size();
     }
 
     /**
