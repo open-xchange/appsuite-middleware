@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -112,7 +113,19 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
             UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-            folderService.updateFolder(folder, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+            AbstractFolder toUpdate = new AbstractFolder() {
+
+                private static final long serialVersionUID = -842650996626709735L;
+
+                @Override
+                public boolean isGlobalID() {
+                    return false;
+                }
+            };
+            toUpdate.setTreeID(folder.getTreeID());
+            toUpdate.setPermissions(folder.getPermissions());
+            toUpdate.setID(folder.getID());
+            folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
         }
     }
 
