@@ -52,6 +52,7 @@ package com.openexchange.contact.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,7 @@ import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -88,6 +90,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -105,6 +108,37 @@ import com.openexchange.userconf.UserPermissionService;
 public final class Tools {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
+
+    private static final FolderObject GUEST_CONTACTS = new FolderObject();
+    static {
+        GUEST_CONTACTS.setObjectID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        GUEST_CONTACTS.setParentFolderID(FolderObject.SYSTEM_FOLDER_ID);
+        GUEST_CONTACTS.setFolderName("Guest contacts");
+        GUEST_CONTACTS.setModule(FolderObject.CONTACT);
+        GUEST_CONTACTS.setType(FolderObject.SYSTEM_TYPE);
+        GUEST_CONTACTS.setCreationDate(new Date());
+        GUEST_CONTACTS.setCreatedBy(2);
+        GUEST_CONTACTS.setLastModified(new Date());
+        GUEST_CONTACTS.setModifiedBy(2);
+        GUEST_CONTACTS.setPermissionFlag(FolderObject.PUBLIC_PERMISSION);
+        GUEST_CONTACTS.setSubfolderFlag(false);
+        GUEST_CONTACTS.setSubfolderIds(new ArrayList<Integer>(0));
+        GUEST_CONTACTS.setDefaultFolder(false);
+
+        OCLPermission allUsersPermission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        allUsersPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        allUsersPermission.setGroupPermission(true);
+
+        OCLPermission allGuestsPermission = new OCLPermission(GroupStorage.GUEST_GROUP_IDENTIFIER, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        allGuestsPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
+        allGuestsPermission.setGroupPermission(true);
+
+        List<OCLPermission> permissions = new ArrayList<>(2);
+        permissions.add(allUsersPermission);
+        permissions.add(allGuestsPermission);
+
+        GUEST_CONTACTS.setPermissions(permissions);
+    }
 
 	/**
 	 * Gets a comparator for contacts based on the supplied sort options.
@@ -242,8 +276,20 @@ public final class Tools {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUserPermissionBits();
         }
+        return getUserPermissionBits(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the user permission bits.
+     *
+     * @param userID The user ID
+     * @param contextID The context ID
+     * @return
+     * @throws OXException
+     */
+    private static UserPermissionBits getUserPermissionBits(int userID, int contextID) throws OXException {
         return ContactServiceLookup.getService(UserPermissionService.class, true).getUserPermissionBits(
-            session.getUserId(), getContext(session));
+            userID, getContext(contextID));
     }
 
     /**
@@ -269,6 +315,10 @@ public final class Tools {
 	 * @throws OXException
 	 */
     public static FolderObject getFolder(int contextID, String folderId) throws OXException {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return GUEST_CONTACTS;
+        }
+
         FolderService folderService = ContactServiceLookup.getService(FolderService.class, true);
         return folderService.getFolderObject(parse(folderId), contextID);
     }
@@ -299,10 +349,13 @@ public final class Tools {
      * @throws OXException
      */
     public static EffectivePermission getPermission(int contextID, String folderId, int userID) throws OXException {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return GUEST_CONTACTS.getEffectiveUserPermission(userID, getUserPermissionBits(userID, contextID));
+        }
         return ContactServiceLookup.getService(FolderService.class, true).getFolderPermission(parse(folderId), userID, contextID);
     }
 
-	/**
+    /**
 	 * Checks whether the supplied string is empty, that is it is either
 	 * <code>null</code>, or consists of whitespace characters exclusively.
 	 *

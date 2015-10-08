@@ -63,6 +63,8 @@ public class UserImpl4Test implements User {
 
     private int[] groups;
 
+    private int guestCreatedBy = 0;
+
 	public UserImpl4Test() {
 
 	}
@@ -216,12 +218,16 @@ public class UserImpl4Test implements User {
 
     @Override
     public int getCreatedBy() {
-        return 0;
+        return guestCreatedBy;
+    }
+
+    public void setGuestCreatedBy(int guestCreatedBy) {
+        this.guestCreatedBy = guestCreatedBy;
     }
 
     @Override
     public boolean isGuest() {
-        return false;
+        return guestCreatedBy > 0;
     }
 
     @Override

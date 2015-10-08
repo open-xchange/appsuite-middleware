@@ -519,7 +519,7 @@ public enum UserField {
     /**
      * Number of distribution list
      */
-    IMAGE1_CONTENT_TYPE(601, "image_content_type"),
+    IMAGE1_CONTENT_TYPE(601, "image1_content_type"),
     /**
      * Mark as distribution list
      */

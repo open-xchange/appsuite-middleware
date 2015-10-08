@@ -434,31 +434,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * update image data if needed
              */
-            if (queryFields.hasImageData()) {
-                contact.setImageLastModified(now);
-                queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
-                if (null == contact.getImage1()) {
-                    // delete previous image if exists
-                    executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, maxLastModified);
-                } else {
-                    checkImageSize(contact);
-                    if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { ContactField.OBJECT_ID })) {
-                        // update previous image
-                        if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, maxLastModified, contact, queryFields.getImageDataFields(true))) {
-                            throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
-                        }
-                    } else {
-                        // create new image
-                        final Contact imageData = new Contact();
-                        imageData.setObjectID(objectID);
-                        imageData.setContextId(contextID);
-                        imageData.setImage1(contact.getImage1());
-                        imageData.setImageContentType(contact.getImageContentType());
-                        imageData.setImageLastModified(contact.getImageLastModified());
-                        executor.insert(connection, Table.IMAGES, imageData, Fields.IMAGE_DATABASE_ARRAY);
-                    }
-                }
-            }
+            updateImageIfNeeded(contextID, objectID, contact, now, maxLastModified, queryFields, connection);
             /*
              * update contact data
              */
@@ -1149,39 +1125,6 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         return objectId;
     }
 
-    private void updateGuestContact(final int contextId, final int userId, final int contactId, final Contact contact, Connection con) throws OXException {
-        boolean newCon = false;
-        DatabaseService dbService = null;
-        if (null == con) {
-            newCon = true;
-            dbService = RdbServiceLookup.getService(DatabaseService.class);
-            if (null == dbService) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
-            }
-            con = dbService.getWritable(contextId);
-        }
-        final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
-        try {
-            final Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.CREATED_BY });
-            if (null == toUpdate) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
-            }
-            if (toUpdate.getCreatedBy() != userId) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
-            }
-            executor.update(con, Table.CONTACTS, contextId, contactId, System.currentTimeMillis(), contact, Fields.sort(queryFields.getContactDataFields()));
-        } catch (final SQLException e) {
-            if (newCon) {
-                DBUtils.rollback(con);
-            }
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (newCon && null != dbService) {
-                dbService.backWritable(contextId, con);
-            }
-        }
-    }
-
     @Override
     public Contact getGuestContact(final int contextId, final int guestId, final ContactField[] contactFields) throws OXException {
         final DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
@@ -1255,13 +1198,87 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
+    private void updateGuestContact(final int contextId, final int userId, final int contactId, final Contact contact, Connection con) throws OXException {
+        boolean newCon = false;
+        DatabaseService dbService = null;
+        if (null == con) {
+            newCon = true;
+            dbService = RdbServiceLookup.getService(DatabaseService.class);
+            if (null == dbService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
+            }
+            con = dbService.getWritable(contextId);
+        }
+
+        Date now = new Date();
+        contact.setLastModified(now);
+
+        QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
+        try {
+            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.CREATED_BY, ContactField.IMAGE_LAST_MODIFIED });
+            if (null == toUpdate) {
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
+            }
+            if (toUpdate.getCreatedBy() != userId) {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+            }
+            long imageLastModified = Long.MIN_VALUE;
+            if (toUpdate.getImageLastModified() != null) {
+                imageLastModified = toUpdate.getImageLastModified().getTime();
+            }
+            updateImageIfNeeded(contextId, contactId, contact, now, imageLastModified, queryFields, con);
+            executor.update(con, Table.CONTACTS, contextId, contactId, now.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
+        } catch (final SQLException e) {
+            if (newCon) {
+                DBUtils.rollback(con);
+            }
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (newCon && null != dbService) {
+                dbService.backWritable(contextId, con);
+            }
+        }
+    }
+
     @Override
     public void updateGuestContact(final int contextId, final int contactId, final Contact contact, final Connection con) throws OXException {
-        final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
+        Date now = new Date();
+        contact.setLastModified(now);
+
+        QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
         try {
-            executor.update(con, Table.CONTACTS, contextId, contactId, System.currentTimeMillis(), contact, Fields.sort(queryFields.getContactDataFields()));
+            updateImageIfNeeded(contextId, contactId, contact, now, Long.MIN_VALUE, queryFields, con);
+            executor.update(con, Table.CONTACTS, contextId, contactId, now.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+    }
+
+    private void updateImageIfNeeded(int contextID, int objectID, Contact contact, Date now, long maxLastModified, QueryFields queryFields, Connection connection) throws SQLException, OXException {
+        if (queryFields.hasImageData()) {
+            contact.setImageLastModified(now);
+            queryFields.update(Mappers.CONTACT.getAssignedFields(contact));
+            if (null == contact.getImage1()) {
+                // delete previous image if exists
+                executor.deleteSingle(connection, Table.IMAGES, contextID, objectID, maxLastModified);
+            } else {
+                checkImageSize(contact);
+                if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { ContactField.OBJECT_ID })) {
+                    // update previous image
+                    if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, maxLastModified, contact, queryFields.getImageDataFields(true))) {
+                        throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
+                    }
+                } else {
+                    // create new image
+                    final Contact imageData = new Contact();
+                    imageData.setObjectID(objectID);
+                    imageData.setContextId(contextID);
+                    imageData.setImage1(contact.getImage1());
+                    imageData.setImageContentType(contact.getImageContentType());
+                    imageData.setImageLastModified(contact.getImageLastModified());
+                    executor.insert(connection, Table.IMAGES, imageData, Fields.IMAGE_DATABASE_ARRAY);
+                }
+            }
         }
     }
 

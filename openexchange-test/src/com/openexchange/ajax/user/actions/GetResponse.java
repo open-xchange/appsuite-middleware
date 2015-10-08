@@ -65,6 +65,8 @@ public class GetResponse extends AbstractAJAXResponse {
 
     private User user;
 
+    private String imageUrl;
+
     /**
      * @param response
      */
@@ -86,5 +88,13 @@ public class GetResponse extends AbstractAJAXResponse {
 
     void setUser(User user) {
         this.user = user;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
