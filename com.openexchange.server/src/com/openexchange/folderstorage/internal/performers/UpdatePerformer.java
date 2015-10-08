@@ -166,9 +166,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
-            if (storageFolder.isDefault() || storageFolder.getDefaultType() != 0) {
-                throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("update");
-            }
             final String oldParentId = storageFolder.getParentID();
 
             final boolean move;
