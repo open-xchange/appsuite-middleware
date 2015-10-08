@@ -64,7 +64,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
  * {@link FolderJSONActivator} - Activator for JSON folder interface.
@@ -114,6 +116,8 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                 ContentTypeDiscoveryService.class));
             track(AdditionalFolderField.class, new FolderFieldCollector(context, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
             track(ShareNotificationService.class, new RegistryServiceTrackerCustomizer<ShareNotificationService>(context, getInstance(), ShareNotificationService.class));
+            track(SubscriptionSourceDiscoveryService.class, new RegistryServiceTrackerCustomizer<SubscriptionSourceDiscoveryService>(context, getInstance(), SubscriptionSourceDiscoveryService.class));
+            track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, getInstance(), PublicationTargetDiscoveryService.class));
             /*
              * Open trackers
              */

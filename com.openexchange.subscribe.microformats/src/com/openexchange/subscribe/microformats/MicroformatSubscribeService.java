@@ -91,7 +91,6 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     private SubscriptionSource source;
     private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
-
     /**
      * Initializes a new {@link MicroformatSubscribeService}.
      */
@@ -100,9 +99,14 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public void subscribe(Subscription subscription) throws OXException {
+    public boolean isCreateModifyEnabled() {
         ConfigurationService configService = OXMFServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if ((configService == null) || (!configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))) {
+        return null != configService && configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false);
+    }
+
+    @Override
+    public void subscribe(Subscription subscription) throws OXException {
+        if (false == isCreateModifyEnabled()) {
             throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
         }
         super.subscribe(subscription);
@@ -110,8 +114,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     @Override
     public void touch(Context ctx, int subscriptionId) throws OXException {
-        ConfigurationService configService = OXMFServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if ((configService == null) || (!configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))) {
+        if (false == isCreateModifyEnabled()) {
             throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
         }
         super.touch(ctx, subscriptionId);
@@ -119,8 +122,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     @Override
     public void update(final Subscription subscription) throws OXException {
-        ConfigurationService configService = OXMFServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if ((configService == null) || (!configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))) {
+        if (false == isCreateModifyEnabled()) {
             throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
         }
         super.update(subscription);
@@ -196,7 +198,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     @Override
     public boolean handles(int folderModule) {
-        return source.getFolderModule() == folderModule;
+        return (source.getFolderModule() == folderModule) && isCreateModifyEnabled();
     }
 
     /**

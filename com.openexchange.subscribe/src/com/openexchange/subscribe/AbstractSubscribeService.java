@@ -54,8 +54,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
 import com.openexchange.crypto.CryptoService;
@@ -92,6 +92,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<FolderService>();
 
     public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<UserPermissionService>();
+
+    /**
+     * Enabled by default - override as needed.
+     */
+    @Override
+    public boolean isCreateModifyEnabled() {
+        return true;
+    }
 
     @Override
     public Collection<Subscription> loadSubscriptions(final Context ctx, final String folderId, final String secret) throws OXException {
