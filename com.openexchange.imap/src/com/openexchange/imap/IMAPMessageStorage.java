@@ -2595,7 +2595,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
                 {
                     final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session, this.ignoreSubscriptions);
-                    if (!STR_INBOX.equals(destFullName) && !listEntry.exists()) {
+                    if (!"INBOX".equals(destFullName) && !listEntry.exists()) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
                     }
                     if (!listEntry.canOpen()) {
@@ -4086,7 +4086,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws MessagingException If a messaging error occurs
      */
     protected char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
-        return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
+        return getLISTEntry("INBOX", imapFolder).getSeparator();
     }
 
     private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
