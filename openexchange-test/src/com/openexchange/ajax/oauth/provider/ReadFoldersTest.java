@@ -256,27 +256,30 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         RootRequest rootRequest = new RootRequest(api);
         rootRequest.setAltNames(altNames);
         Set<Integer> rootFolderIds = collectFolderIds(rootRequest);
-        Assert.assertTrue(rootFolderIds.containsAll(expectedFolderIds));
-        Assert.assertFalse(rootFolderIds.contains(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        Assert.assertTrue("Missing expected root folder(s). Expected " + expectedFolderIds + " but got " + rootFolderIds, rootFolderIds.containsAll(expectedFolderIds));
+        Assert.assertFalse("Infostore root folder was contained in response but must not", rootFolderIds.contains(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
 
         ListRequest listPrivateRequest = new ListRequest(api, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         listPrivateRequest.setAltNames(altNames);
         List<FolderObject> privateFolders = listFolders(listPrivateRequest);
         assertContentTypeAndPermissions(privateFolders);
-        Assert.assertTrue(collectFolderIds(privateFolders).contains(privateFolderId()));
+        Set<Integer> privateFolderIds = collectFolderIds(privateFolders);
+        Assert.assertTrue("Missing expected private folder " + privateFolderId() + " in " + privateFolderIds, privateFolderIds.contains(privateFolderId()));
 
         ListRequest listPrivateSubfoldersRequest = new ListRequest(api, privateFolderId());
         listPrivateSubfoldersRequest.setAltNames(altNames);
         List<FolderObject> privateSubFolders = listFolders(listPrivateSubfoldersRequest);
         assertContentTypeAndPermissions(privateSubFolders);
-        Assert.assertTrue(collectFolderIds(privateSubFolders).contains(privateSubfolder.getObjectID()));
+        Set<Integer> privateSubFolderIds = collectFolderIds(privateSubFolders);
+        Assert.assertTrue("Missing expected private subfolder " + privateSubfolder.getObjectID() + " in " + privateSubFolderIds, privateSubFolderIds.contains(privateSubfolder.getObjectID()));
 
         // expect public folders
         ListRequest listPublicRequest = new ListRequest(api, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         listPublicRequest.setAltNames(altNames);
         List<FolderObject> publicSubFolders = listFolders(listPublicRequest);
         assertContentTypeAndPermissions(publicSubFolders);
-        Assert.assertTrue(collectFolderIds(publicSubFolders).contains(publicSubfolder.getObjectID()));
+        Set<Integer> publicSubFolderIds = collectFolderIds(publicSubFolders);
+        Assert.assertTrue("Missing expected public subfolder " + publicSubfolder.getObjectID() + " in " + publicSubFolderIds, publicSubFolderIds.contains(publicSubfolder.getObjectID()));
 
         // expect shared folders
         ListRequest listSharedFolders = new ListRequest(api, FolderObject.SYSTEM_SHARED_FOLDER_ID);
@@ -284,16 +287,18 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<FolderObject> sharedFolders = listFolders(listSharedFolders);
         assertContentTypeAndPermissions(sharedFolders);
         FolderObject client2Folder = null;
+        String sharedFolderId = "u:" + ajaxClient2.getValues().getUserId();
         for (FolderObject folder : sharedFolders) {
-            if (folder.getFullName().equals("u:" + ajaxClient2.getValues().getUserId())) {
+            if (folder.getFullName().equals(sharedFolderId)) {
                 client2Folder = folder;
                 break;
             }
         }
-        Assert.assertNotNull(client2Folder);
-        ListRequest listSharedSubFolders = new ListRequest(api, "u:" + ajaxClient2.getValues().getUserId());
+        Assert.assertNotNull("Missing expected folder " + sharedFolderId + " below system shared folder", client2Folder);
+        ListRequest listSharedSubFolders = new ListRequest(api, sharedFolderId);
         listSharedSubFolders.setAltNames(altNames);
-        Assert.assertTrue(collectFolderIds(listSharedSubFolders).contains(sharedSubfolder.getObjectID()));
+        Set<Integer> sharedSubFolderIds = collectFolderIds(listSharedSubFolders);
+        Assert.assertTrue("Missing expected shared subfolder " + sharedSubfolder.getObjectID() + " in " + sharedSubFolderIds, sharedSubFolderIds.contains(sharedSubfolder.getObjectID()));
     }
 
     @Test
@@ -442,7 +447,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     }
 
     private void assertContentTypeAndPermissions(FolderObject folder) {
-        Assert.assertTrue(moduleId() == folder.getModule() || FolderObject.SYSTEM_MODULE == folder.getModule());
+        Assert.assertTrue("Unexpected module " + folder.getModule() + " for folder " + folder.getFolderName(), moduleId() == folder.getModule() || FolderObject.SYSTEM_MODULE == folder.getModule());
         boolean canRead = false;
         for (OCLPermission p : folder.getPermissions()) {
             if (p.getEntity() == userId || (p.isGroupPermission() && groups.contains(p.getEntity()))) {

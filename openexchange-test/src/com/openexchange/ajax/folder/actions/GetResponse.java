@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.folder.json.parser.ParsedFolder;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.webdav.xml.fields.FolderFields;
@@ -68,6 +71,7 @@ import com.openexchange.webdav.xml.fields.FolderFields;
 public final class GetResponse extends AbstractAJAXResponse {
 
     private FolderObject folder;
+    private Folder storageFolder;
 
     /**
      * Initializes a new {@link GetResponse}
@@ -107,6 +111,36 @@ public final class GetResponse extends AbstractAJAXResponse {
             this.folder = parsed;
         }
         return folder;
+    }
+
+    public Folder getStorageFolder() throws OXException {
+
+        if (hasError()) {
+            return null;
+        }
+        if (null == storageFolder) {
+            final JSONObject data = (JSONObject) getData();
+            try {
+                if (data.has(FolderFields.ID)) {
+                    rearrangeId(data);
+                }
+                if (data.has(FolderFields.FOLDER_ID)) {
+                    final String tmp = data.getString(FolderFields.FOLDER_ID);
+                    if (tmp.startsWith(FolderObject.SHARED_PREFIX)) {
+                        data.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+                    }
+                }
+            } catch (final JSONException e) {
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create();
+            }
+            com.openexchange.folder.json.parser.FolderParser parser = new com.openexchange.folder.json.parser.FolderParser(new StaticDiscoveryService());
+
+            ParsedFolder pfolder = parser.parseFolder(data, TimeZone.getDefault());// .parse(parsed, (JSONObject) getData());
+
+            this.storageFolder = pfolder;
+        }
+        return storageFolder;
+
     }
 
     private void fillInFullName(final JSONObject data, final FolderObject parsed) {
