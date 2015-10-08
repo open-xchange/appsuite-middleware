@@ -58,6 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.parser.UserParser;
 
 public class GetParser extends AbstractAJAXParser<GetResponse> {
@@ -98,6 +99,10 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
                         groups[i] = jGroups.getInt(i);
                     }
                     user.setGroups(groups);
+                }
+                user.setGuestCreatedBy(data.optInt("guest_created_by", 0));
+                if (data.has(UserField.IMAGE1_URL.getName())) {
+                    retval.setImageUrl(data.getString(UserField.IMAGE1_URL.getName()));
                 }
                 retval.setUser(user);
             } catch (OXException e) {

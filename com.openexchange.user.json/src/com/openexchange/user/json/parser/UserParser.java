@@ -157,6 +157,12 @@ public final class UserParser {
                 if (userJSONObject.has(UserField.LAST_MODIFIED.getName())) {
                     contact.setLastModified(parseTime(userJSONObject, UserField.LAST_MODIFIED.getName(), timeZone));
                 }
+                if (userJSONObject.has(UserField.NUMBER_OF_IMAGES.getName())) {
+                    contact.setNumberOfImages(parseInt(userJSONObject, UserField.NUMBER_OF_IMAGES.getName()));
+                }
+                if (userJSONObject.has(UserField.IMAGE1_CONTENT_TYPE.getName())) {
+                    contact.setImageContentType(parseString(userJSONObject, UserField.IMAGE1_CONTENT_TYPE.getName()));
+                }
             }
             return contact;
         } catch (final JSONException e) {

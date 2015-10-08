@@ -161,16 +161,15 @@ public class Executor extends Assert {
                 addQueryParamsToUri(urlString, getGETParameter(session, request)));
             break;
         case POST:
-            final HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
-            String contentType = detectContentTypeHeader(request);
-
             HttpEntity postEntity;
+            String contentType = detectContentTypeHeader(request);
             if ("multipart/form-data".equals(contentType)) {
                 postEntity = buildMultipartEntity(request);
             } else {
                 postEntity = getBodyParameters(request);
             }
 
+            HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
             httpPost.setEntity(postEntity);
             httpRequest = httpPost;
             break;

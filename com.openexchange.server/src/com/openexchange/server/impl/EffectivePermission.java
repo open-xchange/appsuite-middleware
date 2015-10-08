@@ -169,6 +169,9 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public boolean isFolderAdmin() {
+        if (FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == getFuid()) {
+            return super.isFolderAdmin();
+        }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return false;
@@ -196,6 +199,9 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getFolderPermission() {
+        if (FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == getFuid()) {
+            return super.getFolderPermission();
+        }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
@@ -219,6 +225,9 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getReadPermission() {
+        if (FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == getFuid()) {
+            return super.getReadPermission();
+        }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
@@ -245,6 +254,8 @@ public class EffectivePermission extends OCLPermission {
         if (GAB == getFuid()) {
             int writePermission = super.getWritePermission();
             return OXFolderProperties.isEnableInternalUsersEdit() ? (writePermission <= NO_PERMISSIONS ? WRITE_OWN_OBJECTS : writePermission) : NO_PERMISSIONS;
+        } else if (FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == getFuid()) {
+            return super.getWritePermission();
         }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
@@ -268,6 +279,9 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getDeletePermission() {
+        if (FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == getFuid()) {
+            return super.getDeletePermission();
+        }
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;

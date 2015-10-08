@@ -57,13 +57,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UpdateRequest}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
@@ -82,7 +83,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
 
     /**
      * Initializes a new {@link UpdateRequest} that will fail on errors that happen during the request processing
-     * 
+     *
      * @param contactData contains the contact attributes that should be updated. This contact must contain the attributes parent folder
      *            identifier, object identifier and last modification timestamp.
      * @param userData the user attributes that should be updated: "timezone" and "locale" are the only fields from Detailed user data which
@@ -94,7 +95,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
 
     /**
      * Initializes a new {@link UpdateRequest}.
-     * 
+     *
      * @param contactData contains the contact attributes that should be updated. This contact must contain the attributes parent folder
      *            identifier, object identifier and last modification timestamp.
      * @param userData the user attributes that should be updated: "timezone" and "locale" are the only fields from Detailed user data which
@@ -119,18 +120,38 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        if (hasImage) {
+            return Method.POST;
+        }
         return Method.PUT;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        if (hasImage) {
+            return new Header[] { new Header.SimpleHeader("Content-Type", "multipart/form-data") };
+        }
+
+        return NO_HEADER;
     }
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         if (hasImage) {
+            String ct = "image/jpg";
+            String ext = "jpg";
+            if (contactData.getImageContentType() != null) {
+                ct = contactData.getImageContentType();
+                if (ct.startsWith("image/png")) {
+                    ext = "png";
+                }
+            }
             return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())),
+                new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
+                new URLParameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactData.getInternalUserId())),
+                new URLParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactData.getLastModified().getTime())),
                 new FieldParameter("json", stringifiedJSON),
-                new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactData.getImage1()), "image/jpg") };
+                new FileParameter("file", "open-xchange_image." + ext, new ByteArrayInputStream(contactData.getImage1()), ct) };
         }
 
         return new Parameter[] {
@@ -148,7 +169,7 @@ public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
     public Object getBody() throws IOException, JSONException {
         return convert(contactData, userData);
     }
-    
+
     private JSONObject convert(Contact contactData, User userData) throws JSONException {
         final JSONObject jsonObj = new JSONObject();
         final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));

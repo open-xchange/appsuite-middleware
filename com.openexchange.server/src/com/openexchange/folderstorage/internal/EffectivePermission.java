@@ -278,6 +278,9 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getDeletePermission() {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return underlyingPerm.getDeletePermission();
+        }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
@@ -300,6 +303,9 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getFolderPermission() {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return underlyingPerm.getFolderPermission();
+        }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
@@ -315,6 +321,9 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public int getReadPermission() {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return underlyingPerm.getReadPermission();
+        }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
         } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
@@ -338,6 +347,8 @@ public final class EffectivePermission implements Permission {
         if (GAB.equals(folderId)) {
             int writePermission = underlyingPerm.getWritePermission();
             return OXFolderProperties.isEnableInternalUsersEdit() ? (writePermission <= NO_PERMISSIONS ? WRITE_OWN_OBJECTS : writePermission) : NO_PERMISSIONS;
+        } else if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return underlyingPerm.getWritePermission();
         }
 
         if (!hasModuleAccess()) {
@@ -354,6 +365,9 @@ public final class EffectivePermission implements Permission {
 
     @Override
     public boolean isAdmin() {
+        if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(folderId)) {
+            return underlyingPerm.isAdmin();
+        }
         if (!hasModuleAccess()) {
             return false;
         } else if ((FolderObject.PUBLIC == getType()) && (getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {

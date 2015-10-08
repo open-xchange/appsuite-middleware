@@ -648,6 +648,30 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Finds the first guest permission for the given folder based on the contained OCL permissions.
+     *
+     * @param folder The folder
+     * @return The permission or <code>null</code> if none exists
+     */
+    protected OCLPermission findFirstGuestPermission(FolderObject folder) throws Exception {
+        OCLPermission matchingPermission = null;
+        for (OCLPermission permission : folder.getPermissions()) {
+            if (!permission.isGroupPermission() && permission.getEntity() != client.getValues().getUserId()) {
+                com.openexchange.ajax.user.actions.GetResponse getResponse = client.execute(new com.openexchange.ajax.user.actions.GetRequest(
+                    permission.getEntity(),
+                    client.getValues().getTimeZone(),
+                    true));
+                if (getResponse.getUser().isGuest()) {
+                    matchingPermission = permission;
+                    break;
+                }
+            }
+        }
+
+        return matchingPermission;
+    }
+
+    /**
      * Discovers the share URL based on the supplied guest permission entity by either reading the share URL property directly in case
      * the guest entity points to an anonymous share, or by fetching and parsing the notification message for the recipient in case he is
      * an invited guest.
