@@ -123,15 +123,20 @@ public class RdbCredentialStorage implements CredentialStorage {
         int contextId = credentials.getContextId();
         DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
+        boolean modified = false;
         try {
-            storeCredentials(obfuscator.obfuscateCredentials(credentials), connection);
+            modified = storeCredentials(obfuscator.obfuscateCredentials(credentials), connection);
         } finally {
-            service.backWritable(contextId, connection);
+            if (modified) {
+                service.backWritable(contextId, connection);
+            } else {
+                service.backWritableAfterReading(contextId, connection);
+            }
         }
     }
 
-    private void storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {
-        storeCredentials(obfuscatedCredentials, true, connection);
+    private boolean storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {
+        return storeCredentials(obfuscatedCredentials, true, connection);
     }
 
     private boolean storeCredentials(Credentials obfuscatedCredentials, boolean retry, Connection connection) throws OXException {
