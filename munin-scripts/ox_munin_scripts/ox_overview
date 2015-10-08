@@ -24,8 +24,6 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "graph_vlabel Number\n";
     print "nbofdbc.label NumberOfDBConnections\n";
     print "nbofdbc.draw LINE1\n";
-    print "nbofajp.label NumberOfOpenAJPSockets\n";
-    print "nbofajp.draw LINE1\n";
     print "nboffile.label OpenFileDescriptorCount\n";
     print "nboffile.draw LINE1\n";
     exit 0
@@ -38,12 +36,6 @@ while (<SHOWRUNTIME>) {
         s/.*\=//;
         $val=$_+0;
         print "nbofdbc.value $val\n";
-        next;
-    }
-    if ($_ =~ /GeneralMonitor,NumberOfOpenAJPSockets/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "nbofajp.value $val\n";
         next;
     }
     if ($_ =~ /OperatingSystem,OpenFileDescriptorCount/) {

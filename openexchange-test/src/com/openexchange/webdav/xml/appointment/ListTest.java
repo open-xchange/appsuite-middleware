@@ -77,7 +77,29 @@ public class ListTest extends AppointmentTest {
 
         final Appointment[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
 
-        assertTrue("check response", appointmentArray.length >= 2);
+        assertTrue("Returned list of appointments only contains " + appointmentArray.length + " appointments", appointmentArray.length >= 2);
+
+        boolean found1 = false;
+        boolean found2 = false;
+
+        for (int a = 0; a < appointmentArray.length; a++) {
+            if (objectId1 == appointmentArray[a].getObjectID()) {
+                found1 = true;
+                if (found1 && found2) {
+                    break;
+                }
+                continue;
+            }
+            if (objectId2 == appointmentArray[a].getObjectID()) {
+                found2 = true;
+                if (found1 && found2) {
+                    break;
+                }
+                continue;
+            }
+        }
+
+        assertTrue("objects not found in response", found1 && found2);
 
         final int[][] objectIdAndFolderId = { {objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password, context);
@@ -107,14 +129,14 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setParentFolderID(parentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword(), context);
+        final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password, context);
 
         final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, parentFolderId, getHostName(), getLogin(), getPassword(), context);
         final Date modified = loadAppointment.getCreationDate();
 
-        final Appointment[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
+        final Appointment[] appointmentArray = listAppointment(webCon, parentFolderId, modified, true, false, PROTOCOL + hostName, login, password, context);
 
-        boolean found = true;
+        boolean found = false;
 
         for (int a = 0; a < appointmentArray.length; a++) {
             if (objectId == appointmentArray[a].getObjectID()) {
@@ -156,7 +178,7 @@ public class ListTest extends AppointmentTest {
         final Date modified = loadAppointment.getCreationDate();
 
         final Appointment[] appointmentArray = listAppointment(getSecondWebConversation(), parentFolderId, modified, true, false, PROTOCOL + hostName, getSecondLogin(), getPassword(), context);
-        boolean found = true;
+        boolean found = false;
         for (int a = 0; a < appointmentArray.length; a++) {
             if (objectId == appointmentArray[a].getObjectID()) {
                 found = true;
@@ -183,7 +205,7 @@ public class ListTest extends AppointmentTest {
 
         final Appointment[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, false, true, PROTOCOL + hostName, login, password, context);
 
-        boolean found = true;
+        boolean found = false;
 
         for (int a = 0; a < appointmentArray.length; a++) {
             if (objectId1 == appointmentArray[a].getObjectID()) {

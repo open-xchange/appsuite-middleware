@@ -50,9 +50,9 @@
 package com.openexchange.smtp;
 
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -67,6 +67,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPProperties;
+import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.dataobjects.SMTPBodyPart;
 import com.openexchange.smtp.dataobjects.SMTPDataPart;
 import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
@@ -105,13 +106,31 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
+    protected void startUp() throws OXException {
+        super.startUp();
+        SMTPCapabilityCache.init();
+    }
+
+    @Override
+    protected void shutDown() throws OXException {
+        SMTPSessionProperties.resetDefaultSessionProperties();
+        SMTPCapabilityCache.tearDown();
+        super.shutDown();
+    }
+
+    @Override
     public MailTransport createNewMailTransport(final Session session) throws OXException {
-        return new SMTPTransport(session);
+        return new DefaultSMTPTransport(session);
     }
 
     @Override
     public MailTransport createNewMailTransport(final Session session, final int accountId) throws OXException {
-        return new SMTPTransport(session, accountId);
+        return new DefaultSMTPTransport(session, accountId);
+    }
+
+    @Override
+    public MailTransport createNewNoReplyTransport(int contextId) throws OXException {
+        return new NoReplySMTPTransport(contextId);
     }
 
     @Override

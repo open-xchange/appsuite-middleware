@@ -50,7 +50,9 @@
 package com.openexchange.drive.json.action;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.container.IFileHolder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -59,7 +61,10 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
+import com.openexchange.drive.json.pattern.JsonDirectoryPattern;
+import com.openexchange.drive.json.pattern.JsonFilePattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -105,6 +110,19 @@ public class DownloadAction extends AbstractDriveAction {
                 offset = requestData.getParameter("offset", Long.class).longValue();
             }
             /*
+             * extract file- and directory exclusions if present
+             */
+            Object data = requestData.getData();
+            if (null != data && JSONObject.class.isInstance(data)) {
+                JSONObject dataObject = (JSONObject) data;
+                try {
+                    session.setDirectoryExclusions(JsonDirectoryPattern.deserialize(dataObject.optJSONArray("directoryExclusions")));
+                    session.setFileExclusions(JsonFilePattern.deserialize(dataObject.optJSONArray("fileExclusions")));
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+            /*
              * get data
              */
             DriveService driveService = Services.getService(DriveService.class, true);
@@ -137,7 +155,9 @@ public class DownloadAction extends AbstractDriveAction {
         int status;
         if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) || DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
             DriveExceptionCodes.PATH_NOT_FOUND.equals(e) || "FLS-017".equals(e.getErrorCode()) ||
-            "DROPBOX-0005".equals(e.getErrorCode())) {
+            FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) ||
+            FileStorageExceptionCodes.NOT_FOUND.equals(e) || FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e) ||
+            "DROPBOX-0005".equals(e.getErrorCode()) || "GOOGLE_DRIVE-0005".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_NOT_FOUND;
         } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
             || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {

@@ -96,11 +96,12 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
 
     @Override
     public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user) throws OXException {
-        final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
+        FolderTreeUtil treeUtil = new FolderTreeUtilImpl(this);
         List<Integer> path = treeUtil.getPath(entity, ctx, user);
         final int parent = path.get(path.size()-2).intValue();
         path = path.subList(0, path.size()-2);
-        final String query = findLocks.replaceAll("%%path%%", join(path).toString());
+
+        String query = findLocks.replaceAll("%%path%%", join(path, new StringBuilder()).toString());
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -109,7 +110,8 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
             stmt = readCon.prepareStatement(query);
             set(1, stmt, null, Integer.valueOf(ctx.getContextId()), Integer.valueOf(entity), Integer.valueOf(parent));
             rs = stmt.executeQuery();
-            final List<FolderLock> locks = new ArrayList<FolderLock>();
+
+            List<FolderLock> locks = new ArrayList<FolderLock>();
             while(rs.next()) {
                 final FolderLock lock = newLock();
                 fillLock(lock, rs);

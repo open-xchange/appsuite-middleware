@@ -85,7 +85,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(tasks.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(tasks.class);
 
     public tasks() {
         super();
@@ -262,7 +262,6 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 }
                 writeResponse(task, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
-            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(task, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

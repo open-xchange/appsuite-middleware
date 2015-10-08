@@ -288,7 +288,7 @@ public class UpdateTest extends AppointmentTest {
         update.setFullTime(true);
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, utc, getHostName(), getSessionId());
-        final Date modified = loadAppointment.getLastModified();
+        final Date modified = new Date(Long.MAX_VALUE);
 
         updateAppointment(getWebConversation(), update, objectId, appointmentFolderId, modified, utc, getHostName(), getSessionId());
 

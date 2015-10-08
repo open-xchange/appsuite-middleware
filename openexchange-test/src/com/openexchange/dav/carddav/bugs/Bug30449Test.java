@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -67,10 +69,11 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug30449Test extends CardDAVTest {
 
-	public Bug30449Test(String name) {
-		super(name);
+	public Bug30449Test() {
+		super();
 	}
 
+	@Test
 	public void testDontIncludeX_OPEN_XCHANGE_CTYPE() throws Exception {
 	    /*
          * fetch sync token for later synchronization

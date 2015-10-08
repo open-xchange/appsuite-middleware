@@ -53,7 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.internal.attachment.AttachmentCopyTask;
 
@@ -63,16 +63,16 @@ import com.openexchange.user.copy.internal.attachment.AttachmentCopyTask;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageFactory, QuotaFileStorageFactory> {
+public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageService, QuotaFileStorageService> {
 
     private final BundleContext context;
-
     private ServiceRegistration<CopyUserTaskService> registration;
-
     private AttachmentCopyTask task;
 
-
-    public AttachmentCopyRegisterer(final BundleContext context) {
+    /**
+     * Initializes a new {@link AttachmentCopyRegisterer}.
+     */
+    public AttachmentCopyRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
@@ -81,8 +81,8 @@ public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaF
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public QuotaFileStorageFactory addingService(final ServiceReference<QuotaFileStorageFactory> reference) {
-        final QuotaFileStorageFactory service = context.getService(reference);
+    public QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
+        final QuotaFileStorageService service = context.getService(reference);
         task = new AttachmentCopyTask(service);
         registration = context.registerService(CopyUserTaskService.class, task, null);
 
@@ -93,14 +93,15 @@ public class AttachmentCopyRegisterer implements ServiceTrackerCustomizer<QuotaF
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public void modifiedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
+    public void modifiedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
+        // Nothing
     }
 
     /**
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public void removedService(final ServiceReference<QuotaFileStorageFactory> reference, final QuotaFileStorageFactory service) {
+    public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
         registration.unregister();
         context.ungetService(reference);
         task = null;

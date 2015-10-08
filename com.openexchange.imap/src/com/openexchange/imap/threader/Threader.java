@@ -427,7 +427,7 @@ public class Threader {
                 threadable = c.child.threadable;
             }
             final String subj = threadable.simplifiedSubject();
-            if (isEmpty(subj)) {
+            if (com.openexchange.java.Strings.isEmpty(subj)) {
                 continue;
             }
             final ThreadContainer old = subjTable.get(subj);
@@ -464,7 +464,7 @@ public class Threader {
             final String subj = threadable.simplifiedSubject();
 
             // Don't thread together all subjectless messages; let them dangle.
-            if (isEmpty(subj)) {
+            if (com.openexchange.java.Strings.isEmpty(subj)) {
                 continue;
             }
 
@@ -572,17 +572,4 @@ public class Threader {
             c = prev;
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

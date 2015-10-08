@@ -88,7 +88,12 @@ public class CapabilityAllAction implements AJAXActionService {
         if (null == capabilityService) {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
-        CapabilitySet capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true);
+        CapabilitySet capabilities;
+        if (session == null || session.isAnonymous()) {
+            capabilities = capabilityService.getCapabilities(-1, -1, true, true);
+        } else {
+            capabilities = capabilityService.getCapabilities(session, true);
+        }
         return null == capabilities ? new AJAXRequestResult() : new AJAXRequestResult(capabilities.asSet(), "capability");
     }
 

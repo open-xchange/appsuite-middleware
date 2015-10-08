@@ -68,6 +68,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
@@ -76,10 +77,12 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
@@ -87,6 +90,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,11 +101,22 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AJAXInfostoreRequest implements InfostoreRequest {
 
+    private static final String PARAM_TIMEZONE = Param.TIMEZONE.getName();
+    private static final String PARAM_TIMESTAMP = Param.TIMESTAMP.getName();
+    private static final String PARAM_ORDER = Param.ORDER.getName();
+    private static final String PARAM_SORT = Param.SORT.getName();
+    private static final String PARAM_COLUMNS = Param.COLUMNS.getName();
+    private static final String PARAM_VERSION = Param.VERSION.getName();
+    private static final String PARAM_ID = Param.ID.getName();
+    private static final String PARAM_FOLDER_ID = Param.FOLDER_ID.getName();
+
     private static final String JSON = "json";
 
-    private static final FileMetadataParser parser = FileMetadataParser.getInstance();
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private List<Field> columns;
+    private final ServerSession session;
+    private List<Field> fieldsToLoad;
+    private int[] requestedColumns;
     private byte[] contentData;
     private List<File.Field> fields;
     private File file;
@@ -110,11 +125,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private Map<String, String> folderMapping;
     private Map<String, Set<String>> versionMapping;
     private List<String> folders;
-    private List<String> idVersions;
     private List<String> ids;
-    private final ServerSession session;
     private Field sortingField;
     private String[] versions;
+    private boolean notifyPermissionEntities;
+    private Transport notificationTransport;
+    private String notificationMessage;
 	protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
@@ -162,33 +178,19 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public List<Field> getColumns() throws OXException {
-        if (columns != null) {
-            return columns;
+    public List<Field> getFieldsToLoad() throws OXException {
+        if (null == fieldsToLoad) {
+            parseColumns();
         }
+        return fieldsToLoad;
+    }
 
-        final String parameter = data.getParameter(Param.COLUMNS.getName());
-        if (parameter == null || parameter.length() == 0) {
-            return columns = Arrays.asList(File.Field.values());
+    @Override
+    public int[] getRequestedColumns() throws OXException {
+        if (null == requestedColumns) {
+            parseColumns();
         }
-        final String[] columnStrings = Strings.splitByComma(parameter);
-        final List<Field> fields = new ArrayList<Field>(columnStrings.length);
-        final List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
-
-        for (final String columnNumberOrName : columnStrings) {
-            final Field field = Field.get(columnNumberOrName);
-            if (field == null) {
-                unknownColumns.add(columnNumberOrName);
-            } else {
-                fields.add(field);
-            }
-        }
-
-        if (!unknownColumns.isEmpty()) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.COLUMNS.getName(), unknownColumns.toString());
-        }
-
-        return columns = fields;
+        return requestedColumns;
     }
 
     @Override
@@ -201,16 +203,24 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int getEnd() {
+    public int getEnd() throws OXException {
         String parameter = data.getParameter("end");
         if (parameter == null) {
             parameter = data.getParameter("limit");
             if (parameter == null) {
                 return FileStorageFileAccess.NOT_SET;
             }
-            return Integer.parseInt(parameter) - 1;
+            try {
+                return Integer.parseInt(parameter) - 1;
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "limit", parameter);
+            }
         }
-        return Integer.parseInt(parameter);
+        try {
+            return Integer.parseInt(parameter);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "end", parameter);
+        }
     }
 
     @Override
@@ -252,13 +262,13 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderForID(final String id) throws OXException {
-        parseIDList();
+        parseIDList(true);
         return folderMapping.get(id);
     }
 
     @Override
     public String getFolderId() throws OXException {
-    	final String parameter = data.getParameter(Param.FOLDER_ID.getName());
+    	final String parameter = data.getParameter(PARAM_FOLDER_ID);
         if (parameter == null || parameter.equals("null") || parameter.equals("undefined")) {
             return FileStorageFileAccess.ALL_FOLDERS;
         }
@@ -272,35 +282,58 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getId() {
-        return data.getParameter(Param.ID.getName());
+        return data.getParameter(PARAM_ID);
     }
 
     @Override
     public List<String> getIds() throws OXException {
-        parseIDList();
+        parseIDList(true);
         return ids;
     }
 
     @Override
     public List<IdVersionPair> getIdVersionPairs() throws OXException {
-        parseIDList();
-        final List<IdVersionPair> retval = new ArrayList<IdVersionPair>(ids.size());
-        for (final String id : ids) {
-            final Set<String> versions = versionMapping.get(id);
-            if (null == versions) {
-                retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION, folderMapping.get(id)));
+        parseIDList(true);
+        return generateIdVersionPairs();
+    }
+
+    @Override
+    public List<IdVersionPair> optIdVersionPairs() throws OXException {
+        return parseIDList(false) ? generateIdVersionPairs() : null;
+    }
+
+    /**
+     * Generates the pairs of identifier and version from available request body data.
+     *
+     * @return The generated pairs of identifier and version
+     */
+    private List<IdVersionPair> generateIdVersionPairs() {
+        int size = ids.size();
+        List<IdVersionPair> retval = new ArrayList<IdVersionPair>(size);
+
+        for (int i = size, pos = 0; i-- > 0; pos++) {
+            String id = ids.get(pos);
+            if (null == id) {
+                retval.add(new IdVersionPair(null, null, folders.get(pos)));
             } else {
-                for (final String version : versions) {
-                    retval.add(new IdVersionPair(id, version, folderMapping.get(id)));
+                Set<String> versions = versionMapping.get(id);
+                if (null == versions) {
+                    retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION, folderMapping.get(id)));
+                } else {
+                    for (String version : versions) {
+                        retval.add(new IdVersionPair(id, version, folderMapping.get(id)));
+                    }
                 }
             }
+
         }
+
         return retval;
     }
 
     @Override
     public Set<String> getIgnore() {
-        final String parameter = data.getParameter(Param.IGNORE.getName());
+        String parameter = data.getParameter(Param.IGNORE.getName());
         if (parameter == null) {
             return Collections.emptySet();
         }
@@ -332,7 +365,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getSearchQuery() throws OXException {
-        final Object data2 = data.getData();
+        Object data2 = data.getData();
         if(data2 == null) {
             return "";
         }
@@ -361,41 +394,48 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (sortingField != null) {
             return sortingField;
         }
-        final String sort = data.getParameter(Param.SORT.getName());
+
+        String sort = data.getParameter(PARAM_SORT);
         if (sort == null) {
             return null;
         }
-        final Field field = sortingField = Field.get(sort);
+
+        Field field = sortingField = Field.get(sort);
         if (field == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.SORT.getName(), sort);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_SORT, sort);
         }
+
         return field;
     }
 
     @Override
     public SortDirection getSortingOrder() throws OXException {
-        final SortDirection sortDirection = SortDirection.get(data.getParameter(Param.ORDER.getName()));
+        SortDirection sortDirection = SortDirection.get(data.getParameter(PARAM_ORDER));
         if (sortDirection == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( Param.ORDER.getName(), sortDirection);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_ORDER, sortDirection);
         }
         return sortDirection;
     }
 
     @Override
-    public int getStart() {
-        final String parameter = data.getParameter("start");
-        if(parameter == null ) {
-            if(data.getParameter("limit") != null){
+    public int getStart() throws OXException {
+        String parameter = data.getParameter("start");
+        if (parameter == null) {
+            if (data.getParameter("limit") != null) {
                 return 0;
             }
             return FileStorageFileAccess.NOT_SET;
         }
-        return Integer.valueOf(parameter);
+        try {
+            return Integer.parseInt(parameter);
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "start", parameter);
+        }
     }
 
     @Override
     public long getTimestamp() {
-        final String parameter = data.getParameter(Param.TIMESTAMP.getName());
+        final String parameter = data.getParameter(PARAM_TIMESTAMP);
         if (parameter == null) {
             return FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER;
         }
@@ -404,8 +444,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public TimeZone getTimezone() throws OXException {
-        String parameter = data.getParameter(Param.TIMEZONE.getName());
+    public TimeZone getTimezone() {
+        String parameter = data.getParameter(PARAM_TIMEZONE);
         if (parameter == null) {
             parameter = getSession().getUser().getTimeZone();
         }
@@ -442,7 +482,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getVersion() {
-        final String parameter = data.getParameter(Param.VERSION.getName());
+        final String parameter = data.getParameter(PARAM_VERSION);
         if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
@@ -454,7 +494,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (versions != null) {
             return versions;
         }
-        final JSONArray body = (JSONArray) data.requireData();
+        final JSONArray body = getBodyAsJsonArray();
 
         try {
             versions = new String[body.length()];
@@ -511,67 +551,225 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return requireBody();
     }
 
+    @Override
+    public Document getCachedDocument() {
+        return this.data.getProperty(DocumentAction.DOCUMENT);
+    }
+
+    @Override
+    public boolean notifyPermissionEntities() throws OXException {
+        parseNotification();
+        return notifyPermissionEntities;
+    }
+
+    @Override
+    public Transport getNotificationTransport() throws OXException {
+        parseNotification();
+        return notificationTransport;
+    }
+
+    @Override
+    public String getNotifiactionMessage() throws OXException {
+        parseNotification();
+        return notificationMessage;
+    }
+
+    @Override
+    public List<Integer> getEntities() throws OXException {
+        JSONObject data = getBodyAsJSONObject();
+        if (false == data.hasAndNotNull("entities")) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("entities");
+        }
+        try {
+            JSONArray jsonArray = data.getJSONArray("entities");
+            List<Integer> entityIDs = new ArrayList<Integer>(jsonArray.length());
+            entityIDs = new ArrayList<Integer>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                entityIDs.add(Integer.valueOf(jsonArray.getInt(i)));
+            }
+            if (0 >= entityIDs.size()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("entities");
+            }
+            return entityIDs;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
     private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
 
-    private void parseIDList() throws OXException {
+    /**
+     * Parses ID, folder and version information from request's JSON array
+     *
+     * @param required Whether the JSON array is required or not
+     * @return <code>true</code> if ID, folder and version information are successfully parsed; otherwise <code>false</code> if absent
+     * @throws OXException If parsing fails
+     */
+    private boolean parseIDList(boolean required) throws OXException {
         try {
             if (ids != null) {
-                return;
+                return true;
             }
-            // Initialize
-            final JSONArray array = (JSONArray) data.requireData();
-            final int length = array.length();
-            final List<String> ids = new ArrayList<String>(length);
-            this.ids = ids;
-            final List<String> folders = new ArrayList<String>(length);
-            this.folders = folders;
-            final List<String> idVersions = new ArrayList<String>(length);
-            this.idVersions = idVersions;
-            final Map<String, String> folderMapping = new HashMap<String, String>(length);
-            this.folderMapping = folderMapping;
-            final Map<String, Set<String>> versionMapping = new HashMap<String, Set<String>>(length);
-            this.versionMapping = versionMapping;
-            // Iterate JSON array
-            for (int i = 0, size = length; i < size; i++) {
-                final JSONObject tuple = array.getJSONObject(i);
-                // Identifier
-                final String id = tuple.getString(Param.ID.getName());
-                ids.add(id);
-                // Folder
-                final String folderId = tuple.optString(Param.FOLDER_ID.getName());
-                folders.add(folderId);
-                folderMapping.put(id, folderId);
-                // Version
-                final String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
-                idVersions.add(version);
-                Set<String> list = versionMapping.get(id);
-                if (null == list) {
-                    list = new LinkedHashSet<String>(2);
-                    versionMapping.put(id, list);
+
+            // Check request body
+            JSONArray array;
+            if (required) {
+                // Require request body as a JSON array
+                array = getBodyAsJsonArray();
+            } else {
+                // Optional request body as a JSON array
+                array = optBodyAsJsonArray();
+                if (null == array) {
+                    return false;
                 }
-                list.add(version);
             }
+            int length = array.length();
+
+            // Initialize
+            List<String> ids = new ArrayList<String>(length);
+            List<String> folders = new ArrayList<String>(length);
+            Map<String, String> folderMapping = new HashMap<String, String>(length);
+            Map<String, Set<String>> versionMapping = new HashMap<String, Set<String>>(length);
+
+            // Iterate JSON array
+            for (int i = length, pos = 0; i-- > 0; pos++) {
+                /*-
+                 * A JSON identifier tuple; either
+                 *
+                 * - For a folder:  {"folder": <folder-id>}
+                 * - For a file:    {"folder": <optional-folder-id>, "id": <document-id>, "version": <optional-version-number>}
+                 */
+                JSONObject tuple = array.getJSONObject(pos);
+
+                // Check folder identifier
+                String folderId = tuple.optString(PARAM_FOLDER_ID, null);
+                folders.add(folderId);
+
+                // Check file identifier
+                String id = tuple.optString(PARAM_ID, null);
+                if (null == id) {
+                    ids.add(id);
+                } else {
+                    // Ensure folder identifier is "encoded" in the file identifier
+                    FileID fileID = new FileID(id);
+                    if (fileID.getFolderId() == null) {
+                        fileID.setFolderId(folderId);
+                        ids.add(fileID.toUniqueID());
+                    } else {
+                        ids.add(id);
+                    }
+
+                    // Add to id-to-folder mapping
+                    folderMapping.put(id, folderId);
+
+                    // Add to id-to-versions mapping
+                    final String version = tuple.optString(PARAM_VERSION, FileStorageFileAccess.CURRENT_VERSION);
+                    Set<String> list = versionMapping.get(id);
+                    if (null == list) {
+                        list = new LinkedHashSet<String>(2);
+                        versionMapping.put(id, list);
+                    }
+                    list.add(version);
+                }
+            }
+
+            // Assign to members
+            this.ids = ids;
+            this.folders = folders;
+            this.folderMapping = folderMapping;
+            this.versionMapping = versionMapping;
+            return true;
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
         }
 
     }
 
+    private JSONArray getBodyAsJsonArray() throws OXException {
+        Object obj = data.requireData();
+        if (!(obj instanceof JSONArray)) {
+            try {
+                return new JSONArray(obj.toString());
+            } catch (Exception e) {
+                throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONArray.class.getSimpleName(), obj.getClass().getSimpleName());
+            }
+        }
+        return (JSONArray) obj;
+    }
+
+    private JSONArray optBodyAsJsonArray() throws OXException {
+        Object obj = data.getData();
+        if (null == obj) {
+            return null;
+        }
+
+        if (!(obj instanceof JSONArray)) {
+            try {
+                return new JSONArray(obj.toString());
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return (JSONArray) obj;
+    }
+
+    protected void parseNotification() throws OXException {
+        if (null == notificationTransport) {
+            JSONObject object = getBodyAsJSONObject();
+            JSONObject jNotification = object.optJSONObject("notification");
+            if (jNotification != null) {
+                Transport transport = Transport.MAIL;
+                if (jNotification.hasAndNotNull("transport")) {
+                    try {
+                        transport = Transport.forID(jNotification.getString("transport"));
+                        if (transport == null) {
+                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                        }
+                    } catch (JSONException e) {
+                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                    }
+                }
+                notificationTransport = transport;
+                notifyPermissionEntities = true;
+                String message = jNotification.optString("message", null);
+                if (Strings.isNotEmpty(message)) {
+                    notificationMessage = message;
+                }
+            }
+        }
+    }
+
+    private JSONObject getBodyAsJSONObject() throws OXException {
+        JSONObject object = (JSONObject) data.getData();
+        if (object == null) {
+            try {
+                object = new JSONObject(data.getParameter(JSON));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
+        return object;
+    }
+
     protected void parseFile() throws OXException {
-        if(file != null) {
+        if (file != null) {
             return;
         }
         requireFileMetadata();
 
-        JSONObject object = (JSONObject) data.getData();
-        if(object == null) {
+        JSONObject jFile;
+        JSONObject object = getBodyAsJSONObject();
+
+        if (object.hasAndNotNull("file")) {
             try {
-                object = new JSONObject(data.getParameter(JSON));
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage());
+                jFile = object.getJSONObject("file");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }
+        } else {
+            jFile = object;
         }
 
         UploadFile uploadFile = null;
@@ -589,15 +787,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
-        file = parser.parse(object);
-        fields = parser.getFields(object);
-        if(uploadFile != null) {
-            if(!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+
+        FileMetadataParser parser = FileMetadataParser.getInstance();
+        file = parser.parse(jFile);
+        fields = parser.getFields(jFile);
+        if (uploadFile != null) {
+            if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
                 fields.add(File.Field.FILENAME);
             }
 
-            if(!fields.contains(File.Field.FILE_MIMETYPE)) {
+            if (!fields.contains(File.Field.FILE_MIMETYPE)) {
                 file.setFileMIMEType(uploadFile.getContentType());
                 fields.add(File.Field.FILE_MIMETYPE);
             }
@@ -608,32 +808,86 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         final String fileDisplay = data.getParameter("filedisplay");
-        if(fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
+        if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
             file.setFileName(fileDisplay);
             fields.add(File.Field.FILENAME);
         }
 
-        if(has("id") && ! fields.contains(File.Field.ID)) {
+        if (has("id") && !fields.contains(File.Field.ID)) {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
 
-        if (object.has("content")) {
-        	try {
-				contentData = object.opt("content").toString().getBytes("UTF-8");
+        if (jFile.has("content")) {
+            try {
+                contentData = jFile.opt("content").toString().getBytes("UTF-8");
 
                 file.setFileSize(contentData.length);
                 fields.add(File.Field.FILE_SIZE);
-			} catch (UnsupportedEncodingException e) {
-				// IGNORE;
-			}
+            } catch (UnsupportedEncodingException e) {
+                // IGNORE;
+            }
         }
     }
 
-    @Override
-    public Document getCachedDocument() {
-        return this.data.getProperty(DocumentAction.DOCUMENT);
-    }
+    /**
+     * Parses the requests <code>columns</code> parameter and sets the {@link #fieldsToLoad} and {@link #requestedColumns} members for
+     * this infostore request.
+     */
+    private void parseColumns() throws OXException {
+        String columnsParameter = data.getParameter(PARAM_COLUMNS);
+        if (Strings.isEmpty(columnsParameter)) {
+            /*
+             * use all known file fields
+             */
+            fieldsToLoad = Arrays.asList(Field.values());
+            requestedColumns = new int[fieldsToLoad.size()];
+            for (int i = 0; i < requestedColumns.length; i++) {
+                requestedColumns[i] = fieldsToLoad.get(i).getNumber();
+            }
+        } else {
+            /*
+             * use requested file fields only
+             */
+            List<String> unknownColumns = new ArrayList<String>(0);
+            String[] columns = Strings.splitByComma(columnsParameter);
+            fieldsToLoad = new ArrayList<Field>(columns.length);
+            requestedColumns = new int[columns.length];
+            for (int i = 0; i < columns.length; i++) {
+                /*
+                 * try regular file field first
+                 */
+                Field field = Field.get(columns[i]);
+                if (null != field) {
+                    fieldsToLoad.add(field);
+                    requestedColumns[i] = field.getNumber();
+                    continue;
+                }
 
+                /*
+                 * check additionally registered file fields
+                 */
+                FileFieldCollector fieldCollector = Services.getFieldCollector();
+                if (null != fieldCollector) {
+                    AdditionalFileField additionalField = fieldCollector.getField(columns[i]);
+                    if (null != additionalField) {
+                        Field[] requiredFields = additionalField.getRequiredFields();
+                        if (null != requiredFields && 0 < requiredFields.length) {
+                            fieldsToLoad.addAll(Arrays.asList(requiredFields));
+                        }
+                        requestedColumns[i] = additionalField.getColumnID();
+                        continue;
+                    }
+                }
+                /*
+                 * unknown column
+                 */
+                unknownColumns.add(columns[i]);
+            }
+            if (0 < unknownColumns.size()) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());
+            }
+        }
+    }
 
 }

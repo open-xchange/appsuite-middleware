@@ -2,12 +2,20 @@
 Name:          open-xchange-linkedin
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
-BuildRequires: ant-nodeps
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
+BuildRequires:  ant
+%else
+BuildRequires:  ant-nodeps
+%endif
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
-BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +71,18 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-1501
     # updated by SoftwareChange_Request-1710
     ox_add_property com.openexchange.subscribe.socialplugin.linkedin.autorunInterval 1d /opt/open-xchange/etc/linkedinsubscribe.properties
+
+    # SoftwareChange_Request-2410
+    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
+    OLDNAMES=( com.openexchange.socialplugin.linkedin.apikey com.openexchange.socialplugin.linkedin.apisecret )
+    NEWNAMES=( com.openexchange.oauth.linkedin.apiKey com.openexchange.oauth.linkedin.apiSecret )
+    for I in $(seq 1 ${#OLDNAMES[@]}); do
+        VALUE=$(ox_read_property ${OLDNAMES[$I-1]} $PFILE)
+        if [ "" != "$VALUE" ]; then
+            ox_add_property ${NEWNAMES[$I-1]} "$VALUE" $PFILE
+            ox_remove_property ${OLDNAMES[$I-1]} $PFILE
+        fi
+    done
 fi
 
 %clean
@@ -80,16 +100,28 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
+* Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
 * Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-12 (2671)
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
 * Tue Aug 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -132,5 +164,7 @@ Tenth candidate for 7.6.2 release
 Nineth candidate for 7.6.2 release
 * Tue Feb 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.6.2 release
+* Mon Feb 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release
 * Thu Feb 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Extracting LinkedIn integration into its own package due to special API access grants are necessary

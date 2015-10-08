@@ -54,11 +54,12 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.session.ServerSession;
 
 public class InvalidCharactersValidator implements InfostoreValidator{
 
 	@Override
-    public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+    public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata) {
 		final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 		final GetSwitch get = new GetSwitch(metadata);
 		for(final Metadata field : Metadata.VALUES_ARRAY){

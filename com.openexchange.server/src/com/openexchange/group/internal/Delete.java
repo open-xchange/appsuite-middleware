@@ -150,7 +150,7 @@ public final class Delete {
         if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
             throw GroupExceptionCodes.NO_DELETE_PERMISSION.create();
         }
-        if (groupId == GroupTools.GROUP_ZERO.getIdentifier()) {
+        if (groupId == GroupStorage.GROUP_ZERO_IDENTIFIER) {
             try {
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
             } catch (final OXException e) {

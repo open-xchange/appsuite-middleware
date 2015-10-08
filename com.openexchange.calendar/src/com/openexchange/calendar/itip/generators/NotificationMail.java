@@ -336,7 +336,6 @@ public class NotificationMail {
         LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
         return true;
     }
-    
     private String id() {
         try {
             return getRecipient().getUser().getId() + "";

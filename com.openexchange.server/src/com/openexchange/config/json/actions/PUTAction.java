@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.json.ConfigAJAXRequest;
+import com.openexchange.config.json.ConfigActionFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -72,8 +73,10 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,6 +87,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "config/path", description = "Set configuration data", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "The new value of the node specified by path.")
+@OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
 public final class PUTAction extends AbstractConfigAction {
 
     /** The paths to ignore */
@@ -144,8 +148,12 @@ public final class PUTAction extends AbstractConfigAction {
 
     @Override
     protected AJAXRequestResult perform(final ConfigAJAXRequest req) throws OXException, JSONException {
-        final ServerSession session = req.getSession();
-        String value = req.getData().toString(); // Unparse
+        Object data = req.getData();
+        if (null == data) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        String value = data.toString(); // Unparse
         if (value.length() > 0 && value.charAt(0) == '"') {
             value = value.substring(1);
         }
@@ -159,13 +167,16 @@ public final class PUTAction extends AbstractConfigAction {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        final SettingStorage stor = SettingStorage.getInstance(session);
+
+        ServerSession session = req.getSession();
+        SettingStorage stor = SettingStorage.getInstance(session);
         {
-            final Setting setting = ConfigTree.getInstance().getSettingByPath(path);
+            Setting setting = ConfigTree.getInstance().getSettingByPath(path);
             setting.setSingleValue(value);
             UserSettingMailStorage.getInstance().removeUserSettingMail(session.getUserId(), session.getContext());
             saveSettingWithSubs(stor, setting);
         }
+
         return getJSONNullResult();
     }
 

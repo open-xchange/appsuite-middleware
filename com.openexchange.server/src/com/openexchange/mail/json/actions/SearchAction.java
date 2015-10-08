@@ -87,7 +87,6 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SearchAction}
@@ -116,9 +115,8 @@ public final class SearchAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
             /*
-             * Read in parameters
+             * Read parameters
              */
             String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             ColumnCollection columnCollection = req.checkColumnsAndHeaders();
@@ -176,6 +174,7 @@ public final class SearchAction extends AbstractMailAction {
             /*
              * Perform search dependent on passed JSON value
              */
+            columns = prepareColumns(columns);
             if (searchValue.isArray()) {
                 /*
                  * Parse body into a JSON array
@@ -213,10 +212,8 @@ public final class SearchAction extends AbstractMailAction {
                 SearchIterator<MailMessage> it = null;
                 try {
                     if (("thread".equalsIgnoreCase(sort))) {
-                        it = mailInterface.getThreadedMessages(folderId,null,MailSortField.RECEIVED_DATE.getField(),orderDir,searchCols,searchPats,true,columns);
-
-                        int size = it.size();
-                        for (int i = 0; i < size; i++) {
+                        it = mailInterface.getThreadedMessages(folderId, null, MailSortField.RECEIVED_DATE.getField(), orderDir, searchCols, searchPats, true, columns);
+                        for (int i = it.size(); i-- > 0;) {
                             final MailMessage mail = it.next();
                             if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                                 mails.add(mail);

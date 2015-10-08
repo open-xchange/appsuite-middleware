@@ -56,38 +56,61 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractContextBasedConfigProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {
 
-    protected ContextService contexts;
+    /** The service look-up */
+    protected final ServiceLookup services;
 
-    public AbstractContextBasedConfigProvider(final ContextService contexts) {
-        this.contexts = contexts;
+    /**
+     * Initializes a new {@link AbstractContextBasedConfigProvider}.
+     * @param contexts
+     */
+    protected AbstractContextBasedConfigProvider(ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+    public BasicProperty get(String property, int contextId, int userId) throws OXException {
         if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
-        return get(property, contexts.getContext(contextId), userId);
+        return get(property, services.getService(ContextService.class).getContext(contextId), userId);
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         if (contextId == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        return getAllPropertyNames(contexts.getContext(contextId));
+        return getAllPropertyNames(services.getService(ContextService.class).getContext(contextId));
     }
 
+    /**
+     * Gets all available property names
+     *
+     * @param context The associated context
+     * @return All available property names
+     */
     protected abstract Collection<String> getAllPropertyNames(Context context);
 
+    /**
+     * Gets the denoted property
+     *
+     * @param property The property name
+     * @param context The associated context
+     * @param user The identifier for the associated user
+     * @return The property
+     * @throws OXException If property cannot be returned
+     */
     protected abstract BasicProperty get(String property, Context context, int user) throws OXException;
 
 }

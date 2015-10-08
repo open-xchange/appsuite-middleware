@@ -53,6 +53,8 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccounts;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -63,10 +65,20 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.database.contentType.UnboundContentType;
+import com.openexchange.folderstorage.filestorage.contentType.DocumentsContentType;
+import com.openexchange.folderstorage.filestorage.contentType.MusicContentType;
+import com.openexchange.folderstorage.filestorage.contentType.PicturesContentType;
+import com.openexchange.folderstorage.filestorage.contentType.TemplatesContentType;
+import com.openexchange.folderstorage.filestorage.contentType.VideosContentType;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -133,6 +145,9 @@ public class DatabaseFolder extends AbstractFolder {
         parent = String.valueOf(folderObject.getParentFolderID());
         type = getType(folderObject.getType());
         contentType = getContentType(folderObject.getModule());
+        if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
+            accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
+        }
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         permissions = new Permission[oclPermissions.length];
         for (int i = 0; i < oclPermissions.length; i++) {
@@ -186,6 +201,16 @@ public class DatabaseFolder extends AbstractFolder {
             return PublicType.getInstance();
         case FolderObject.TRASH:
             return TrashType.getInstance();
+        case FolderObject.PICTURES:
+            return PicturesType.getInstance();
+        case FolderObject.DOCUMENTS:
+            return DocumentsType.getInstance();
+        case FolderObject.MUSIC:
+            return MusicType.getInstance();
+        case FolderObject.VIDEOS:
+            return VideosType.getInstance();
+        case FolderObject.TEMPLATES:
+            return TemplatesType.getInstance();
         default:
             return null;
         }
@@ -205,6 +230,16 @@ public class DatabaseFolder extends AbstractFolder {
             return InfostoreContentType.getInstance();
         case FolderObject.UNBOUND:
             return UnboundContentType.getInstance();
+        case FolderObject.PICTURES:
+            return PicturesContentType.getInstance();
+        case FolderObject.DOCUMENTS:
+            return DocumentsContentType.getInstance();
+        case FolderObject.MUSIC:
+            return MusicContentType.getInstance();
+        case FolderObject.VIDEOS:
+            return VideosContentType.getInstance();
+        case FolderObject.TEMPLATES:
+            return TemplatesContentType.getInstance();
         default:
             LOG.warn("Unknown database folder content type: {}", module);
             return SystemContentType.getInstance();

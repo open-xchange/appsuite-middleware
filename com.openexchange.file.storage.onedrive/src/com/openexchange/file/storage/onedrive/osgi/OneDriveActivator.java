@@ -54,11 +54,9 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.OAuthService;
@@ -106,7 +104,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
              * Register event handler
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new OneDriveEventHandler(), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);

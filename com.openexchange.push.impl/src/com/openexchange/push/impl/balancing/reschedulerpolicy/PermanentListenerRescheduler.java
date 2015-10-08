@@ -67,6 +67,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
@@ -76,7 +78,9 @@ import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
@@ -100,7 +104,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>, MembershipListener {
+public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>, MembershipListener, EventHandler {
 
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermanentListenerRescheduler.class);
@@ -156,6 +160,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     private final AtomicReference<String> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
     private final BufferingQueue<ReschedulePlan> rescheduleQueue;
+    private final ReschedulePolicy policy;
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
 
@@ -172,6 +177,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         registrationIdRef = new AtomicReference<String>();
         this.pushManagerRegistry = pushManagerRegistry;
         this.context = context;
+        this.policy = ReschedulePolicy.MASTER;
     }
 
     /**
@@ -220,6 +226,30 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
         // Don't care
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void handleEvent(Event event) {
+        if (UpdaterEventConstants.TOPIC.equals(event.getTopic())) {
+            if (ReschedulePolicy.MASTER.equals(policy)) {
+                try {
+                    planReschedule(true);
+                } catch (Exception e) {
+                    LOG.error("Failed to plan rescheduling", e);
+                }
+            } else {
+                // Only handle if locally received
+                if (event.containsProperty(CommonEvent.PUBLISH_MARKER)) {
+                    try {
+                        planReschedule(true);
+                    } catch (Exception e) {
+                        LOG.error("Failed to plan rescheduling", e);
+                    }
+                }
+            }
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -280,7 +310,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             ReschedulePlan plan = rescheduleQueue.poll();
             if (null != plan) {
                 boolean remotePlan = plan.isRemotePlan();
-                doReschedule(ReschedulePolicy.MASTER, remotePlan);
+                doReschedule(this.policy, remotePlan);
                 LOG.info("Triggered rescheduling of permanent listeners {}", remotePlan ? "incl. remote rescheduling" : "local-only");
             }
 

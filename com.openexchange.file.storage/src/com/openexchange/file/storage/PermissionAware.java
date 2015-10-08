@@ -49,22 +49,11 @@
 
 package com.openexchange.file.storage;
 
-import com.openexchange.exception.OXException;
-
-
 /**
  * {@link PermissionAware} - Implementor is aware of permissions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PermissionAware {
-
-    /**
-     * Gets the own permission.
-     *
-     * @return The own permission
-     * @throws OXException If permission cannot be returned
-     */
-    public FileStoragePermission getOwnPermission() throws OXException;
 
 }

@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings.impl;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -255,7 +256,13 @@ public class RdbSettingStorage extends SettingStorage {
             }
             // Return value
             return;
-        } catch (final SQLException e) {
+        } catch (DataTruncation e) {
+            String name = setting.getName();
+            if (null == name) {
+                name = Integer.toString(setting.getId());
+            }
+            throw SettingExceptionCodes.DATA_TRUNCATION.create(name, e);
+        } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         }
     }

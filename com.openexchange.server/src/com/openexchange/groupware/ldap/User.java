@@ -53,12 +53,13 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.groupware.contexts.FileStorageInfo;
 
 /**
  * Interface for the user object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface User extends Serializable {
+public interface User extends FileStorageInfo, Serializable {
 
     /**
      * Getter for userPassword.
@@ -76,6 +77,18 @@ public interface User extends Serializable {
      * @return User identifier.
      */
     int getId();
+
+    /**
+     * Gets the creators user id if this user is a guest.
+     * @return The user id of the creator or <code>0</code> if this instance is a fully fledged user.
+     */
+    int getCreatedBy();
+
+    /**
+     * Returns if this user is a guest.
+     * @return <code>true</code> if so, otherwise <code>false</code>.
+     */
+    boolean isGuest();
 
     /**
      * Getter for mailEnabled.
@@ -186,6 +199,17 @@ public interface User extends Serializable {
      * @return the contactId
      */
     int getContactId();
+
+    /**
+     * Gets the identifier for the owner of the file storage associated with this user.
+     * <p>
+     * Provided that {@link #getFilestoreId()} returns a positive, valid file storage identifier:<br>
+     * If a value less than/equal to zero is returned, then {@link #getId()} is supposed to be considered as the file storage owner;
+     * otherwise the returned value itself
+     *
+     * @return The identifier of the owner or a value less than/equal to zero if there is none
+     */
+    int getFileStorageOwner();
 
     /**
      * TODO a user can have multiple logins.

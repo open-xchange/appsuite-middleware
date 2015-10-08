@@ -111,7 +111,7 @@ public class ContactHaloImpl implements ContactHalo {
      */
     public ContactHaloImpl(final ServiceLookup services) {
         super();
-        contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>(8);
+        contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>(8, 0.9f, 1);
         imageSources = new ArrayList<HaloContactImageSource>();
         this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
         queryCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.SECONDS).build();
@@ -399,25 +399,33 @@ public class ContactHaloImpl implements ContactHalo {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ContactHaloQueryKey other = (ContactHaloQueryKey) obj;
             if (contact == null) {
-                if (other.contact != null)
+                if (other.contact != null) {
                     return false;
-            } else if (!contact.equals(other.contact))
+                }
+            } else if (!contact.equals(other.contact)) {
                 return false;
+            }
             if (sessionID == null) {
-                if (other.sessionID != null)
+                if (other.sessionID != null) {
                     return false;
-            } else if (!sessionID.equals(other.sessionID))
+                }
+            } else if (!sessionID.equals(other.sessionID)) {
                 return false;
-            if (withBytes != other.withBytes)
+            }
+            if (withBytes != other.withBytes) {
                 return false;
+            }
             return true;
         }
 

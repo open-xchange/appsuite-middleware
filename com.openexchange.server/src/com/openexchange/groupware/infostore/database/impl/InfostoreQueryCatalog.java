@@ -62,6 +62,24 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 
 public class InfostoreQueryCatalog {
 
+    private static final InfostoreQueryCatalog INSTANCE = new InfostoreQueryCatalog();
+
+    /**
+     * Gets the query catalog instance.
+     *
+     * @return The instance.
+     */
+    public static InfostoreQueryCatalog getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link InfostoreQueryCatalog}.
+     */
+    private InfostoreQueryCatalog() {
+        super();
+    }
+
     private static final String SQL_CHUNK05 = " AND infostore.last_modified > ";
 
     private static final String SQL_CHUNK04 = " FROM infostore JOIN infostore_document ON infostore.cid = ";
@@ -75,6 +93,8 @@ public class InfostoreQueryCatalog {
     private static final String STR_SELECT = "SELECT ";
 
     private static final String STR_ORDER_BY = " ORDER BY ";
+
+    private static final String STR_LIMIT = " LIMIT ";
 
     private static final String STR_CID = "cid";
 
@@ -248,6 +268,10 @@ public class InfostoreQueryCatalog {
     private static final String INSERT_DEL_INFOSTORE = buildInsert(Table.DEL_INFOSTORE, STR_CID);
 
     public List<String> getDelete(final Table t, final List<DocumentMetadata> documents) {
+        return getDelete(t, documents, true);
+    }
+
+    public List<String> getDelete(final Table t, final List<DocumentMetadata> documents, boolean includeVersions) {
         switch (t) {
         default:
             break;
@@ -258,7 +282,7 @@ public class InfostoreQueryCatalog {
         final int size = documents.size();
         final List<String> l = new ArrayList<String>(2);
         // Versions
-        {
+        if (includeVersions) {
             final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
             final StringBuilder delete = new StringBuilder("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
                 Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append(" IN (");
@@ -361,6 +385,31 @@ public class InfostoreQueryCatalog {
         builder.append("SELECT COUNT(infostore_id) AS number_of_versions FROM infostore_document WHERE ").append(idColumn).append(" = ? ").append(
             "AND cid = ? GROUP BY infostore_id");
         return builder.toString();
+    }
+
+    /**
+     * Gets a SQL statement to retrieve the number of versions for multiple documents.
+     *
+     * @param ids The ids of the documents to get the versions for
+     * @return The statement
+     */
+    public String getNumberOfVersionsQueryForDocuments(int[] ids) {
+        if (null == ids || 0 == ids.length) {
+            throw new IllegalArgumentException("ids");
+        }
+        StringBuilder stringBuilder = new StringBuilder("SELECT infostore_id,COUNT(infostore_id) ")
+            .append("FROM infostore_document WHERE cid=? AND infostore_id");
+        if (1 == ids.length) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < ids.length; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        stringBuilder.append(" GROUP BY infostore_id;");
+        return stringBuilder.toString();
     }
 
     public Metadata[] getDocumentFields() {
@@ -543,22 +592,41 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
-    public String getDocumentsQuery(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
+    public String getDocumentsQuery(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, int start, int end, final FieldChooser wins, final int contextId) {
+        StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId);
+
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
         }
 
         return builder.toString();
     }
 
-    public String getDocumentsQuery(final long folderId, final int userId, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
+    public String getDocumentsQuery(final long folderId, final int userId, final Metadata[] metadata, final Metadata sort, final int order, int start, int end, final FieldChooser wins, final int contextId) {
+        StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK02).append(userId);
+
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
+
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
+        }
+
         return builder.toString();
     }
 
@@ -591,11 +659,11 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder("SELECT infostore.id").append(
+        final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
             contextId).append(SQL_CHUNK05).append(since);
-        if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        if (null != sort && Table.DEL_INFOSTORE.getFieldSet().contains(sort)) {
+            builder.append(STR_ORDER_BY).append(sort.doSwitch(Table.DEL_INFOSTORE.getFieldSwitcher())).append(' ').append(order(order));
         }
         return builder.toString();
     }
@@ -621,7 +689,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getDeletedDocumentsQuery(final long folderId, final int userId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder("SELECT infostore.id").append(
+        final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
             contextId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(userId);
         if (sort != null) {
@@ -669,6 +737,129 @@ public class InfostoreQueryCatalog {
         }
         allocator.append(" GROUP BY ").append(Metadata.FOLDER_ID_LITERAL.getName()).append(';');
         return allocator.toString();
+    }
+
+    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, Metadata sort, int order, int start, int end, final DocumentWins wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.bits >=").append(leastPermission);
+
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        if (start >= 0 && end > 0) {
+            builder.append(STR_LIMIT);
+            if (start > 0) {
+                builder.append(start).append(',');
+            }
+            builder.append(end - start);
+        }
+
+        return builder.toString();
+    }
+
+    public String getSharedDocumentsByUserQuery(int contextId, int userId, Metadata[] metadata, Metadata sort, int order, int start, int end, DocumentWins wins) {
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT ")
+            .append(fields(metadata, wins))
+            .append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId)
+            .append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid")
+            .append(" AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id")
+            .append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND")
+            .append(" infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id")
+            .append(" WHERE object_permission.created_by = ").append(userId)
+            .append(" AND object_permission.permission_id != ").append(userId)
+        ;
+        if (sort != null) {
+            stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        if (start >= 0 && end > 0) {
+            stringBuilder.append(STR_LIMIT);
+            if (start > 0) {
+                stringBuilder.append(start).append(',');
+            }
+            stringBuilder.append(end - start);
+        }
+        return stringBuilder.toString();
+    }
+
+    public String getSharedDocumentsSequenceNumbersQuery(final boolean versionsOnly, final boolean deleted, final int contextId, final int userId, final int[] groups) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT);
+        if (deleted) {
+            builder.append("MAX(p.last_modified) FROM del_object_permission");
+        } else {
+            builder.append("MAX(i.last_modified) FROM object_permission");
+        }
+        builder.append(" AS p JOIN infostore AS i ON p.cid = i.cid AND p.module = 8 AND p.folder_id = i.folder_id AND p.object_id = i.id");
+        builder.append(" WHERE p.cid = ").append(contextId).append(" AND");
+        appendEntityConstraint(builder, "p", userId, groups);
+        if (versionsOnly) {
+            builder.append(" AND i.version > 0");
+        }
+        return builder.toString();
+    }
+
+    public String getNewSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
+    public String getModifiedSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND infostore.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
+    public String getDeletedSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
+        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
+        builder.append(" FROM del_object_permission AS object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
+        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
+        builder.append(" WHERE");
+        appendEntityConstraint(builder, "object_permission", userId, groups);
+
+        builder.append(" AND object_permission.last_modified > ").append(since);
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        return builder.toString();
+    }
+
+    private static void appendEntityConstraint(StringBuilder builder, String tablePrefix, int userId, int[] groups) {
+        if (groups != null && groups.length > 0) {
+            builder.append(" ((").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(") OR (").append(tablePrefix).append(".group_flag = 1 AND ").append(tablePrefix).append(".permission_id IN (");
+            boolean first = true;
+            for (int group : groups) {
+                if (first) {
+                    builder.append(group);
+                    first = false;
+                } else {
+                    builder.append(", ").append(group);
+                }
+            }
+            builder.append(")))");
+        } else {
+            builder.append(" (").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(")");
+        }
     }
 
     private String order(final int order) {
@@ -838,6 +1029,16 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
@@ -966,6 +1167,17 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1094,6 +1306,17 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1222,6 +1445,17 @@ public class InfostoreQueryCatalog {
         public Object numberOfVersions() {
             return null;
         }
+
+        @Override
+        public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static interface FieldChooser {
@@ -1250,5 +1484,4 @@ public class InfostoreQueryCatalog {
             return Table.INFOSTORE_DOCUMENT;
         }
     }
-
 }

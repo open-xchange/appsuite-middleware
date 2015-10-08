@@ -425,8 +425,8 @@ public class JsonMessageHandlerTest extends TestCase {
             e.printStackTrace();
             fail(e.getMessage());
         }
-    }
 
+    }
     /**
      * Ensure that proper TNEF parsing
      */
@@ -515,22 +515,68 @@ public class JsonMessageHandlerTest extends TestCase {
 
             JSONArray jAttachments = jMail.getJSONArray("attachments");
             assertNotNull(jAttachments);
-            assertEquals("Unexpected number of attachments", 3, jAttachments.length());
+            assertEquals("Unexpected number of attachments", 2, jAttachments.length());
 
             final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
             assertNotNull(jAttachment1);
             final JSONObject jAttachment2 = jAttachments.getJSONObject(1);
             assertNotNull(jAttachment2);
-            final JSONObject jAttachment3 = jAttachments.getJSONObject(2);
-            assertNotNull(jAttachment3);
 
             System.out.println("------- Debug Output ------");
             System.out.println(jMail.toString(2));
             assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
             assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/pdf"));
-            assertTrue("Unexpected content", jAttachment3.getString("content_type").startsWith("application/pkcs7-signature"));
 
             assertTrue("Unexpected message body", jAttachment1.getString("content").indexOf("da muss ein vermutlich") > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Ensure PGP signature is not handled in S/MIME validation
+     */
+    public void testBug40645() {
+        try {
+            final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/Test_PGP.eml"));
+
+            // Preps
+            MimeType2ExtMap.addMimeType("application/pdf", "pdf");
+            MimeType2ExtMap.addMimeType("application/rtf", "rtf");
+            MimeType2ExtMap.addMimeType("image/png", "png");
+
+            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+
+            UserSettingMail usm = new UserSettingMail(1, 1);
+            usm.parseBits(627479);
+
+            ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
+
+            JsonMessageHandler handler = new JsonMessageHandler(0, "INBOX/1", DisplayMode.DISPLAY, true, session, usm, false, 0);
+
+            // Test
+
+            MailMessageParser parser = new MailMessageParser();
+            parser.parseMailMessage(mail, handler);
+
+            JSONObject jMail = handler.getJSONObject();
+            assertNotNull(jMail);
+
+            JSONArray jAttachments = jMail.getJSONArray("attachments");
+            assertNotNull(jAttachments);
+            assertEquals("Unexpected number of attachments", 2, jAttachments.length());
+
+            final JSONObject jAttachment1 = jAttachments.getJSONObject(0);
+            assertNotNull(jAttachment1);
+            final JSONObject jAttachment2 = jAttachments.getJSONObject(1);
+            assertNotNull(jAttachment2);
+
+            System.out.println("------- Debug Output ------");
+            System.out.println(jMail.toString(2));
+            assertTrue("Unexpected content", jAttachment1.getString("content_type").startsWith("text/plain"));
+            assertTrue("Unexpected content", jAttachment2.getString("content_type").startsWith("application/pgp-signature"));
+
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

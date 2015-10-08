@@ -68,23 +68,48 @@ public abstract class FilestoreStorage {
     public abstract Filestore getFilestore(Connection con, int id) throws OXException;
 
     /**
-     * Convenience method for generating the context specific file store
-     * location.
+     * Convenience method for generating the context specific file store location.
+     * <pre>
+     * &lt;filestore-uri&gt; + "/" + &lt;context-appendix&gt;
+     * </pre>
+     *
      * @param ctx the location will be generated for this context.
-     * @return a ready to use context specific file store location.
-     * @throws OXException if an error occurs generating the URI.
+     * @return A ready to use context-specific file store location.
+     * @throws OXException If an error occurs generating the URI
      */
     public static URI createURI(final Context ctx) throws OXException {
         final Filestore store = getInstance().getFilestore(ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
 
+    /**
+     * Convenience method for generating the context specific file store location.
+     * <pre>
+     * &lt;filestore-uri&gt; + "/" + &lt;context-appendix&gt;
+     * </pre>
+     *
+     * @param con The connection to use
+     * @param ctx The associated context
+     * @return The context-specific file store location
+     * @throws OXException If an error occurs generating the URI
+     */
     public static URI createURI(final Connection con, final Context ctx) throws OXException {
         final FilestoreStorage storage = getInstance();
         final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
 
+    /**
+     * Convenience method for generating the context specific file store location.
+     * <pre>
+     * &lt;filestore-uri&gt; + "/" + &lt;context-appendix&gt;
+     * </pre>
+     *
+     * @param con The connection
+     * @param contextId The context identifier
+     * @return The context-specific file store location
+     * @throws OXException If an error occurs generating the URI
+     */
     public static URI createURI(final Connection con, final int contextId) throws OXException {
         final RdbContextStorage ctxStorage = new RdbContextStorage();
         final Context ctx = ctxStorage.loadContextData(con, contextId);
@@ -92,4 +117,5 @@ public abstract class FilestoreStorage {
         final Filestore store = storage.getFilestore(con, ctx.getFilestoreId());
         return FilestoreTools.createLocation(store, ctx);
     }
+
 }

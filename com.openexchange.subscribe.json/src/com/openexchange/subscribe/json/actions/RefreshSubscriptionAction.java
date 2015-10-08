@@ -49,11 +49,9 @@
 
 package com.openexchange.subscribe.json.actions;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +61,8 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link RefreshSubscriptionAction}
@@ -82,7 +82,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
-        final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
+        final List<Subscription> subscriptionsToRefresh = new LinkedList<Subscription>();
         final TIntSet ids = new TIntHashSet();
         JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         if (parameters.has("folder")) {
@@ -121,11 +121,10 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
             }
         }
 
-        int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(
-            subscriptionsToRefresh,
-            subscribeRequest.getServerSession());
+        List<OXException> errors = new LinkedList<OXException>();
+        int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession(), errors);
 
-        return new AJAXRequestResult(Integer.valueOf(resultCode), "json");
+        return new AJAXRequestResult(Integer.valueOf(resultCode), "json").addWarnings(errors);
     }
 
 }

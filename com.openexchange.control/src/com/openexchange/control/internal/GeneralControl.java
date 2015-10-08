@@ -49,6 +49,10 @@
 
 package com.openexchange.control.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +69,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.Streams;
 import com.openexchange.version.Version;
 
 /**
@@ -76,57 +81,78 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GeneralControl.class);
 
-    private MBeanServer server;
+    private static final String INITIAL_LOCATION = "initial@";
 
     private final BundleContext bundleContext;
+    private MBeanServer server;
 
+    /**
+     * Initializes a new {@link GeneralControl}.
+     *
+     * @param bundleContext The associated bundle context
+     */
     public GeneralControl(final BundleContext bundleContext) {
         super();
         this.bundleContext = bundleContext;
     }
 
+    private Bundle getBundleByName(final String name, final Bundle[] bundle) {
+        if (null == name) {
+            return null;
+        }
+
+        for (Bundle element : bundle) {
+            if (name.equals(element.getSymbolicName())) {
+                return element;
+            }
+        }
+        return null;
+    }
+
     @Override
     public List<Map<String, String>> list() {
         LOG.info("control command: list");
-        final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
-        final Bundle[] bundles = bundleContext.getBundles();
+        Bundle[] bundles = bundleContext.getBundles();
+        List<Map<String, String>> list = new ArrayList<Map<String, String>>(bundles.length);
         for (Bundle bundle : bundles) {
-            final Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<String, String>(4);
             map.put("bundlename", bundle.getSymbolicName());
             map.put("status", resolvState(bundle.getState()));
-            arrayList.add(map);
+            list.add(map);
         }
 
-        return arrayList;
+        return list;
     }
 
     @Override
     public void start(final String name) throws MBeanException {
         LOG.info("control command: start bundle {}", name);
-        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        if (bundle == null) {
+            throw new MBeanException(null, "bundle " + name + " not found");
+        }
         try {
-            if (bundle != null) {
-                bundle.start();
-            } else {
-                throw new MBeanException(null, "bundle " + name + " not found");
-            }
+            bundle.start();
         } catch (final BundleException exc) {
             LOG.error("cannot start bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
     }
 
     @Override
     public void stop(final String name) throws MBeanException {
         LOG.info("control command: stop bundle {}", name);
-        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        if (bundle == null) {
+            throw new MBeanException(null, "bundle " + name + " not found");
+        }
         try {
-            if (bundle != null) {
-                bundle.stop();
-            } else {
-                throw new MBeanException(null, "bundle " + name + " not found");
-            }
+            bundle.stop();
         } catch (final BundleException exc) {
             LOG.error("cannot stop bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
     }
 
@@ -137,45 +163,72 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     }
 
     @Override
-    public void install(final String location) {
+    public void install(final String location) throws MBeanException {
         LOG.info("install bundle: {}", location);
         try {
             bundleContext.installBundle(location);
         } catch (final BundleException exc) {
             LOG.error("cannot install bundle: {}", location, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
     }
 
     @Override
     public void uninstall(final String name) throws MBeanException {
-        LOG.info("uninstall bundle");
-        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        LOG.info("uninstall bundle: {}", name);
+        Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        if (bundle == null) {
+            throw new MBeanException(null, "bundle " + name + " not found");
+        }
         try {
-            if (bundle != null) {
-                bundle.uninstall();
-            } else {
-                throw new MBeanException(null, "bundle " + name + " not found");
-            }
+            bundle.uninstall();
         } catch (final BundleException exc) {
             LOG.error("cannot uninstall bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
     }
 
     @Override
     public void update(final String name, final boolean autofresh) throws MBeanException {
         LOG.info("control command: update bundle: {}", name);
-        final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        if (bundle == null) {
+            throw new MBeanException(null, "bundle " + name + " not found");
+        }
+
+        InputStream in = null;
         try {
-            if (bundle != null) {
-                bundle.update();
-                if (autofresh) {
-                    freshPackages(bundleContext);
-                }
-            } else {
-                throw new MBeanException(null, "bundle " + name + " not found");
+            String location = bundle.getLocation();
+            if (location.startsWith(INITIAL_LOCATION)) {
+                // Prepended by Equinox
+                location = location.substring(INITIAL_LOCATION.length());
+            }
+            in = new URL(location).openStream();
+
+            bundle.update(in);
+            if (autofresh) {
+                freshPackages(bundleContext);
             }
         } catch (final BundleException exc) {
             LOG.error("cannot update bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        } catch (MalformedURLException exc) {
+            LOG.error("cannot update bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        } catch (IOException exc) {
+            LOG.error("cannot update bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        } catch (RuntimeException exc) {
+            LOG.error("cannot update bundle: {}", name, exc);
+            String message = exc.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        } finally {
+            Streams.close(in);
         }
     }
 
@@ -203,15 +256,15 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
      * @param bundleContext The bundle context
      * @param waitForExit <code>true</code> to wait for the OSGi framework being shut down completely; otherwise <code>false</code>
      * @return <code>true</code> if the shutdown did complete successfully. This is only valid if waitForExit parameter is set to
-     * <code>true</code>.
+     *         <code>true</code>.
      */
-    public static final boolean shutdown(final BundleContext bundleContext, final boolean waitForExit) {
+    public static boolean shutdown(BundleContext bundleContext, boolean waitForExit) {
         boolean completed = false;
         try {
             /*
              * Simply shut-down the system bundle to enforce invocation of close() method on all running bundles
              */
-            final Bundle systemBundle = bundleContext.getBundle(0);
+            Bundle systemBundle = getSystemBundleSafe(bundleContext);
             if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
                 LOG.info("Stopping system bundle...");
                 // Note that stopping process is done in a separate thread
@@ -219,7 +272,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 if (waitForExit) {
                     // Wait on condition. The BundleListener for the system bundle does not work reliably therefore we have to poll the
                     // state.
-                    final long timeout = System.currentTimeMillis() + 120 * 1000;
+                    long timeout = System.currentTimeMillis() + 120 * 1000;
                     while (!completed && System.currentTimeMillis() < timeout) {
                         try {
                             Thread.sleep(100);
@@ -230,10 +283,19 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     }
                 }
             }
-        } catch (final BundleException e) {
+        } catch (BundleException e) {
             LOG.error("", e);
         }
         return completed;
+    }
+
+    private static Bundle getSystemBundleSafe(BundleContext bundleContext) {
+        try {
+            return bundleContext.getBundle(0);
+        } catch (Exception e) {
+            LOG.debug("Unable to acquire system bundle", e);
+        }
+        return null;
     }
 
     @Override
@@ -296,21 +358,11 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         return updateTasksInProgess() || configDBMigrationsRunning();
     }
 
-    private Bundle getBundleByName(final String name, final Bundle[] bundle) {
-        for (Bundle element : bundle) {
-            if (element.getSymbolicName().equals(name)) {
-                return element;
-            }
-        }
-        return null;
-    }
-
     @Override
     public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
         ObjectName name = nameArg;
         if (name == null) {
-            name = new ObjectName(
-                new StringBuilder(server.getDefaultDomain()).append(":name=").append(this.getClass().getName()).toString());
+            name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=").append(this.getClass().getName()).toString());
         }
         this.server = server;
         return name;
@@ -362,18 +414,18 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     private static String resolvState(final int state) {
         // TODO: add all states
         switch (state) {
-        case Bundle.ACTIVE:
-            return "ACTIVE";
-        case Bundle.INSTALLED:
-            return "INSTALLED";
-        case Bundle.RESOLVED:
-            return "RESOLVED";
-        case Bundle.STOPPING:
-            return "STOPPING";
-        case Bundle.UNINSTALLED:
-            return "UNINSTALLED";
-        default:
-            return "UNKNOWN";
+            case Bundle.ACTIVE:
+                return "ACTIVE";
+            case Bundle.INSTALLED:
+                return "INSTALLED";
+            case Bundle.RESOLVED:
+                return "RESOLVED";
+            case Bundle.STOPPING:
+                return "STOPPING";
+            case Bundle.UNINSTALLED:
+                return "UNINSTALLED";
+            default:
+                return "UNKNOWN";
         }
     }
 

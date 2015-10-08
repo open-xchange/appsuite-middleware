@@ -96,6 +96,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
@@ -166,7 +167,9 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.Trackable;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -385,24 +388,33 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null == session ? null : ContextStorage.getStorageContext(session);
     }
 
+    /**
+     * Gets the ID of the user's default infostore folder.
+     *
+     * @param session The session to get the default folder for
+     * @return The folder ID, or <code>null</code> if not found
+     */
     private static String getDefaultInfoStoreFolderId(final Session session) {
         final String paramName = "com.openexchange.folderstorage.defaultInfoStoreFolderId";
-        final String tmp = (String) session.getParameter(paramName);
-        if (null != tmp) {
-            return tmp;
-        }
-        try {
-            final String id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID());
+        String id = (String) session.getParameter(paramName);
+        if (null == id) {
+            try {
+                id = Integer.toString(new OXFolderAccess(getContext(session)).getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE));
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.equals(e)) {
+                    id = "-1";
+                } else {
+                    LOG.error("", e);
+                    return null;
+                }
+            }
             if (session instanceof PutIfAbsent) {
                 ((PutIfAbsent) session).setParameterIfAbsent(paramName, id);
             } else {
                 session.setParameter(paramName, id);
             }
-            return id;
-        } catch (final OXException e) {
-            LOG.error("", e);
-            return null;
         }
+        return "-1".equals(id) ? null : id;
     }
 
     /*-
@@ -566,6 +578,32 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
+        }
+        boolean ownsTransaction = folderStorage.startTransaction(storageParameters, false);
+        try {
+            SortableId[] sharedFolderIDs = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
+            if (ownsTransaction) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return sharedFolderIDs;
+        } catch (OXException e) {
+            if (ownsTransaction) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if (ownsTransaction) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to restore, not a real storage
     }
@@ -651,19 +689,30 @@ public final class OutlookFolderStorage implements FolderStorage {
             return false;
         }
         /*
-         * Check
+         * check presence in real storage
          */
-        final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, folderId);
-        if (!dedicatedFolderStorage.containsFolder(realTreeId, folderId, storageType, storageParameters)) {
-            return false;
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
-
-        // Exclude unsupported folders like infostore folders
-        // final Folder folder = dedicatedFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters);
-        // if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
-        // return false;
-        // }
-        return true;
+        boolean started = folderStorage.startTransaction(storageParameters, false);
+        try {
+            boolean contains = folderStorage.containsFolder(realTreeId, folderId, storageType, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return contains;
+        } catch (OXException e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (Exception e) {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
@@ -2035,8 +2084,10 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Callable for primary mail folder
          */
-        completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
-        taskCount++;
+        if (null == parameters.getSession() || ServerSessionAdapter.valueOf(parameters.getSession()).getUserConfiguration().hasWebMail()) {
+            completionService.submit(new MailFolderCallable(comparator, locale, user, contextId, tree, parameters));
+            taskCount++;
+        }
         /*
          * Callable for the ones from virtual table
          */
@@ -2280,11 +2331,23 @@ public final class OutlookFolderStorage implements FolderStorage {
      * Creates a new storage parameter instance.
      */
     static StorageParameters newStorageParameters(final StorageParameters source) {
+        StorageParametersImpl parameters;
         final Session session = source.getSession();
         if (null == session) {
-            return new StorageParametersImpl(source.getUser(), source.getContext());
+            parameters = new StorageParametersImpl(source.getUser(), source.getContext());
+        } else {
+            parameters = new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
+
+        FolderServiceDecorator decorator = source.getDecorator();
+        if (decorator != null) {
+            try {
+                parameters.setDecorator(decorator.clone());
+            } catch (CloneNotSupportedException e) {
+                // ignore
+            }
+        }
+        return parameters;
     }
 
     @Override
@@ -2470,6 +2533,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                     throw e;
                 }
                 final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                if (mailIDs.length == 0) {
+                    // If no subfolders exist in the mail account, loading the default folders fails.
+                    // Therefore we need to return early here.
+                    return treeMap;
+                }
+
                 final String publicFolderPath = getPublicMailFolderPath();
                 for (final SortableId sortableId : mailIDs) {
                     /*

@@ -67,13 +67,14 @@ public class SimpleTokenizer {
     /**
      * Tokenizes a list of strings.
      *
+     * @param queries The list of queries to tokenize
      * @return A list of tokens; never <code>null</code> but possibly empty,
      * if none of the strings did contain any valid token (e.g. empty strings or only white spaces).
      */
     public static List<String> tokenize(List<String> queries) {
         List<String> tokens = new LinkedList<String>();
         for (String query : queries) {
-            tokenize(tokens, query);
+            tokenize(tokens, query, 1);
         }
         return tokens;
     }
@@ -81,16 +82,31 @@ public class SimpleTokenizer {
     /**
      * Tokenizes the given input.
      *
+     * @param query The query to tokenize
      * @return A list of tokens; never <code>null</code> but possibly empty,
      * if the string did not contain any valid token (e.g. empty string or only white spaces).
      */
     public static List<String> tokenize(String query) {
         List<String> tokens = new LinkedList<String>();
-        tokenize(tokens, query);
+        tokenize(tokens, query, 1);
         return tokens;
     }
 
-    private static void tokenize(List<String> tokens, String query) {
+    /**
+     * Tokenizes the given input and keeps only tokens which are longer than <code>minTokenLen</code> characters.
+     *
+     * @param query The query to tokenize
+     * @param minTokenLen The minimum number of characters every token must have
+     * @return A list of tokens; never <code>null</code> but possibly empty,
+     * if the string did not contain any valid token (e.g. empty string or only white spaces).
+     */
+    public static List<String> tokenize(String query, int minTokenLen) {
+        List<String> tokens = new LinkedList<String>();
+        tokenize(tokens, query, minTokenLen);
+        return tokens;
+    }
+
+    private static void tokenize(List<String> tokens, String query, int minTokenLen) {
         int lastQuotePos = -1;
         boolean inQuotes = false;
         char[] chars = query.trim().toCharArray();
@@ -110,7 +126,10 @@ public class SimpleTokenizer {
                     if (inQuotes) {
                         tokenBuilder.append(' ');
                     } else {
-                        tokens.add(tokenBuilder.toString());
+                        String token = tokenBuilder.toString();
+                        if (token.length() >= minTokenLen) {
+                            tokens.add(tokenBuilder.toString());
+                        }
                         tokenBuilder.setLength(0);
                     }
                 } else {
@@ -122,7 +141,7 @@ public class SimpleTokenizer {
                 tokens.addAll(tokenize(new String(chars, lastQuotePos + 1, chars.length - (lastQuotePos + 1))));
             } else {
                 String token = tokenBuilder.toString();
-                if (token.trim().length() > 0) {
+                if (token.trim().length() >= minTokenLen) {
                     tokens.add(token);
                 }
             }

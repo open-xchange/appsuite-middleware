@@ -76,6 +76,11 @@ import com.openexchange.webdav.protocol.WebdavPath;
 public class Tools {
 
     /**
+     * The OAuth scope token for CardDAV
+     */
+    public static final String OAUTH_SCOPE = "carddav";
+
+    /**
      * Extracts the UID part from the supplied {@link WebdavPath}, i.e. the
      * path's name without the <code>.vcf</code> extension.
      *

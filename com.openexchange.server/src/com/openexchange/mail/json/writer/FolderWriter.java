@@ -88,6 +88,8 @@ public final class FolderWriter {
     public interface JSONValuePutter {
 
         void put(String key, Object value) throws JSONException;
+
+        boolean withKey();
     }
 
     public static final class JSONArrayPutter implements JSONValuePutter {
@@ -111,6 +113,11 @@ public final class FolderWriter {
         @Override
         public void put(final String key, final Object value) throws JSONException {
             jsonArray.put(value);
+        }
+
+        @Override
+        public boolean withKey() {
+            return false;
         }
 
     }
@@ -140,6 +147,11 @@ public final class FolderWriter {
                 return;
             }
             jsonObject.put(key, value);
+        }
+
+        @Override
+        public boolean withKey() {
+            return true;
         }
 
     }
@@ -184,9 +196,9 @@ public final class FolderWriter {
                         if (null == value) {
                             throw MailExceptionCode.MISSING_FULLNAME.create();
                         }
-                        putter.put(DataFields.ID, value);
+                        putter.put(putter.withKey() ? DataFields.ID : null, value);
                     } else {
-                        putter.put(DataFields.ID, fullName);
+                        putter.put(putter.withKey() ? DataFields.ID : null, fullName);
                     }
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -198,7 +210,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(DataFields.CREATED_BY, Integer.valueOf(-1));
+                    putter.put(putter.withKey() ? DataFields.CREATED_BY : null, Integer.valueOf(-1));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -209,7 +221,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(DataFields.MODIFIED_BY, Integer.valueOf(-1));
+                    putter.put(putter.withKey() ? DataFields.MODIFIED_BY : null, Integer.valueOf(-1));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -220,7 +232,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(DataFields.CREATION_DATE, Integer.valueOf(0));
+                    putter.put(putter.withKey() ? DataFields.CREATION_DATE : null, Integer.valueOf(0));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -231,7 +243,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(DataFields.LAST_MODIFIED, Integer.valueOf(0));
+                    putter.put(putter.withKey() ? DataFields.LAST_MODIFIED : null, Integer.valueOf(0));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -248,7 +260,7 @@ public final class FolderWriter {
                     } else {
                         parent = accountId >= 0 ? prepareFullname(accountId, folder.getParentFullname()) : folder.getParentFullname();
                     }
-                    putter.put(FolderChildFields.FOLDER_ID, parent);
+                    putter.put(putter.withKey() ? FolderChildFields.FOLDER_ID : null, parent);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -259,7 +271,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(FolderFields.TITLE, name == null ? folder.getName() : name);
+                    putter.put(putter.withKey() ? FolderFields.TITLE : null, name == null ? folder.getName() : name);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -270,7 +282,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(FolderFields.MODULE, AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
+                    putter.put(putter.withKey() ? FolderFields.MODULE : null, AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -281,7 +293,7 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws OXException {
                 try {
-                    putter.put(FolderFields.TYPE, Integer.valueOf(FolderObject.MAIL));
+                    putter.put(putter.withKey() ? FolderFields.TYPE : null, Integer.valueOf(FolderObject.MAIL));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -301,7 +313,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.SUBFOLDERS, Boolean.valueOf(boolVal));
+                    putter.put(putter.withKey() ? FolderFields.SUBFOLDERS : null, Boolean.valueOf(boolVal));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -344,7 +356,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.OWN_RIGHTS, Integer.valueOf(permissionBits));
+                    putter.put(putter.withKey() ? FolderFields.OWN_RIGHTS : null, Integer.valueOf(permissionBits));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -367,7 +379,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.PERMISSIONS, ja);
+                    putter.put(putter.withKey() ? FolderFields.PERMISSIONS : null, ja);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -384,7 +396,7 @@ public final class FolderWriter {
                     final String value =
                         folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
                             folder.getUnreadMessageCount()).append(')').toString();
-                    putter.put(FolderFields.SUMMARY, value);
+                    putter.put(putter.withKey() ? FolderFields.SUMMARY : null, value);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -398,9 +410,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(
-                        FolderFields.STANDARD_FOLDER,
-                        Boolean.valueOf(folder.containsDefaultFolder() ? folder.isDefaultFolder() : false));
+                    putter.put(putter.withKey() ? FolderFields.STANDARD_FOLDER : null, Boolean.valueOf(folder.containsDefaultFolder() ? folder.isDefaultFolder() : false));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -414,7 +424,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.TOTAL, Integer.valueOf(folder.getMessageCount()));
+                    putter.put(putter.withKey() ? FolderFields.TOTAL : null, Integer.valueOf(folder.getMessageCount()));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -428,7 +438,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.NEW, Integer.valueOf(folder.getNewMessageCount()));
+                    putter.put(putter.withKey() ? FolderFields.NEW : null, Integer.valueOf(folder.getNewMessageCount()));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -442,7 +452,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.UNREAD, Integer.valueOf(folder.getUnreadMessageCount()));
+                    putter.put(putter.withKey() ? FolderFields.UNREAD : null, Integer.valueOf(folder.getUnreadMessageCount()));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -456,7 +466,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.DELETED, Integer.valueOf(folder.getDeletedMessageCount()));
+                    putter.put(putter.withKey() ? FolderFields.DELETED : null, Integer.valueOf(folder.getDeletedMessageCount()));
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -476,7 +486,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.SUBSCRIBED, boolVal);
+                    putter.put(putter.withKey() ? FolderFields.SUBSCRIBED : null, boolVal);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -498,7 +508,7 @@ public final class FolderWriter {
                     /*
                      * Put value
                      */
-                    putter.put(FolderFields.SUBSCR_SUBFLDS, boolVal);
+                    putter.put(putter.withKey() ? FolderFields.SUBSCR_SUBFLDS : null, boolVal);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -601,7 +611,7 @@ public final class FolderWriter {
                                 fo.setModule(FolderObject.MAIL);
                                 fo.setType(FolderObject.PRIVATE);
                                 fo.setCreatedBy(-1);
-                                putter.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
+                                putter.put(folderField.getColumnName(), folderField.renderJSON(null, folderField.getValue(fo, session)));
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }

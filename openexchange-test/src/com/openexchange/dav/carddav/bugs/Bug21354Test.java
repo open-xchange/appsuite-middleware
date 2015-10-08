@@ -49,10 +49,11 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -62,24 +63,25 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21354Test}
- * 
+ *
  * CardDAV client stuck after trying to delete user from global address book
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21354Test extends CardDAVTest {
 
-	public Bug21354Test(String name) {
-		super(name);
+	public Bug21354Test() {
+		super();
 	}
-	
+
+	@Test
 	public void testDeleteFromGAB_10_6() throws Exception {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
 		/*
 		 * store current sync state via all ETags and CTag properties
 		 */
 		Map<String, String> eTags = super.getAllETags();
-		String cTag = super.getCTag();		
+		String cTag = super.getCTag();
 		/*
 		 * pick random contact from global address book
 		 */
@@ -100,18 +102,19 @@ public class Bug21354Test extends CardDAVTest {
 		String cTag2 = super.getCTag();
 		assertFalse("No changes indicated by CTag", cTag.equals(cTag2));
 		/*
-		 * check Etag collection 
+		 * check Etag collection
 		 */
 		Map<String, String> eTags2 = super.getAllETags();
 		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
 		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
 		/*
-		 * check updated vCard for deleted member 
+		 * check updated vCard for deleted member
 		 */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
         assertContains(uid, addressData);
 	}
-	
+
+	@Test
 	public void testDeleteFromGAB_10_7() throws Exception {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
 		/*
@@ -140,10 +143,10 @@ public class Bug21354Test extends CardDAVTest {
 		List<String> changedHrefs = super.getChangedHrefs(eTags, eTags2);
 		assertTrue("less than 1 change reported in Etags", 0 < changedHrefs.size());
 		/*
-		 * check updated vCards for deleted member and global address book 
+		 * check updated vCards for deleted member and global address book
 		 */
         final List<VCardResource> addressData = super.addressbookMultiget(changedHrefs);
         assertContains(uid, addressData);
 	}
-	
+
 }

@@ -82,7 +82,7 @@ public final class UserLockManagement {
      */
     private UserLockManagement() {
         super();
-        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, ReadWriteLock>>(32);
+        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, ReadWriteLock>>(32, 0.9f, 1);
     }
 
     /**
@@ -146,7 +146,7 @@ public final class UserLockManagement {
     public ReadWriteLock getFor(final int userId, final int contextId) {
         ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(contextId));
         if (null == userMap) {
-            final ConcurrentMap<Integer, ReadWriteLock> newUserMap = new ConcurrentHashMap<Integer, ReadWriteLock>(32);
+            final ConcurrentMap<Integer, ReadWriteLock> newUserMap = new ConcurrentHashMap<Integer, ReadWriteLock>(32, 0.9f, 1);
             userMap = map.putIfAbsent(Integer.valueOf(contextId), newUserMap);
             if (null == userMap) {
                 userMap = newUserMap;

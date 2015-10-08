@@ -51,7 +51,6 @@ package com.openexchange.ajax.simple;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,18 +58,14 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.subscribe.helpers.TrustAllAdapter;
-
 
 /**
  * {@link SimpleOXClient}
@@ -87,7 +82,7 @@ public class SimpleOXClient {
     private String sessionID;
 
     public SimpleOXClient(String host, boolean secure) {
-        if(secure) {
+        if (secure) {
             final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
             client.getHostConfiguration().setHost(host, 443, https);
         } else {
@@ -101,8 +96,8 @@ public class SimpleOXClient {
 
     public String login(String login, String password) throws JSONException, IOException {
         JSONObject obj = raw("login", "login", "name", login, "password", password);
-        if(obj.has("error")) {
-            throw new RuntimeException("Unexpected Repsonse: "+obj.toString());
+        if (obj.has("error")) {
+            throw new RuntimeException("Unexpected Repsonse: " + obj.toString());
         }
         return sessionID = obj.getString("session");
     }
@@ -115,14 +110,14 @@ public class SimpleOXClient {
         return new SimpleOXModule(this, moduleName);
     }
 
-    public SimpleResponse call(String module, String action, Object...parameters) throws JSONException, IOException {
+    public SimpleResponse call(String module, String action, Object... parameters) throws JSONException, IOException {
         return new SimpleResponse(raw(module, action, parameters));
     }
 
     public JSONObject raw(String module, String action, Object... parameters) throws JSONException, IOException {
         HttpMethod method = rawMethod(module, action, parameters);
-        int statusCode= method.getStatusCode();
-        if(statusCode != 200) {
+        int statusCode = method.getStatusCode();
+        if (statusCode != 200) {
             throw new IllegalStateException("Expected a return code of 200 but was " + statusCode);
         }
         String response = method.getResponseBodyAsString();
@@ -132,20 +127,20 @@ public class SimpleOXClient {
         return new JSONObject(response);
     }
 
-    public HttpMethod rawMethod(String module, String action, Object...parameters) throws JSONException, IOException {
+    public HttpMethod rawMethod(String module, String action, Object... parameters) throws JSONException, IOException {
         Map<String, Object> params = M(parameters);
         params.put("action", action);
-        if(!params.containsKey("session") && isLoggedIn()) {
+        if (!params.containsKey("session") && isLoggedIn()) {
             params.put("session", sessionID);
         }
         HttpMethod method;
 
-        String url = BASE+"/"+module;
+        String url = BASE + "/" + module;
 
-        if(params.containsKey("body")) {
+        if (params.containsKey("body")) {
             EntityEnclosingMethod entityMethod;
             String body = JSONCoercion.coerceToJSON(params.remove("body")).toString();
-            if("getWithBody".equals(action)) {
+            if ("getWithBody".equals(action)) {
                 entityMethod = new GetWithBody(url);
             } else {
                 entityMethod = new PutMethod(url);
@@ -157,27 +152,32 @@ public class SimpleOXClient {
                 e.printStackTrace();
             }
             method = entityMethod;
+
+            NameValuePair[] pairs = new NameValuePair[params.size()];
+            int i = 0;
+            for (Entry<String, Object> entry : params.entrySet()) {
+                pairs[i++] = new NameValuePair(entry.getKey(), entry.getValue().toString());
+            }
+
+            method.setQueryString(pairs);
         } else {
-            method = new GetMethod(url);
+            PostMethod post = new PostMethod(url);
+            for (final Entry<String, Object> entry : params.entrySet()) {
+                post.addParameter(new NameValuePair(entry.getKey(), entry.getValue().toString()));
+            }
+            post.setQueryString(url);
+            method = post;
         }
-
-        NameValuePair[] pairs = new NameValuePair[params.size()];
-        int i = 0;
-        for (Entry<String, Object> entry : params.entrySet()) {
-            pairs[i++] = new NameValuePair(entry.getKey(), entry.getValue().toString());
-        }
-
-        method.setQueryString(pairs);
 
         client.executeMethod(method);
 
         return method;
     }
 
-    private Map<String, Object> M(Object...parameters) {
-        HashMap<String,Object> map = new HashMap<String, Object>();
+    private Map<String, Object> M(Object... parameters) {
+        HashMap<String, Object> map = new HashMap<String, Object>();
 
-        for(int i = 0; i < parameters.length; i++) {
+        for (int i = 0; i < parameters.length; i++) {
             map.put(parameters[i++].toString(), parameters[i]);
         }
 

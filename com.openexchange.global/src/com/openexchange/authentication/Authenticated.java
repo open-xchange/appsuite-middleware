@@ -60,8 +60,18 @@ package com.openexchange.authentication;
  */
 public interface Authenticated {
 
+    /**
+     * Gets the context information used to look-up the associated context.
+     *
+     * @return The context information
+     */
     String getContextInfo();
 
+    /**
+     * Gets the user information used to look-up the associated user.
+     *
+     * @return The user information
+     */
     String getUserInfo();
 
 }

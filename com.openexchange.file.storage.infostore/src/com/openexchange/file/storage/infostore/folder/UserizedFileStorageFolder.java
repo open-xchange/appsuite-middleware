@@ -52,6 +52,7 @@ package com.openexchange.file.storage.infostore.folder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -60,10 +61,18 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link UserizedFileStorageFolder}
@@ -72,22 +81,24 @@ import com.openexchange.folderstorage.type.TrashType;
  */
 public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements TypeAware {
 
+    private final UserizedFolder folder;
     private FileStorageFolderType type;
 
     /**
      * Initializes a new {@link UserizedFileStorageFolder} from the supplied userized folder
      *
      * @param folder The userized folder to construct the file storage folder from
-     * @throws OXException
      */
     public UserizedFileStorageFolder(UserizedFolder folder) throws OXException {
         super();
+        this.folder = folder;
         setCreationDate(folder.getCreationDateUTC());
         setDefaultFolder(folder.isDefault());
         setExists(true);
         setId(folder.getID());
         setLastModifiedDate(folder.getLastModifiedUTC());
-        setName(folder.getName());
+        String defaultName = folder.getLocalizedName(LocaleTools.DEFAULT_LOCALE, folder.isAltNames());
+        setName(null != defaultName ? defaultName : folder.getName());
         setParentId(folder.getParentID());
         setPermissions(parsePermission(folder.getPermissions()));
         setOwnPermission(parsePermission(folder.getOwnPermission()));
@@ -95,8 +106,16 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         setSubscribed(folder.isSubscribed());
         String[] subfolderIDs = folder.getSubfolderIDs();
         setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
-        setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        FolderID folderID = new FolderID(folder.getID());
         setType(getType(folder.getType()));
+        setCreatedBy(folder.getCreatedBy());
+        setModifiedBy(folder.getModifiedBy());
+        /*
+         * only assume all infostore capabilities if it's really an infostore folder
+         */
+        if (FileID.INFOSTORE_SERVICE_ID.equals(folderID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(folderID.getAccountId())) {
+            setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        }
     }
 
     @Override
@@ -111,6 +130,11 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
      */
     public void setType(FileStorageFolderType type) {
         this.type = type;
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return folder.getLocalizedName(locale, folder.isAltNames());
     }
 
     @Override
@@ -176,6 +200,21 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
         }
         if (PublicType.getInstance().equals(type)) {
             return FileStorageFolderType.PUBLIC_FOLDER;
+        }
+        if (PicturesType.getInstance().equals(type)) {
+            return FileStorageFolderType.PICTURES_FOLDER;
+        }
+        if (DocumentsType.getInstance().equals(type)) {
+            return FileStorageFolderType.DOCUMENTS_FOLDER;
+        }
+        if (MusicType.getInstance().equals(type)) {
+            return FileStorageFolderType.MUSIC_FOLDER;
+        }
+        if (VideosType.getInstance().equals(type)) {
+            return FileStorageFolderType.VIDEOS_FOLDER;
+        }
+        if (TemplatesType.getInstance().equals(type)) {
+            return FileStorageFolderType.TEMPLATES_FOLDER;
         }
         return FileStorageFolderType.NONE;
     }

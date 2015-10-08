@@ -85,8 +85,8 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -172,19 +172,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     protected void saveObject(boolean checkPermissions) throws OXException {
         try {
             /*
-             * load original appointment and change exceptions
+             * load original appointment
              */
             Appointment originalAppointment = parent.load(this.object, false);
-            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
-            /*
-             * transform change- to delete-exceptions where user is removed from participants if needed (bug #26293)
-             */
-            if (null != originalExceptions && 0 < originalExceptions.length) {
-                originalExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, originalAppointment, originalExceptions);
-            }
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
-                throw super.protocolException(HttpServletResponse.SC_CONFLICT);
+                throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
              * update appointment
@@ -208,6 +201,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (null != appointmentToSave.getLastModified()) {
                     clientLastModified = appointmentToSave.getLastModified();
                 }
+            }
+            if (0 == exceptionsToSave.size() && 0 == deleteExceptionsToSave.size()) {
+                return;
+            }
+            /*
+             * load original exceptions, transforming change- to delete-exceptions where user is removed from participants if needed (bug #26293)
+             */
+            CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object, false);
+            if (null != originalExceptions && 0 < originalExceptions.length) {
+                originalExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, originalAppointment, originalExceptions);
             }
             /*
              * update change exceptions
@@ -256,7 +259,6 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * update exception
                  */
-                // TODO fix for bug 32536 - closing reminder for appointment results in 'containing changes'
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
                     LOG.debug("No changes detected in {}, skipping update.", exceptionToSave);
                 } else {
@@ -357,14 +359,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * load appointment and change exceptions
              */
             CalendarDataObject appointment = parent.load(object, true);
-            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.getChangeExceptions(object.getObjectID()) : null;
+            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
-             * load change exceptions, transforming them to delete-exceptions where user is removed from participants if needed (bug #26293)
+             * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
              */
             if (null != changeExceptions && 0 < changeExceptions.length) {
-                for (int i = 0; i < changeExceptions.length; i++) {
-                    changeExceptions[i] = parent.load(changeExceptions[i], true);
-                }
                 changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
             }
             /*
@@ -404,16 +403,21 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 cdo.setIgnoreConflicts(true);
                 if (null != this.object) {
                     cdo.setParentFolderID(this.object.getParentFolderID());
-                    cdo.setObjectID(this.object.getObjectID());
                     cdo.removeUid();
                 } else {
                     cdo.setParentFolderID(this.parentFolderID);
                 }
                 if (1 == appointments.size() || looksLikeMaster(cdo)) {
+                    if (null != object) {
+                        cdo.setObjectID(object.getObjectID());
+                    }
                     this.appointmentToSave = cdo;
                     createNewDeleteExceptions(this.object, appointmentToSave);
                 } else {
                     factory.getCalendarUtilities().removeRecurringType(cdo);
+                    if (null != object) {
+                        cdo.setRecurrenceID(object.getObjectID());
+                    }
                     exceptionsToSave.add(cdo);
                 }
             }
@@ -429,93 +433,26 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
-    private List<CalendarDataObject> parse(final InputStream body) throws IOException, ConversionError {
-        UnsynchronizedByteArrayOutputStream baos = null;
+    private List<CalendarDataObject> parse(InputStream body) throws IOException, ConversionError {
         try {
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
-            baos = new UnsynchronizedByteArrayOutputStream(8192);
-            for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
-                baos.write(buf, 0, read);
+            if (LOG.isTraceEnabled()) {
+                byte[] iCal = Streams.stream2bytes(body);
+                LOG.trace(new String(iCal, Charsets.UTF_8));
+                body = Streams.newByteArrayInputStream(iCal);
             }
-            return this.parse(new String(baos.toByteArray(), "UTF-8"));
+            return factory.getIcalParser().parseAppointments(
+                body, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         } finally {
-            Streams.close(baos);
             Streams.close(body);
         }
     }
 
-    private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
-        LOG.trace(iCal);
-        /*
-         * apply patches
-         */
-        String patchedICal = iCal;
-
-        //XXX to make the UserResolver do it's job correctly
-        //patchedICal = patchedICal.replace("424242669@devel-mail.netline.de", "@premium");
-        /*
-         * parse appointments
-         */
-        return factory.getIcalParser().parseAppointments(
-            patchedICal, getTimeZone(), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
-    }
-
-    private static boolean differs(Object value1, Object value2) {
-        if (value1 == value2) {
-            return false;
-        } else if (null == value1 && null != value2) {
-            return true;
-        } else if (null == value2) {
-            return true;
-        } else if (String.class.isInstance(value1) && String.class.isInstance(value2)) {
-            return 0 != ((String)value1).trim().compareTo(((String)value2).trim());
-        } else if (Participant[].class.isInstance(value1)) {
-            return false == ParticipantTools.equals((Participant[])value1, (Participant[])value2, true);
-        } else if (Comparable.class.isInstance(value1)) {
-            return 0 != ((Comparable)value1).compareTo(value2);
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean differs(int field, Appointment oldAppointment, CalendarDataObject cdo) {
-        return oldAppointment.contains(field) && false == cdo.contains(field) ||
-            false == oldAppointment.contains(field) && cdo.contains(field) ||
-            differs(oldAppointment.get(field), cdo.get(field));
-    }
-
     private static boolean containsChanges(Appointment oldAppointment, CalendarDataObject cdo) {
-        boolean useDiff = true;
-        if (useDiff) {
-            AppointmentDiff diff = AppointmentDiff.compare(oldAppointment, cdo);
-            return diff.anyFieldChangedOf(CALDAV_FIELDS) ||
-                CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType() &&
-                diff.anyFieldChangedOf(RECURRENCE_FIELDS);
-        }
-        try {
-            /*
-             * check appointment fields
-             */
-            for (int field : CALDAV_FIELDS) {
-                if (differs(field, oldAppointment, cdo)) {
-                    return true;
-                }
-            }
-            if (CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
-                CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType()) {
-                for (int field : RECURRENCE_FIELDS) {
-                    if (differs(field, oldAppointment, cdo)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) { // not enough trust in generic comparisons
-            LOG.error("Error checking for appointment changes", e);
-            return true;
-        }
-        return false;
+        AppointmentDiff diff = AppointmentDiff.compare(oldAppointment, cdo);
+        return diff.anyFieldChangedOf(CALDAV_FIELDS) ||
+            CalendarObject.NO_RECURRENCE != oldAppointment.getRecurrenceType() &&
+            CalendarObject.NO_RECURRENCE != cdo.getRecurrenceType() &&
+            diff.anyFieldChangedOf(RECURRENCE_FIELDS);
     }
 
     private void checkForExplicitRemoves(Appointment oldAppointment, CalendarDataObject updatedAppointment) {
@@ -725,11 +662,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     private static boolean trimTruncatedAttribute(final Truncated truncated, final CalendarDataObject calendarObject) {
-        final Object value = calendarObject.get(truncated.getId());
+        int field = truncated.getId();
+        if (field <= 0) {
+            return false;
+        }
+
+        Object value = calendarObject.get(field);
         if (null != value && String.class.isInstance(value)) {
-            final String stringValue = (String)value;
+            String stringValue = (String)value;
             if (stringValue.length() > truncated.getMaxSize()) {
-                calendarObject.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                calendarObject.set(field, stringValue.substring(0, truncated.getMaxSize()));
                 return true;
             }
         }

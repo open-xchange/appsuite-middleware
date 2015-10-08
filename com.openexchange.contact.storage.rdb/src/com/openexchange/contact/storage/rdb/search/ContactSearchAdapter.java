@@ -60,6 +60,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -95,8 +96,8 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	}
 
 	@Override
-	public String getClause() {
-		return stringBuilder.toString().trim();
+	public StringBuilder getClause() {
+		return Strings.trim(stringBuilder);
 	}
 
 	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {

@@ -126,7 +126,7 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("f", "file", true, "The name of the file in which to dump the heap snapshot; e.g. /tmp/heap.bin");
+        options.addOption("f", "file", true, "The path name of the file in which to dump the heap snapshot; e.g. \"/tmp/heap.bin\"");
     }
 
     @Override
@@ -168,11 +168,9 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
             int c = 21;
             while (false == ft.isDone()) {
                 System.out.print(".");
-                if (c >= 76) {
+                if (c++ >= 76) {
                     c = 0;
                     System.out.println();
-                } else {
-                    c++;
                 }
                 LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
             }

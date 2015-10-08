@@ -82,18 +82,28 @@ public class VisibleFoldersResponse extends AbstractAJAXResponse {
     public VisibleFoldersResponse(final Response response, final int[] columns) throws JSONException {
         super(response);
         this.columns = columns;
-        final List<List<Object[]>> parsedResponse = parseResponse();
-        privateFolders = parsedResponse.get(0);
-        publicFolders = parsedResponse.get(1);
-        sharedFolders = parsedResponse.get(2);
+        if (false == response.hasError()) {
+            final List<List<Object[]>> parsedResponse = parseResponse();
+            privateFolders = parsedResponse.get(0);
+            publicFolders = parsedResponse.get(1);
+            sharedFolders = parsedResponse.get(2);
+        } else {
+            privateFolders = null;
+            publicFolders = null;
+            sharedFolders = null;
+        }
     }
 
     private List<List<Object[]>> parseResponse() throws JSONException {
         final JSONObject object = (JSONObject) getResponse().getData();
         List<List<Object[]>> ret = new ArrayList<List<Object[]>>(3);
         // Parse private folders
-        final Object[][] privateArray = parseData(object.getJSONArray("private"));
-        ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
+        if (object.has("private")) {
+            final Object[][] privateArray = parseData(object.getJSONArray("private"));
+            ret.add(Collections.unmodifiableList(Arrays.asList(privateArray)));
+        } else {
+            ret.add(Collections.<Object[]>emptyList());
+        }
         // Parse public folders
         if (object.has("public")) {
             final Object[][] publicArray = parseData(object.getJSONArray("public"));

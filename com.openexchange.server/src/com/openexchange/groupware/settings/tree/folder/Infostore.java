@@ -113,10 +113,15 @@ public class Infostore implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
+                if (user.isGuest()) {
+                    return;
+                }
                 // Check availability of InfoStore
                 if (InfostoreFacades.isInfoStoreAvailable()) {
-                    setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE).getObjectID()));
+                    int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE);
+                    if (-1 != folderID) {
+                        setting.setSingleValue(Integer.valueOf(folderID));
+                    }
                     return;
                 }
                 // Choose the primary folder from another file storage
@@ -144,8 +149,7 @@ public class Infostore implements PreferencesItemService {
                     LOG.error("Infostore default folder could not be applied to user configuration.", e);
                 }
                 // All failed
-                setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(
-                    user.getId(), FolderObject.INFOSTORE).getObjectID()));
+                setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE)));
             }
         };
     }

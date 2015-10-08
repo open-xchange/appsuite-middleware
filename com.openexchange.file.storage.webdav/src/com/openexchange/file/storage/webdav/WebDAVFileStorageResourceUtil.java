@@ -59,12 +59,14 @@ import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.w3c.dom.Element;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link WebDAVFileStorageResourceUtil} - Utility class for WebDAV resources.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> - Exceptions
  */
 public final class WebDAVFileStorageResourceUtil {
 
@@ -92,9 +94,9 @@ public final class WebDAVFileStorageResourceUtil {
             }
             return stringProperty.getValue();
         } catch (final ClassCastException e) {
-            throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(e, davPropertyName.getName(), String.class.getName());
+            throw FileStorageExceptionCodes.INVALID_PROPERTY.create(e, davPropertyName.getName(), String.class.getName());
         } catch (final Exception e) {
-            throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -114,9 +116,9 @@ public final class WebDAVFileStorageResourceUtil {
             }
             return stringProperty.getValue();
         } catch (final ClassCastException e) {
-            throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, String.class.getName());
+            throw FileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, String.class.getName());
         } catch (final Exception e) {
-            throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -132,15 +134,15 @@ public final class WebDAVFileStorageResourceUtil {
         try {
             @SuppressWarnings("unchecked") final DavProperty<String> intProperty = (DavProperty<String>) propertySet.get(name);
             if (null == intProperty) {
-                throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(name, int.class.getName());
+                throw FileStorageExceptionCodes.INVALID_PROPERTY.create(name, int.class.getName());
             }
             return Integer.parseInt(intProperty.getValue());
         } catch (final ClassCastException e) {
-            throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, int.class.getName());
+            throw FileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, int.class.getName());
         } catch (final NumberFormatException e) {
-            throw WebDAVFileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, int.class.getName());
+            throw FileStorageExceptionCodes.INVALID_PROPERTY.create(e, name, int.class.getName());
         } catch (final Exception e) {
-            throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -190,13 +192,13 @@ public final class WebDAVFileStorageResourceUtil {
             }
             ret = DateUtil.parseDate(datePropertyValue);
             if (null == ret) {
-                throw WebDAVFileStorageExceptionCodes.INVALID_DATE_PROPERTY.create(datePropertyValue);
+                throw FileStorageExceptionCodes.INVALID_TYPE_PROPERTY.create("date", datePropertyValue);
             }
             return ret;
         } catch (final ClassCastException e) {
-            throw WebDAVFileStorageExceptionCodes.INVALID_DATE_PROPERTY.create(e, name);
+            throw FileStorageExceptionCodes.INVALID_TYPE_PROPERTY.create(e, "date", name);
         } catch (final Exception e) {
-            throw WebDAVFileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

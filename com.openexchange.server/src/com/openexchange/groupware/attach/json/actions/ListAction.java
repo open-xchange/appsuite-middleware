@@ -72,6 +72,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -178,13 +179,7 @@ public final class ListAction extends AbstractAttachmentAction {
                 LOG.error("", e);
             }
 
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
 

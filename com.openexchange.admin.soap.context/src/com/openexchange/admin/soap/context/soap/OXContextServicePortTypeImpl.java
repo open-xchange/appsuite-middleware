@@ -1,4 +1,3 @@
-
 /**
  * Please modify this class to meet your needs
  * This class is not complete
@@ -45,9 +44,11 @@ import com.openexchange.admin.soap.context.dataobjects.Database;
 import com.openexchange.admin.soap.context.dataobjects.Entry;
 import com.openexchange.admin.soap.context.dataobjects.Filestore;
 import com.openexchange.admin.soap.context.dataobjects.Group;
+import com.openexchange.admin.soap.context.dataobjects.Quota;
 import com.openexchange.admin.soap.context.dataobjects.SOAPMapEntry;
 import com.openexchange.admin.soap.context.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.context.dataobjects.SOAPStringMapMap;
+import com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.soap.context.dataobjects.User;
 import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
 import com.openexchange.tools.net.URIDefaults;
@@ -61,12 +62,11 @@ import com.openexchange.tools.net.URIParser;
  */
 
 @javax.jws.WebService(
-                      serviceName = "OXContextService",
-                      portName = "OXContextServiceHttpsEndpoint",
-                      targetNamespace = "http://soap.admin.openexchange.com",
-                      // wsdlLocation = "null",
-                      endpointInterface = "com.openexchange.admin.soap.context.soap.OXContextServicePortType")
-
+    serviceName = "OXContextService",
+    portName = "OXContextServiceHttpsEndpoint",
+    targetNamespace = "http://soap.admin.openexchange.com",
+    // wsdlLocation = "null",
+    endpointInterface = "com.openexchange.admin.soap.context.soap.OXContextServicePortType")
 public class OXContextServicePortTypeImpl implements OXContextServicePortType {
 
     public static final AtomicReference<OXContextInterface> RMI_REFERENCE = new AtomicReference<OXContextInterface>();
@@ -74,9 +74,49 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     private static OXContextInterface getContextInterface() throws RemoteException_Exception {
         final OXContextInterface contextInterface = RMI_REFERENCE.get();
         if (null == contextInterface) {
-            throw new RemoteException_Exception("Missing "+OXContextInterface.class.getName() + " instance.");
+            throw new RemoteException_Exception("Missing " + OXContextInterface.class.getName() + " instance.");
         }
         return contextInterface;
+    }
+
+    @Override
+    public List<Quota> listQuota(Context ctx, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+        OXContextInterface contextInterface = getContextInterface();
+        try {
+            com.openexchange.admin.rmi.dataobjects.Quota[] quotas = contextInterface.listQuotas(soap2Context(ctx), soap2Credentials(auth));
+
+            List<Quota> retval = new ArrayList<Quota>(quotas.length);
+            for (com.openexchange.admin.rmi.dataobjects.Quota quota : quotas) {
+                retval.add(quota2Soap(quota));
+            }
+            return retval;
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
+            com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.context.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(new com.openexchange.admin.soap.context.exceptions.InvalidCredentialsException());
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NoSuchContextException e) {
+            com.openexchange.admin.soap.context.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.context.soap.NoSuchContextException();
+            faultDetail.setNoSuchContextException(new com.openexchange.admin.soap.context.exceptions.NoSuchContextException());
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
+            faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidDataException e) {
+            com.openexchange.admin.soap.context.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.context.soap.InvalidDataException();
+            com.openexchange.admin.soap.context.exceptions.InvalidDataException value = new com.openexchange.admin.soap.context.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NumberFormatException e) {
+            throw new InvalidDataException_Exception("Invalid quota value.", e);
+        }
     }
 
     @Override
@@ -84,7 +124,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final String sQuotaValue = parameters.quotaValue;
-            if (isEmpty(sQuotaValue)) {
+            if (com.openexchange.java.Strings.isEmpty(sQuotaValue)) {
                 throw new InvalidDataException("Missing quota value.");
             }
             final String module = parameters.module;
@@ -165,7 +205,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception {
+    public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeCapabilities(soap2Context(parameters.ctx), parseToSet(parameters.capsToAdd), parseToSet(parameters.capsToRemove), parseToSet(parameters.capsToDrop), soap2Credentials(parameters.auth));
@@ -198,7 +238,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
 
     private Set<String> parseToSet(final String csv) {
         String s = csv;
-        if (isEmpty(s)) {
+        if (com.openexchange.java.Strings.isEmpty(s)) {
             return Collections.emptySet();
         }
         s = s.trim();
@@ -207,7 +247,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 return Collections.emptySet();
             }
             s = s.substring(1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -216,7 +256,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                 return Collections.emptySet();
             }
             s = s.substring(0, s.length() - 1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -225,28 +265,15 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         final Set<String> set = new HashSet<String>(arr.length);
         for (String element : arr) {
             final String cap = element;
-            if (!isEmpty(cap)) {
-                set.add(toLowerCase(cap));
+            if (!com.openexchange.java.Strings.isEmpty(cap)) {
+                set.add(com.openexchange.java.Strings.toLowerCase(cap));
             }
         }
         return set;
     }
 
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
     @Override
-    public void change(final Change parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public void change(final Change parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.change(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
@@ -278,7 +305,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public UserModuleAccess getModuleAccess(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return moduleAccess2Soap(contextInterface.getModuleAccess(soap2Context(ctx), soap2Credentials(auth)));
@@ -310,7 +337,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void enable(final Enable parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public void enable(final Enable parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enable(soap2Context(parameters.getCtx()), soap2Credentials(parameters.getAuth()));
@@ -342,7 +369,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void disableAll(final DisableAll parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , NoSuchReasonException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public void disableAll(final DisableAll parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, NoSuchReasonException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disableAll(soap2Credentials(parameters.getAuth()));
@@ -375,7 +402,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void changeModuleAccessByName(final ChangeModuleAccessByName parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public void changeModuleAccessByName(final ChangeModuleAccessByName parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.getCtx()), parameters.getAccessCombinationName(), soap2Credentials(parameters.getAuth()));
@@ -407,7 +434,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listAll(final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Context> listAll(final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listAll(soap2Credentials(auth));
@@ -443,7 +470,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.lang.Integer moveContextDatabase(final Context ctx,final Database dstDatabaseId,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , OXContextException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    {
+    public java.lang.Integer moveContextDatabase(final Context ctx, final Database dstDatabaseId, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, OXContextException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.moveContextDatabase(soap2Context(ctx), soap2Database(dstDatabaseId), soap2Credentials(auth)));
@@ -482,10 +509,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context createModuleAccess(final Context ctx,final User adminUser,final UserModuleAccess access,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , ContextExistsException_Exception , RemoteException_Exception    {
+    public Context createModuleAccess(final Context ctx, final User adminUser, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2ModuleAccess(access), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
@@ -512,7 +539,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void changeModuleAccess(final ChangeModuleAccess parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public void changeModuleAccess(final ChangeModuleAccess parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.changeModuleAccess(soap2Context(parameters.ctx), soap2ModuleAccess(parameters.access), soap2Credentials(parameters.auth));
@@ -544,10 +571,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context createModuleAccessByName(final Context ctx,final User adminUser,final java.lang.String accessCombinationName,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , ContextExistsException_Exception , RemoteException_Exception    {
+    public Context createModuleAccessByName(final Context ctx, final User adminUser, final java.lang.String accessCombinationName, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), accessCombinationName, soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
@@ -574,7 +601,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void enableAll(final EnableAll parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , RemoteException_Exception    {
+    public void enableAll(final EnableAll parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.enableAll(soap2Credentials(parameters.auth));
@@ -596,7 +623,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listByFilestore(final Filestore fs,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , NoSuchFilestoreException_Exception    {
+    public java.util.List<Context> listByFilestore(final Filestore fs, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByFilestore(soap2Filestore(fs), soap2Credentials(auth));
@@ -637,7 +664,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.lang.Integer getAdminId(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public java.lang.Integer getAdminId(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.getAdminId(soap2Context(ctx), soap2Credentials(auth)));
@@ -663,7 +690,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void delete(final Delete parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    {
+    public void delete(final Delete parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.delete(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -700,7 +727,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void disable(final Disable parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , NoSuchReasonException_Exception , InvalidDataException_Exception , OXContextException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public void disable(final Disable parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, NoSuchReasonException_Exception, InvalidDataException_Exception, OXContextException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.disable(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -739,7 +766,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.lang.String getAccessCombinationName(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public java.lang.String getAccessCombinationName(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return contextInterface.getAccessCombinationName(soap2Context(ctx), soap2Credentials(auth));
@@ -771,7 +798,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public void downgrade(final Downgrade parameters) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception , DatabaseUpdateException_Exception    {
+    public void downgrade(final Downgrade parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             contextInterface.downgrade(soap2Context(parameters.ctx), soap2Credentials(parameters.auth));
@@ -808,10 +835,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context create(final Context ctx,final User adminUser,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , ContextExistsException_Exception , RemoteException_Exception    {
+    public Context create(final Context ctx, final User adminUser, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.context.soap.RemoteException faultDetail = new com.openexchange.admin.soap.context.soap.RemoteException();
             com.openexchange.admin.soap.context.rmi.RemoteException value = new com.openexchange.admin.soap.context.rmi.RemoteException();
@@ -838,7 +865,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.lang.Integer moveContextFilestore(final Context ctx,final Filestore dstFilestoreId,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , NoSuchReasonException_Exception , InvalidDataException_Exception , OXContextException_Exception , NoSuchContextException_Exception , RemoteException_Exception , NoSuchFilestoreException_Exception    {
+    public java.lang.Integer moveContextFilestore(final Context ctx, final Filestore dstFilestoreId, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, NoSuchReasonException_Exception, InvalidDataException_Exception, OXContextException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Integer.valueOf(contextInterface.moveContextFilestore(soap2Context(ctx), soap2Filestore(dstFilestoreId), soap2Credentials(auth)));
@@ -882,10 +909,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> list(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.util.List<Context> list(final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -918,7 +945,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.lang.Boolean exists(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public java.lang.Boolean exists(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return Boolean.valueOf(contextInterface.exists(soap2Context(ctx), soap2Credentials(auth)));
@@ -946,7 +973,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listByDatabase(final Database db,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception , NoSuchDatabaseException_Exception    {
+    public java.util.List<Context> listByDatabase(final Database db, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchDatabaseException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByDatabase(soap2Database(db), soap2Credentials(auth));
@@ -987,7 +1014,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public Context getData(final Context ctx,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , NoSuchContextException_Exception , RemoteException_Exception    {
+    public Context getData(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
             return context2Soap(contextInterface.getData(soap2Context(ctx), soap2Credentials(auth)));
@@ -1032,6 +1059,44 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             credentials.setPassword(password);
         }
         return credentials;
+    }
+
+    private static com.openexchange.admin.rmi.dataobjects.Quota soap2Quota(final Quota soapQuota) {
+        if (null == soapQuota) {
+            return null;
+        }
+        final com.openexchange.admin.rmi.dataobjects.Quota quota = new com.openexchange.admin.rmi.dataobjects.Quota();
+        final String m = soapQuota.getModule();
+        if (null != m) {
+            quota.setModule(m);
+        }
+        final long limit = soapQuota.getLimit();
+        quota.setLimit(limit);
+        return quota;
+    }
+
+    private static com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy soap2SchemaSelectStrategy(SchemaSelectStrategy schemaSelectStrategy) throws InvalidDataException_Exception {
+        if (schemaSelectStrategy == null) {
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
+        }
+
+        if (schemaSelectStrategy.getSchemaName() != null && schemaSelectStrategy.getStrategy() != null) {
+            throw new InvalidDataException_Exception("Setting schema_name and schema_select_strategy at the same time is not possible.");
+        }
+
+        if (schemaSelectStrategy.getSchemaName() != null) {
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.schema(schemaSelectStrategy.getSchemaName());
+        } else if (schemaSelectStrategy.getStrategy() != null) {
+            if (schemaSelectStrategy.getStrategy().equals("automatic")) {
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
+            } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.inMemory();
+            } else {
+                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible values: \"automatic\", \"in-memory\"");
+            }
+        }
+
+        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
     }
 
     private static com.openexchange.admin.rmi.dataobjects.Filestore soap2Filestore(final Filestore soapFilestore) {
@@ -1275,7 +1340,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.IMAP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -1292,19 +1357,18 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                                {
+                                case 1: {
                                     final String schema = matcher.group(1);
                                     if (null != schema) {
                                         sb.append(schema);
                                     }
                                 }
-                                break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1465,7 +1529,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         i = soapUser.getSmtpPort();
         if (i != null) {
             final String s = user.getSmtpServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.SMTP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -1482,19 +1546,18 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                            case 1:
-                            {
-                                final String schema = matcher.group(1);
-                                if (null != schema) {
-                                    sb.append(schema);
+                                case 1: {
+                                    final String schema = matcher.group(1);
+                                    if (null != schema) {
+                                        sb.append(schema);
+                                    }
                                 }
-                            }
-                            break;
-                            case 2:
-                                sb.append(matcher.group(2));
-                                break;
-                            default:
-                                break;
+                                    break;
+                                case 2:
+                                    sb.append(matcher.group(2));
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1953,7 +2016,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
+        final Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -2151,6 +2214,16 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         return soapModuleAccess;
     }
 
+    private static Quota quota2Soap(final com.openexchange.admin.rmi.dataobjects.Quota quota) {
+        if (null == quota) {
+            return null;
+        }
+        final Quota soapQuota = new Quota();
+        soapQuota.setModule(quota.getModule());
+        soapQuota.setLimit(quota.getLimit());
+        return soapQuota;
+    }
+
     private static Context context2Soap(final com.openexchange.admin.rmi.dataobjects.Context context) {
         if (null == context) {
             return null;
@@ -2204,7 +2277,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         final SOAPStringMapMap soapMapMap = new SOAPStringMapMap();
         final java.util.List<SOAPMapEntry> entries = new ArrayList<SOAPMapEntry>(mapmap.size());
-        for (final Map.Entry<String,Map<String,String>> mapmapEntry : mapmap.entrySet()) {
+        for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
             final SOAPMapEntry mapEntry = new SOAPMapEntry();
             mapEntry.setKey(mapmapEntry.getKey());
             mapEntry.setValue(map2Soap(mapmapEntry.getValue()));
@@ -2220,7 +2293,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         final SOAPStringMap soapMap = new SOAPStringMap();
         final java.util.List<Entry> entries = new ArrayList<Entry>(map.size());
-        for (final Map.Entry<String,String> mapEntry : map.entrySet()) {
+        for (final Map.Entry<String, String> mapEntry : map.entrySet()) {
             final Entry entry = new Entry();
             entry.setKey(mapEntry.getKey());
             entry.setValue(mapEntry.getValue());
@@ -2229,17 +2302,4 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         soapMap.setEntries(entries);
         return soapMap;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

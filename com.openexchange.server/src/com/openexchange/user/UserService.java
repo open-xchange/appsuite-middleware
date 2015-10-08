@@ -90,6 +90,7 @@ public interface UserService {
      * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
      * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
      * API.
+     *
      * @param name Name of the attribute.
      * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
      * @param userId Identifier of the user that attribute should be set.
@@ -111,6 +112,41 @@ public interface UserService {
      * @throws OXException if writing the attribute fails.
      */
     void setAttribute(String name, String value, int userId, Context context) throws OXException;
+
+    /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param con A (writable) database connection to use
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     */
+    void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException;
+
+    /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    boolean isGuest(int userId, int contextId) throws OXException;
+
+    /**
+     * Checks if specified user is a guest.
+     *
+     * @param userId The user identifier
+     * @param context The associated context
+     * @return <code>true</code> if user is a guest; otherwise <code>false</code>
+     * @throws OXException If check for a guest user fails
+     */
+    boolean isGuest(int userId, Context context) throws OXException;
 
     /**
      * Searches for a user whose login matches the given <code>loginInfo</code>.
@@ -170,6 +206,40 @@ public interface UserService {
     int createUser(Connection con, Context context, User user) throws OXException;
 
     /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param context The context
+     * @param user The user to delete
+     */
+    void deleteUser(Context context, User user) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param user The user to delete
+     */
+    void deleteUser(Connection con, Context context, User user) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Context context, int userId) throws OXException;
+
+    /**
+     * Deletes a user from the underlying storage.
+     *
+     * @param con A (writable) database connection
+     * @param context The context
+     * @param user The id of the user to delete
+     */
+    void deleteUser(Connection con, Context context, int userId) throws OXException;
+
+    /**
      * Writes a new user into the database.
      *
      * @param context The context.
@@ -202,6 +272,42 @@ public interface UserService {
     User[] getUser(Context ctx) throws OXException;
 
     /**
+     * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+     *
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Reads all user for the given context, optionally including/excluding guest- and regular users. This method
+     * is faster than getting each user information with the {@link #getUser(Context)} and filtering them afterwards.
+     *
+     * @param con A database connection
+     * @param ctx the context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user objects from a context.
+     * @throws OXException if all user objects can not be loaded from the persistent storage.
+     */
+    User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Gets all guest users that were created by a specific user.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param userId The identifier of the user to load the created guests for
+     * @return The created guest users, or an empty array if there are none
+     * @throws OXException
+     */
+    User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException;
+
+    /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
      * <p>
@@ -214,12 +320,76 @@ public interface UserService {
      * <li>IMAP login</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
+     * For guest users, additionally the following property may be changed:
+     * <ul>
+     * <li>Shadow last change</li>
+     * </ul>
+     *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.user.UserService.updatePassword(User, Context)
+     * </b>
+     *
      * @param user user object with the updated values.
      * @param context The context.
-     * @throws OXException  if an error occurs.
+     * @throws OXException if an error occurs.
      * @see #getContext(int)
      */
     void updateUser(User user, Context context) throws OXException;
+
+    /**
+     * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user
+     * identifier and the attributes you want to change. Every attribute with value <code>null</code> will not be touched.
+     *
+     * <b>
+     * If you use this method within a transaction, you must(!) call {@link UserService#invalidateUser(Context, int)}
+     * after you committed the connection!
+     * </b>
+     *
+     * <p>
+     * Currently supported values for update:
+     * <ul>
+     * <li>Time zone</li>
+     * <li>Language</li>
+     * <li>IMAP server</li>
+     * <li>SMTP server</li>
+     * <li>IMAP login</li>
+     * <li>Attributes (if present, not <code>null</code>)</li>
+     * </ul>
+     * For guest users, additionally the following property may be changed:
+     * <ul>
+     * <li>Shadow last change</li>
+     * </ul>
+     *
+     * <b>
+     * To update the user password and/or password mechanism you have to explicitly call com.openexchange.user.UserService.updatePassword(Connection, User, Context)
+     * </b>
+     *
+     * @param con a writable database connection
+     * @param user user object with the updated values.
+     * @param context The context.
+     * @throws OXException if an error occurs.
+     * @see #getContext(int)
+     */
+    void updateUser(Connection con, User user, Context context) throws OXException;
+
+    /**
+     * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
+     *
+     * @param user User object with the (encoded) userPassword and passwordMech set.
+     * @param context The context.
+     * @throws OXException
+     */
+    void updatePassword(User user, Context context) throws OXException;
+
+    /**
+     * Updates the user password and password mechanism for the provided user. Both parameters have to be provided for the user!
+     *
+     * @param connection a writable database connection (or <code>null</code> if you do not have a connection)
+     * @param user User object with the (encoded) userPassword and passwordMech set.
+     * @param context The context.
+     * @throws OXException if an error occurs.
+     */
+    void updatePassword(Connection connection, User user, Context context) throws OXException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
@@ -228,7 +398,6 @@ public interface UserService {
      * @param context The context.
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws OXException If an error occurs.
-     * @see #getContext(int)
      */
     User searchUser(String email, Context context) throws OXException;
 
@@ -236,13 +405,26 @@ public interface UserService {
      * Searches a user by its email address. This is used for converting iCal to appointments.
      *
      * @param email The email address of the user.
+     * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
      * @param context The context.
      * @param considerAliases Whether to consider alias E-Mail addresses when searching for an appropriate user
      * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws OXException If an error occurs.
-     * @see #getContext(int)
      */
     User searchUser(String email, Context context, boolean considerAliases) throws OXException;
+
+    /**
+     * Searches a user by its email address. This is used for converting iCal to appointments.
+     *
+     * @param email The email address of the user.
+     * @param context The context.
+     * @param considerAliases <code>true</code> to consider a user's aliases, <code>false</code>, otherwise
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
+     * @throws OXException If an error occurs.
+     */
+    User searchUser(String email, Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Search for matching login name.
@@ -278,6 +460,29 @@ public interface UserService {
      * @see #getContext(int)
      */
     int[] listAllUser(Context context) throws OXException;
+
+    /**
+     * Returns an array with all user identifier of the context.
+     *
+     * @param context The context.
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return an array with all user identifier of the context.
+     * @throws OXException If generating this list fails.
+     * @see #getContext(int)
+     */
+    int[] listAllUser(Context context, boolean includeGuests, boolean excludeUsers) throws OXException;
+
+    /**
+     * Returns an array with all user identifiers of a context.
+     *
+     * @param contextID The identifier of the context to get the users for
+     * @param includeGuests <code>true</code> to also include guest users, <code>false</code>, otherwise
+     * @param excludeUsers <code>true</code> to exclude regular users, <code>false</code>, otherwise
+     * @return An array with all user identifier of the context
+     * @throws OXException If generating this list fails.
+     */
+    int[] listAllUser(int contextID, boolean includeGuests, boolean excludeUsers) throws OXException;
 
     /**
      * Searches for users whose IMAP login name matches the given login name.

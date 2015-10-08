@@ -50,20 +50,20 @@
 package com.openexchange.resource.json.actions;
 
 import java.util.Date;
-import org.json.JSONArray;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
-import com.openexchange.resource.json.ResourceWriter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -92,47 +92,43 @@ public final class UpdatesAction extends AbstractResourceAction {
 
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final Date lastModified = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        final ServerSession session = req.getSession();
+        Date lastModified = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        ServerSession session = req.getSession();
+
         Resource[] updatedResources = null;
         Resource[] deletedResources = null;
         try {
-            final ResourceService resService = ResourceServiceImpl.getInstance();
+            ResourceService resService = ResourceServiceImpl.getInstance();
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
             LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
-        final JSONArray modified = new JSONArray();
+        List<Resource> modified = new LinkedList<Resource>();
+        List<Resource> deleted= new LinkedList<Resource>();
+
         long lm = 0;
         if(updatedResources != null){
             for(final Resource res: updatedResources){
                 if(res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
-                modified.put(ResourceWriter.writeResource(res));
+                modified.add(res);
             }
         }
 
-        final JSONArray deleted = new JSONArray();
         if(deletedResources != null){
             for(final Resource res: deletedResources){
                 if(res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
 
-                deleted.put(ResourceWriter.writeResource(res));
+                deleted.add(res);
             }
         }
-        final Date timestamp = new Date(lm);
 
-        final JSONObject retVal = new JSONObject();
-        retVal.put("modified", modified);
-        retVal.put("new", modified);
-        retVal.put("deleted", deleted);
-
-        return new AJAXRequestResult(retVal, timestamp, "json");
+        return new AJAXRequestResult(new CollectionDelta<Resource>(modified, deleted), new Date(lm), "resource");
     }
 
 }

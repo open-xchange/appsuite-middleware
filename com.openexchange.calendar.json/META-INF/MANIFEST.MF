@@ -2,10 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Calendar JSON Bundle
 Bundle-SymbolicName: com.openexchange.calendar.json
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.parser,
@@ -13,6 +21,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
  com.openexchange.api2,
+ com.openexchange.capabilities,
  com.openexchange.data.conversion.ical,
  com.openexchange.documentation,
  com.openexchange.documentation.annotations,
@@ -28,8 +37,12 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.search,
  com.openexchange.groupware.tasks,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.oauth.provider,
+ com.openexchange.oauth.provider.annotations,
+ com.openexchange.oauth.provider.scope,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
@@ -50,3 +63,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.calendar.json.osgi.AppointmentJSONActivator
+Export-Package: com.openexchange.calendar.json

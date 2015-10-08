@@ -49,42 +49,29 @@
 
 package com.openexchange.oauth.vkontakte;
 
+import java.util.Collection;
+import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.VkontakteApi;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-
+import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link VkontakteOAuthServiceMetaData} - See <a href="http://vk.com/developers.php#devstep2">Vkontakte API</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class VkontakteOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
 
     /**
      * Initializes a new {@link VkontakteOAuthServiceMetaData}.
      *
      * @param configService The configuration service
      */
-    public VkontakteOAuthServiceMetaData(ConfigurationService configService) {
-        super();
-        id = "com.openexchange.oauth.vkontakte";
-        displayName = "Vkontakte.ru";
-
-        final String apiKey = configService.getProperty("com.openexchange.oauth.vkontakte.apiKey");
-        if (Strings.isEmpty(apiKey)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.vkontakte.apiKey");
-        }
-        this.apiKey = apiKey;
-
-        final String apiSecret = configService.getProperty("com.openexchange.oauth.vkontakte.apiSecret");
-        if (Strings.isEmpty(apiSecret)) {
-            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.vkontakte.apiSecret");
-        }
-        this.apiSecret = apiSecret;
+    public VkontakteOAuthServiceMetaData(ServiceLookup services) {
+        super(services, "com.openexchange.oauth.vkontakte", "Vkontakte.ru");
     }
 
     @Override
@@ -100,6 +87,16 @@ public final class VkontakteOAuthServiceMetaData extends AbstractOAuthServiceMet
     @Override
     public String getScope() {
         return "friends,wall,offline";
+    }
+
+    @Override
+    protected String getPropertyId() {
+        return "vkontakte";
+    }
+
+    @Override
+    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
+        return Collections.emptyList();
     }
 
 }

@@ -54,6 +54,7 @@ package com.openexchange.authentication.ucs.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -97,6 +98,10 @@ public class UCSAuthentication implements AuthenticationService {
 
     private static Hashtable<String, String> LDAP_CONFIG = null;
     private final static String LDAP_PROPERTY_FILE = "/opt/open-xchange/etc/authplugin.properties";
+    
+    private static final String PASSWORD_CHANGE_URL_OPTION = "com.openexchange.authentication.ucs.passwordChangeURL";
+    
+    private static URL passwordChangeURL = null;
 
     /**
      * Default constructor.
@@ -227,7 +232,7 @@ public class UCSAuthentication implements AuthenticationService {
                     final long sum_up = shadowlastchange_days+shadowmax_days;
                     if(sum_up<days_since_1970){
                         LOG.info("Password for account \"{}\" seems to be expired({}<{})!", uid, sum_up, days_since_1970);
-                        throw LoginExceptionCodes.ACCOUNT_LOCKED.create(uid);
+                        throw LoginExceptionCodes.PASSWORD_EXPIRED.create(passwordChangeURL.toString());
                     }
                 }else{
                     LOG.debug("LDAP Attributes shadowlastchange and shadowmax NOT found in LDAP! No password expired calculation will be done!");
@@ -334,6 +339,13 @@ public class UCSAuthentication implements AuthenticationService {
                     fis = new FileInputStream(file);
                     props = new Properties();
                     props.load(fis);
+                    if( props.containsKey(PASSWORD_CHANGE_URL_OPTION) && ((String)props.get(PASSWORD_CHANGE_URL_OPTION)).length() > 0 ) {
+                        passwordChangeURL = new URL((String)props.get(PASSWORD_CHANGE_URL_OPTION));
+                    } else {
+                        OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
+                        LOG.error("",e);
+                        throw e;
+                    }
                 } catch (final IOException e) {
                     LOG.error("",e);
                     throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());

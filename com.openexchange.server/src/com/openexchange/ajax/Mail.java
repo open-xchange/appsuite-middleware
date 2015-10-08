@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -97,14 +96,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
-import com.openexchange.ajax.container.ByteArrayRandomAccess;
-import com.openexchange.ajax.container.InputStreamReadable;
-import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
+import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
@@ -114,7 +113,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -124,12 +125,9 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
@@ -182,6 +180,7 @@ import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.AddressUtility;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -205,7 +204,6 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
@@ -327,6 +325,8 @@ public class Mail extends PermissionServlet implements UploadListener {
      * Parameter to define the maximum desired content length (in bytes) returned for the requested mail.
      */
     public static final String PARAMETER_MAX_SIZE = "max_size";
+
+    public static final String PARAMETER_ALLOW_NESTED_MESSAGES = "allow_nested_messages";
 
     public static final String PARAMETER_SAVE = "save";
 
@@ -1578,65 +1578,9 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            addrs.addAll(Arrays.asList(mail.getFrom()));
-            addrs.addAll(Arrays.asList(mail.getTo()));
-            addrs.addAll(Arrays.asList(mail.getCc()));
-            addrs.addAll(Arrays.asList(mail.getBcc()));
-            // Strip by aliases
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
+            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
 
-            }
             if (!addrs.isEmpty()) {
-                // Add addresses
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
-        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            try {
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
-                // Strip by aliases
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            } catch (final JSONException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            }
-            if (!addrs.isEmpty()) {
-                // Add addresses
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
         }
@@ -1837,32 +1781,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Save dependent on content type
                      */
-                    final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                     final List<CommonObject> retvalList = new ArrayList<CommonObject>();
                     if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_VCARD)) {
                         /*
                          * Save VCard
                          */
-                        VersitUtility.saveVCard(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.add(VCardUtil.importContactToDefaultFolder(versitPart.getInputStream(), session));
                     } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_CALENDAR)) {
                         /*
                          * Save ICalendar
                          */
-                        VersitUtility.saveICal(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.addAll(ICalUtil.importToDefaultFolder(versitPart.getInputStream(), session));
                     } else {
                         throw MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT.create(versitPart.getContentType());
                     }
@@ -2424,7 +2355,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*-
          * On socket layer characters are casted to byte values.
          *
-         * See AJPv13Response.writeString():
          * sink.write((byte) chars[i]);
          *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1

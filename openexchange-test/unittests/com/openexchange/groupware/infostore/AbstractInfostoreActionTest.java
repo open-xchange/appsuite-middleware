@@ -38,7 +38,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	public void setUp() throws Exception {
 		Init.startServer();
 		provider = new DBPoolProvider();
-		queryCatalog = new InfostoreQueryCatalog();
+		queryCatalog = InfostoreQueryCatalog.getInstance();
 
 		final TestConfig config = new TestConfig();
         final String userName = config.getUser();

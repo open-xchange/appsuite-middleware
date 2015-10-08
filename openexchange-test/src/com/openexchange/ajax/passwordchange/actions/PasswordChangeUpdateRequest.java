@@ -63,7 +63,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeResourceRequest {
+public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeResourceRequest<PasswordChangeUpdateResponse> {
 
 	private final boolean failOnError;
 
@@ -97,7 +97,7 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	@Override
     public Object getBody() throws JSONException {
 		final JSONObject retval = new JSONObject();
-		retval.put("new_password", newPassword);
+		retval.put("new_password", null == newPassword ? JSONObject.NULL : newPassword);
 		retval.put("old_password", oldPassword);
 		return retval;
 	}

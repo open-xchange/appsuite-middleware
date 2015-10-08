@@ -2,12 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Importexport
 Bundle-SymbolicName: com.openexchange.importexport
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.importexport.osgi.ImportExportActivator
 Bundle-Vendor: OPENEXCHANGE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.ajax,
  com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
@@ -16,6 +25,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.contact,
+ com.openexchange.contact.vcard,
+ com.openexchange.contact.vcard.storage,
  com.openexchange.contacts.json.mapping,
  com.openexchange.data.conversion.ical,
  com.openexchange.documentation,
@@ -54,13 +65,11 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
  com.openexchange.tools.stream,
- com.openexchange.tools.versit,
- com.openexchange.tools.versit.converter,
- com.openexchange.tools.versit.old,
  gnu.trove,
  gnu.trove.map,
  gnu.trove.map.hash,
  gnu.trove.procedure,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

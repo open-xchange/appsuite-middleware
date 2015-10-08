@@ -50,27 +50,23 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.java.Streams;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.json.ziputil.ZipMaker;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -91,137 +87,92 @@ public class ZipDocumentsAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         // Get IDs
-        final List<IdVersionPair> idVersionPairs;
+        List<IdVersionPair> idVersionPairs;
         {
-            final String value = request.getParameter("body");
+            String value = request.getParameter("body");
             if (Strings.isEmpty(value)) {
                 idVersionPairs = request.getIdVersionPairs();
             } else {
                 try {
-                    final JSONArray jsonArray = new JSONArray(value);
-                    final int len = jsonArray.length();
+                    JSONArray jsonArray = new JSONArray(value);
+                    int len = jsonArray.length();
                     idVersionPairs = new ArrayList<IdVersionPair>(len);
                     for (int i = 0; i < len; i++) {
-                        final JSONObject tuple = jsonArray.getJSONObject(i);
-                        // Identifier
-                        final String id = tuple.getString(Param.ID.getName());
-                        // Folder
-                        final String folderId = tuple.optString(Param.FOLDER_ID.getName());
-                        // Version
-                        final String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
+                        JSONObject tuple = jsonArray.getJSONObject(i);
 
-                        final IdVersionPair pair = new IdVersionPair(id, version, folderId);
-                        idVersionPairs.add(pair);
+                        // Identifier
+                        String id = tuple.optString(Param.ID.getName(), null);
+
+                        // Folder
+                        String folderId = tuple.optString(Param.FOLDER_ID.getName(), null);
+
+                        // Version
+                        String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
+
+                        // Check validity
+                        if (null == id && null == folderId) {
+                            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("body", "Invalid resource identifier: " + tuple);
+                        }
+
+                        idVersionPairs.add(new IdVersionPair(id, version, folderId));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", e.getMessage());
                 }
             }
         }
-        // Get file access
-        IDBasedFileAccess fileAccess = request.getFileAccess();
-        // Initialize ZIP'ing -- Either streamed or in-memory/tmp file
-        {
-            final AJAXRequestData ajaxRequestData = request.getRequestData();
-            if (null != ajaxRequestData) {
-                if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-                    try {
-                        ajaxRequestData.setResponseHeader("Content-Disposition", "attachment; filename*=UTF-8''documents.zip; filename=\"documents.zip\"");
-                        createZipArchive(idVersionPairs, fileAccess, ajaxRequestData.optOutputStream());
-                        // Streamed
-                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-                    } catch (final IOException e) {
-                        throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                    }
-                }
-            }
-        }
-        // In-memory/tmp file
-        final ThresholdFileHolder thresholdFileHolder = new ThresholdFileHolder();
-        createZipArchive(idVersionPairs, fileAccess, thresholdFileHolder.asOutputStream());
-        // Set meta information
-        final AJAXRequestData requestData = request.getRequestData();
-        if (null != requestData) {
-            requestData.setFormat("file");
-        }
-        thresholdFileHolder.setContentType("application/zip");
-        thresholdFileHolder.setName("documents.zip");
-        // Return AJAX result
-        return new AJAXRequestResult(thresholdFileHolder, "file");
-    }
 
-    private void createZipArchive(List<IdVersionPair> idVersionPairs, IDBasedFileAccess fileAccess, OutputStream out) throws OXException {
-        final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
-        zipOutput.setUseLanguageEncodingFlag(true);
-        zipOutput.setLevel(getZipDocumentsCompressionLevel());
-        try {
-            final int buflen = 8192;
-            final byte[] buf = new byte[buflen];
-            for (final IdVersionPair idVersionPair : idVersionPairs) {
-                final String id = idVersionPair.getIdentifier();
-                String version = idVersionPair.getVersion();
-                if (null == version) {
-                    version = FileStorageFileAccess.CURRENT_VERSION;
-                }
-                final File fileMetadata = fileAccess.getFileMetadata(id, version);
-                final InputStream in = fileAccess.getDocument(id, version);
-                try {
-                    /*
-                     * Add ZIP entry to output stream
-                     */
-                    String name = fileMetadata.getFileName();
-                    if (null == name) {
-                        final List<String> extensions = MimeType2ExtMap.getFileExtensions(fileMetadata.getFileMIMEType());
-                        name = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
-                    }
-                    int num = 1;
-                    ZipArchiveEntry entry;
-                    while (true) {
-                        try {
-                            final String entryName;
-                            {
-                                final int pos = name.indexOf('.');
-                                if (pos < 0) {
-                                    entryName = name + (num > 1 ? "_(" + num + ")" : "");
-                                } else {
-                                    entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
-                                }
-                            }
-                            entry = new ZipArchiveEntry(entryName);
-                            zipOutput.putArchiveEntry(entry);
-                            break;
-                        } catch (final java.util.zip.ZipException e) {
-                            final String message = e.getMessage();
-                            if (message == null || !message.startsWith("duplicate entry")) {
-                                throw e;
-                            }
-                            num++;
-                        }
-                    }
-                    /*
-                     * Transfer bytes from the file to the ZIP file
-                     */
-                    long size = 0;
-                    for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
-                        zipOutput.write(buf, 0, read);
-                        size += read;
-                    }
-                    entry.setSize(size);
-                    /*
-                     * Complete the entry
-                     */
-                    zipOutput.closeArchiveEntry();
-                } catch (final IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } finally {
-                    Streams.close(in);
-                }
-            }
-        } finally {
-            // Complete the ZIP file
-            Streams.close(zipOutput);
+        boolean recursive;
+        {
+            String tmp = request.getParameter("recursive");
+            recursive = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
+
+        // Get file/folder access
+        IDBasedFileAccess fileAccess = request.getFileAccess();
+        IDBasedFolderAccess folderAccess = request.getFolderAccess();
+
+        // Initialize ZIP maker for folder resource
+        ZipMaker zipMaker = new ZipMaker(idVersionPairs, recursive, fileAccess, folderAccess);
+
+        // Check against size threshold
+        zipMaker.checkThreshold(threshold());
+
+        AJAXRequestData ajaxRequestData = request.getRequestData();
+        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
+            // Set HTTP response headers
+            {
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append("attachment");
+                DownloadUtility.appendFilenameParameter("documents.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
+                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
+            }
+
+            // Write ZIP archive
+            try {
+                zipMaker.writeZipArchive(ajaxRequestData.optOutputStream());
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+
+            // Signal direct response
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+        }
+
+        // No direct response possible
+
+        // Create archive
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        fileHolder.setDisposition("attachment");
+        fileHolder.setName("documents.zip");
+        fileHolder.setContentType("application/zip");
+        fileHolder.setDelivery("download");
+
+        // Create ZIP archive
+        zipMaker.writeZipArchive(fileHolder.asOutputStream());
+
+        ajaxRequestData.setFormat("file");
+        return new AJAXRequestResult(fileHolder, "file");
     }
 
 }

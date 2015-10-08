@@ -55,11 +55,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link CacheContentTypeRegistry} - A registry for a tree's content types.
@@ -90,7 +90,7 @@ public final class CacheContentTypeRegistry {
         public Element() {
             super();
             concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
-            generalStorages = new Java7ConcurrentLinkedQueue<FolderStorage>();
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>();
         }
 
         public ConcurrentMap<ContentType, FolderStorage> getConcreteStorages() {
@@ -102,14 +102,14 @@ public final class CacheContentTypeRegistry {
         }
 
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
-            generalStorages = new Java7ConcurrentLinkedQueue<FolderStorage>(replacement);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(replacement);
         }
 
         public void removeAndSortGeneralStorages(final FolderStorage toRemove, final Comparator<FolderStorage> comparator) {
             final List<FolderStorage> sortMe = new ArrayList<FolderStorage>(generalStorages);
             sortMe.remove(toRemove);
             Collections.sort(sortMe, comparator);
-            generalStorages = new Java7ConcurrentLinkedQueue<FolderStorage>(sortMe);
+            generalStorages = new ConcurrentLinkedQueue<FolderStorage>(sortMe);
         }
 
     }

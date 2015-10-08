@@ -49,8 +49,8 @@
 
 package com.openexchange.tasks.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -64,9 +64,12 @@ import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -83,24 +86,22 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested tasks."),
     @Parameter(name = "ignore", description = "(mandatory - should be set to \"deleted\") (deprecated) - Which kinds of updates should be ignored. Currently, the only valid value - \"deleted\" - causes deleted object IDs not to be returned.")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted tasks. New and modified tasks are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted tasks (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array. ")
+@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class UpdatesAction extends TaskAction {
 
     /**
      * Initializes a new {@link UpdatesAction}.
      * @param services
      */
-    public UpdatesAction(final ServiceLookup services) {
+    public UpdatesAction(ServiceLookup services) {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final int[] columnsToLoad = removeVirtualColumns(columns);
-        final Date requestedTimestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        int[] columnsToLoad = removeVirtualColumns(columns);
+        Date requestedTimestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         Date timestamp = new Date(requestedTimestamp.getTime());
         final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         String ignore = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
@@ -117,16 +118,16 @@ public class UpdatesAction extends TaskAction {
 
         Date lastModified = null;
 
-        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
-            final int[] internalColumns = new int[columnsToLoad.length+1];
+            int[] internalColumns = new int[columnsToLoad.length+1];
             System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
 
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
+            List<Task> taskList = new LinkedList<Task>();
             while (it.hasNext()) {
                 final Task taskObj = it.next();
                 taskList.add(taskObj);
@@ -156,9 +157,7 @@ public class UpdatesAction extends TaskAction {
 
             return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
-            if(it!=null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

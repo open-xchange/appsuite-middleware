@@ -3,7 +3,6 @@ package com.openexchange.webdav.xml.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug6960Test extends AbstractRecurrenceTest {

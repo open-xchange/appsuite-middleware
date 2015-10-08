@@ -66,7 +66,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -87,12 +86,12 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BLOCKING);
+        return new Attributes();
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask.class.getName() };
+        return new String[] { "com.openexchange.jslob.storage.db.groupware.DBJSlobIncreaseBlobSizeTask" };
     }
 
     @Override

@@ -53,16 +53,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -73,7 +71,7 @@ import com.openexchange.webdav.xml.WebdavLockWriter;
 
 public abstract class AbstractResource implements WebdavResource {
 
-	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.GET, WEBDAV_METHOD.PUT, WEBDAV_METHOD.DELETE, WEBDAV_METHOD.HEAD, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.TRACE, WEBDAV_METHOD.PROPPATCH, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.MOVE, WEBDAV_METHOD.COPY, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.REPORT, WEBDAV_METHOD.ACL, WEBDAV_METHOD.MKCALENDAR};
+	private static final WebdavMethod[] OPTIONS = {WebdavMethod.GET, WebdavMethod.PUT, WebdavMethod.DELETE, WebdavMethod.HEAD, WebdavMethod.OPTIONS, WebdavMethod.TRACE, WebdavMethod.PROPPATCH, WebdavMethod.PROPFIND, WebdavMethod.MOVE, WebdavMethod.COPY, WebdavMethod.LOCK, WebdavMethod.UNLOCK, WebdavMethod.REPORT, WebdavMethod.ACL, WebdavMethod.MKCALENDAR};
 
 	protected List<PropertyMixin> mixins = new ArrayList<PropertyMixin>();
 
@@ -250,7 +248,7 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 
 	@Override
-    public WEBDAV_METHOD[] getOptions(){
+    public WebdavMethod[] getOptions(){
 		return OPTIONS;
 	}
 

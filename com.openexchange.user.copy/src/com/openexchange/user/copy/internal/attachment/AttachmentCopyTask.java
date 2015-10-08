@@ -52,7 +52,6 @@ package com.openexchange.user.copy.internal.attachment;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.InputStream;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,16 +61,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -118,10 +116,10 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private final QuotaFileStorageFactory qfsf;
+    private final QuotaFileStorageService qfsf;
 
 
-    public AttachmentCopyTask(final QuotaFileStorageFactory qfsf) {
+    public AttachmentCopyTask(final QuotaFileStorageService qfsf) {
         super();
         this.qfsf = qfsf;
     }
@@ -167,10 +165,8 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
         try {
-            final URI srcFilestoreUri = FilestoreStorage.createURI(srcCtx);
-            final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);
-            srcFileStorage = qfsf.getQuotaFileStorage(srcCtx, srcFilestoreUri);
-            dstFileStorage = qfsf.getQuotaFileStorage(dstCtx, dstFilestoreUri);
+            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId);
+            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId);
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }

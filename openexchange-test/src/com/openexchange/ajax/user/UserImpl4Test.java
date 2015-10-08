@@ -61,6 +61,8 @@ public class UserImpl4Test implements User {
 
 	private Locale locale;
 
+    private int[] groups;
+
 	public UserImpl4Test() {
 
 	}
@@ -160,8 +162,13 @@ public class UserImpl4Test implements User {
 
 	@Override
     public int[] getGroups() {
-		return null;
+		return groups;
 	}
+
+
+    public void setGroups(int[] groups) {
+        this.groups = groups;
+    }
 
 	@Override
     public int getContactId() {
@@ -205,5 +212,40 @@ public class UserImpl4Test implements User {
      */
     public void setSurname(String surname) {
         this.surName = surname;
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return 0;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return false;
+    }
+
+    @Override
+    public String[] getFileStorageAuth() {
+        return new String[2];
+    }
+
+    @Override
+    public long getFileStorageQuota() {
+        return 0;
+    }
+
+    @Override
+    public int getFilestoreId() {
+        return -1;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return null;
+    }
+
+    @Override
+    public int getFileStorageOwner() {
+        return -1;
     }
 }

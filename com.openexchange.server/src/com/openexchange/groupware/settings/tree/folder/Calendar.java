@@ -88,17 +88,17 @@ public class Calendar implements PreferencesItemService {
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
+
             @Override
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws OXException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
-                    user.getId(), FolderObject.CALENDAR).getObjectID()));
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                if (false == user.isGuest()) {
+                    setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.CALENDAR)));
+                }
             }
         };
     }

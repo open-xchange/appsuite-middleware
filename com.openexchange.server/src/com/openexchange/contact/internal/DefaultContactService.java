@@ -50,10 +50,8 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
-
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -439,7 +437,6 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(folderID, "folderID");
         return this.doCheckIfFolderContainsForeignObjects(session, folderID);
     }
-
 
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------

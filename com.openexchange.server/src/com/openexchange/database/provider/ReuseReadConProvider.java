@@ -86,9 +86,6 @@ public class ReuseReadConProvider implements DBProvider {
         if (con == null) {
             return;
         }
-        if (!readCon.equals(con)) {
-            throw new IllegalArgumentException("I don't know this connection");
-        }
         refCount--;
         if (refCount == 0) {
             provider.releaseReadConnection(ctx, con);

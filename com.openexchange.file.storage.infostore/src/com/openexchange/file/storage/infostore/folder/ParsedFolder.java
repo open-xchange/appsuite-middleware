@@ -53,10 +53,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link ParsedFolder} - A parsed folder.
@@ -66,6 +68,8 @@ import com.openexchange.folderstorage.Type;
 public final class ParsedFolder implements Folder {
 
     private static final long serialVersionUID = 11110622220507954L;
+
+    private static final String ACCOUNT_ID = IDMangler.mangle(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
 
     protected int createdBy;
 
@@ -116,6 +120,7 @@ public final class ParsedFolder implements Folder {
     protected Map<String, Object> meta;
 
     protected Set<String> supportedCapbilitites;
+
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -227,6 +232,16 @@ public final class ParsedFolder implements Folder {
     @Override
     public String getParentID() {
         return parent;
+    }
+
+    @Override
+    public String getAccountID() {
+        return ACCOUNT_ID;
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        // no-op
     }
 
     @Override

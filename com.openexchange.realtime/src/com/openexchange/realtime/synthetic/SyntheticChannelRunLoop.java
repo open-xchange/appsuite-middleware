@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.BlockingQueue;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.threadpool.RunLoop;
@@ -65,22 +65,31 @@ import com.openexchange.threadpool.RunLoop;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannelRunLoop.class);
-    
+
+   /**
+    * NOOP Dispatch Does nothing and is only used for stopping a {@link SyntheticChannelRunLoop} that is waiting for the next
+    * element being offered to it's {@link BlockingQueue}
+    */
+    private final static MessageDispatch NOOP = new MessageDispatch(null, null) {
+        @Override
+        public void tick() {/*NOOP*/}
+    };
+
     public SyntheticChannelRunLoop(String name) {
         super(name);
     }
 
     @Override
-    protected void handle(MessageDispatch element) throws OXException {
+    protected void handle(MessageDispatch element) {
         element.tick();
     }
 
     /**
      * Remove all {@link MessageDispatch}s that were destined for the given handle. This will pause the RunLoop, causing it to refuse any
      * Elements offered. Matching elements are removed from the RunLoop. Finally handling continues and the matching elements are returned.
-     * @param destination The handle to match against 
+     * @param destination The handle to match against
      * @return All {@link MessageDispatch}s that were destined for the given handle
      */
     public Collection<MessageDispatch> removeMessagesForHandle(ID destination) {
@@ -88,9 +97,10 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
         // Pause handling for MessageDispatch inspection but make sure to enable it again
         try {
             pauseHandling();
-            // Check currently handled element(leave?) first. Set to null so it doesn't get handled if it isdestinedForID 
+            // Check currently handled element(leave?) first. Set to null so it doesn't get handled if it isdestinedForID
+            MessageDispatch currentElement = this.currentElementReference.get();
             if (currentElement != null && isDestinedForID(destination, currentElement)) {
-                currentElement=null;
+                this.currentElementReference.compareAndSet(currentElement, null);
             }
 
             // remove remaining messages from queue
@@ -114,6 +124,11 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
         ComponentHandle handle = messageDispatch.getHandle();
         ID currentID = handle.getId();
         return currentID.equals(destination);
+    }
+
+    @Override
+    protected void unblock() {
+        queue.offer(NOOP);
     }
 
 }

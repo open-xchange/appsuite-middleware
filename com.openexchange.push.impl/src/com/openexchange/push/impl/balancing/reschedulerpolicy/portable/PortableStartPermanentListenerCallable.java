@@ -50,6 +50,7 @@
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -67,6 +68,19 @@ import com.openexchange.push.impl.PushManagerRegistry;
  * @since v7.6.2
  */
 public class PortableStartPermanentListenerCallable extends AbstractCustomPortable implements Callable<Boolean> {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableStartPermanentListenerCallable.class);
+
+    private static final String HOSTNAME;
+    static {
+        String fbHostname;
+        try {
+            fbHostname = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            fbHostname = "localhost";
+        }
+        HOSTNAME = fbHostname;
+    }
 
     public static final String PARAMETER_CONTEXT_IDS = "contextIds";
     public static final String PARAMETER_USER_IDS = "userIds";
@@ -115,7 +129,9 @@ public class PortableStartPermanentListenerCallable extends AbstractCustomPortab
             pushUsers.add(new PushUser(userIds[i], contextIds[i]));
         }
 
-        PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
+        List<PushUser> startedOnes = PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
+        LOG.info("This cluster member \"{}\" now runs permanent listeners for: {}", HOSTNAME, startedOnes.isEmpty() ? "none" : startedOnes.toString());
+
         return Boolean.TRUE;
     }
 

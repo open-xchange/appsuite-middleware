@@ -1,0 +1,15 @@
+[Unit]
+After=remote-fs.target
+After=time-sync.target ypbind.service sendmail.service cyrus.service
+
+[Service]
+User=open-xchange
+PermissionsStartOnly=true
+TimeoutStartSec=0
+ExecStartPre=/opt/open-xchange/sbin/triggerupdatethemes -u
+ExecStart=/opt/open-xchange/sbin/open-xchange
+ExecStop=/opt/open-xchange/sbin/shutdown -w
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

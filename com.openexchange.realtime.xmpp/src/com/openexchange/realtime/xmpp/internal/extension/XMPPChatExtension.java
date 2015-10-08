@@ -68,7 +68,6 @@ import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
 import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPChatExtension}

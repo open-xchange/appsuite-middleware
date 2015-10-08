@@ -59,6 +59,10 @@ public class MBeanNamer {
 
     private static volatile ObjectName name;
 
+    private MBeanNamer() {
+        super();
+    }
+
     public static ObjectName getName() throws MalformedObjectNameException, NullPointerException {
         ObjectName name = MBeanNamer.name;
         if (name == null) {

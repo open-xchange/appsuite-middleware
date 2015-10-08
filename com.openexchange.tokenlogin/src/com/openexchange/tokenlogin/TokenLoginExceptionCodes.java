@@ -66,47 +66,29 @@ public enum TokenLoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(TokenLoginExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(TokenLoginExceptionCodes.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2),
     /**
      * No such token: %1$s
      */
-    NO_SUCH_TOKEN(TokenLoginExceptionCodes.NO_SUCH_TOKEN_MSG, CATEGORY_ERROR, 3),
+    NO_SUCH_TOKEN("No such token: %1$s", CATEGORY_ERROR, 3),
     /**
      * Token login service is not available.
      */
-    SERVICE_NOT_AVAILABLE(TokenLoginExceptionCodes.SERVICE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 4),
+    SERVICE_NOT_AVAILABLE("Token login service is not available.", CATEGORY_ERROR, 4),
     /**
      * No such session for token: %1$s
      */
-    NO_SUCH_SESSION_FOR_TOKEN(TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN_MSG, CATEGORY_ERROR, 5),
+    NO_SUCH_SESSION_FOR_TOKEN("No such session for token: %1$s", CATEGORY_ERROR, 5),
     /**
      * Token redeem denied.
      */
-    TOKEN_REDEEM_DENIED(TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
+    TOKEN_REDEEM_DENIED("Token redeem denied.", CATEGORY_PERMISSION_DENIED, 6),
 
     ;
-
-    // An error occurred: %1$s
-    private static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    private static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // No such token: %1$s
-    private static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
-
-    // Token login service is not available.
-    private static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
-
-    // No such session for token: %1$s
-    private static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
-
-    // Token redeem denied.
-    private static final String TOKEN_REDEEM_DENIED_MSG = "Token redeem denied.";
 
     /**
      * The error code prefix for token-login module.

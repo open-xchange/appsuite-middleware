@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -73,11 +74,14 @@ import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.guest.GuestService;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -86,7 +90,6 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.mapping.UserMapper;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link UpdateAction} - Maps the action to an <tt>update</tt> action.
@@ -110,8 +113,8 @@ public final class UpdateAction extends AbstractUserAction {
     /**
      * Initializes a new {@link UpdateAction}.
      */
-    public UpdateAction() {
-        super();
+    public UpdateAction(ServiceLookup services) {
+        super(services);
     }
 
     private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
@@ -130,7 +133,7 @@ public final class UpdateAction extends AbstractUserAction {
             /*
              * Get user service to get contact ID
              */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            final UserService userService = services.getService(UserService.class);
             final User storageUser = userService.getUser(id, session.getContext());
             final int contactId = storageUser.getContactId();
             /*
@@ -152,26 +155,37 @@ public final class UpdateAction extends AbstractUserAction {
                 setImageData(request, parsedUserContact);
             }
 
-
             /*
              * Update contact
              */
-            final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-            if (parsedUserContact.containsDisplayName()) {
-                final String displayName = parsedUserContact.getDisplayName();
-                if (null != displayName) {
-                    if (com.openexchange.java.Strings.isEmpty(displayName)) {
-                        parsedUserContact.removeDisplayName();
-                    } else {
-                        // Remove display name if equal to storage version to avoid update conflict
-                        final Contact storageContact = contactService.getUser(session, id);
-                        if (displayName.equals(storageContact.getDisplayName())) {
+            final ContactService contactService;
+            if (!storageUser.isGuest()) {
+                contactService = services.getService(ContactService.class);
+                if (parsedUserContact.containsDisplayName()) {
+                    final String displayName = parsedUserContact.getDisplayName();
+                    if (null != displayName) {
+                        if (com.openexchange.java.Strings.isEmpty(displayName)) {
                             parsedUserContact.removeDisplayName();
+                        } else {
+                            // Remove display name if equal to storage version to avoid update conflict
+                            Contact storageContact = contactService.getUser(session, id, new ContactField[] { ContactField.DISPLAY_NAME });
+                            if (displayName.equals(storageContact.getDisplayName())) {
+                                parsedUserContact.removeDisplayName();
+                            }
                         }
                     }
                 }
+                contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
+            } else {
+                ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+                contactUserStorage.updateGuestContact(session, contactId, parsedUserContact, parsedUserContact.getLastModified());
+
+                GuestService guestService = services.getService(GuestService.class);
+                if ((guestService != null) && (storageUser.isGuest())) {
+                    Contact updatedGuestContact = contactUserStorage.getGuestContact(session.getContextId(), id, ContactField.values());
+                    guestService.updateGuestContact(updatedGuestContact, session.getContextId());
+                }
             }
-            contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
             /*
              * Update user, too, if necessary
              */
@@ -184,14 +198,21 @@ public final class UpdateAction extends AbstractUserAction {
                 if (null == parsedLocale) {
                     UserMapper.getInstance().get(UserField.LOCALE).copy(storageUser, parsedUser);
                 }
+
                 userService.updateUser(parsedUser, session.getContext());
+
+                GuestService guestService = services.getService(GuestService.class);
+                if ((guestService != null) && (storageUser.isGuest())) {
+                    User updatedUser = userService.getUser(id, session.getContextId());
+                    guestService.updateGuestUser(updatedUser, session.getContextId());
+                }
             }
             /*
              * Check what has been updated
              */
             if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
                 // Update folder name if display-name was changed
-                final DatabaseService service = com.openexchange.user.json.services.ServiceRegistry.getInstance().getService(DatabaseService.class);
+                final DatabaseService service = services.getService(DatabaseService.class);
                 if (null != service) {
                     final int contextId = session.getContextId();
                     Connection con = null;
@@ -226,6 +247,7 @@ public final class UpdateAction extends AbstractUserAction {
         }
 
     }
+
     // Copied from RequestTools in contact module
 
     public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
@@ -295,14 +317,13 @@ public final class UpdateAction extends AbstractUserAction {
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
 
-
     private static boolean isImageContentType(String contentType) {
         return null != contentType && contentType.toLowerCase().startsWith("image");
     }
 
     private static long sysconfMaxUpload() {
         final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if(null == sizeS) {
+        if (null == sizeS) {
             return 0;
         }
         return Long.parseLong(sizeS);

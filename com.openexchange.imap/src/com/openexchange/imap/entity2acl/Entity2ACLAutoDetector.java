@@ -190,6 +190,14 @@ public final class Entity2ACLAutoDetector {
 
     private static final Map<InetSocketAddress, IMAPServer> CACHE = new NonBlockingHashMap<InetSocketAddress, IMAPServer>();
 
+    /**
+     * Maps given IMAP server greeting and IMAP configuration to an {@link IMAPServer} instance.
+     *
+     * @param info The IMAP server greeting
+     * @param imapConfig The IMAP configuration
+     * @return The associated {@link IMAPServer} instance
+     * @throws OXException If mapping fails
+     */
     private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws OXException {
         for (final IMAPServer imapServer : IMAPServer.getIMAPServers()) {
             if (imapServer.matches(info)) {

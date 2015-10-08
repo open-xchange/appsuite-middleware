@@ -115,7 +115,7 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
         try {
             stmt = connection.prepareStatement(SQL.DELETE_SUBSCRIPTIONS_FOR_USER_STMT);
             stmt.setInt(1, cid);
-            stmt.setInt(2, cid);
+            stmt.setInt(2, user);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

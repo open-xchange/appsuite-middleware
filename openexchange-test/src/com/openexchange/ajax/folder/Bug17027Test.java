@@ -105,7 +105,7 @@ public class Bug17027Test extends AbstractAJAXSession {
     }
 
     public void testUpdates() throws Throwable {
-        FolderUpdatesResponse response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
+        FolderUpdatesResponse response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));
         boolean found = false;
         for (FolderObject folder : response.getFolders()) {
             if (createdFolder.getObjectID() == folder.getObjectID()) {
@@ -118,7 +118,7 @@ public class Bug17027Test extends AbstractAJAXSession {
             response.getDeletedIds().contains(I(createdFolder.getObjectID())));
         client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
         folderDeleted = true;
-        response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
+        response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, COLUMNS, -1, null, before, Ignore.NONE));
         for (FolderObject folder : response.getFolders()) {
             assertFalse("By other user newly created private folder is returned in updates response.", createdFolder.getObjectID() == folder.getObjectID());
         }

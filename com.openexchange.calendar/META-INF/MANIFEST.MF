@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Module
 Bundle-SymbolicName: com.openexchange.calendar
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: cern.colt,
  cern.colt.bitvector,
  cern.colt.buffer,
@@ -26,6 +26,7 @@ Import-Package: cern.colt,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
+ com.openexchange.contactcollector,
  com.openexchange.context,
  com.openexchange.data.conversion.ical,
  com.openexchange.data.conversion.ical.itip,
@@ -80,6 +81,7 @@ Import-Package: cern.colt,
  com.openexchange.session,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,
+ com.openexchange.sql.tools,
  com.openexchange.templating,
  com.openexchange.timer,
  com.openexchange.tools,

@@ -87,7 +87,7 @@ public interface ConfigView {
      * @param coerceTo The type to coerce to
      * @param defaultValue The default value
      * @return The coerced value or <code>defaultValue</code> if absent
-     * @throws OXException If such a property does not exist
+     * @throws OXException If returning property fails
      */
     <T> T opt(String property, Class<T> coerceTo, T defaultValue) throws OXException;
 

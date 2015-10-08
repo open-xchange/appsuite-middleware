@@ -61,19 +61,25 @@ public class Difference {
 
     public static final int COMMON = -1;
 
-    private List<Object> added;
-
-    private List<Object> removed;
-
-    private List<Change> changed;
-
+    private final List<Object> added;
+    private final List<Object> removed;
+    private final List<Change> changed;
     private int field;
 
+    /**
+     * Initializes a new {@link Difference}.
+     */
     public Difference() {
         this(COMMON);
     }
 
+    /**
+     * Initializes a new {@link Difference}.
+     *
+     * @param field The field identifier
+     */
     public Difference(int field) {
+        super();
         added = new ArrayList<Object>();
         removed = new ArrayList<Object>();
         changed = new ArrayList<Change>();
@@ -84,24 +90,12 @@ public class Difference {
         return added;
     }
 
-    public void setAdded(List<Object> added) {
-        this.added = added;
-    }
-
     public List<Object> getRemoved() {
         return removed;
     }
 
-    public void setRemoved(List<Object> removed) {
-        this.removed = removed;
-    }
-
     public List<Change> getChanged() {
         return changed;
-    }
-
-    public void setChanged(List<Change> changed) {
-        this.changed = changed;
     }
 
     public int getField() {

@@ -56,6 +56,8 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.Quota;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -164,6 +166,61 @@ public interface OXContextInterface extends Remote {
      * @throws ContextExistsException
      */
     public Context create(final Context ctx, final User admin_user, UserModuleAccess access,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+
+    /**
+     * Create a new context.
+     *
+     * If setFilestoreId() or setWriteDatabase() has been used in the given context object, the context will be created
+     * in the corresponding database or filestore.
+     * The assigned limits to the database/filestore are ignored, though.
+     *
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
+     * @param admin_user User data of administrative user account for this context
+     * @param auth Credentials for authenticating against server.
+     * @param schemaSelectStrategy SchemaSelectStrategy to define how to select the schema where the context will be created.
+     *
+     * @return Context object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws ContextExistsException
+     */
+    public Context create(final Context ctx, final User admin_user, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+
+    /**
+     * Create a new context! Given access combination name will be used for admin module access rights!
+     * @param ctx Context object
+     * @param admin_user User data of administrative user account for this context
+     * @param access_combination_name String Access combination name!
+     * @param auth Credentials for authenticating against server.
+     * @param schemaSelectStrategy SchemaSelectStrategy to define how to select the schema where the context will be created.
+     *
+     * @return A new Context object, this should not have been used before or a one returned from a previous call to this API.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws ContextExistsException
+     */
+    public Context create(final Context ctx, final User admin_user, String access_combination_name,final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+
+    /**
+     * Create a new context! Given access rights be used for admin!
+     * @param ctx Context object
+     * @param admin_user User data of administrative user account for this context
+     * @param access UserModuleAccess Access rights!
+     * @param auth Credentials for authenticating against server.
+     * @param schemaSelectStrategy SchemaSelectStrategy to define how to select the schema where the context will be created.
+     *
+     * @return A new Context object, this should not have been used before or a one returned from a previous call to this API.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws ContextExistsException
+     */
+    public Context create(final Context ctx, final User admin_user, UserModuleAccess access,final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
 
 
     /**
@@ -337,6 +394,20 @@ public interface OXContextInterface extends Remote {
      * Get specified context details
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context IDs of these objects should be set.
+     * @param auth The context-specific credentials
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Context getOwnData(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
+     * Get specified context details
+     *
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. The context IDs of these objects should be set.
      * @param auth
      * @return
      * @throws RemoteException
@@ -374,7 +445,7 @@ public interface OXContextInterface extends Remote {
      *
      * Change storage data informations - Change filestore infos for context. Normally NO need to change!
      *
-     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID 
+     * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. Beside the context ID
      * or name for identifying the context itself the object should only contain those field which need to be changed.
      * @param auth
      * @throws RemoteException
@@ -416,7 +487,21 @@ public interface OXContextInterface extends Remote {
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
-     * Changes specified context's capabilities.
+     * Gets the configured quotas in given context.
+     *
+     * @param ctx The context
+     * @param auth The credentials
+     * @return The configured quota
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Quota[] listQuotas(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
+     * Changes specified context's quota for a certain module.
      *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param module The module to apply quota to
@@ -530,7 +615,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines the user ID of the admin user for a given context
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API. This context will be used for determining the userId of the admin.
      * @param auth Credentials for authenticating against the server.
      * @return The userId of the admin user
@@ -543,7 +628,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not
@@ -552,7 +637,7 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Determines whether a context already exists.
-     * 
+     *
      * @param ctx A new Context object, this should not have been used before or a one returned from a previous call to this API.
      * @param auth Credentials for authenticating against the server.
      * @return Whether the given context exists or not

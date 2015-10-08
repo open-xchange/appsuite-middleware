@@ -61,7 +61,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since 7.6.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ Bug30843Test.class })
+@SuiteClasses({ Bug30843Test.class, NoReplySMTPTransportTest.class })
 public class UnitTests {
 
     /**

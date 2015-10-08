@@ -123,6 +123,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     new InternalParticipant(participant, groupId);
                 taskParticipant.setConfirm(result.getInt(pos++));
                 taskParticipant.setConfirmMessage(result.getString(pos++));
+                // Only for removed participants the folder is stored in the participant table. For all active participants the folder
+                // is stored in the task_folder table.
                 if (StorageType.REMOVED == type) {
                     final int folderId = result.getInt(pos++);
                     if (0 == folderId) {
@@ -150,13 +152,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    void updateInternal(final Context ctx, final Connection con,
-        final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type) throws OXException {
+    void updateInternal(Context ctx, Connection con, int taskId, Set<InternalParticipant> participants, StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             // UPDATE table SET group_id=?, accepted=?, description=? WHERE cid=? AND task=? AND user=?
@@ -284,36 +281,32 @@ public class RdbParticipantStorage extends ParticipantStorage {
             return java.util.Collections.emptyMap();
         }
         final Map<Integer, Set<ExternalParticipant>> retval = new HashMap<Integer, Set<ExternalParticipant>>();
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type), tasks.length));
+        try (PreparedStatement stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type), tasks.length))) {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             for (final int taskId : tasks) {
                 stmt.setInt(pos++, taskId);
             }
-            result = stmt.executeQuery();
-            while (result.next()) {
-                pos = 1;
-                final int taskId = result.getInt(pos++);
-                final ExternalUserParticipant external =
-                    new ExternalUserParticipant(result.getString(pos++));
-                external.setDisplayName(result.getString(pos++));
-                final ExternalParticipant participant =
-                    new ExternalParticipant(external);
-                Set<ExternalParticipant> participants = retval.get(Integer
-                    .valueOf(taskId));
-                if (null == participants) {
-                    participants = new HashSet<ExternalParticipant>();
-                    retval.put(Integer.valueOf(taskId), participants);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    pos = 1;
+                    final int taskId = result.getInt(pos++);
+                    final ExternalUserParticipant external =
+                        new ExternalUserParticipant(result.getString(pos++));
+                    external.setDisplayName(result.getString(pos++));
+                    final ExternalParticipant participant =
+                        new ExternalParticipant(external);
+                    Set<ExternalParticipant> participants = retval.get(Integer
+                        .valueOf(taskId));
+                    if (null == participants) {
+                        participants = new HashSet<ExternalParticipant>();
+                        retval.put(Integer.valueOf(taskId), participants);
+                    }
+                    participants.add(participant);
                 }
-                participants.add(participant);
             }
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(result, stmt);
         }
         return retval;
     }
@@ -323,10 +316,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         if (0 == addresses.length || StorageType.REMOVED == type || StorageType.DELETED == type) {
             return;
         }
-        PreparedStatement stmt = null;
         int deleted = 0;
-        try {
-            stmt = con.prepareStatement(getIN(SQL.DELETE_EXTERNAL.get(type), addresses.length));
+        try (PreparedStatement stmt = con.prepareStatement(getIN(SQL.DELETE_EXTERNAL.get(type), addresses.length))) {
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
@@ -336,8 +327,6 @@ public class RdbParticipantStorage extends ParticipantStorage {
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(stmt);
         }
         if (check && addresses.length != deleted) {
             OXException exc = TaskExceptionCode.PARTICIPANT_DELETE_WRONG.create(I(addresses.length), I(deleted));
@@ -350,9 +339,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         if (0 == participants.size() || StorageType.REMOVED == type || StorageType.DELETED == type) {
             return;
         }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL.INSERT_EXTERNAL.get(type));
+        try (PreparedStatement stmt = con.prepareStatement(SQL.INSERT_EXTERNAL.get(type))) {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, taskId);
@@ -374,8 +361,6 @@ public class RdbParticipantStorage extends ParticipantStorage {
             throw Tools.parseIncorrectString(e);
         } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 

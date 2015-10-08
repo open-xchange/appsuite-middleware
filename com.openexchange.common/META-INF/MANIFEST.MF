@@ -2,10 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Common
 Bundle-SymbolicName: com.openexchange.common
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.tools.ssl,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.tools.ssl,
  javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
@@ -115,7 +123,7 @@ Bundle-ClassPath: .,
  lib/cssparser-0.9.7.jar,
  lib/fluent-hc-4.2.1.jar,
  lib/gnu-rex.jar,
- lib/htmlcleaner-2.9.jar,
+ lib/htmlcleaner-2.14.jar,
  lib/httpclient-4.2.1.jar,
  lib/httpclient-cache-4.2.1.jar,
  lib/httpcore-4.2.1.jar,
@@ -139,6 +147,7 @@ Bundle-ClassPath: .,
  lib/concurrentlinkedhashmap-1.0.1-custom.jar,
  lib/brownies-collections-0.9.6.jar,
  lib/jdo2-api-2.3-eb.jar,
+ lib/commons-validator-1.4.0.jar,
  lib/ical4j-1.0.6.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
@@ -233,6 +242,7 @@ Export-Package: com.googlecode.concurrentlinkedhashmap,
  org.apache.commons.httpclient.params;version="3.1.0",
  org.apache.commons.httpclient.protocol;version="3.1.0",
  org.apache.commons.httpclient.util;version="3.1.0",
+ org.apache.commons.validator.routines,
  org.apache.http,
  org.apache.http.annotation,
  org.apache.http.auth,

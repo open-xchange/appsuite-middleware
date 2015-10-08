@@ -26,19 +26,14 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-2492
-    pfile=/opt/open-xchange/etc/grizzly.properties
-    if ! ox_exists_property com.openexchange.http.grizzly.maxHttpHeaderSize $pfile; then
-        ox_set_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $pfile
-    fi
-	
-    # SoftwareChange_Request-1293
-    pfile=/opt/open-xchange/etc/grizzly.properties
-    if ! ox_exists_property com.openexchange.http.grizzly.hasAJPEnabled $pfile; then
-       ox_set_property com.openexchange.http.grizzly.hasAJPEnabled "false" $pfile
-    fi
-}
+    PFILE=/opt/open-xchange/etc/grizzly.properties
 
+    # SoftwareChange_Request-2289
+    ox_remove_property com.openexchange.http.grizzly.hasAJPEnabled $PFILE
+
+    # SoftwareChange_Request-2492
+    ox_add_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $PFILE
+}
 
 case "$1" in
     configure)

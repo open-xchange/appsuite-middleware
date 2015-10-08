@@ -64,8 +64,6 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class SubscriptionJSONParser {
 
-    // private static final FormContentParser formParser = new FormContentParser();
-
     private final SubscriptionSourceDiscoveryService discovery;
 
     /**

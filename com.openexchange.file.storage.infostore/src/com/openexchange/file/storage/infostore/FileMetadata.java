@@ -50,12 +50,17 @@
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 
@@ -191,7 +196,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getVersion() {
         final String version = file.getVersion();
-        return isEmpty(version) ? -1 : Integer.parseInt(version);
+        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Integer.parseInt(version);
     }
 
     @Override
@@ -324,16 +329,24 @@ public class FileMetadata implements DocumentMetadata {
         file.setMeta(properties);
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+    @Override
+    public List<ObjectPermission> getObjectPermissions() {
+        return PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+    }
+
+    @Override
+    public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+        file.setObjectPermissions(PermissionHelper.getFileStorageObjectPermissions(objectPermissions));
+    }
+
+    @Override
+    public boolean isShareable() {
+        return file.isShareable();
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        file.setShareable(shareable);
     }
 
     /**
@@ -366,6 +379,12 @@ public class FileMetadata implements DocumentMetadata {
         }
     }
 
+    /**
+     * Gets the InfoStore {@link DocumentMetadata} from given file.
+     *
+     * @param file The file
+     * @return The appropriate {@link DocumentMetadata} instance
+     */
     public static DocumentMetadata getMetadata(final File file) {
         final DocumentMetadata metaData = new DocumentMetadata() {
 
@@ -477,6 +496,16 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
+            public void setOriginalId(int id) {
+                // nothing to do
+            }
+
+            @Override
+            public void setOriginalFolderId(long id) {
+                // nothing to do
+            }
+
+            @Override
             public boolean isCurrentVersion() {
                 return file.isCurrentVersion();
             }
@@ -538,12 +567,20 @@ public class FileMetadata implements DocumentMetadata {
 
             @Override
             public int getId() {
-                return Integer.parseInt(file.getId());
+                String id = file.getId();
+                if (FileStorageFileAccess.NEW == id) {
+                    return InfostoreFacade.NEW;
+                }
+                return Integer.parseInt(new FileID(id).getFileId());
             }
 
             @Override
             public long getFolderId() {
-                return Long.parseLong(file.getFolderId());
+                String id = file.getFolderId();
+                if (FileStorageFileAccess.NEW == id) {
+                    return InfostoreFacade.NEW;
+                }
+                return Long.parseLong(new FolderID(id).getFolderId());
             }
 
             @Override
@@ -611,8 +648,79 @@ public class FileMetadata implements DocumentMetadata {
             public void setMeta(Map<String, Object> properties) {
                 // Nothing to do
             }
+
+            @Override
+            public List<ObjectPermission> getObjectPermissions() {
+                return PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+            }
+
+            @Override
+            public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+                // Nothing to do
+            }
+
+            @Override
+            public boolean isShareable() {
+                return file.isShareable();
+            }
+
+            @Override
+            public void setShareable(boolean shareable) {
+                file.setShareable(shareable);
+            }
+
+            @Override
+            public int getOriginalId() {
+                if (file instanceof UserizedFile) {
+                    return Integer.parseInt(((UserizedFile) file).getOriginalId());
+                }
+
+                return getId();
+            }
+
+            @Override
+            public long getOriginalFolderId() {
+                if (file instanceof UserizedFile) {
+                    return Long.parseLong(((UserizedFile) file).getOriginalFolderId());
+                }
+
+                return getFolderId();
+            }
+
         };
         return metaData;
+    }
+
+    @Override
+    public int getOriginalId() {
+        if (file instanceof UserizedFile) {
+            return Integer.parseInt(((UserizedFile) file).getOriginalId());
+        }
+
+        return getId();
+    }
+
+    @Override
+    public void setOriginalId(int id) {
+        if (file instanceof UserizedFile) {
+            ((UserizedFile) file).setOriginalId(Integer.toString(id));
+        }
+    }
+
+    @Override
+    public long getOriginalFolderId() {
+        if (file instanceof UserizedFile) {
+            return Long.parseLong(((UserizedFile) file).getOriginalFolderId());
+        }
+
+        return getFolderId();
+    }
+
+    @Override
+    public void setOriginalFolderId(long id) {
+        if (file instanceof UserizedFile) {
+            ((UserizedFile) file).setOriginalFolderId(Long.toString(id));
+        }
     }
 
 }

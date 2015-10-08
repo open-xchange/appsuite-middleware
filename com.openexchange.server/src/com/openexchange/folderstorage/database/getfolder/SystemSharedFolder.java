@@ -77,6 +77,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
@@ -155,11 +156,7 @@ public final class SystemSharedFolder {
             retval.setSubfolderIDs(hasNext ? null : new String[0]);
             retval.setSubscribedSubfolders(hasNext);
         } finally {
-            try {
-                searchIterator.close();
-            } catch (final OXException e) {
-                LOG.error("Failed closing search iterator.", e);
-            }
+            SearchIterators.close(searchIterator);
         }
         return retval;
     }

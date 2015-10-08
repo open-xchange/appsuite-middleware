@@ -52,17 +52,25 @@ package com.openexchange.groupware.tasks;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.
@@ -103,6 +111,9 @@ public class TasksSQLImpl implements TasksSQLInterface {
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
             throw e;
         }
         try {
@@ -121,17 +132,23 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public Task getTaskById(final int taskId, final int folderId) throws OXException {
-        final Context ctx;
-        final int userId = session.getUserId();
-        final User user;
-        final UserPermissionBits permissionBits;
+        Context ctx = Tools.getContext(session.getContextId());
+        int userId = session.getUserId();
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
         try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-            final GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
+            GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                // Parent folder does no more exist
+                try {
+                    DeleteData deleteData = new DeleteData(ctx, user, permissionBits, null, taskId, null);
+                    deleteData.doDeleteHard(session, folderId, StorageType.ACTIVE);
+                } catch (Exception x) {
+                    // Ignore
+                }
+            }
             throw e;
         }
     }
@@ -148,6 +165,9 @@ public class TasksSQLImpl implements TasksSQLInterface {
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
             throw e;
         }
         boolean onlyOwn;
@@ -187,6 +207,39 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.doInsert();
         insert.createReminder();
         insert.sentEvent(session);
+
+        collectAddresses(task);
+    }
+
+    /**
+     * Tries to add addresses of external participants to the ContactCollector.
+     *
+     * @param task - the {@link Task} to collect addresses for
+     */
+    private void collectAddresses(Task task) {
+        if ((task == null) || (task.getParticipants() == null)) {
+            LOG.debug("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+
+        ContactCollectorService contactCollectorService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (contactCollectorService != null) {
+            Participant[] participants = task.getParticipants();
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(participants.length) ;
+            for (Participant participant : participants) {
+                String emailAddress = participant.getEmailAddress();
+                try {
+                    if (emailAddress != null) {
+                        addresses.add(new InternetAddress(emailAddress));
+                    }
+                } catch (AddressException addressException) {
+                    LOG.warn("Unable to add address " + emailAddress + " to ContactCollector.", addressException);
+                }
+            }
+
+            contactCollectorService.memorizeAddresses(addresses, session);
+        }
     }
 
     @Override
@@ -212,8 +265,44 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.sentEvent(session);
             update.updateReminder();
             update.makeNextRecurrence(session);
+
+            collectAddresses(update);
         } catch (final OXException e) {
             throw e;
+        }
+    }
+
+    /**
+     * Collects addresses from the given {@link UpdateData}
+     *
+     * @param update - the {@link UpdateData} to get addresses from
+     * @throws OXException
+     */
+    private void collectAddresses(UpdateData update) throws OXException {
+        if (update == null) {
+            LOG.info("Provided UpdateData object is null. Nothing to collect for the ContactCollector!");
+            return;
+        }
+        ContactCollectorService contactCollectorService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        Set<TaskParticipant> updatedParticipants = update.getUpdatedParticipants();
+
+        if ((contactCollectorService != null) && (!updatedParticipants.isEmpty())) {
+
+            List<InternetAddress> addresses = new ArrayList<InternetAddress>(updatedParticipants.size());
+            for (TaskParticipant participant : updatedParticipants) {
+                if (participant.getType() == TaskParticipant.Type.EXTERNAL) {
+                    ExternalParticipant external = (ExternalParticipant) participant;
+                    String mail = external.getMail();
+                    try {
+                        if (mail != null) {
+                            addresses.add(new InternetAddress(mail));
+                        }
+                    } catch (AddressException addressException) {
+                        LOG.warn("Unable to add address " + mail + " to ContactCollector.", addressException);
+                    }
+                }
+            }
+            contactCollectorService.memorizeAddresses(addresses, session);
         }
     }
 

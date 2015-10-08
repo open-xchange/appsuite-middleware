@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.util.Date;
 import javax.mail.internet.MailDateFormat;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;

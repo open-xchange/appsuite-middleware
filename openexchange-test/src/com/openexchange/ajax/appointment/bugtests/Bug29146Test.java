@@ -93,7 +93,7 @@ public class Bug29146Test extends AbstractAJAXSession {
         ctm.insert(appointment);
 
         Appointment loadedAppointment = ctm.get(appointment);
-        UserParticipant participant = (UserParticipant) loadedAppointment.getUsers()[0];
+        UserParticipant participant = loadedAppointment.getUsers()[0];
         assertEquals("Wrong confirm status.", Appointment.NONE, participant.getConfirm());
     }
 

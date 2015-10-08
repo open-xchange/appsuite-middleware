@@ -51,8 +51,8 @@ package com.openexchange.contact.storage.rdb.search;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
@@ -94,21 +94,53 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     AutocompleteAdapter(String query, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields, String charset, boolean checkPatternLength) throws OXException {
         super(charset);
         this.stringBuilder = new StringBuilder(2048);
-        List<String> patterns = extractPatterns(query, checkPatternLength);
+        /*
+         * extract patterns & remove too short patterns
+         */
+        List<String> patterns = SimpleTokenizer.tokenize(query);
+        if (checkPatternLength) {
+            for (Iterator<String> iterator = patterns.iterator(); iterator.hasNext();) {
+                String pattern = iterator.next();
+                try {
+                    Search.checkPatternLength(pattern);
+                } catch (OXException e) {
+                    if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
+                        addIgnoredPatternWarning(pattern, parameters);
+                        iterator.remove();
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        }
+        /*
+         * prepare & optimize patterns, restricting the number of used patterns
+         */
+        patterns = preparePatterns(patterns);
         if (MAX_PATTERNS < patterns.size()) {
-            throw ContactExceptionCodes.TOO_MANY_PATTERNS.create(query, Integer.valueOf(MAX_PATTERNS));
+            for (int i = 5; i < patterns.size(); i++) {
+                addIgnoredPatternWarning(patterns.get(i), parameters);
+            }
+            patterns = patterns.subList(0, 5);
         }
         appendAutocomplete(patterns, parameters, folderIDs, contextID, fields);
     }
 
+    private static void addIgnoredPatternWarning(String ignoredPattern, AutocompleteParameters parameters) {
+        if (null != parameters) {
+            parameters.addWarning(ContactExceptionCodes.IGNORED_PATTERN.create(ignoredPattern));
+        }
+    }
+
 	@Override
-	public String getClause() {
-		return stringBuilder.toString().trim();
+	public StringBuilder getClause() {
+		return Strings.trim(stringBuilder);
 	}
 
 	private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
         boolean ignoreDistributionLists = parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false);
+        boolean ignoreNonWebmailUsers = false; // TODO: Maybe for future use
 		if (null == patterns || 0 == patterns.size()) {
 	        stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
 	            .append(getFolderIDsClause(folderIDs));
@@ -118,7 +150,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	        	stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
 	        }
 	    } else if (1 == patterns.size()) {
-	        appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, folderIDs, contextID, fields);
+	        appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
 	    } else {
 	        stringBuilder.append("SELECT ");
 	        stringBuilder.append("o.").append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
@@ -126,10 +158,10 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	            stringBuilder.append(",o.").append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
 	        }
 	        stringBuilder.append(" FROM (");
-	        appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, folderIDs, contextID, fields);
+	        appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
 	        for (int i = 1; i < patterns.size(); i++) {
 	            stringBuilder.append(" UNION ALL (");
-	            appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, folderIDs, contextID, fields);
+	            appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
                 stringBuilder.append(')');
 	        }
 	        stringBuilder.append(") AS o GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
@@ -137,7 +169,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	    }
    }
 
-    private void appendAutocompletePattern(String pattern, boolean requireEmail, boolean ignoreDistributionLists, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
+    private void appendAutocompletePattern(String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         String contextIDClause = getContextIDClause(contextID);
         String folderIDsClause = getFolderIDsClause(folderIDs);
         String selectClause = getSelectClause(fields);
@@ -152,16 +184,21 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
                 stringBuilder.append(')');
             }
         }
+        if (ignoreNonWebmailUsers) {
+            stringBuilder.append(") AS U WHERE U.intfield01 NOT IN (SELECT intfield01 FROM prg_contacts as c JOIN user_configuration as u ON c.cid=u.cid and c.userid=u.user WHERE c.cid=").append(contextID).append(" AND (u.permissions & 1) <> 1)");
+            stringBuilder.insert(0, '(');
+            stringBuilder.insert(0, getSelectClause(fields, false));
+        }
     }
 
-    private void appendAutocompletePattern(String tableAlias, String pattern, boolean requireEmail, boolean ignoreDistributionLists, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
+    private void appendAutocompletePattern(String tableAlias, String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         stringBuilder.append("SELECT ");
         stringBuilder.append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
         for (int i = 1; i < fields.length; i++) {
             stringBuilder.append(',').append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
         }
         stringBuilder.append(" FROM (");
-        appendAutocompletePattern(pattern, requireEmail, ignoreDistributionLists, folderIDs, contextID, fields);
+        appendAutocompletePattern(pattern, requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
         stringBuilder.append(") AS ").append(tableAlias);
     }
 
@@ -199,33 +236,18 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     }
 
     /**
-     * Extracts the search patterns from the supplied query, appending wildcards as needed, as well as checking the individual pattern
-     * length restrictions. Some optimizations regarding sole wildcards or redundant patterns are excluded implicitly.
+     * Prepares search patterns from the tokenized query, appending wildcards as needed, performing ome optimizations regarding sole
+     * wildcards or redundant patterns.
      *
-     * @param query The query as supplied by the client
-     * @return The patterns
-     * @throws OXException
-     */
-    private static List<String> extractPatterns(String query) throws OXException {
-        return extractPatterns(query, true);
-    }
-
-    /**
-     * Extracts the search patterns from the supplied query, appending wildcards as needed, as well as checking the individual pattern
-     * length restrictions. Some optimizations regarding sole wildcards or redundant patterns are excluded implicitly.
-     *
-     * @param query The query as supplied by the client
+     * @param tokens The tokenized query as supplied by the client
      * @param checkPatternLength <code>true</code> to check each pattern length against the configured restrictions, <code>false</code>, otherwise
      * @return The patterns
      * @throws OXException
      */
-    static List<String> extractPatterns(String query, boolean checkPatternLength) throws OXException {
+    static List<String> preparePatterns(List<String> tokens) throws OXException {
         List<String> resultingPatterns = new ArrayList<String>();
-        for (String pattern : SimpleTokenizer.tokenize(query)) {
+        for (String pattern : tokens) {
             pattern = StringCollection.prepareForSearch(pattern, false, true, true);
-            if (checkPatternLength) {
-                Search.checkPatternLength(pattern);
-            }
             if (Strings.isEmpty(pattern)) {
                 /*
                  * ignore empty patterns

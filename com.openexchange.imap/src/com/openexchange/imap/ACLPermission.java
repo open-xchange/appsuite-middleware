@@ -50,12 +50,16 @@
 package com.openexchange.imap;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.entity2acl.Entity2ACLArgs;
+import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.sun.mail.imap.ACL;
@@ -193,7 +197,13 @@ public final class ACLPermission extends MailPermission {
              */
             return acl;
         }
-        final Rights rights = permission2Rights(this, imapConfig);
+        Rights rights = permission2Rights(this, imapConfig);
+        if (isGroupPermission() && OCLPermission.ALL_GROUPS_AND_USERS != getEntity()) {
+            // Group not supported
+            GroupService groups = Services.getService(GroupService.class);
+            Group group = groups.getGroup(ctx, getEntity());
+            throw Entity2ACLExceptionCode.UNKNOWN_GROUP.create(getEntity(), ctx.getContextId(), imapConfig.getServer(), group.getDisplayName());
+        }
         return (acl = new ACL(Entity2ACL.getInstance(imapStore, imapConfig).getACLName(getEntity(), ctx, args), rights));
     }
 

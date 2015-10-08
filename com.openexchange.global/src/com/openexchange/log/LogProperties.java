@@ -99,50 +99,6 @@ public final class LogProperties {
          */
         THREAD_ID("__threadId"),
         /**
-         * com.openexchange.ajpv13.requestURI
-         */
-        AJP_REQUEST_URI("com.openexchange.ajpv13.requestURI"),
-        /**
-         * com.openexchange.ajpv13.servletPath
-         */
-        AJP_SERVLET_PATH("com.openexchange.ajpv13.servletPath"),
-        /**
-         * com.openexchange.ajpv13.pathInfo
-         */
-        AJP_PATH_INFO("com.openexchange.ajpv13.pathInfo"),
-        /**
-         * com.openexchange.ajpv13.requestIp
-         */
-        AJP_REQUEST_IP("com.openexchange.ajpv13.requestIp"),
-        /**
-         * com.openexchange.ajpv13.requestId
-         */
-        AJP_REQUEST_ID("com.openexchange.ajpv13.requestId"),
-        /**
-         * com.openexchange.ajpv13.serverName
-         */
-        AJP_SERVER_NAME("com.openexchange.ajpv13.serverName"),
-        /**
-         * com.openexchange.ajpv13.threadName
-         */
-        AJP_THREAD_NAME("com.openexchange.ajpv13.threadName"),
-        /**
-         * com.openexchange.ajpv13.remotePort
-         */
-        AJP_REMOTE_PORT("com.openexchange.ajpv13.remotePort"),
-        /**
-         * com.openexchange.ajpv13.remoteAddres
-         */
-        AJP_REMOTE_ADDRESS("com.openexchange.ajpv13.remoteAddress"),
-        /**
-         * com.openexchange.ajp13.httpSession
-         */
-        AJP_HTTP_SESSION("com.openexchange.ajp13.httpSession"),
-        /**
-         * com.openexchange.ajp13.userAgent
-         */
-        AJP_USER_AGENT("com.openexchange.ajp13.userAgent"),
-        /**
          * com.openexchange.session.authId
          */
         SESSION_AUTH_ID("com.openexchange.session.authId"),
@@ -180,22 +136,39 @@ public final class LogProperties {
         SESSION_LOGIN_NAME("com.openexchange.session.loginName"),
         /**
          * com.openexchange.grizzly.requestURI
+         * <p>
+         * The part of this request's URL from the protocol name up to the query string in the first line of the HTTP request.
          */
         GRIZZLY_REQUEST_URI("com.openexchange.grizzly.requestURI"),
         /**
          * com.openexchange.grizzly.queryString
+         * <p>
+         * The query string that is contained in the request URL after the path
          */
         GRIZZLY_QUERY_STRING("com.openexchange.grizzly.queryString"),
         /**
+         * com.openexchange.grizzly.method
+         */
+        GRIZZLY_METHOD("com.openexchange.grizzly.method"),
+        /**
          * com.openexchange.grizzly.servletPath
+         * <p>
+         * The part of this request's URL that calls the servlet. This path starts with a "/" character and includes either the servlet name
+         * or a path to the servlet, but does not include any extra path information or a query string.
          */
         GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
         /**
          * com.openexchange.grizzly.pathInfo
+         * <p>
+         * The extra path information associated with the URL the client sent when it made this request. The extra path information follows
+         * the servlet path but precedes the query string and will start with a "/" character.
          */
         GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
         /**
          * com.openexchange.grizzly.serverName
+         * <p>
+         * The host name of the server to which the request was sent. It is the value of the part before ":" in the <code>Host</code> header
+         * value, if any, or the resolved server name, or the server IP address.
          */
         GRIZZLY_SERVER_NAME("com.openexchange.grizzly.serverName"),
         /**
@@ -204,10 +177,14 @@ public final class LogProperties {
         GRIZZLY_THREAD_NAME("com.openexchange.grizzly.threadName"),
         /**
          * com.openexchange.grizzly.remotePort
+         * <p>
+         * The Internet Protocol (IP) address of the client or last proxy that sent the request
          */
         GRIZZLY_REMOTE_PORT("com.openexchange.grizzly.remotePort"),
         /**
          * com.openexchange.grizzly.remoteAddres
+         * <p>
+         * The Internet Protocol (IP) address of the client or last proxy that sent the request
          */
         GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
         /**
@@ -216,6 +193,8 @@ public final class LogProperties {
         GRIZZLY_HTTP_SESSION("com.openexchange.grizzly.session"),
         /**
          * com.openexchange.grizzly.userAgent
+         * <p>
+         * The content of the <code>User-Agent</code> header.
          */
         GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
         /**
@@ -267,6 +246,14 @@ public final class LogProperties {
          */
         MAIL_LOGIN("com.openexchange.mail.login"),
         /**
+         * com.openexchange.mail.command
+         */
+        MAIL_COMMAND("com.openexchange.mail.command"),
+        /**
+         * com.openexchange.mail.session
+         */
+        MAIL_SESSION("com.openexchange.mail.session"),
+        /**
          * com.openexchange.database.schema
          */
         DATABASE_SCHEMA("com.openexchange.database.schema"),
@@ -294,10 +281,6 @@ public final class LogProperties {
          * com.openexchange.login.version
          */
         LOGIN_VERSION("com.openexchange.login.version"),
-        /**
-         * com.openexchange.system.tempfile
-         */
-        TEMP_FILE("com.openexchange.system.tempfile"),
 
         ;
 
@@ -344,7 +327,124 @@ public final class LogProperties {
         super();
     }
 
-    private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4);
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private static final ThreadLocal<Map<String, Object>> TMP_FILES = new ThreadLocal<Map<String, Object>>();
+
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Gets the temporary file property.
+     *
+     * @return The removed temporary file property or <code>null</code>
+     */
+    public static String[] getTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map == null) {
+            return null;
+        }
+        int size = map.size();
+        if (size <= 0) {
+            return null;
+        }
+        return map.keySet().toArray(new String[size]);
+    }
+
+    /**
+     * Gets (and removes) the temporary file property.
+     *
+     * @return The removed temporary file property or <code>null</code>
+     */
+    public static String[] getAndRemoveTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map == null) {
+            return null;
+        }
+        int size = map.size();
+        if (size <= 0) {
+            return null;
+        }
+        String[] pathNames = map.keySet().toArray(new String[size]);
+        map.clear();
+        return pathNames;
+    }
+
+    /**
+     * Adds given temporary file.
+     *
+     * @param file The temporary file
+     */
+    public static void addTempFile(File file) {
+        if (null != file) {
+            addTempFile(file.getPath());
+        }
+    }
+
+    /**
+     * Adds given denoted temporary file.
+     *
+     * @param pathName The denoted temporary file
+     */
+    public static void addTempFile(String pathName) {
+        if (Strings.isEmpty(pathName)) {
+            return;
+        }
+        Map<String, Object> oldMap = TMP_FILES.get();
+        if (oldMap == null) {
+            Map<String, Object> newMap = new HashMap<String, Object>(4, 0.9F);
+            TMP_FILES.set(newMap);
+            newMap.put(pathName, PRESENT);
+        } else {
+            oldMap.put(pathName, PRESENT);
+        }
+    }
+
+    /**
+     * Removes given temporary file.
+     *
+     * @param file The temporary file
+     */
+    public static void removeTempFile(File file) {
+        if (null != file) {
+            removeTempFile(file.getPath());
+        }
+    }
+
+    /**
+     * Removes given denoted temporary file.
+     *
+     * @param pathName The denoted temporary file
+     */
+    public static void removeTempFile(String pathName) {
+        if (Strings.isEmpty(pathName)) {
+            return;
+        }
+        Map<String, Object> map = TMP_FILES.get();
+        if (map != null) {
+            map.remove(pathName);
+        }
+    }
+
+    /**
+     * Removes all temporary files.
+     */
+    public static void removeAllTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map != null) {
+            map.clear();
+        }
+    }
+
+    /**
+     * Drops temporary files association.
+     */
+    public static void dropTempFiles() {
+        TMP_FILES.remove();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4, 0.9f, 1);
 
     @SuppressWarnings("unchecked")
     private static InheritableThreadLocal<Map<String, String>> getPropertiesMap(final MDCAdapter mdcAdapter) throws OXException {
@@ -489,41 +589,6 @@ public final class LogProperties {
     }
 
     /**
-     * Gets the temporary file property.
-     *
-     * @return The temporary file property or <code>null</code>
-     */
-    public static String[] getTempFileProperty() {
-        String str = MDC.get(Name.TEMP_FILE.getName());
-        return null == str ? null : Strings.splitByComma(str);
-    }
-
-    /**
-     * Appends temporary file.
-     *
-     * @param tempFile The temporary file
-     */
-    public static void appendTempFileProperty(File tempFile) {
-        if (null == tempFile) {
-            return;
-        }
-        appendTempFileProperty(tempFile.getPath());
-    }
-
-    /**
-     * Appends temporary file.
-     *
-     * @param tempFilePath The path of the temporary file
-     */
-    public static void appendTempFileProperty(String tempFilePath) {
-        if (null == tempFilePath) {
-            return;
-        }
-        String prev = MDC.get(Name.TEMP_FILE.getName());
-        MDC.put(Name.TEMP_FILE.getName(), null == prev ? tempFilePath : new StringBuffer(prev).append(',').append(tempFilePath).toString());
-    }
-
-    /**
      * Appends denoted property
      *
      * @param name The name
@@ -532,8 +597,9 @@ public final class LogProperties {
         if (null == name || null == value) {
             return;
         }
-        String prev = MDC.get(name.getName());
-        MDC.put(name.getName(), null == prev ? value : new StringBuffer(prev).append(',').append(value).toString());
+        String sName = name.getName();
+        String prev = MDC.get(sName);
+        MDC.put(sName, null == prev ? value : new StringBuilder(prev).append(',').append(value).toString());
     }
 
     /**
@@ -543,13 +609,6 @@ public final class LogProperties {
      */
     public static void remove(final LogProperties.Name name) {
         removeProperty(name);
-    }
-
-    /**
-     * Removes temporary file property
-     */
-    public static void removeTempFileProperty() {
-        MDC.remove(Name.TEMP_FILE.getName());
     }
 
     /**

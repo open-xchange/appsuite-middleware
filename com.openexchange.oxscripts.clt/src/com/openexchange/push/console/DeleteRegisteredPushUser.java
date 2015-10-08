@@ -106,10 +106,10 @@ public class DeleteRegisteredPushUser extends AbstractMBeanCLI<Void> {
 
         return null;
     }
-    
+
     @Override
     protected void checkOptions(CommandLine cmd) {
-    	checkOptions(cmd, null);
+        checkOptions(cmd, options);
     }
 
     @Override

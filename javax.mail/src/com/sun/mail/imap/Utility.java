@@ -72,7 +72,7 @@ public final class Utility {
      */
     public static 
     MessageSet[] toMessageSet(Message[] msgs, Condition cond) {
-	Vector v = new Vector(1);
+	java.util.List<MessageSet> v = new java.util.ArrayList<MessageSet>(1);
 	int current, next;
 
 	IMAPMessage msg;
@@ -113,15 +113,13 @@ public final class Utility {
 		}
 	    }
 	    set.end = current;
-	    v.addElement(set);
+	    v.add(set);
 	}
 	
 	if (v.isEmpty()) // No valid messages
 	    return null;
 	else {
-	    MessageSet[] sets = new MessageSet[v.size()];
-	    v.copyInto(sets);
-	    return sets;
+	    return v.toArray(new MessageSet[v.size()]);
 	}
     }
 

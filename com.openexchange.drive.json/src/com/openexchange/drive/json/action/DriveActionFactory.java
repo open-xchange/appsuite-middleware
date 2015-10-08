@@ -67,7 +67,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
 
     public DriveActionFactory() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(12);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(24, 0.9f, 1);
         actions.put("syncfolders", new SyncFoldersAction());
         actions.put("syncfiles", new SyncFilesAction());
         actions.put("upload", new UploadAction());
@@ -80,6 +80,18 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("updateToken", new UpdateTokenAction());
         actions.put("fileMetadata", new FileMetadataAction());
         actions.put("directoryMetadata", new DirectoryMetadataAction());
+        actions.put("jump", new JumpAction());
+        actions.put("subfolders", new SubfoldersAction());
+        actions.put("getLink", new GetLinkAction());
+        actions.put("updateLink", new UpdateLinkAction());
+        actions.put("deleteLink", new DeleteLinkAction());
+        actions.put("sendLink", new SendLinkAction());
+        actions.put("updateFile", new UpdateFileAction());
+        actions.put("updateFolder", new UpdateFolderAction());
+        actions.put("getFile", new GetFileAction());
+        actions.put("getFolder", new GetFolderAction());
+        actions.put("shares", new SharesAction());
+        actions.put("notify", new NotifyAction());
     }
 
     @Override

@@ -57,6 +57,7 @@ import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.Types;
@@ -127,6 +128,7 @@ public class TaskActivator extends AJAXModuleActivator {
             }
         };
         track(quotaProviderRegisterer.getFilter(), quotaProviderRegisterer);
+        trackService(ContactCollectorService.class);
         openTrackers();
     }
 }

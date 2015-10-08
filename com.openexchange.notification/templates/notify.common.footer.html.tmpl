@@ -1,0 +1,18 @@
+  <#--
+    Include this at the bottom of your body element to display the footer image and text.
+    See example.tmpl in the docs directory for details.
+  -->
+
+  <#if footer_text?has_content || footer_image_src?has_content>
+  <hr />
+    <div id="signature">
+      <p id="signature_text">
+        <#if footer_image_src?has_content>
+          <img id="signature_image" src="${footer_image_src}" alt="${footer_image_alt}" style="display:inline;float:right;">
+        </#if>
+        <#if footer_text?has_content>
+          ${footer_text?html}
+        </#if>
+      </p>
+    </div>
+  </#if>

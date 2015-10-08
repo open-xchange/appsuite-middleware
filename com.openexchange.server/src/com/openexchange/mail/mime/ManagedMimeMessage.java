@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.mail.Flags;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
@@ -71,7 +72,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
@@ -238,7 +238,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
         final File[] files = new File[1];
         final InputStream in = getInputStreamFor(original, files);
         parse(in);
-        closeables = new Java7ConcurrentLinkedQueue<Closeable>();
+        closeables = new ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
         this.file = files[0];
@@ -272,7 +272,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
     private ManagedMimeMessage(final Session session, final File file, final InputStream in, final Date receivedDate) throws MessagingException {
         super(session, in);
-        closeables = new Java7ConcurrentLinkedQueue<Closeable>();
+        closeables = new ConcurrentLinkedQueue<Closeable>();
         closeables.add(in);
         this.managedFile = null;
         this.file = file;

@@ -2,12 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Caldav Plug-in
 Bundle-SymbolicName: com.openexchange.caldav
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.api2,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.requesthandler.oauth,
+ com.openexchange.api2,
  com.openexchange.authentication,
  com.openexchange.calendar,
+ com.openexchange.capabilities,
  com.openexchange.config.cascade,
  com.openexchange.data.conversion.ical,
  com.openexchange.exception,
@@ -29,11 +31,15 @@ Import-Package: com.openexchange.api2,
  com.openexchange.groupware.settings,
  com.openexchange.groupware.tasks,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.jslob,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
+ com.openexchange.oauth.provider,
+ com.openexchange.oauth.provider.grant,
+ com.openexchange.oauth.provider.scope,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.server.impl,

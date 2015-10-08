@@ -68,10 +68,12 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.DependentServiceStarter;
@@ -96,10 +98,13 @@ import com.openexchange.saml.spi.ExceptionHandler;
 import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -184,6 +189,19 @@ public class SAMLFeature extends DependentServiceStarter {
                 httpService.registerServlet(slsServletAlias, new SingleLogoutService(serviceProvider, exceptionHandler), null, null);
                 servlets.push(slsServletAlias);
                 services.getService(CapabilityService.class).declareCapability("saml-single-logout");
+                serviceRegistrations.push(context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+                    @Override
+                    public boolean isEnabled(String capability, Session session) throws OXException {
+                        if ("saml-single-logout".equals(capability)) {
+                            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                            if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+                }, null));
             }
 
             if (config.enableMetadataService()) {

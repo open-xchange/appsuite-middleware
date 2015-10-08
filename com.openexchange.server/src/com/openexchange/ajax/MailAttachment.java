@@ -58,8 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -145,7 +145,6 @@ public class MailAttachment extends AJAXServlet {
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not orderly initialized");
                 return;
             }
-
             AJAXActionService getAttachmentAction = actionFactory.createActionService("attachment");
             if (null == getAttachmentAction) {
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not orderly initialized");
@@ -157,9 +156,10 @@ public class MailAttachment extends AJAXServlet {
                 SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 Session session = sessiondService.getSession(token.getSessionId());
                 ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                DispatcherPrefixService dispatcherPrefixService = ServerServiceRegistry.getServize(DispatcherPrefixService.class, true);
 
                 // Create request & yield result
-                AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, Dispatcher.PREFIX.get(), resp);
+                AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, dispatcherPrefixService.getPrefix(), resp);
                 request.setSession(serverSession);
                 request.putParameter(PARAMETER_FOLDERID, token.getFolderPath());
                 request.putParameter(PARAMETER_ID, token.getMailId());

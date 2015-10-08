@@ -56,6 +56,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.serialization.PortableContextPredicateFactory;
 import com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcherFactory;
 import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcherFactory;
@@ -67,10 +68,12 @@ import com.openexchange.realtime.hazelcast.serialization.group.PortableNotIntern
 import com.openexchange.realtime.hazelcast.serialization.group.PortableSelectorChoiceFactory;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableIDFactory;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortablePresenceFactory;
+import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntryFactory;
+import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapFactory;
 
 /**
  * {@link HazelcastSerializationActivator}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
@@ -88,8 +91,14 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
         /*
          * The PortableStanzaDispatcher needs:
-         * - LocalMessageDispatcher: For its default operation of delivering stanzas locally on the target node
-         * - GlobalRealtimeCleanup: In case the addressed recipient can't be found. A cleanup has to be triggered before trying to resend
+         * - LocalMessageDispatcher:  For its default operation of delivering stanzas locally on the target node, see
+         *                            PortableStanzaDispatcher
+         * - LocalRealtimeCleanup:    For its default operation of initiating a local cleanup on the target node, see
+         *                            PortableCleanupDispatcher
+         * - GlobalRealtimeCleanup:   In case the addressed recipient can't be found. A cleanup has to be triggered before trying to resend
+         *                            , see PortableStanzaDispatcher
+         * - GlobalMessageDispatcher: If local delivery fails and delivery has to be retried globally after removing the Resource that was
+         *                            listed as local to this node from the ResourceDirectory, see PortableStanzaDispatcher
          */
         track(LocalMessageDispatcher.class, new SimpleRegistryListener<LocalMessageDispatcher>() {
 
@@ -100,6 +109,19 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
             @Override
             public void removed(ServiceReference<LocalMessageDispatcher> ref, LocalMessageDispatcher service) {
+                removeService(LocalMessageDispatcher.class);
+            }
+        });
+
+        track(MessageDispatcher.class, new SimpleRegistryListener<MessageDispatcher>() {
+
+            @Override
+            public void added(ServiceReference<MessageDispatcher> ref, MessageDispatcher service) {
+                addService(MessageDispatcher.class, service);
+            }
+
+            @Override
+            public void removed(ServiceReference<MessageDispatcher> ref, MessageDispatcher service) {
                 removeService(LocalMessageDispatcher.class);
             }
         });
@@ -117,10 +139,6 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
             }
         });
 
-        /*
-         * The PortableCleanupDispatcher needs:
-         * - LocalRealtimeCleanup: For its default operation of initiating a local cleanup on the target node 
-         */
         track(LocalRealtimeCleanup.class, new SimpleRegistryListener<LocalRealtimeCleanup>() {
 
             @Override
@@ -145,6 +163,8 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
         registerService(CustomPortableFactory.class, new PortableStanzaDispatcherFactory());
         registerService(CustomPortableFactory.class, new PortableCleanupDispatcherFactory());
         registerService(CustomPortableFactory.class, new PortableCleanupStatusFactory());
+        registerService(CustomPortableFactory.class, new PortableIDToOXExceptionMapFactory());
+        registerService(CustomPortableFactory.class, new PortableIDToOXExceptionMapEntryFactory());
     }
 
     @Override

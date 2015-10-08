@@ -24,7 +24,9 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.metatype.*;
+import org.osgi.service.metatype.AttributeDefinition;
+import org.osgi.service.metatype.MetaTypeProvider;
+import org.osgi.service.metatype.ObjectClassDefinition;
 
 /**
  * The optional meta type provider for the event admin config.
@@ -38,19 +40,25 @@ public class MetaTypeProviderImpl
     private final int m_timeout;
     private final boolean m_requireTopic;
     private final String[] m_ignoreTimeout;
+    private final String[] m_ignoreTopic;
+    private final double m_asyncThreadPoolRatio;
 
     private final ManagedService m_delegatee;
 
     public MetaTypeProviderImpl(final ManagedService delegatee,
             final int threadPoolSize,
             final int timeout, final boolean requireTopic,
-            final String[] ignoreTimeout)
+            final String[] ignoreTimeout,
+            final String[] ignoreTopic,
+            final double asyncThreadPoolRatio)
     {
         m_threadPoolSize = threadPoolSize;
         m_timeout = timeout;
         m_requireTopic = requireTopic;
         m_delegatee = delegatee;
         m_ignoreTimeout = ignoreTimeout;
+        m_ignoreTopic = ignoreTopic;
+        m_asyncThreadPoolRatio = asyncThreadPoolRatio;
     }
 
     private ObjectClassDefinition ocd;
@@ -58,7 +66,8 @@ public class MetaTypeProviderImpl
     /**
      * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
      */
-    public void updated(Dictionary properties) throws ConfigurationException
+    @Override
+    public void updated(Dictionary<String, ?> properties) throws ConfigurationException
     {
         m_delegatee.updated(properties);
     }
@@ -66,6 +75,7 @@ public class MetaTypeProviderImpl
     /**
      * @see org.osgi.service.metatype.MetaTypeProvider#getLocales()
      */
+    @Override
     public String[] getLocales()
     {
         return null;
@@ -74,6 +84,7 @@ public class MetaTypeProviderImpl
     /**
      * @see org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang.String, java.lang.String)
      */
+    @Override
     public ObjectClassDefinition getObjectClassDefinition( String id, String locale )
     {
         if ( !Configuration.PID.equals( id ) )
@@ -83,14 +94,21 @@ public class MetaTypeProviderImpl
 
         if ( ocd == null )
         {
-            final ArrayList adList = new ArrayList();
+            final ArrayList<AttributeDefinition> adList = new ArrayList<AttributeDefinition>();
 
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_THREAD_POOL_SIZE, "Thread Pool Size",
-                "The size of the thread pool. The default value is 10. Increase in case of a large amount " +
-                "of synchronous events where the event handler services in turn send new synchronous events in " +
-                "the event dispatching thread or a lot of timeouts are to be expected. A value of " +
-                "less then 2 triggers the default value. A value of 2 effectively disables thread pooling.",
+                "The size of the thread pool used for event delivery. The default value is 20. " +
+                "Increase in case of a large amount of events. A value of " +
+                "less then 2 triggers the default value. If the pool is exhausted, event delivery " +
+                "is blocked until a thread becomes available from the pool. Each event is delivered " +
+                "in a thread from the pool unless the ignore timeouts is configured for the receiving event handler.",
                 m_threadPoolSize ) );
+            adList.add( new AttributeDefinitionImpl( Configuration.PROP_ASYNC_TO_SYNC_THREAD_RATIO, "Async/sync Thread Pool Ratio",
+                    "The ratio of asynchronous to synchronous threads in the internal thread" +
+                    " pool. Ratio must be positive and may be adjusted to represent the " +
+                    "distribution of post to send operations.  Applications with higher number " +
+                    "of post operations should have a higher ratio.",
+                    m_asyncThreadPoolRatio));
 
             adList.add( new AttributeDefinitionImpl( Configuration.PROP_TIMEOUT, "Timeout",
                     "The black-listing timeout in milliseconds. The default value is 5000. Increase or decrease " +
@@ -116,31 +134,44 @@ public class MetaTypeProviderImpl
                     "all handlers in this package and all subpackages are ignored. If the string neither " +
                     "ends with a dot nor with a star, this is assumed to define an exact class name.",
                     AttributeDefinition.STRING, m_ignoreTimeout, Integer.MAX_VALUE, null, null));
+            adList.add( new AttributeDefinitionImpl( Configuration.PROP_IGNORE_TOPIC, "Ignore Topics",
+                    "For performance optimization it is possible to configure topics which are ignored " +
+                    "by the event admin implementation. In this case, a event is not delivered to " +
+                    "registered event handlers. The value is a list of strings (separated by comma). " +
+                    "If a single value ends with a dot, all topics in exactly this package are ignored. " +
+                    "If a single value ends with a star, all topics in this package and all sub packages " +
+                    "are ignored. If a single value neither ends with a dot nor with a start, this is assumed " +
+                    "to define an exact topic. A single star can be used to disable delivery completely.",
+                    AttributeDefinition.STRING, m_ignoreTopic, Integer.MAX_VALUE, null, null));
             ocd = new ObjectClassDefinition()
             {
 
-                private final AttributeDefinition[] attrs = ( AttributeDefinition[] ) adList
+                private final AttributeDefinition[] attrs = adList
                     .toArray( new AttributeDefinition[adList.size()] );
 
 
+                @Override
                 public String getName()
                 {
                     return "Apache Felix Event Admin Implementation";
                 }
 
 
+                @Override
                 public InputStream getIcon( int arg0 )
                 {
                     return null;
                 }
 
 
+                @Override
                 public String getID()
                 {
                     return Configuration.PID;
                 }
 
 
+                @Override
                 public String getDescription()
                 {
                     return "Configuration for the Apache Felix Event Admin Implementation." +
@@ -148,6 +179,7 @@ public class MetaTypeProviderImpl
                 }
 
 
+                @Override
                 public AttributeDefinition[] getAttributeDefinitions( int filter )
                 {
                     return ( filter == OPTIONAL ) ? null : attrs;
@@ -183,6 +215,12 @@ public class MetaTypeProviderImpl
                 { String.valueOf(defaultValue) }, 0, null, null );
         }
 
+        AttributeDefinitionImpl( final String id, final String name, final String description, final double defaultValue )
+        {
+            this( id, name, description, DOUBLE, new String[]
+                { String.valueOf(defaultValue) }, 0, null, null );
+        }
+
         AttributeDefinitionImpl( final String id, final String name, final String description, final int type,
             final String[] defaultValues, final int cardinality, final String[] optionLabels,
             final String[] optionValues )
@@ -198,54 +236,63 @@ public class MetaTypeProviderImpl
         }
 
 
+        @Override
         public int getCardinality()
         {
             return cardinality;
         }
 
 
+        @Override
         public String[] getDefaultValue()
         {
             return defaultValues;
         }
 
 
+        @Override
         public String getDescription()
         {
             return description;
         }
 
 
+        @Override
         public String getID()
         {
             return id;
         }
 
 
+        @Override
         public String getName()
         {
             return name;
         }
 
 
+        @Override
         public String[] getOptionLabels()
         {
             return optionLabels;
         }
 
 
+        @Override
         public String[] getOptionValues()
         {
             return optionValues;
         }
 
 
+        @Override
         public int getType()
         {
             return type;
         }
 
 
+        @Override
         public String validate( String arg0 )
         {
             return null;

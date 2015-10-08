@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImplTest;
-import com.openexchange.mail.autoconfig.tools.MailValidatorTest;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParserTest;
 
 /**
@@ -64,8 +63,8 @@ import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParserTest;
  * @since 7.8.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ 
-    AutoconfigServiceImplTest.class, 
+@SuiteClasses({
+    AutoconfigServiceImplTest.class,
     AutoconfigParserTest.class
 })
 public class UnitTests {

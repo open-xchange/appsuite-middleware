@@ -60,10 +60,11 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link EasySSLSocketFactory}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
@@ -81,7 +82,7 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static EasySSLSocketFactory getInstance() {
@@ -147,15 +148,32 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
 
     @Override
     public Socket createLayeredSocket(Socket socket, String host, int port, HttpParams params) throws IOException, UnknownHostException {
-        final int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
-        final int soTimeout = HttpConnectionParams.getSoTimeout(params);
-        
-        final InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
-        
-        final SSLSocket sslsock = (SSLSocket) (socket != null ? socket : createSocket(params));
-        sslsock.connect(remoteAddress, connTimeout);
-        sslsock.setSoTimeout(soTimeout);
-        
-        return sslsock;
+        SSLSocket sslSocket = (SSLSocket) TrustAllSSLSocketFactory.getDefault().createSocket(socket, host, port, true);
+        if (!sslSocket.isConnected()) {
+            int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
+            InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
+            sslSocket.connect(remoteAddress, connTimeout);
+        }
+
+        int soTimeout = HttpConnectionParams.getSoTimeout(params);
+        sslSocket.setSoTimeout(soTimeout);
+
+        return sslSocket;
+
+        /*
+        Socket sock = socket != null ? socket : createSocket(params);
+        if (sock instanceof SSLSocket) {
+            final SSLSocket sslsock = (SSLSocket) sock;
+            sslsock.connect(remoteAddress, connTimeout);
+            sslsock.setSoTimeout(soTimeout);
+            sock = sslsock;
+        } else {
+            if (!sock.isConnected()) {
+                sock.connect(remoteAddress, connTimeout);
+                sock.setSoTimeout(soTimeout);
+            }
+        }
+        */
+
     }
 }

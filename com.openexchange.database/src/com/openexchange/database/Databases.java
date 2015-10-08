@@ -81,6 +81,34 @@ public final class Databases {
     }
 
     /**
+     * Closes the given instances.
+     *
+     * @param closeables The instances to close.
+     */
+    public static void closeSQLStuff(AutoCloseable... closeables) {
+        if (closeables != null) {
+            for (AutoCloseable closeable : closeables) {
+                closeSQLStuff(closeable);
+            }
+        }
+    }
+
+    /**
+     * Closes the instance.
+     *
+     * @param closeable <code>null</code> or a {@link AutoCloseable} to close.
+     */
+    public static void closeSQLStuff(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOG.error("", e);
+            }
+        }
+    }
+
+    /**
      * Closes the {@link ResultSet} instances.
      *
      * @param results The instances to close.

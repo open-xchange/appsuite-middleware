@@ -51,10 +51,8 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
@@ -101,8 +99,13 @@ public class FileMetadataParser implements FileMetadataParserService{
         	}
         	File.Field.inject(jsonHandler, file, purged);
         } catch (final RuntimeException x) {
-            if(x.getCause() != null && JSONException.class.isInstance(x.getCause())) {
-                throw AjaxExceptionCodes.JSON_ERROR.create( x.getCause().getMessage());
+            Throwable cause = x.getCause();
+            if(cause != null) {
+                if (OXException.class.isInstance(cause)) {
+                    throw (OXException) cause;
+                } else if (JSONException.class.isInstance(cause)) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(cause.getMessage());
+                }
             }
             throw x;
         }
@@ -135,44 +138,16 @@ public class FileMetadataParser implements FileMetadataParserService{
                 field.doSwitch(set, md, value);
             } catch (final JSONException x) {
                 throw new RuntimeException(x);
+            } catch (OXException x) {
+                throw new RuntimeException(x);
             }
 
 
             return md;
         }
 
-        private Object process(final Field field, final Object value) throws JSONException {
-            Object val = value;
-            if (val == JSONObject.NULL) {
-                val = null;
-            }
-            switch (field) {
-                case CATEGORIES: {
-                    if (String.class.isInstance(val)) {
-                        return val;
-                    }
-                    return categories((JSONArray) val);
-                }
-                case META:
-                    if (value == null || value == JSONObject.NULL) {
-                        return null;
-                    }
-                    return JSONCoercion.coerceToNative(value);
-                default:
-                    return val;
-            }
-        }
-
-        private Object categories(final JSONArray value) throws JSONException {
-            if (value.length() == 0) {
-                return "";
-            }
-            final StringBuilder b = new StringBuilder();
-            for (int i = 0, size = value.length(); i < size; i++) {
-                b.append(value.getString(i)).append(", ");
-            }
-            b.setLength(b.length() - 2);
-            return b.toString();
+        private Object process(final Field field, final Object value) throws JSONException, OXException {
+            return FileMetadataFieldParser.convert(field, value);
         }
     }
 

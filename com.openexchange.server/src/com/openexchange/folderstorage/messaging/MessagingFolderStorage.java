@@ -78,6 +78,7 @@ import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.folderstorage.messaging.contentType.SentContentType;
@@ -221,7 +222,12 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
+        throw new UnsupportedOperationException("MessagingFolderStorage.getVisibleSubfolders()");
+    }
+
+    @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("MessagingFolderStorage.getSharedFolders()");
     }
 
     private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws OXException {
@@ -604,9 +610,6 @@ public final class MessagingFolderStorage implements FolderStorage {
                 if ("com.openexchange.messaging.rss".equals(serviceId)) {
                     retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
                     hasSubfolders = false;
-                } else if ("com.openexchange.messaging.facebook".equals(serviceId)) {
-                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
-                    hasSubfolders = true;
                 } else if ("com.openexchange.messaging.twitter".equals(serviceId)) {
                     retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
                     hasSubfolders = false;
@@ -863,10 +866,17 @@ public final class MessagingFolderStorage implements FolderStorage {
         /*
          * Put map
          */
-        return parameters.putParameterIfAbsent(
+        boolean started = parameters.putParameterIfAbsent(
             MessagingFolderType.getInstance(),
             PARAM,
             new ConcurrentHashMap<Key, MessagingAccountAccess>());
+
+        if (started && TransactionManager.isManagedTransaction(parameters)) {
+            TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+            return false;
+        }
+
+        return started;
     }
 
     @Override

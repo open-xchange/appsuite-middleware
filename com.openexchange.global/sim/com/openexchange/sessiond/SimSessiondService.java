@@ -295,8 +295,7 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
-    public Collection<String> findSessions(SessionFilter filter) throws OXException {
+    public Collection<String> findSessions(SessionFilter filter) {
         return filterSessionIds(filter, false);
     }
-
 }

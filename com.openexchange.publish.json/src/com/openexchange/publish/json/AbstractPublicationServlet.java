@@ -82,10 +82,28 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
         return session.getUserPermissionBits().isPublication();
     }
 
-    protected void writeOXException(final OXException x, final HttpServletRequest req, final HttpServletResponse resp) {
-        x.log(getLog());
+    protected void writeOXException(final OXException e, final HttpServletRequest req, final HttpServletResponse resp) {
+        switch (e.getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                getLog().trace("", e);
+                break;
+            case DEBUG:
+                getLog().debug("", e);
+                break;
+            case INFO:
+                getLog().info("", e);
+                break;
+            case WARNING:
+                getLog().warn("", e);
+                break;
+            case ERROR:
+                getLog().error("", e);
+                break;
+            default:
+                break;
+        }
         final Response response = new Response(getSessionObject(req));
-        response.setException(x);
+        response.setException(e);
         writeResponseSafely(response, resp, getSessionObject(req));
     }
 

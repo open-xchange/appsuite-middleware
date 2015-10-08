@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Pair;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -142,5 +143,15 @@ public interface TemplateService {
      * @return The templating helper
      */
     TemplatingHelper createHelper(Object rootObject, Session session, boolean createCopy);
+    
+    /**
+     * Loads an image from the configured template path, encodes the image to base64 and returns a {@link Pair} consisting of 
+     * (contentType, base64Representation) of the image for use within data-urls in templates
+     * 
+     * @param imageName The name of the image within the templates path
+     * @return a {@link Pair} consisting of (contentType, base64Representation) of the image at footerImagePath
+     * @throws OXException if loading/encoding fails
+     */
+    public Pair<String, String> encodeTemplateImage(String imageName) throws OXException;
 
 }

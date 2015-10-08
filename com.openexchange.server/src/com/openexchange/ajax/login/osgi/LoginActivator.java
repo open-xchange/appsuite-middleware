@@ -63,13 +63,14 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.format.CompositeLoginFormatter;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.osgi.Tools;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tokenlogin.TokenLoginService;
@@ -95,10 +96,17 @@ public class LoginActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         class ServerServiceRegistryTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
+            private final Class<? extends S> clazz;
+
+            ServerServiceRegistryTracker(Class<? extends S> clazz) {
+                super();
+                this.clazz = clazz;
+            }
+
             @Override
             public S addingService(final ServiceReference<S> reference) {
                 final S service = context.getService(reference);
-                ServerServiceRegistry.getInstance().addService(service);
+                ServerServiceRegistry.getInstance().addService(clazz, service);
                 return service;
             }
 
@@ -110,11 +118,12 @@ public class LoginActivator extends HousekeepingActivator {
             @Override
             public void removedService(final ServiceReference<S> reference, final S service) {
                 context.ungetService(reference);
-                ServerServiceRegistry.getInstance().removeService(service.getClass());
+                ServerServiceRegistry.getInstance().removeService(clazz);
             }
         }
-        track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
-        track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
+        track(ShareService.class, new ServerServiceRegistryTracker<ShareService>(ShareService.class));
+        track(PasswordMechFactory.class, new ServerServiceRegistryTracker<PasswordMechFactory>(PasswordMechFactory.class));
+        track(ModuleSupport.class, new ServerServiceRegistryTracker<ModuleSupport>(ModuleSupport.class));
 
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
         track(LoginRampUpService.class, rampUp);
@@ -150,6 +159,6 @@ public class LoginActivator extends HousekeepingActivator {
         final String logoutFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.logout");
         LoginPerformer.setLoginFormatter(new CompositeLoginFormatter(loginFormat, logoutFormat));
 
-
+        com.openexchange.tools.servlet.http.Tools.setConfigurationService(configurationService);
     }
 }

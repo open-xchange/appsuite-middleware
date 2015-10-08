@@ -62,7 +62,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 public class Column {
 
     private static final ConcurrentTIntObjectHashMap<Column> FIELDS = new ConcurrentTIntObjectHashMap<Column>(24);
-    private static final ConcurrentMap<String, Column> HEADERS = new ConcurrentHashMap<String, Column>(32);
+    private static final ConcurrentMap<String, Column> HEADERS = new ConcurrentHashMap<String, Column>(32, 0.9f, 1);
 
     /**
      * Gets the column for given field.

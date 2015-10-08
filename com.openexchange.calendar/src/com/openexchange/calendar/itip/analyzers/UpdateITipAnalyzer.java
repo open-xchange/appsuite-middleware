@@ -122,6 +122,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             update = original;
         }
     	analysis.setUid(update.getUid());
+    	if (update.getAttachmentLink() != null) {
+    	    analysis.getAttributes().put("attach", update.getAttachmentLink());
+    	}
 
     	CalendarDataObject master = update;
         List<Appointment> exceptions = Collections.emptyList();
@@ -134,6 +137,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
+                change.setCurrentAppointment(original);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);
@@ -285,23 +291,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original.getParticipants() == null || original.getParticipants().length == 0) {
             return;
         }
-        
+
         List<Participant> newParticipants = new ArrayList<Participant>();
         for (Participant p : original.getParticipants()) {
             if (p.getType() == Participant.RESOURCE || p.getType() == Participant.RESOURCEGROUP) {
                 newParticipants.add(p);
             }
         }
-        
+
         if (newParticipants.isEmpty()) {
             return;
         }
-        
+
         if (update.getParticipants() == null || update.getParticipants().length == 0) {
             update.setParticipants(newParticipants);
             return;
         }
-        
+
         List<Participant> participants = Arrays.asList(update.getParticipants());
         for (Participant p : newParticipants) {
             if (!participants.contains(p)) {
@@ -320,22 +326,22 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         Calendar originalLastTouched = null;
-        if (original.containsLastModified()) {
+        if (original.containsLastModified() && original.getLastModified() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             originalLastTouched.setTime(original.getLastModified());
-        } else if (original.containsCreationDate()) {
+        } else if (original.containsCreationDate() && original.getCreationDate() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             originalLastTouched.setTime(original.getCreationDate());
         }
         Calendar updateLastTouched = null;
-        if (update.containsLastModified()) {
+        if (update.containsLastModified() && update.getLastModified() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getLastModified());
-        } else if (original.containsCreationDate()) {
+        } else if (update.containsCreationDate() && update.getCreationDate() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getCreationDate());
         }
-        
+
         if (originalLastTouched != null && updateLastTouched != null) {
             if (timeInMillisWithoutMillis(originalLastTouched) > timeInMillisWithoutMillis(updateLastTouched)) { //Remove millis, since ical accuracy is just of seconds.
                 return true;
@@ -343,7 +349,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         return false;
     }
-    
+
     private long timeInMillisWithoutMillis(Calendar cal) {
         return cal.getTimeInMillis() - cal.get(Calendar.MILLISECOND);
     }

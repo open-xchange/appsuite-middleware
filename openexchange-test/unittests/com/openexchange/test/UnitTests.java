@@ -106,7 +106,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
-        tests.addTestSuite(com.openexchange.groupware.infostore.InsertDocumentIntoDelTableActionTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.ValidationChainTest.class);
         tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);
@@ -130,6 +129,7 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBasicTests.class);
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBugTests.class);
+        tests.addTest(com.openexchange.data.conversion.ical.bugs.UnitTests.suite());
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);
         tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.importexport.importers.Bug12380RecoveryParserTest.class);
@@ -175,6 +175,9 @@ public class UnitTests {
 
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
+
+        //Share tests
+        tests.addTest(com.openexchange.share.ShareTestSuite.suite());
 
         //User tests
         tests.addTest(com.openexchange.user.UserTestSuite.suite());

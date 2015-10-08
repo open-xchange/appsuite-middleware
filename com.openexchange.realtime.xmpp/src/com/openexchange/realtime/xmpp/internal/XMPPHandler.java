@@ -55,9 +55,7 @@ import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.xmpp.XMPPExtension;
-import com.openexchange.realtime.xmpp.packet.XMPPMessage;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPHandler}

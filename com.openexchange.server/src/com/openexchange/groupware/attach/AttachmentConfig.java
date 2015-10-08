@@ -56,6 +56,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -121,11 +122,17 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     public static long getMaxUploadSize() {
 		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
-		if (null == sizeS) {
+        if (Strings.isEmpty(sizeS)) {
 			return sysconfMaxUpload();
 		}
-		final long size = Long.parseLong(sizeS);
-		if (-1 == size) {
+        long size;
+        try {
+            size = Long.parseLong(sizeS.trim());
+        } catch (final NumberFormatException e) {
+            LOG.warn("{} is not a number: {}. Fall-back to system upload limitation.", AttachmentProperty.MAX_UPLOAD_SIZE.name(), sizeS);
+            size = -1;
+        }
+        if (size < 0) {
 			return sysconfMaxUpload();
 		}
 		return size;

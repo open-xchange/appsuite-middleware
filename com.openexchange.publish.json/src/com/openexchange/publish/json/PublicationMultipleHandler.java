@@ -93,12 +93,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private static final String PROPERTY_USE_OTHER_SUBDOMAIN = "com.openexchange.publish.subdomain";
 
     private final PublicationTargetDiscoveryService discovery;
-
     private final Map<String, EntityType> entities;
-
     private final ConfigurationService config;
 
     public PublicationMultipleHandler(final PublicationTargetDiscoveryService discovery, final Map<String, EntityType> entities, final ConfigurationService config) {
+        super();
         this.discovery = discovery;
         this.entities = entities;
         this.config = config;
@@ -132,8 +131,14 @@ public class PublicationMultipleHandler implements MultipleHandler {
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");
             } else if (action.equals("new")) {
+                if (!config.getBoolProperty("com.openexchange.publish.createModifyEnabled", false)) {
+                    throw PublicationJSONErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
+                }
                 return createPublication(request, session);
             } else if (action.equals("update")) {
+                if (!config.getBoolProperty("com.openexchange.publish.createModifyEnabled", false)) {
+                    throw PublicationJSONErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
+                }
                 return updatePublication(request, session);
             } else if (action.equals("delete")) {
                 return deletePublication(request, session);

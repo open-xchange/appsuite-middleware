@@ -80,4 +80,7 @@ public interface FileFieldSwitcher {
     Object lastModifiedUtc(Object...args);
     Object numberOfVersions(Object...args);
     Object meta(Object...args);
+    Object objectPermissions(Object...args);
+    Object shareable(Object...args);
+
 }

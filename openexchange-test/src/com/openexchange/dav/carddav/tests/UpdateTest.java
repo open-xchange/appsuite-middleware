@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -65,10 +67,11 @@ import com.openexchange.groupware.container.Contact;
  */
 public class UpdateTest extends CardDAVTest {
 
-	public UpdateTest(String name) {
-		super(name);
+	public UpdateTest() {
+		super();
 	}
 
+	@Test
 	public void testUpdateSimpleOnClient() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -143,6 +146,7 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
 
+	@Test
 	public void testUpdateSimpleOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -191,6 +195,7 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
 
+	@Test
 	public void testUpdateWithQuotedETag() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -265,6 +270,7 @@ public class UpdateTest extends CardDAVTest {
         assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
 
+	@Test
 	public void testUpdateWithDifferentFilename() throws Exception {
 		/*
 		 * fetch sync token for later synchronization

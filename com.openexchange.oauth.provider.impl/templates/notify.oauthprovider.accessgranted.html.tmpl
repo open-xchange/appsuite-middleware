@@ -1,0 +1,19 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+</head>
+<body class="content">
+  <#escape x as x?html>
+    <p>${salutation}</p>
+    <p>${appConnected}</p>
+    <p>${revokeAccess}</p>
+    <#-- view item_type button -->
+    <p><@styledButton link="${settingsURL}">${gotoSettings}</@styledButton></p>
+  </#escape>
+
+  <#include "notify.common.footer.html.tmpl">
+</body>
+</html>

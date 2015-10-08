@@ -96,7 +96,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
      */
     public OSGIFileStorageAccountManagerLookupService() {
         super();
-        providers = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(8);
+        providers = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(8, 0.9f, 1);
     }
 
     /**

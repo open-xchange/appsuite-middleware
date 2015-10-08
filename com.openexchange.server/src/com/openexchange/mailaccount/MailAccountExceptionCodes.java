@@ -69,7 +69,7 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
      */
-    NOT_FOUND(MailAccountExceptionCodes.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 2, MailAccountExceptionStrings.NOT_FOUND_MSG_DISPLAY),
+    NOT_FOUND(MailAccountExceptionCodes.NOT_FOUND_MSG, CATEGORY_ERROR, 2, MailAccountExceptionStrings.NOT_FOUND_MSG_DISPLAY),
     /**
      * Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
      */

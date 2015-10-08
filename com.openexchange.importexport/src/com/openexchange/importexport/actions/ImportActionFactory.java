@@ -50,18 +50,15 @@ package com.openexchange.importexport.actions;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.importexport.actions.importer.CSVImportAction;
-import com.openexchange.importexport.actions.importer.FacebookArchiveImportAction;
-import com.openexchange.importexport.actions.importer.FacebookFriendsImportAction;
 import com.openexchange.importexport.actions.importer.ICalImportAction;
 import com.openexchange.importexport.actions.importer.VCardImportAction;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.ServiceLookup;
 
 public class ImportActionFactory extends AbstractIEActionFactory{
- 
+
    /**
      * Initializes a new {@link ImportActionFactory}.
      * @param services
@@ -77,9 +74,6 @@ public class ImportActionFactory extends AbstractIEActionFactory{
     		put(Format.OUTLOOK_CSV, new CSVImportAction(services));
     		put(Format.VCARD, new VCardImportAction(services));
     		put(Format.ICAL, new ICalImportAction(services));
-
-    		put(Format.FacebookArchive, new FacebookArchiveImportAction(services));
-    		put(Format.FacebookFriends, new FacebookFriendsImportAction(services));
     	}};
     }
 

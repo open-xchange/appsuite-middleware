@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class IDNA {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IDNA.class);
+
     /**
      * No Initialization.
      */
@@ -121,16 +123,22 @@ public final class IDNA {
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
      */
-    public static String toIDN(final String aceAddress) {
+    public static String toIDN(String aceAddress) {
         if (null == aceAddress) {
             return null;
         }
-        final int pos = aceAddress.indexOf('@');
+        int pos = aceAddress.indexOf('@');
         if (pos < 0 || aceAddress.indexOf(ACE_PREFIX) < 0) {
             return aceAddress;
         }
-        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
-            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
+        try {
+            String unicode = gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true);
+            return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(unicode).toString();
+        } catch (RuntimeException e) {
+            // Decoding punycode failed
+            LOGGER.error("Failed to decode puny-code address: {}", aceAddress, e);
+            return aceAddress;
+        }
     }
 
     private static final String SCHEME_DELIM = "://";

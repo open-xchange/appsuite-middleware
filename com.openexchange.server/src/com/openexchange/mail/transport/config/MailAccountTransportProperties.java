@@ -62,6 +62,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountTransportProperties.class);
 
+    protected Boolean enforceSecureConnection;
     protected final Map<String, String> properties;
 
     /**
@@ -91,6 +92,26 @@ public class MailAccountTransportProperties implements ITransportProperties {
             LOG.error("Referenced Part Limit: Invalid value.", e);
             return TransportProperties.getInstance().getReferencedPartLimit();
         }
+    }
+
+    @Override
+    public boolean isEnforceSecureConnection() {
+        Boolean b = this.enforceSecureConnection;
+        if (null != b) {
+            return b.booleanValue();
+        }
+
+        String tmp = properties.get("com.openexchange.mail.enforceSecureConnection");
+        if (null == tmp) {
+            return TransportProperties.getInstance().isEnforceSecureConnection();
+        }
+
+        return Boolean.parseBoolean(tmp.trim());
+    }
+
+    @Override
+    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
+        this.enforceSecureConnection = Boolean.valueOf(enforceSecureConnection);
     }
 
 }

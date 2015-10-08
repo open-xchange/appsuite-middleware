@@ -51,6 +51,7 @@ package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.CalDAVServiceLookup;
+import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -58,6 +59,7 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -73,13 +75,17 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
@@ -126,10 +132,16 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override
-                public PropertyMixin create(final SessionHolder sessionHolder) {
+                public PropertyMixin create(SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
+            });
+            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
+                @Override
+                public PropertyMixin create(SessionHolder sessionHolder) {
+                    return new CurrentUserPrincipal(sessionHolder);
+                }
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
@@ -200,6 +212,13 @@ public class CaldavActivator extends HousekeepingActivator {
                 @Override
                 public String toString() {
                     return "modules/caldav/url > io.ox/caldav//url";
+                }
+            });
+
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CALENDAR) {
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CALDAV.getCapabilityName());
                 }
             });
 

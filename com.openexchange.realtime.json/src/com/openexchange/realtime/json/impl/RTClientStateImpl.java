@@ -56,13 +56,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.realtime.json.actions.SendAction;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.Duration;
+import com.openexchange.realtime.util.OwnerAwareReentrantLock;
 
 
 /**
@@ -80,7 +80,7 @@ public class RTClientStateImpl implements RTClientState {
     private final Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
     private final List<Stanza> nonsequenceStanzas = new ArrayList<Stanza>();
 
-    private final Lock lock = new ReentrantLock();
+    private final OwnerAwareReentrantLock lock = new OwnerAwareReentrantLock();
     private long lastSeen;
     private long sequenceNumber = 0;
 
@@ -91,8 +91,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public void acknowledgementReceived(long sequenceNumber) {
+        lock();
         try {
-            lock();
             resendBuffer.remove(sequenceNumber);
         } finally {
             unlock();
@@ -102,8 +102,8 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void enqueue(Stanza stanza) {
         if (stanza.getSequenceNumber() != -1) {
+            lock();
             try {
-                lock();
                 stanza.setSequenceNumber(sequenceNumber);
                 stanza.trace("RTClientState recasting stanza to sequence number "+ sequenceNumber + " for delivery");
                 sequenceNumber++;
@@ -128,8 +128,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public List<Stanza> getStanzasToSend() {
+        lock();
         try {
-            lock();
             List<Stanza> list = new ArrayList<Stanza>(resendBuffer.size() + nonsequenceStanzas.size());
             for(EnqueuedStanza es: resendBuffer.values()) {
                 list.add(es.stanza);
@@ -153,8 +153,8 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public void purge() {
+        lock();
         try {
-            lock();
             for (Stanza s : nonsequenceStanzas) {
                 s.trace("Stanza could not be delivered");
             }
@@ -177,8 +177,8 @@ public class RTClientStateImpl implements RTClientState {
     @Override
     public void reset() {
         LOG.debug("Removing all sequenced and unsequenced Stanzas.");
+        lock();
         try {
-            lock();
             nonsequenceStanzas.clear();
             resendBuffer.clear();
         } finally {
@@ -192,8 +192,39 @@ public class RTClientStateImpl implements RTClientState {
     }
 
     @Override
+    public Thread getOwner() {
+        return lock.getOwner();
+    }
+
+    @Override
+    public boolean tryLock(long timeout, TimeUnit unit) throws InterruptedException {
+        return lock.tryLock(timeout, unit);
+    }
+
+    @Override
     public void lock() {
         lock.lock();
+
+//        boolean lockAcquired = false;
+//        long waitedSeconds = 0L;
+//        while (!lockAcquired) {
+//            try {
+//                lockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
+//            } catch (InterruptedException x) {
+//                Thread.currentThread().interrupt();
+//                return;
+//            }
+//
+//            if (!lockAcquired) {
+//                Thread owner = lock.getOwner();
+//                if (null != owner) {
+//                    waitedSeconds += 5;
+//                    FastThrowable t = new FastThrowable("Trace from thread " + owner.getName());
+//                    t.setStackTrace(owner.getStackTrace());
+//                    LOG.warn("Thread {} failed to get lock for client state {} after {}sec. Lock still acquired by thread {}:", Thread.currentThread().getName(), id, waitedSeconds, owner.getName(), t);
+//                }
+//            }
+//        }
     }
 
     @Override

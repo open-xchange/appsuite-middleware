@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -426,9 +427,6 @@ public final class InternalList {
         // Creates new Contact fields (First Name); Last Name); Company) for Kana based search in japanese environments.
         list.add(new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch());
 
-        // Remove facebook subscriptions to force use of new oauth
-        list.add(new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask());
-
         // Remove linkedin subscriptions to force use of new oauth
         list.add(new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask());
 
@@ -753,17 +751,45 @@ public final class InternalList {
         // Adds the 'full_time' column to the tasks tables
         list.add(new com.openexchange.groupware.update.tasks.TasksAddFulltimeColumnTask());
 
-        // +++++++++++++++++++++++++++++++++ Version 7.6.2 starts here. +++++++++++++++++++++++++++++++++
-
         // Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
         list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
 
-        // Delete remnants for removed Facebook subscription
-        list.add(new com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask());
+        // +++++++++++++++++++++++++++++++++ Version 7.8.0 starts here. +++++++++++++++++++++++++++++++++
 
-        //Add primary key to dlist tables
+        // Adds permissions to system- and root-folders for the virtual guest group.
+        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionAddGuestGroup());
+
+        // Adds the column 'guestCreatedBy' to the tables 'user' and 'del_user'
+        list.add(new com.openexchange.groupware.update.tasks.UserAddGuestCreatedByTask());
+
+        // Create table for object permissions
+        list.add(new com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask());
+
+        // Extends "user" table by the (`cid`, `guestCreatedBy`) index
+        list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
+
+        // Drop redundant indices
+        list.add(new DropRendundantIndicesUpdateTask());
+
+        // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
+        list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
+
+        // Grants "read all" permissions for the user infostore folder
+        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore());
+
+        // Add vCardId column if missing
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdTask());
+
+        // Add vCardId column for del table if missing
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdToDelTask());
+
+        // Remove accounts related to facebook
+        list.add(new com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask());
+
+        // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
+
 }

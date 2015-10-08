@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -123,9 +124,9 @@ public class ContactMergerator implements SearchIterator<Contact>{
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         for (final SearchIterator<Contact> iter : delegates) {
-            iter.close();
+            SearchIterators.close(iter);
         }
     }
 

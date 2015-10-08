@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.SyncToken;
 import com.openexchange.caldav.query.Filter;
@@ -83,7 +84,7 @@ public class ScheduleInboxCollection extends CommonCollection implements Filteri
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory));
     }
 
     @Override

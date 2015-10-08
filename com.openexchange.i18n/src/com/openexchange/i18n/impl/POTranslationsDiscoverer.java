@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -103,7 +104,9 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                     final File poFile = new File(directory, file);
                     input = new BufferedInputStream(new FileInputStream(poFile), 65536);
                     // POParser remembers headers of PO file. Therefore a new one is needed for every file.
+                    long start = System.currentTimeMillis();
                     final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
+                    LOG.trace("Parsing translations for locale {} took {}ms.", l, L(System.currentTimeMillis() - start));
                     translations.setLocale(l);
                     list.add(translations);
                     LOG.info("Parsed .po file \"{}\" for locale: {}", file, l);

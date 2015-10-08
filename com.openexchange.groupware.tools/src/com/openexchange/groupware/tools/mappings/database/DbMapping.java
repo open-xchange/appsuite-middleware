@@ -73,14 +73,21 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
 	 * @return the value
 	 * @throws SQLException
 	 */
-	T get(ResultSet resultSet) throws SQLException;
+	T get(ResultSet resultSet, String columnLabel) throws SQLException;
 
-	/**
-	 * Gets the column label of the mapped property.
-	 *
-	 * @return the column label
-	 */
-	String getColumnLabel();
+    /**
+     * Gets the column label of the mapped property.
+     *
+     * @return the column label
+     */
+    String getColumnLabel();
+
+    /**
+     * Gets the column label of the mapped property, prefixed with the supplied value.
+     *
+     * @return the prefixed column label
+     */
+    String getColumnLabel(String prefix);
 
 	/**
 	 * Gets the readable name of the mapped property.
@@ -107,14 +114,26 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
 	 */
 	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
 
-	/**
-	 * Sets the value of the mapped property in an object.
-	 *
-	 * @param resultSet the result set to read out the value from
-	 * @param object the object to set the value
-	 * @throws SQLException
-	 * @throws OXException
-	 */
-	void set(ResultSet resultSet, O object) throws SQLException, OXException;
+    /**
+     * Sets the value of the mapped property in an object.
+     *
+     * @param resultSet the result set to read out the value from
+     * @param object the object to set the value
+     * @throws SQLException
+     * @throws OXException
+     */
+    void set(ResultSet resultSet, O object) throws SQLException, OXException;
+
+    /**
+     * Sets the value of the mapped property in an object.
+     *
+     * @param resultSet the result set to read out the value from
+     * @param object the object to set the value
+     * @param columnLabel the label for the column specified with the SQL AS clause, or, if the SQL AS clause was not specified, the
+     *                    label of the column name
+     * @throws SQLException
+     * @throws OXException
+     */
+    void set(ResultSet resultSet, O object, String columnLabel) throws SQLException, OXException;
 
 }

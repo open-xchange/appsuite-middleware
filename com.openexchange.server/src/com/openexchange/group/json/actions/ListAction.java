@@ -50,13 +50,14 @@
 package com.openexchange.group.json.actions;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -88,24 +89,26 @@ public final class ListAction extends AbstractGroupAction {
 
     @Override
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        final JSONArray jsonArray = req.getData();
+        JSONArray jBody = req.getData();
         Date timestamp = new Date(0);
         Date lastModified = null;
-        final JSONArray jsonResponseArray = new JSONArray();
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        final GroupWriter groupWriter = new GroupWriter();
-        for (int a = 0; a < jsonArray.length(); a++) {
-            final JSONObject jData = jsonArray.getJSONObject(a);
-            final Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), req.getSession().getContext());
-            final JSONObject jsonGroupObj = new JSONObject();
-            groupWriter.writeGroup(group, jsonGroupObj);
-            jsonResponseArray.put(jsonGroupObj);
+
+        List<Group> groupList = new LinkedList<Group>();
+        GroupStorage groupStorage = GroupStorage.getInstance();
+
+        int length = jBody.length();
+        for (int a = 0; a < length; a++) {
+            JSONObject jData = jBody.getJSONObject(a);
+
+            Group group = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID), req.getSession().getContext());
+            groupList.add(group);
+
             lastModified = group.getLastModified();
-            if (timestamp.getTime() < lastModified.getTime()) {
+            if (null != lastModified && timestamp.getTime() < lastModified.getTime()) {
                 timestamp = lastModified;
             }
         }
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        return new AJAXRequestResult(groupList, timestamp, "group");
     }
 
 }

@@ -55,9 +55,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import com.openexchange.java.Streams;
 
 /**
@@ -116,6 +119,17 @@ public final class Collections {
             retval[i] = iter.next().intValue();
         }
         return retval;
+    }
+
+    /**
+     * Creates a set containing the supplied elements, and returns an unmodifiable view to this set.
+     * 
+     * @param elements The elements to include in the unmodifiable set
+     * @return The unmodifiable set
+     */
+    @SafeVarargs
+    public static <T> Set<T> unmodifiableSet(T...elements) {
+        return null == elements ? null : java.util.Collections.unmodifiableSet(new HashSet<T>(Arrays.asList(elements)));        
     }
 
     /**

@@ -51,8 +51,6 @@ package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.tools.encoding.Base64;
-
-
 /**
  * {@link HttpAuthRequest}
  *
@@ -99,6 +97,6 @@ public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
 
     @Override
     public HttpAuthParser getParser() {
-        return new HttpAuthParser();
+        return new HttpAuthParser(true, true, true);
     }
 }

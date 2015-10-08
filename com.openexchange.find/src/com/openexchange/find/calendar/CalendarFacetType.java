@@ -89,7 +89,7 @@ public enum CalendarFacetType implements FacetType {
     /**
      * The "date" facet
      */
-    RELATIVE_DATE("date", CalendarStrings.FACET_TYPE_RELATIVE_DATE),
+    RELATIVE_DATE("relative_date", CalendarStrings.FACET_TYPE_RELATIVE_DATE),
     /**
      * The "recurring type" facet
      */

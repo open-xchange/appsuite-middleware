@@ -49,17 +49,14 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -71,15 +68,10 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.server.services.SessionInspector;
 import com.openexchange.session.Reply;
@@ -89,6 +81,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -101,168 +94,146 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoLogin.class);
 
     private final LoginConfiguration conf;
+    private final ShareLoginConfiguration shareConf;
 
     /**
      * Initializes a new {@link AutoLogin}.
      *
+     * @param conf A reference to the login configuration
+     * @param shareConf A reference to the share login configuration
      */
-    public AutoLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+    public AutoLogin(LoginConfiguration conf, ShareLoginConfiguration shareConf, Set<LoginRampUpService> rampUp) {
         super(rampUp);
         this.conf = conf;
+        this.shareConf = shareConf;
     }
 
     @Override
     public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-        final Response response = new Response();
+        Response response = new Response();
         Session session = null;
         try {
-            if (!conf.isSessiondAutoLogin()) {
-                // Auto-login disabled per configuration.
-                // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                if (doAutoLogin(req, resp)) {
-                    if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
-                        return;
+            /*
+             * try guest auto-login first
+             */
+            LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
+            if (null == loginResult) {
+                if (false == conf.isSessiondAutoLogin()) {
+                    // Auto-login disabled per configuration.
+                    // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                            return;
+                        }
+                        throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                     }
-                    throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
+                    return;
                 }
-                return;
-            }
-
-            Cookie[] cookies = req.getCookies();
-            if (cookies == null) {
-                cookies = new Cookie[0];
-            }
-
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null == sessiondService) {
-                final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                LOG.error("", se);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-            String secret = null;
-            final String hash = HashCalculator.getInstance().getHash(req);
-            final String sessionCookieName = LoginServlet.SESSION_PREFIX + hash;
-            final String secretCookieName = LoginServlet.SECRET_PREFIX + hash;
-
-            NextCookie: for (final Cookie cookie : cookies) {
-                final String cookieName = cookie.getName();
-                if (cookieName.startsWith(sessionCookieName)) {
-                    final String sessionId = cookie.getValue();
-                    session = sessiondService.getSession(sessionId);
-                    if (null != session) {
-                        // IP check if enabled; otherwise update session's IP address if different to request's IP address
-                        // Insecure check is done in updateIPAddress method.
-                        if (!conf.isIpCheck()) {
-                            // Update IP address if necessary
-                            updateIPAddress(conf, req.getRemoteAddr(), session);
-                        } else {
-                            final String newIP = req.getRemoteAddr();
-                            SessionUtility.checkIP(true, conf.getRanges(), session, newIP, conf.getIpCheckWhitelist());
-                            // IP check passed: update IP address if necessary
-                            updateIPAddress(conf, newIP, session);
-                        }
-                        try {
-                            final Context ctx = ContextStorage.getInstance().getContext(session.getContextId());
-                            if (!ctx.isEnabled()) {
-                                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                            }
-                            final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-                            if (!user.isMailEnabled()) {
-                                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                            }
-                        } catch (final UndeclaredThrowableException e) {
-                            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                        }
-
-                        // Trigger client-specific ramp-up
-                        Future<JSONObject> optRampUp = rampUpAsync(ServerSessionAdapter.valueOf(session), req);
-
-                        // Request modules
-                        Future<Object> optModules = getModulesAsync(session, req);
-
-                        // Create JSON object
-                        final JSONObject json = new JSONObject(8);
-                        LoginWriter.write(session, json);
-
-                        if (null != optModules) {
-                            // Append "config/modules"
-                            try {
-                                final Object oModules = optModules.get();
-                                if (null != oModules) {
-                                    json.put("modules", oModules);
-                                }
-                            } catch (final InterruptedException e) {
-                                // Keep interrupted state
-                                Thread.currentThread().interrupt();
-                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                            } catch (final ExecutionException e) {
-                                // Cannot occur
-                                final Throwable cause = e.getCause();
-                                LOG.warn("Modules could not be added to login JSON response", cause);
-                            }
-                        }
-
-                        // Await client-specific ramp-up and add to JSON object
-                        if (null != optRampUp) {
-                            try {
-                                JSONObject jsonObject = optRampUp.get();
-                                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                                    json.put(entry.getKey(), entry.getValue());
-                                }
-                            } catch (InterruptedException e) {
-                                // Keep interrupted state
-                                Thread.currentThread().interrupt();
-                                throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
-                            } catch (ExecutionException e) {
-                                // Cannot occur
-                                final Throwable cause = e.getCause();
-                                LOG.warn("Ramp-up information could not be added to login JSON response", cause);
-                            }
-                        }
-
-                        // Set data
-                        response.setData(json);
-
-                        // Secret already found?
-                        if (null != secret) {
-                            break NextCookie;
-                        }
-                    }
-                } else if (cookieName.startsWith(secretCookieName)) {
-                    secret = cookie.getValue();
+                /*
+                 * try auto-login for regular user
+                 */
+                String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
+                loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
+                if (null == loginResult) {
                     /*
-                     * Session already found?
+                     * auto-login failed
                      */
-                    if (null != session) {
-                        break NextCookie;
+                    SessionUtility.removeOXCookies(hash, req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
+                            return;
+                        }
+                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
                     }
+                    return;
                 }
             }
-            if (null == response.getData() || session == null || secret == null || !(session.getSecret().equals(secret))) {
-                SessionUtility.removeOXCookies(hash, req, resp);
-                SessionUtility.removeJSESSIONID(req, resp);
-                if (doAutoLogin(req, resp)) {
-                    if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
-                        return;
+            /*
+             * auto-login successful, prepare result
+             */
+            ServerSession serverSession = ServerSessionAdapter.valueOf(loginResult.getSession(), loginResult.getContext(), loginResult.getUser());
+            session = serverSession;
+
+            // Trigger client-specific ramp-up
+            Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
+
+            // Request modules
+            Future<Object> optModules = getModulesAsync(session, req);
+
+            // Create JSON object
+            final JSONObject json = new JSONObject(8);
+            LoginWriter.write(session, json);
+
+            // Append "config/modules"
+            if (null != optModules) {
+                try {
+                    final Object oModules = optModules.get();
+                    if (null != oModules) {
+                        json.put("modules", oModules);
                     }
-                    throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                } catch (final InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (final ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Modules could not be added to login JSON response", cause);
                 }
-                return;
             }
+
+            // Await client-specific ramp-up and add to JSON object
+            if (null != optRampUp) {
+                try {
+                    JSONObject jsonObject = optRampUp.get();
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        json.put(entry.getKey(), entry.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    // Keep interrupted state
+                    Thread.currentThread().interrupt();
+                    throw LoginExceptionCodes.UNKNOWN.create(e, "Thread interrupted.");
+                } catch (ExecutionException e) {
+                    // Cannot occur
+                    final Throwable cause = e.getCause();
+                    LOG.warn("Ramp-up information could not be added to login JSON response", cause);
+                }
+            }
+
+            // Set data
+            response.setData(json);
 
             /*-
              * Ensure appropriate public-session-cookie is set
              */
-            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), conf);
+            LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                 LOG.debug("", e);
             } else {
-                e.log(LOG);
+                switch (e.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", e);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", e);
+                        break;
+                    case INFO:
+                        LOG.info("", e);
+                        break;
+                    case WARNING:
+                        LOG.warn("", e);
+                        break;
+                    case ERROR:
+                        LOG.error("", e);
+                        break;
+                    default:
+                        break;
+                }
             }
             if (SessionUtility.isIpCheckError(e) && null != session) {
                 try {
@@ -298,7 +269,11 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     }
 
     /**
-     * @return a boolean value indicated if an auto login should proceed afterwards
+     * Performs a login while providing the auto-login {@link LoginClosure closure}.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @return <code>true</code> if an auto login should proceed afterwards; otherwise <code>false</code>
      */
     private boolean doAutoLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
         return loginOperation(req, resp, new LoginClosure() {
@@ -311,7 +286,14 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         }, conf);
     }
 
-    private LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
+    /**
+     * Parses the given HTTP request into an appropriate {@link LoginRequest} instance.
+     *
+     * @param req The HTTP request to parse
+     * @return The resulting {@link LoginRequest} instance
+     * @throws OXException If parse operation fails
+     */
+    LoginRequest parseAutoLoginRequest(final HttpServletRequest req) throws OXException {
         final String authId = LoginTools.parseAuthId(req, false);
         final String client = LoginTools.parseClient(req, false, conf.getDefaultClient());
         final String clientIP = LoginTools.parseClientIP(req);
@@ -319,22 +301,13 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         final Map<String, List<String>> headers = copyHeaders(req);
         final com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
         final String httpSessionId = req.getSession(true).getId();
-        return new LoginRequestImpl(
-            null,
-            null,
-            clientIP,
-            userAgent,
-            authId,
-            client,
-            null,
-            HashCalculator.getInstance().getHash(req, client),
-            HTTP_JSON,
-            headers,
-            cookies,
-            Tools.considerSecure(req, conf.isCookieForceHTTPS()),
-            req.getServerName(),
-            req.getServerPort(),
-            httpSessionId);
+
+        LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(null).password(null).clientIP(clientIP);
+        b.userAgent(userAgent).authId(authId).client(client).version(null);
+        b.hash(HashCalculator.getInstance().getHash(req, client));
+        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        return b.build();
     }
 
 }

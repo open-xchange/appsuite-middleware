@@ -66,8 +66,8 @@ public abstract class BigIntMapping<O> extends DefaultDbMapping<Long, O> {
 	}
 
 	@Override
-	public Long get(final ResultSet resultSet) throws SQLException {
-		return resultSet.getLong(this.getColumnLabel());
+	public Long get(final ResultSet resultSet, String columnLabel) throws SQLException {
+		return resultSet.getLong(columnLabel);
 	}
 
 }

@@ -1,3 +1,7 @@
+* 2011-03-01 - choeger@open-xchange.com
+
+ - SCR #2523: password change url for ucs authentication
+
 * 2011-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.

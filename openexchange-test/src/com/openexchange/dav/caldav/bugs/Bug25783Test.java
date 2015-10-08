@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -63,10 +65,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug25783Test extends CalDAVTest {
 
-	public Bug25783Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testPreserveWhitespaceAtFoldingBoundary() throws Exception {
 		/*
 		 * create appointment

@@ -52,6 +52,7 @@ package com.openexchange.mailfilter.exceptions;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
+import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.MAILFILTER_NOT_AVAILABLE_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.REJECTED_REDIRECT_ADDRESS_MSG;
 import java.util.regex.Pattern;
 import org.apache.jsieve.SieveException;
@@ -189,7 +190,11 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Invalid credentials
      */
-    INVALID_FILTER_TYPE_FLAG("Invalid filter type flag: %1$s", CATEGORY_ERROR, 26)
+    INVALID_FILTER_TYPE_FLAG("Invalid filter type flag: %1$s", CATEGORY_ERROR, 26),
+    /**
+     * Mailfilter not available for user %1$d in context %1$d.
+     */
+    MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %1$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
     ;
 
     private final String message;
@@ -202,7 +207,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link MailFilterExceptionCode}.
-     * 
+     *
      * @param message The (technical) error message
      * @param category The category
      * @param detailNumber The detail number
@@ -213,7 +218,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link MailFilterExceptionCode} containing a display message for the user.
-     * 
+     *
      * @param message The (technical) error message
      * @param displayMessage The display message for the enduser
      * @param category The category
@@ -258,7 +263,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -267,7 +272,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -277,7 +282,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
@@ -289,7 +294,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions. This method analyses an exception message and throws a more
      * detailed one if possible.
-     * 
+     *
      * @param e the OXSieveHandlerException
      * @param credentials the user credentials
      * @param useSIEVEResponseCodes flag to communicate the condition of whether or not to use the sieve response codes
@@ -345,7 +350,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Sanitize message
-     * 
+     *
      * @param message
      * @return
      */
@@ -359,7 +364,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Match the SieveResponse to an OXCategory
-     * 
+     *
      * @param code
      * @return
      */
@@ -387,7 +392,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Handle a SieveException
-     * 
+     *
      * @param e the SieveException
      * @return an OXException
      */
@@ -395,7 +400,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
         final String msg = e.getMessage();
         return MailFilterExceptionCode.SIEVE_ERROR.create(e, msg);
     }
-    
+
     public static String getNANString(final NumberFormatException nfe) {
         final String msg = nfe.getMessage();
         if (msg != null && msg.startsWith("For input string: \"")) {

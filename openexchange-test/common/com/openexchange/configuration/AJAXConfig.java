@@ -162,6 +162,11 @@ public class AJAXConfig extends AbstractConfig {
         USER_PARTICIPANT2("user_participant2"),
         USER_PARTICIPANT3("user_participant3"),
         /**
+         * OXADMINMASTER
+         */
+        OX_ADMIN_MASTER("oxadminmaster"),
+        OX_ADMIN_MASTER_PWD("oxadminmaster_password"),
+        /**
          * Resource Participants
          */
         RESOURCE_PARTICIPANT1("resource_participant1"),

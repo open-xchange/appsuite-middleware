@@ -58,56 +58,40 @@ import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
- * @author Benjamin Otterbach
+ * The activator for <i>com.openexchange.audit</i> bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AuditActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuditActivator.class);
-
+    /**
+     * Initializes a new {@link AuditActivator}.
+     */
     public AuditActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
+        return new Class<?>[] { UserService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            Services.setServiceLookup(this);
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
-            registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+        Services.setServiceLookup(this);
 
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
+        registerService(EventHandler.class, new AuditEventHandler(getService(UserService.class)), serviceProperties);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            Services.setServiceLookup(null);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
 }

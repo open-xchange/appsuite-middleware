@@ -19,7 +19,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
  * Unit tests for {@link MailUploadQuotaCheckerTest}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
@@ -35,20 +35,20 @@ public class MailUploadQuotaCheckerTest {
     @Mock
     private UserSettingMail userSettingMail;
 
-    private long quota = 10000000L;
+    private final long quota = 10000000L;
 
-    private int quotaFromFile = 9999;
+    private final long quotaFromFile = 9999L;
 
-    private int unlimitedQuota = 0;
+    private final long unlimitedQuota = 0L;
 
-    private int unlimitedQuota2 = -1;
+    private final long unlimitedQuota2 = -1L;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(ServerConfig.class);
-        PowerMockito.when(ServerConfig.getInt((Property) Matchers.any())).thenReturn(quotaFromFile);
+        PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenReturn(quotaFromFile);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -111,7 +111,7 @@ public class MailUploadQuotaCheckerTest {
     @Test
     public void testMailUploadQuotaCheckerUserSettingMail_uploadQuotaNegativAndServerConfigException_setUploadQuotaToZero() throws OXException {
         Mockito.when(userSettingMail.getUploadQuota()).thenReturn(-1L);
-        PowerMockito.when(ServerConfig.getInt((Property) Matchers.any())).thenThrow(new OXException());
+        PowerMockito.when(ServerConfig.getLong((Property) Matchers.any())).thenThrow(new OXException());
 
         this.mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
 

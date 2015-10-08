@@ -50,7 +50,9 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -71,7 +73,7 @@ public final class FunambolTest extends AbstractAJAXSession {
     private AJAXClient client;
     private int folderId;
     private TimeZone timeZone;
-    private Appointment appointment;
+    private List<Appointment> toDelete;
 
     public FunambolTest(final String name) {
         super(name);
@@ -83,34 +85,56 @@ public final class FunambolTest extends AbstractAJAXSession {
         client = getClient();
         folderId = client.getValues().getPrivateAppointmentFolder();
         timeZone = client.getValues().getTimeZone();
-        appointment = new Appointment();
+        toDelete = new ArrayList<Appointment>();
+    }
+
+    private Appointment getAppointment() {
+        Appointment appointment = new Appointment();
         appointment.setParentFolderID(folderId);
         appointment.setTitle("TestCreationTime");
         appointment.setStartDate(new Date(TimeTools.getHour(0, timeZone)));
         appointment.setEndDate(new Date(TimeTools.getHour(1, timeZone)));
         appointment.setIgnoreConflicts(true);
+        return appointment;
     }
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(appointment));
+        for (Appointment app : toDelete) {
+            client.execute(new DeleteRequest(app));
+        }
         super.tearDown();
     }
 
     public void testAppointmentCreationTime() throws Throwable {
-        // Sometimes requests are really, really fast and time of first insert is same as this time. Maybe it is more a problem of XEN and a
-        // frozen clock there.
-        final Date timeBeforeCreation = new Date(client.getValues().getServerTime().getTime() - 1);
-
-        final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
-        insertResponse.fillObject(appointment);
-        final GetResponse response = client.execute(new GetRequest(appointment));
-        final Appointment reload = response.getAppointment(timeZone);
-        // reload.getCreationDate() does not have milliseconds.
-        final Date lastModified = reload.getLastModified();
-
-        // This request is responded even faster than creating an appointment. Therefore this must be the second request.
-        final Date timeAfterCreation = new Date(client.getValues().getServerTime().getTime() + 1);
+        Date lastModified = null;
+        Date timeAfterCreation = null;
+        Date timeBeforeCreation = null;
+        Appointment reload = null;
+        
+        boolean potentialTimestamp = false;
+        while (!potentialTimestamp) {
+            Appointment appointment = getAppointment();
+            // Sometimes requests are really, really fast and time of first insert is same as this time. Maybe it is more a problem of XEN and a
+            // frozen clock there.
+            timeBeforeCreation = new Date(client.getValues().getServerTime().getTime() - 1);
+    
+            final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
+            insertResponse.fillObject(appointment);
+            final GetResponse response = client.execute(new GetRequest(appointment));
+            reload = response.getAppointment(timeZone);
+            // reload.getCreationDate() does not have milliseconds.
+            lastModified = reload.getLastModified();
+    
+            // This request is responded even faster than creating an appointment. Therefore this must be the second request.
+            timeAfterCreation = new Date(client.getValues().getServerTime().getTime() + 1);
+            
+            System.out.println(lastModified.getTime());
+            if (lastModified.getTime() % 1000 >= 500) {
+                potentialTimestamp = true;
+            }
+            toDelete.add(appointment);
+        }
 
         assertTrue("Appointment creation time is not after time request before creation.", lastModified.after(timeBeforeCreation));
         assertTrue("Appointment creation time is not before time request after creation.", lastModified.before(timeAfterCreation));

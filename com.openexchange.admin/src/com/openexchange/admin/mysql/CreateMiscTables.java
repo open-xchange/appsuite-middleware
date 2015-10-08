@@ -99,8 +99,9 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
 
     private static final String createFilestoreUsageTable = "CREATE TABLE filestore_usage ("
         + "cid INT4 UNSIGNED NOT NULL,"
+        + "user INT4 UNSIGNED NOT NULL DEFAULT 0,"
         + "used INT8 NOT NULL,"
-        + "PRIMARY KEY(cid)"
+        + "PRIMARY KEY(cid, user)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**

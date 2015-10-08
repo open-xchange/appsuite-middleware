@@ -77,7 +77,7 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
      */
     public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(5);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(5, 0.9f, 1);
         GetAction getAction = new com.openexchange.quota.json.actions.GetAction(context);
         actions.put("get", getAction);
         actions.put("GET", getAction);

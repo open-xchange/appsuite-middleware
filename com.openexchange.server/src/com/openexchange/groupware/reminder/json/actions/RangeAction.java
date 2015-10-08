@@ -68,8 +68,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -82,6 +86,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "end", description = "The End date of the reminder range.")
 }, responseDescription = "An Array with all reminders which are scheduled until the specified time. Each reminder is described in Reminder response.")
+@OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
 public final class RangeAction extends AbstractReminderAction {
 
     private static final org.slf4j.Logger LOG =
@@ -129,20 +134,28 @@ public final class RangeAction extends AbstractReminderAction {
                         } catch (final OXException e) {
                             if (e.isGeneric(Generic.NOT_FOUND)) {
                                 LOG.warn("Cannot load target object of this reminder.", e);
-                                reminderSql.deleteReminder(reminder.getTargetId(), user.getId(), reminder.getModule());
+                                deleteReminderSafe(reminder, user.getId(), reminderSql);
                             } else {
                                 LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
                             }
                         }
                     }
-                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
-                        final JSONObject jsonReminderObj = new JSONObject(12);
-                        reminderWriter.writeObject(reminder, jsonReminderObj);
-                        jsonResponseArray.put(jsonReminderObj);
+                    try {
+                        if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                            final JSONObject jsonReminderObj = new JSONObject(12);
+                            reminderWriter.writeObject(reminder, jsonReminderObj);
+                            jsonResponseArray.put(jsonReminderObj);
+                        }
+                    } catch (OXException e) {
+                        if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                            throw e;
+                        }
+                        LOG.warn("Cannot load target object of this reminder.", e);
+                        deleteReminderSafe(reminder, user.getId(), reminderSql);
                     }
                 }
             } finally {
-                it.close();
+                SearchIterators.close(it);
             }
             return new AJAXRequestResult(jsonResponseArray, "json");
         } catch (final OXException e) {

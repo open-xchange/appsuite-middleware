@@ -61,6 +61,7 @@ import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -108,6 +109,9 @@ public class CoreCalendarActivator extends HousekeepingActivator {
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
         registerService(TargetService.class, new CalendarReminderDelete(), props);
         registerCacheRegion();
+
+        track(ContactCollectorService.class, new ContactCollectorServiceTracker(this.context));
+        openTrackers();
     }
 
     private void registerCacheRegion() throws OXException {
@@ -143,6 +147,7 @@ public class CoreCalendarActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregisterCacheRegion();
+        cleanUp();
         super.stopBundle();
     }
 

@@ -49,7 +49,9 @@
 
 package com.openexchange.imap.storecache;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
@@ -148,7 +150,7 @@ public final class IMAPStoreCache {
      * -------------------------------------- Runnable stuff --------------------------------------
      */
 
-    private final class ContainerCloseElapsedRunnable implements Runnable {
+    private static final class ContainerCloseElapsedRunnable implements Runnable {
 
         private final IMAPStoreContainer container;
         private final long stamp;
@@ -166,16 +168,19 @@ public final class IMAPStoreCache {
         }
     }
 
-    private final class CloseElapsedRunnable implements Runnable {
+    private static final class CloseElapsedRunnable implements Runnable {
 
-        protected CloseElapsedRunnable() {
+        private final IMAPStoreCache storeCache;
+
+        protected CloseElapsedRunnable(IMAPStoreCache storeCache) {
             super();
+            this.storeCache = storeCache;
         }
 
         @Override
         public void run() {
             try {
-                closeElapsed();
+                storeCache.closeElapsed();
             } catch (final Exception e) {
                 LOG.error("", e);
             }
@@ -220,16 +225,25 @@ public final class IMAPStoreCache {
 
     private void init() {
         final TimerService timer = Services.getService(TimerService.class);
-        final Runnable task = new CloseElapsedRunnable();
+        final Runnable task = new CloseElapsedRunnable(this);
         final int shrinkerMillis = SHRINKER_MILLIS;
         timerTask = timer.scheduleWithFixedDelay(task, shrinkerMillis, shrinkerMillis);
     }
 
     private void shutDown() {
+        List<IMAPStoreContainer> containers = new ArrayList<IMAPStoreContainer>(this.map.values());
+        this.map.clear();
+
         final ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
             timerTask.cancel();
             this.timerTask = null;
+        }
+
+        if (!containers.isEmpty()) {
+            for (IMAPStoreContainer container : containers) {
+                container.clear();
+            }
         }
     }
 
@@ -270,19 +284,21 @@ public final class IMAPStoreCache {
     protected void closeElapsed() {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (containers.hasNext()) {
-            final boolean debug = LOG.isDebugEnabled();
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
-            do {
-                final IMAPStoreContainer container = containers.next();
-                if (null != container && container.hasElapsed(stamp)) {
-                    threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
-                }
-            } while (containers.hasNext());
+            boolean debug = LOG.isDebugEnabled();
+            ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null != threadPool) {
+                long stamp = System.currentTimeMillis() - IDLE_MILLIS;
+                do {
+                    IMAPStoreContainer container = containers.next();
+                    if (null != container && container.hasElapsed(stamp)) {
+                        threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
+                    }
+                } while (containers.hasNext());
+            }
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session, boolean propagateClientIp) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
         /*
          * Check for a cached one
          */
@@ -292,7 +308,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = newContainer(server, port, propagateClientIp);
+            final IMAPStoreContainer newContainer = newContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -312,16 +328,16 @@ public final class IMAPStoreCache {
         return container;
     }
 
-    private IMAPStoreContainer newContainer(final String server, final int port, boolean propagateClientIp) {
+    private IMAPStoreContainer newContainer(final String server, final int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         switch (containerType) {
         case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(server, port, propagateClientIp);
+            return new UnboundedIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
         case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp);
+            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
         case NON_CACHING:
             return new NonCachingIMAPStoreContainer(server, port, propagateClientIp);
         default:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp);
+            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
         }
     }
 
@@ -352,16 +368,17 @@ public final class IMAPStoreCache {
      * @param login The login/user name
      * @param pw The password
      * @param propagateClientIp <code>true</code> to signal client IP address; otherwise <code>false</code>
+     * @param checkConnectivityIfPolled <code>true</code> to explicitly check an <code>IMAPStore</code> instance's connectivity status (through issuing a <code>"NOOP"</code> command) if polled; otherwise <code>false</code> to pass as-is
      * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */
-    public IMAPStore borrowIMAPStore(int accountId, javax.mail.Session imapSession, String server, int port, String login, String pw, Session session, boolean propagateClientIp) throws MessagingException, OXException {
+    public IMAPStore borrowIMAPStore(int accountId, javax.mail.Session imapSession, String server, int port, String login, String pw, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
         try {
-            return getContainer(accountId, server, port, login, session, propagateClientIp).getStore(imapSession, login, pw, session);
+            return getContainer(accountId, server, port, login, session, propagateClientIp, checkConnectivityIfPolled).getStore(imapSession, login, pw, session);
         } catch (final InterruptedException e) {
             // Should not occur
             Thread.currentThread().interrupt();

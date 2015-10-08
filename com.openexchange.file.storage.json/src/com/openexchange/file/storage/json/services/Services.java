@@ -54,10 +54,15 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.startup.ThreadControlService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Services}
@@ -67,6 +72,16 @@ import com.openexchange.server.ServiceLookup;
 public class Services {
 
     private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
+    private static AtomicReference<FileFieldCollector> FIELD_COLLECTOR = new AtomicReference<FileFieldCollector>();
+
+    /**
+     * Sets the file field collector instance.
+     *
+     * @param fieldCollector The field collector to set
+     */
+    public static void setFieldCollector(FileFieldCollector fieldCollector) {
+        FIELD_COLLECTOR.set(fieldCollector);
+    }
 
     /**
      * Sets the service look-up instance.
@@ -75,6 +90,15 @@ public class Services {
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         LOOKUP_REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the file field collector instance.
+     *
+     * @return The field collector, or <code>null</code> if not initialized
+     */
+    public static FileFieldCollector getFieldCollector() {
+        return FIELD_COLLECTOR.get();
     }
 
     public static ConfigurationService getConfigurationService() {
@@ -111,4 +135,25 @@ public class Services {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(FolderService.class);
     }
+
+    public static ShareNotificationService getShareNotificationService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ShareNotificationService.class);
+    }
+
+    public static ThreadPoolService getThreadPoolService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ThreadPoolService.class);
+    }
+
+    public static PreviewService getPreviewService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(PreviewService.class);
+    }
+
+    public static ThreadControlService getThreadControlService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ThreadControlService.class);
+    }
+
 }

@@ -71,7 +71,7 @@ public interface FolderUpdaterStrategy<T> {
 
     void update(T original, T update, Object session) throws OXException;
 
-    void save(T newElement, Object session) throws OXException;
+    void save(T newElement, Object session, Collection<OXException> errors) throws OXException;
 
     int calculateSimilarityScore(T original, T candidate, Object session) throws OXException;
 

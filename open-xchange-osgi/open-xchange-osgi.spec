@@ -2,11 +2,18 @@
 Name:          open-xchange-osgi
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
-BuildRequires: java-devel >= 1.6.0
+%endif
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -19,15 +26,13 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
-%if 0%{?rhel_version} && 0%{?rhel_version} < 599
-# rhel needs special handling because on rhel5 supplementary bea java will be installed by default
-# bug id #22563
-Requires:      java-sun >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+Requires:      java7
 %else
-Requires:      java >= 1.6.0
+Requires:      java >= 1.7.0
 %endif
-%if 0%{?rhel_version} >= 600
-# ibm java only on sles11, please
+%if 0%{?rhel_version}
+# ibm java only on SLE, please
 Conflicts:     java-ibm
 %endif
 
@@ -46,9 +51,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-
 mkdir -m 750 -p %{buildroot}/opt/open-xchange/osgi
-
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
@@ -63,16 +66,30 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
+* Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
 * Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-12 (2671)
+* Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-17 (2666)
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
 * Tue Aug 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -91,6 +108,10 @@ Build for patch 2015-06-29 (2578)
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -199,6 +220,8 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
+* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>

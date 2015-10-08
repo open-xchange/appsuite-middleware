@@ -49,7 +49,10 @@
 
 package com.openexchange.tools.iterator;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SearchIterators} - Utility class for {@link SearchIterator}.
@@ -81,6 +84,23 @@ public final class SearchIterators {
                 LOGGER.error("Closing SearchIterator instance failed", e);
             }
         }
+    }
+    
+    /**
+     * Iterates through the supplied search iterator and puts all elements into a list.
+     * 
+     * @param iterator The search iterator to get the elements from 
+     * @return The iterator's elements in a list
+     */
+    public static <T> List<T> asList(SearchIterator<T> iterator) throws OXException {
+        if (null == iterator) {
+            return null;
+        }
+        List<T> list = new ArrayList<T>();
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
     }
 
 }

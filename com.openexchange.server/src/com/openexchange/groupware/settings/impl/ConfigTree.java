@@ -269,7 +269,7 @@ public final class ConfigTree {
                 LOG.warn("", e);
             } else {
                 final String message = e.getMessage();
-                if (toLowerCase(message).indexOf("/io.ox/") < 0) {
+                if (com.openexchange.java.Strings.toLowerCase(message).indexOf("/io.ox/") < 0) {
                     LOG.warn(message);
                 }
             }
@@ -324,7 +324,6 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.mail.LineWrapSP3.class,
             com.openexchange.groupware.settings.tree.mail.SendAddressSP3.class,
             com.openexchange.groupware.settings.tree.mail.SpamButtonSP3.class,
-            com.openexchange.groupware.settings.tree.mail.VCardSP3.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.MinimumSearchCharacters.class,
             com.openexchange.groupware.settings.tree.modules.calendar.GUI.class,
@@ -343,6 +342,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
             com.openexchange.groupware.settings.tree.modules.contacts.SingleFolderSearch.class,
             com.openexchange.groupware.settings.tree.modules.contacts.CharacterSearch.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.MaxImageSize.class,
             com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.GUI.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
@@ -350,6 +350,11 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.infostore.GUI.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Trash.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Pictures.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Documents.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Templates.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Music.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.folder.Videos.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
@@ -470,19 +475,5 @@ public final class ConfigTree {
             LOG.error("", se);
         }
         tree = null;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

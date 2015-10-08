@@ -55,8 +55,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,7 +82,9 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
     private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
     private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
     private String FIND_BY_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
+    private String FIND_BY_SINGLE_ENTITY = "SELECT entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% FROM %%tablename%% WHERE entity = ? and cid = ? ";
     private String EXISTS_BY_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity IN %%entity_ids%% and cid = ? ";
+    private String EXISTS_BY_SINGLE_ENTITY = "SELECT 1 FROM %%tablename%% WHERE entity = ? and cid = ? ";
     private String DELETE_BY_ENTITY = "DELETE FROM %%tablename%% WHERE cid = ? AND entity = ?";
     private String UPDATE_BY_ID = "UPDATE %%tablename%% SET timeout = ? , scope = ?, type = ? , ownerDesc = ? %%additional_updates%% WHERE id = ? AND cid = ?";
 
@@ -102,9 +106,11 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 
         FIND_BY_ENTITY = FIND_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
         FIND_BY_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_ENTITY);
+        FIND_BY_SINGLE_ENTITY = FIND_BY_SINGLE_ENTITY.replaceAll(PAT_TABLENAME, tablename);
+        FIND_BY_SINGLE_ENTITY = initAdditionalFIND_BY_ENTITY(FIND_BY_SINGLE_ENTITY);
 
         EXISTS_BY_ENTITY = EXISTS_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
-
+        EXISTS_BY_SINGLE_ENTITY = EXISTS_BY_SINGLE_ENTITY.replaceAll(PAT_TABLENAME, tablename);
 
         DELETE_BY_ENTITY = DELETE_BY_ENTITY.replaceAll(PAT_TABLENAME, tablename);
 
@@ -231,42 +237,55 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    public Map<Integer,List<T>> findLocksByEntity(final List<Integer> entities, final Context ctx) throws OXException {
+    public Map<Integer,List<T>> findLocksByEntity(List<Integer> entities, Context ctx) throws OXException {
+        if (null == entities || 0 == entities.size()) {
+            return Collections.emptyMap();
+        }
+
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder entityIds = new StringBuilder().append('(');
-            entityIds.append(join(entities));
-            entityIds.append(')');
-
             con = getReadConnection(ctx);
-            stmt = con.prepareStatement(FIND_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-            set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
-            rs = stmt.executeQuery();
-            final Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>();
-            final Set<Integer> entitySet = new HashSet<Integer>(entities);
+            int size = entities.size();
+            if (1 == size) {
+                stmt = con.prepareStatement(FIND_BY_SINGLE_ENTITY);
+                stmt.setInt(1, entities.get(0).intValue());
+                stmt.setInt(2, ctx.getContextId());
+            } else {
+                StringBuilder entityIds = new StringBuilder().append('(');
+                join(entities, entityIds);
+                entityIds.append(')');
 
-            while(rs.next()) {
-                final int entity = rs.getInt("entity");
+                stmt = con.prepareStatement(FIND_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
+                set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
+            }
+
+            rs = stmt.executeQuery();
+
+            Map<Integer, List<T>> locks = new HashMap<Integer, List<T>>(size);
+            Set<Integer> entitySet = new HashSet<Integer>(entities);
+            while (rs.next()) {
+                int entity = rs.getInt(1);
                 entitySet.remove(Integer.valueOf(entity));
                 List<T> lockList = locks.get(Integer.valueOf(entity));
-                if(null == lockList) {
+                if (null == lockList) {
                     lockList = new ArrayList<T>();
                     locks.put(Integer.valueOf(entity), lockList);
                 }
 
-                final T lock = newLock();
+                T lock = newLock();
                 fillLock(lock, rs);
-                if(lock.getTimeout()<1){
+                if (lock.getTimeout() < 1) {
                     removeLock(lock.getId(), ctx);
                     lockExpired(lock);
                 } else {
                     lockList.add(lock);
                 }
             }
-            for(final Integer entity : entitySet) {
-                locks.put(entity, new ArrayList<T>());
+
+            for (Integer entity : entitySet) {
+                locks.put(entity, Collections.<T> emptyList());
             }
             return locks;
         } catch (final SQLException x) {
@@ -284,16 +303,22 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            final StringBuilder entityIds = new StringBuilder().append('(');
-            entityIds.append(join(entities));
-            entityIds.append(')');
-
             con = getReadConnection(ctx);
-            stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
-            set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
+            if (1 == entities.size()) {
+                stmt = con.prepareStatement(EXISTS_BY_SINGLE_ENTITY);
+                stmt.setInt(1, entities.get(0).intValue());
+                stmt.setInt(2, ctx.getContextId());
+            } else {
+                StringBuilder entityIds = new StringBuilder().append('(');
+                join(entities, entityIds);
+                entityIds.append(')');
+
+                stmt = con.prepareStatement(EXISTS_BY_ENTITY.replaceAll("%%entity_ids%%", entityIds.toString()));
+                set(1, stmt, null, Integer.valueOf(ctx.getContextId()));
+            }
+
             rs = stmt.executeQuery();
             return rs.next();
-
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } catch (final OXException e) {
@@ -343,24 +368,33 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
         }
     }
 
-    protected CharSequence join(final List<Integer> entities) {
-        final StringBuilder b = new StringBuilder();
-        for(final int entity : entities) { b.append(entity); b.append(", "); }
-        b.setLength(b.length()-2);
+    protected CharSequence join(List<Integer> entities, StringBuilder b) {
+        Iterator<Integer> it = entities.iterator();
+        if (it.hasNext()) {
+            Integer entity = it.next();
+            b.append(entity.intValue());
+
+            while (it.hasNext()) {
+                entity = it.next();
+                b.append(", ");
+                b.append(entity.intValue());
+            }
+        }
+
         return b;
     }
 
-    protected final int set(int index, final PreparedStatement stmt, final Object[] additional, final Object...values) throws SQLException {
-        for(final Object o : values) {
-            stmt.setObject(index++,o);
+    protected final int set(int index, PreparedStatement stmt, Object[] additional, Object... values) throws SQLException {
+        int idx = index;
+        for (Object o : values) {
+            stmt.setObject(idx++, o);
         }
-        if(null == additional) {
-            return index;
+        if (null != additional) {
+            for (Object o : additional) {
+                stmt.setObject(idx++, o);
+            }
         }
-        for(final Object o : additional) {
-            stmt.setObject(index++,o);
-        }
-        return index;
+        return idx;
     }
 
     public void addExpiryListener(final LockExpiryListener listener) {

@@ -49,78 +49,142 @@
 
 package com.openexchange.oauth.provider;
 
-import java.io.IOException;
-import net.oauth.OAuthAccessor;
-import net.oauth.OAuthConsumer;
-import net.oauth.OAuthMessage;
-import net.oauth.OAuthProblemException;
-import net.oauth.OAuthValidator;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link OAuthProviderService} - The OAuth provider service in addition to <a href="http://oauth.googlecode.com/">Google's OAuth Java
- * library</a>.
+ * The management service to be used by the OAuth provider implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
+ * @see OAuthResourceService
  */
-public interface OAuthProviderService extends OAuthProviderConstants {
+@SingletonService
+public interface OAuthProviderService {
 
-    /*
-     * Methods
-     */
-
-    /**
-     * Gets the associated validator instance.
-     *
-     * @return The validator instance
-     */
-    public OAuthValidator getValidator();
+    // -------------------------------------- Client Handling -------------------------------------- \\
 
     /**
-     * Loads consumers from database
-     *
-     * @throws OXException If loading consumers fails
+     * The max. number of clients that a user is allowed to grant access to
      */
-    public void loadConsumers() throws OXException;
+    public static final int MAX_CLIENTS_PER_USER = 50;
 
     /**
-     * Gets the consumer for specified OAuth request message.
+     * Gets the management instance for clients.
      *
-     * @param requestMessage The request message
-     * @return The associated consumer
-     * @throws IOException If an I/O error occurs
-     * @throws OAuthProblemException If an OAuth problem occurs
+     * @return The management instance
      */
-    public OAuthConsumer getConsumer(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    ClientManagement getClientManagement();
+
+    // -------------------------------- Authorization Code Handling -------------------------------- \\
+    //  Manages authorization codes generated for/redeemed by OAuth client applications.
 
     /**
-     * Get the access token and token secret for the given oauth_token.
-     *
-     * @param requestMessage The OAuth message providing oauth_token
+     * The default timeout for an generated authorization code in milliseconds.
      */
-    public OAuthAccessor getAccessor(OAuthMessage requestMessage) throws IOException, OAuthProblemException;
+    public static final long AUTH_CODE_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
     /**
-     * Marks specified access token as authorized.
+     * Generates a new authorization code that is bound to the given client identifier, redirect URI and scope.
      *
-     * @throws OXException If token cannot be marked as authorized
+     * @param contextId The context ID
+     * @param user The user ID
+     * @param clientId The client identifier
+     * @param redirectURI The redirect URI
+     * @param scope The scope, must have been validated before
+     * @param session The session
+     * @return A new authorization code
+     * @throws OXException If operation fails
      */
-    public void markAsAuthorized(OAuthAccessor accessor, int userId, int contextId) throws OXException;
+    String generateAuthorizationCodeFor(String id, String redirectURI, Scope scope, Session session) throws OXException;
 
     /**
-     * Generate a fresh request token and secret for a consumer.
+     * Redeems the passed authorization code for an access token.
      *
-     * @param accessor The <b><small>VALIDATED</small></b> <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
+     * @param client The client
+     * @param redirectURI The redirect URI
+     * @param authCode The authorization code
+     * @return A newly created access token or <code>null</code> if the code was invalid
+     * @throws OXException If redeem operation fails
      */
-    public void generateRequestToken(OAuthAccessor accessor) throws OXException;
+    OAuthGrant redeemAuthCode(Client client, String redirectURI, String authCode) throws OXException;
+
+    // ------------------------------------ Grant Handling ----------------------------------- \\
+
 
     /**
-     * Generate an access token for a consumer.
+     * Redeems the passed authorization code for a new access token. The
+     * refresh token itself may also be changed due to security reasons.
      *
-     * @param accessor The user-associated <tt>OAuthAccessor</tt> instance
-     * @throws OXException If generation fails
+     * @param client The client
+     * @param refreshToken The refresh token
+     * @return The updated grant
+     * @throws OXException If redeem operation fails
      */
-    public void generateAccessToken(OAuthAccessor accessor, int userId, int contextId) throws OXException;
+    OAuthGrant redeemRefreshToken(Client client, String refreshToken) throws OXException;
+
+    /**
+     * Revokes a grant by its refresh token.
+     *
+     * @param refreshToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     */
+    boolean revokeByRefreshToken(String refreshToken) throws OXException;
+
+    /**
+     * Revokes a grant by its access token.
+     *
+     * @param accessToken The token
+     * @return <code>true</code> if the grant was revoked, <code>false</code> if no grant existed for the given token
+     */
+    boolean revokeByAccessToken(String accessToken) throws OXException;
+
+    /**
+     * Gets all grants of a user as client-centric views.
+     *
+     * @param contextId The contest ID
+     * @param userId The user ID
+     * @return An immutable iterator of {@link GrantView}s.
+     */
+    Iterator<GrantView> getGrants(int contextId, int userId) throws OXException;
+
+    /**
+     * Revokes all grants of a user to a certain client.
+     *
+     * @param clientId The client ID
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @throws OXException
+     */
+    void revokeGrants(String clientId, int contextId, int userId) throws OXException;
+
+    // --------------------------------------- Helper methods -------------------------------------- \\
+
+    /**
+     * Checks if the given scope is valid in terms of syntax and server-side provided scopes.
+     *
+     * @param scope The scope to check
+     * @return <code>true</code> if the scope contains at least one token and all tokens belong
+     * to registered providers. Otherwise <code>false</code>.
+     */
+    boolean isValidScope(String scope);
+
+    /**
+     * Gets the scope provider for a given scope ID (must be non-qualified).
+     *
+     * @param token The scope token
+     * @return The provider or <code>null</code> if none can be found
+     */
+    OAuthScopeProvider getScopeProvider(String token);
 
 }

@@ -100,8 +100,17 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Indicates a deactivated user
     public static final String USER_NOT_ACTIVE_MSG = "The user account is not activated.";
 
+    // You exceeded the maximum count of logins without password.
+    public static final String LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG = "You exceeded the maximum count of logins without password.";
+
+    // A password is required to continue. Please choose one and try again.
+    public static final String NEW_PASSWORD_REQUIRED_MSG = "A password is required to continue. Please choose one and try again.";
+
     // Authentication via this method is disabled.
     public static final String AUTHENTICATION_DISABLED_MSG = "Authentication via this method is disabled.";
+
+    // The password is incorrect.
+    public static final String INVALID_GUEST_PASSWORD_MSG = "The password is incorrect.";
 
     private LoginExceptionMessages() {
         super();

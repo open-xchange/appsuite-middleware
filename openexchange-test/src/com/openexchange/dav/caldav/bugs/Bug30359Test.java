@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -57,6 +58,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
+import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
@@ -68,10 +70,7 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class Bug30359Test extends CalDAVTest {
 
-	public Bug30359Test(final String name) {
-		super(name);
-	}
-
+	@Test
     public void testExternalEntities() throws Exception {
         String uri = getBaseUri() + "/caldav/" + getDefaultFolderID() + "/";
         EntityEnclosingMethod m = new EntityEnclosingMethod(uri) {
@@ -116,7 +115,7 @@ public class Bug30359Test extends CalDAVTest {
             }
         });
 
-        int status = getWebDAVClient().getHttpClient().executeMethod(m);
+        int status = getWebDAVClient().executeMethod(m);
         assertEquals(207, status);
         String response = m.getResponseBodyAsString();
         assertNotNull(response);

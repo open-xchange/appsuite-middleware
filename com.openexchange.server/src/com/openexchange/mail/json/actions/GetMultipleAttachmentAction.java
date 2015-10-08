@@ -278,5 +278,4 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             Streams.close(in);
         }
     }
-
 }

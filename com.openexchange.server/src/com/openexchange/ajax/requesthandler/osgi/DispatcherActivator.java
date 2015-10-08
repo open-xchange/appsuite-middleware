@@ -51,11 +51,13 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.servlet.http.HttpServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.ajax.requesthandler.AJAXActionAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -67,7 +69,9 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
@@ -88,6 +92,8 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
+import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
@@ -95,14 +101,20 @@ import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRend
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mail.mime.utils.ImageMatcher;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -112,13 +124,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DispatcherActivator extends AbstractSessionServletActivator {
 
-    private final Set<String> servlets = new HashSet<String>();
-    private volatile String prefix;
+    final Set<String> servlets = new HashSet<String>();
+    volatile String prefix;
 
     @Override
     protected void startBundle() throws Exception {
-
-    	prefix = getService(DispatcherPrefixService.class).getPrefix();
+    	DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+        prefix = dispatcherPrefixService.getPrefix();
+    	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
+    	Dispatcher.PREFIX.set(prefix);
 
     	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
@@ -212,17 +226,24 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
         });
 
-        final DispatcherServlet servlet = new DispatcherServlet();
-        DispatcherServlet.setDispatcher(dispatcher);
-
         Multiple.setDispatcher(dispatcher);
-
+        DispatcherServlet.setDispatcher(dispatcher);
         DispatcherServlet.registerRenderer(new APIResponseRenderer());
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
         DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
 
+        registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
+        registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
+
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, prefix);
+        trackService(OAuthResourceService.class);
+        trackService(OAuthSessionProvider.class);
+        trackService(ContextService.class);
+        trackService(UserService.class);
+        trackService(SessiondService.class);
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 
             @Override
@@ -251,28 +272,44 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
-//        registerSessionServlet("/ajax", servlet);
-
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
             @Override
             public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
                 dispatcher.register(module, service);
-                if (!servlets.contains(module)) {
-                    registerSessionServlet(prefix + module, servlet);
-                    servlets.add(module);
+                if (servlets.add(module)) {
+                    registerSessionServlet(prefix + module, dispatcherServlet);
+                    if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
+                    }
                 }
             }
 
             @Override
             public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
                 final String module = (String) ref.getProperty("module");
-                if (servlets.contains(module)) {
+                if (servlets.remove(module)) {
                     unregisterServlet(prefix + module);
-                    servlets.remove(module);
+                    if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
+                        unregisterServlet(prefix + "oauth/modules/" + module);
+                    }
                 }
                 dispatcher.remove(module, service);
+            }
+
+        });
+
+        track(AJAXActionAnnotationProcessor.class, new SimpleRegistryListener<AJAXActionAnnotationProcessor>() {
+
+            @Override
+            public void added(ServiceReference<AJAXActionAnnotationProcessor> ref, AJAXActionAnnotationProcessor service) {
+                dispatcher.addAnnotationProcessor(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<AJAXActionAnnotationProcessor> ref, AJAXActionAnnotationProcessor service) {
+                dispatcher.removeAnnotationProcessor(service);
             }
 
         });
@@ -304,6 +341,21 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
 
         });
+        
+        track(AJAXActionCustomizerFactory.class, new SimpleRegistryListener<AJAXActionCustomizerFactory>() {
+
+			@Override
+			public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+				dispatcher.addCustomizer(service);
+			}
+
+			@Override
+			public void removed(ServiceReference<AJAXActionCustomizerFactory> ref,
+					AJAXActionCustomizerFactory service) {
+				dispatcher.removeCustomizer(service);
+				
+			}
+		});
 
         openTrackers();
 
@@ -312,7 +364,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         /*
          * Register preview filestore updater for move context filestore
          */
-        registerService(FilestoreLocationUpdater.class, new PreviewFilestoreLocationUpdater());
+        registerService(FileLocationHandler.class, new PreviewFilestoreLocationUpdater());
     }
 
     @Override
@@ -320,7 +372,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         super.stopBundle();
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
-        DispatcherServlet.setPrefix(null);
         ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
         DecoratingAJAXActionCustomizer.REGISTRY_REF.set(null);
         CoverExtractorRegistry.REGISTRY_REFERENCE.set(null);
@@ -330,6 +381,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
         AJAXRequestDataTools.setBodyParserRegistry(null);
+        Dispatchers.setDispatcherPrefixService(null);
+        Dispatcher.PREFIX.set(DispatcherPrefixService.DEFAULT_PREFIX);
     }
 
     @Override
@@ -345,6 +398,16 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
         return new Class<?>[] { DispatcherPrefixService.class };
+    }
+
+    @Override
+    public void registerSessionServlet(String alias, HttpServlet servlet, String... configKeys) {
+        super.registerSessionServlet(alias, servlet, configKeys);
+    }
+
+    @Override
+    public void unregisterServlet(String alias) {
+        super.unregisterServlet(alias);
     }
 
 }

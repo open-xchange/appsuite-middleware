@@ -7,7 +7,6 @@ import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -97,7 +96,7 @@ public class ConflictTest extends AppointmentTest {
 		final int secondObjectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
 		Appointment loadAppointment = loadAppointment(getWebConversation(), secondObjectId, appointmentFolderId, rangeStart, rangeEnd, APPOINTMENT_FIELDS, timeZone, getHostName(), getSessionId());
-		Date modified = loadAppointment.getCreationDate();
+		Date modified = new Date(Long.MAX_VALUE);
 
 		appointmentObj.setObjectID(secondObjectId);
 		appointmentObj.setIgnoreConflicts(true);

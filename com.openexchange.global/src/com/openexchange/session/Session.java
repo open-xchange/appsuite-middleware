@@ -191,12 +191,26 @@ public interface Session {
     static final String PARAM_PUBLICATION = "__session.publication".intern();
 
     /**
+     * The parameter to indicate a guest session.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_GUEST = "__session.guest".intern();
+
+    /**
+     * The parameter for the cookie refresh time stamp.
+     *
+     * @type <code>java.lang.Long</code>
+     */
+    public static final String PARAM_COOKIE_REFRESH_TIMESTAMP = "__session.cookierefresh".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();
 
     /**
-     * Gets the local IP address
+     * IP address of the session client. Normally every request from the client using this session is verified to come from this IP address.
      *
      * @return The local IP address
      */

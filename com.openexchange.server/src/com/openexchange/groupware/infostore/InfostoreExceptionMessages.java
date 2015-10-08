@@ -83,7 +83,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG_DISPLAY = "You do not have the appropriate permissions to delete this version.";
 
     // The document is already locked. Please try again later.
-    public static final String ALREADY_LOCKED_MSG_DISPLAY = "The document is already locked. Please try again later.";
+    public static final String CURRENTLY_LOCKED_MSG_DISPLAY = "The document is currently locked. Please try again later.";
 
     // You do not have the appropriate permissions to unlock the document.
     public static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG_DISPLAY = "You do not have the appropriate permissions to unlock the document.";
@@ -126,6 +126,13 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     // Unsupported character. Please correct your input.
     public static final String INVALID_CHARACTER_SIMPLE_MSG_DISPLAY = "Unsupported character. Please correct your input.";
+
+    // Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+    public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY = "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.";
+
+    // Concurrent write attempt. Please await the previous save operation to terminate.
+    public static final String CONCURRENT_VERSION_CREATION_MSG_DISPLA = "Concurrent write attempt. Please await the previous save operation to terminate.";
+
 
     private InfostoreExceptionMessages() {
         super();

@@ -318,8 +318,10 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Error message: %5$s
      */
     IN_USE_ERROR_EXT("That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: %5$s", CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, MimeMailExceptionMessage.IN_USE_ERROR_EXT_MSG_DISPLAY),
-
-    ;
+    /**
+     * Image attachments are not supported
+     */
+    IMAGE_ATTACHMENTS_UNSUPPORTED("Image attachments are not supported", CATEGORY_ERROR, 1032);
 
     private final String message;
     private final int detailNumber;

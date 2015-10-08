@@ -88,7 +88,7 @@ public final class MessageTimelineActivator extends AJAXModuleActivator {
 
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new MessageTimelineEventHandler(), serviceProperties);
         }
 

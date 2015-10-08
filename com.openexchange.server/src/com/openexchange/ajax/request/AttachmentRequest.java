@@ -91,6 +91,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -478,20 +479,8 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e1) {
-                    LOG.error("", e1);
-                }
-            }
-            if (iter2 != null) {
-                try {
-                    iter2.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
+            SearchIterators.close(iter2);
         }
     }
 
@@ -527,13 +516,7 @@ public class AttachmentRequest extends CommonRequest {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
 
@@ -615,13 +598,8 @@ public class AttachmentRequest extends CommonRequest {
                 LOG.error("", e);
             }
 
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
+            SearchIterators.close(iter);
         }
     }
+
 }

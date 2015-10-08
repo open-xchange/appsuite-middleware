@@ -87,6 +87,12 @@ public class ConfigCascade implements ConfigViewFactory {
 
     @Override
     public ConfigView getView(final int user, final int context) {
+        if (user <= 0) {
+            if (context <= 0) {
+                return getView();
+            }
+            return new View(-1, context);
+        }
         return new View(user, context);
     }
 
@@ -129,6 +135,7 @@ public class ConfigCascade implements ConfigViewFactory {
         final int user;
 
         View(int user, int context) {
+            super();
             this.user = user;
             this.context = context;
         }
@@ -182,6 +189,18 @@ public class ConfigCascade implements ConfigViewFactory {
                         final String value = provider.get(property, context, user).get(metadataName);
                         if (value != null) {
                             return value;
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                public String getScope() throws OXException {
+                	final String finalScope = getFinalScope();
+                    for (final ConfigProviderService provider : getConfigProviders(finalScope)) {
+                        final String value = provider.get(property, context, user).get();
+                        if (value != null) {
+                            return provider.getScope();
                         }
                     }
                     return null;

@@ -54,12 +54,15 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -86,37 +89,104 @@ public interface InfostoreFacade extends TransactionAware {
     /** Descending sort order */
     static final int DESC = -1;
 
+    /** Permission for documents; either due to folder or object permissions **/
+    static enum AccessPermission {
+        READ {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canReadObject();
+            }
+        },
+        WRITE {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canWriteObject();
+            }
+        },
+        DELETE {
+            @Override
+            public boolean appliesTo(EffectiveInfostorePermission effectivePermission) {
+                return effectivePermission.canDeleteObject();
+            }
+        },
+        ;
+
+        /**
+         * Checks if this permission applies to the passed effective infostore permission.
+         *
+         * @param effectivePermission The effective permission
+         * @return <code>true</code> if the permission applies
+         */
+        public abstract boolean appliesTo(EffectiveInfostorePermission effectivePermission);
+    }
+
     /**
-     * Checks if denoted document exists.
+     * Checks if denoted document exists and the sessions user can read it.
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
-     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @param session The session
+     * @return <code>true</code> if it exists and is visible; otherwise <code>false</code>
      * @throws OXException If checking for existence fails
      * @see #CURRENT_VERSION
      */
     boolean exists(int id, int version, ServerSession session) throws OXException;
 
     /**
+     * Checks if denoted document exists.
+     *
+     * @param id The identifier
+     * @param version The version
+     * @param context The context
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws OXException If checking for existence fails
+     * @see #CURRENT_VERSION
+     */
+    boolean exists(int id, int version, Context context) throws OXException;
+
+    /**
      * Gets the denoted document's meta data information.
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The session
+     * @return The meta data
+     * @throws OXException If operation fails
+     * @see #CURRENT_VERSION
+     * @deprecated use {@link InfostoreFacade#getDocument(int, int, long, long, ServerSession)} instead
+     */
+    @Deprecated
+    DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets the denoted document's meta data information.
+     *
+     * @param folderId The identifier of the parent folder
+     * @param id The identifier
+     * @param version The version
+     * @param session The session
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
      */
-    DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
+    DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets the denoted document's meta data information.<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param id The identifier
+     * @param version The version
+     * @param context The context
+     * @return The meta data
+     * @throws OXException If operation fails
+     * @see #CURRENT_VERSION
+     */
+    DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException;
 
     /**
      * Saves given document meta data.
-     * <p>
+     * <br>
      * <b>Note</b>: No <tt>modifiedColumns</tt> means all columns.
      *
      * @param document The meta data of the document
@@ -124,7 +194,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    int saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException;
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data
@@ -135,21 +205,59 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    int saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+    /**
+     * Saves given document meta data. This is currently only meant for updating existing documents. Trying to create a new one will throw
+     * an exception!<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param document The meta data of the document
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify; <code>null</code> means all columns.
+     * @param context The context
+     * @throws OXException If save operation fails
+     */
+    IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException;
 
     /**
      * Gets the document's binary content.
      *
      * @param id The identifier
      * @param version The version
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's binary content
      * @throws OXException If retrieving binary content fails
      * @see #CURRENT_VERSION
      */
     InputStream getDocument(int id, int version, ServerSession session) throws OXException;
+
+    /**
+     * Gets a doucment's stream including associated metadata, depending on the supplied client E-Tag, i.e. the document data is only
+     * included in the result in case the client has a stale E-Tag.
+     *
+     * @param id The identifier of the document to retrieve
+     * @param version The version of the document to retrieve
+     * @param clientETag The client E-Tag to compare the current E-Tag to
+     * @param session The session
+     * @return The document metadata, including the document's input stream in case the client E-Tag is outdated
+     * @deprecated use {@link InfostoreFacade#getDocumentAndMetadata(int, int, int, String, ServerSession) instead
+     */
+    @Deprecated
+    DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException;
+
+    /**
+     * Gets a doucment's stream including associated metadata, depending on the supplied client E-Tag, i.e. the document data is only
+     * included in the result in case the client has a stale E-Tag.
+     *
+     * @param folderId The identifier of the parent folder
+     * @param id The identifier of the document to retrieve
+     * @param version The version of the document to retrieve
+     * @param clientETag The client E-Tag to compare the current E-Tag to
+     * @param session The session
+     * @return The document metadata, including the document's input stream in case the client E-Tag is outdated
+     */
+    DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -160,7 +268,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -172,7 +280,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -185,7 +293,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If save operation fails
      */
-    int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
 
     /**
      * Removes all documents contained in specified folder.
@@ -206,7 +314,17 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    int[] removeDocument(int[] ids, long date, ServerSession session) throws OXException;
+    List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException;
+
+    /**
+     * Removes denoted documents.<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param ids The identifiers of the documents to remove
+     * @param context The context
+     * @throws OXException If remove operation fails
+     */
+    void removeDocuments(List<IDTuple> ids, Context context) throws OXException;
 
     /**
      * Moves denoted documents to another folder. Colliding filenames in the target folder may be renamed automatically.
@@ -219,7 +337,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The identifiers of those documents that could <b>not</b> be moved successfully
      * @throws OXException If remove operation fails
      */
-    int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
+    List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
 
     /**
      * Removes denoted versions.
@@ -249,13 +367,30 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param folderId The folder identifier
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
     TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException;
+
+    /**
+     * Gets the documents in a specific folder as seen by a user.
+     * <p/>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param folderId The folder identifier
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive)
+     * @param end The end index (exclusive)
+     * @param context The context
+     * @param user The user
+     * @param permissionBits The user permission bits
+     * @return The documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException;
 
     /**
      * Gets the sorted folder's documents.
@@ -264,21 +399,47 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
     TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException;
 
     /**
+     * Gets the sorted folder's documents.
+     *
+     * @param folderId The folder identifier
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive)
+     * @param end The end index (exclusive)
+     * @param session The associated session
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException;
+
+    /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity.
+     *
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive), or <code>-1</code> to start at the beginning
+     * @param end The end index (exclusive), or <code>-1</code> for no limitation
+     * @param session The associated session
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException;
+
+    /**
      * Gets the document's versions.
      *
      * @param id The document identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's version
      * @throws OXException If retrieval fails
      */
@@ -289,9 +450,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param id The document identifier
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
@@ -304,9 +463,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
@@ -317,13 +474,11 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param ids The identifiers
      * @param columns The columns to set in returned documents
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The documents
      * @throws OXException If retrieval fails
      */
-    TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
+    TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException;
 
     /**
      * Gets the folder's updated & deleted documents.
@@ -332,9 +487,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param updateSince The time stamp to consider
      * @param columns The columns to set in returned documents
      * @param ignoreDeleted Whether to ignore deleted ones
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
@@ -349,9 +502,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param sort The sort-by field
      * @param order The order; see {@link #ASC} or {@link #DESC}
      * @param ignoreDeleted Whether to ignore deleted ones
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
@@ -363,9 +514,7 @@ public interface InfostoreFacade extends TransactionAware {
      *
      * @param folderIds A list of folder IDs to get the sequence numbers for
      * @param versionsOnly <code>true</code> to only take documents with at least one version into account, <code>false</code>, otherwise
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return A map holding the resulting sequence numbers to each requested folder ID
      * @throws OXException
      */
@@ -375,9 +524,7 @@ public interface InfostoreFacade extends TransactionAware {
      * Gets the number of documents in given folder.
      *
      * @param folderId The folder identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return The number of documents
      * @throws OXException If operation fails
      */
@@ -387,9 +534,7 @@ public interface InfostoreFacade extends TransactionAware {
      * Signals if denoted folder contains documents not owned by specified user.
      *
      * @param folderId The folder identifier
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return <code>true</code> if folder contains documents not owned by specified user; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
@@ -474,9 +619,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @param version The version of the document. Pass {@link FileStorageFileAccess#CURRENT_VERSION} for the current version.
      * @param offset The start offset in bytes to read from the document, or <code>0</code> to start from the beginning
      * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
-     * @param ctx The context
-     * @param user The user
-     * @param userPermissions The user permissions
+     * @param session The associated session
      * @return An input stream for the content
      * @throws OXException
      */
@@ -493,5 +636,17 @@ public interface InfostoreFacade extends TransactionAware {
      * @param session The session
      * @throws OXException If operation fails
      */
-    int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
+    IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
+
+    /**
+     * Checks whether a user has a certain access permission for a certain file.
+     *
+     * @param id The ID of the document
+     * @param permission The permission
+     * @param user The user
+     * @param context The context
+     * @throws OXException If operation fails
+     */
+    boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException;
+
 }

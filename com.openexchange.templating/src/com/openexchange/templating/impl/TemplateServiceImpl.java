@@ -71,11 +71,14 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.io.FileUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
@@ -84,6 +87,7 @@ import com.openexchange.templating.OXTemplateImpl;
 import com.openexchange.templating.TemplateErrorMessage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import freemarker.template.Configuration;
@@ -569,5 +573,18 @@ public class TemplateServiceImpl implements TemplateService {
         Collections.sort(userTemplates);
         basicTemplateNames.addAll(userTemplates);
         return basicTemplateNames;
+    }
+    
+    @Override
+    public Pair<String, String> encodeTemplateImage(String imageName) throws OXException {
+        try {
+            File imageFile = new File(defaultTemplatePath, imageName);
+            String contentType = MimeType2ExtMap.getContentType(imageFile);
+            byte[] imageBytes = FileUtils.readFileToByteArray(imageFile);
+            String imageBase64 = Base64.encode(imageBytes);
+            return new Pair<String, String>(contentType, imageBase64);
+        } catch (IOException e) {
+            throw TemplateErrorMessage.IOException.create(e, e.getMessage());
+        }
     }
 }

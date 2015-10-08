@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.java.util.TimeZones;
 
 
 /**
@@ -74,9 +75,9 @@ import com.openexchange.folderstorage.mail.contentType.MailContentType;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements ContentTypeDiscoveryService {
-    
+
     private static final Map<String, ContentType> TYPES = new HashMap<String, ContentType>();
-    
+
     static {
         TYPES.put(CalendarContentType.getInstance().toString(), CalendarContentType.getInstance());
         TYPES.put(ContactContentType.getInstance().toString(), ContactContentType.getInstance());
@@ -104,7 +105,7 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
         } else {
             data = (JSONObject) response.getData();
             try {
-                folder = new FolderParser(this).parseFolder(data);
+                folder = new FolderParser(this).parseFolder(data, TimeZones.UTC);
             } catch (OXException e) {
                 throw new IllegalStateException("Could not parse folder response.", e);
             }
@@ -112,9 +113,19 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
 
         return new GetResponseNew(response, data, folder);
     }
-    
+
     @Override
     public ContentType getByString(String contentTypeString) {
         return TYPES.get(contentTypeString);
+    }
+
+    @Override
+    public ContentType getByModule(int module) {
+        for (ContentType type : TYPES.values()) {
+            if (type.getModule() == module) {
+                return type;
+            }
+        }
+        return null;
     }
 }

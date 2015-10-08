@@ -49,10 +49,12 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -72,10 +74,7 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public class Bug23610Test extends CalDAVTest {
 
-	public Bug23610Test(String name) {
-		super(name);
-	}
-
+	@Test
     public void testConfirmAppointment() throws Exception {
         for (int shownAs : new int[] { Appointment.FREE, Appointment.TEMPORARY, Appointment.RESERVED, Appointment.ABSENT }) {
             for (int confirmation : new int[] { Appointment.ACCEPT, Appointment.DECLINE, Appointment.TENTATIVE }) {

@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -65,7 +66,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface IDBasedFolderAccess extends TransactionAware {
+public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>
@@ -151,6 +152,8 @@ public interface IDBasedFolderAccess extends TransactionAware {
      */
     FileStorageFolder[] getRootFolders(Locale locale) throws OXException;
 
+    FileStorageFolder[] getUserSharedFolders() throws OXException;
+
     /**
      * Checks user's default folder as defined in user's file storage settings and creates them if any is missing.
      * <p>
@@ -163,7 +166,10 @@ public interface IDBasedFolderAccess extends TransactionAware {
     // void checkDefaultFolders() throws OXException;
 
     /**
-     * Creates a new file storage folder with attributes taken from given file storage folder description
+     * Creates a new file storage folder with attributes taken from given file storage folder description.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the capability to store an attribute, the creation fails with an
+     * exception.
      *
      * @param toCreate The file storage folder to create
      * @return The identifier of the created file storage folder
@@ -182,7 +188,7 @@ public interface IDBasedFolderAccess extends TransactionAware {
      * </ul>
      * Of course more folder attributes may be checked by implementation to enhance update operations.
      * <p>
-     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update fails with an exception.
      *
      * @param identifier The identifier of the file storage folder to update
      * @param toUpdate The file storage folder to update containing only the modified fields
@@ -224,6 +230,25 @@ public interface IDBasedFolderAccess extends TransactionAware {
      * @throws OXException If either folder does not exist or cannot be moved
      */
     String moveFolder(String folderId, String newParentId, String newName) throws OXException;
+
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
+     * it to the supplied new name.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.newName
+     * </pre>
+     *
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
+     * @param ignoreWarnings <code>true</code> to force the folder move even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    String moveFolder(String folderId, String newParentId, String newName, boolean ignoreWarnings) throws OXException;
 
     /**
      * Renames the folder identified through given identifier to the specified new name.

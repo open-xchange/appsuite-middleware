@@ -204,7 +204,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         expectedDocument.setFolderId(srcMailAttachmentFolder.getObjectID());
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         expectedDocument.setFileName(upload.getName());
-        itm.newAction(expectedDocument, upload);
+        itm.newAction(new com.openexchange.file.storage.infostore.InfostoreFile(expectedDocument), upload);
         client.logout();
     }
 

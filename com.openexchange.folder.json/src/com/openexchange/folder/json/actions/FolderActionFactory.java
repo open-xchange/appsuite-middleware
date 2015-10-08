@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -65,6 +66,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @Module(name = "folders", description = "Provides access to OX folder structure.")
+@OAuthModule
 public final class FolderActionFactory implements AJAXActionServiceFactory {
 
     private static final FolderActionFactory SINGLETON = new FolderActionFactory();
@@ -107,6 +109,8 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(UpdatesAction.ACTION, new UpdatesAction());
         tmp.put(VisibleFoldersAction.ACTION, new VisibleFoldersAction());
         tmp.put(SubscribeAction.ACTION, new SubscribeAction());
+        tmp.put(SharesAction.ACTION, new SharesAction());
+        tmp.put(NotifyAction.ACTION, new NotifyAction());
         return Collections.unmodifiableMap(tmp);
     }
 

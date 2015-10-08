@@ -54,36 +54,50 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * Convenience methods for servlets.
@@ -91,6 +105,10 @@ import com.openexchange.tools.encoding.Helper;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    public static final String COM_OPENEXCHANGE_CHECK_URL_PARAMS = "com.openexchange.check.url.params";
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * DateFormat for HTTP header.
@@ -139,6 +157,8 @@ public final class Tools {
      * Pragma HTTP header value.
      */
     private static final String PRAGMA_VALUE = "no-cache";
+
+    private static final AtomicReference<ConfigurationService> CONFIG_SERVICE_REF = new AtomicReference<ConfigurationService>();
 
     static {
         /*
@@ -225,7 +245,7 @@ public final class Tools {
     public static void setETag(final String eTag, final long expiry, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         if (null != eTag) {
-            resp.setHeader(NAME_ETAG, eTag); // ETag
+            resp.setHeader(NAME_ETAG, eTag);// ETag
         }
         if (expiry <= 0) {
             synchronized (HEADER_DATEFORMAT) {
@@ -289,7 +309,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_HOUR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600"); // 1 hour
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600");// 1 hour
     }
 
     /**
@@ -301,7 +321,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018");// 1 year
     }
 
     /**
@@ -486,7 +506,6 @@ public final class Tools {
             /*-
              * On socket layer characters are casted to byte values.
              *
-             * See AJPv13Response.writeString():
              * sink.write((byte) chars[i]);
              *
              * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
@@ -501,25 +520,6 @@ public final class Tools {
         }
 
         resp.setHeader("Content-Disposition", cd);
-    }
-
-    private static final class AuthCookie implements com.openexchange.authentication.Cookie {
-
-        private final Cookie cookie;
-
-        protected AuthCookie(final Cookie cookie) {
-            this.cookie = cookie;
-        }
-
-        @Override
-        public String getValue() {
-            return cookie.getValue();
-        }
-
-        @Override
-        public String getName() {
-            return cookie.getName();
-        }
     }
 
     public static interface CookieNameMatcher {
@@ -672,15 +672,54 @@ public final class Tools {
     }
 
     /**
+     * Creates a new {@link HostData} instance based on the given servlet request and an optional
+     * user information.
+     *
+     * @param servletRequest The servlet request
+     * @param contextId The context id or <code>-1</code> if none is available
+     * @param userId The user id or <code>-1</code> if none is available
+     * @param isGuest <code>true</code> to determine the hostname for guest users, <code>false</code>, otherwise
+     * @return The host data
+     */
+    public static HostData createHostData(HttpServletRequest request, int contextId, int userId, boolean isGuest) {
+        String host = determineHostname(request, contextId, userId, isGuest);
+        int port = request.getServerPort();
+        String dispatcherPrefix = determineServletPrefix();
+        boolean secure = considerSecure(request);
+        HttpSession httpSession = request.getSession(false);
+        String httpSessionID = null != httpSession ? httpSession.getId() : null;
+        String route = extractRoute(httpSessionID);
+        return new HostDataImpl(secure, host, port, httpSessionID, route, dispatcherPrefix);
+    }
+
+    /**
+     * Extracts a request's backend "route" based on the supplied HTTP session ID, falling back to this server's default backend route as
+     * configured via <code>com.openexchange.server.backendRoute</code>.
+     *
+     * @param httpSessionID The request's HTTP session ID, or <code>null</code> if unknown
+     * @return The route, e.g. <code>OX1</code>
+     */
+    public static String extractRoute(String httpSessionID) {
+        if (null != httpSessionID) {
+            int index = httpSessionID.indexOf('.');
+            if (0 < index && index < httpSessionID.length() - 1) {
+                return httpSessionID.substring(index + 1);
+            }
+        }
+        return determineBackendRoute();
+    }
+
+    /**
      * Sends an error response having a JSON body using given HTTP response
      *
      * @param httpResponse The HTTP response to use
      * @param statusCode The HTTP status code
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
-        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap(), body);
     }
 
     /**
@@ -691,10 +730,9 @@ public final class Tools {
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
-        httpResponse.reset();
-
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
         }
@@ -712,9 +750,10 @@ public final class Tools {
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
-        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap());
     }
 
     /**
@@ -724,9 +763,9 @@ public final class Tools {
      * @param statusCode The HTTP status code
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
-        httpResponse.reset();
         httpResponse.setContentType(null);
         for (Entry<String, String> header : additionalHeaders.entrySet()) {
             httpResponse.setHeader(header.getKey(), header.getValue());
@@ -737,14 +776,15 @@ public final class Tools {
 
     /**
      * Sends an HTML error page to HTTP response.
+     *
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @param desc The error description
      *
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
-        httpResponse.reset();
         httpResponse.setContentType("text/html; charset=UTF-8");
         httpResponse.setHeader("Content-Disposition", "inline");
         httpResponse.setStatus(statusCode);
@@ -795,6 +835,23 @@ public final class Tools {
         return sb.toString();
     }
 
+    /**
+     * Generates an empty HTML page for given arguments.
+     *
+     * @return An empty HTML page
+     */
+    public static String getEmptyPage() {
+        StringBuilder sb = new StringBuilder(128);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        sb.append("<title>A blank HTML page</title>").append(lineSep);
+        sb.append("<meta charset=\"utf-8\" />").append(lineSep);
+        sb.append("</head><body>").append(lineSep);
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
@@ -823,4 +880,121 @@ public final class Tools {
         return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
     }
 
+    private static String determineServletPrefix() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(Tools.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+
+                @Override
+                public String call(DispatcherPrefixService service) throws Exception {
+                    return service.getPrefix();
+                }
+            }, DispatcherPrefixService.DEFAULT_PREFIX);
+        } catch (ServiceException e) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+    }
+
+    private static String determineBackendRoute() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(Tools.class, SystemNameService.class, new ServiceUser<SystemNameService, String>() {
+
+                @Override
+                public String call(SystemNameService service) throws Exception {
+                    return service.getSystemName();
+                }
+            }, "OX1");
+        } catch (ServiceException e) {
+            return "OX1";
+        }
+    }
+
+    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId, final boolean isGuest) {
+        String hostname = null;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(Tools.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    if (isGuest) {
+                        return service.getGuestHostname(userId, contextId);
+                    } else {
+                        return service.getHostname(userId, contextId);
+                    }
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+
+        if (hostname == null) {
+            hostname = servletRequest.getServerName();
+        }
+
+        return hostname;
+    }
+
+    /**
+     * Checks the existence of the given parameters within the request URL and throws an exception if at least one param hurts this rule. If the {@link ConfigurationService} is <code>null</code> no check is performed
+     *
+     * @param req - the request to look for URL
+     * @param parameters - the URL parameter that should not occur
+     * @throws OXException - if the parameters was sent by the client
+     */
+    public static void checkNonExistence(final HttpServletRequest req, String... parameters) throws OXException {
+        ConfigurationService configService = CONFIG_SERVICE_REF.get();
+        if ((configService == null) || (req == null) || (parameters == null)) {
+            LOG.debug("One of the provided parameters is null. Return without checking parameters.");
+            return;
+        }
+        if (!configService.getBoolProperty(COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)) {
+            LOG.debug(COM_OPENEXCHANGE_CHECK_URL_PARAMS + " configured to false. return without checking parameters.");
+            return;
+        }
+
+        String queryString = req.getQueryString();
+        if ((queryString == null) || (queryString.isEmpty())) {
+            return;
+        }
+
+        Map<String, List<String>> parameterMap = null;
+        try {
+            parameterMap = splitQuery(queryString);
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("Unable to analyze query string. Will not check for undesired URI params.", e);
+            return;
+        }
+        if (parameterMap == null) {
+            return;
+        }
+
+        List<String> notAllowed = new ArrayList<>();
+        for (String parameter : parameters) {
+            if (parameterMap.containsKey(parameter)) {
+                notAllowed.add(parameter);
+            }
+        }
+
+        if (!notAllowed.isEmpty()) {
+            throw AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.create(Strings.concat(", ", notAllowed));
+        }
+    }
+
+    private static Map<String, List<String>> splitQuery(String queryString) throws UnsupportedEncodingException {
+        final Map<String, List<String>> queryPairs = new LinkedHashMap<String, List<String>>();
+        final String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            final int idx = pair.indexOf("=");
+            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), Charsets.UTF_8_NAME) : pair;
+            if (!queryPairs.containsKey(key)) {
+                queryPairs.put(key, new LinkedList<String>());
+            }
+            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), Charsets.UTF_8_NAME) : null;
+            queryPairs.get(key).add(value);
+        }
+        return queryPairs;
+    }
+
+    public static void setConfigurationService(final ConfigurationService configurationService) {
+        CONFIG_SERVICE_REF.set(configurationService);
+    }
 }

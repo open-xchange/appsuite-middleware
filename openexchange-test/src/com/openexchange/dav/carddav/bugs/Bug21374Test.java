@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -66,10 +68,11 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug21374Test extends CardDAVTest {
 
-	public Bug21374Test(String name) {
-		super(name);
+	public Bug21374Test() {
+		super();
 	}
 
+	@Test
 	public void testCreateWithProfession() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -87,7 +90,7 @@ public class Bug21374Test extends CardDAVTest {
    				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
 				"FN:" + firstName + " " + lastName + "\r\n" +
-				"TITLE:" + profession + "\r\n" +
+				"ROLE:" + profession + "\r\n" +
 				"UID:" + uid + "\r\n" +
 				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
 				"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
@@ -111,6 +114,6 @@ public class Bug21374Test extends CardDAVTest {
         assertEquals("N wrong", firstName, card.getGivenName());
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
-        assertEquals("TITLE wrong", profession, card.getVCard().getTitle().getTitle());
+        assertEquals("ROLE wrong", profession, card.getVCard().getRole().getRole());
 	}
 }

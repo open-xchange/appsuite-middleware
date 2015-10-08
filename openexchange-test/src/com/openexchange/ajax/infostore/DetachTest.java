@@ -1,7 +1,6 @@
 package com.openexchange.ajax.infostore;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -119,16 +118,16 @@ public class DetachTest extends InfostoreAJAXTest {
 	public void testUniqueFilenames() throws Exception {
 		final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-		final int id = clean.get(0);
+		final String id = clean.get(0);
 
 
 		Response res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("filename" , "blupp.properties"));
 		assertNoError(res);
 
-		final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
+		final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m("title" , "otherFile", "description","other_desc", "folder_id" ,	((Integer)folderId).toString()), upload, "text/plain");
 		clean.add(id2);
 
 		detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
-		
+
 	}
 }

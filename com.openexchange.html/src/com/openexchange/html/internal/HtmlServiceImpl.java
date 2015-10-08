@@ -51,19 +51,21 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,6 +80,7 @@ import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -101,6 +104,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.image.DroppingImageHandler;
+import com.openexchange.html.internal.image.ImageProcessor;
+import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
@@ -115,8 +121,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
-import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
@@ -142,7 +146,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * Member stuff
      */
 
-    private final Map<Character, String> htmlCharMap;
+    private final TIntObjectMap<String> htmlCharMap;
     private final Map<String, Character> htmlEntityMap;
     private final Tika tika;
     private final String lineSeparator;
@@ -158,108 +162,30 @@ public final class HtmlServiceImpl implements HtmlService {
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
         lineSeparator = System.getProperty("line.separator");
-        this.htmlCharMap = htmlCharMap;
+        {
+            TIntObjectMap<String> tmp = new TIntObjectHashMap<String>(htmlCharMap.size());
+            for (Map.Entry<Character, String> entry : htmlCharMap.entrySet()) {
+                tmp.put(entry.getKey().charValue(), entry.getValue());
+            }
+            this.htmlCharMap = tmp;
+        }
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
     }
-
-    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @Override
     public String replaceImages(final String content, final String sessionId) {
         if (null == content) {
             return null;
         }
-        try {
-            final Matcher imgMatcher = IMG_PATTERN.matcher(content);
-            if (imgMatcher.find()) {
-                /*
-                 * Check presence of ProxyRegistry
-                 */
-                final ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
-                if (null == proxyRegistry) {
-                    LOG.warn("Missing ProxyRegistry service. Replacing image URL skipped.");
-                    return content;
-                }
-                /*
-                 * Start replacing
-                 */
-                final StringBuilder sb = new StringBuilder(content.length());
-                int lastMatch = 0;
-                do {
-                    sb.append(content.substring(lastMatch, imgMatcher.start()));
-                    final String imgTag = imgMatcher.group();
-                    replaceSrcAttribute(imgTag, sessionId, sb, proxyRegistry);
-                    lastMatch = imgMatcher.end();
-                } while (imgMatcher.find());
-                sb.append(content.substring(lastMatch));
-                return sb.toString();
-            }
-
-        } catch (final Exception e) {
-            LOG.error("", e);
+        ProxyRegistry proxyRegistry = ProxyRegistryProvider.getInstance().getProxyRegistry();
+        if (null == proxyRegistry) {
+            LOG.warn("Missing ProxyRegistry service. Replacing image URL skipped.");
+            return content;
         }
-        return content;
-    }
-
-    private static final Pattern SRC_PATTERN = Pattern.compile(
-        "(?:src=\"([^\"]*)\")|(?:src='([^']*)')|(?:src=[^\"']([^\\s>]*))",
-        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    private static String replaceSrcAttribute(final String imgTag, final String sessionId, final StringBuilder sb, final ProxyRegistry proxyRegistry) {
-        final Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
-        int lastMatch = 0;
-        if (srcMatcher.find()) {
-            /*
-             * 'src' attribute found
-             */
-            sb.append(imgTag.substring(lastMatch, srcMatcher.start()));
-            try {
-                /*
-                 * Extract URL
-                 */
-                int group = 1;
-                String urlStr = srcMatcher.group(group);
-                if (urlStr == null) {
-                    urlStr = srcMatcher.group(++group);
-                    if (urlStr == null) {
-                        urlStr = srcMatcher.group(++group);
-                    }
-                }
-                /*
-                 * Check for an inline image
-                 */
-                if (urlStr.toLowerCase(Locale.ENGLISH).startsWith("cid", 0)) {
-                    sb.append(srcMatcher.group());
-                } else {
-                    /*
-                     * Add proxy registration
-                     */
-                    final URL imageUrl = new URL(urlStr);
-                    final URI uri = proxyRegistry.register(new ProxyRegistration(
-                        imageUrl,
-                        sessionId,
-                        ImageContentTypeRestriction.getInstance()));
-                    /*
-                     * Compose replacement
-                     */
-                    sb.append("src=\"").append(uri.toString()).append('"');
-                }
-            } catch (final MalformedURLException e) {
-                LOG.debug("Invalid URL found in \"img\" tag: {}. Keeping original content.", imgTag, e);
-                sb.append(srcMatcher.group());
-            } catch (final OXException e) {
-                LOG.warn("Proxy registration failed for \"img\" tag: {}", imgTag, e);
-                sb.append(srcMatcher.group());
-            } catch (final Exception e) {
-                LOG.warn("URL replacement failed for \"img\" tag: {}", imgTag, e);
-                sb.append(srcMatcher.group());
-            }
-            lastMatch = srcMatcher.end();
-        }
-        sb.append(imgTag.substring(lastMatch));
-        return sb.toString();
+        ProxyRegistryImageHandler handler = new ProxyRegistryImageHandler(sessionId, proxyRegistry);
+        return ImageProcessor.getInstance().replaceImages(content, handler);
     }
 
     @Override
@@ -616,11 +542,24 @@ public final class HtmlServiceImpl implements HtmlService {
                 FilterJerichoHandler handler = getHandlerFor(html.length(), optConfigName);
                 handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix).setMaxContentSize(maxContentSize);
 
+                // Drop external images using regular expression
+                if (dropExternalImages) {
+                    DroppingImageHandler imageHandler = new DroppingImageHandler();
+                    html = ImageProcessor.getInstance().replaceImages(html, imageHandler);
+                    if (null != modified) {
+                        modified[0] |= imageHandler.isModified();
+                    }
+                }
+
                 // Parse the HTML content
                 JerichoParser.getInstance().parse(html, handler, maxContentSize <= 0);
+
+                // Check if modified by handler
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
+
+                // Get HTML content
                 html = handler.getHTML();
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
@@ -725,7 +664,31 @@ public final class HtmlServiceImpl implements HtmlService {
             prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
-            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            Renderer renderer = new Renderer(new Segment(new Source(prepared), 0, prepared.length())) {
+                @Override
+                public String renderHyperlinkURL(final StartTag startTag) {
+                    /*
+                     * The default returns the 'href' content in angle brackets, i.e.
+                     * <a href="http://www.example.com">Link</a> is transformed into
+                     * <http://www.example.com>. Some web mailers tend to remove text
+                     * within angle brackets in plain text modes, which leads to missing
+                     * links in plain text replies/forwards. We override this behavior
+                     * here, to return the href content as is as described in the JavaDoc
+                     * of Renderer().renderHyperlinkURL(StartTag).
+                     */
+                    final String href=startTag.getAttributeValue("href");
+                    if (href==null || href.startsWith("javascript:")) return null;
+                    try {
+                        URI uri=new URI(href);
+                        if (!uri.isAbsolute()) return null;
+                    } catch (URISyntaxException ex) {
+                        return null;
+                    }
+                    return href;
+                }
+            };
+            renderer.setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref);
+            String text = quoteText(renderer.toString());
             // Drop heading whitespaces
             text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
             // ... but keep enforced ones
@@ -964,29 +927,37 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
-        final int length = s.length();
-        final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
+        int length = s.length();
+        TIntObjectMap<String> htmlChar2EntityMap = htmlCharMap;
+
+        int i = 0;
         if (withQuote) {
-            for (int i = 0; i < length; i++) {
-                final char c = s.charAt(i);
-                final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
-                if (entity == null) {
-                    sb.append(c);
-                } else {
+            for (int k = length; k-- > 0; i++) {
+                char c = s.charAt(i);
+                String entity = htmlChar2EntityMap.get(c);
+                if (entity != null) {
                     sb.append('&').append(entity).append(';');
+                } else if (c > 127) {
+                    // Non-ASCII character
+                    sb.append("&#").append((int) c).append(';');
+                } else {
+                    sb.append(c);
                 }
             }
         } else {
-            for (int i = 0; i < length; i++) {
-                final char c = s.charAt(i);
+            for (int k = length; k-- > 0; i++) {
+                char c = s.charAt(i);
                 if ('"' == c) {
                     sb.append(c);
                 } else {
-                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
-                    if (entity == null) {
-                        sb.append(c);
-                    } else {
+                    String entity = htmlChar2EntityMap.get(c);
+                    if (entity != null) {
                         sb.append('&').append(entity).append(';');
+                    } else if (c > 127) {
+                        // Non-ASCII character
+                        sb.append("&#").append((int) c).append(';');
+                    } else {
+                        sb.append(c);
                     }
                 }
             }
@@ -1199,7 +1170,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Convert to absolute URIs
          */
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
-        m = IMG_PATTERN.matcher(html);
+        m = ImageProcessor.getInstance().getImgPattern().matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
         final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
         if (m.find()) {
@@ -1465,28 +1436,27 @@ public final class HtmlServiceImpl implements HtmlService {
         html = validate(html);
 
         // Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
-        final int headTagLen = TAG_S_HEAD.length();
-        final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
+        int headTagLen = TAG_S_HEAD.length();
+        int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
-            final int end = html.indexOf(TAG_E_HEAD);
-            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type")) {
-                final StringBuilder sb = new StringBuilder(html);
-                final String cs;
-                if (null == charset) {
-                    LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
-                    cs = CHARSET_UTF_8;
-                } else {
-                    cs = charset;
-                }
-                /*-
-                 * In reverse order:
-                 *
-                 * "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + <charset> + "\" />\r\n "
-                 *
-                 */
-                sb.insert(start, "\" />\r\n ");
+            int end = html.indexOf(TAG_E_HEAD);
+            if (!occursWithin(html, start, end, true, "http-equiv=\"content-type\"", "http-equiv=content-type", "charset=\"UTF-8\"", "charset=UTF-8")) {
+                StringBuilder sb = new StringBuilder(html);
+                String cs = null == charset ? CHARSET_UTF_8 : charset;
+
+                // Append in reverse order
+                sb.insert(start, Strings.getLineSeparator());
+                sb.insert(start, "\">").append(Strings.getLineSeparator()).append(' ');
                 sb.insert(start, cs);
-                sb.insert(start, "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
+
+                if (html.indexOf("<!DOCTYPE html>") >= 0) {
+                    sb.insert(start, "<meta charset=\"");
+                } else {
+                    sb.insert(start, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
+                }
+
+                sb.insert(start, "    ");
+                sb.insert(start, Strings.getLineSeparator());
                 html = sb.toString();
             }
         }
@@ -1539,15 +1509,17 @@ public final class HtmlServiceImpl implements HtmlService {
         return outputDocument.toString();
     }
 
-    private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
-        final String source = ignorecase ? str.toLowerCase(Locale.US) : str;
+    private static boolean occursWithin(String str, int start, int end, boolean ignorecase, String... searchStrings) {
+        String source = ignorecase ? Strings.asciiLowerCase(str) : str;
+
         int index;
-        for (final String searchString : searchStrings) {
-            final String searchMe = ignorecase ? searchString.toLowerCase(Locale.US) : searchString;
+        for (String searchString : searchStrings) {
+            String searchMe = ignorecase ? Strings.asciiLowerCase(searchString) : searchString;
             if (((index = source.indexOf(searchMe, start)) >= start) && ((index + searchMe.length()) < end)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -1903,7 +1875,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return new SimpleHtmlSerializer(newCleanerProperties());
     }
 
-    private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
+    private static final String DOCTYPE_DECL = "<!DOCTYPE html>" + Strings.getLineSeparator();
 
     private static final List<Pattern> P_HTMLE = Collections.unmodifiableList(Arrays.asList(
         Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE),
@@ -1970,13 +1942,6 @@ public final class HtmlServiceImpl implements HtmlService {
             String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
-
-            // Check for presence of HTML namespace
-            if (!htmlNode.hasAttribute("xmlns")) {
-                final Map<String, String> attributes = new HashMap<String, String>(1);
-                attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
-                htmlNode.setAttributes(attributes);
-            }
 
             // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());

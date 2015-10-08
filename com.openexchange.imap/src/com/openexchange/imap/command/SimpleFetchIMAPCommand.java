@@ -72,6 +72,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -141,7 +142,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -149,7 +150,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false);
+        command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
         map = new TLongObjectHashMap<MailMessage>(length);
@@ -170,7 +171,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -182,11 +183,11 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         map = new TLongObjectHashMap<MailMessage>(length);
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
@@ -834,10 +835,11 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @param serverInfo The IMAP server information
      * @return The FETCH items to craft a FETCH command
      */
-    private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody);
+    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo);
     }
 
     /**

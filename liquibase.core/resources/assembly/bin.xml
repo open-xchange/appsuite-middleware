@@ -68,7 +68,7 @@
         <dependencySet>
             <outputDirectory>sdk/lib-sdk</outputDirectory>
             <excludes>
-                <exclude>org.liquibase:liquibase-core</exclude>
+                <exclude>org.liquibase:liquibase.core</exclude>
                 <exclude>org.yaml:snakeyaml</exclude>
             </excludes>
         </dependencySet>

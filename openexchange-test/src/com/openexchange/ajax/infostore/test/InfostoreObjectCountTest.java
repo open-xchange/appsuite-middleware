@@ -53,10 +53,12 @@ import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.folder.AbstractObjectCountTest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
 /**
@@ -87,7 +89,7 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             int objectsInFolder = folder.getTotal();
             assertEquals("Wrong object count", 0, objectsInFolder);
 
-            DocumentMetadata expected = createDocumentMetadata(folder);
+            File expected = createDocumentMetadata(folder);
             infostoreTestManager.newAction(expected);
 
             Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
@@ -109,7 +111,7 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
-            DocumentMetadata expected = createDocumentMetadata(folder);
+            File expected = createDocumentMetadata(folder);
 
             infostoreTestManager.newAction(expected);
             infostoreTestManager.newAction(expected);
@@ -131,11 +133,31 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
         FolderTestManager folderTestManager = new FolderTestManager(client1);
 
         try {
-            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId(), folderTestManager);
+            OCLPermission permissionUser1 = new OCLPermission();
+            permissionUser1.setEntity(client1.getValues().getUserId());
+            permissionUser1.setGroupPermission(false);
+            permissionUser1.setFolderAdmin(true);
+            permissionUser1.setAllPermission(
+                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+                OCLPermission.READ_ALL_OBJECTS,
+                OCLPermission.WRITE_ALL_OBJECTS,
+                OCLPermission.DELETE_ALL_OBJECTS);
+
+            OCLPermission permissionUser2 = new OCLPermission();
+            permissionUser2.setEntity(client2.getValues().getUserId());
+            permissionUser2.setGroupPermission(false);
+            permissionUser2.setFolderAdmin(false);
+            permissionUser2.setAllPermission(
+                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+                OCLPermission.READ_OWN_OBJECTS,
+                OCLPermission.WRITE_ALL_OBJECTS,
+                OCLPermission.DELETE_ALL_OBJECTS);
+
+            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, folderTestManager, permissionUser1, permissionUser2);
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
-            DocumentMetadata expected = createDocumentMetadata(folder);
+            File expected = createDocumentMetadata(folder);
             infostoreTestManager.newAction(expected);
             infostoreTestManager.newAction(expected);
             infostoreTestManager.newAction(expected);
@@ -159,11 +181,31 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
         FolderTestManager folderTestManager = new FolderTestManager(client1);
 
         try {
-            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, client2.getValues().getUserId(), folderTestManager);
+            OCLPermission permissionUser1 = new OCLPermission();
+            permissionUser1.setEntity(client1.getValues().getUserId());
+            permissionUser1.setGroupPermission(false);
+            permissionUser1.setFolderAdmin(true);
+            permissionUser1.setAllPermission(
+                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+                OCLPermission.READ_OWN_OBJECTS,
+                OCLPermission.WRITE_ALL_OBJECTS,
+                OCLPermission.DELETE_ALL_OBJECTS);
+
+            OCLPermission permissionUser2 = new OCLPermission();
+            permissionUser2.setEntity(client2.getValues().getUserId());
+            permissionUser2.setGroupPermission(false);
+            permissionUser2.setFolderAdmin(false);
+            permissionUser2.setAllPermission(
+                OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+                OCLPermission.READ_OWN_OBJECTS,
+                OCLPermission.WRITE_ALL_OBJECTS,
+                OCLPermission.DELETE_ALL_OBJECTS);
+
+            FolderObject created = createSharedFolder(client1, FolderObject.INFOSTORE, folderTestManager, permissionUser1, permissionUser2);
             Folder folder = getFolder(client2, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
 
-            DocumentMetadata expected = createDocumentMetadata(folder);
+            File expected = createDocumentMetadata(folder);
             infostoreTestManager.newAction(expected);
             infostoreTestManager.newAction(expected);
             infostoreTestManager.newAction(expected);
@@ -187,10 +229,10 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
      * @param folder - the folder to create the {@link DocumentMetadata} for
      * @return {@link DocumentMetadata} - created object
      */
-    private DocumentMetadata createDocumentMetadata(Folder folder) {
-        DocumentMetadata expected = new DocumentMetadataImpl();
-        expected.setCreationDate(new Date());
-        expected.setFolderId(Long.parseLong(folder.getID()));
+    private File createDocumentMetadata(Folder folder) {
+        File expected = new DefaultFile();
+        expected.setCreated(new Date());
+        expected.setFolderId(folder.getID());
         expected.setTitle("InfostoreCountTest Item");
         expected.setLastModified(new Date());
         return expected;

@@ -65,8 +65,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.smtp.config.ISMTPProperties;
+import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -76,8 +78,27 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class SMTPCapabilityCache {
 
-    static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(SMTPCapabilityCache.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPCapabilityCache.class);
+
+    private static volatile Integer capabiltiesCacheIdleTime;
+    private static int capabiltiesCacheIdleTime() {
+        Integer tmp = capabiltiesCacheIdleTime;
+        if (null == tmp) {
+            synchronized (SMTPCapabilityCache.class) {
+                tmp = capabiltiesCacheIdleTime;
+                if (null == tmp) {
+                    int defaultValue = 0; // Do not check again
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.smtp.capabiltiesCacheIdleTime", defaultValue));
+                    capabiltiesCacheIdleTime = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     private static volatile ConcurrentMap<InetSocketAddress, Future<Capabilities>> MAP;
 
@@ -140,27 +161,59 @@ public final class SMTPCapabilityCache {
     }
 
     private static Capabilities getCapabilities0(final InetSocketAddress address, final boolean isSecure, final ISMTPProperties smtpProperties, final String domain) throws IOException {
-        final ConcurrentMap<InetSocketAddress, Future<Capabilities>> map = MAP;
+        int idleTime = capabiltiesCacheIdleTime();
+        if (idleTime < 0 ) {
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityAndGreetingCallable(address, isSecure, smtpProperties, domain));
+            ft.run();
+            return getFrom(ft);
+        }
+
+        ConcurrentMap<InetSocketAddress, Future<Capabilities>> map = MAP;
+
         Future<Capabilities> f = map.get(address);
         if (null == f) {
-            final FutureTask<Capabilities> ft =
-                new FutureTask<Capabilities>(new CapabilityAndGreetingCallable(address, isSecure, smtpProperties, domain));
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityAndGreetingCallable(address, isSecure, smtpProperties, domain));
             f = map.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
             }
         }
+
+        Capabilities caps = getFrom(f);
+        if (isElapsed(caps, idleTime)) {
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityAndGreetingCallable(address, isSecure, smtpProperties, domain));
+            if (map.replace(address, f, ft)) {
+                f = ft;
+                ft.run();
+            } else {
+                f = map.get(address);
+            }
+            caps = getFrom(f);
+        }
+
+        return caps;
+    }
+
+    private static boolean isElapsed(Capabilities caps, int idleTime) {
+        if (idleTime == 0) {
+            return false; // never
+        }
+        // Check if elapsed
+        return ((System.currentTimeMillis() - caps.getStamp()) > idleTime);
+    }
+
+    private static Capabilities getFrom(Future<Capabilities> f) throws IOException, Error {
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw new IOException(e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw new IOException(e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw ((IOException) cause);
             }
@@ -309,6 +362,7 @@ public final class SMTPCapabilityCache {
     private static final class Capabilities {
 
         private final Map<String, String> capabilities;
+        private final long stamp;
 
         public Capabilities(final String sCapabilities) {
             super();
@@ -321,9 +375,14 @@ public final class SMTPCapabilityCache {
                 }
             }
             this.capabilities = Collections.unmodifiableMap(capabilities);
+            this.stamp = System.currentTimeMillis();
         }
 
-        public Map<String, String> getCapabilities() {
+        long getStamp() {
+            return stamp;
+        }
+
+        Map<String, String> getCapabilities() {
             return capabilities;
         }
 

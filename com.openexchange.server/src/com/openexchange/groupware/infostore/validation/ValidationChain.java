@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author francisco.laguna@open-xchange.com
@@ -70,16 +71,30 @@ public class ValidationChain {
 
     private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
 
+    /**
+     * Initializes a new {@link ValidationChain}.
+     *
+     * @param validators The validators to add to the chain
+     */
+    public ValidationChain(InfostoreValidator...validators) {
+        super();
+        if (null != validators && 0 < validators.length) {
+            for (InfostoreValidator validator : validators) {
+                this.validators.add(validator);
+            }
+        }
+    }
+
     public void add(final InfostoreValidator validator) {
         validators.add(validator);
     }
 
-    public void validate(final DocumentMetadata metadata) throws OXException {
+    public void validate(ServerSession session, DocumentMetadata metadata) throws OXException {
         final StringBuilder message = new StringBuilder();
         boolean failed = false;
         OXException exception = null;
         for (final InfostoreValidator validator : validators) {
-            final DocumentMetadataValidation validation = validator.validate(metadata);
+            final DocumentMetadataValidation validation = validator.validate(session, metadata);
             if (!validation.isValid()) {
                 {
                     OXException fatalException = validation.getFatalException();

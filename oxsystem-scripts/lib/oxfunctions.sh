@@ -65,6 +65,25 @@ ox_set_JAVA_BIN() {
         fi
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
+    minor_version=$(detect_minor_java_version)
+    if [ $minor_version -lt 7 ]; then
+      JAVA_BIN=/opt/open-xchange/sbin/insufficientjava
+    fi
+}
+
+# Detect the minor version of the selected JVM
+#
+# JVMs output e.g: java version "1.7.0_80" as part of their version
+# specification. From this line we simply extract the minor version
+# which would be 7 in this case.
+#
+# Returns the detected minor version or -1 if it can't be detected
+function detect_minor_java_version () {
+    version_line_array=( $($JAVA_BIN -version 2>&1 | grep version) )
+    unquoted_version=${version_line_array[2]//\"/}
+    version_components=( ${unquoted_version//./ } )
+    major=${version_components[1]}
+    echo ${major:--1}
 }
 
 DEBIAN=1
@@ -319,7 +338,8 @@ ox_exists_property() {
     test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_exists_property: $propfile does not exist"
 
-    grep -E "^$prop *[:=]" $propfile >/dev/null || return 1
+    local escaped=$(sed 's/[]\.|$(){}?+*^[]/\\&/g' <<< "$prop")
+    grep -E "^$escaped *[:=]" $propfile >/dev/null || return 1
 }
 
 # savely find key/val in keys and values containing all kind of ugly chars

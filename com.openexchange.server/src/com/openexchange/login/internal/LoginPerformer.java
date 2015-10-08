@@ -60,6 +60,7 @@ import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
@@ -72,9 +73,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
@@ -158,17 +161,19 @@ public final class LoginPerformer {
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
-        final LoginResultImpl retval = new LoginResultImpl();
+        LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
-            final Map<String, List<String>> headers = request.getHeaders();
+            Map<String, List<String>> headers = request.getHeaders();
             if (headers != null) {
                 properties.put("headers", headers);
             }
-            final Cookie[] cookies = request.getCookies();
+            Cookie[] cookies = request.getCookies();
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
+            String userLoginLanguage = request.getLanguage();
+            boolean storeLanguage = request.isStoreLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -184,21 +189,44 @@ public final class LoginPerformer {
                     return retval;
                 }
             }
-            final Context ctx = findContext(authed.getContextInfo());
-            retval.setContext(ctx);
-            final String username = authed.getUserInfo();
-            final User user = findUser(ctx, username);
-            retval.setUser(user);
-            // Checks if something is deactivated.
-            final AuthorizationService authService = Authorization.getService();
-            if (null == authService) {
-                final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
-                LOG.error("unable to find AuthorizationService", e);
-                throw e;
+
+            // Get user & context
+            Context ctx;
+            User user;
+            if (GuestAuthenticated.class.isInstance(authed)) {
+                // use already resolved user / context
+                GuestAuthenticated guestAuthenticated = (GuestAuthenticated) authed;
+                ctx = getContext(guestAuthenticated.getContextID());
+                user = getUser(ctx, guestAuthenticated.getUserID());
+            } else {
+                // Perform user / context lookup
+                ctx = findContext(authed.getContextInfo());
+                user = findUser(ctx, authed.getUserInfo());
+
+                // Checks if something is deactivated.
+                AuthorizationService authService = Authorization.getService();
+                if (null == authService) {
+                    final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
+                    LOG.error("unable to find AuthorizationService", e);
+                    throw e;
+                }
+
+                // Authorize
+                authService.authorizeUser(ctx, user);
             }
-            authService.authorizeUser(ctx, user);
+            if (storeLanguage && !Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+                UserStorage us = UserStorage.getInstance();
+                UserImpl impl = new UserImpl(user);
+                impl.setPreferredLanguage(userLoginLanguage);
+                us.updateUser(impl, ctx);
+                user = impl;
+            }
+            retval.setContext(ctx);
+            retval.setUser(user);
+
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
+
             // Check needed service
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
@@ -208,11 +236,11 @@ public final class LoginPerformer {
                     throw ServiceExceptionCode.absentService(SessiondService.class);
                 }
             }
-            AddSessionParameterImpl addSession = new AddSessionParameterImpl(username, request, user, ctx);
+            AddSessionParameterImpl addSession = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
             if (SessionEnhancement.class.isInstance(authed)) {
                 addSession.setEnhancement((SessionEnhancement) authed);
             }
-            final Session session = sessiondService.addSession(addSession);
+            Session session = sessiondService.addSession(addSession);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -223,19 +251,25 @@ public final class LoginPerformer {
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 LOG.error(e.getLogMessage(), e);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {
             logLoginRequest(request, retval);
         }
     }
 
-    private static void sanityChecks(LoginRequest request) throws OXException {
+    /**
+     * Performs sanity checks
+     *
+     * @param request The request to check
+     * @throws OXException If a sanity check fails
+     */
+    public static void sanityChecks(LoginRequest request) throws OXException {
         // Check if somebody is using the User-Agent as client parameter
         String client = request.getClient();
         if (null != client && client.equals(request.getUserAgent())) {
@@ -243,7 +277,15 @@ public final class LoginPerformer {
         }
     }
 
-    private static void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
+    /**
+     * Checks given request's client
+     *
+     * @param request The request
+     * @param user The resolved user
+     * @param ctx The resolved context
+     * @throws OXException If check fails
+     */
+    public static void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
         final String client = request.getClient();
         // Check for OLOX v2.0
         if ("USM-JSON".equalsIgnoreCase(client)) {
@@ -261,7 +303,7 @@ public final class LoginPerformer {
      *
      * @param contextInfo The context info (as usually supplied in the login name)
      * @return The context
-     * @throws OXException
+     * @throws OXException If context look-up fails
      */
     public static Context findContext(String contextInfo) throws OXException {
         ContextStorage contextStor = ContextStorage.getInstance();
@@ -284,8 +326,8 @@ public final class LoginPerformer {
      *
      * @param ctx The context
      * @param userInfo The user info (as usually supplied in the login name)
-     * @return The context
-     * @throws OXException
+     * @return The user
+     * @throws OXException If user look-up fails
      */
     public static User findUser(Context ctx, String userInfo) throws OXException {
         String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
@@ -299,6 +341,33 @@ public final class LoginPerformer {
         }
 
         return us.getUser(userId, ctx);
+    }
+
+    /**
+     * Gets a context by it's identifier from the context storage.
+     *
+     * @param contextID The context ID
+     * @return The context
+     * @throws OXException
+     */
+    private static Context getContext(int contextID) throws OXException {
+        final Context context = ContextStorage.getInstance().getContext(contextID);
+        if (null == context) {
+            throw ContextExceptionCodes.NOT_FOUND.create(I(contextID));
+        }
+        return context;
+    }
+
+    /**
+     * Gets a user by it's identifier from the user storage.
+     *
+     * @param ctx The context
+     * @param userID The user ID
+     * @return The user
+     * @throws OXException
+     */
+    private static User getUser(Context ctx, int userID) throws OXException {
+        return UserStorage.getInstance().getUser(userID, ctx);
     }
 
     /**
@@ -344,7 +413,12 @@ public final class LoginPerformer {
         return session;
     }
 
-    private static void triggerLoginHandlers(final LoginResult login) {
+    /**
+     * Triggers the login handlers
+     *
+     * @param login The login
+     */
+    public static void triggerLoginHandlers(final LoginResult login) {
         final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
@@ -468,7 +542,25 @@ public final class LoginPerformer {
                 handler.handleLogout(login);
             }
         } catch (final OXException e) {
-            e.log(LOG);
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }

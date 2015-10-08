@@ -903,5 +903,4 @@ public class SAMLWebSSOProviderTest {
         }
 
     }
-
 }

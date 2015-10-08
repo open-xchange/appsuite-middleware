@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -62,11 +60,21 @@ import java.util.concurrent.FutureTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -235,7 +243,9 @@ public final class Tools {
      *
      * @param perm The permission
      * @return The bits calculated from given permission
+     * @deprecated Deprecated as of 7.8.0. Use {@link Permissions#createPermissionBits(Permission)}
      */
+    @Deprecated
     public static int createPermissionBits(final Permission perm) {
         return createPermissionBits(
             perm.getFolderPermission(),
@@ -246,22 +256,6 @@ public final class Tools {
     }
 
     /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final TIntIntMap MAPPING = new TIntIntHashMap(6) {
-        { //Unnamed Block.
-            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
-            put(MAX_PERMISSION, MAX_PERMISSION);
-            put(0, 0);
-            put(2, 1);
-            put(4, 2);
-            put(8, 4);
-        }
-    };
-
-    /**
      * Calculates the bits from given permissions.
      *
      * @param fp The folder permission
@@ -270,16 +264,12 @@ public final class Tools {
      * @param dp The delete permission
      * @param adminFlag <code>true</code> if admin access; otherwise <code>false</code>
      * @return The bits calculated from given permissions
+     *
+     * @deprecated Deprecated as of 7.8.0. Use {@link Permissions#createPermissionBits(int, int, int, int, boolean)}
      */
+    @Deprecated
     public static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
-        int retval = 0;
-        int i = 4;
-        retval += (adminFlag ? 1 : 0) << (i-- * 7)/*Number of bits to be shifted*/;
-        retval += MAPPING.get(dp) << (i-- * 7);
-        retval += MAPPING.get(wp) << (i-- * 7);
-        retval += MAPPING.get(rp) << (i-- * 7);
-        retval += MAPPING.get(fp) << (i * 7);
-        return retval;
+        return Permissions.createPermissionBits(fp, rp, wp, dp, adminFlag);
     }
 
     /**
@@ -321,11 +311,38 @@ public final class Tools {
         if (InfostoreContentType.class.isInstance(contentType)) {
             if (TrashType.getInstance().equals(type)) {
                 return "modules/infostore/folder/trash";
+            } else if (DocumentsType.getInstance().equals(type)) {
+                return "modules/infostore/folder/documents";
+            } else if (TemplatesType.getInstance().equals(type)) {
+                return "modules/infostore/folder/templates";
+            } else if (VideosType.getInstance().equals(type)) {
+                return "modules/infostore/folder/videos";
+            } else if (MusicType.getInstance().equals(type)) {
+                return "modules/infostore/folder/music";
+            } else if (PicturesType.getInstance().equals(type)) {
+                return "modules/infostore/folder/pictures";
             } else  {
                 return "folder/infostore";
             }
         }
         return null;
+    }
+
+    /**
+     * Tries to get the host data of the according HTTP request.
+     *
+     * @param session The session or <code>null</code>
+     * @return The host data or <code>null</code> if none could be determined
+     */
+    public static HostData getHostData(Session session) {
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (requestContext == null) {
+            if (session != null) {
+                return (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            }
+        }
+
+        return requestContext.getHostData();
     }
 
 }

@@ -140,7 +140,6 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] { DBJSlobCreateTableTask.class.getName() };
     }
-
 }

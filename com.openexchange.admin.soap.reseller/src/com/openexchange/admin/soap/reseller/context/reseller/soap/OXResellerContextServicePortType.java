@@ -22,6 +22,15 @@ import javax.xml.ws.ResponseWrapper;
 public interface OXResellerContextServicePortType {
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:listQuota", output = "urn:listQuotaResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listQuotaInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:listQuotaDuplicateExtensionException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listQuotaNoSuchContextException"), @FaultAction(className = StorageException_Exception.class, value = "urn:listQuotaStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listQuotaRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listQuotaInvalidDataException")})
+    @WebMethod(action = "urn:listQuota")
+    @ResponseWrapper(localName = "listResponse", targetNamespace = "http://soap.reseller.admin.openexchange.com", className = "com.openexchange.admin.soap.reseller.context.reseller.soap.ListQuotaResponse")
+    public java.util.List<com.openexchange.admin.soap.reseller.context.soap.dataobjects.Quota> listQuota(
+        @WebParam(partName = "parameters", name = "listQuota", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        ListQuota parameters
+    ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
+
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:change", output = "urn:changeResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeInvalidCredentialsException"), @FaultAction(className = DuplicateExtensionException_Exception.class, value = "urn:changeDuplicateExtensionException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeNoSuchContextException"), @FaultAction(className = StorageException_Exception.class, value = "urn:changeStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeRemoteException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeInvalidDataException")})
     @WebMethod(action = "urn:change")
     public void change(
@@ -146,7 +155,9 @@ public interface OXResellerContextServicePortType {
         @WebParam(name = "admin_user", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
@@ -162,7 +173,9 @@ public interface OXResellerContextServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.context.soap.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")
@@ -190,7 +203,9 @@ public interface OXResellerContextServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception, ContextExistsException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")

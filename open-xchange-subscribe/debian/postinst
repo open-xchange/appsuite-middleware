@@ -17,7 +17,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-CRAWLERCONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties"
+CRAWLERCONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties"
 
 for FILE in ${CRAWLERCONFFILES}; do
     dpkg-maintscript-helper mv_conffile "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}" 6.20.99 \
@@ -47,9 +47,6 @@ dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/xing.yml 7.6.
 
 # SoftwareChange_Request-2154
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/msnsubscribe.properties 7.6.1~ -- "$@"
-
-# SoftwareChange_Request-2444
-dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/facebooksubscribe.properties 7.6.2~ -- "$@"
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -149,6 +146,15 @@ postFix() {
             ox_remove_property $prop $pfile
         fi
     done
+    
+    # SoftwareChange_Request-2470
+    ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
+
+    # SoftwareChange_Request-2670
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/t-online.yml 7.8.0~ -- "$@"
+    ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
+    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
+    
 }
 
 setConfigFilePermissions() {

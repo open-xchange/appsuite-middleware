@@ -1360,7 +1360,7 @@ public final class IMAPException extends OXException {
             // Delegate to MIME handling
             return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
         }
-        final String message = toLowerCase(e.getMessage());
+        final String message = com.openexchange.java.Strings.toLowerCase(e.getMessage());
         if (null != message) {
             // Check for absent folder
             if (message.indexOf("not found") >= 0 || (message.indexOf("mailbox") >= 0 && (message.indexOf("doesn't exist") >= 0 || message.indexOf("does not exist") >= 0))) {
@@ -1416,19 +1416,6 @@ public final class IMAPException extends OXException {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     private IMAPException() {

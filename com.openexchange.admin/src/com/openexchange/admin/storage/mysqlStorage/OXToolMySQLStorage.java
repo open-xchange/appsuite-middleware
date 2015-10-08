@@ -838,6 +838,43 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean isGuestUser(Context ctx, int userId) throws StorageException {
+        AdminCache cache = ClientAdminThread.cache;
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        try {
+            con = cache.getConnectionForContext(ctx.getId());
+            prep = con.prepareStatement("SELECT 1 FROM user WHERE cid=? AND id=? AND guestCreatedBy > 0");
+            prep.setInt(1, ctx.getId());
+            prep.setInt(2, userId);
+            rs = prep.executeQuery();
+            return rs.next();
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            if (prep != null) {
+                try {
+                    prep.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing statement", e);
+                }
+            }
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(ctx.getId(), con);
+                } catch (final PoolException ecp) {
+                    log.error("Error pushing ox db write connection to pool!", ecp);
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean existsUser(final Context ctx, final User user) throws StorageException {
         // FIXME: Should be rewritten to optimize performance
         return existsUser(ctx, new User[]{user});
@@ -1279,6 +1316,16 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getConnectionForContext(ctx.getId().intValue());
+            if (isGuest(con, ctx, user_id)) {
+                prep_check = con.prepareStatement("SELECT field65 FROM prg_contacts WHERE cid = ? AND userid = ?");
+                prep_check.setInt(1, ctx.getId());
+                prep_check.setInt(2, user_id);
+                rs = prep_check.executeQuery();
+                if (rs.next() && !rs.getString(1).isEmpty() && !"".equals(rs.getString(1))) {
+                    return rs.getString(1) + " (Guest)";
+                }
+                return "Anonymous Guest";
+            }
             prep_check = con.prepareStatement("SELECT uid from login2user where cid = ? and id = ?");
             prep_check.setInt(1,ctx.getId().intValue());
             prep_check.setInt(2, user_id);
@@ -1305,6 +1352,51 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     log.error("Error pushing ox db read connection to pool!", e);
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean getIsGuestByUserID(final Context ctx, final int user_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+            return isGuest(con, ctx, user_id);
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox db read connection to pool!", e);
+                }
+            }
+        }
+    }
+
+
+    private boolean isGuest(Connection con, Context ctx, int userId) throws SQLException {
+        String sql = "SELECT id FROM user WHERE cid = ? AND id = ? AND guestCreatedBy > 0";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, ctx.getId());
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
         }
     }
 
@@ -1638,7 +1730,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.debug("FATAL: this error must not happen",e);
             }
             log.error("Error in checking/updating schema",e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 
@@ -2518,29 +2610,29 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final Database retval;
         try {
             stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                retval = new Database();
-                int pos = 1;
-                retval.setId(I(id));
-                retval.setUrl(rs.getString(pos++));
-                retval.setDriver(rs.getString(pos++));
-                retval.setLogin(rs.getString(pos++));
-                retval.setPassword(rs.getString(pos++));
-                retval.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    retval.setRead_id(I(slaveId));
-                }
-                retval.setClusterWeight(I(rs.getInt(pos++)));
-                retval.setMaxUnits(I(rs.getInt(pos++)));
-            } else {
+            if (!rs.next()) {
                 throw new StorageException("Database with identifer " + id + " does not exist.");
             }
+
+            Database retval = new Database();
+            int pos = 1;
+            retval.setId(I(id));
+            retval.setUrl(rs.getString(pos++));
+            retval.setDriver(rs.getString(pos++));
+            retval.setLogin(rs.getString(pos++));
+            retval.setPassword(rs.getString(pos++));
+            retval.setName(rs.getString(pos++));
+            final int slaveId = rs.getInt(pos++);
+            if (slaveId > 0) {
+                retval.setRead_id(I(slaveId));
+            }
+            retval.setClusterWeight(I(rs.getInt(pos++)));
+            retval.setMaxUnits(I(rs.getInt(pos++)));
+            return retval;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -2551,6 +2643,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error pushing connection to pool!", e);
             }
         }
-        return retval;
     }
+
 }

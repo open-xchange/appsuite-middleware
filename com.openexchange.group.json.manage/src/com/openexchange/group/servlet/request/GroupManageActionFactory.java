@@ -77,7 +77,7 @@ public final class GroupManageActionFactory implements AJAXActionServiceFactory 
      */
     public GroupManageActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4, 0.9f, 1);
         actions.put("new", new com.openexchange.group.servlet.request.actions.NewAction(services));
         actions.put("update", new com.openexchange.group.servlet.request.actions.UpdateAction(services));
         actions.put("delete", new com.openexchange.group.servlet.request.actions.DeleteAction(services));

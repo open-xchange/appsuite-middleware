@@ -147,7 +147,7 @@ public class Deduplicator {
             rollback = false;
             return contactDataToDelete;
         } catch (SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 DBUtils.rollback(connection);
@@ -232,7 +232,7 @@ public class Deduplicator {
                 }
             }
         } catch (SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
         }
@@ -507,7 +507,7 @@ public class Deduplicator {
             connection.commit();
             rollback = false;
         } catch (SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 DBUtils.rollback(connection);

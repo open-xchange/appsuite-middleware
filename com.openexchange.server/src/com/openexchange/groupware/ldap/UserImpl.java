@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.passwordmechs.IPasswordMech;
 
 /**
  * This class implements the data container for the attributes of a user. This
@@ -85,6 +86,11 @@ public class UserImpl implements User, Cloneable {
      * Unique identifier. This identifier must be only unique in a context.
      */
     private int id;
+
+    /**
+     * The user id of this guest users creator.
+     */
+    private int createdBy = 0;
 
     /**
      * Unique identifier of the contact belonging to this user.
@@ -160,7 +166,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * Password encryption mechanism.
      */
-    private String passwordMech = "{CRYPT}";
+    private String passwordMech = IPasswordMech.CRYPT;
 
     /**
      * Determines if the user is enabled or disabled.
@@ -175,12 +181,18 @@ public class UserImpl implements User, Cloneable {
     /**
      * Groups this user is member of.
      */
-    private int[] groups;
+    private int[] groups = new int[0];
 
     /**
      * Login information of this user.
      */
     private String loginInfo;
+
+    private int filestoreId = -1;
+    private String filestoreName;
+    private String[] filestorageAuth;
+    private long fileStorageQuota;
+    private int fileStorageOwner;
 
     /**
      * Default constructor.
@@ -211,6 +223,11 @@ public class UserImpl implements User, Cloneable {
         passwordMech = user.getPasswordMech();
         shadowLastChange = user.getShadowLastChange();
         groups = user.getGroups().clone();
+        createdBy = user.getCreatedBy();
+        filestoreId = user.getFilestoreId();
+        filestoreName = user.getFilestoreName();
+        filestorageAuth = user.getFileStorageAuth();
+        fileStorageQuota = user.getFileStorageQuota();
     }
 
     /**
@@ -238,10 +255,27 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getCreatedBy() {
+        return createdBy ;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return createdBy > 0;
+    }
+
+    /**
      * Setter for userPassword.
      * @param userPassword Password.
      */
-    void setUserPassword(final String userPassword) {
+    public void setUserPassword(final String userPassword) {
         this.userPassword = userPassword;
     }
 
@@ -257,7 +291,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mailEnabled.
      * @param mailEnabled <code>true</code> to enable user.
      */
-    void setMailEnabled(final boolean mailEnabled) {
+    public void setMailEnabled(final boolean mailEnabled) {
         this.mailEnabled = mailEnabled;
     }
 
@@ -274,14 +308,14 @@ public class UserImpl implements User, Cloneable {
      * @param shadowLastChange Days since Jan 1, 1970 that password was last
      * changed.
      */
-    void setShadowLastChange(final int shadowLastChange) {
+    public void setShadowLastChange(final int shadowLastChange) {
         this.shadowLastChange = shadowLastChange;
     }
 
     /**
      * @param passwordMech password encryption mechanism.
      */
-    void setPasswordMech(final String passwordMech) {
+    public void setPasswordMech(final String passwordMech) {
         this.passwordMech = passwordMech;
     }
 
@@ -321,7 +355,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mailDomain.
      * @param mailDomain mail domain.
      */
-    void setMailDomain(final String mailDomain) {
+    public void setMailDomain(final String mailDomain) {
         this.mailDomain = mailDomain == null ? null : IDNA.toUnicode(mailDomain);
     }
 
@@ -337,7 +371,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for givenName.
      * @param givenName given name.
      */
-    void setGivenName(final String givenName) {
+    public void setGivenName(final String givenName) {
         this.givenName = givenName;
     }
 
@@ -353,7 +387,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for sure name.
      * @param sureName sure name.
      */
-    void setSurname(final String sureName) {
+    public void setSurname(final String sureName) {
         this.surname = sureName;
     }
 
@@ -369,7 +403,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for mail.
      * @param mail Mail address.
      */
-    void setMail(final String mail) {
+    public void setMail(final String mail) {
         this.mail = mail == null ? mail : IDNA.toIDN(mail);
     }
 
@@ -385,7 +419,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for displayName.
      * @param displayName Display name.
      */
-    void setDisplayName(final String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -453,7 +487,7 @@ public class UserImpl implements User, Cloneable {
      * Setter for groups.
      * @param groups the groups this user is member of.
      */
-    void setGroups(final int[] groups) {
+    public void setGroups(final int[] groups) {
         this.groups = groups;
     }
 
@@ -587,7 +621,78 @@ public class UserImpl implements User, Cloneable {
     /**
      * @param loginInfo the login information.
      */
-    void setLoginInfo(final String loginInfo) {
+    public void setLoginInfo(String loginInfo) {
         this.loginInfo = loginInfo;
     }
+
+    @Override
+    public int getFilestoreId() {
+        return filestoreId;
+    }
+
+    /**
+     * Sets the file storage identifier
+     *
+     * @param filestoreId The identifier
+     */
+    public void setFilestoreId(int filestoreId) {
+        this.filestoreId = filestoreId;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return filestoreName;
+    }
+
+    /**
+     * Sets the file storage name serving as appendix to base URI.
+     *
+     * @param filestoreName The name
+     */
+    public void setFilestoreName(String filestoreName) {
+        this.filestoreName = filestoreName;
+    }
+
+    /**
+     * Sets the optional file storage credentials
+     *
+     * @param filestoreAuth The credentials
+     */
+    public void setFilestoreAuth(String[] filestoreAuth) {
+        this.filestorageAuth = filestoreAuth;
+    }
+
+    @Override
+    public String[] getFileStorageAuth() {
+        return null != filestorageAuth ? filestorageAuth.clone() : null;
+    }
+
+    @Override
+    public long getFileStorageQuota() {
+        return fileStorageQuota;
+    }
+
+    /**
+     * Sets the file storage quota
+     *
+     * @param fileStorageQuota The quota
+     */
+    public void setFileStorageQuota(long fileStorageQuota) {
+        this.fileStorageQuota = fileStorageQuota;
+    }
+
+    @Override
+    public int getFileStorageOwner() {
+        return fileStorageOwner;
+    }
+
+    /**
+     * Sets the file storage owner
+     *
+     * @param fileStorageOwner The file storage owner to set
+     */
+    public void setFileStorageOwner(int fileStorageOwner) {
+        this.fileStorageOwner = fileStorageOwner;
+    }
+
 }

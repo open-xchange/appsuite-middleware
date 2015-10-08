@@ -53,20 +53,21 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.DBQuotaFileStorage;
+import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.tools.RandomString;
-import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.internal.DBQuotaFileStorage;
-import com.openexchange.tools.file.internal.LocalFileStorage;
 
 public class QuotaFileStorageTest extends TestCase {
 
-    private FileStorage fs;
+    private com.openexchange.filestore.FileStorage fs;
 
     @Override
     protected void setUp() throws Exception {
@@ -87,7 +88,11 @@ public class QuotaFileStorageTest extends TestCase {
         tempFile.delete();
 
         fs = new LocalFileStorage(new URI("file:"+tempFile.getAbsolutePath()));
-        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
+
+        SimpleServiceLookup slk = new SimpleServiceLookup();
+        slk.add(DatabaseService.class, new DummyDatabaseService());
+        com.openexchange.filestore.impl.osgi.Services.setServiceLookup(slk);
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs);
 
         quotaStorage.setQuota(10000);
         // And again, some lines from the original test
@@ -114,7 +119,10 @@ public class QuotaFileStorageTest extends TestCase {
         tempFile.delete();
 
         fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
-        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
+        SimpleServiceLookup slk = new SimpleServiceLookup();
+        slk.add(DatabaseService.class, new DummyDatabaseService());
+        com.openexchange.filestore.impl.osgi.Services.setServiceLookup(slk);
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs);
         quotaStorage.setQuota(10000);
 
         final String fileContent = RandomString.generateLetter(100);
@@ -134,8 +142,8 @@ public class QuotaFileStorageTest extends TestCase {
 
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
-        public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws OXException {
-            super(ctx, fs, dbs);
+        public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
+            super(ctx.getContextId(), -1, 0L, fs, null);
         }
 
         private long usage;
@@ -246,7 +254,12 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        public void lock(Connection con) {
+        public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void lock(Connection con, int poolId) {
             // Nothing to do
         }
 
@@ -392,14 +405,62 @@ public class QuotaFileStorageTest extends TestCase {
 
         @Override
         public Connection getForUpdateTask() throws OXException {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public void backForUpdateTask(Connection con) {
-            // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public Connection getReadOnlyForGlobal(String group) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getReadOnlyForGlobal(int contextId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void backReadOnlyForGlobal(String group, Connection connection) {
+
+        }
+
+        @Override
+        public void backReadOnlyForGlobal(int contextId, Connection connection) {
+
+        }
+
+        @Override
+        public Connection getWritableForGlobal(String group) throws OXException {
+            return null;
+        }
+
+        @Override
+        public Connection getWritableForGlobal(int contextId) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void backWritableForGlobal(String group, Connection connection) {
+
+        }
+
+        @Override
+        public void backWritableForGlobal(int contextId, Connection connection) {
+
+        }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+            return false;
+        }
+
+        @Override
+        public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
+            return false;
         }
     }
 

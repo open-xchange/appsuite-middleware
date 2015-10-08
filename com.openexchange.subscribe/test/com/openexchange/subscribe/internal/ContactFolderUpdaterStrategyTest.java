@@ -201,4 +201,5 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
 
         assertTrue("Score to high. Only GivenName is equal.", score < strategy.getThreshold(null));
     }
+
 }

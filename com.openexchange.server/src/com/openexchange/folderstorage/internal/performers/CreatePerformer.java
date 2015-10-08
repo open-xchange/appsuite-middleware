@@ -49,11 +49,9 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -63,9 +61,11 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -73,7 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.session.Session;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -85,8 +85,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
-
-    private static final String CONTENT_TYPE_INFOSTORE = InfostoreContentType.getInstance().toString();
 
     /**
      * Initializes a new {@link CreatePerformer}.
@@ -152,7 +150,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+
+        TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        /*
+         * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+         * As long as a TransactionManager is present, every storage has to add itself to the
+         * TransactionManager in FolderStorage.startTransaction() and must return false.
+         */
+        final List<FolderStorage> openedStorages = Collections.emptyList();
         checkOpenedStorage(parentStorage, openedStorages);
         try {
             final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
@@ -177,97 +182,64 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check for duplicates for OLOX-covered folders
              */
-            if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
-                final Session session = storageParameters.getSession();
-                if (null == session) {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename) {
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
-                } else {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename || result.error.similarTo(FolderExceptionErrorMessage.RESERVED_NAME)) {
-                            if (null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
-                                return result.optFolderId;
-                            }
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
+            UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, toCreate.getContentType(), true);
+            if (null != existingFolder) {
+                if (null != session && "USM-JSON".equals(session.getClient())) {
+                    return existingFolder.getID(); // taken over from fix for bug #21286 ...
                 }
-            } else {
-                final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                if (autoRename) {
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result) {
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
-                        } while (null != result);
-                        toCreate.setName(nameBuilder.toString());
-                    }
-                }
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
+            }
+            String reservedName = checkForReservedName(treeId, parentId, toCreate, toCreate.getContentType(), false);
+            if (null != reservedName) {
+                throw FolderExceptionErrorMessage.RESERVED_NAME.create(toCreate.getName());
+            }
+
+            boolean addedDecorator = false;
+            FolderServiceDecorator decorator = storageParameters.getDecorator();
+            if (decorator == null) {
+                decorator = new FolderServiceDecorator();
+                storageParameters.setDecorator(decorator);
+                addedDecorator = true;
+            }
+            boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
+            if (!isRecursion) {
+                decorator.put(RECURSION_MARKER, true);
             }
             /*
-             * Create folder dependent on folder is virtual or not
+             * check for any present guest permissions
              */
+            Permission[] permissions = toCreate.getPermissions();
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0], shareService);
             final String newId;
-            if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
-                newId = doCreateReal(toCreate, parentId, treeId, parentStorage);
-            } else {
-                newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages);
+            try {
+                /*
+                 * Create folder dependent on folder is virtual or not
+                 */
+                if (FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
+                    newId = doCreateReal(toCreate, parentId, treeId, parentStorage, transactionManager, comparedPermissions);
+                } else {
+                    newId = doCreateVirtual(toCreate, parentId, treeId, parentStorage, openedStorages, transactionManager, comparedPermissions);
+                }
+            } finally {
+                if (!isRecursion) {
+                    decorator.remove(RECURSION_MARKER);
+                }
+
+                if (addedDecorator) {
+                    storageParameters.setDecorator(null);
+                }
             }
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.commitTransaction(storageParameters);
-            }
+
+            transactionManager.commit();
+
             /*
              * Sanity check
              */
             if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
                 final String duplicateId = DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId);
                 if (null != duplicateId) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
                     // return duplicateId;
                 }
             }
@@ -281,19 +253,16 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
             return newId;
         } catch (final OXException e) {
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            for (final FolderStorage folderStorage : openedStorages) {
-                folderStorage.rollback(storageParameters);
-            }
+            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage) throws OXException {
+
+    private String doCreateReal(final Folder toCreate, final String parentId, final String treeId, final FolderStorage parentStorage, final TransactionManager transactionManager, final ComparedFolderPermissions comparedPermissions) throws OXException {
         final ContentType[] contentTypes = parentStorage.getSupportedContentTypes();
         boolean supported = false;
         final ContentType folderContentType = toCreate.getContentType();
@@ -315,22 +284,44 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Real tree is not capable to create a folder of an unsupported content type
              */
-            throw FolderExceptionErrorMessage.INVALID_CONTENT_TYPE.create(
-                parentId,
-                folderContentType.toString(),
-                treeId,
-                Integer.valueOf(user.getId()),
-                Integer.valueOf(context.getContextId()));
+            throw FolderExceptionErrorMessage.INVALID_CONTENT_TYPE.create(parentId, folderContentType.toString(), treeId, Integer.valueOf(user.getId()), Integer.valueOf(context.getContextId()));
         }
-        parentStorage.createFolder(toCreate, storageParameters);
+
+        /*
+         * Check permissions of anonymous guest users
+         */
+        checkGuestPermissions(toCreate, comparedPermissions);
+
+        if (comparedPermissions.hasNewGuests()) {
+            /*
+             * create "plain" folder without guests first...
+             */
+            List<Permission> plainPermissions = comparedPermissions.getAddedPermissions();
+            Folder plainFolder = (Folder) toCreate.clone();
+            plainFolder.setPermissions(plainPermissions.toArray(new Permission[plainPermissions.size()]));
+            parentStorage.createFolder(plainFolder, storageParameters);
+            String folderID = plainFolder.getID();
+            /*
+             * setup shares and guest users, enrich previously skipped guest permissions with real entities
+             */
+            processAddedGuestPermissions(folderID, plainFolder.getContentType(), comparedPermissions, transactionManager.getConnection());
+            /*
+             * update with re-added guest permissions
+             */
+            toCreate.setID(folderID);
+            toCreate.setLastModified(plainFolder.getLastModified());
+            parentStorage.updateFolder(toCreate, storageParameters);
+        } else {
+            parentStorage.createFolder(toCreate, storageParameters);
+        }
         return toCreate.getID();
     }
 
-    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages) throws OXException {
+    private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager, ComparedFolderPermissions comparedPermissions) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
         if (realStorage.equals(virtualStorage)) {
-            virtualStorage.createFolder(toCreate, storageParameters);
+            doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager, comparedPermissions);
         } else {
             /*
              * Check if real storage supports folder's content types
@@ -340,7 +331,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * 1. Create in real storage
                  */
-                realStorage.createFolder(toCreate, storageParameters);
+                doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager, comparedPermissions);
                 /*
                  * 2. Create in virtual storage
                  */
@@ -447,7 +438,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             }
                         }
                     }
-                    capStorage.createFolder(clone4Real, storageParameters);
+                    doCreateReal(clone4Real, realParentId, FolderStorage.REAL_TREE_ID, capStorage, transactionManager, comparedPermissions);
                     toCreate.setID(clone4Real.getID());
                 }
                 /*

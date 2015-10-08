@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Password Change Database
 Bundle-SymbolicName: com.openexchange.passwordchange.database
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Description: The Open-Xchange password-change bundle that only changes the encrypted password in database, but leaves any subsystems (e.g. IMAP/SMTP) as-is
 Import-Package: com.openexchange.database,
  com.openexchange.databaseold,
@@ -21,5 +21,6 @@ Import-Package: com.openexchange.database,
  com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.passwordchange.database.osgi.DatabasePasswordChangeActivator

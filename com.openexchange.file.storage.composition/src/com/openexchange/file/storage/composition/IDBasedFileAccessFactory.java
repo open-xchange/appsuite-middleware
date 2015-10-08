@@ -69,4 +69,12 @@ public interface IDBasedFileAccessFactory {
      */
     IDBasedFileAccess createAccess(Session session);
 
+    /**
+     * Creates an administrative file access for the given context.
+     *
+     * @param contextId The context id.
+     * @return The administrative file access
+     */
+    IDBasedAdministrativeFileAccess createAccess(int contextId);
+
 }

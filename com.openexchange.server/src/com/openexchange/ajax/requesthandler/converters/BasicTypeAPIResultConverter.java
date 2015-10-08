@@ -110,6 +110,10 @@ public final class BasicTypeAPIResultConverter implements ResultConverter {
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
         response.setProperties(result.getResponseProperties());
+        OXException exception = result.getException();
+        if (null != exception) {
+            response.setException(exception);
+        }
         final Collection<OXException> warnings = result.getWarnings();
         if (null != warnings && !warnings.isEmpty()) {
             for (final OXException warning : warnings) {

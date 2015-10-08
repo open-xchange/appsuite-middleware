@@ -2,14 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange SurDoc OAuth Bundle
 Bundle-SymbolicName: com.openexchange.oauth.surdoc
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
+ com.openexchange.groupware.ldap,
  com.openexchange.http.deferrer,
  com.openexchange.java,
  com.openexchange.java.util,

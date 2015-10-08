@@ -49,16 +49,15 @@
 
 package com.openexchange.admin.storage.fileStorage;
 
-
-import java.io.UnsupportedEncodingException;
-
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
-import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.exception.OXException;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 
 /**
  * Default file implementation for admin auth.
@@ -74,9 +73,7 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
     }
 
     /**
-     *
      * Authenticates against a textfile
-     *
      */
     @Override
     public boolean authenticate(final Credentials authdata) {
@@ -85,20 +82,22 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
            master.getLogin() != null && authdata.getLogin() != null &&
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {
-                try {
-                    return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
-                } catch (UnsupportedEncodingException e) {
-                    log.error("", e);
-                    return false;
+            try {
+                PasswordMechFactory factory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class);
+                if (factory != null) {
+                    IPasswordMech passwordMech = factory.get(master.getPasswordMech());
+                    return passwordMech.check(authdata.getPassword(), master.getPassword());
                 }
-        }else{
-            return false;
+            } catch (OXException e) {
+                log.error("", e);
+                return false;
+            }
         }
+        return false;
     }
 
     @Override
-    public boolean authenticate(final Credentials authdata, final Context ctx)
-            throws StorageException {
+    public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
         return false;
     }
 

@@ -100,12 +100,11 @@ public class CalendarQuotaProvider implements QuotaProvider {
 
     static Quota getAmountQuota(Session session, Connection connection, ConfigViewFactory viewFactory, CalendarMySQL calendarMySQL) throws OXException {
         long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection);
-        if (limit == Quota.UNLIMITED) {
+        if (limit <= Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
-        } else {
-            long usage = calendarMySQL.countAppointments(connection, session);
-            return new Quota(QuotaType.AMOUNT, limit, usage);
         }
+        long usage = calendarMySQL.countAppointments(connection, session);
+        return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
     @Override

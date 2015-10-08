@@ -102,10 +102,10 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         final OXFolderManager manager = OXFolderManager.getInstance(session);
         final OXFolderAccess access = getFolderAccess(session);
 
-        final FolderObject parent = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
+        final int parentFolderID = access.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE);
 
         final FolderObject fo = new FolderObject();
-        fo.setParentFolderID(parent.getObjectID());
+        fo.setParentFolderID(parentFolderID);
         fo.setFolderName(TEMPLATE_FOLDER_NAME);
 
         final OCLPermission adminPermission = new OCLPermission();

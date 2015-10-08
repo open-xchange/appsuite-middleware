@@ -272,6 +272,7 @@ public class IMAPStore extends Store
     private boolean enableImapEvents = false;
     private String propagateClientIpAddress = null;
     private Map<String, String> clientParameters = null;
+    private ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
     private int authTimeout = -1;
     private final String guid;			// for Yahoo! Mail IMAP
@@ -764,12 +765,36 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Sets the external ID generator
+     *
+     * @param externalIdGenerator The generator to set
+     */
+    public void setExternalIdGenerator(ExternalIdGenerator externalIdGenerator) {
+        this.externalIdGenerator = externalIdGenerator;
+    }
+
+    /**
      * Sets the client parameters
      *
      * @param clientParameters The client parameters to set
      */
     public void setClientParameters(Map<String, String> clientParameters) {
         this.clientParameters = clientParameters;
+    }
+
+    /**
+     * Gets the denoted client parameter (advertised via <code>"ID"</code> command).
+     *
+     * @param name The parameter name
+     * @return The value or <code>null</code> if there is no such client parameter set
+     */
+    public String getClientParameter(String name) {
+        if (null == name) {
+            return null;
+        }
+        
+        Map<String, String> clientParameters = this.clientParameters;
+        return null == clientParameters ? null : clientParameters.get(name);
     }
 
     /**
@@ -932,26 +957,11 @@ public class IMAPStore extends Store
 
 	// issue special ID command to Yahoo! Mail IMAP server
 	// http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
-	{
-	    Map<String, String> clientParams = clientParameters;
-        if (null != clientParams || guid != null) {
-            if (guid == null) {
-                if (p.hasCapability("ID")) {
-                    try {
-                        p.id(clientParams);
-                    } catch (Exception e) {
-                        // Ignore errors
-                    }
-                }
-            } else {
-                if (null == clientParams) {
-                    clientParams = new LinkedHashMap<String, String>(2);
-                }
-                clientParams.put("GUID", guid);
-                p.id(clientParams);
-            }
-        }
-	}
+    if (guid != null) {
+        Map<String, String> clientParams = new LinkedHashMap<String, String>(2);
+        clientParams.put("GUID", guid);
+        p.id(clientParams);
+    }
 
 	/*
 	 * Put a special "marker" in the capabilities list so we can
@@ -1011,6 +1021,42 @@ public class IMAPStore extends Store
 
 	if (proxyAuthUser != null) {
         p.proxyauth(proxyAuthUser);
+    }
+
+	/*
+	 * Advertise client parameters (if any)
+	 */
+    {
+        Map<String, String> clientParams = null;
+        {
+            ExternalIdGenerator generator = this.externalIdGenerator;
+            if (null == generator) {
+                if (null != this.clientParameters && p.hasCapability("ID")) {
+                    clientParams = this.clientParameters;
+                }
+            } else if (p.hasCapability("ID")) {
+                // Generate external identifier & add to client parameters
+                String generatedExternalId = generator.generateExternalId();
+                clientParams = new LinkedHashMap<String, String>(6);
+                if (null == this.clientParameters) {
+                    clientParams.put("x-session-ext-id", generatedExternalId);
+                } else {
+                    // Overwrite "x-session-ext-id" client parameter with the generated one
+                    this.clientParameters.put("x-session-ext-id", generatedExternalId);
+                    clientParams.putAll(clientParameters);
+                }
+            }
+        }
+        
+        if (null != clientParams) {
+            try {
+                p.id(clientParams);
+            } catch (CommandFailedException cex) {
+                // Swallow "NO" responses
+            } catch (BadCommandException e) {
+                // Swallow "BAD" responses
+            }
+        }
     }
 
 	/*
@@ -2493,7 +2539,8 @@ public class IMAPStore extends Store
     /**
      * Is this IMAP store currently connected?
      * <p>
-     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command.
+     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command;
+     * unless an exception occurred that forced to close either IMAPFolder or IMAPStore.
      *
      * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
      */

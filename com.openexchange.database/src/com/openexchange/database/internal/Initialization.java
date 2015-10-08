@@ -55,8 +55,11 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -91,8 +94,8 @@ public final class Initialization {
 
     // -------------------------------------------------------------------------------------------------------------- //
 
-    private final Management management = new Management();
     private final Timer timer = new Timer();
+    private final Management management = new Management(timer);
     private final Configuration configuration = new Configuration();
 
     private CacheService cacheService;
@@ -100,6 +103,7 @@ public final class Initialization {
     private Pools pools;
     private ConfigDatabaseServiceImpl configDatabaseService;
     private DatabaseServiceImpl databaseService;
+    private GlobalDatabaseServiceImpl globalDatabaseService;
 
     private Initialization() {
         super();
@@ -113,7 +117,15 @@ public final class Initialization {
         return null != databaseService;
     }
 
-    public DatabaseService start(final ConfigurationService configurationService) throws OXException {
+    /**
+     * Initializes the database service.
+     *
+     * @param configurationService A reference to the configuration service
+     * @param configViewFactory The config view factory
+     * @param migrationService The database migration service, or <code>null</code> if not available
+     * @return The database service
+     */
+    public DatabaseService start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -135,12 +147,7 @@ public final class Initialization {
             configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
-            configuration,
-            management,
-            timer,
-            configDatabaseService);
-        pools.addLifeCycle(contextDBLifeCycle);
+        pools.addLifeCycle(new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService));
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
@@ -148,7 +155,16 @@ public final class Initialization {
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
-        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, monitor);
+        // Global database service
+        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, configurationService, configDatabaseService, configViewFactory);
+        GlobalDbConfigsReloadable.setGlobalDatabaseServiceRef(globalDatabaseService);
+        GlobalDbConfigsReloadable.setGlobalDatabaseServiceRef(migrationService);
+        // Schedule pending migrations
+        if (null != migrationService) {
+            configDatabaseService.scheduleMigrations(migrationService);
+            globalDatabaseService.scheduleMigrations(migrationService);
+        }
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, globalDatabaseService, monitor);
         return databaseService;
     }
 
@@ -156,6 +172,7 @@ public final class Initialization {
         databaseService = null;
         configDatabaseService.removeCacheService();
         configDatabaseService = null;
+        globalDatabaseService = null;
         pools.stop(timer);
         pools = null;
         configuration.clear();
@@ -182,4 +199,5 @@ public final class Initialization {
     public Timer getTimer() {
         return timer;
     }
+
 }

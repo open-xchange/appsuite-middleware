@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.util;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +58,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
+import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -68,6 +70,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -140,7 +143,12 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                 folderStorage = getImapFolderStorage(mailAccess);
                 IMAPStore imapStore = folderStorage.getImapStore();
                 Map<String, FolderInfo> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
-                tmp = null == folders ? new ConcurrentHashMap<String, FolderInfo>(0) : new ConcurrentHashMap<String, FolderInfo>(folders);
+                if (null == folders) {
+                    tmp = new ConcurrentHashMap<String, FolderInfo>(0, 0.9f, 1);
+                } else {
+                    tmp = new ConcurrentHashMap<>(folders.size(), 0.9f, 1);
+                    tmp.putAll(folders);
+                }
             } catch (MessagingException e) {
                 throw folderStorage.handleMessagingException(e);
             } finally {
@@ -154,7 +162,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object renderJSON(Object value) {
+    public Object renderJSON(AJAXRequestData requestData, Object value) {
         return value == null ? JSONObject.NULL : value;
     }
 
@@ -332,11 +340,13 @@ public class ExtAccountFolderField implements AdditionalFolderField {
 
                         return null;
                     } else if (response.isBAD()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
                             ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         protocol.handleResult(response);
                     }
                     return null;

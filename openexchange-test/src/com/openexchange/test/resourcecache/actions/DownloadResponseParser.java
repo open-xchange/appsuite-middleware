@@ -51,6 +51,7 @@ package com.openexchange.test.resourcecache.actions;
 
 import java.io.IOException;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -74,7 +75,7 @@ public class DownloadResponseParser extends AbstractAJAXParser<DownloadResponse>
     }
 
     @Override
-    public String checkResponse(HttpResponse resp) throws ParseException ,IOException {
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException ,IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
         if (entity.getContentType().getValue().startsWith("text/javascript")) {

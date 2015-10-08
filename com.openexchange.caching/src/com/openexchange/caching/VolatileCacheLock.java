@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link VolatileCacheLock} - A volatile lock for caching.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VolatileCacheLock {
@@ -147,7 +147,7 @@ public final class VolatileCacheLock {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static VolatileCacheLock getInstance() {
@@ -163,12 +163,12 @@ public final class VolatileCacheLock {
      */
     private VolatileCacheLock() {
         super();
-        locks = new ConcurrentHashMap<LockKey, Lock>(1024);
+        locks = new ConcurrentHashMap<LockKey, Lock>(1024, 0.9f, 1);
     }
 
     /**
      * Acquire volatile lock for specified key.
-     * 
+     *
      * <pre>
      *         ...
      *         final VolatileCacheLock instance = VolatileCacheLock.getInstance();
@@ -179,7 +179,7 @@ public final class VolatileCacheLock {
      *             instance.release(res);
      *         }
      * </pre>
-     * 
+     *
      * @param key The lock key
      * @param regionName The cache's region name
      * @return <code>true</code> whether clean-up needs to be performed; otherwise <code>false</code>
@@ -191,7 +191,7 @@ public final class VolatileCacheLock {
 
     /**
      * Acquire volatile lock for specified key.
-     * 
+     *
      * <pre>
      *         ...
      *         final VolatileCacheLock instance = VolatileCacheLock.getInstance();
@@ -202,7 +202,7 @@ public final class VolatileCacheLock {
      *             instance.release(res);
      *         }
      * </pre>
-     * 
+     *
      * @param key The lock key
      * @param groupName The optional group name
      * @param regionName The cache's region name
@@ -227,7 +227,7 @@ public final class VolatileCacheLock {
 
     /**
      * Releases volatile lock for specified key and result.
-     * 
+     *
      * @param key The lock key
      * @param regionName The cache's region name
      * @param result The result

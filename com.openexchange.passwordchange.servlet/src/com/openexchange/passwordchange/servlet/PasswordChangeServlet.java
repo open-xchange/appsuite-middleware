@@ -49,7 +49,6 @@
 
 package com.openexchange.passwordchange.servlet;
 
-import static com.openexchange.passwordchange.servlet.services.PasswordChangeServletServiceRegistry.getServiceRegistry;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -66,12 +65,17 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeServlet}
@@ -82,21 +86,29 @@ public final class PasswordChangeServlet extends SessionServlet {
 
     private static final long serialVersionUID = 3129607149739575803L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeServlet.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PasswordChangeServlet.class);
 
-    private static final String PARAM_OLD_PASSWORD = "old_password";
-
-    private static final String PARAM_NEW_PASSWORD = "new_password";
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link PasswordChangeServlet}
+     *
+     * @param services The service look-up
      */
-    public PasswordChangeServlet() {
+    public PasswordChangeServlet(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Tools.checkNonExistence(req, PARAMETER_PASSWORD);
+        } catch (OXException oxException) {
+            handleException(req, resp, oxException);
+            return;
+        }
+
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         /*
          * The magic spell to disable caching
@@ -105,13 +117,37 @@ public final class PasswordChangeServlet extends SessionServlet {
         try {
             actionGet(req, resp);
         } catch (final OXException e) {
-            LOG.error("PasswordChangeServlet.doGet()", e);
-            final ServerSession session = getSessionObject(req);
-            final Response response = new Response(session);
-            response.setException(e);
+            LOGGER.error("PasswordChangeServlet.doGet()", e);
+            handleException(req, resp, e);
+        }
+    }
+
+    @Override
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Tools.checkNonExistence(req, PARAMETER_PASSWORD);
+        } catch (OXException oxException) {
+            handleException(req, resp, oxException);
+            return;
+        }
+
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        /*
+         * The magic spell to disable caching
+         */
+        Tools.disableCaching(resp);
+        try {
+            actionPut(req, resp);
+        } catch (final OXException e) {
+            LOGGER.error("PasswordChangeServlet.doPut()", e);
+            handleException(req, resp, e);
+        } catch (final JSONException e) {
+            LOGGER.error("PasswordChangeServlet.doPut()", e);
+            final Response response = new Response();
+            response.setException(PasswordChangeServletExceptionCode.JSON_ERROR.create(e, e.getMessage()));
             final PrintWriter writer = resp.getWriter();
             try {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
             } catch (final JSONException e1) {
                 final ServletException se = new ServletException(e1);
                 se.initCause(e1);
@@ -121,45 +157,19 @@ public final class PasswordChangeServlet extends SessionServlet {
         }
     }
 
-    @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-        /*
-         * The magic spell to disable caching
-         */
-        Tools.disableCaching(resp);
+    private void handleException(final HttpServletRequest req, final HttpServletResponse resp, final OXException e) throws IOException, ServletException {
+        final ServerSession session = getSessionObject(req);
+        final Response response = new Response(session);
+        response.setException(e);
+        final PrintWriter writer = resp.getWriter();
         try {
-            actionPut(req, resp);
-        } catch (final OXException e) {
-            LOG.error("PasswordChangeServlet.doPut()", e);
-            final Response response = new Response();
-            response.setException(e);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
-                final ServletException se = new ServletException(e1);
-                se.initCause(e1);
-                throw se;
-            }
-            writer.flush();
-        } catch (final JSONException e) {
-            LOG.error("PasswordChangeServlet.doPut()", e);
-            final Response response = new Response();
-            response.setException(
-                PasswordChangeServletExceptionCode.JSON_ERROR.create(
-                e,
-                e.getMessage()));
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(getSessionObject(req)));
-            } catch (final JSONException e1) {
-                final ServletException se = new ServletException(e1);
-                se.initCause(e1);
-                throw se;
-            }
-            writer.flush();
+            ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+        } catch (final JSONException e1) {
+            final ServletException se = new ServletException(e1);
+            se.initCause(e1);
+            throw se;
         }
+        writer.flush();
     }
 
     private void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
@@ -178,42 +188,65 @@ public final class PasswordChangeServlet extends SessionServlet {
     }
 
     protected void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
-        /*
-         * Some variables
-         */
         final Response response = new Response();
         final Session session = getSessionObject(req);
         try {
             /*
-             * Construct JSON object from request's body data and check mandatory fields
+             * get context & user
              */
-            final JSONObject requestObject = new JSONObject(getBody(req));
-            if (!requestObject.has(PARAM_NEW_PASSWORD) || requestObject.isNull(PARAM_NEW_PASSWORD)) {
-                throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(PARAM_NEW_PASSWORD);
-            }
-            if (!requestObject.has(PARAM_OLD_PASSWORD) || requestObject.isNull(PARAM_OLD_PASSWORD)) {
-                throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(PARAM_OLD_PASSWORD);
-            }
-            /*
-             * Perform password change
-             */
-            final PasswordChangeService passwordChangeService = getServiceRegistry().getService(PasswordChangeService.class);
-            if (passwordChangeService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
-                    PasswordChangeService.class.getName());
-            }
-
-            final ContextService contextService = getServiceRegistry().getService(ContextService.class);
+            ContextService contextService = services.getService(ContextService.class);
             if (contextService == null) {
                 throw ServiceExceptionCode.absentService(ContextService.class);
-			}
+            }
+            UserService userService = services.getService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
+            Context context = contextService.getContext(session.getContextId());
+            User user = userService.getUser(session.getUserId(), context);
 
-			Map<String, List<String>> headers = copyHeaders(req);
-            com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+            // Construct JSON object from request's body data and check mandatory fields
+            String oldPw;
+            String newPw;
+            {
+                JSONObject jBody = new JSONObject(getBody(req));
+                String paramOldPw = "old_password";
+                String paramNewPw = "new_password";
+                if (!jBody.has(paramNewPw) || jBody.isNull(paramNewPw) && false == user.isGuest()) {
+                    throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramNewPw);
+                }
+                if (!jBody.has(paramOldPw) || jBody.isNull(paramOldPw) && false == user.isGuest()) {
+                    throw PasswordChangeServletExceptionCode.MISSING_PARAM.create(paramOldPw);
+                }
 
-            passwordChangeService.perform(new PasswordChangeEvent(session, contextService.getContext(session.getContextId()), requestObject.getString(PARAM_NEW_PASSWORD), requestObject.getString(PARAM_OLD_PASSWORD), headers, cookies));
+                newPw = jBody.isNull(paramNewPw) ? null : jBody.getString(paramNewPw);
+                oldPw = jBody.isNull(paramOldPw) ? null : jBody.getString(paramOldPw);
+            }
+
+            // Perform password change
+            if (user.isGuest()) {
+                BasicPasswordChangeService passwordChangeService = services.getService(BasicPasswordChangeService.class);
+                if (passwordChangeService == null) {
+                    throw ServiceExceptionCode.absentService(BasicPasswordChangeService.class);
+                }
+
+                Map<String, List<String>> headers = copyHeaders(req);
+                com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
+            } else {
+                PasswordChangeService passwordChangeService = services.getService(PasswordChangeService.class);
+                if (passwordChangeService == null) {
+                    throw ServiceExceptionCode.absentService(PasswordChangeService.class);
+                }
+
+                Map<String, List<String>> headers = copyHeaders(req);
+                com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
+            }
         } catch (final OXException e) {
-            LOG.error("", e);
+            LOGGER.error("", e);
             response.setException(e);
         }
         /*

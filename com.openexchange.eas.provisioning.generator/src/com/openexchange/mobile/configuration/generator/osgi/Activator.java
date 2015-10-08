@@ -74,6 +74,8 @@ public class Activator extends HousekeepingActivator {
 
     public static final String ALIAS = "/servlet/mobileconfig";
 
+    private volatile boolean registered;
+
     /**
      * Initializes a new {@link Activator}.
      */
@@ -83,8 +85,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
+        return new Class<?>[] { ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
     }
 
     @Override
@@ -104,9 +105,9 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         {
-            final ServiceRegistry registry = MobileConfigServiceRegistry.getServiceRegistry();
+            ServiceRegistry registry = MobileConfigServiceRegistry.getServiceRegistry();
             registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
+            Class<?>[] classes = getNeededServices();
             for (int i = 0; i < classes.length; i++) {
                 final Object service = getService(classes[i]);
                 if (null != service) {
@@ -133,17 +134,22 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregister();
-
         MobileConfigServiceRegistry.getServiceRegistry().clearRegistry();
+        super.stopBundle();
     }
 
-    private void register() {
-        final HttpService service = getService(HttpService.class);
+    /**
+     * Registers the servlet.
+     */
+    private synchronized void register() {
+        HttpService service = getService(HttpService.class);
         if (null == service) {
             return;
         }
+
         try {
             service.registerServlet(ALIAS, new MobileConfigServlet(), null, null);
+            registered = true;
         } catch (ServletException e) {
             LOG.error("", e);
         } catch (NamespaceException e) {
@@ -152,10 +158,17 @@ public class Activator extends HousekeepingActivator {
         LOG.info("MobileConfig servlet registered");
     }
 
-    public void unregister() {
-        final HttpService service = getService(HttpService.class);
+    /**
+     * Unregisters the servlet.
+     */
+    private synchronized void unregister() {
+        HttpService service = getService(HttpService.class);
         if (null != service) {
-            service.unregister(ALIAS);
+            boolean registered = this.registered;
+            if (registered) {
+                service.unregister(ALIAS);
+                this.registered = false;
+            }
         }
     }
 

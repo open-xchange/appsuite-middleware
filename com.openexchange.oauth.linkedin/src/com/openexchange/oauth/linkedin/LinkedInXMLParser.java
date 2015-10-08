@@ -68,8 +68,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 
 public class LinkedInXMLParser {
 
@@ -97,9 +96,9 @@ public class LinkedInXMLParser {
         try {
             final String imageUrl = getTextValue(person, "picture-url");
             if (null != imageUrl) {
-                OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                HTTPToolkit.loadImageFromURL(contact, imageUrl);
             }
-        } catch (final ConverterException e) {
+        } catch (final OXException e) {
             LOG.error("", e);
         }
 
@@ -227,9 +226,9 @@ public class LinkedInXMLParser {
             try {
                 final String imageUrl = person.optString("pictureUrl", null);
                 if (null != imageUrl) {
-                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                    HTTPToolkit.loadImageFromURL(contact, imageUrl);
                 }
-            } catch (final ConverterException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
 

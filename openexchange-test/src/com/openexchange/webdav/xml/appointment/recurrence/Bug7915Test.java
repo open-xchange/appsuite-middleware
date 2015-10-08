@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug7915Test extends AbstractRecurrenceTest {

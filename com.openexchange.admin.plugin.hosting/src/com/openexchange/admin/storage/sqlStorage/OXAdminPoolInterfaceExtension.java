@@ -62,7 +62,6 @@ public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
     public int getDBPoolIdForContextId(int context_id) throws PoolException;
     public Connection getWRITEConnectionForPoolId(int db_pool_id,String db_schema) throws PoolException;
     public void pushWRITEConnectionForPoolId(int db_pool_id,Connection con) throws PoolException;
-    public void resetPoolMappingForContext(int context_id) throws PoolException;
     public String getSchemeForContextId(int context_id) throws PoolException;
 
     public Connection getWRITENoTimeoutConnectionForPoolId(int db_pool_id, String schema_name) throws PoolException;

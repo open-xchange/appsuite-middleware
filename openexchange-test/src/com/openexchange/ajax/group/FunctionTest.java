@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -111,7 +110,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     public void testSearch() throws Throwable {
         SearchResponse response = getClient().execute(new SearchRequest("*"));
         final Group[] groups = response.getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
 
@@ -121,13 +120,13 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     public void testRealSearch() throws Throwable {
         final Group[] groups = getClient().execute(new SearchRequest("*l*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertNotNull(groups);
     }
 
     public void testList() throws Throwable {
         Group[] groups = getClient().execute(new SearchRequest("*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int[] groupIds = new int[groups.length];
@@ -137,7 +136,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         AbstractGroupResponse listResponse = getClient().execute(new ListRequest(groupIds));
         groups = listResponse
             .getGroups();
-        LOG.info("Listed " + groups.length + " groups.");
+        LOG.trace("Listed " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         assertEquals("Size of requested groups and listed groups should be equal.",
@@ -194,7 +193,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     }
 
     public void testUpdatesViaCreateAndDelete() throws Exception {
-        int GROUP0 = 1; // group 0 always has a very high creation date since it is automatically generated, so this will be included most of the time
+        int staticGroupCount = 2; // "all users" & "guests" are always included in new/modified responses
         Group group = new Group();
         group.setSimpleName("simplename_"+new Date().getTime());
         group.setDisplayName("Group Updates Test"+new Date());
@@ -210,8 +209,8 @@ public final class FunctionTest extends AbstractAJAXSession {
         int numberNewAfterCreation = updatesResponseAfterCreate.getNew().size();
         int numberModifiedAfterCreation = updatesResponseAfterCreate.getModified().size();
         int numberDeletedAfterCreation = updatesResponseAfterCreate.getDeleted().size();
-        assertEquals("Amount of modified elements should have increased after creation", 1+GROUP0, numberModifiedAfterCreation);
-        assertEquals("Amount of deleted elements should not change after creation", 0+GROUP0, numberDeletedAfterCreation);
+        assertEquals("Amount of modified elements should have increased after creation", 1 + staticGroupCount, numberModifiedAfterCreation);
+        assertEquals("Amount of deleted elements should not change after creation", 0 + staticGroupCount, numberDeletedAfterCreation);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterCreation, numberModifiedAfterCreation);
 
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
@@ -223,8 +222,8 @@ public final class FunctionTest extends AbstractAJAXSession {
         int numberNewAfterDeletion = updatesResponseAfterDeletion.getNew().size();
         int numberModifiedAfterDeletion = updatesResponseAfterDeletion.getModified().size();
         int numberDeletedAfterDeletion = updatesResponseAfterDeletion.getDeleted().size();
-        assertEquals("Amount of modified elements should have decreased after deletion", 0+GROUP0, numberModifiedAfterDeletion);
-        assertEquals("Amount of deleted elements should have increased after deletion", 1+GROUP0, numberDeletedAfterDeletion);
+        assertEquals("Amount of modified elements should have decreased after deletion", 0 + staticGroupCount, numberModifiedAfterDeletion);
+        assertEquals("Amount of deleted elements should have increased after deletion", 1 + staticGroupCount, numberDeletedAfterDeletion);
         assertEquals("Amount of new elements should equal modfied elements, since we cannot distinguish between the two", numberNewAfterDeletion, numberModifiedAfterDeletion);
     }
 
@@ -239,14 +238,14 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     public void testGet() throws Throwable {
         final Group groups[] = getClient().execute(new SearchRequest("*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int pos = new Random(System.currentTimeMillis()).nextInt(groups
             .length);
         GetResponse response = getClient().execute(new GetRequest(groups[pos].getIdentifier()));
         final Group group = response.getGroup();
-        LOG.info("Loaded group: " + group.toString());
+        LOG.trace("Loaded group: " + group.toString());
         JSONObject entry = (JSONObject) response.getData();
         assertTrue(entry.has("last_modified_utc"));
     }
@@ -266,11 +265,11 @@ public final class FunctionTest extends AbstractAJAXSession {
             final CreateResponse response = client1.execute(request);
             group.setIdentifier(response.getId());
             group.setLastModified(response.getTimestamp());
-            LOG.info("Created group with identifier: " + group.getIdentifier());
+            LOG.trace("Created group with identifier: " + group.getIdentifier());
             final ChangeRequest change = new ChangeRequest(group);
             final ChangeResponse changed = client1.execute(change);
             group.setLastModified(changed.getTimestamp());
-            LOG.info("Changed group with identifier: " + group.getIdentifier());
+            LOG.trace("Changed group with identifier: " + group.getIdentifier());
         } finally {
             if (-1 != group.getIdentifier()) {
                 client1.execute(new DeleteRequest(

@@ -109,6 +109,8 @@ public class DovecotPushActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(DeleteListener.class, new DovecotPushDeleteListener());
+
+        registerService(DovecotPushRESTService.class, new DovecotPushRESTService(this));
     }
 
     @Override

@@ -65,11 +65,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
-import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -77,7 +75,7 @@ import com.openexchange.log.LogProperties;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
- * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation.
+ * and creates a new HttpSession.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -89,13 +87,9 @@ public class WrappingFilter implements Filter {
     private String forHeader;
     private List<String> knownProxies;
     private String protocolHeader;
-    private String httpsProtoValue;
-    private int httpPort;
-    private int httpsPort;
     private boolean isConsiderXForwards = false;
-    private String echoHeader;
+    private String echoHeaderName;
     private String contentSecurityPolicy = null;
-    private String dispatcherPrefix = DispatcherPrefixService.DEFAULT_PREFIX;
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -103,11 +97,8 @@ public class WrappingFilter implements Filter {
         this.forHeader = config.getForHeader();
         this.knownProxies = config.getKnownProxies();
         this.protocolHeader = config.getProtocolHeader();
-        this.httpsProtoValue = config.getHttpsProtoValue();
-        this.httpPort = config.getHttpProtoPort();
-        this.httpsPort = config.getHttpsProtoPort();
         this.isConsiderXForwards = config.isConsiderXForwards();
-        this.echoHeader = config.getEchoHeader();
+        this.echoHeaderName = config.getEchoHeader();
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
 
         // register listener for changed known proxies configuration
@@ -118,13 +109,6 @@ public class WrappingFilter implements Filter {
                 knownProxies = config.getKnownProxies();
             }
         });
-
-        String prefix = DispatcherPrefixService.DEFAULT_PREFIX;
-        DispatcherPrefixService service = Services.optService(DispatcherPrefixService.class);
-        if (null != service) {
-            prefix = service.getPrefix();
-        }
-        this.dispatcherPrefix = prefix;
     }
 
     @Override
@@ -135,9 +119,9 @@ public class WrappingFilter implements Filter {
         HttpServletResponseWrapper httpResponseWrapper = null;
 
         // Inspect echoHeader and when present copy it to Response
-        String echoHeaderValue = httpRequest.getHeader(echoHeader);
+        String echoHeaderValue = httpRequest.getHeader(echoHeaderName);
         if (echoHeaderValue != null) {
-            httpResponse.setHeader(echoHeader, echoHeaderValue);
+            httpResponse.setHeader(echoHeaderName, echoHeaderValue);
         }
 
         // Set Content-Security-Policy header
@@ -158,7 +142,7 @@ public class WrappingFilter implements Filter {
 
             if (!isValidProtocol(protocol)) {
                 LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                 protocol = httpRequest.getScheme();
+                protocol = httpRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {
@@ -171,7 +155,7 @@ public class WrappingFilter implements Filter {
         } else {
             httpRequestWrapper = new HttpServletRequestWrapper(httpRequest);
         }
-        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse);
+        httpResponseWrapper = new HttpServletResponseWrapper(httpResponse, echoHeaderName, echoHeaderValue);
 
         // Set LogProperties
         {
@@ -184,6 +168,7 @@ public class WrappingFilter implements Filter {
                 String queryString = httpRequest.getQueryString();
                 LogProperties.put(LogProperties.Name.GRIZZLY_QUERY_STRING, null == queryString ? "<none>" : LogProperties.getSanitizedQueryString(queryString));
             }
+            LogProperties.put(LogProperties.Name.GRIZZLY_METHOD, httpRequest.getMethod());
 
             // Remote infos
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequestWrapper.getRemotePort()));
@@ -197,30 +182,6 @@ public class WrappingFilter implements Filter {
             {
                 String userAgent = httpRequest.getHeader("User-Agent");
                 LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
-            }
-
-            // AJAX module/action
-            {
-                String action = request.getParameter("action");
-                if (null == action) {
-                    action = Strings.toUpperCase(httpRequest.getMethod());
-                }
-                LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
-
-                String requestURI = httpRequest.getRequestURI();
-                if (requestURI.startsWith(dispatcherPrefix) && requestURI.length() > dispatcherPrefix.length()) {
-                    String pathInfo = requestURI;
-                    int lastIndex = pathInfo.lastIndexOf(';');
-                    if (lastIndex > 0) {
-                        pathInfo = pathInfo.substring(0, lastIndex);
-                    }
-                    String module = pathInfo.substring(dispatcherPrefix.length());
-                    int mlen = module.length() - 1;
-                    if (mlen > 0 && '/' == module.charAt(mlen)) {
-                        module = module.substring(0, mlen);
-                    }
-                    LogProperties.put(LogProperties.Name.AJAX_MODULE, module);
-                }
             }
 
             // Tracking identifier

@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.provider;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * {@link OAuthProviderConstants} - Constants for OAuth provider.
  *
@@ -57,53 +59,89 @@ package com.openexchange.oauth.provider;
 public interface OAuthProviderConstants {
 
     /**
-     * The identifier of the default provider.
+     * Servlet alias of the authorization endpoint without leading and trailing slashes
      */
-    public static final int DEFAULT_PROVIDER = 0;
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "oauth/provider/authorization";
 
     /**
-     * Property name <code>"authorized"</code>
+     * Servlet alias of the access token endpoint without leading and trailing slashes
      */
-    public static final String PROP_AUTHORIZED = "authorized";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "oauth/provider/accessToken";
 
     /**
-     * Property name <code>"user"</code>
+     * Servlet alias of the endpoint for grant revocation by client applications
      */
-    public static final String PROP_USER = "user";
+    public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
+
+    // -------------------------------------------------------------------------------------------------------
 
     /**
-     * Property name <code>"context"</code>
+     * The default expiration time for a generated access token in milliseconds.
      */
-    public static final String PROP_CONTEXT = "context";
+    public static final long DEFAULT_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
 
-    /**
-     * Property name <code>"password"</code>
-     */
-    public static final String PROP_PASSWORD = "password";
+    // ---------------- Parameters ---------------------------------------------------------------------------
 
-    /**
-     * Property name <code>"login"</code>
-     */
-    public static final String PROP_LOGIN = "login";
+    /** Required. See {@link #RESPONSE_TYPE_AUTH_CODE} */
+    public static final String PARAM_RESPONSE_TYPE = "response_type";
 
-    /**
-     * Property name <code>"description"</code>
-     */
-    public static final String PROP_DESCRIPTION = "description";
+    /** Required. Value of your <b>API Key</b> given when you registered your application */
+    public static final String PARAM_CLIENT_ID = "client_id";
 
-    /**
-     * Property name <code>"providerId"</code>
-     */
-    public static final String PROP_PROVIDER_ID = "providerId";
+    /** Required. Value of your <b>API Secret</b> given when you registered your application */
+    public static final String PARAM_CLIENT_SECRET = "client_secret";
 
-    /**
-     * Property name <code>"name"</code>
-     */
-    public static final String PROP_NAME = "name";
+    /** Optional. Used to specify a list of needed member permissions */
+    public static final String PARAM_SCOPE = "scope";
 
-    /**
-     * Property name <code>"id"</code>
-     */
-    public static final String PROP_ID = "id";
+    /** Required. A long unique string value of that is hard to guess */
+    public static final String PARAM_STATE = "state";
+
+    /** Required. URI of the app used as redirect after authorization. */
+    public static final String PARAM_REDIRECT_URI = "redirect_uri";
+
+    /** Required. Value of <b>authorization_code</b>. */
+    public static final String PARAM_CODE = "code";
+
+    /** Required. Must always be <b>authorization_code</b>. */
+    public static final String PARAM_GRANT_TYPE = "grant_type";
+
+    /** Required. The refresh token */
+    public static final String PARAM_REFRESH_TOKEN = "refresh_token";
+
+    /** Required. The user login */
+    public static final String PARAM_USER_LOGIN = "user_login";
+
+    /** Required. The user password */
+    public static final String PARAM_USER_PASSWORD = "user_password";
+
+    /** Required. The session ID */
+    public static final String PARAM_SESSION = "session";
+
+    /** Required. The user password */
+    public static final String PARAM_ACCESS_DENIED = "access_denied";
+
+    /** Required. The CSRF token */
+    public static final String PARAM_CSRF_TOKEN = "csrf_token";
+
+    /** The error */
+    public static final String PARAM_ERROR = "error";
+
+    /** The error description */
+    public static final String PARAM_ERROR_DESCRIPTION = "error_description";
+
+    /** The language parameter defining a locale for i18n */
+    public static final String PARAM_LANGUAGE = "language";
+
+    // ---------------- Common parameter values --------------------------------------------------------------
+
+    /** Response type <b><code>code</code></b> */
+    public static final String RESPONSE_TYPE_AUTH_CODE = "code";
+
+    /** Grant type <b><code>refresh_token</code></b> */
+    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+
+    /** Grant type <b><code>authorization_code</code></b> */
+    public static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
 
 }

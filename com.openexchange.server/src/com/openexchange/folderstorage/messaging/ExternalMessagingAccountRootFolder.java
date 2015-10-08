@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.session.Session;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link ExternalMessagingAccountRootFolder} - A mail folder.
@@ -102,6 +103,7 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
          * Set proper name
          */
         name = msgAccount.getDisplayName();
+        super.accountId = IDMangler.mangle(serviceId, Integer.toString(msgAccount.getId()));
         final MessagingPermissionImpl mp = new MessagingPermissionImpl();
         mp.setEntity(session.getUserId());
         if (null == rootPerms) {

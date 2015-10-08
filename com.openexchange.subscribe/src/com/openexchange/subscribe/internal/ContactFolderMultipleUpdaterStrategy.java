@@ -172,7 +172,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     }
 
     @Override
-    public void save(final Contact newElement, final Object session) throws OXException {
+    public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
         ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
         TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
         TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -189,7 +189,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                     LOG.warn("error trying to handle truncated attributes", x);
                 }
                 if (hasTrimmed) {
-                    save(newElement, session);
+                    save(newElement, session, errors);
                     return;
                 }
             }

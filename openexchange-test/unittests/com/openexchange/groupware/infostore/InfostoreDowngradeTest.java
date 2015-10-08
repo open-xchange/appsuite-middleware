@@ -50,6 +50,7 @@ package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.TestCase;
@@ -58,6 +59,8 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -145,7 +148,8 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private void deleteAll() throws OXException {
         for(final DocumentMetadata document : clean) {
-            database.removeDocument(new int[]{document.getId()}, Long.MAX_VALUE, session);
+            IDTuple idTuple = new IDTuple(Long.toString(document.getFolderId()), Integer.toString(document.getId()));
+            database.removeDocument(Collections.singletonList(idTuple), Long.MAX_VALUE, session);
         }
     }
 
@@ -153,7 +157,8 @@ public class InfostoreDowngradeTest extends TestCase {
     private void assertDeletedEvent(final int id) throws OXException {
         Event event = TestEventAdmin.getInstance().getNewestEvent();
         assertTrue(FileStorageEventHelper.isDeleteEvent(event));
-        assertEquals(String.valueOf(id), FileStorageEventHelper.extractObjectId(event));
+        FileID fileID = new FileID(FileStorageEventHelper.extractObjectId(event));
+        assertEquals(String.valueOf(id), fileID.getFileId());
     }
 
     private void assertNotFound(final int id) {
@@ -161,7 +166,7 @@ public class InfostoreDowngradeTest extends TestCase {
             database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session);
             fail("The document still exists!");
         } catch (final OXException e) {
-            assertEquals(e.getMessage(), 300, e.getCode());
+            assertTrue(e.getMessage(), InfostoreExceptionCodes.NOT_EXIST.equals(e) || InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e));
         }
     }
 

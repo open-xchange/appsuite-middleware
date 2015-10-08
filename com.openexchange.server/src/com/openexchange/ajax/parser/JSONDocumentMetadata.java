@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -498,6 +502,88 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             return jsonObject.optInt(Metadata.NUMBER_OF_VERSIONS_LITERAL.getName());
         }
         return -1;
+    }
+
+    @Override
+    public List<ObjectPermission> getObjectPermissions() {
+        if (jsonObject.has(Metadata.OBJECT_PERMISSIONS_LITERAL.getName())) {
+            try {
+                JSONArray jsonArray = jsonObject.getJSONArray(Metadata.OBJECT_PERMISSIONS_LITERAL.getName());
+                if (null != jsonArray) {
+                    List<ObjectPermission> objectPermissions = new ArrayList<ObjectPermission>(jsonArray.length());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonPermission = jsonArray.getJSONObject(i);
+                        int entity = jsonPermission.getInt("entity");
+                        boolean group = jsonPermission.getBoolean("group");
+                        int permissions = jsonPermission.getInt("bits");
+                        objectPermissions.add(new ObjectPermission(entity, group, permissions));
+                    }
+                }
+            } catch (JSONException e) {
+                LOG.error("", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+        try {
+            if (null == objectPermissions) {
+                jsonObject.put(Metadata.OBJECT_PERMISSIONS_LITERAL.getName(), JSONObject.NULL);
+            } else {
+                JSONArray jsonArray = new JSONArray(objectPermissions.size());
+                for (int i = 0; i < objectPermissions.size(); i++) {
+                    ObjectPermission objectPermission = objectPermissions.get(i);
+                    JSONObject jsonPermission = new JSONObject(3);
+                    jsonPermission.put("entity", objectPermission.getEntity());
+                    jsonPermission.put("group", objectPermission.isGroup());
+                    jsonPermission.put("bits", objectPermission.getPermissions());
+
+                }
+                jsonObject.put(Metadata.OBJECT_PERMISSIONS_LITERAL.getName(), jsonArray);
+            }
+        } catch (JSONException e) {
+            LOG.error("", e);
+        }
+    }
+
+    @Override
+    public boolean isShareable() {
+        return jsonObject.optBoolean(Metadata.OBJECT_PERMISSIONS_LITERAL.getName());
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        if (shareable) {
+            try {
+                jsonObject.put(Metadata.SHAREABLE_LITERAL.getName(), shareable);
+            } catch (JSONException e) {
+                LOG.error("", e);
+            }
+        } else {
+            jsonObject.remove(Metadata.SHAREABLE_LITERAL.getName());
+        }
+    }
+
+    @Override
+    public int getOriginalId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setOriginalId(int id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long getOriginalFolderId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setOriginalFolderId(long id) {
+        throw new UnsupportedOperationException();
     }
 
 }

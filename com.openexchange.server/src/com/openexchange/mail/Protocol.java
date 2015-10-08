@@ -50,11 +50,11 @@
 package com.openexchange.mail;
 
 import java.io.Serializable;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Protocol} - Represents both a mail and transport protocol
@@ -76,7 +76,7 @@ public class Protocol implements Component, Serializable {
         private static final long serialVersionUID = 388987764125558623L;
 
         @Override
-        public boolean isSupported(final String protocolName) {
+        public boolean isSupported(String protocolName) {
             return true;
         }
 
@@ -100,7 +100,7 @@ public class Protocol implements Component, Serializable {
      * @return Corresponding instance of {@link Protocol}
      * @throws OXException If parsing the specified protocol string fails
      */
-    public static Protocol parseProtocol(final String protocol) throws OXException {
+    public static Protocol parseProtocol(String protocol) throws OXException {
         if (ALL.equals(protocol)) {
             return PROTOCOL_ALL;
         }
@@ -122,12 +122,11 @@ public class Protocol implements Component, Serializable {
         return new Protocol(m.group(1), aliases);
     }
 
+    // --------------------------------------------------------------------------------------------------------- //
+
     private final String[] aliases;
-
     private final int hashCode;
-
     private final String name;
-
     private String abbr;
 
     /**
@@ -136,12 +135,12 @@ public class Protocol implements Component, Serializable {
      * @param name The protocol's name in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
      */
-    public Protocol(final String name) {
+    public Protocol(String name) {
         super();
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        this.name = name.toLowerCase(Locale.ENGLISH);
+        this.name = Strings.asciiLowerCase(name);
         aliases = null;
         hashCode = 31 * 1 + (name.hashCode());
     }
@@ -153,13 +152,13 @@ public class Protocol implements Component, Serializable {
      * @param secureName The protocol's secure name in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
      */
-    public Protocol(final String name, final String secureName) {
+    public Protocol(String name, String secureName) {
         super();
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        this.name = name.toLowerCase(Locale.ENGLISH);
-        aliases = secureName == null ? null : new String[] { secureName.toLowerCase(Locale.ENGLISH) };
+        this.name = Strings.asciiLowerCase(name);
+        aliases = secureName == null ? null : new String[] { Strings.asciiLowerCase(secureName) };
         hashCode = 31 * 1 + (name.hashCode());
     }
 
@@ -170,19 +169,19 @@ public class Protocol implements Component, Serializable {
      * @param aliases The protocol's aliases in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
      */
-    public Protocol(final String name, final String... aliases) {
+    public Protocol(String name, String... aliases) {
         super();
         if (null == name) {
             throw new IllegalArgumentException("name is null");
         }
-        this.name = name.toLowerCase(Locale.ENGLISH);
+        this.name = Strings.asciiLowerCase(name);
         if (null == aliases) {
             this.aliases = null;
         } else {
             this.aliases = new String[aliases.length];
             System.arraycopy(aliases, 0, this.aliases, 0, aliases.length);
             for (int i = 0; i < this.aliases.length; i++) {
-                this.aliases[i] = this.aliases[i].toLowerCase(Locale.ENGLISH);
+                this.aliases[i] = Strings.asciiLowerCase(this.aliases[i]);
             }
         }
         hashCode = 31 * 1 + (name.hashCode());
@@ -254,10 +253,11 @@ public class Protocol implements Component, Serializable {
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
     public boolean isSupported(final String protocolName) {
-        final String oName = protocolName.toLowerCase(Locale.ENGLISH);
+        String oName = Strings.asciiLowerCase(protocolName);
         if (name.equals(oName)) {
             return true;
         }
+        String[] aliases = this.aliases;
         if (null != aliases) {
             for (int i = 0; i < aliases.length; i++) {
                 if (aliases[i].equals(oName)) {
@@ -270,7 +270,8 @@ public class Protocol implements Component, Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(name);
+        StringBuilder sb = new StringBuilder(name);
+        String[] aliases = this.aliases;
         if (null != aliases) {
             for (int i = 0; i < aliases.length; i++) {
                 sb.append('_').append(aliases[i]);
@@ -282,7 +283,7 @@ public class Protocol implements Component, Serializable {
     @Override
     public String getAbbreviation() {
         if (null == abbr) {
-            abbr = name.toUpperCase(Locale.ENGLISH);
+            abbr = Strings.asciiLowerCase(name);
         }
         return abbr;
     }

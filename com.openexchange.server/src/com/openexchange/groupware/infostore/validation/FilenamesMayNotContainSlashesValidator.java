@@ -52,6 +52,7 @@ package com.openexchange.groupware.infostore.validation;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -70,7 +71,7 @@ public class FilenamesMayNotContainSlashesValidator implements InfostoreValidato
     }
 
     @Override
-    public DocumentMetadataValidation validate(DocumentMetadata metadata) {
+    public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata) {
         String filename = metadata.getFileName();
         DocumentMetadataValidation validation = new DocumentMetadataValidation();
         if(filename != null && filename.indexOf('/') >= 0) {

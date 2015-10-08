@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="java_commons" default="download_check_and_add_jars" basedir=".">
+    <description>
+        Enhances target platform by downloading shared jars from artifactory.open-xchange
+    </description>
+
+    <property name="tmp_dir" value="commons_tmp" />
+    <property name="logback.jar.url" value="https://artifactory.open-xchange.com/artifactory/simple/libs-release/com/openexchange/java-commons/logback-extensions/1.1.0/logback-extensions-1.1.0.jar" />
+
+    <target name="download_check_and_add_jars">
+        <antcall target="download_check_and_add_jar">
+            <param name="jar.url" value="${logback.jar.url}" />
+        </antcall>
+        <delete dir="${tmp_dir}" verbose="true"/>
+    </target>
+
+    <target name="download_check_and_add_jar" depends="already_downloaded_test" unless="jar.found">
+
+        <antcall target="download">
+            <param name="url" value="${jar.url}" />
+        </antcall>
+
+        <antcall target="check">
+            <param name="file" value="${jar.filename}" />
+        </antcall>
+
+        <antcall target="add_to_jars">
+            <param name="file" value="${jar.filename}" />
+        </antcall>
+
+    </target>
+
+    <target name="already_downloaded_test">
+        <basename property="jar.filename" file="${jar.url}" />
+        <available file="jars/${jar.filename}" property="jar.found" />
+    </target>
+
+    <target name="mktmp">
+        <mkdir dir="${tmp_dir}" />
+    </target>
+
+    <target name="download" depends="mktmp">
+        <get dest="${tmp_dir}">
+            <url url="${url}" />
+        </get>
+    </target>
+
+    <target name="check">
+        <antcall target="download">
+            <param name="url" value="${jar.url}.md5" />
+        </antcall>
+        <checksum file="${tmp_dir}/${file}" fileext=".md5" verifyproperty="checksum.matches" />
+        <condition property="checksum.matches.fail">
+            <equals arg1="${checksum.matches}" arg2="false" />
+        </condition>
+        <echo message="MD5 matches for file ${file}: ${checksum.matches}" />
+        <fail if="checksum.matches.fail">Checksum error</fail>
+        <delete file="${tmp_dir}/${file}.md5" />
+    </target>
+
+    <target name="add_to_jars" depends="remove_other_versions">
+        <move file="${tmp_dir}/${file}" todir="jars" />
+    </target>
+
+    <target name="remove_other_versions">
+        <basename property="jar.filename" file="${jar.url}" />
+        <loadresource property="java-commons.delete.prefix">
+          <propertyresource name="jar.filename"/>
+          <filterchain>
+            <tokenfilter>
+              <replaceregex pattern="\d\.\d\.\d\.jar$" replace="*"/>
+            </tokenfilter>
+          </filterchain>
+        </loadresource>
+
+        <fail message="Property &quot;java-commons.delete.prefix&quot; needs to be set to a value">
+            <condition>
+                <or>
+                    <equals arg1="${java-commons.delete.prefix}" arg2=""/>
+                    <not>
+                        <isset property="java-commons.delete.prefix"/>
+                    </not>
+               </or>
+           </condition>
+        </fail>
+
+        <delete verbose="true">
+            <fileset dir="jars">
+                <include name="**/${java-commons.delete.prefix}" />
+            </fileset>
+        </delete>
+    </target>
+
+</project>

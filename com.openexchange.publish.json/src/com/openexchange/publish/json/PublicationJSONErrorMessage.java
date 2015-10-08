@@ -61,62 +61,45 @@ import com.openexchange.exception.OXExceptionStrings;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum PublicationJSONErrorMessage implements DisplayableOXExceptionCode {
+
     /**
      * An unexpected error occurred: %s
      */
-    THROWABLE(CATEGORY_ERROR, 1, PublicationJSONErrorMessage.THROWABLE_MSG),
+    THROWABLE(CATEGORY_ERROR, 1, "An unexpected error occurred: %s"),
     /**
      * Missing value for parameter %s
      */
-    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, PublicationJSONErrorMessage.MISSING_PARAMETER_MSG),
+    MISSING_PARAMETER(CATEGORY_USER_INPUT, 2, "Missing value for parameter %s"),
     /**
      * Unknown action: %s
      */
-    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, PublicationJSONErrorMessage.UNKNOWN_ACTION_MSG),
+    UNKNOWN_ACTION(CATEGORY_USER_INPUT, 3, "Unknown action: %s"),
     /**
      * Unknown entity module: %s
      */
-    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, PublicationJSONErrorMessage.UNKOWN_ENTITY_MODULE_MSG),
+    UNKOWN_ENTITY_MODULE(CATEGORY_USER_INPUT, 4, "Unknown entity module: %s"),
     /**
      * Unknown column: %s
      */
-    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, PublicationJSONErrorMessage.UNKNOWN_COLUMN_MSG),
+    UNKNOWN_COLUMN(CATEGORY_USER_INPUT, 5, "Unknown column: %s"),
     /**
      * Unknown target: %s
      */
-    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, PublicationJSONErrorMessage.UNKNOWN_TARGET_MSG)
+    UNKNOWN_TARGET(CATEGORY_USER_INPUT, 6, "Unknown target: %s"),
+    /**
+     * The operation is forbidden according to configuration.
+     */
+    FORBIDDEN_CREATE_MODIFY(CATEGORY_USER_INPUT, 7, "The operation is forbidden according to configuration.", PublicationJSONErrorDisplayMessage.FORBIDDEN_CREATE_MODIFY_MESSAGE),
 
     ;
 
-    private final static String THROWABLE_MSG = "An unexpected error occurred: %s";
-
-    private final static String MISSING_PARAMETER_MSG = "Missing value for parameter %s";
-
-    private final static String UNKNOWN_ACTION_MSG = "Unknown action: %s";
-
-    private final static String UNKOWN_ENTITY_MODULE_MSG = "Unknown entity module: %s";
-
-    private final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
-
-    private final static String UNKNOWN_TARGET_MSG = "Unknown target: %s";
-
-    private Category category;
-
-    private int errorCode;
-
-    private String message;
-
-    /**
-     * Message displayed to the user
-     */
-    private String displayMessage;
+    private final Category category;
+    private final int errorCode;
+    private final String message;
+    private final String displayMessage;
 
     /**
      * Initializes a new {@link PublicationJSONErrorMessage}.
-     * 
-     * @param category
-     * @param errorCode
-     * @param message
      */
     private PublicationJSONErrorMessage(final Category category, final int errorCode, final String message) {
         this(category, errorCode, message, null);
@@ -124,11 +107,6 @@ public enum PublicationJSONErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link PublicationJSONErrorMessage}.
-     * 
-     * @param category
-     * @param errorCode
-     * @param message
-     * @param displayMessage
      */
     private PublicationJSONErrorMessage(final Category category, final int errorCode, final String message, final String displayMessage) {
         this.category = category;
@@ -172,7 +150,7 @@ public enum PublicationJSONErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

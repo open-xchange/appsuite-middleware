@@ -51,14 +51,8 @@ package com.openexchange.groupware.importexport;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.groupware.importexport.importers.CsvDoesDifferentLanguages;
-import com.openexchange.groupware.importexport.importers.ExpressiveErrorMessageWhileParsingVCard;
 import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
-import com.openexchange.groupware.vcard.BracketedNicknameTest;
-import com.openexchange.groupware.vcard.MissingAddressesAfterImportTest;
-import com.openexchange.groupware.vcard.VCardMimeTypeTest;
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
  * This suite is meant for tests without a running OX instance
@@ -71,10 +65,8 @@ public class ImportExportStandaloneSuite extends TestSuite {
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
 		//basics
-		tests.addTestSuite( VCardTokenizerTest.class );
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
 		tests.addTest( CSVParserTest.suite() );
 		//tests.addTestSuite( com.openexchange.groupware.importexport.OXContainerConverterTest.class );
 		//tests.addTestSuite( com.openexchange.tools.versit.OXContainerConverterTest.class );
@@ -84,17 +76,11 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( CSVContactImportTest.suite() );
 		tests.addTest( CSVContactExportTest.suite() );
 		tests.addTest( OutlookCSVContactImportTest.suite() );
-        tests.addTestSuite(com.openexchange.groupware.importexport.importers.CannotImportAppleContactsWithInlineImage.class);
         tests.addTest(CsvDoesDifferentLanguages.suite());
         tests.addTestSuite(PropertyDrivenMapperTest.class);
 
 		//ICAL
 		tests.addTest( ICalImportTest.suite() );
-
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
-		tests.addTestSuite( BracketedNicknameTest.class );
-		tests.addTestSuite(ExpressiveErrorMessageWhileParsingVCard.class);
 
 		//separate tests for reported bugs
 		tests.addTest( Bug7732Test.suite() );
@@ -104,8 +90,6 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug8653.suite() );
 		tests.addTest( Bug8654.suite() );
 		tests.addTest( Bug8681Suite.suite() );
-		tests.addTestSuite( VCardMimeTypeTest.class);
-		tests.addTestSuite( MissingAddressesAfterImportTest.class);
 
 		return tests;
 	}

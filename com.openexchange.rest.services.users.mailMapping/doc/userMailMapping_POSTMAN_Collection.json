@@ -1,0 +1,37 @@
+{
+  "id": "7fd0f789-f607-e51b-1749-36664a3c5cbf",
+  "name": "REST Resolver",
+  "timestamp": 1425390049790,
+  "requests": [
+    {
+      "collectionId": "7fd0f789-f607-e51b-1749-36664a3c5cbf",
+      "id": "8e796b30-55d2-69b9-1b1a-de4293d0a085",
+      "name": "Resolve Single Mail Address",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/utilities/mailResolver/v1/resolve/olox20@premium",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": "{\"login\":\"oxadmin\",\n\"password\":\"secret\",\n \"context\": 424242669}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1425473116740
+    },
+    {
+      "collectionId": "7fd0f789-f607-e51b-1749-36664a3c5cbf",
+      "id": "eb621b7d-3e78-af20-10ef-d0e004e8c527",
+      "name": "Resolve Multiple Mail Addresses",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/utilities/mailResolver/v1/resolve/olox20@premium;thorben.betten@premium;marcus.klein@premium",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": "{\"login\":\"oxadmin\",\n\"password\":\"secret\",\n \"context\": 424242669}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    }
+  ]
+}

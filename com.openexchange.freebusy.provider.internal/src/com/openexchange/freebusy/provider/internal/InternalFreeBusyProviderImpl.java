@@ -74,6 +74,7 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.user.UserService;
 
 /**
@@ -202,13 +203,7 @@ public class InternalFreeBusyProviderImpl implements InternalFreeBusyProvider {
                     freeBusyData.add(getFreeBusyInterval(freeBusyInformation.next()));
                 }
             } finally {
-                if (null != freeBusyInformation) {
-                    try {
-                        freeBusyInformation.close();
-                    } catch (OXException e) {
-                        // ignore
-                    }
-                }
+                SearchIterators.close(freeBusyInformation);
             }
         } else {
             freeBusyData.add(new FreeBusyInterval(freeBusyData.getFrom(), freeBusyData.getUntil(), BusyStatus.UNKNOWN));

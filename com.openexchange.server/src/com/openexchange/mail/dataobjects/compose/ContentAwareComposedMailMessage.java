@@ -57,6 +57,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
@@ -76,10 +77,36 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
      *
      * @param content The content object
      * @param session The session
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final int contextId) throws OXException {
+        this(content, session, ContextStorage.getStorageContext(contextId));
+    }
+
+    /**
+     * Initializes a new {@link ContentAwareComposedMailMessage}.
+     *
+     * @param content The content object
+     * @param session The session
      * @param ctx The context
      */
     public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final Context ctx) {
         super(session, ctx);
+        this.content = content;
+    }
+
+    /**
+     * Initializes a new {@link ContentAwareComposedMailMessage}. Use this
+     * constructor for administrative mails that should not be send in the name of a
+     * certain user.
+     *
+     * @param content The content object
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    public ContentAwareComposedMailMessage(final MimeMessage content, final int contextId) throws OXException {
+        super(null, ContextStorage.getStorageContext(contextId));
         this.content = content;
     }
 
@@ -97,7 +124,12 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
 
     @Override
     public boolean containsFrom() {
-        return true;
+        try {
+            Address[] from = content.getFrom();
+            return from != null && from.length > 0;
+        } catch (MessagingException e) {
+            return false;
+        }
     }
 
     @Override

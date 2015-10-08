@@ -49,12 +49,9 @@
 
 package com.openexchange.groupware.importexport;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.importexport.formats.Format;

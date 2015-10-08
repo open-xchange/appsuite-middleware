@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.Cache;
@@ -74,6 +75,7 @@ import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.lock.LockService;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
@@ -184,11 +186,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     static CacheKey newCacheKey(CacheService cacheService, int id, int userId, int contextId) {
-        return cacheService.newCacheKey(contextId, String.valueOf(id), String.valueOf(userId));
+        return cacheService.newCacheKey(contextId, Integer.toString(id), Integer.toString(userId));
     }
 
     static CacheKey accountsCacheKey(CacheService cacheService, int userId, int contextId) {
-        return cacheService.newCacheKey(contextId, String.valueOf(userId));
+        return cacheService.newCacheKey(contextId, Integer.toString(userId));
     }
 
     @Override
@@ -315,9 +317,22 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        MailAccount defaultMailAccount = delegate.getDefaultMailAccount(userId, contextId);
-        cache.put(newCacheKey(cacheService, MailAccount.DEFAULT_ID, userId, contextId), defaultMailAccount, false);
-        return defaultMailAccount;
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailaccount-").append(contextId).append('-').append(userId).append('-').append(MailAccount.DEFAULT_ID).toString());
+        lock.lock();
+        try {
+            object = cache.get(newCacheKey(cacheService, MailAccount.DEFAULT_ID, userId, contextId));
+            if (object instanceof MailAccount) {
+                return (MailAccount) object;
+            }
+
+            MailAccount defaultMailAccount = delegate.getDefaultMailAccount(userId, contextId);
+            cache.put(newCacheKey(cacheService, MailAccount.DEFAULT_ID, userId, contextId), defaultMailAccount, false);
+            return defaultMailAccount;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -333,23 +348,36 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        RdbMailAccountStorage d = delegate;
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailaccount-").append(contextId).append('-').append(userId).append('-').append(id).toString());
+        lock.lock();
         try {
-            MailAccount mailAccount = d.getMailAccount(id, userId, contextId);
-            cache.put(key, mailAccount, false);
-            return mailAccount;
-        } catch (OXException e) {
-            if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                throw e;
+            object = cache.get(key);
+            if (object instanceof MailAccount) {
+                return (MailAccount) object;
             }
-            Connection wcon = Database.get(contextId, true);
+
+            RdbMailAccountStorage d = delegate;
             try {
-                MailAccount mailAccount = d.getMailAccount(id, userId, contextId, wcon);
+                MailAccount mailAccount = d.getMailAccount(id, userId, contextId);
                 cache.put(key, mailAccount, false);
                 return mailAccount;
-            } finally {
-                Database.backAfterReading(contextId, wcon);
+            } catch (OXException e) {
+                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                Connection wcon = Database.get(contextId, true);
+                try {
+                    MailAccount mailAccount = d.getMailAccount(id, userId, contextId, wcon);
+                    cache.put(key, mailAccount, false);
+                    return mailAccount;
+                } finally {
+                    Database.backAfterReading(contextId, wcon);
+                }
             }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -406,22 +434,25 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         Cache cache = cacheService.getCache(REGION_NAME);
         CacheKey key = newCacheKey(cacheService, id, userId, contextId);
         Object object = cache.get(key);
-        if (object == null) {
-            /*
-             * Not contained in cache. Load with specified connection
-             */
-            MailAccount mailAccount = delegate.getMailAccount(id, userId, contextId, con);
-            cache.put(key, mailAccount, false);
-        }
-        /*
-         * Return mail account
-         */
         if (object instanceof MailAccount) {
             return (MailAccount) object;
         }
-        MailAccount mailAccount = delegate.getMailAccount(id, userId, contextId, con);
-        cache.put(key, mailAccount, false);
-        return mailAccount;
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailaccount-").append(contextId).append('-').append(userId).append('-').append(id).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof MailAccount) {
+                return (MailAccount) object;
+            }
+
+            RdbMailAccountStorage d = delegate;
+            cache.put(key, d.getMailAccount(id, userId, contextId), false);
+            return d.getMailAccount(id, userId, contextId);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

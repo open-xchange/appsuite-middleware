@@ -55,7 +55,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * CommonObject
@@ -433,53 +432,6 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_uid = false;
         b_filename = false;
         b_extendedProperties = false;
-    }
-
-    @Override
-    public Set<Integer> findDifferingFields(final DataObject dataObject) {
-
-        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
-
-        if (!getClass().isAssignableFrom(dataObject.getClass())) {
-            return differingFields;
-        }
-
-        final CommonObject other = (CommonObject) dataObject;
-
-        if ((!containsCategories() && other.containsCategories()) || (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
-            other.getCategories())))) {
-            differingFields.add(I(CATEGORIES));
-        }
-
-        if ((!containsLabel() && other.containsLabel()) || (containsLabel() && other.containsLabel() && getLabel() != other.getLabel())) {
-            differingFields.add(I(COLOR_LABEL));
-        }
-
-        if ((!containsNumberOfAttachments() && other.containsNumberOfAttachments()) || (containsNumberOfAttachments() && other.containsNumberOfAttachments() && getNumberOfAttachments() != other.getNumberOfAttachments())) {
-            differingFields.add(I(NUMBER_OF_ATTACHMENTS));
-        }
-
-        if ((!containsLastModifiedOfNewestAttachment() && other.containsLastModifiedOfNewestAttachment()) || (containsLastModifiedOfNewestAttachment() && other.containsLastModifiedOfNewestAttachment() && getLastModifiedOfNewestAttachment() != other.getLastModifiedOfNewestAttachment())) {
-            differingFields.add(I(LAST_MODIFIED_OF_NEWEST_ATTACHMENT));
-        }
-
-//        if ((!containsNumberOfLinks() && other.containsNumberOfLinks()) || (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks())) {
-//            differingFields.add(I(NUMBER_OF_LINKS));
-//        }
-
-        if ((!containsPrivateFlag() && other.containsPrivateFlag()) || (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag())) {
-            differingFields.add(I(PRIVATE_FLAG));
-        }
-
-        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid())) {
-            differingFields.add(I(UID));
-        }
-
-        if ((!containsFilename() && other.containsFilename()) || (containsFilename() && other.containsFilename() && getFilename() != other.getFilename())) {
-            differingFields.add(I(FILENAME));
-        }
-
-        return differingFields;
     }
 
     @Override

@@ -50,15 +50,20 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
@@ -194,7 +199,7 @@ public interface OXUserInterface extends Remote {
      * Returns the module access rights of the context-admin
      *
      * @param context
-     *            Context
+     *            The context
      * @param auth
      *            Credentials for authenticating against server.
      *
@@ -217,8 +222,8 @@ public interface OXUserInterface extends Remote {
     /**
      * Returns the Context admin {@link User} object
      *
-     * @param ctx
-     * @param auth
+     * @param ctx The context from which to obtain the administrator
+     * @param auth The credentials
      * @return
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -262,6 +267,130 @@ public interface OXUserInterface extends Remote {
      * @throws NoSuchUserException
      */
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Changes the personal part of specified user's E-Mail address.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param personal The personal to set or <code>null</code> to drop the personal information (if any)
+     * @param auth The credentials
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from one storage to another.
+     * <p>
+     * This operation leaves quota usage unchanged and thus can be considered as the user-sensitive counterpart for <code>OXContextInterface.moveContextFilestore()</code>.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param dstFilestore The destination file storage
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveUserFilestore(Context ctx, User user, Filestore dstFilestore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from his own storage to the storage of specified master.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage to master account as well.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param masterUser The master user account
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveFromUserFilestoreToMaster(Context ctx, User user, User masterUser, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from a master account to his own storage.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage from master account to user.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param masterUser The master user account
+     * @param dstFilestore The destination file storage to move to
+     * @param maxQuota TODO
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveFromMasterToUserFilestore(Context ctx, User user, User masterUser, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from a context to his own storage.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage from context to user.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param dstFilestore The destination file storage to move to
+     * @param maxQuota TODO
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveFromContextToUserFilestore(Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
+     * Moves a user's files from his own to a context storage.
+     * <p>
+     * This operation is quota-aware and thus transfers current quota usage from user to context.
+     *
+     * @param ctx The context in which the user resides
+     * @param user The user
+     * @param credentials The credentials
+     * @return The job identifier which can be used for retrieving progress information.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException If an error in the subsystems occurred.
+     * @throws InvalidCredentialsException If the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If no such context exists
+     * @throws NoSuchFilestoreException If no file storage context exists
+     * @throws InvalidDataException If passed data is invalid
+     * @throws DatabaseUpdateException If update operation fails
+     * @throws NoSuchUserException If no such user exists
+     */
+    public int moveFromUserToContextFilestore(Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.
@@ -555,6 +684,33 @@ public interface OXUserInterface extends Remote {
      *            A pattern to search for
      * @param auth
      *            Credentials for authenticating against server.
+     * @param includeGuests
+     *            List guest users too
+     * @param excludeUsers
+     *            List only guest users
+     * @return User[] with currently ONLY id set in each User.
+     *
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] list(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
+     *
+     * @param ctx
+     *            Context object.
+     * @param search_pattern
+     *            A pattern to search for
+     * @param auth
+     *            Credentials for authenticating against server.
      * @return User[] with currently ONLY id set in each User.
      *
      * @throws RemoteException
@@ -565,6 +721,33 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Retrieve all users for a given context.
+     * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
+     * a * is transformed into a %<br>
+     * a % and a _ must be escaped by a \ (e.g. if you want to search for _doe, use the pattern \_doe
+     *
+     * @param ctx
+     *            Context object.
+     * @param search_pattern
+     *            A pattern to search for
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @param includeGuests
+     *            List guest users too
+     * @param excludeUsers
+     *            List only guest users
+     * @return User[] with currently ONLY id set in each User.
+     *
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"
@@ -585,6 +768,28 @@ public interface OXUserInterface extends Remote {
     public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
+     * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"
+     *
+     * @param ctx
+     *            Context object.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @param includeGuests
+     *            List guest users too
+     * @param excludeUsers
+     *            List only guest users
+     * @return User[] with currently ONLY id set in each User.
+     *
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] listAll(final Context ctx, final Credentials auth, boolean includeGuests, boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
      * Check whether the given user exists. Either users id or name must be set.
      *
      * @param ctx
@@ -599,4 +804,31 @@ public interface OXUserInterface extends Remote {
      */
     public boolean exists(final Context ctx, final User user, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException;
 
+    /**
+     * Retrieve user configuration (within {@link UserProperty}) and its source.
+     * @param ctx Context object the user is associated to
+     * @param user User object to retrieve the configuration for
+     * @param searchPattern string with a pattern to search for a property
+     * @param credentials Credentials for authenticating against server
+     * @return The found properties in a {@link List}
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws NoSuchUserException
+     * @throws InvalidCredentialsException
+     */
+    public List<UserProperty> getUserConfigurationSource(final Context ctx, final User user, final String searchPattern, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
+
+    /**
+     * Gets the capabilities tree showing which capability comes from which source
+     *
+     * @param ctx Context object the user is associated to
+     * @param user User object to retrieve the configuration for
+     * @param credentials Credentials for authenticating against server
+     * @return The capabilities tree
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws NoSuchUserException
+     * @throws InvalidCredentialsException
+     */
+    public Map<String, Map<String, Set<String>>> getUserCapabilitiesSource(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
 }

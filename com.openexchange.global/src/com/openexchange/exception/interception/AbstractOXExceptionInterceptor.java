@@ -110,7 +110,7 @@ public abstract class AbstractOXExceptionInterceptor implements OXExceptionInter
     @Override
     public boolean isResponsible(String module, String action) {
         for (Responsibility responsibility : responsibilitites) {
-            if (responsibility.equals(new Responsibility(module, action))) {
+            if (responsibility.implies(module, action)) {
                 return true;
             }
         }

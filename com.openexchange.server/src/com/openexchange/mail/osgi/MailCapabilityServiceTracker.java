@@ -60,6 +60,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
@@ -92,7 +93,8 @@ public final class MailCapabilityServiceTracker implements ServiceTrackerCustomi
             @Override
             public boolean isEnabled(String capability, Session ses) throws OXException {
                 if (MSISDN.equals(capability)) {
-                    if (ServerSessionAdapter.valueOf(ses).isAnonymous()) {
+                    ServerSession session = ServerSessionAdapter.valueOf(ses);
+                    if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
                         return false;
                     }
                     return MailProperties.getInstance().isSupportMsisdnAddresses();

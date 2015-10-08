@@ -49,6 +49,9 @@
 
 package com.openexchange.tools.servlet.ratelimit;
 
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * {@link RateLimitedException} - Thrown if associated request is rate limited.
  *
@@ -57,6 +60,7 @@ package com.openexchange.tools.servlet.ratelimit;
 public final class RateLimitedException extends RuntimeException {
 
     private static final long serialVersionUID = 5342199025241682441L;
+    private static final int SC_TOO_MANY_REQUESTS = 429;
 
     private final int retryAfterSeconds;
 
@@ -78,6 +82,20 @@ public final class RateLimitedException extends RuntimeException {
      */
     public int getRetryAfter() {
         return retryAfterSeconds;
+    }
+
+    /**
+     * Sends an <code>HTTP 429</code> error response to the client based on this rate limited exception. The advised retry interval is
+     * put into an appropriate <code>Retry-After</code> header.
+     *
+     * @param response The response to use for sending the error
+     */
+    public void send(HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain; charset=UTF-8");
+        if (0 < retryAfterSeconds) {
+            response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
+        }
+        response.sendError(SC_TOO_MANY_REQUESTS, "Too Many Requests - Your request is being rate limited.");
     }
 
 }

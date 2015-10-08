@@ -79,6 +79,7 @@ import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
+import com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.VisibleFoldersPerformer;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -192,7 +193,7 @@ public final class FolderServiceImpl implements FolderService {
         String folderId = Tools.getConfiguredDefaultFolder(serverSession, contentType, type);
         if (null == folderId) {
             /*
-             * get default folder from storage, otherwise            
+             * get default folder from storage, otherwise
              */
             final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
             if (null == folderStorage) {
@@ -247,6 +248,12 @@ public final class FolderServiceImpl implements FolderService {
     public FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException {
         final VisibleFoldersPerformer performer = new VisibleFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
         return FolderResponseImpl.newFolderResponse(performer.doVisibleFolders(treeId, contentType, type, all), performer.getWarnings());
+    }
+
+    @Override
+    public FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        final UserSharedFoldersPerformer performer = new UserSharedFoldersPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doSharedFolders(treeId, contentType), performer.getWarnings());
     }
 
     @Override
@@ -343,6 +350,16 @@ public final class FolderServiceImpl implements FolderService {
     @Override
     public Map<Integer, ContentType> getAvailableContentTypes() {
         return ContentTypeRegistry.getInstance().getAvailableContentTypes();
+    }
+
+    @Override
+    public ContentType parseContentType(String value) {
+        int module = Tools.getUnsignedInteger(value);
+        if (-1 != module) {
+            return ContentTypeRegistry.getInstance().getByModule(module);
+        } else {
+            return ContentTypeRegistry.getInstance().getByString(value);
+        }
     }
 
 }

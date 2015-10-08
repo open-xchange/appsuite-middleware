@@ -59,20 +59,32 @@ import org.glassfish.grizzly.http.HttpResponsePacket;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.servlet.ServletUtils;
+import com.openexchange.java.Strings;
 
 /**
- * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to
- * modify to the response object. Other methods are modified to keep compatibility to the old
- * {@link com.openexchange.http.grizzly.wrapper.ajp13.servlet.http.HttpServletResponseWrapper} as good as we can using Grizzly.
+ * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to modify to the response
+ * object.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HttpServletResponseWrapper implements HttpServletResponse {
 
     private final HttpServletResponse httpServletResponse;
+    private final String echoHeaderName;
+    private final String echoHeaderValue;
 
-    public HttpServletResponseWrapper(HttpServletResponse httpServletResponse) {
+    /**
+     * Initializes a new {@link HttpServletResponseWrapper}. Incorporates the echo header when using KippData's mod_id in case somebody
+     * calls {@link HttpServletResponse#reset}.
+     *
+     * @param httpServletResponse The response to wrap
+     * @param echoHeaderName The name of the echo header when using KippData's mod_id
+     * @param echoHeaderValue The value of the echo header when using KippData's mod_id.
+     */
+    public HttpServletResponseWrapper(HttpServletResponse httpServletResponse, String echoHeaderName, String echoHeaderValue) {
         this.httpServletResponse = httpServletResponse;
+        this.echoHeaderName = echoHeaderName;
+        this.echoHeaderValue = echoHeaderValue;
     }
 
     @Override
@@ -163,6 +175,10 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
     @Override
     public void reset() {
         httpServletResponse.reset();
+        //Don't reset the com.openexchange.servlet.echoHeaderName if present
+        if(Strings.isNotEmpty(echoHeaderValue)) {
+            setHeader(echoHeaderName, echoHeaderValue);
+        }
     }
 
     @Override
@@ -222,7 +238,7 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
         Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
 
         if (httpServletResponse.isCommitted()) {
-            throw new IllegalStateException("Respone is already committed");
+            throw new IllegalStateException("Response is already committed");
         }
 
         if (headerValue == null) {

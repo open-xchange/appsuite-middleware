@@ -60,9 +60,10 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link MeAction} - Maps the action to a <tt>GET</tt> action.
@@ -72,6 +73,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
 @Action(method = RequestMethod.GET, name = "GET", description = "Get information about requesting user.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "Response with timestamp: A JSON object providing some user information.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class MeAction extends AbstractUserAction {
 
     /**
@@ -82,8 +84,8 @@ public final class MeAction extends AbstractUserAction {
     /**
      * Initializes a new {@link MeAction}.
      */
-    public MeAction() {
-        super();
+    public MeAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -93,7 +95,7 @@ public final class MeAction extends AbstractUserAction {
             Context context = session.getContext();
 
             // Obtain user's contact
-            Contact contact = ServiceRegistry.getInstance().getService(ContactService.class, true).getUser(session, userId);
+            Contact contact = services.getService(ContactService.class).getUser(session, userId);
 
             // Craft JSON result
             JSONObject jReturn = new JSONObject(8);

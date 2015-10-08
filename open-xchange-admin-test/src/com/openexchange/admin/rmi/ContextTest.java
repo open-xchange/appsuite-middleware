@@ -74,7 +74,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * 
+ *
  * @author cutmasta
  * @author d7
  */
@@ -90,10 +90,10 @@ public class ContextTest extends AbstractTest {
         Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
 
         OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
-        
+
         assertEquals(2, xctx.getAdminId(ctx, cred));
     }
-    
+
     @Test
     public void testGetAndChangeContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
@@ -106,8 +106,8 @@ public class ContextTest extends AbstractTest {
 
         assertEquals("lemon", srv_loaded.getUserAttribute("com.openexchange.test", "flavor"));
         assertEquals("squishy", srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
-        
-        
+
+
         assertTrue("Expected same context ids", ctx.getId().intValue() == srv_loaded.getId().intValue());
 
         String add_mapping = srv_loaded.getId().intValue() + "_" + System.currentTimeMillis();
@@ -115,13 +115,13 @@ public class ContextTest extends AbstractTest {
 
         String changed_context_name = srv_loaded.getName() + "_" + System.currentTimeMillis();
         srv_loaded.setName(changed_context_name);
-        
+
         // And for good measure some dynamic attributes
-        
+
         srv_loaded.setUserAttribute("com.openexchange.test", "flavor", "pistaccio");
         srv_loaded.setUserAttribute("com.openexchange.test", "color", "green");
         srv_loaded.setUserAttribute("com.openexchange.test", "texture", null);
-        
+
         // change context and load again
         xctx.change(srv_loaded, cred);
 
@@ -131,7 +131,7 @@ public class ContextTest extends AbstractTest {
         assertEquals("green", srv_loaded.getUserAttribute("com.openexchange.test", "color"));
         assertEquals(null, srv_loaded.getUserAttribute("com.openexchange.test", "texture"));
 
-        
+
         // ids must be correct again and the mapping should now exist
         assertTrue("Expected same context ids", edited_ctx.getId().intValue() == srv_loaded.getId().intValue());
 
@@ -219,7 +219,7 @@ public class ContextTest extends AbstractTest {
         Context[] ctxs = searchContext(String.valueOf(ctx.getId()), hosturl, cred);
         boolean ctx_disabled = false;
 
-        for (final Context elem : ctxs) {            
+        for (final Context elem : ctxs) {
             if (!elem.isEnabled()) {
                 ctx_disabled = true;
             }
@@ -233,7 +233,7 @@ public class ContextTest extends AbstractTest {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
-        
+
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
         MaintenanceReason[] mrs = oxu.listMaintenanceReason("*",cred);
@@ -275,7 +275,7 @@ public class ContextTest extends AbstractTest {
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
     }
-    
+
     @Test(expected=InvalidDataException.class)
     public void testCreateContextNoQuota() throws Exception {
         final Credentials cred = DummyMasterCredentials();
@@ -349,7 +349,7 @@ public class ContextTest extends AbstractTest {
         assertTrue("context not found", foundctx);
     }
 
-   
+
     private Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByDatabase(db, cred);
@@ -361,7 +361,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);        
+        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.list(pattern, cred);
     }
 
@@ -369,8 +369,8 @@ public class ContextTest extends AbstractTest {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.delete(ctx, cred);
     }
-    
-    
+
+
     private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
@@ -398,17 +398,17 @@ public class ContextTest extends AbstractTest {
             Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
             oxu.registerDatabase(db, cred);
         }
-        
+
         OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        
-        oxcontext.create(ctx,UserTest.getTestUserObject("admin","secret"), cred);
+
+        oxcontext.create(ctx,UserTest.getTestUserObject("admin","secret", ctx), cred);
         return ctx;
     }
 
     private int addContext(Context ctx, String host, Credentials cred) throws Exception {
         return addSystemContext(ctx,host,cred).getId().intValue();
     }
-     
+
 
     private void disableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
@@ -466,13 +466,13 @@ public class ContextTest extends AbstractTest {
     @Test
     public void testExistsContext() throws Exception {
         OXContextInterface ctxstub = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
-        
+
         final Credentials cred = DummyMasterCredentials();
         Context ctxexists = getTestContextObject(cred);
         addContext(ctxexists, getRMIHostUrl(), cred);
         Context ctxnotexists = new Context();
         ctxnotexists.setName("notexists.com");
-        
+
         assertFalse("context must not exist", ctxstub.exists(ctxnotexists, cred));
         assertTrue("context must exist", ctxstub.exists(ctxexists, cred));
     }

@@ -52,10 +52,10 @@ package com.openexchange.threadpool;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ExceptionUtils;
 
 
@@ -78,26 +78,36 @@ public abstract class RunLoop<E> implements Runnable {
 
     private final Lock handleLock = new ReentrantLock();
 
-    /** The Condition to await before the runloop continues processing */
+    /** The condition to await before the run-loop continues processing */
     private final Condition proceedCondition = handleLock.newCondition();
 
-    /** The element we have just taken from the queue for handling */
-    protected E currentElement;
+    /** Reference for the element we have just taken from the queue for handling */
+    protected final AtomicReference<E> currentElementReference = new AtomicReference<E>();
 
-    public RunLoop(String name) {
+    private volatile boolean isRunning = false;
+
+    /**
+     * Initializes a new {@link RunLoop}.
+     *
+     * @param name The name to set
+     */
+    protected RunLoop(String name) {
+        super();
         this.name = name;
     }
 
     @Override
     public void run() {
         Thread.currentThread().setName(name);
-        while (true) {
+        isRunning=true;
+        while (isRunning) {
             /*
              * Get the current element from the queue. blocking, so this must be done outside the handleLock
              */
             try {
-                currentElement = queue.take();
+                currentElementReference.set(queue.take());
             } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
                 LOG.info("Returning from RunLoop due to interruption");
                 return;
             }
@@ -113,21 +123,26 @@ public abstract class RunLoop<E> implements Runnable {
                 /*
                  * Element could have been removed while RunLoop was paused
                  */
+                E currentElement = this.currentElementReference.get();
                 if(null != currentElement) {
                     handle(currentElement);
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 LOG.info("Returning from RunLoop due to interruption");
+                isRunning=false;
                 return;
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 LOG.error("", t);
             } finally {
                 // Do not prevent GC of last handled element
-                currentElement = null;
+                currentElementReference.set(null);
                 handleLock.unlock();
             }
         }
+        LOG.info("Leaving run loop");
+        Thread.currentThread().setName(name + "-stopped");
     }
 
     /**
@@ -162,6 +177,43 @@ public abstract class RunLoop<E> implements Runnable {
           }
     }
 
-    protected abstract void handle(E element) throws OXException;
+    /**
+     * Check if the RunLoop is running
+     * @return true if the RunLoop is running, else false
+     */
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    /**
+     * Stop the {@link RunLoop} by ending the while loop and poisoning the internal {@link BlockingQueue}.
+     */
+    public void stop() {
+        isRunning = false;
+        unblock();
+    }
+
+    /**
+     * Get the name of this RunLoop
+     * @return the name of this RunLoop
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Get the number of Elements being enqueued in this {@link RunLoop}.
+     * @return the number of Elements that are currently enqueued.
+     */
+    public int getQueueSize() {
+        return queue.size();
+    }
+
+    protected abstract void handle(E element);
+
+    /**
+     * Unblock the potentially blocked internal {@link BlockingQueue} by inserting a NoOp element.
+     */
+    protected abstract void unblock();
 
 }

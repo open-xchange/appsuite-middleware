@@ -128,7 +128,8 @@ public class ContactReader {
         if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
             String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
 
-            if (senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+            //TODO: Guests do not have mail settings
+            if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
                 UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
                 String defaultSendAddress = userSettingMail.getSendAddr();
                 if (false == Strings.isEmpty(defaultSendAddress)) {

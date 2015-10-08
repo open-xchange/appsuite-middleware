@@ -74,7 +74,11 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * The string cannot be parsed to a valid URL.
      */
     INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, "The string cannot be parsed to a valid URL."),
-    
+    /**
+     * The operation is forbidden according to configuration.
+     */
+    FORBIDDEN_CREATE_MODIFY(CATEGORY_USER_INPUT, 8, OXMFErrorStrings.FORBIDDEN_CREATE_MODIFY_MESSAGE, "The operation is forbidden according to configuration.")
+
     ;
 
     private Category category;
@@ -82,13 +86,13 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
     private int errorCode;
 
     private String message;
-    
+
     private final String displayMessage;
 
     private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String message) {
         this(category, errorCode, null, message);
     }
-    
+
     private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String displayMessage, final String message) {
         this.category = category;
         this.errorCode = errorCode;

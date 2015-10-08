@@ -60,8 +60,6 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -76,13 +74,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
-import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
@@ -99,6 +94,8 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
@@ -113,8 +110,10 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.impl.EventFactoryServiceImpl;
 import com.openexchange.event.impl.EventQueue;
@@ -131,32 +130,38 @@ import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
 import com.openexchange.folder.internal.FolderServiceImpl;
+import com.openexchange.folderstorage.FolderI18nNamesService;
+import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.impl.CachingAliasStorage;
+import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
-import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
 import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
+import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.index.IndexFacadeService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -183,6 +188,8 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.config.NoReplyConfigFactory;
+import com.openexchange.mail.transport.config.impl.DefaultNoReplyConfigFactory;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -194,10 +201,13 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -208,7 +218,6 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
-import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -219,11 +228,10 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -234,6 +242,8 @@ import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
@@ -285,7 +295,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class };
+        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class, PasswordMechFactory.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -356,25 +366,6 @@ public final class ServerActivator extends HousekeepingActivator {
                     LOG.error("", e);
                 }
             }
-        }
-    }
-
-    private static int parseInt(final int index, final String[] sa, final int defaultValue) {
-        if (null == sa) {
-            return defaultValue;
-        }
-        if (index >= sa.length) {
-            return defaultValue;
-        }
-        final String toParse = sa[index];
-        if (null == toParse) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(toParse.trim());
-        } catch (NumberFormatException e) {
-            LOG.error("Not an integer: {}", toParse, e);
-            return defaultValue;
         }
     }
 
@@ -450,6 +441,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // ICal Emitter
         track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
 
+        // vCard service & storage
+        track(VCardService.class, new RegistryCustomizer<VCardService>(context, VCardService.class));
+        track(VCardStorageFactory.class, new RegistryCustomizer<VCardStorageFactory>(context, VCardStorageFactory.class));
+
         // Data Retention Service
         track(DataRetentionService.class, new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class));
 
@@ -458,6 +453,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
+
+        // Delete Context Group Listener Service Tracker
+        track(DeleteContextGroupListener.class, new DeleteContextGroupListenerServiceTracker(context));
 
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
@@ -492,30 +490,6 @@ public final class ServerActivator extends HousekeepingActivator {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put("RMIName", RemoteAuthenticator.RMI_NAME);
             registerService(Remote.class, new RemoteAuthenticatorImpl(), props);
-        }
-
-        // MetaContributors
-        {
-            class MetaContributorRegistryCustomizer extends RegistryCustomizer<MetaContributorRegistry> {
-
-                public MetaContributorRegistryCustomizer(final BundleContext context) {
-                    super(context, MetaContributorRegistry.class);
-                }
-
-                @Override
-                public MetaContributorRegistry addingService(final ServiceReference<MetaContributorRegistry> serviceReference) {
-                    final MetaContributorRegistry registry = super.addingService(serviceReference);
-                    MetaContributors.setRegistry(registry);
-                    return registry;
-                }
-
-                @Override
-                public void removedService(final ServiceReference<MetaContributorRegistry> serviceReference, final MetaContributorRegistry o) {
-                    MetaContributors.setRegistry(null);
-                    super.removedService(serviceReference, o);
-                }
-            }
-            track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
         }
 
         /*
@@ -556,6 +530,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
+        track(GuestService.class, new RegistryCustomizer<GuestService>(context, GuestService.class));
+
         // Attachment Plugins
         serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
         serviceTrackerList.add(new AttachmentListenerTracker(context));
@@ -572,12 +548,9 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
 
-        track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
-
         /*
-         * Track candidates for file storage
+         * Track ManagedFileManagement
          */
-        track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
         track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
         /*
@@ -586,11 +559,44 @@ public final class ServerActivator extends HousekeepingActivator {
         track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
 
         /*
+         * Track OAuth provider services
+         */
+        track(OAuthResourceService.class, new RegistryCustomizer<OAuthResourceService>(context, OAuthResourceService.class));
+        track(OAuthSessionProvider.class, new RegistryCustomizer<OAuthSessionProvider>(context, OAuthSessionProvider.class));
+
+        /*
+         * User Alias Service
+         */
+        UserAliasStorage aliasStorage;
+        {
+            String regionName = "UserAlias";
+            byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+
+            aliasStorage = new CachingAliasStorage(new RdbAliasStorage());
+            ServerServiceRegistry.getInstance().addService(UserAliasStorage.class, aliasStorage);
+        }
+
+        /*
          * User Service
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
-        UserService userService = new UserServiceImpl(interceptorRegistry);
+
+        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         // Start up server the usual way
@@ -602,6 +608,7 @@ public final class ServerActivator extends HousekeepingActivator {
         openTrackers();
         // Register server's services
         registerService(UserService.class, userService);
+        registerService(UserAliasStorage.class, aliasStorage);
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
@@ -651,6 +658,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(this));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
@@ -711,16 +719,6 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registerService(DataHandler.class, new ContactInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
-            registerService(DataHandler.class, new ContactJSONDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
             registerService(DataHandler.class, new ICalInsertDataHandler(), props);
         }
@@ -739,9 +737,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(DBProvider.class, new DBPoolProvider());
 
         // Register Infostore
-        registerService(InfostoreFacade.class, Infostore.FACADE);
-        registerService(EventFiringInfostoreFacade.class, Infostore.EVENT_FIRING_FACADE);
-        registerService(InfostoreSearchEngine.class, Infostore.SEARCH_ENGINE);
+        registerInfostore();
 
         // Register AttachmentBase
         registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
@@ -757,6 +753,11 @@ public final class ServerActivator extends HousekeepingActivator {
         final FolderService folderService = new FolderServiceImpl();
         registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
+
+        // Register folder i18n name service
+        FolderI18nNamesServiceImpl folderI18nNamesService = FolderI18nNamesServiceImpl.getInstance();
+        registerService(FolderI18nNamesService.class, folderI18nNamesService);
+        ServerServiceRegistry.getInstance().addService(FolderI18nNamesService.class, folderI18nNamesService);
 
         // Register SessionHolder
         registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
@@ -776,7 +777,7 @@ public final class ServerActivator extends HousekeepingActivator {
             final String regionName = "GenLocks";
             final byte[] ccf = ("jcs.region." + regionName + "=\n" +
                 "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                "jcs.region." + regionName + ".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region." + regionName + ".cacheattributes.MaxObjects=20000000\n" +
                 "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
                 "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" +
                 "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
@@ -849,6 +850,19 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
+    private void registerInfostore() {
+        DBProvider dbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
+        InfostoreFacadeImpl infostoreFacade = new InfostoreFacadeImpl(dbProvider);
+        infostoreFacade.setTransactional(true);
+        infostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
+        EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
+        eventFiringInfostoreFacade.setTransactional(true);
+        eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
+        registerService(InfostoreFacade.class, infostoreFacade);
+        registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
+        registerService(InfostoreSearchEngine.class, infostoreFacade);
+    }
+
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
@@ -869,7 +883,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
-        final String prefix = Dispatcher.PREFIX.get();
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         http.registerServlet(prefix + "mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
         // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);

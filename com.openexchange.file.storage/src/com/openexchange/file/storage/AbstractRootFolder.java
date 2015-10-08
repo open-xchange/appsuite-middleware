@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,6 +63,10 @@ import java.util.Set;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractRootFolder implements FileStorageFolder {
+
+    protected int createdBy;
+
+    protected int modifiedBy;
 
     /**
      * Initializes a new {@link AbstractRootFolder}.
@@ -82,6 +87,11 @@ public abstract class AbstractRootFolder implements FileStorageFolder {
 
     @Override
     public abstract String getName();
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return null;
+    }
 
     @Override
     public FileStoragePermission getOwnPermission() {
@@ -150,10 +160,20 @@ public abstract class AbstractRootFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return Collections.emptyMap();
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return this.modifiedBy;
     }
 
 }

@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPExtension}

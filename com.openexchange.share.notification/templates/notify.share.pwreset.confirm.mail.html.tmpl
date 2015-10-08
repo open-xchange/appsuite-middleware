@@ -1,0 +1,36 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+</head>
+<body>
+ <#escape x as x?html>
+ 
+  <p id="pwrc_greeting">
+    ${pwrc_greeting}
+  </p>
+  
+  <p id="pwrc_requestreceived">
+    ${pwrc_requestreceived}
+  </p>
+  
+  <p id="pwrc_set_new_pwd" style="padding:10px 0;margin:20px 0;">
+    <@styledButton link="${pw_reset_confirm_link}">${pw_reset_confirm_link_label}</@styledButton>
+  </p>
+  
+  <p id="pwrc_ignore">
+    ${pwrc_ignore}
+  </p>
+  
+  <p id="pwrc_automated_mail">
+    ${pwrc_automated_mail}
+  </p>
+
+ </#escape>
+ 
+ <#include "notify.common.footer.html.tmpl">
+ 
+</body>
+</html>

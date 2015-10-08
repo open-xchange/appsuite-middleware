@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.threadsort2;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.java.Strings.isDigit;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
@@ -60,8 +61,10 @@ import javax.mail.FetchProfile;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFillerIMAPCommand;
 import com.openexchange.imap.threader.references.Conversation;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -104,9 +107,9 @@ public final class ThreadSorts {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ").append(sortRange).toString();
                 final Response[] r;
                 {
-                    final String command = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -129,10 +132,13 @@ public final class ThreadSorts {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
                 }
                 return retval;
@@ -149,12 +155,13 @@ public final class ThreadSorts {
      * @param imapFolder The IMAP folder on which THREAD command shall be executed
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or <code>&quot;12,13,14,24&quot;</code>
      * @param isRev1 Flag for IMAPrev1
+     * @param serverInfo The IMAP server information
      * @param fields The optional fields to pre-fill
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final MailField... fields) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, MailField... fields) throws OXException, MessagingException {
         if (null == fields || fields.length == 0 || (fields.length == 1 && MailField.RECEIVED_DATE.equals(fields[0]))) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
         }
@@ -164,7 +171,7 @@ public final class ThreadSorts {
         for (MailField field : fields) {
             MimeStorageUtility.addFetchItem(fp, field);
         }
-        return getConversations(imapFolder, sortRange, isRev1, fp);
+        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo);
     }
 
     /**
@@ -176,11 +183,12 @@ public final class ThreadSorts {
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or <code>&quot;12,13,14,24&quot;</code>
      * @param isRev1 Flag for IMAPrev1
      * @param fetchProfile The optional fetch profile to pre-fill messages
+     * @param serverInfo The IMAP server information
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo) throws OXException, MessagingException {
         if (null == fetchProfile) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
         }
@@ -196,7 +204,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapFolder).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder).doCommand();
         }
 
         return conversations;
@@ -211,11 +219,12 @@ public final class ThreadSorts {
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or <code>&quot;12,13,14,24&quot;</code>
      * @param isRev1 Flag for IMAPrev1
      * @param fetchProfile The optional fetch profile to pre-fill messages
+     * @param serverInfo The IMAP server information
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile) throws OXException, MessagingException {
+    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo) throws OXException, MessagingException {
         List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
@@ -226,7 +235,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapFolder).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder).doCommand();
         }
 
         List<Conversation> retval = new ArrayList<Conversation>(conversations.size());

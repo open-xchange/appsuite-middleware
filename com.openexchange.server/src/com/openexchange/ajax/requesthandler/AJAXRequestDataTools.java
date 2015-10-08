@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -158,7 +159,9 @@ public class AJAXRequestDataTools {
         /*
          * Set the module
          */
-        retval.setModule(getModule(prefix, req));
+        if (null != prefix) {
+            retval.setModule(getModule(prefix, req));
+        }
         /*
          * Set request URI
          */
@@ -272,7 +275,7 @@ public class AJAXRequestDataTools {
         if (null == value) {
             return defaultValue;
         }
-        return TRUE_VALS.contains(toLowerCase(value.trim()));
+        return TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(value.trim()));
     }
 
     private static final Set<String> TRUE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
@@ -287,7 +290,7 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        return (null != parameter) && TRUE_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
     private static final Set<String> FALSE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("false", "0", "no", "n", "off")));
@@ -305,7 +308,7 @@ public class AJAXRequestDataTools {
         if (null == parameter) {
             return null;
         }
-        return FALSE_VALS.contains(toLowerCase(parameter.trim())) ? Boolean.FALSE : null;
+        return FALSE_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim())) ? Boolean.FALSE : null;
     }
 
     /**
@@ -327,45 +330,89 @@ public class AJAXRequestDataTools {
     }
 
     /**
-     * Parses host name, secure and AJP route.
+     * Parses the "from"/"to" indexes from specified {@code AJAXRequestData} instance
+     *
+     * @param requestData The request data
+     * @return The parsed "from"/"to" indexes or <code>null</code>
+     * @throws OXException If parsing fails; e.g. NaN
+     */
+    public static int[] parseFromToIndexes(AJAXRequestData requestData) throws OXException {
+        String sLimit = requestData.getParameter(AJAXServlet.PARAMETER_LIMIT);
+        if (null == sLimit) {
+            int from = parseIntParameter(requestData.getParameter(AJAXServlet.LEFT_HAND_LIMIT), -1);
+            if (from < 0) {
+                return null;
+            }
+            int to = parseIntParameter(requestData.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), -1);
+            if (to < 0) {
+                return null;
+            }
+
+            return new int[] { from < 0 ? 0 : from, to < 0 ? 0 : to};
+        }
+
+        int start;
+        int end;
+        try {
+            int pos = sLimit.indexOf(',');
+            if (pos < 0) {
+                start = 0;
+                int i = Integer.parseInt(sLimit.trim());
+                end = i < 0 ? 0 : i;
+            } else {
+                int i = Integer.parseInt(sLimit.substring(0, pos).trim());
+                start = i < 0 ? 0 : i;
+                i = Integer.parseInt(sLimit.substring(pos+1).trim());
+                end = i < 0 ? 0 : i;
+            }
+        } catch (NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "limit", sLimit);
+        }
+        return new int[] {start, end};
+    }
+
+    /**
+     * Parses host name, secure and route.
      *
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param session The associated session
      */
-    public static void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
+    public static void parseHostName(AJAXRequestData request, HttpServletRequest req, ServerSession session) {
+        if (null == session) {
+            parseHostName(request, req, -1, -1, false);
+        } else {
+            parseHostName(request, req, session.getUserId(), session.getContextId(), session.getUser().isGuest());
+        }
+    }
+
+    /**
+     * Parses host name, secure and route.
+     *
+     * @param request The AJAX request data
+     * @param req The HTTP Servlet request
+     * @param userId The user identifier
+     * @param isGuest <code>true</code> if the guest hostname should be preferred, <code>false</code>, otherwise
+     * @param contextId The context identifier
+     */
+    private static void parseHostName(AJAXRequestData request, HttpServletRequest req, int userId, int contextId, boolean isGuest) {
         request.setSecure(Tools.considerSecure(req));
         {
             final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
             if (null == hostnameService) {
                 request.setHostname(req.getServerName());
             } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                final String hn;
+                if (isGuest) {
+                    hn = hostnameService.getGuestHostname(userId, contextId);
+                } else {
+                    hn = hostnameService.getHostname(userId, contextId);
+                }
                 request.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
         request.setRemoteAddress(req.getRemoteAddr());
         request.setRoute(Tools.getRoute(req.getSession(true).getId()));
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
     /**
@@ -381,7 +428,7 @@ public class AJAXRequestDataTools {
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
-        String module = pathInfo.substring(prefix.length());
+        String module = null != prefix ? pathInfo.substring(prefix.length()) : pathInfo;
         final int mlen = module.length() - 1;
         if ('/' == module.charAt(mlen)) {
             module = module.substring(0, mlen);
@@ -398,36 +445,9 @@ public class AJAXRequestDataTools {
     public String getAction(final HttpServletRequest req) {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
-            return toUpperCase(req.getMethod());
+            return Strings.toUpperCase(req.getMethod());
         }
         return action;
 
-    }
-
-    /** ASCII-wise upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

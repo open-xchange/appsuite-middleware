@@ -791,13 +791,14 @@ public final class MailProperties implements IMailProperties {
         return attachDisplaySize;
     }
 
-    /**
-     * Signals whether secure connections to external accounts are mandatory.
-     *
-     * @return <code>true</code> if secure connections are enforced; otherwise <code>false</code>
-     */
+    @Override
     public boolean isEnforceSecureConnection() {
         return enforceSecureConnection;
+    }
+
+    @Override
+    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
+        throw new UnsupportedOperationException("setEnforceSecureConnection() not allowed for static MailProperties");
     }
 
     /**

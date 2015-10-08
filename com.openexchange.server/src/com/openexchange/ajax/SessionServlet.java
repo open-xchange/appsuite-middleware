@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -67,8 +66,10 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Reply;
@@ -130,6 +131,7 @@ public abstract class SessionServlet extends AJAXServlet {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
+        ServerSession session = null;
         String sessionId = null;
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -142,7 +144,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
 
             // Get associated session (may be null)
-            ServerSession session = result.getSession();
+            session = result.getSession();
             if (null != session) {
                 /*
                  * Track DB schema
@@ -173,19 +175,19 @@ public abstract class SessionServlet extends AJAXServlet {
                     threadCounter.increment(sessionId);
                 }
                 for (SessionServletInterceptor interceptor : SessionServletInterceptorRegistry.getInstance().getInterceptors()) {
-                    interceptor.intercept(session);
+                    interceptor.intercept(session, req, resp);
                 }
             }
 
             // Invoke service() method
             super.service(req, resp);
-        } catch (final RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                resp.setHeader(RETRY_AFTER, String.valueOf(e.getRetryAfter()));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        } catch (RateLimitedException e) {
+            e.send(resp);
         } catch (final OXException e) {
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
             handleOXException(e, req, resp);
         } finally {
             if (null != sessionId && null != threadCounter) {
@@ -235,7 +237,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 String sessionId = SessionUtility.getSessionId(req);
                 SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
                 if (null != result.getSession()) {
-                    SessionUtility.removeOXCookies(result.getSession().getHash(), req, resp);
+                    SessionUtility.removeOXCookies(result.getSession(), req, resp);
                 }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
@@ -278,7 +280,21 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp);
+        handleOXException(e, req, resp, true, true);
+    }
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param checkUploadQuota Whether to check for an upload-quote error or not
+     * @param doLog <code>true</code> to perform appropriate logging; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp, boolean checkUploadQuota, boolean doLog) throws IOException {
+        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp, checkUploadQuota, doLog);
     }
 
     private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
@@ -291,13 +307,16 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param reasonPhrase The HTTP reason phrase
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
+     * @param checkUploadQuota Whether to check for an upload-quote error or not
+     * @param doLog <code>true</code> to perform appropriate logging; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e)) {
+    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp, boolean checkUploadQuota, boolean doLog) throws IOException {
+        if (checkUploadQuota && (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e))) {
             // An upload failed
             LOG.debug("", e);
-            resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
+            String sLoc = e.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
+            resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(null == sLoc ? Locale.US : LocaleTools.getLocale(sLoc)));
         } else if (sessionErrorPrefix.equals(e.getPrefix())) {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
@@ -317,7 +336,27 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         } else {
-            e.log(LOG);
+            if (doLog) {
+                switch (e.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", e);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", e);
+                        break;
+                    case INFO:
+                        LOG.info("", e);
+                        break;
+                    case WARNING:
+                        LOG.warn("", e);
+                        break;
+                    case ERROR:
+                        LOG.error("", e);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             // Check expected output format
             if (Dispatchers.isApiOutputExpectedFor(req)) {

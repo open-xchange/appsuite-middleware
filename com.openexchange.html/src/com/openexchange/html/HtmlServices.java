@@ -51,16 +51,10 @@ package com.openexchange.html;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
-import com.openexchange.html.tools.HTMLUtils;
-
 
 /**
  * {@link HtmlServices} - A utility class for {@link HtmlService}.
@@ -75,8 +69,6 @@ public final class HtmlServices {
     private HtmlServices() {
         super();
     }
-
-    private static final Set<String> NOT_ALLOWED = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("%3c", "%3e", "%22")));
 
     /**
      * Checks if specified URL String is safe or not.
@@ -100,25 +92,6 @@ public final class HtmlServices {
             return false;
         }
         String lc = asciiLowerCase(val.trim());
-        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
-            return false;
-        }
-        if (null != more && more.length > 0) {
-            for (final String token : more) {
-                if (lc.indexOf(asciiLowerCase(token)) >= 0) {
-                    return false;
-                }
-            }
-        }
-        if (lc.indexOf("%") < 0) {
-            return true;
-        }
-        for (final String notAllowed : NOT_ALLOWED) {
-            if (lc.indexOf(notAllowed) >= 0) {
-                return false;
-            }
-        }
-        lc = HTMLUtils.decodeUrl(val, null);
         if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
             return false;
         }

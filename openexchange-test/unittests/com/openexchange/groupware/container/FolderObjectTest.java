@@ -1,30 +1,16 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.groupware.container.FolderObject.FOLDER_NAME;
+import static com.openexchange.groupware.container.FolderObject.MODULE;
+import static com.openexchange.groupware.container.FolderObject.PERMISSIONS_BITS;
+import static com.openexchange.groupware.container.FolderObject.SUBFOLDERS;
+import static com.openexchange.groupware.container.FolderObject.TYPE;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.server.impl.OCLPermission;
 
-import static com.openexchange.groupware.container.FolderObject.*;
-
 public class FolderObjectTest extends FolderChildObjectTest {
-
-    @Override
-    public void testFindDifferingFields() {
-        FolderObject dataObject = getFolderObject();
-        FolderObject otherDataObject = getFolderObject();
-
-        otherDataObject.setFolderName("Blupp");
-        assertDifferences(dataObject, otherDataObject, FolderObject.FOLDER_NAME);
-
-        otherDataObject.setModule(12);
-        assertDifferences(dataObject, otherDataObject, FolderObject.FOLDER_NAME, FolderObject.MODULE);
-
-        otherDataObject.setType(12);
-        assertDifferences(dataObject, otherDataObject, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE);
-
-    }
-
 
     public void testPermissionMethods() {
         FolderObject object = new FolderObject();

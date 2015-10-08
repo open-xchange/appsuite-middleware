@@ -482,23 +482,13 @@ public class ID implements Serializable {
     }
 
     /**
-     * Get a "scope"-wide lock for a given {@link ID}.
-     *
-     * @param scope The scope to be used for the {@link Lock}
-     * @return The "scope"-wide lock for this {@link ID}.
-     */
-    public Lock getLock(String scope) throws RealtimeException {
-        return getManager().getLock(this, scope);
-    }
-
-    /**
      * Get a {@link Lock} for the given scope from this {@link ID} and lock it.
      *
      * @param scope The scope for the {@link Lock}
      * @throws RealtimeException If getting the {@link Lock}/locking fails
      */
     public void lock(String scope) throws RealtimeException {
-        getManager().getLock(this, scope).lock();
+        getManager().lock(this, scope);
     }
 
     /**
@@ -508,7 +498,7 @@ public class ID implements Serializable {
      * @throws RealtimeException If getting the {@link Lock}/unlocking fails
      */
     public void unlock(String scope) throws RealtimeException {
-        getManager().getLock(this, scope).unlock();
+        getManager().unlock(this, scope);
     }
 
     /**

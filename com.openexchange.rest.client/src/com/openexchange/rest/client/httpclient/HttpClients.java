@@ -87,6 +87,8 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpClients} - Utility class for HTTP client.
+ * <p>
+ * See <a href="http://svn.apache.org/repos/asf/httpcomponents/httpclient/branches/4.0.x/httpclient/src/examples/org/apache/http/examples/client/">here</a> for several examples.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.1
@@ -115,6 +117,9 @@ public final class HttpClients {
     /** Maximum connections per route */
     private static final int MAX_CONNECTIONS_PER_ROUTE = 10;
 
+    /** Default socket buffer size */
+    private static final int DEFAULT_SOCKET_BUFFER_SIZE = 8192;
+
     /**
      * Creates a {@link DefaultHttpClient} instance.
      *
@@ -122,26 +127,36 @@ public final class HttpClients {
      * @return A newly created {@link DefaultHttpClient} instance
      */
     public static DefaultHttpClient getHttpClient(String userAgent) {
+        return getHttpClient(new ClientConfig().setUserAgent(userAgent));
+    }
+
+    /**
+     * Creates a {@link DefaultHttpClient} instance.
+     *
+     * @param config The configuration settings for the client
+     * @return A newly created {@link DefaultHttpClient} instance
+     */
+    public static DefaultHttpClient getHttpClient(final ClientConfig config) {
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
 
-        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, MAX_CONNECTIONS_PER_ROUTE, MAX_TOTAL_CONNECTIONS);
-        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, KEEP_ALIVE_DURATION_SECS));
+        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
+        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
 
         HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
-        HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
-        HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
-        if (null != userAgent) {
-            HttpProtocolParams.setUserAgent(httpParams, userAgent);
+        HttpConnectionParams.setConnectionTimeout(httpParams, config.connectionTimeout);
+        HttpConnectionParams.setSoTimeout(httpParams, config.socketReadTimeout);
+        HttpConnectionParams.setSocketBufferSize(httpParams, config.socketBufferSize);
+        if (null != config.userAgent) {
+            HttpProtocolParams.setUserAgent(httpParams, config.userAgent);
         }
 
         final DefaultHttpClient c = new DefaultHttpClient(ccm, httpParams) {
 
             @Override
             protected ConnectionKeepAliveStrategy createConnectionKeepAliveStrategy() {
-                return new KeepAliveStrategy();
+                return new KeepAliveStrategy(config.keepAliveDuration);
             }
 
             @Override
@@ -171,6 +186,140 @@ public final class HttpClients {
         });
 
         return c;
+    }
+
+    /**
+     * A container for HTTP client settings. All settings are pre-set to default values.
+     * However those probably don't fit your use case, so you should adjust them accordingly.
+     * Settings can be applied in a builder-like way, e.g.:
+     * <pre>
+     * ClientConfig config = ClientConfig.newInstance()
+     *     .setConnectionTimeout(10000)
+     *     .setSocketReadTimeout(10000);
+     * </pre>
+     */
+    public static final class ClientConfig {
+
+        private int socketReadTimeout = DEFAULT_TIMEOUT_MILLIS;
+
+        private int connectionTimeout = DEFAULT_TIMEOUT_MILLIS;
+
+        private int maxTotalConnections = MAX_TOTAL_CONNECTIONS;
+
+        private int maxConnectionsPerRoute = MAX_CONNECTIONS_PER_ROUTE;
+
+        private int keepAliveDuration = KEEP_ALIVE_DURATION_SECS;
+
+        private int keepAliveMonitorInterval = KEEP_ALIVE_MONITOR_INTERVAL_SECS;
+
+        private int socketBufferSize = DEFAULT_SOCKET_BUFFER_SIZE;
+
+        private String userAgent;
+
+        private ClientConfig() {
+            super();
+        }
+
+        /**
+         * Creates a new {@link ClientConfig} instance.
+         */
+        public static ClientConfig newInstance() {
+            return new ClientConfig();
+        }
+
+        /**
+         * Sets the socket read timeout in milliseconds. A timeout value of zero
+         * is interpreted as an infinite timeout.
+         * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
+         *
+         * @param socketReadTimeout The timeout
+         */
+        public ClientConfig setSocketReadTimeout(int socketReadTimeout) {
+            this.socketReadTimeout = socketReadTimeout;
+            return this;
+        }
+
+        /**
+         * Sets the connection timeout in milliseconds. A timeout value of zero
+         * is interpreted as an infinite timeout.
+         * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
+         *
+         * @param connectionTimeout The timeout
+         */
+        public ClientConfig setConnectionTimeout(int connectionTimeout) {
+            this.connectionTimeout = connectionTimeout;
+            return this;
+        }
+
+        /**
+         * Sets the max. number of concurrent connections that can be opened by the
+         * client instance.
+         * Default: {@value #MAX_TOTAL_CONNECTIONS}
+         *
+         * @param maxTotalConnections The number of connections
+         */
+        public ClientConfig setMaxTotalConnections(int maxTotalConnections) {
+            this.maxTotalConnections = maxTotalConnections;
+            return this;
+        }
+
+        /**
+         * Sets the max. number of concurrent connections that can be opened by the
+         * client instance per route.
+         * Default: {@value #MAX_CONNECTIONS_PER_ROUTE}
+         *
+         * @param maxTotalConnections The number of connections
+         */
+        public ClientConfig setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
+            this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+            return this;
+        }
+
+        /**
+         * Sets the number of seconds that connections shall be kept alive.
+         * Default: {@value #KEEP_ALIVE_DURATION_SECS}.
+         *
+         * @param keepAliveDuration The keep alive duration
+         */
+        public ClientConfig setKeepAliveDuration(int keepAliveDuration) {
+            this.keepAliveDuration = keepAliveDuration;
+            return this;
+        }
+
+        /**
+         * The interval in seconds between two monitoring runs that close stale connections
+         * which exceeded the keep-alive duration.
+         * Default: {@value #KEEP_ALIVE_MONITOR_INTERVAL_SECS}
+         *
+         * @param keepAliveMonitorInterval The interval
+         */
+        public ClientConfig setKeepAliveMonitorInterval(int keepAliveMonitorInterval) {
+            this.keepAliveMonitorInterval = keepAliveMonitorInterval;
+            return this;
+        }
+
+        /**
+         * Sets the socket buffer size in bytes.
+         * Default: {@value #DEFAULT_SOCKET_BUFFER_SIZE}
+         *
+         * @param socketBufferSize The buffer size.
+         */
+        public ClientConfig setSocketBufferSize(int socketBufferSize) {
+            this.socketBufferSize = socketBufferSize;
+            return this;
+        }
+
+        /**
+         * Sets the user agent identifier to be used.
+         * Default: <code>null</code>
+         *
+         * @param userAgent The user agent
+         */
+        public ClientConfig setUserAgent(String userAgent) {
+            this.userAgent = userAgent;
+            return this;
+        }
+
     }
 
     /**
@@ -221,11 +370,13 @@ public final class HttpClients {
     private static class ClientConnectionManager extends PoolingClientConnectionManager {
 
         private volatile IdleConnectionCloser idleConnectionCloser;
+        private final int keepAliveMonitorInterval;
 
-        ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal) {
+        ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal, int keepAliveMonitorInterval) {
             super(registry);
             setMaxTotal(maxTotal);
             setDefaultMaxPerRoute(maxPerRoute);
+            this.keepAliveMonitorInterval = keepAliveMonitorInterval;
         }
 
         /**
@@ -241,7 +392,7 @@ public final class HttpClients {
         public ClientConnectionRequest requestConnection(HttpRoute route, Object state) {
             IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
             if (null != idleConnectionClose) {
-                idleConnectionClose.ensureRunning(KEEP_ALIVE_MONITOR_INTERVAL_SECS);
+                idleConnectionClose.ensureRunning(keepAliveMonitorInterval);
             }
             return super.requestConnection(route, state);
         }
@@ -312,14 +463,17 @@ public final class HttpClients {
 
     private static final class KeepAliveStrategy implements ConnectionKeepAliveStrategy {
 
-        KeepAliveStrategy() {
+        private final int keepAliveSeconds;
+
+        KeepAliveStrategy(int keepAliveSeconds) {
             super();
+            this.keepAliveSeconds = keepAliveSeconds;
         }
 
         @Override
         public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
-            long timeout = KEEP_ALIVE_DURATION_SECS * 1000;
+            long timeout = keepAliveSeconds * 1000;
 
             final HeaderElementIterator i = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {

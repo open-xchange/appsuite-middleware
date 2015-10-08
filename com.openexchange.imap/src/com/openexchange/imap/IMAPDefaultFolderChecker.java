@@ -78,6 +78,7 @@ import com.openexchange.java.BoolReference;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MimeMailException;
@@ -133,6 +134,7 @@ public class IMAPDefaultFolderChecker {
     protected final IMAPAccess imapAccess;
     protected final IMAPConfig imapConfig;
     protected final boolean hasMetadata;
+    protected final boolean ignoreSubscription;
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
@@ -152,24 +154,64 @@ public class IMAPDefaultFolderChecker {
         this.imapAccess = imapAccess;
         imapConfig = imapAccess.getIMAPConfig();
         this.hasMetadata = hasMetadata;
+        ignoreSubscription = imapConfig.getIMAPProperties().isIgnoreSubscription();
     }
 
     /**
-     * Checks if given full name denotes a default folder.
+     * Checks if given full name denotes a default folder (w/o considering archive folder).
      *
      * @param folderFullName The full name to check
      * @return <code>true</code> if given full name denotes a default folder; otherwise <code>false</code>
      * @throws OXException If check for default folder fails
      */
     public boolean isDefaultFolder(String folderFullName) throws OXException {
-        boolean isDefaultFolder = false;
-        isDefaultFolder = (folderFullName.equalsIgnoreCase(INBOX));
-        for (int index = 0; (index < 6) && !isDefaultFolder; index++) {
+        return isDefaultFolder(folderFullName, false);
+    }
+
+    /**
+     * Checks if given full name denotes a default folder.
+     *
+     * @param folderFullName The full name to check
+     * @param checkArchive Whether the archive folder should also be checked
+     * @return <code>true</code> if given full name denotes a default folder; otherwise <code>false</code>
+     * @throws OXException If check for default folder fails
+     */
+    public boolean isDefaultFolder(String folderFullName, boolean checkArchive) throws OXException {
+        if (folderFullName.equalsIgnoreCase(INBOX)) {
+            return true;
+        }
+
+        for (int index = 6; index-- > 0;) {
             if (folderFullName.equalsIgnoreCase(getDefaultFolder(index))) {
                 return true;
             }
         }
-        return isDefaultFolder;
+
+        if (checkArchive) {
+            MailAccountStorageService storageService = com.openexchange.imap.services.Services.getService(MailAccountStorageService.class);
+            MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            String archiveFullName = optArchiveFullName(mailAccount, imapAccess);
+            if (null != archiveFullName && archiveFullName.equals(folderFullName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
+        if (null == mailAccount) {
+            return null;
+        }
+        String fn = mailAccount.getArchiveFullname();
+        if (null == fn) {
+            String name = mailAccount.getArchive();
+            if (null == name) {
+                return null;
+            }
+            fn = mailAccess.getFolderStorage().getDefaultFolderPrefix() + name;
+        }
+        return fn;
     }
 
     /**
@@ -278,7 +320,7 @@ public class IMAPDefaultFolderChecker {
                         IMAPFolder inboxFolder;
                         {
                             IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, true);
+                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription, true);
                             if (entry.exists()) {
                                 inboxFolder = tmp;
                             } else {
@@ -291,9 +333,9 @@ public class IMAPDefaultFolderChecker {
                                 } catch (MessagingException e) {
                                     IMAPCommandsCollection.createFolder(tmp, sep, Folder.HOLDS_MESSAGES);
                                 }
-                                ListLsubCache.addSingle(INBOX, accountId, tmp, session);
+                                ListLsubCache.addSingle(INBOX, accountId, tmp, session, ignoreSubscription);
                                 inboxFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-                                entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
+                                entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                             }
                             inboxListEntry = entry;
                         }
@@ -302,8 +344,8 @@ public class IMAPDefaultFolderChecker {
                              * Subscribe INBOX folder
                              */
                             inboxFolder.setSubscribed(true);
-                            ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session);
-                            inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session);
+                            ListLsubCache.addSingle(INBOX, accountId, inboxFolder, session, ignoreSubscription);
+                            inboxListEntry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, inboxFolder, session, ignoreSubscription);
                         }
                         char sep = inboxFolder.getSeparator();
                         /*
@@ -402,7 +444,7 @@ public class IMAPDefaultFolderChecker {
                 ListLsubEntry entry = size == 1 ? entries.iterator().next() : (MailAccount.DEFAULT_ID == accountId ? getByName(names[index], entries) : getByFullName(fullNames[index], entries));
 
                 // Check entry
-                ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session);
+                ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session, ignoreSubscription);
                 if (!cached.exists()) {
                     LOG.warn("{} SPECIAL-USE marked folder \"{}\" does not exist. Skipping... (user={}, context={})", SPECIAL_USES[index], entry.getFullName(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     return Boolean.FALSE;
@@ -454,19 +496,19 @@ public class IMAPDefaultFolderChecker {
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
 
             // Entries with "\Drafts" marker
-            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session);
+            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_DRAFTS, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Junk" marker
-            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_SPAM, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Send" marker
-            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_SENT, names, fullNames, checkedIndexes, cache, modified);
 
             // Entries with "\Trash" marker
-            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session);
+            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
             handleMarkedEntries(entries, StorageUtility.INDEX_TRASH, names, fullNames, checkedIndexes, cache, modified);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
@@ -707,18 +749,26 @@ public class IMAPDefaultFolderChecker {
              * Not possible to retry since connection is broken
              */
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        } catch (AlreadyLoggedMessagingException alreadyLogged) {
+            handleMessagingErrorOnCheckFullName(alreadyLogged.messagingException, namespace, fullName, name, false);
         } catch (MessagingException e) {
-            if (isOverQuotaException(e)) {
-                /*
-                 * Special handling for over-quota error
-                 */
-                throw MimeMailException.handleMessagingException(e, imapConfig, session);
-            }
-            LOG.warn("Couldn't check default folder: {}. Namespace prefix: \"{}\"", (null == fullName ? (namespace + name) : fullName), (null == namespace ? "null" : namespace), e);
-            OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-            imapAccess.addWarnings(Collections.singleton(warning));
+            handleMessagingErrorOnCheckFullName(e, namespace, fullName, name, true);
         }
         return null;
+    }
+
+    private void handleMessagingErrorOnCheckFullName(MessagingException e, String namespace, String fullName, String name, boolean logWarning) throws OXException {
+        if (isOverQuotaException(e)) {
+            /*
+             * Special handling for over-quota error
+             */
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        }
+        if (logWarning) {
+            LOG.warn("Couldn't check default folder: {}. Namespace prefix: \"{}\"", (null == fullName ? (namespace + name) : fullName), (null == namespace ? "null" : namespace), e);
+        }
+        OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+        imapAccess.addWarnings(Collections.singleton(warning));
     }
 
     /**
@@ -744,7 +794,7 @@ public class IMAPDefaultFolderChecker {
         int prefixLen = prefix.length();
         String desiredFullName = prefixLen == 0 ? qualifiedName : new StringBuilder(prefix).append(qualifiedName).toString();
         {
-            ListLsubEntry entry = modified.getValue() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session);
+            ListLsubEntry entry = modified.getValue() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription);
             if (null != entry && entry.exists()) {
                 // The easy one -- already existing; just check subscription status
                 if (1 == subscribe) {
@@ -759,7 +809,7 @@ public class IMAPDefaultFolderChecker {
                             IMAPCommandsCollection.setSpecialUses((IMAPFolder) imapStore.getFolder(desiredFullName), Collections.singletonList(flag));
                             modified.setValue(true);
                         } catch (Exception e) {
-                            LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                         }
                     }
                 } else if (0 == subscribe) {
@@ -774,7 +824,7 @@ public class IMAPDefaultFolderChecker {
                             IMAPCommandsCollection.setSpecialUses((IMAPFolder) imapStore.getFolder(desiredFullName), Collections.singletonList(flag));
                             modified.setValue(true);
                         } catch (Exception e) {
-                            LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                         }
                     }
                 }
@@ -836,10 +886,11 @@ public class IMAPDefaultFolderChecker {
                     checkSpecialUse = false;
                     modified.setValue(true);
                 } catch (MessagingException e) {
-                    if (isOverQuotaException(e)) {
+                    MessagingException toAnalyze = (e instanceof AlreadyLoggedMessagingException) ? ((AlreadyLoggedMessagingException) e).messagingException : e;
+                    if (isOverQuotaException(toAnalyze)) {
                         throw e;
                     }
-                    if (isAlreadyExistsException(e)) {
+                    if (isAlreadyExistsException(toAnalyze)) {
                         // Grab the first in sight
                         closeSafe(f);
                         if (!candidates.isEmpty()) {
@@ -915,7 +966,7 @@ public class IMAPDefaultFolderChecker {
                     IMAPCommandsCollection.setSpecialUses(folder, Collections.singletonList(flag));
                     modified.setValue(true);
                 } catch (Exception e) {
-                    LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), folder.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), folder.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 }
             }
         } else if (0 == subscribe) {
@@ -930,7 +981,7 @@ public class IMAPDefaultFolderChecker {
                     IMAPCommandsCollection.setSpecialUses(folder, Collections.singletonList(flag));
                     modified.setValue(true);
                 } catch (Exception e) {
-                    LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), folder.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), folder.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 }
             }
         }
@@ -958,14 +1009,14 @@ public class IMAPDefaultFolderChecker {
                     try {
                         IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
                     } catch (Exception e) {
-                        LOG.info("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                        LOG.debug("Failed to set {} flag for new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                     }
                 }
             } catch (MessagingException e) {
                 String msg = e.getMessage();
                 if (null == msg || Strings.toUpperCase(msg).indexOf("[ALREADYEXISTS]") < 0) {
                     LOG.warn("Failed to create new standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                    throw e;
+                    throw new AlreadyLoggedMessagingException(e);
                 }
                 // Obviously such a folder does already exist; treat as being successfully created
                 LOG.info("Standard {} folder does already exist (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
@@ -977,7 +1028,7 @@ public class IMAPDefaultFolderChecker {
                 try {
                     IMAPCommandsCollection.setSpecialUses(f, Collections.singletonList(flag));
                 } catch (Exception e) {
-                    LOG.info("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), f.getFullName(), namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 }
             }
         }
@@ -1197,6 +1248,29 @@ public class IMAPDefaultFolderChecker {
             } catch (Exception e) {
                 // Ignore
             }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+
+    /**
+     * Wraps an already logged {@link MessagingException} instance.
+     */
+    protected static class AlreadyLoggedMessagingException extends MessagingException {
+
+        private static final long serialVersionUID = 1973917919275287767L;
+
+        /** The associated {@link MessagingException} instance. */
+        protected final MessagingException messagingException;
+
+        /**
+         * Initializes a new {@link AlreadyLoggedMessagingException}.
+         *
+         * @param messagingException The already logged messaging exception instance.
+         */
+        protected AlreadyLoggedMessagingException(MessagingException messagingException) {
+            super(messagingException.getMessage(), messagingException);
+            this.messagingException = messagingException;
         }
     }
 

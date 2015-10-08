@@ -93,6 +93,13 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     }
 
     private List<CalendarDataObject> splitIfNeeded(final List<CalendarDataObject> appointments) throws ConversionError {
+        if (appointments == null) {
+            return null;
+        }
+        
+        if (appointments.size() == 0) {
+            return appointments;
+        }
         final CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
         int index = 0;
         final LinkedList<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);

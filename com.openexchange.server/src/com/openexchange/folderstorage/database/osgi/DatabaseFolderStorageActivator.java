@@ -56,6 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link DatabaseFolderStorageActivator} - {@link BundleActivator Activator} for database folder storage.
@@ -73,7 +74,7 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+        return new Class<?>[] { DatabaseService.class, UserPermissionService.class };
     }
 
     @Override

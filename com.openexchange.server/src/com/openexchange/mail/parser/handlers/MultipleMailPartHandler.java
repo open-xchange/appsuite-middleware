@@ -52,7 +52,6 @@ package com.openexchange.mail.parser.handlers;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -116,13 +115,9 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
             setContentType(contentType);
         }
 
-        private DataSource getDataSource() throws OXException {
+        private DataSource getDataSource() {
             if (null == dataSource) {
-                try {
-                    dataSource = new MessageDataSource(text, getContentType());
-                } catch (final UnsupportedEncodingException e) {
-                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                }
+                dataSource = new MessageDataSource(text, getContentType());
             }
             return dataSource;
         }

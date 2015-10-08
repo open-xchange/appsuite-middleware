@@ -52,7 +52,19 @@ package com.openexchange.file.storage.json.actions.files;
 import com.openexchange.file.storage.FileStorageFileAccess;
 
 /**
- * {@link IdVersionPair} - A pair of an identifier and a version.
+ * {@link IdVersionPair} - A tuple for file identifier, version string and folder identifier.
+ * <p>
+ * The JSON representation for such a tuple is either:
+ * <ul>
+ *  <li>
+ *   For a folder
+ *   <ul><li><code>{"folder": &lt;folder&gt;}</code></li></ul>
+ *  </li>
+ *  <li>
+ *   For a file
+ *   <ul><li><code>{"id": &lt;file&gt;, "version": &lt;opt-version&gt;, "folder": &lt;opt-folder&gt;}</code></li></ul>
+ *  </li>
+ * </ul>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,8 +77,9 @@ public final class IdVersionPair {
     /**
      * Initializes a new {@link IdVersionPair}.
      *
-     * @param identifier
-     * @param version
+     * @param identifier The file identifier
+     * @param version The version string
+     * @param folderId The folder identifier
      */
     public IdVersionPair(final String identifier, final String version, final String folderId) {
         super();
@@ -76,7 +89,7 @@ public final class IdVersionPair {
     }
 
     /**
-     * Gets the folder identifier
+     * Gets the folder identifier.
      *
      * @return The folder identifier
      */
@@ -85,16 +98,16 @@ public final class IdVersionPair {
     }
 
     /**
-     * Gets the identifier
+     * Gets the file identifier.
      *
-     * @return The identifier
+     * @return The file identifier
      */
     public String getIdentifier() {
         return identifier;
     }
 
     /**
-     * Gets the version
+     * Gets the version string.
      *
      * @return The version or {@link FileStorageFileAccess#CURRENT_VERSION}
      */

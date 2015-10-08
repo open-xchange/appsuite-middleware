@@ -70,13 +70,14 @@ import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
+import com.openexchange.database.internal.StateAware;
 
 /**
  * {@link JDBC4ConnectionReturner}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class JDBC4ConnectionReturner implements Connection {
+public abstract class JDBC4ConnectionReturner implements Connection, StateAware {
 
     private final Pools pools;
     private final ReplicationMonitor monitor;
@@ -96,6 +97,11 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         this.noTimeout = noTimeout;
         this.write = write;
         state = new ConnectionState(usedAsRead);
+    }
+
+    @Override
+    public ConnectionState getConnectionState() {
+        return state;
     }
 
     @Override

@@ -208,7 +208,7 @@ public class DowngradeTest extends TestCase {
 
             @Override
             public UserPermissionBits getUserPermissionBits() {
-                return new AllowAllUserPermissionBits(userId, groups, ctx.getContextId()) {
+                return new AllowAllUserPermissionBits(userId, groups, ctx) {
                     private static final long serialVersionUID = 8557097436407742416L;
 
                     @Override
@@ -237,7 +237,7 @@ public class DowngradeTest extends TestCase {
 
             @Override
             public UserPermissionBits getUserPermissionBits() {
-                return new AllowAllUserPermissionBits(userId, groups, ctx.getContextId()) {
+                return new AllowAllUserPermissionBits(userId, groups, ctx) {
                     private static final long serialVersionUID = -1380938924019873373L;
 
                     @Override

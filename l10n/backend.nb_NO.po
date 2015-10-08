@@ -92,7 +92,6 @@ msgid "Events"
 msgstr "Arrangement"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
 msgid "Location"
 msgstr "Beliggenhet"
 
@@ -484,8 +483,7 @@ msgstr "%1$s har avslått foreslåtte endringer for avtale %2$s."
 msgid ""
 "%1$s has declined your proposed changes on behalf of %2$s for the "
 "appointment %3$s."
-msgstr ""
-"%1$s har avslått endringene foreslått på vegne av %2$s for avtale %3$s."
+msgstr "%1$s har avslått endringene foreslått på vegne av %2$s for avtale %3$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:98
 msgid ""
@@ -978,12 +976,7 @@ msgstr "Mellomnavn"
 msgid "Suffix"
 msgstr "Suffiks"
 
-#. A document's title
-#. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:96
 msgid "Title"
 msgstr "Tittel"
 
@@ -1239,10 +1232,7 @@ msgstr "E-post 3"
 msgid "URL"
 msgstr "URL"
 
-#. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:131
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:75
 msgid "Categories"
 msgstr "Kategorier"
 
@@ -1350,19 +1340,13 @@ msgstr "Etternavn (yomi)"
 msgid "Company (yomi)"
 msgstr "Selskap (yomi)"
 
-#. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:158
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:102
 msgid "UID"
 msgstr "UID"
 
 #. Search in file name.
-#. A document's file name
-#. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:87
 msgid "File name"
 msgstr "Filnavn"
 
@@ -1549,8 +1533,7 @@ msgstr ""
 msgid ""
 "The directory version \"%1$s\" was not found. Please retry the "
 "synchronization."
-msgstr ""
-"Mappeversjonen \"%1$s\" ble ikke funnet. Prøv synkroniseringen på nytt."
+msgstr "Mappeversjonen \"%1$s\" ble ikke funnet. Prøv synkroniseringen på nytt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
 msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\"."
@@ -1635,8 +1618,7 @@ msgstr "En nyere versjon av klientprogrammet er tilgjengelig for nedlasting."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
-msgstr ""
-"Mønsteret \"%1$s\" er ugyldig. Bruk et gyldig mønster, og prøv på nytt."
+msgstr "Mønsteret \"%1$s\" er ugyldig. Bruk et gyldig mønster, og prøv på nytt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
 msgid ""
@@ -1752,6 +1734,7 @@ msgstr "Godkjenning mislyktes: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.facebook/src/com/openexchange/subscribe/facebook/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
@@ -2069,9 +2052,11 @@ msgstr ""
 msgid "Login"
 msgstr "Pålogging"
 
+#. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr "Passord"
@@ -2356,8 +2341,7 @@ msgstr "Filen du ba om finnes ikke."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid ""
 "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
-msgstr ""
-"Mappen \"%1$s\"  finnes allerede under den overordnede mappen \"%2$s\"."
+msgstr "Mappen \"%1$s\"  finnes allerede under den overordnede mappen \"%2$s\"."
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
 #. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
@@ -2367,8 +2351,8 @@ msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
 "folder \"%1$s\"."
 msgstr ""
-"Du har ikke riktige tillatelser til å opprette en undermappe under mappen "
-"\"%1$s\"."
+"Du har ikke riktige tillatelser til å opprette en undermappe under mappen \""
+"%1$s\"."
 
 #. In order to accomplish the search, %1$d or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
@@ -2396,24 +2380,6 @@ msgstr "Tillatt kvote er nådd. Slett noen elementer for å lagre nye."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP arkivet overskrider maks. tillatt størrelse på %1$s"
-
-#. The file storage account is currently not accessible.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
-#, fuzzy
-msgid "The file storage account is currently not accessible."
-msgstr "Påloggingsfeil: kontoen er midlertidig deaktivert."
-
-#. The folder \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
-#, fuzzy
-msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
-msgstr "Standardmappen %1$s kan ikke slettes"
-
-#. The file \"%1$s\" cannot be moved to \"%2$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
-#, fuzzy
-msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
-msgstr "Standardmappen %1$s kan ikke slettes"
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -2583,6 +2549,13 @@ msgstr "Det angitte tokenet må oppdateres."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
 msgid "The e-mail address you provided does not match any account on record."
 msgstr "E-postadressen du oppga stemmer ikke med noen konto i registeret."
+
+#. * The allowed Quota is reached.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
+msgid ""
+"The allowed quota is reached. Please delete some items in order to create "
+"new ones."
+msgstr "Tillatt kvote er nådd. Slett noen elementer for å lage nye."
 
 #. The service you requested is currently not available. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
@@ -3226,11 +3199,6 @@ msgstr ""
 msgid "The session is no longer available. Please try again."
 msgstr "Økten er ikke lenger tilgjengelig. Prøv på nytt."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:69
-#, fuzzy
-msgid "Kerberos ticket in session is missing. Pleasy try again."
-msgstr "Økten er ikke lenger tilgjengelig. Prøv på nytt."
-
 #. No Linked-In account available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
 msgid "No Linked-In account available."
@@ -3247,8 +3215,8 @@ msgid ""
 "Cannot search a contact that is neither an internal user nor has an e-mail "
 "address."
 msgstr ""
-"Kan ikke søke etter en kontakt som verken er en intern bruker eller har en e-"
-"postadresse."
+"Kan ikke søke etter en kontakt som verken er en intern bruker eller har en "
+"e-postadresse."
 
 #. *
 #. * No connection available to access mailbox
@@ -3407,8 +3375,8 @@ msgid ""
 "Message move aborted for user %1$s. Source and destination folder are equal "
 "to \"%2$s\""
 msgstr ""
-"Flytting av melding avbrutt for bruker %1$s. Kilden og målmappe er lik \"%2$s"
-"\""
+"Flytting av melding avbrutt for bruker %1$s. Kilden og målmappe er lik \"%2$"
+"s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
 msgid "IMAP folder read-only check failed"
@@ -3482,8 +3450,7 @@ msgstr "Det oppstod en SQL-feil: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
 msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-msgstr ""
-"Endring av navn på mappe \"%1$ s\" til \"%2$s\" mislyktes med \"%3$s\"."
+msgstr "Endring av navn på mappe \"%1$ s\" til \"%2$s\" mislyktes med \"%3$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
 msgid "No rename access to mail folder %1$s"
@@ -3575,8 +3542,7 @@ msgstr "Finner ikke følgende felt %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:93
 msgid "Could not translate a single column title. Is this a valid CSV file?"
-msgstr ""
-"Kan ikke oversette en enkeltkolonne tittel. Er dette en gyldig CSV-fil?"
+msgstr "Kan ikke oversette en enkeltkolonne tittel. Er dette en gyldig CSV-fil?"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:95
 msgid ""
@@ -3590,8 +3556,8 @@ msgid ""
 "File does not contain fields for assigning contact names: no name, company "
 "or E-Mail."
 msgstr ""
-"Filen inneholder ikke felt for å tilordne navn: ingen navn, selskap eller e-"
-"post."
+"Filen inneholder ikke felt for å tilordne navn: ingen navn, selskap eller "
+"e-post."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:99
 msgid ""
@@ -3668,13 +3634,6 @@ msgid "Import limit exceeded. Only imported the first %1$s contacts"
 msgstr ""
 "Importeringsgrense oversteget. Importerte bare de første %1$s kontaktene"
 
-#. The character encoding \"%1$s\" is not supported. Please choose another one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:136
-#, fuzzy
-msgid ""
-"The character encoding \"%1$s\" is not supported. Please choose another one."
-msgstr "Mappenavnet \"%1$s\" er reservert. Velg et annet navn."
-
 #. You do not have the appropriate permissions to search within this module.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
 msgid ""
@@ -3712,8 +3671,8 @@ msgstr "Omdirigeringsadressen \"%1$s\" ble avvist."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
 msgstr ""
-"Ugyldig SIEVE regel angitt. Vennligst se igjennom filterreglene for din e-"
-"post"
+"Ugyldig SIEVE regel angitt. Vennligst se igjennom filterreglene for din "
+"e-post"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid ""
@@ -3811,8 +3770,7 @@ msgstr "Ukjent fargeetikett indeks: %1$s"
 msgid ""
 "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
 "\"."
-msgstr ""
-"Mappen \"%1$s\"  finnes allerede under den overordnede mappen \"%2$s\"."
+msgstr "Mappen \"%1$s\"  finnes allerede under den overordnede mappen \"%2$s\"."
 
 #. No create access on mail folder %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:85
@@ -3916,37 +3874,6 @@ msgid "There was a problem while creating a connection to the remote service."
 msgstr ""
 "Det oppstod et problem med å opprette en tilkobling til den eksterne "
 "tjenesten."
-
-#. You need to grant additional %1$s permissions to access the resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
-#, fuzzy
-msgid "You need to grant additional %1$s permissions to access the resource."
-msgstr ""
-"Du må opprette en OAuth-konto først for å få tilgang til denne tjenesten."
-
-#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
-#, fuzzy
-msgid ""
-"Your '%1$s' access was rejected. You have to reauthorize the server to use "
-"your account with a new password. To do so, go to Configuration -> My Social "
-"Configuration -> Accounts. Then try again."
-msgstr ""
-"Ditt '%1$s' passord er forandret. Du må godkjenne serveren for å bruke "
-"kontoen med det nye passordet. For å gjøre så, gå til Konfigurasjon -&gt; "
-"Min sosiale konfigurasjon -&gt; Kontoer. Prøv på nytt."
-
-#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
-#, fuzzy
-msgid ""
-"Your '%1$s' access was revoked. You have to reauthorize the server to use "
-"your account with a new password. To do so, go to Configuration -> My Social "
-"Configuration -> Accounts. Then try again."
-msgstr ""
-"Ditt '%1$s' passord er forandret. Du må godkjenne serveren for å bruke "
-"kontoen med det nye passordet. For å gjøre så, gå til Konfigurasjon -&gt; "
-"Min sosiale konfigurasjon -&gt; Kontoer. Prøv på nytt."
 
 #. *
 #. * New password too short.
@@ -4320,8 +4247,7 @@ msgstr "Utkastmeldinger støttes ikke av serveren."
 msgid ""
 "The POP3 storage name is missing for user %1$s. Please provide one and try "
 "again."
-msgstr ""
-"POP3-lagringsnavnet mangler for brukeren %1$s. Angi et og prøv på nytt."
+msgstr "POP3-lagringsnavnet mangler for brukeren %1$s. Angi et og prøv på nytt."
 
 #. *
 #. * Missing POP3 storage for user %1$s in context %2$s.
@@ -4585,6 +4511,16 @@ msgstr ""
 "noen vedlegg for å opprette nye. Merk at kvoten deles av alle brukerne i "
 "domenet ditt."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
+msgid ""
+"Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
+msgstr ""
+"Kvote overskredet for shares. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
+"noen shares for å opprette nye. Merk at kvoten deles av alle brukerne i "
+"domenet ditt."
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
@@ -4679,6 +4615,28 @@ msgstr "HTTP-feil %1$s under lasting av RSS feed fra URL: %2$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr "Tidsavbrudd under lesing av RSS feed fra URL: %1$s"
+
+#. No appropriate anonymizer available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
+msgid "No appropriate anonymizer available."
+msgstr "Ingen passende navnløshet tilgjengelig."
+
+#. The identifier for user module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
+msgid "User"
+msgstr "Bruker"
+
+#. The identifier for group module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:74
+msgid "Group"
+msgstr "Gruppe"
+
+#. The identifier for resource module
+#. Resource
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:663
+msgid "Resource"
+msgstr "Ressurs"
 
 #. *
 #. * The value you inserted for %2$s is not correct
@@ -4824,8 +4782,8 @@ msgid ""
 "Please rename one of the folders. There should be no two folders with the "
 "same name."
 msgstr ""
-"Fant to mapper med navnet \"%1$s\" som ligger under den overordnede mappen "
-"\"%2$s\". Vennligst endre navn på en av mappene. Det bør ikke være to mapper "
+"Fant to mapper med navnet \"%1$s\" som ligger under den overordnede mappen \""
+"%2$s\". Vennligst endre navn på en av mappene. Det bør ikke være to mapper "
 "med samme navn."
 
 #. Failed to delete following folder/s: %1$s
@@ -4900,12 +4858,6 @@ msgstr "Gruppen \"%1$s\" kan ikke slettes."
 msgid "Group \"%1$s\" can not be changed."
 msgstr "Gruppen \"%1$s\" kan ikke endres."
 
-#. The display name "%1$s" is reserved. Please choose another one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:107
-#, fuzzy
-msgid "The display name \"%1$s\" is reserved. Please choose another one."
-msgstr "Mappenavnet \"%1$s\" er reservert. Velg et annet navn."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:61
 msgid "Attachment cannot be saved. File store limit is exceeded."
 msgstr "Vedlegg kan ikke lagres. Fillagringsgrensen er overskredet."
@@ -4951,18 +4903,6 @@ msgstr ""
 msgid "Attachments"
 msgstr "Vedlegg"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
-msgid "Label"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:65
-msgid "Note"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:66
-msgid "Timezone"
-msgstr ""
-
 #. *
 #. * Appointments must have at least one participant.
 #.
@@ -4977,8 +4917,7 @@ msgstr "Avtaler må ha minst én deltaker."
 msgid ""
 "You do not have the appropriate permissions to read appointments in folder "
 "%1$d."
-msgstr ""
-"Du har ikke de nødvendige tillatelsene til å lese avtaler i mappe %1$d."
+msgstr "Du har ikke de nødvendige tillatelsene til å lese avtaler i mappe %1$d."
 
 #. *
 #. * End date must not be before start date.
@@ -5165,11 +5104,10 @@ msgid "You can not use the private flag in a non private folder."
 msgstr "Du kan ikke bruke privatflagg i en ikke privat mappe."
 
 #. *
-#. * Invalid characters (%2$s) in field %1$s.
+#. * Invalid characters in field %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:198
-#, fuzzy
-msgid "Invalid characters (%2$s) in field %1$s."
+msgid "Invalid characters in field %1$s."
 msgstr "Ugyldige tegn i felt %1$s."
 
 #. *
@@ -5214,8 +5152,8 @@ msgid ""
 "You do not have the appropriate permission to access objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"Du har ikke riktig tillatelse til å få tilgang til objekter i mappen \"%1$s"
-"\"."
+"Du har ikke riktig tillatelse til å få tilgang til objekter i mappen \"%1$s\""
+"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid "Unable to scale image down."
@@ -5378,15 +5316,6 @@ msgstr "Kunne ikke konvertere gitt objekt %s til en dato når du setter %s."
 msgid "Getting the value of %s requires at least a ContactObject"
 msgstr "Får å få verdien av %s kreves minst et Kontaktobjekt"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:139
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
-#, fuzzy
-msgid ""
-"The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
-"problematic character and try again."
-msgstr ""
-"Mønsteret \"%1$s\" er ugyldig. Bruk et gyldig mønster, og prøv på nytt."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "Kontoen %1$d ble ikke funnet."
@@ -5398,13 +5327,6 @@ msgstr "Serveren er for øyeblikket nede for vedlikehold. Prøv igjen senere."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "Kunne ikke koble innholdslagringen."
-
-#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
-#. This should happen in very rare conditions and is not visible to the client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
-msgid "Denied concurrent update of user attributes."
-msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -5486,19 +5408,18 @@ msgstr "Slettede filer"
 msgid "Other files"
 msgstr "Andre filer"
 
-#. -----------------------------------------------------------------------------------------------------
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:116
-#, fuzzy
-msgid "Folder name"
-msgstr "Filnavn"
-
-#. Display name of group with identifier 0. This group always contains all existing users of a context.
+#. Display name of group with identifier 0. This group always contains all existing users of a context but no guests.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:68
 msgid "All users"
 msgstr "Alle brukere"
 
-#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#. Display name of group for guest users.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:71
+msgid "Guests"
+msgstr "Gjester"
+
+#. Display name of group with identifier 1. Every created user will be added to this group but they can be removed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Groups.java:74
 msgid "Standard group"
 msgstr "Standardgruppe"
 
@@ -6594,11 +6515,6 @@ msgstr "Ingen endringsunntak"
 msgid "Mail to resource %1$s"
 msgstr "E-post til ressurs %1$s"
 
-#. Resource
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:663
-msgid "Resource"
-msgstr "Ressurs"
-
 #. Not set
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:666
 msgid "Not set"
@@ -6828,6 +6744,11 @@ msgstr ", slutter på %1$s"
 msgid "Weekday"
 msgstr "Ukedag"
 
+#. Display name of the anonymous guest user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Users.java:69
+msgid "Guest"
+msgstr "Gjest"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
 msgstr "Ødelagt CSV-fil."
@@ -6943,33 +6864,6 @@ msgstr ""
 "Denne mappen er en virtuell mappe som ikke kan inneholde dokumenter. "
 "Vennligst velg en annen mappe."
 
-#. Unsupported character "%1$s" in field "%2$s". Please remove that character.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:122
-msgid ""
-"Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
-"character."
-msgstr ""
-
-#. Unsupported character. Please correct your input.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:125
-msgid "Unsupported character. Please correct your input."
-msgstr ""
-
-#. A document's description
-#. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
-#, fuzzy
-msgid "Description"
-msgstr "i beskrivelse"
-
-#. A document's version comment
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
-msgid "Version comment"
-msgstr ""
-
 #. *
 #. * Problem putting an object into the cache.
 #.
@@ -6994,21 +6888,27 @@ msgstr "Hashalgoritmen \"%s\" ble ikke funnet."
 msgid "Encoding \"%s\" cannot be used."
 msgstr "Tegnsettet \"%s\" kan ikke brukes."
 
-#. No resource group found for identifier \"%1$d\".
+#. *
+#. * No resource group found for identifier \"%1$d\".
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:71
 msgid "No resource group found for identifier \"%1$d\"."
 msgstr "Ingen ressursgruppe funnet for ID \"%1$d\"."
 
-#. Found resource groups with the same identifier %1$d.
+#. *
+#. * Found resource groups with the same identifier %1$d.
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:76
 msgid "Found resource groups with the same identifier \"%1$d\"."
 msgstr "Fant ressursgrupper med samme ID \"%1$d\"."
 
-#. No resource found with identifier \"%1$d\".
+#. *
+#. * No resource found with identifier \"%1$d\".
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:81
 msgid "No resource found with identifier \"%1$d\"."
 msgstr "Ingen ressurs funnet med ID \"%1$d\"."
 
@@ -7135,8 +7035,8 @@ msgid ""
 "Locking attributes of multiple users is not allowed. You tried to lock %1$d "
 "user's attributes."
 msgstr ""
-"Låsing av attributter til flere brukere er ikke tillatt. Du prøvde å låse "
-"%1$d brukers attributter."
+"Låsing av attributter til flere brukere er ikke tillatt. Du prøvde å låse %1$"
+"d brukers attributter."
 
 #. *
 #. * The entered password is illegal and can't be saved. Allowed characters are: %1$s
@@ -7278,36 +7178,13 @@ msgstr "Nåværende varighet"
 
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:72
-#, fuzzy
-msgid "Billing information"
-msgstr "i beliggenhet"
-
-#. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:78
-#, fuzzy
-msgid "Companies"
-msgstr "Firma"
-
-#. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:81
-#, fuzzy
-msgid "Currency"
-msgstr "Nåværende kostnader"
-
-#. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:90
 msgid "Estimated costs"
 msgstr "Estimerte kostnader"
 
 #. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:75
 msgid "Estimated duration"
 msgstr "Estimert varighet"
-
-#. Task attribute name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:99
-msgid "Trip meter"
-msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:65
 msgid "Error while inserting task."
@@ -7356,8 +7233,8 @@ msgid ""
 "You do not have the appropriate permissions to read the contents of folder "
 "\"%1$s\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å lese innholdet i mappen \"%1$s"
-"\"."
+"Du har ikke de nødvendige tillatelsene til å lese innholdet i mappen \"%1$s\""
+"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -7368,8 +7245,8 @@ msgid ""
 "You do not have the appropriate permissions to create tasks in folder \"%1$s"
 "\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å opprette oppgaver i mappen "
-"\"%1$s\"."
+"Du har ikke de nødvendige tillatelsene til å opprette oppgaver i mappen \"%1$"
+"s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:89
 msgid "You do not have the appropriate permission to delegate tasks."
@@ -7395,8 +7272,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å endre oppgaver i mappen \"%1$s"
-"\"."
+"Du har ikke de nødvendige tillatelsene til å endre oppgaver i mappen \"%1$s\""
+"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
@@ -7458,8 +7335,7 @@ msgstr "Oppgaven %1$d  er ikke lagret i mappen %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
 msgid "Group %1$d is empty. You can not add an empty group to a task."
-msgstr ""
-"Gruppe %1$d er tom. Du kan ikke legge til en tom gruppe til en oppgave."
+msgstr "Gruppe %1$d er tom. Du kan ikke legge til en tom gruppe til en oppgave."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:128
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
@@ -7499,8 +7375,8 @@ msgid ""
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
 "Versjonen kan ikke settes tilbake hvis håndteringen av oppdateringsoppgaver "
-"har blitt migrert til Huskede Utførte Oppdater Oppgaver konsept på skjema "
-"\"%1$s\"."
+"har blitt migrert til Huskede Utførte Oppdater Oppgaver konsept på skjema \""
+"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
@@ -7623,26 +7499,6 @@ msgstr ""
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Tilkoblingen ble lukket uventet. Prøv på nytt."
 
-#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
-#, fuzzy
-msgid ""
-"Request rejected because file size (%1$s) exceeds the maximum configured "
-"file size of %2$s."
-msgstr ""
-"Forespørsel avvist fordi dens størrelse (%1$s) overstiger den maksimale "
-"konfigurerte størrelsen på %2$s."
-
-#. Request rejected because file size exceeds the maximum configured file size of %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
-#, fuzzy
-msgid ""
-"Request rejected because file size exceeds the maximum configured file size "
-"of %1$s."
-msgstr ""
-"Forespørsel avvist fordi dens størrelse overstiger den maksimale "
-"konfigurerte størrelsen på %1$s."
-
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -7705,8 +7561,7 @@ msgstr "Ingen vedlegg ble funnet med id %1$s i melding"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:80
 msgid "Versit attachment could not be saved due to an unsupported MIME type."
-msgstr ""
-"Versit vedlegg kunne ikke lagres på grunn av en ikke støttet MIME-type."
+msgstr "Versit vedlegg kunne ikke lagres på grunn av en ikke støttet MIME-type."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:82
 msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)."
@@ -7955,19 +7810,6 @@ msgstr ""
 msgid "Mail access is disabled for context administrator."
 msgstr "E-posttilgang er deaktivert for domeneadministrator."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
-#, fuzzy
-msgid ""
-"The maximum number of files that may be attached to an E-Mail is exceeded. "
-"Max. is %1$s."
-msgstr "Maksimal meldingsstørrelse er overskredet. Maks. er %1$s."
-
-#. The client request is not permitted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
-#, fuzzy
-msgid "The client request is not permitted."
-msgstr "Dokumentet du ba om finnes ikke."
-
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -7987,8 +7829,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:70
 msgid "The provided login information seem to be wrong. Please try again."
-msgstr ""
-"Den medfølgende innloggingsinformasjon synes å være feil. Prøv på nytt."
+msgstr "Den medfølgende innloggingsinformasjon synes å være feil. Prøv på nytt."
 
 #. *
 #. * The provided login information to access mail server %1$s seem to be wrong. Please try again.
@@ -8057,8 +7898,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å endre innholdet i mappen \"%1$s"
-"\"."
+"Du har ikke de nødvendige tillatelsene til å endre innholdet i mappen \"%1$"
+"s\"."
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -8068,8 +7909,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\" on mail server %2$s."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å endre innholdet i mappen \"%1$s"
-"\" på e-postserver %2$s."
+"Du har ikke de nødvendige tillatelsene til å endre innholdet i mappen \"%1$"
+"s\" på e-postserver %2$s."
 
 #. *
 #. * Invalid search expression: %1$s
@@ -8173,13 +8014,11 @@ msgid "The mailbox is already in use. Please try again later."
 msgstr "Postboksen er allerede i bruk. Prøv igjen senere."
 
 #. *
-#. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
+#. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
-#, fuzzy
 msgid ""
-"The mailbox on mail server %1$s for login %2$s is already in use by one of "
-"your other processes or clients. Please try again later."
+"The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
 "Postboksen på e-postserveren %1$s er allerede i bruk. Prøv igjen senere."
 
@@ -8340,51 +8179,41 @@ msgstr "Det oppgitte vertsnavnet \"%1$s\" er ikke tillatt."
 msgid "The protocol must not changed from %1$s to %2$s."
 msgstr "Protokollen skal ikke endres fra %1$s til %2$s."
 
-#. Found resource(s) with same identifier \"%1$s\".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:78
+#. *
+#. * Found resource(s) with same identifier \"%1$s\".
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:86
 msgid "Found resource(s) with same identifier \"%1$s\"."
 msgstr "Fant ressurs(er) med samme ID \"%1$s.\"."
 
-#. You do not have the appropriate permissions to modify resources.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:81
+#. *
+#. * You do not have the appropriate permissions to modify resources.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:91
 msgid "You do not have the appropriate permissions to modify resources."
 msgstr "Du har ikke de nødvendige tillatelsene til å endre ressurser."
 
-#. The provided resource identifier \"%1$s\" contains invalid characters.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:84
+#. *
+#. * The provided resource identifier \"%1$s\" contains invalid characters.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
 msgid "The provided resource identifier \"%1$s\" contains invalid characters."
 msgstr ""
 "Den medfølgende ressurs-identfikatoren \"%1$s\" inneholder ugyldige tegn."
 
-#. The provided E-Mail address \"%1$s\" for resource is invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:87
+#. *
+#. * The provided E-Mail address \"%1$s\" for resource is invalid.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:101
 msgid "The provided E-Mail address \"%1$s\" for resource is invalid."
 msgstr "Den medfølgende e-post adressen \"%1$s\" for ressursen er ugyldig."
 
-#. There is already a resource with E-Mail address "%1$s". Please choose another one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:90
-#, fuzzy
-msgid ""
-"There is already a resource with E-Mail address \"%1$s\". Please choose "
-"another one."
-msgstr "Mappenavnet \"%1$s\" er reservert. Velg et annet navn."
-
-#. The selected resource \"%1$s\" has been changed in the meantime.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:93
+#. *
+#. * The selected resource \"%1$s\" has been changed in the meantime.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:106
 msgid "The selected resource \"%1$s\" has been changed in the meantime."
 msgstr "Den valgte ressursen \"%1$s\" er blitt endret i mellomtiden."
-
-#. Missing mandatory field(s) in given resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:96
-msgid "Missing mandatory field(s) in given resource."
-msgstr ""
-
-#. * The allowed Quota is reached.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:62
-msgid ""
-"The allowed quota is reached. Please delete some items in order to create "
-"new ones."
-msgstr "Tillatt kvote er nådd. Slett noen elementer for å lage nye."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
@@ -8476,8 +8305,7 @@ msgstr "Mappen \"%1$s\" er en systemmappe og kan ikke flyttes."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
 msgid ""
 "The private folder \"%1$s\" can only be moved to another private folder."
-msgstr ""
-"Den private mappen \"%1$s\" kan bare flyttes til en annen privat mappe."
+msgstr "Den private mappen \"%1$s\" kan bare flyttes til en annen privat mappe."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
 msgid "The public folder \"%1$s\" can only be moved to another public folder."
@@ -8500,8 +8328,8 @@ msgstr ""
 msgid ""
 "You do not have appropriate permissions to delete the shared folder \"%2$s\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å slette den delte mappen \"%2$s"
-"\"."
+"Du har ikke de nødvendige tillatelsene til å slette den delte mappen \"%2$s\""
+"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:94
 msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
@@ -8534,8 +8362,8 @@ msgid ""
 "The value for attribute %1$s contains more than the allowed number of %2$d "
 "characters. Current length: %3$d characters."
 msgstr ""
-"Verdien for attributtet %1$s inneholder mer enn det tillatte antallet av "
-"%2$d tegn. Nåværende lengde: %3$d tegn."
+"Verdien for attributtet %1$s inneholder mer enn det tillatte antallet av %2$"
+"d tegn. Nåværende lengde: %3$d tegn."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:100
 msgid ""
@@ -8641,13 +8469,12 @@ msgstr "Ingen individuelle brukertillatelser er tillatt for mappen \"%1$s\"."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
 msgid "You do not have appropriate permissions to rename the folder \"%2$s\"."
 msgstr ""
-"Du har ikke de nødvendige tillatelsene til å gi nytt navn til mappen \"%2$s"
-"\"."
+"Du har ikke de nødvendige tillatelsene til å gi nytt navn til mappen \"%2$s\""
+"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
 msgid "The folder \"%1$s\" cannot be deleted as it contains locked documents."
-msgstr ""
-"Mappen \"%1$s\" kan ikke slettes fordi den inneholder låste dokumenter."
+msgstr "Mappen \"%1$s\" kan ikke slettes fordi den inneholder låste dokumenter."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "Operation may only be performed for context administrator."
@@ -8694,8 +8521,8 @@ msgid ""
 "The file \"%1$s\" (\"%2$s\") can't be imported as image. Only image types "
 "(JPG, GIF, BMP or PNG) are supported."
 msgstr ""
-"Filen \"%1$s\" (\"%2$s\") kan ikke importeres som bilde. Bare bildetyper "
-"(JPG, GIF, BMP eller PNG) støttes."
+"Filen \"%1$s\" (\"%2$s\") kan ikke importeres som bilde. Bare bildetyper ("
+"JPG, GIF, BMP eller PNG) støttes."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:67
 msgid ""
@@ -8706,12 +8533,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:68
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "Mangler følgende felt i JSON data: %1$s"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
-msgid ""
-"The HTML content is too big and therefore cannot be safely displayed. Please "
-"select to download its content if you want to see it."
-msgstr ""
 
 #. *
 #. * The provided cookie is invalid. Please login.
@@ -8763,6 +8584,117 @@ msgstr "Godkjenning mislyktes for brukernavn: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 msgid "No session found for identifier: %1$s"
 msgstr "Ingen sesjon funnet for ID: %1$s"
+
+#. [John Doe] shared "[holiday pictures]" with you
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:64
+msgid "%1$s shared \"%2$s\" with you"
+msgstr "%1$s delte \"%2$s\" med deg"
+
+#. Message from [John Doe]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:67
+msgid "Message from %1$s"
+msgstr "Melding fra %1$s"
+
+#. Click here to view [holiday pictures]
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:70
+msgid "Click here to view %1$s"
+msgstr "Klikk her for å se %1$s"
+
+#. Please use the following credentials if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:73
+msgid "Please use the following credentials if asked for"
+msgstr "Vennligst benytt følgende legitimasjon dersom bedt om det"
+
+#. Please use your existing credentials if asked for.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:76
+msgid "Please use your existing credentials if asked for."
+msgstr "Bruk din eksisterende legitimasjon hvis bedt om det."
+
+#. Please use the following password if asked for
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
+msgid "Please use the following password if asked for"
+msgstr "Vennligst benytt følgende passord hvis du blir bedt om det"
+
+#. Click here to reset your password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
+msgid "Click here to reset your password"
+msgstr "Klikk her for å tilbakestille passordet ditt"
+
+#. Username
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
+msgid "Username"
+msgstr "Brukernavn"
+
+#. John Doe shared 7 items with you
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
+msgid "%d items"
+msgstr "%d objekter"
+
+#. Your password has been reseted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
+msgid "Your password has been reseted"
+msgstr "Passordet ditt er tilbakestilt"
+
+#. Your password for the following URL has been reseted to %1$s:\n\n%2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:97
+msgid ""
+"Your password for the following URL has been reseted to %1$s:\n"
+"\n"
+"%2$s"
+msgstr ""
+"Ditt passord for følgende URL har blitt tilbakestilt til %1$s:\n"
+"\n"
+"%2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
+msgid "The requested share does not exist."
+msgstr "Den forespurte ressursen finnes ikke."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
+msgid "The token \"%1$s\" is invalid."
+msgstr "Tokenet \"%1$s\" er ugyldig."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
+msgid "The link \"%1$s\" is invalid."
+msgstr "Linken \"%1$s\" er ugyldig."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+msgid "\"%1$s\" is not a valid email address."
+msgstr "\"%1$s\" is not a valid email address."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
+msgid ""
+"The share has been modified in the meantime. Please refresh or synchronize "
+"and try again."
+msgstr ""
+"Sharet har blitt endret i mellomtiden. Vennligst oppdater eller synkroniser "
+"og prøv igjen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
+msgid "You don't have sufficient permissions to delete the share."
+msgstr "Du har ikke tilstrekkelige tillatelser til å slette sharet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
+msgid "You don't have sufficient permissions to edit the share."
+msgstr "Du har ikke tilstrekkelige rettigheter til å redigere sharet."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
+msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
+msgstr ""
+"Du har ikke tilstrekkelige tillatelser til å dele mappen eller elementet \""
+"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
+msgid "Module %1$s does not support sharing."
+msgstr "Modulen %1$s støtter ikke deling."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:82
+msgid "Module %1$s does not support sharing of items."
+msgstr "Modulen %1$s støtter ikke deling av elementer."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:84
+msgid "Module %1$s does not support sharing of folders."
+msgstr "Modulen %1$s støtter ikke deling av mapper."
 
 #. *
 #. * No recipient(s) has been defined for new message
@@ -8889,11 +8821,6 @@ msgstr ""
 "Tjenesteleverandøren har bedt om en identitetsbekreftelse. Dette skjer for "
 "noen kontoer og kan ikke løses av oss. Det er leverandørens ansvar. Av denne "
 "grunn, kan abonnementet ikke fullføres."
-
-#. You already have such a subscription.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
-msgid "You already have such a subscription."
-msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
@@ -11203,106 +11130,3 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
-
-#~ msgid ""
-#~ "Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please "
-#~ "delete some shares in order to create new ones. Please note: The quota "
-#~ "refers to all shares of one user in this context."
-#~ msgstr ""
-#~ "Kvote overskredet for shares. Kvotegrense: %2$s. Kvote brukt: %1$s. Slett "
-#~ "noen shares for å opprette nye. Merk at kvoten deles av alle brukerne i "
-#~ "domenet ditt."
-
-#~ msgid "No appropriate anonymizer available."
-#~ msgstr "Ingen passende navnløshet tilgjengelig."
-
-#~ msgid "User"
-#~ msgstr "Bruker"
-
-#~ msgid "Group"
-#~ msgstr "Gruppe"
-
-#~ msgid "Guests"
-#~ msgstr "Gjester"
-
-#~ msgid "Guest"
-#~ msgstr "Gjest"
-
-#~ msgid "%1$s shared \"%2$s\" with you"
-#~ msgstr "%1$s delte \"%2$s\" med deg"
-
-#~ msgid "Message from %1$s"
-#~ msgstr "Melding fra %1$s"
-
-#~ msgid "Click here to view %1$s"
-#~ msgstr "Klikk her for å se %1$s"
-
-#~ msgid "Please use the following credentials if asked for"
-#~ msgstr "Vennligst benytt følgende legitimasjon dersom bedt om det"
-
-#~ msgid "Please use your existing credentials if asked for."
-#~ msgstr "Bruk din eksisterende legitimasjon hvis bedt om det."
-
-#~ msgid "Please use the following password if asked for"
-#~ msgstr "Vennligst benytt følgende passord hvis du blir bedt om det"
-
-#~ msgid "Click here to reset your password"
-#~ msgstr "Klikk her for å tilbakestille passordet ditt"
-
-#~ msgid "Username"
-#~ msgstr "Brukernavn"
-
-#~ msgid "%d items"
-#~ msgstr "%d objekter"
-
-#~ msgid "Your password has been reseted"
-#~ msgstr "Passordet ditt er tilbakestilt"
-
-#~ msgid ""
-#~ "Your password for the following URL has been reseted to %1$s:\n"
-#~ "\n"
-#~ "%2$s"
-#~ msgstr ""
-#~ "Ditt passord for følgende URL har blitt tilbakestilt til %1$s:\n"
-#~ "\n"
-#~ "%2$s"
-
-#~ msgid "The requested share does not exist."
-#~ msgstr "Den forespurte ressursen finnes ikke."
-
-#~ msgid "The token \"%1$s\" is invalid."
-#~ msgstr "Tokenet \"%1$s\" er ugyldig."
-
-#~ msgid "The link \"%1$s\" is invalid."
-#~ msgstr "Linken \"%1$s\" er ugyldig."
-
-#~ msgid "\"%1$s\" is not a valid email address."
-#~ msgstr "\"%1$s\" is not a valid email address."
-
-#~ msgid ""
-#~ "The share has been modified in the meantime. Please refresh or "
-#~ "synchronize and try again."
-#~ msgstr ""
-#~ "Sharet har blitt endret i mellomtiden. Vennligst oppdater eller "
-#~ "synkroniser og prøv igjen."
-
-#~ msgid "You don't have sufficient permissions to delete the share."
-#~ msgstr "Du har ikke tilstrekkelige tillatelser til å slette sharet."
-
-#~ msgid "You don't have sufficient permissions to edit the share."
-#~ msgstr "Du har ikke tilstrekkelige rettigheter til å redigere sharet."
-
-#~ msgid ""
-#~ "You don't have sufficient permissions to share folder or item \"%2$s\"."
-#~ msgstr ""
-#~ "Du har ikke tilstrekkelige tillatelser til å dele mappen eller elementet "
-#~ "\"%2$s\"."
-
-#~ msgid "Module %1$s does not support sharing."
-#~ msgstr "Modulen %1$s støtter ikke deling."
-
-#~ msgid "Module %1$s does not support sharing of items."
-#~ msgstr "Modulen %1$s støtter ikke deling av elementer."
-
-#~ msgid "Module %1$s does not support sharing of folders."
-#~ msgstr "Modulen %1$s støtter ikke deling av mapper."

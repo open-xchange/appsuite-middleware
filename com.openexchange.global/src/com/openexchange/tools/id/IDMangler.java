@@ -115,7 +115,7 @@ public class IDMangler {
         if (null == mangled) {
             return null;
         }
-        final List<String> list = new ArrayList<String>(5);
+        List<String> list = new ArrayList<String>(5);
         // Find first delimiter
         int prev = 0;
         int pos = mangled.indexOf(PRIMARY_DELIM, prev);

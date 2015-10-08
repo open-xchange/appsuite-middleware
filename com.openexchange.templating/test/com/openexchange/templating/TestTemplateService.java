@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- * 
+ *
  * This test will not work if started from the MainTestSuite as the folder test-resources is not found
  * TODO fix this in the future
  */
@@ -132,8 +132,8 @@ public class TestTemplateService extends TestCase {
         noInfostore.setInfostore(false);
 
         SimSession simSession = new SimSession(1, 1);
-        session = new ServerSessionAdapter(simSession, context, new SimUser(1), userConfig, new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
-        sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, 1));
+        session = new ServerSessionAdapter(simSession, context, new SimUser(1), userConfig, new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, context));
+        sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, context));
     }
 
     @Override

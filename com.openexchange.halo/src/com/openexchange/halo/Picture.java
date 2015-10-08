@@ -50,7 +50,7 @@
 package com.openexchange.halo;
 
 import java.util.UUID;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.java.util.UUIDs;
 
 /**

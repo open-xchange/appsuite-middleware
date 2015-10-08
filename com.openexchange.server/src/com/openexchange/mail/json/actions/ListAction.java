@@ -120,11 +120,12 @@ public final class ListAction extends AbstractMailAction {
              * Start response
              */
             final List<MailMessage> list = new LinkedList<MailMessage>();
-            for (final Map.Entry<String, List<String>> entry : idMap.entrySet()) {
-                final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
-                final int accountID = mailInterface.getAccountID();
+            columns = prepareColumns(columns);
+            for (Map.Entry<String, List<String>> entry : idMap.entrySet()) {
+                MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
+                int accountID = mailInterface.getAccountID();
                 for (int i = 0; i < mails.length; i++) {
-                    final MailMessage mail = mails[i];
+                    MailMessage mail = mails[i];
                     if (mail != null) {
                         if (!mail.containsAccountId()) {
                             mail.setAccountId(accountID);

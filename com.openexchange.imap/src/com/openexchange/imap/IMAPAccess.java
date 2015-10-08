@@ -54,7 +54,6 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -117,7 +116,6 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
-import com.openexchange.version.Version;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -173,6 +171,26 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The scheduled timer task to clean-up maps.
      */
     private static volatile ScheduledTimerTask cleanUpTimerTask;
+
+    private static Boolean checkConnectivityIfPolled;
+    private static boolean checkConnectivityIfPolled() {
+        Boolean b = checkConnectivityIfPolled;
+        if (null == b) {
+            synchronized (IMAPAccess.class) {
+                b = checkConnectivityIfPolled;
+                if (null == b) {
+                    boolean defaultValue = false;
+                    ConfigurationService configService = Services.optService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    b = Boolean.valueOf(configService.getBoolProperty("com.openexchange.imap.storecache.checkConnectivityIfPolled", defaultValue));
+                    checkConnectivityIfPolled = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
 
     /*-
      * Member section
@@ -499,9 +517,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Obtain IMAP folder
              */
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
-            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapFolder, session);
-            final boolean exists = "INBOX".equals(fullname) || (listEntry.exists());
             final IMAPConfig imapConfig = getIMAPConfig();
+            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullname, accountId, imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription());
+            final boolean exists = "INBOX".equals(fullname) || (listEntry.exists());
             if (!exists) {
                 throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullname);
             }
@@ -566,7 +584,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = imapConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection();
+                boolean forceSecure = imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure);
             }
             /*
@@ -583,7 +601,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, preAuthStartTlsCap);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, -1, preAuthStartTlsCap);
                 /*
                  * Add warning if non-secure
                  */
@@ -645,7 +663,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            boolean certainPassword = false; // ("dovecot.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            boolean certainPassword = false;
             if (certainPassword) {
                 tmpPass = "secret";
             }
@@ -697,13 +715,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+                boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection());
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure);
             }
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("mail.devel.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false;
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -714,7 +732,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String clientIp = null;
             if (imapConfProps.isPropagateClientIPAddress() && isPropagateAccount(imapConfProps)) {
                 final String ip = session.getLocalIp();
-                if (!isEmpty(ip)) {
+                if (!com.openexchange.java.Strings.isEmpty(ip)) {
                     clientIp = ip;
                 }
             }
@@ -880,7 +898,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 properties.put("mail.imap.authAwait", "true");
                 properties.put("mail.imap.accountId", Integer.toString(accountId));
             }
-            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null));
+            boolean checkConnectivityIfPolled = checkConnectivityIfPolled();
+            final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw, (clientIp != null), checkConnectivityIfPolled);
             if (null == borrowedIMAPStore) {
                 throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
             }
@@ -901,7 +920,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         int retryCount = 0;
         while (retryCount++ < maxRetryCount) {
             try {
-                return newConnectedImapStore(imapSession, server, port, login, pw);
+                return newConnectedImapStore(imapSession, server, port, login, pw, accountId);
             } catch (final MessagingException e) {
                 if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
                     throw e;
@@ -914,22 +933,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
     }
 
-    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
-        return newConnectedImapStore(imapSession, server, port, login, pw, null);
+    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId) throws MessagingException {
+        return newConnectedImapStore(imapSession, server, port, login, pw, accountId, null);
     }
 
-    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final boolean[] preAuthStartTlsCap) throws MessagingException {
+    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId, boolean[] preAuthStartTlsCap) throws MessagingException {
         /*
          * Establish a new one...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-        {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
+        if (MailAccount.DEFAULT_ID == accountId) {
+            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         }
         /*
          * ... and connect it
@@ -955,6 +969,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
             doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
+
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
+
         return imapStore;
     }
 
@@ -983,8 +1003,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
     }
 
-    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp) throws MessagingException, OXException {
-        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp);
+    private IMAPStore borrowIMAPStore(javax.mail.Session imapSession, String server, int port, String login, String pw, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws MessagingException, OXException {
+        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, propagateClientIp, checkConnectivityIfPolled);
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
@@ -1352,24 +1372,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
-    }
-
-    /**
-     * Checks if given string is empty.
-     *
-     * @param s The string to check
-     * @return <code>true</code> if empty; otherwise <code>false</code>
-     */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final int MAX_STACK_TRACE_ELEMENTS = 1000;

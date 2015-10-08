@@ -60,14 +60,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
+import com.openexchange.ajax.login.ShareLoginConfiguration.ShareLoginProperty;
+import com.openexchange.ajax.login.session.CookieRefresher;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.InitProperty;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.ConfigurationProperty;
@@ -92,7 +97,15 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private DispatcherPrefixService prefixService;
 
     private LoginServlet login;
+    private volatile String alias;
+    private volatile ServiceRegistration<SessionServletInterceptor> interceptorRegistration;
 
+    /**
+     * Initializes a new {@link LoginServletRegisterer}.
+     *
+     * @param context The bundle context
+     * @param rampUp The ramp-up service set
+     */
     public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
         this.context = context;
@@ -158,9 +171,22 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.DISABLE_TRIM_LOGIN);
             addProperty(params, ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID);
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
+            /*
+             * add properties for share login configuration
+             */
+            for (ShareLoginProperty property : ShareLoginProperty.values()) {
+                addProperty(params, property);
+            }
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX, login, params, null);
+                String alias = prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
+                httpService.registerServlet(alias, login, params, null);
+                this.alias = alias;
+
+                LoginConfiguration conf = LoginServlet.getLoginConfiguration();
+                if (conf.isSessiondAutoLogin() || conf.getCookieExpiry() < 0) {
+                    interceptorRegistration = context.registerService(SessionServletInterceptor.class, new CookieRefresher(conf), null);
+                }
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -182,9 +208,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
     }
 
-    private void addProperty(final Dictionary<String, String> params, final com.openexchange.login.ConfigurationProperty property) {
-        final String propertyName = property.getPropertyName();
-        final String value = configService.getProperty(propertyName, property.getDefaultValue());
+    private void addProperty(Dictionary<String, String> params, InitProperty property) {
+        String propertyName = property.getPropertyName();
+        String value = configService.getProperty(propertyName, property.getDefaultValue());
         if (null != value) {
             params.put(propertyName, value.trim());
         }
@@ -225,7 +251,17 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX);
+            String alias = this.alias;
+            if (null != alias) {
+                unregister.unregister(alias);
+                this.alias = null;
+            }
+
+            ServiceRegistration<SessionServletInterceptor> interceptorRegistration = this.interceptorRegistration;
+            if (null != interceptorRegistration) {
+                this.interceptorRegistration = null;
+                interceptorRegistration.unregister();
+            }
         }
         context.ungetService(reference);
     }

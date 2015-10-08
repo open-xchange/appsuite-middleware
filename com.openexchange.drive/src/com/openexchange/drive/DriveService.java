@@ -52,7 +52,7 @@ package com.openexchange.drive;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
@@ -166,5 +166,24 @@ public interface DriveService {
      */
     DriveSettings getSettings(DriveSession session) throws OXException;
 
-}
+    /**
+     * Creates an URL for the given file or directory used to jump into it directly.
+     *
+     * @param session The session
+     * @param path The path to the folder, relative to the root folder
+     * @param fileName The filename, or <code>null</code>
+     * @param method The method
+     * @return The URL to redirect to
+     * @throws OXException
+     */
+    String getJumpRedirectUrl(DriveSession session, String path, String fileName, String method) throws OXException;
 
+    /**
+     * Gets a reference providing additional utility methods.
+     *
+     * @return The drive utilities
+     * @throws OXException
+     */
+    DriveUtility getUtility();
+
+}

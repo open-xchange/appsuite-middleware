@@ -87,11 +87,11 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier.Action;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleaner;
-import com.openexchange.sessiond.osgi.Services;
-import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -113,7 +113,7 @@ public final class SessionHandler {
 
         @Override
         public int getNumberOfSessions(int userId, final int contextId) {
-            return sessionDataRef.get().getNumOfUserSessions(userId, contextId);
+            return SESSION_DATA_REF.get().getNumOfUserSessions(userId, contextId);
         }
     };
 
@@ -124,7 +124,7 @@ public final class SessionHandler {
     static volatile SessiondConfigInterface config;
 
     /** The {@link SessionData} reference */
-    protected static final AtomicReference<SessionData> sessionDataRef = new AtomicReference<SessionData>();
+    protected static final AtomicReference<SessionData> SESSION_DATA_REF = new AtomicReference<SessionData>();
 
     /** Whether there is no limit when adding a new session */
     private static volatile boolean noLimit;
@@ -167,7 +167,7 @@ public final class SessionHandler {
             config.getRandomTokenTimeout(),
             config.getNumberOfLongTermSessionContainers(),
             config.isAutoLogin());
-        sessionDataRef.set(sessionData);
+        SESSION_DATA_REF.set(sessionData);
         if (initialized.compareAndSet(false, true)) {
             try {
                 sessionIdGenerator = SessionIdGenerator.getInstance();
@@ -219,7 +219,7 @@ public final class SessionHandler {
      * @return The wrapper objects for removed sessions
      */
     public static Session[] removeUserSessions(final int userId, final int contextId) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return new Session[0];
@@ -263,8 +263,19 @@ public final class SessionHandler {
      */
     public static void removeContextSessionsGlobal(final Set<Integer> contextIds) throws OXException {
         SessionHandler.removeRemoteContextSessions(contextIds);
-
         SessionHandler.removeContextSessions(contextIds);
+    }
+
+    /**
+     * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @throws OXException If operation fails
+     */
+    public static void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+        SessionHandler.removeRemoteUserSessions(userId, contextId);
+        SessionHandler.removeUserSessions(userId, contextId);
     }
 
     /**
@@ -324,37 +335,6 @@ public final class SessionHandler {
         }
     }
 
-    /**
-     * Returns the timeout (in seconds) configured to wait for remote invalidation of context sessions. Default value 0 means "no timeout"
-     *
-     * @return timeout (in seconds) or 0 for no timeout
-     */
-    private static int getRemoteContextSessionsExecutionTimeout() {
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (configurationService == null) {
-            LOG.info("ConfigurationService not available. No execution timeout for remote processing of context sessions invalidation available. Fallback to no timeout.");
-            return 0;
-        }
-        return configurationService.getIntProperty("com.openexchange.remote.context.sessions.invalidation.timeout", 0);
-    }
-
-    /**
-     * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
-     *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @throws OXException If operation fails
-     */
-    public static void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
-        SessionHandler.removeRemoteUserSessions(userId, contextId);
-        SessionHandler.removeUserSessions(userId, contextId);
-    }
-
-    /**
-     * Triggers removing sessions for given context ids on remote cluster nodes
-     *
-     * @param contextIds - Set with context ids to be removed
-     */
     private static void removeRemoteUserSessions(int userId, int contextId) throws OXException {
         LOG.debug("Trying to remove sessions for user {} in context {} from remote nodes", userId, contextId);
         Map<Member, Integer> results = executeGlobalTask(new PortableUserSessionsCleaner(userId, contextId));
@@ -417,7 +397,7 @@ public final class SessionHandler {
      * @return The found session IDs
      */
     public static List<String> findLocalSessions(SessionFilter filter) {
-        final SessionData sessionData = sessionDataRef.get();
+        final SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return Collections.emptyList();
@@ -502,6 +482,20 @@ public final class SessionHandler {
     }
 
     /**
+     * Returns the timeout (in seconds) configured to wait for remote invalidation of context sessions. Default value 0 means "no timeout"
+     *
+     * @return timeout (in seconds) or 0 for no timeout
+     */
+    private static int getRemoteContextSessionsExecutionTimeout() {
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.info("ConfigurationService not available. No execution timeout for remote processing of context sessions invalidation available. Fallback to no timeout.");
+            return 0;
+        }
+        return configurationService.getIntProperty("com.openexchange.remote.context.sessions.invalidation.timeout", 0);
+    }
+
+    /**
      * Returns the timeout (in seconds) configured to wait for remote execution of session tasks. Default value 0 means "no timeout"
      *
      * @return timeout (in seconds) or 0 for no timeout
@@ -550,7 +544,7 @@ public final class SessionHandler {
      * @param contextId Set with contextIds to remove session for.
      */
     public static Set<Integer> removeContextSessions(final Set<Integer> contextIds) {
-        final SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -577,7 +571,7 @@ public final class SessionHandler {
      * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
      */
     public static boolean hasForContext(final int contextId, boolean considerSessionStorage) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return false;
@@ -612,7 +606,7 @@ public final class SessionHandler {
      * @return The wrapper objects for sessions
      */
     public static List<SessionControl> getUserSessions(final int userId, final int contextId, boolean considerSessionStorage) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return new LinkedList<SessionControl>();
@@ -643,7 +637,7 @@ public final class SessionHandler {
                                 retval[i] = obfuscator.unwrap(userSessions[i], remoteParameterNames);
                             }
                             return retval;
-                            }
+                        }
                     };
                     Session[] sessions = getFrom(c, new Session[0]);
                     for (int i = 0; i < sessions.length; i++) {
@@ -667,7 +661,7 @@ public final class SessionHandler {
      * @return
      */
     public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm, final boolean includeStorage) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -697,7 +691,7 @@ public final class SessionHandler {
     }
 
     public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm, final boolean ignoreStorage) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -734,7 +728,7 @@ public final class SessionHandler {
             return false;
         }
 
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return false;
@@ -764,7 +758,7 @@ public final class SessionHandler {
      * @throws OXException If creating a new session fails
      */
     protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, SessionEnhancement enhancement) throws OXException {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
@@ -819,7 +813,7 @@ public final class SessionHandler {
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    public static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
+    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -964,7 +958,7 @@ public final class SessionHandler {
     }
 
     private static void checkMaxSessPerUser(final int userId, final int contextId, boolean considerSessionStorage) throws OXException {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
@@ -1005,7 +999,7 @@ public final class SessionHandler {
         }
         int maxSessPerClient = config.getMaxSessionsPerClient();
         if (maxSessPerClient > 0) {
-            SessionData sessionData = sessionDataRef.get();
+            SessionData sessionData = SESSION_DATA_REF.get();
             List<SessionControl> userSessions = null == sessionData ? new LinkedList<SessionControl>() : sessionData.getUserSessions(userId, contextId);
             int cnt = 1; // We have at least one
             for (SessionControl sessionControl : userSessions) {
@@ -1042,7 +1036,7 @@ public final class SessionHandler {
     }
 
     private static void checkAuthId(String login, final String authId) throws OXException {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
@@ -1067,7 +1061,7 @@ public final class SessionHandler {
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
     protected static boolean clearSession(String sessionid) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return false;
@@ -1089,7 +1083,7 @@ public final class SessionHandler {
      * @throws OXException If changing the password fails
      */
     protected static void changeSessionPassword(final String sessionid, final String newPassword) throws OXException {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
@@ -1295,7 +1289,7 @@ public final class SessionHandler {
     }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String newIP) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -1340,7 +1334,7 @@ public final class SessionHandler {
     }
 
     static Session getSessionWithTokens(String clientToken, final String serverToken) throws OXException {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
@@ -1381,7 +1375,7 @@ public final class SessionHandler {
      */
     protected static SessionControl getSession(String sessionId, final boolean considerLocalStorage, final boolean considerSessionStorage) {
         LOG.debug("getSession <{}>", sessionId);
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -1430,12 +1424,21 @@ public final class SessionHandler {
      * @return <code>true</code> if <code>locally</code> active; otherwise <code>false</code>
      */
     protected static boolean isActive(String sessionId) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return false;
         }
         return null != sessionData.optShortTermSession(sessionId);
+    }
+
+    protected static List<String> getActiveSessionIDs() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return Collections.emptyList();
+        }
+        return sessionData.getShortTermSessionIDs();
     }
 
     /**
@@ -1446,7 +1449,7 @@ public final class SessionHandler {
      */
     protected static SessionControl getSessionByAlternativeId(final String altId, boolean lookupSessionStorage) {
         LOG.debug("getSessionByAlternativeId <{}>", altId);
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
@@ -1513,7 +1516,7 @@ public final class SessionHandler {
      */
     public static List<SessionControl> getSessions() {
         LOG.debug("getSessions");
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return Collections.emptyList();
@@ -1547,7 +1550,7 @@ public final class SessionHandler {
 
     protected static void cleanUp() {
         LOG.debug("session cleanup");
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
@@ -1555,31 +1558,19 @@ public final class SessionHandler {
         List<SessionControl> controls = sessionData.rotateShort();
         if (config.isAutoLogin()) {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sessionControl.getSession().getSessionID();
-                    }
-                });
+                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
             }
             postSessionDataRemoval(controls);
         } else {
             for (final SessionControl sessionControl : controls) {
-                LOG.info("Session timed out. ID: {}", new Object() {
-
-                    @Override
-                    public String toString() {
-                        return sessionControl.getSession().getSessionID();
-                    }
-                });
+                LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
             }
             postContainerRemoval(controls, true);
         }
     }
 
     protected static void cleanUpLongTerm() {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return;
@@ -1593,11 +1584,11 @@ public final class SessionHandler {
 
     public static void close() {
         if (initialized.compareAndSet(true, false)) {
-            SessionData sd = sessionDataRef.get();
+            SessionData sd = SESSION_DATA_REF.get();
             if (null != sd) {
                 postContainerRemoval(sd.getShortTermSessions(), false);
                 sd.clear();
-                sessionDataRef.set(null);
+                SESSION_DATA_REF.set(null);
             } else {
                 LOG.warn("\tSessionData instance is null.");
             }
@@ -1608,17 +1599,17 @@ public final class SessionHandler {
     }
 
     public static int getNumberOfActiveSessions() {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? 0 : sessionData.countSessions();
     }
 
     public static int[] getNumberOfLongTermSessions() {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? new int[0]: sessionData.getLongTermSessionsPerContainer();
     }
 
     public static int[] getNumberOfShortTermSessions() {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? new int[0] : sessionData.getShortTermSessionsPerContainer();
     }
 
@@ -1701,7 +1692,7 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic));
             LOG.debug("Posted event for removed session");
 
-            SessionData sessionData = sessionDataRef.get();
+            SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
                 int contextId = session.getContextId();
                 int userId = session.getUserId();
@@ -1720,7 +1711,7 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
             LOG.debug("Posted event for last removed session for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
 
-            SessionData sessionData = sessionDataRef.get();
+            SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
                 if (false == sessionData.hasForContext(contextId)) {
                     postContextLastSessionGone(contextId, eventAdmin);
@@ -1784,7 +1775,7 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic));
             LOG.debug("Posted event for removed session container");
 
-            SessionData sessionData = sessionDataRef.get();
+            SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
                 for (UserKey userKey : users) {
                     if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
@@ -1812,7 +1803,7 @@ public final class SessionHandler {
             eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic));
             LOG.debug("Posted event for removing temporary session data.");
 
-            SessionData sessionData = sessionDataRef.get();
+            SessionData sessionData = SESSION_DATA_REF.get();
             if (null != sessionData) {
                 for (UserKey userKey : users) {
                     if (false == sessionData.isUserActive(userKey.userId, userKey.contextId, false)) {
@@ -1852,21 +1843,21 @@ public final class SessionHandler {
     }
 
     public static void addThreadPoolService(ThreadPoolService service) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null != sessionData) {
             sessionData.addThreadPoolService(service);
         }
     }
 
     public static void removeThreadPoolService() {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null != sessionData) {
             sessionData.removeThreadPoolService();
         }
     }
 
     public static void addTimerService(TimerService service) {
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null != sessionData) {
             sessionData.addTimerService(service);
         }
@@ -1889,7 +1880,7 @@ public final class SessionHandler {
             shortSessionContainerRotator.cancel(false);
             SessionHandler.shortSessionContainerRotator = null;
         }
-        SessionData sessionData = sessionDataRef.get();
+        SessionData sessionData = SESSION_DATA_REF.get();
         if (null != sessionData) {
             sessionData.removeTimerService();
         }
@@ -2057,7 +2048,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    static boolean useSessionStorage(SessionImpl session) {
+    public static boolean useSessionStorage(SessionImpl session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 

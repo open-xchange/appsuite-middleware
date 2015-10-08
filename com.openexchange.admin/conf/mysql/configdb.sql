@@ -7,22 +7,6 @@ CREATE TABLE configdb_sequence (
 
 INSERT INTO configdb_sequence VALUES (0);
 
-DROP PROCEDURE IF EXISTS get_configdb_id;
-DELIMITER //
-CREATE PROCEDURE get_configdb_id() NOT DETERMINISTIC MODIFIES SQL DATA
-BEGIN
-    DECLARE identifier INT4 UNSIGNED;
-    SET identifier = 0;
-    SELECT id INTO identifier FROM configdb_sequence FOR UPDATE;
-    IF 0 = identifier THEN
-        INSERT INTO configdb_sequence (id) VALUES (identifier);
-    END IF;
-    SET identifier = identifier + 1;
-    UPDATE configdb_sequence SET id = identifier;
-    SELECT identifier;
-END//
-DELIMITER ;
-
 CREATE TABLE db_pool (
     db_pool_id INT4 UNSIGNED NOT NULL,
     url VARCHAR(255) NOT NULL,
@@ -64,7 +48,8 @@ CREATE TABLE context (
     filestore_passwd VARCHAR(32),
     quota_max INT8,
     PRIMARY KEY (cid),
-    INDEX (filestore_id)
+    INDEX (filestore_id),
+    UNIQUE KEY `context_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE filestore (
@@ -103,4 +88,9 @@ CREATE TABLE context_server2db_pool (
     INDEX (db_schema),
     INDEX `poolAndSchema` (write_db_pool_id, db_schema),
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE context2push_registration (
+    cid INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

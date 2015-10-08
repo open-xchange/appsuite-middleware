@@ -2,13 +2,20 @@
 Name:           open-xchange-file-storage-dropbox
 BuildArch:      noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
+%else
 BuildRequires:  ant-nodeps
+%endif
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
-BuildRequires:  java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -50,6 +57,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Oct 02 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Sixth candidate for 7.8.0 release
+* Fri Sep 25 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Fourth candidate for 7.8.0 release
+* Mon Sep 07 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Third candidate for 7.8.0 release
+* Fri Aug 21 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.8.0 release
+* Wed Aug 05 2015 Thorben Betten <thorben.betten@open-xchange.com>
+First release candidate for 7.8.0
 * Fri Dec 12 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Fourth candidate for 7.6.2 release
 * Mon Dec 08 2014 Thorben Betten <thorben.betten@open-xchange.com>
@@ -69,7 +88,7 @@ Build for patch 2014-11-20
 * Mon Nov 10 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2014-11-17
 * Wed Nov 05 2014 Thorben Betten <thorben.betten@open-xchange.com>
-prepare for 7.6.2 release
+prepare for 7.8.0 release
 * Fri Oct 31 2014 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.6.2 release
 * Mon Oct 27 2014 Thorben Betten <thorben.betten@open-xchange.com>
@@ -82,6 +101,8 @@ Fifth candidate for 7.6.1 release
 Fourth candidate for 7.6.1 release
 * Thu Oct 02 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Third release candidate for 7.6.1
+* Wed Sep 17 2014 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.6.2 release
 * Tue Sep 16 2014 Thorben Betten <thorben.betten@open-xchange.com>
 Second release candidate for 7.6.1
 * Fri Sep 05 2014 Thorben Betten <thorben.betten@open-xchange.com>

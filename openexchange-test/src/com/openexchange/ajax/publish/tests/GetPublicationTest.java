@@ -51,7 +51,6 @@ package com.openexchange.ajax.publish.tests;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.publish.actions.GetPublicationRequest;
 import com.openexchange.ajax.publish.actions.GetPublicationResponse;
 import com.openexchange.exception.OXException;

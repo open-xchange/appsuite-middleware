@@ -79,6 +79,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginJsonEnhancer;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -162,18 +163,36 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     }
 
     /**
-     * Performs the login operation.
+     * Invokes given {@link LoginClosure}'s {@link LoginClosure#doLogin(HttpServletRequest) doLogin()} method to obtain a session.
+     * <p>
+     * Having the session further ramp-up operations are performed and finally an appropriate JSON result object is composed that gets written to passed HTTP response.
      *
-     * @param req The HTTP request
-     * @param resp The HTTP response
-     * @param login The closure performing the actual login
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param login The login closure to invoke
      * @param conf The login configuration
-     * @return <code>true</code> if an auto login should proceed afterwards; otherwise <code>false</code>
+     * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      * @throws OXException If an Open-Xchange error occurs
-     * @throws RateLimitedException If login attempt gets rate limited
      */
-    protected boolean loginOperation(final HttpServletRequest req, final HttpServletResponse resp, final LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginConfiguration conf) throws IOException, OXException {
+        return loginOperation(req, resp, login, null, conf);
+    }
+
+    /**
+     * Invokes given {@link LoginClosure}'s {@link LoginClosure#doLogin(HttpServletRequest) doLogin()} method to obtain a session.
+     * <p>
+     * Having the session further ramp-up operations are performed and finally an appropriate JSON result object is composed that gets written to passed HTTP response.
+     *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param login The login closure to invoke
+     * @param conf The login configuration
+     * @return <code>true</code> if an auto-login should proceed afterwards; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf) throws IOException, OXException {
         Tools.disableCaching(resp);
         resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
 
@@ -259,6 +278,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             // Write response
             JSONObject json = new JSONObject(12);
             LoginWriter.write(result, json);
+            if (result instanceof LoginJsonEnhancer) {
+                ((LoginJsonEnhancer) result).enhanceJson(json);
+            }
 
             // Handle initial multiple
             {
@@ -322,7 +344,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 LOG.debug("", e);
                 throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
-            if (LoginExceptionCodes.REDIRECT.equals(e)) {
+            if (LoginExceptionCodes.REDIRECT.equals(e) || LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e) || LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
                 LOG.debug("", e);
             } else {
                 LOG.error("", e);
@@ -348,10 +370,18 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 ResponseWriter.write(response, resp.getWriter(), locale);
                 return false;
             }
-            final Session session = result.getSession();
+
+            Session session = result.getSession();
             // Store associated session
             SessionUtility.rememberSession(req, new ServerSessionAdapter(session));
-            LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+
+            // Set cookies
+            if (null == cookiesSetter) {
+                LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+            } else {
+                cookiesSetter.setLoginCookies(session, req, resp, conf);
+            }
+
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {
                 APIResponseRenderer.writeResponse(response, LoginServlet.ACTION_LOGIN, req, resp);
@@ -400,9 +430,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             if (rampUpServices != null) {
                 try {
                     String client = session.getClient();
-                    String clientOverride = req.getParameter("rampUpFor");
-                    if (clientOverride != null) {
-                    	client = clientOverride;
+                    {
+                        String clientOverride = req.getParameter("rampUpFor");
+                        if (clientOverride != null) {
+                        	client = clientOverride;
+                        }
                     }
                     for (LoginRampUpService rampUpService : rampUpServices) {
                         if (rampUpService.contributesTo(client)) {

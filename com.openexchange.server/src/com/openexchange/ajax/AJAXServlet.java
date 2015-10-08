@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -228,11 +227,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_LOGIN = "login";
 
-    public static final String ACTION_OAUTH = "oauth";
-
     public static final String ACTION_STORE = "store";
 
     public static final String ACTION_RAMPUP = "rampup";
+
+    public static final String ACTION_GUEST = "guest";
+
+    public static final String ACTION_ANONYMOUS = "anonymous";
 
     public static final String ACTION_REDEEM_RESERVATION = "redeemReservation";
 
@@ -502,9 +503,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final String CONTENTTYPE_UPLOAD = "multipart/form-data";
 
     /**
-     * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
-     * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
-     * session.
+     * The service method of HttpServlet is extended to catch bad exceptions and keep the socket alive. Otherwise Apache thinks in a
+     * balancer environment this container is temporarily dead and redirects requests to other containers. This will kill the users session.
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -532,12 +532,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 super.service(new CountingHttpServletRequest(req), resp);
             }
         } catch (RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            int retryAfter = e.getRetryAfter();
-            if (retryAfter > 0) {
-                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(resp);
         } catch (RuntimeException e) {
             OXException oxe = new OXException(e);
             LOG.error("", oxe);

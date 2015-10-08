@@ -73,5 +73,15 @@ public enum FileStorageFolderType {
      * Folder is a trash folder for current user.
      */
     TRASH_FOLDER,
+
+    PICTURES_FOLDER,
+
+    DOCUMENTS_FOLDER,
+
+    MUSIC_FOLDER,
+
+    VIDEOS_FOLDER,
+
+    TEMPLATES_FOLDER
     ;
 }

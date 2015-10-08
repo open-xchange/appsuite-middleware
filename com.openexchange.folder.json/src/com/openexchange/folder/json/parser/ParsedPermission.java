@@ -56,7 +56,9 @@ import com.openexchange.folderstorage.Permission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ParsedPermission implements Permission {
+public class ParsedPermission implements Permission {
+
+    private static final long serialVersionUID = -2384707153822857968L;
 
     private int system;
 
@@ -70,7 +72,7 @@ public final class ParsedPermission implements Permission {
 
     private boolean admin;
 
-    private int entity;
+    private int entity = -1;
 
     private boolean group;
 
@@ -79,60 +81,6 @@ public final class ParsedPermission implements Permission {
      */
     public ParsedPermission() {
         super();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (admin ? 1231 : 1237);
-        result = prime * result + deletePermission;
-        result = prime * result + entity;
-        result = prime * result + folderPermission;
-        result = prime * result + (group ? 1231 : 1237);
-        result = prime * result + readPermission;
-        result = prime * result + system;
-        result = prime * result + writePermission;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        final Permission other = (Permission) obj;
-        if (admin != other.isAdmin()) {
-            return false;
-        }
-        if (deletePermission != other.getDeletePermission()) {
-            return false;
-        }
-        if (entity != other.getEntity()) {
-            return false;
-        }
-        if (folderPermission != other.getFolderPermission()) {
-            return false;
-        }
-        if (group != other.isGroup()) {
-            return false;
-        }
-        if (readPermission != other.getReadPermission()) {
-            return false;
-        }
-        if (system != other.getSystem()) {
-            return false;
-        }
-        if (writePermission != other.getWritePermission()) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -254,5 +202,62 @@ public final class ParsedPermission implements Permission {
             throw new InternalError(e.getMessage());
         }
     }
+
+  @Override
+  public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (admin ? 1231 : 1237);
+      result = prime * result + deletePermission;
+      result = prime * result + entity;
+      result = prime * result + folderPermission;
+      result = prime * result + (group ? 1231 : 1237);
+      result = prime * result + readPermission;
+      result = prime * result + system;
+      result = prime * result + writePermission;
+      return result;
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+      if (this == obj) {
+          return true;
+      }
+      if (obj == null) {
+          return false;
+      }
+
+      if (!(obj instanceof Permission)) {
+          return false;
+      }
+
+      final Permission other = (Permission) obj;
+      if (admin != other.isAdmin()) {
+          return false;
+      }
+      if (deletePermission != other.getDeletePermission()) {
+          return false;
+      }
+      if (entity != other.getEntity()) {
+          return false;
+      }
+      if (folderPermission != other.getFolderPermission()) {
+          return false;
+      }
+      if (group != other.isGroup()) {
+          return false;
+      }
+      if (readPermission != other.getReadPermission()) {
+          return false;
+      }
+      if (system != other.getSystem()) {
+          return false;
+      }
+      if (writePermission != other.getWritePermission()) {
+          return false;
+      }
+
+      return true;
+  }
 
 }

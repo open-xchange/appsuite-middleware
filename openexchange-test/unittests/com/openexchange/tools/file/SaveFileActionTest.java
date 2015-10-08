@@ -55,9 +55,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.LocalFileStorageFactory;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tx.UndoableAction;
 
 public class SaveFileActionTest extends AbstractActionTest {
@@ -67,20 +67,18 @@ public class SaveFileActionTest extends AbstractActionTest {
 	private File tempFile;
 
 	private SaveFileAction saveFile = null;
-	private FileStorage storage = null;
+	private com.openexchange.filestore.FileStorage storage = null;
 
 	@Override
     protected void setUp() throws Exception {
         super.setUp();
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage.setFileStorageStarter(new LocalFileStorageFactory());
     }
 
     @Override
     protected void tearDown() throws Exception {
         rmdir(tempFile);
-        FileStorage.setFileStorageStarter(null);
         super.tearDown();
     }
 
@@ -95,7 +93,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		storage = FileStorage.getInstance(tempFile.toURI());
+		storage = new LocalFileStorageFactory().getFileStorage(tempFile.toURI());
 		saveFile = new SaveFileAction(storage, new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)), 0);
 		return saveFile;
 	}

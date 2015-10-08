@@ -49,8 +49,13 @@
 
 package com.openexchange.ajax.infostore.actions;
 
+import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.json.FileMetadataFieldParser;
 
 
 /**
@@ -61,12 +66,51 @@ import com.openexchange.ajax.framework.AbstractColumnsResponse;
  */
 public class ListInfostoreResponse extends AbstractColumnsResponse {
 
+    private Object[][] convertedArray = null;
+
     /**
      * Initializes a new {@link ListInfostoreResponse}.
      * @param response
      */
     protected ListInfostoreResponse(Response response) {
         super(response);
+    }
+
+    @Override
+    public Object[][] getArray() {
+        if (convertedArray != null) {
+            return convertedArray;
+        }
+
+        Object[][] array = super.getArray();
+        if (array == null) {
+            return null;
+        }
+
+        int[] columns = getColumns();
+        convertedArray = new Object[array.length][];
+        for (int i = 0; i < array.length; i++) {
+            Object[] origObjects = array[i];
+            Object[] convertedObjects = convertedArray[i] = new Object[origObjects.length];
+            for (int j = 0; j < origObjects.length; j++) {
+                Object orig = origObjects[j];
+                Object converted = orig;
+                Field field = File.Field.get(columns[j]);
+                if (orig != null && field != null) {
+                    try {
+                        converted = FileMetadataFieldParser.convert(field, orig);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    } catch (OXException e) {
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                }
+
+                convertedObjects[j] = converted;
+            }
+        }
+
+        return convertedArray;
     }
 
 }

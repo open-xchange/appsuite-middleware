@@ -90,6 +90,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
@@ -162,6 +163,10 @@ public final class Tools {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("'Contact storage for folder " + folderID + "'");
         }
         return storage;
+	}
+
+	public static List<ContactStorage> getStorages() throws OXException {
+	    return ContactServiceLookup.getService(ContactStorageRegistry.class, true).getStorages(null);
 	}
 
 	/**
@@ -430,21 +435,20 @@ public final class Tools {
 	/**
 	 * Gets a default set of folders used for searches of an user.
 	 *
-	 * @param contextID the context ID
-	 * @param userID the user ID
-	 * @return the folder IDs
+	 * @param contextID The context ID
+	 * @param userID The user ID
+	 * @return The folder IDs
 	 * @throws OXException
 	 */
-	private static List<String> getBasicFolders(final int contextID, final int userID) throws OXException {
-		final List<String> folderIDs = new ArrayList<String>();
-		folderIDs.add(Integer.toString(
-				new OXFolderAccess(Tools.getContext(contextID)).getDefaultFolder(userID, FolderObject.CONTACT).getObjectID()));
+	private static List<String> getBasicFolders(int contextID, int userID) throws OXException {
+		List<String> folderIDs = new ArrayList<String>();
+		folderIDs.add(String.valueOf(new OXFolderAccess(getContext(contextID)).getDefaultFolderID(userID, FolderObject.CONTACT)));
 		if (Tools.getPermission(contextID, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userID).canReadAllObjects()) {
-			folderIDs.add(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+			folderIDs.add(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
 		}
-		final Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
+		Integer collectedContactFolderID = ServerUserSetting.getInstance().getContactCollectionFolder(contextID, userID);
 		if (null != collectedContactFolderID) {
-			folderIDs.add(Integer.toString(collectedContactFolderID));
+			folderIDs.add(String.valueOf(collectedContactFolderID));
 		}
 		return folderIDs;
 	}
@@ -501,13 +505,7 @@ public final class Tools {
 	 * @param searchIterator The iterator to close
 	 */
 	public static void close(SearchIterator<?> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                LOG.warn("error closing iterator", e);
-            }
-        }
+	    SearchIterators.close(searchIterator);
 	}
 
 	/**

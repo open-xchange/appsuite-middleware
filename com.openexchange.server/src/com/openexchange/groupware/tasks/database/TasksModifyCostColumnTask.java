@@ -89,8 +89,8 @@ public final class TasksModifyCostColumnTask extends UpdateTaskAdapter {
         Column targetCostsColumn = new Column("target_costs", "DECIMAL(12,2) DEFAULT NULL");
         try {
             startTransaction(con);
-            Tools.checkAndModifyColumns(con, "task", actualCostsColumn, targetCostsColumn);
-            Tools.checkAndModifyColumns(con, "del_task", actualCostsColumn, targetCostsColumn);
+            Tools.checkAndModifyColumns(con, "task", true, actualCostsColumn, targetCostsColumn);
+            Tools.checkAndModifyColumns(con, "del_task", true, actualCostsColumn, targetCostsColumn);
             con.commit();
         } catch (SQLException e) {
             rollback(con);

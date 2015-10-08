@@ -54,6 +54,7 @@ import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
@@ -62,7 +63,7 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
@@ -78,6 +79,8 @@ import com.openexchange.session.Session;
 public final class ImageUtility {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImageUtility.class);
+
+    private static final AtomicReference<DispatcherPrefixService> DPS_REF = new AtomicReference<DispatcherPrefixService>();
 
     /**
      * Initializes a new {@link ImageUtility}.
@@ -150,6 +153,10 @@ public final class ImageUtility {
         NVP_HANDLERS = map;
     }
 
+    public static void setDispatcherPrefixService(DispatcherPrefixService service) {
+        DPS_REF.set(service);
+    }
+
     /**
      * Parses image location from specified image URI.
      *
@@ -193,6 +200,13 @@ public final class ImageUtility {
         return il;
     }
 
+    /**
+     * Parses image location from given request data
+     *
+     * @param requestData The request data to parse from
+     * @return The parsed image location
+     * @throws IllegalArgumentException If there is no matching registration name for request's URI (the URI part after path to the Servlet)
+     */
     public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
         if (requestData == null) {
             return null;
@@ -244,13 +258,13 @@ public final class ImageUtility {
      * @param session The session
      * @param imageDataSource The data source
      * @param preferRelativeUrl Whether to prefer a relative image URL
-     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
+     * @param addRoute <code>true</code> to add route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
         boolean optImageHostSet = false;
         final String prefix;
-        final String route;
+        final String httpSessionID;
         String publicSessionId = null;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
@@ -272,8 +286,7 @@ public final class ImageUtility {
                         optImageHostSet = true;
                     }
                 }
-                final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
-                route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                httpSessionID = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION);
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred
@@ -314,27 +327,27 @@ public final class ImageUtility {
                         optImageHostSet = true;
                     }
                 }
-                route = hostData.getRoute();
+                httpSessionID = null != hostData.getHTTPSession() ? hostData.getHTTPSession() : "0123456789." + hostData.getRoute();
             }
         }
         /*
          * Compose URL parameters
          */
         sb.append(prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
-        sb.append(DefaultDispatcherPrefixService.getInstance().getPrefix());
+        sb.append(getDispatcherPrefix());
         sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);
         }
         if (optImageHostSet) {
-            if (null != route) {
-                sb.append(";jsessionid=").append(route);
+            if (null != httpSessionID) {
+                sb.append(";jsessionid=").append(httpSessionID);
             }
         } else if (addRoute ) {
             final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
-            if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
-                sb.append(";jsessionid=").append(route);
+            if ((null == noRoute || !noRoute.booleanValue()) && null != httpSessionID) {
+                sb.append(";jsessionid=").append(httpSessionID);
             }
         }
         boolean first = true;
@@ -528,6 +541,15 @@ public final class ImageUtility {
         default:
             return -1;
         }
+    }
+
+    static String getDispatcherPrefix() {
+        DispatcherPrefixService dispatcherPrefixService = DPS_REF.get();
+        if (dispatcherPrefixService == null) {
+            throw new IllegalStateException(ImageUtility.class.getName() + " has not been initialized. DispatcherPrefixService is not set!");
+        }
+
+        return dispatcherPrefixService.getPrefix();
     }
 
 }

@@ -53,7 +53,6 @@ import static com.openexchange.webdav.xml.XmlServlet.NS;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.apache.commons.logging.LogFactory;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import com.openexchange.exception.OXException;

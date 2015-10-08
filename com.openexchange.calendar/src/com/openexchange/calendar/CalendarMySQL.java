@@ -145,6 +145,7 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.ISNULL;
 import com.openexchange.sql.grammar.OR;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -1671,9 +1672,10 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
     private static boolean containsWildcards(String pattern) {
-        final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-        return WILDCARD_PATTERN.matcher(pattern).find();
+        return null == pattern ? false : WILDCARD_PATTERN.matcher(pattern).find();
     }
 
     private static String getPlaceholders(int length) {
@@ -1746,7 +1748,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
             handleUid(cdao, so, !notify);
 
-            pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
+            pst.setTimestamp(i++, SQLTools.toTimestamp(cdao.getCreationDate()));
             if (!cdao.containsLastModified()) {
                 cdao.setLastModified(cdao.getCreationDate());
             }
@@ -2039,7 +2041,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                         if (FolderObject.PRIVATE == folderType) {
                             if (cdao.getEffectiveFolderId() == 0) {
-                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolderID(user.getIdentifier(), FolderObject.CALENDAR);
                                 stmt.setInt(3, pfid);
                                 user.setPersonalFolderId(pfid);
                                 if (user.getIdentifier() == uid) {
@@ -2055,9 +2057,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 } else {
                                     // Prefer the personal folder ID if present in UserParticipant instance
                                     final int personalFolderId = user.getPersonalFolderId();
-                                    final int pfid = personalFolderId > 0 ? personalFolderId : access.getDefaultFolder(
+                                    final int pfid = personalFolderId > 0 ? personalFolderId : access.getDefaultFolderID(
                                         user.getIdentifier(),
-                                        FolderObject.CALENDAR).getObjectID();
+                                        FolderObject.CALENDAR);
                                     stmt.setInt(3, pfid);
                                     user.setPersonalFolderId(pfid);
                                 }
@@ -2070,7 +2072,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                             if (user.getIdentifier() == cdao.getSharedFolderOwner()) {
                                 if (cdao.getGlobalFolderID() == 0) {
-                                    final int pfid = access.getDefaultFolder(cdao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+                                    final int pfid = access.getDefaultFolderID(cdao.getSharedFolderOwner(), FolderObject.CALENDAR);
                                     stmt.setInt(3, pfid);
                                     user.setPersonalFolderId(pfid);
                                     if (user.getIdentifier() == uid) {
@@ -2081,7 +2083,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     user.setPersonalFolderId(cdao.getGlobalFolderID());
                                 }
                             } else {
-                                final int pfid = access.getDefaultFolder(user.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                final int pfid = access.getDefaultFolderID(user.getIdentifier(), FolderObject.CALENDAR);
                                 stmt.setInt(3, pfid);
                                 user.setPersonalFolderId(pfid);
                             }
@@ -2748,7 +2750,12 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         CalendarDataObject clone = null;
 
-        final boolean changeMasterTime = checkRecurrenceMasterTimeUpdate(cdao, edao);
+        final boolean changeMasterTime;
+        if (CalendarObject.NO_RECURRENCE == edao.getRecurrenceType() || 0 != cdao.getRecurrencePosition() || null != cdao.getRecurrenceDatePosition()) {
+            changeMasterTime = false; // no recurrence or not master
+        } else {
+            changeMasterTime = COLLECTION.detectTimeChange(cdao, edao);
+        }
 
         // Reset all exceptions (change and delete)
         if (changeMasterTime) {
@@ -3085,7 +3092,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         reminder.setFolder(cdao.getActionFolder());
                     } else {
                         final OXFolderAccess access = new OXFolderAccess(cdao.getContext());
-                        reminder.setFolder(access.getDefaultFolder(reminder.getUser(), FolderObject.CALENDAR).getObjectID());
+                        reminder.setFolder(access.getDefaultFolderID(reminder.getUser(), FolderObject.CALENDAR));
                     }
                 } else {
                     reminder.setFolder(cdao.getParentFolderID());
@@ -3135,7 +3142,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
-            if (rresults.size() <= cdao.getDeleteException().length) {
+            if (null != cdao.getDeleteException() && rresults.size() <= cdao.getDeleteException().length) {
                 /*
                  * Commit current transaction
                  */
@@ -3164,48 +3171,6 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         }
         return null;
-    }
-
-    /**
-     * Checks, if the start or end date of the whole sequence has been changed.
-     *
-     * @param newObject new CalendarDataObject
-     * @param currencObject old CalendarDataObject
-     * @return
-     */
-    private boolean checkRecurrenceMasterTimeUpdate(final CalendarDataObject newObject, final CalendarDataObject currentObject) {
-        // Is sequence?
-        if (!currentObject.containsRecurrenceType() || currentObject.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
-            return false;
-        }
-
-        // Is Exception
-        if (newObject.containsRecurrencePosition() && newObject.getRecurrencePosition() != 0) {
-            return false;
-        }
-        if (newObject.containsRecurrenceDatePosition()) {
-            return false;
-        }
-
-        final Date newStart = newObject.getStartDate();
-        final Date newEnd = newObject.getEndDate();
-
-        // No new dates
-        if (newStart == null && newEnd == null) {
-            return false;
-        }
-
-        // New start date
-        if (newStart != null && !newStart.equals(currentObject.getStartDate())) {
-            return true;
-        }
-
-        // New end date
-        if (newEnd != null && !newEnd.equals(currentObject.getEndDate())) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -3424,7 +3389,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (new_userparticipant.getIdentifier() == uid) {
                                 if (cdao.getGlobalFolderID() == 0) {
                                     try {
-                                        final int pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        final int pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                         pi.setInt(5, pfid);
                                         new_userparticipant.setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
@@ -3450,15 +3415,15 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = cdao.getActionFolder();
                                             } else {
                                                 // Non-folder-owner
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         } else {
                                             // A move into another private folder: Set to default folder ID for non-folder-owner
-                                            pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                            pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
-                                        pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     }
                                     if (pfid == 0) {
                                         pi.setInt(5, -2);
@@ -3475,9 +3440,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (cdao.getFolderMove()) {
                                 if (FolderObject.PRIVATE == cdao.getFolderType()) {
                                     // move public -> private
-                                    final int defaultId = access.getDefaultFolder(
-                                        new_userparticipant.getIdentifier(),
-                                        FolderObject.CALENDAR).getObjectID();
+                                    final int defaultId = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     if (new_userparticipant.getIdentifier() == uid && cdao.getActionFolder() != defaultId) {
                                         pfid = cdao.getActionFolder();
                                     } else {
@@ -3504,7 +3467,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (edao.getSharedFolderOwner() == new_userparticipant.getIdentifier()) {
                                 if (cdao.getGlobalFolderID() == 0) {
                                     try {
-                                        final int pfid = access.getDefaultFolder(edao.getSharedFolderOwner(), FolderObject.CALENDAR).getObjectID();
+                                        final int pfid = access.getDefaultFolderID(edao.getSharedFolderOwner(), FolderObject.CALENDAR);
                                         pi.setInt(5, pfid);
                                         new_userparticipant.setPersonalFolderId(pfid);
                                     } catch (final Exception fe) {
@@ -3530,7 +3493,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                                 pfid = cdao.getActionFolder();
                                             } else {
                                                 // Non-folder-owner
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         } else {
                                             /*
@@ -3541,12 +3504,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                                             if(new_userparticipant.getIdentifier() == access.getFolderOwner(cdao.getParentFolderID())) {
                                                 pfid = cdao.getParentFolderID();
                                             } else {
-                                                pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                                pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                             }
                                         }
                                     } else {
                                         // always set the folder to the private folder of the user participant in private calendar folders.
-                                        pfid = access.getDefaultFolder(new_userparticipant.getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                        pfid = access.getDefaultFolderID(new_userparticipant.getIdentifier(), FolderObject.CALENDAR);
                                     }
                                     if (pfid == 0) {
                                         pi.setInt(5, -2);
@@ -3874,7 +3837,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 try {
                     pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    pidm.setTimestamp(1, SQLTools.toTimestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, System.currentTimeMillis());
                     pidm.setInt(4, uid);
@@ -4514,7 +4477,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 final int folderType = ofa.getFolderType(fid, so.getUserId());
                 final PreparedStatement pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 try {
-                    pidm.setTimestamp(1, new Timestamp(lastModified));
+                    pidm.setTimestamp(1, SQLTools.toTimestamp(lastModified));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, lastModified);
                     pidm.setInt(4, 0);
@@ -4927,7 +4890,6 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @param foldertype any of PRIVATE, PUBLIC or SHARED.
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified) throws SQLException, OXException {
-        IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
         deleteSingleAppointment(
             cid,
             oid,
@@ -4969,6 +4931,9 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws OXException
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified, boolean backup) throws SQLException, OXException {
+        if (!writecon.getAutoCommit()) {
+            IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
+        }
         int folderOwner = new OXFolderAccess(ctx).getFolderOwner(fid);
         if ((foldertype == FolderObject.PRIVATE || (foldertype == FolderObject.SHARED && owner != folderOwner)) && uid != owner) {
             if (foldertype == FolderObject.SHARED) {

@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.osgi;
 
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
@@ -58,15 +59,21 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.json.FileConverter;
 import com.openexchange.file.storage.json.FileMetadataParser;
+import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
 import com.openexchange.file.storage.json.actions.files.AliasFileActionFactory;
 import com.openexchange.file.storage.json.actions.files.FileActionFactory;
+import com.openexchange.file.storage.json.actions.services.ServiceActionFactory;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.startup.ThreadControlService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -78,7 +85,8 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
-            AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class };
+            AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
+            ThreadControlService.class };
     }
 
     @Override
@@ -86,13 +94,21 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
         try {
             Services.setServiceLookup(this);
             rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            FileFieldCollector fieldCollector = new FileFieldCollector(context);
+            Services.setFieldCollector(fieldCollector);
+            rememberTracker(new ServiceTracker<AdditionalFileField, AdditionalFileField>(context, AdditionalFileField.class.getName(), fieldCollector));
+
+            trackService(ShareNotificationService.class);
             trackService(RdiffService.class);
+            trackService(PreviewService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
             registerModule(AliasFileActionFactory.ALIAS_INSTANCE, "files");
+            registerModule(new AccountActionFactory(getService(FileStorageServiceRegistry.class)), "fileaccount");
+            registerModule(new ServiceActionFactory(getService(FileStorageServiceRegistry.class)), "fileservice");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
-            registerService(ResultConverter.class, new FileConverter());
+            registerService(ResultConverter.class, new FileConverter(fieldCollector));
         } catch (final Exception x) {
             org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error("", x);
             throw x;
@@ -101,8 +117,9 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
         Services.setServiceLookup(null);
+        Services.setFieldCollector(null);
+        super.stopBundle();
     }
 
 }

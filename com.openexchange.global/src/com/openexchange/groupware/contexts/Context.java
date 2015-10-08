@@ -62,7 +62,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Context extends Serializable {
+public interface Context extends FileStorageInfo, Serializable {
 
     /**
      * Returns the unique identifier of the context.
@@ -89,21 +89,6 @@ public interface Context extends Serializable {
     int getMailadmin();
 
     /**
-     * @return a string array with login and password of the file storage.
-     */
-    String[] getFileStorageAuth();
-
-    /**
-     * @return the quota for the file storage or <code>0</code> if there is no quota.
-     */
-    long getFileStorageQuota();
-
-    /**
-     * @return the filestoreId
-     */
-    int getFilestoreId();
-
-    /**
      * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
      * maintain these contexts.
      *
@@ -125,11 +110,6 @@ public interface Context extends Serializable {
      * @return <code>true</code> if the master database server is not reachable.
      */
     boolean isReadOnly();
-
-    /**
-     * @return the context specific location inside the filestore.
-     */
-    String getFilestoreName();
 
     /**
      * Gets the context attributes as an unmodifiable map.

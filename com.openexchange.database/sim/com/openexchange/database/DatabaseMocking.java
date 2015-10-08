@@ -50,18 +50,11 @@
 package com.openexchange.database;
 
 
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyByte;
-import static org.mockito.Matchers.anyDouble;
-import static org.mockito.Matchers.anyFloat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyShort;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,9 +66,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.junit.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
 import com.mysql.jdbc.ResultSetMetaData;
 
 /**
@@ -140,7 +135,8 @@ public class DatabaseMocking {
                 for(int i = 0, size = parameters.size(); i < size; i++) {
                     Object expected = parameters.get(i);
                     Object actual = paramSet.getParameter(i + 1);
-                    if (!expected.equals(actual)) {
+                    
+                    if (!equals(expected, actual)) {
                         success = false;
                     }
                 }
@@ -152,7 +148,26 @@ public class DatabaseMocking {
             return false;
         }
 
-        public String dump() {
+        private boolean equals(Object expected, Object actual) {
+        	if (expected == actual) {
+        		return true;
+        	}
+        	if (expected == null) {
+        		return false;
+        	}
+        	if (actual == null) {
+        		return false;
+        	}
+        	if (expected instanceof byte[]) {
+        		if (!(actual instanceof byte[])) {
+        			return false;
+        		}
+        		return Arrays.equals((byte[]) expected, (byte[]) actual); 
+        	}
+        	return expected.equals(actual);
+		}
+
+		public String dump() {
             StringBuilder b = new StringBuilder();
             for(Map.Entry<String, List<SetParameterAnswer>> entry: queries.entrySet()) {
                 b.append(entry.getKey()).append(":\n");
@@ -205,6 +220,7 @@ public class DatabaseMocking {
             doAnswer(this).when(stmt).setBoolean(anyInt(), anyBoolean());
             doAnswer(this).when(stmt).setString(anyInt(), anyString());
             doAnswer(this).when(stmt).setObject(anyInt(), anyObject());
+            doAnswer(this).when(stmt).setBytes(anyInt(), any(byte[].class));
         }
 
         public Object getParameter(int i) {
@@ -300,7 +316,12 @@ public class DatabaseMocking {
                                         for (int i = 0, size = qStub.parameters.size(); i < size; i++) {
                                             Object param = qStub.parameters.get(i);
                                             Object setParam = paramCollector.getParameter(i+1);
-                                            if (!param.equals(setParam)) {
+                                            if (param instanceof byte[] && setParam instanceof byte[]) {
+                                            	if (!Arrays.equals((byte[])param, (byte[])setParam)) {
+                                            		success = false;
+                                            		break;
+                                            	}
+                                            } else if (!param.equals(setParam)) {
                                                 success = false;
                                                 break;
                                             }

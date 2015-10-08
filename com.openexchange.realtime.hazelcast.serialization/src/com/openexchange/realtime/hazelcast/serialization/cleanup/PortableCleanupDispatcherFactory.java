@@ -52,7 +52,6 @@ package com.openexchange.realtime.hazelcast.serialization.cleanup;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
-import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 
 
 /**

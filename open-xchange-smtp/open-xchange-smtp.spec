@@ -2,12 +2,19 @@
 Name:          open-xchange-smtp
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
+%endif
 BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +62,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2553
     ox_add_property com.openexchange.smtp.sendPartial false $PFILE
+
+    ox_update_permissions /opt/open-xchange/etc/noreply.properties root:open-xchange 640
 fi
 
 %clean
@@ -67,19 +76,34 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/noreply.properties
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
+* Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
 * Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-12 (2671)
+* Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-17 (2666)
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
 * Tue Aug 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -98,6 +122,10 @@ Build for patch 2015-06-29 (2578)
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -206,6 +234,8 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
+* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>

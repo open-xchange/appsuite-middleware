@@ -50,14 +50,11 @@
 package com.openexchange.ajax.mailaccount;
 
 import java.io.IOException;
-import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 /**

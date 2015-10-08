@@ -10,6 +10,7 @@ excludes = [
   /buildservice.properties$/,
   /3rdPartyLibs\.properties$/,
   /HTMLEntities\.properties$/,
+  /file-logging-test\.properties$/,
   /whitelist.properties$/,
   /ldap\.properties$/,
   /language-codes\.properties$/,

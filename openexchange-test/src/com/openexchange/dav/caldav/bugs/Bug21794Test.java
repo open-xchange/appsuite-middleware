@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -61,25 +63,22 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
 /**
- * {@link NewTest} - 500 an CalDAVWriteEntityQueueableOperation. 
- * 
+ * {@link NewTest} - 500 an CalDAVWriteEntityQueueableOperation.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21794Test extends CalDAVTest {
 
-	public Bug21794Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testDeclineImportedAppointment() throws Exception {
 		/*
 		 * create appointment
 		 */
 		String uid = "WEBEX-MEETING CENTER-6.0292133-" + new Date().getTime();
-		String resourceName = uid.replace(".", "");		
+		String resourceName = uid.replace(".", "");
     	Date start = TimeTools.D("next monday at 15:30");
     	Date end = TimeTools.D("next monday at 16:30");
-		String iCal = 
+		String iCal =
 				"BEGIN:VCALENDAR" + "\r\n" +
 				"VERSION:2.0" + "\r\n" +
 				"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
@@ -181,5 +180,5 @@ public class Bug21794Test extends CalDAVTest {
         assertNotNull("declining attendee not found", attendee);
         assertEquals("partstat status wrong", "DECLINED", attendee.getAttribute("PARTSTAT"));
 	}
-	
+
 }

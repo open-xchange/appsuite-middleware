@@ -67,9 +67,9 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      */
     TOO_LONG_VALUES("Some field values are too long.", CATEGORY_TRUNCATED, 100),
     /**
-     * Invalid SQL Query: %s
+     * Unexpected database error: \"%1$s\"
      */
-    SQL_PROBLEM("Invalid SQL Query: %1$s", CATEGORY_ERROR, 200, OXExceptionStrings.SQL_ERROR_MSG),
+    SQL_PROBLEM("Unexpected database error: \"%1$s\"", CATEGORY_ERROR, 200, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Cannot pre-fetch results.
      */
@@ -113,7 +113,11 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * This document is locked.
      */
-    ALREADY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.ALREADY_LOCKED_MSG_DISPLAY),
+    CURRENTLY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.CURRENTLY_LOCKED_MSG_DISPLAY),
+    /**
+     * This document is locked.
+     */
+    ALREADY_LOCKED("This document is locked.", CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.CURRENTLY_LOCKED_MSG_DISPLAY), // Copy for legacy reasons
     /**
      * You cannot unlock this document.
      */
@@ -202,6 +206,15 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * Unsupported character.
      */
     INVALID_CHARACTER_SIMPLE("Unsupported character", CATEGORY_USER_INPUT, 2103 /* Yes, the same as INVALID_CHARACTER */, InfostoreExceptionMessages.INVALID_CHARACTER_SIMPLE_MSG_DISPLAY),
+    /**
+     * Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+     */
+    VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS("Inapplicable permissions of user \"%1$s\"", CATEGORY_USER_INPUT, 2104, InfostoreExceptionMessages.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY),
+    /**
+     * Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.
+     */
+    CONCURRENT_VERSION_CREATION("Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.", CATEGORY_USER_INPUT, 2105, InfostoreExceptionMessages.CONCURRENT_VERSION_CREATION_MSG_DISPLA),
+
     ;
 
     private final String message;

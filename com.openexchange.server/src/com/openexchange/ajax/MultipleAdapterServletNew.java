@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.ajax.SessionUtility.getSessionObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -263,7 +262,12 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             if (null == hostnameService) {
                 retval.setHostname(req.getServerName());
             } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                final String hn;
+                if (session.getUser().isGuest()) {
+                    hn = hostnameService.getGuestHostname(session.getUserId(), session.getContextId());
+                } else {
+                    hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                }
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }

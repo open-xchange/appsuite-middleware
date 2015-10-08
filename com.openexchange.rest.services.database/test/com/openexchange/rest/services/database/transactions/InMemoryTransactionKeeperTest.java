@@ -49,30 +49,31 @@
 
 package com.openexchange.rest.services.database.transactions;
 
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.junit.Test;
-import com.openexchange.rest.services.database.transactions.Transaction;
 import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import com.openexchange.rest.services.database.transactions.Transaction;
+
 /**
  * {@link InMemoryTransactionKeeperTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InMemoryTransactionKeeperTest {
-    
+
     private InMemoryTransactionKeeper keeper = new InMemoryTransactionKeeper();
     private Connection con = mock(Connection.class);
-    
-    
+
     @Test
     public void testLifecycle() throws Exception {
         String txId = begin();
         doOperations(txId);
         commit(txId);
-        
+
         con = mock(Connection.class);
         txId = begin();
         doOperations(txId);
@@ -95,7 +96,7 @@ public class InMemoryTransactionKeeperTest {
         keeper.commit(txId);
         verify(con).commit();
     }
-    
+
     private void rollback(String txId) throws SQLException {
         keeper.rollback(txId);
         verify(con).rollback();

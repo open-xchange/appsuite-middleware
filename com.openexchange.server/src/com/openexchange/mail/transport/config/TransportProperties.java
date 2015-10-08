@@ -101,6 +101,8 @@ public final class TransportProperties implements ITransportProperties {
 
     private boolean removeMimeVersionInSubParts;
 
+    private boolean enforceSecureConnection;
+
     /**
      * Initializes a new {@link TransportProperties}
      */
@@ -147,6 +149,7 @@ public final class TransportProperties implements ITransportProperties {
         publishedDocumentTimeToLive = 604800000L;
         externalRecipientsLocale = null;
         removeMimeVersionInSubParts = false;
+        enforceSecureConnection = false;
     }
 
     private void loadProperties0() {
@@ -247,6 +250,12 @@ public final class TransportProperties implements ITransportProperties {
             logBuilder.append("\tRemove \"MIME-Version\" header in sub-parts: ").append(removeMimeVersionInSubParts).append('\n');
         }
 
+        {
+            final String tmp = configuration.getProperty("com.openexchange.mail.enforceSecureConnection", "false").trim();
+            enforceSecureConnection = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tEnforced secure connections to external accounts: ").append(enforceSecureConnection).append('\n');
+        }
+
         logBuilder.append("Global transport properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -344,6 +353,16 @@ public final class TransportProperties implements ITransportProperties {
      */
     public Locale getExternalRecipientsLocale() {
         return externalRecipientsLocale;
+    }
+
+    @Override
+    public boolean isEnforceSecureConnection() {
+        return enforceSecureConnection;
+    }
+
+    @Override
+    public void setEnforceSecureConnection(boolean enforceSecureConnection) {
+        throw new UnsupportedOperationException("setEnforceSecureConnection() not allowed for static MailProperties");
     }
 
 }

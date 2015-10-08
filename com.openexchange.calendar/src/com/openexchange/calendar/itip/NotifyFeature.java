@@ -54,9 +54,12 @@ import com.openexchange.calendar.api.CalendarFeature;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link NotifyFeature}
@@ -69,7 +72,7 @@ public class NotifyFeature implements CalendarFeature {
     private final ITipMailGeneratorFactory generators;
     private final MailSenderService sender;
     private final ServiceLookup services;
-	private final AttachmentMemory attachmentMemory;
+    private final AttachmentMemory attachmentMemory;
 
     public NotifyFeature(ITipMailGeneratorFactory generators, MailSenderService sender, AttachmentMemory attachmentMemory, ServiceLookup services) {
         super();
@@ -85,10 +88,14 @@ public class NotifyFeature implements CalendarFeature {
     }
 
     @Override
-    public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) {
-        return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
+    public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) throws OXException {
+        UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ContextStorage.getStorageContext(session));
+
+        if (userConfiguration.hasWebMail()) {
+            return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
+        }
+
+        return delegate;
     }
-
-
 
 }

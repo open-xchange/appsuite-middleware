@@ -66,6 +66,8 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -81,12 +83,26 @@ public final class UserServiceImpl implements UserService {
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
+    private final PasswordMechFactory passwordMechFactory;
+
     /**
      * Initializes a new {@link UserServiceImpl}
      */
-    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry) {
+    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechFactory factory) {
         super();
         this.interceptorRegistry = interceptorRegistry;
+        this.passwordMechFactory = factory;
+
+    }
+
+    @Override
+    public boolean isGuest(int userId, Context context) throws OXException {
+        return UserStorage.getInstance().isGuest(userId, context);
+    }
+
+    @Override
+    public boolean isGuest(int userId, int contextId) throws OXException {
+        return UserStorage.getInstance().isGuest(userId, contextId);
     }
 
     @Override
@@ -107,6 +123,11 @@ public final class UserServiceImpl implements UserService {
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         UserStorage.getInstance().setAttribute(name, value, userId, context);
+    }
+
+    @Override
+    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
+        UserStorage.getInstance().setAttribute(con, name, value, userId, context);
     }
 
     @Override
@@ -135,6 +156,21 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User[] getUser(Connection con, Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().getUser(con, ctx, includeGuests, excludeUsers);
+    }
+
+    @Override
+    public User[] getUser(Context ctx, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().getUser(ctx, includeGuests, excludeUsers);
+    }
+
+    @Override
+    public User[] getGuestsCreatedBy(Connection connection, Context context, int userId) throws OXException {
+        return UserStorage.getInstance().getGuestsCreatedBy(connection, context, userId);
+    }
+
+    @Override
     public int createUser(final Context context, final User user) throws OXException {
         checkUser(user);
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
@@ -159,6 +195,32 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(Context context, User user) throws OXException {
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeDelete(context, user, interceptors);
+        UserStorage.getInstance().deleteUser(context, user.getId());
+        afterDelete(context, user, interceptors);
+    }
+
+    @Override
+    public void deleteUser(Connection con, Context context, User user) throws OXException {
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        beforeDelete(context, user, interceptors);
+        UserStorage.getInstance().deleteUser(con, context, user.getId());
+        afterDelete(context, user, interceptors);
+    }
+
+    @Override
+    public void deleteUser(Context context, int userId) throws OXException {
+        deleteUser(context, getUser(userId, context));
+    }
+
+    @Override
+    public void deleteUser(Connection con, Context context, int userId) throws OXException {
+        deleteUser(con, context, getUser(con, userId, context));
+    }
+
+    @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         return UserStorage.getInstance().getUserId(loginInfo, context);
     }
@@ -171,6 +233,16 @@ public final class UserServiceImpl implements UserService {
     @Override
     public int[] listAllUser(final Context context) throws OXException {
         return UserStorage.getInstance().listAllUser(context);
+    }
+
+    @Override
+    public int[] listAllUser(final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().listAllUser(null, context, includeGuests, excludeUsers);
+    }
+
+    @Override
+    public int[] listAllUser(int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().listAllUser(null, contextID, includeGuests, excludeUsers);
     }
 
     @Override
@@ -194,15 +266,25 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
+        return UserStorage.getInstance().searchUser(email, context, considerAliases, includeGuests, excludeUsers);
+    }
+
+    @Override
     public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
         return UserStorage.getInstance().searchUserByName(name, context, searchType);
     }
 
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
+        updateUser(null, user, context);
+    }
+
+    @Override
+    public void updateUser(Connection con, User user, Context context) throws OXException {
         List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
         beforeUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
-        UserStorage.getInstance().updateUser(user, context);
+        UserStorage.getInstance().updateUser(con, user, context);
         afterUpdate(context, user, UserServiceInterceptor.EMPTY_PROPS, interceptors);
     }
 
@@ -211,37 +293,66 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
-        return UserStorage.authenticate(user, password);
+        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+        return iPasswordMech.check(password, user.getUserPassword());
     }
 
     private void beforeCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeCreate(context, user, null);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeCreate(context, user, null);
+            }
         }
     }
 
-    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterCreate(context, user, null);
-            } catch(OXException e) {
-                LOG.error("Error while calling interceptor.", e);
+    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) {
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterCreate(context, user, null);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
             }
         }
     }
 
     private void beforeUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.beforeUpdate(context, user, null, properties);
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeUpdate(context, user, null, properties);
+            }
         }
     }
 
-    private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.afterUpdate(context, user, null, properties);
-            } catch(OXException e) {
-                LOG.error("Error while calling interceptor.", e);
+    private void afterUpdate(Context context, User user, Map<String, Object> properties, List<UserServiceInterceptor> interceptors) {
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterUpdate(context, user, null, properties);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
+            }
+        }
+    }
+
+    private void beforeDelete(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                interceptor.beforeDelete(context, user, null);
+            }
+        }
+    }
+
+    private void afterDelete(Context context, User user, List<UserServiceInterceptor> interceptors) {
+        if (!user.isGuest()) {
+            for (UserServiceInterceptor interceptor : interceptors) {
+                try {
+                    interceptor.afterDelete(context, user, null);
+                } catch (OXException e) {
+                    LOG.error("Error while calling interceptor.", e);
+                }
             }
         }
     }
@@ -264,11 +375,10 @@ public final class UserServiceImpl implements UserService {
          */
         if (language == null || LocaleTools.getLocale(language) == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
-        } else {
-            final Locale locale = LocaleTools.getLocale(language);
-            if (locale == null) {
-                throw UserExceptionCode.INVALID_LOCALE.create(language);
-            }
+        }
+        final Locale locale = LocaleTools.getLocale(language);
+        if (locale == null) {
+            throw UserExceptionCode.INVALID_LOCALE.create(language);
         }
 
         /*
@@ -276,19 +386,18 @@ public final class UserServiceImpl implements UserService {
          */
         if (timeZone == null) {
             throw UserExceptionCode.MISSING_PARAMETER.create("timezone");
-        } else {
-            final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
-            boolean found = false;
-            for (final String validTimeZone : validTimeZones) {
-                if (validTimeZone.equals(timeZone)) {
-                    found = true;
-                    break;
-                }
+        }
+        final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
+        boolean found = false;
+        for (final String validTimeZone : validTimeZones) {
+            if (validTimeZone.equals(timeZone)) {
+                found = true;
+                break;
             }
+        }
 
-            if (!found) {
-                throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
-            }
+        if (!found) {
+            throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
         }
 
         /*
@@ -296,13 +405,26 @@ public final class UserServiceImpl implements UserService {
          */
         if (passwordMech == null) {
             throw UserExceptionCode.MISSING_PASSWORD_MECH.create();
-        } else {
-            if (!passwordMech.equalsIgnoreCase("{CRYPT}") && !passwordMech.equalsIgnoreCase("{SHA}")) {
-                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(passwordMech);
-            }
         }
 
         // TODO: Maybe we have to check the contact id here.
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePassword(User user, Context context) throws OXException {
+        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+        UserStorage.getInstance().updatePassword(null, context, user.getId(), iPasswordMech, user.getUserPassword());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePassword(Connection connection, User user, Context context) throws OXException {
+        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
+        UserStorage.getInstance().updatePassword(connection, context, user.getId(), iPasswordMech, user.getUserPassword());
+    }
 }

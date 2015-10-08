@@ -53,11 +53,27 @@ import static com.openexchange.java.Strings.isEmpty;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.tools.session.SessionHolder;
 
+/**
+ * {@link OXWebdavMaxUploadSizeAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public class OXWebdavMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
-	private SessionHolder sessionHolder;
+
+    private final SessionHolder sessionHolder;
+
+	/**
+	 * Initializes a new {@link OXWebdavMaxUploadSizeAction}.
+	 *
+	 * @param sessionHolder A reference to the session holder to use
+	 */
+	public OXWebdavMaxUploadSizeAction(SessionHolder sessionHolder) {
+	    super();
+	    this.sessionHolder = sessionHolder;
+	}
 
 	@Override
-	public boolean fits(final WebdavRequest req) {
+	public boolean fits(WebdavRequest req) {
 		if (sessionHolder == null) {
 			return true;
 		}
@@ -71,7 +87,4 @@ public class OXWebdavMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
         return isEmpty(sContentLength) ? true : maxSize >= Long.parseLong(sContentLength);
 	}
 
-	public void setSessionHolder(final SessionHolder holder) {
-		this.sessionHolder = holder;
-	}
 }

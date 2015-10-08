@@ -49,24 +49,27 @@
 
 package com.openexchange.tools.session;
 
+import static com.openexchange.osgi.util.ServiceCallWrapper.doServiceCall;
 import java.util.Set;
 import org.apache.commons.lang.Validate;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ServerSessionAdapter}
@@ -168,17 +171,23 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
         super();
-        context = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        this.session = new SessionObject("synthetic") {
+        if (contextId > 0) {
+            context = loadContext(contextId);
+        } else {
+            context = null;
+        }
+
+        session = new SessionObject("synthetic") {
             @Override
             public int getUserId() { return userId; }
             @Override
             public int getContextId() {return contextId; }
         };
-        this.serverSession = null;
+
+        serverSession = null;
+        overwriteUserConfiguration = null;
+        overwritePermissionBits = null;
+        overwriteUser = null;
     }
 
     /**
@@ -188,21 +197,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws OXException If initialization fails
      */
     public ServerSessionAdapter(final Session session) throws OXException {
-        super();
-
-        Validate.notNull(session, "Session is null.");
-
-        context = ContextStorage.getStorageContext(session.getContextId());
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
+        this(session, loadContext(session.getContextId()), null, null, null);
     }
 
     /**
@@ -212,23 +207,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @param ctx The session's context object
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
-    public ServerSessionAdapter(final Session session, final Context ctx) {
-        super();
-
-        Validate.notNull(session, "Session is null.");
-        Validate.notNull(ctx, "Context is null.");
-
-        context = ctx;
-        overwriteUser = null;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
+    public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx) {
+        this(session, ctx, null, null, null);
     }
 
     /**
@@ -240,22 +220,8 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user) {
-        super();
+        this(session, ctx, user, null, null);
 
-        Validate.notNull(session, "Session is null.");
-        Validate.notNull(ctx, "Context is null.");
-
-        context = ctx;
-        overwriteUser = user;
-        overwriteUserConfiguration = null;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
     }
 
     /**
@@ -267,22 +233,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      * @throws IllegalArgumentException If session argument is <code>null</code>
      */
     public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration) {
-        super();
-
-        Validate.notNull(session, "Session is null.");
-        Validate.notNull(ctx, "Context is null.");
-
-        context = ctx;
-        overwriteUser = user;
-        overwriteUserConfiguration = userConfiguration;
-        overwritePermissionBits = null;
-        if (ServerSession.class.isInstance(session)) {
-            this.serverSession = (ServerSession) session;
-            this.session = null;
-        } else {
-            this.serverSession = null;
-            this.session = session;
-        }
+        this(session, ctx, user, userConfiguration, null);
     }
 
     /**
@@ -295,7 +246,6 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(@NonNull final Session session, @NonNull final Context ctx, @Nullable final User user, @Nullable final UserConfiguration userConfiguration, @Nullable final UserPermissionBits permissionBits) {
         super();
-
         Validate.notNull(session, "Session is null.");
         Validate.notNull(ctx, "Context is null.");
 
@@ -421,6 +371,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (serverSession != null) {
             return serverSession.getContext();
         }
+
         return context;
     }
 
@@ -432,14 +383,15 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (null != overwriteUser) {
             return overwriteUser;
         }
+
         // Do not cache fetched instance
         final int userId = session.getUserId();
         if (userId <= 0) {
             return null;
         }
         try {
-            return UserStorage.getInstance().getUser(userId, context);
-        } catch (final OXException e) {
+            return loadUser();
+        } catch (final Exception e) {
             LOG.error("", e);
         }
         return null;
@@ -453,14 +405,15 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (null != overwritePermissionBits) {
             return overwritePermissionBits;
         }
+
         // Do not cache fetched instance
         final int userId = null == overwriteUser ? session.getUserId() : overwriteUser.getId();
         if (userId <= 0) {
             return null;
         }
         try {
-            return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, context);
-        } catch (final OXException e) {
+            return loadUserPermissionBits();
+        } catch (final Exception e) {
             LOG.error("", e);
         }
         return null;
@@ -474,14 +427,15 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (null != overwriteUserConfiguration) {
             return overwriteUserConfiguration;
         }
+
         // Do not cache fetched instance
         final int userId = null == overwriteUser ? session.getUserId() : overwriteUser.getId();
         if (userId <= 0) {
             return null;
         }
         try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(userId, context);
-        } catch (final OXException e) {
+            return loadUserConfiguration();
+        } catch (final Exception e) {
             LOG.error("", e);
         }
         return null;
@@ -497,6 +451,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (userId <= 0) {
             return null;
         }
+
+        if (getUser().isGuest()) {
+            return null;
+        }
+
         return UserSettingMailStorage.getInstance().getUserSettingMail(userId, context);
     }
 
@@ -533,4 +492,49 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     public Set<String> getParameterNames() {
         return session().getParameterNames();
     }
+
+    private static Context loadContext(final int contextId) throws OXException {
+        try {
+            return doServiceCall(ServerSessionAdapter.class, ContextService.class,
+                new ServiceUser<ContextService, Context>() {
+                    @Override
+                    public Context call(ContextService service) throws OXException {
+                        return service.getContext(contextId);
+                    }
+                });
+        } catch (ServiceException e) {
+            throw e.toOXException();
+        }
+    }
+
+    private User loadUser() throws Exception {
+        return doServiceCall(getClass(), UserService.class,
+            new ServiceUser<UserService, User>() {
+                @Override
+                public User call(UserService service) throws OXException {
+                    return service.getUser(getUserId(), getContextId());
+                }
+            });
+    }
+
+    private UserPermissionBits loadUserPermissionBits() throws Exception {
+        return doServiceCall(getClass(), UserPermissionService.class,
+            new ServiceUser<UserPermissionService, UserPermissionBits>() {
+                @Override
+                public UserPermissionBits call(UserPermissionService service) throws OXException {
+                    return service.getUserPermissionBits(getUserId(), getContext());
+                }
+            });
+    }
+
+    private UserConfiguration loadUserConfiguration() throws Exception {
+        return doServiceCall(getClass(), UserConfigurationService.class,
+            new ServiceUser<UserConfigurationService, UserConfiguration>() {
+                @Override
+                public UserConfiguration call(UserConfigurationService service) throws OXException {
+                    return service.getUserConfiguration(getUserId(), getContext());
+                }
+            });
+    }
+
 }

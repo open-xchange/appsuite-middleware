@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.ThrowableHolder;
@@ -68,10 +70,11 @@ import com.openexchange.groupware.container.Contact;
  */
 public class UpgradeTest extends CardDAVTest {
 
-	public UpgradeTest(String name) {
-		super(name);
+	public UpgradeTest() {
+		super();
 	}
 
+	@Test
 	public void testUpgradeWithGAB_10_6() throws Throwable {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
 		/*
@@ -177,6 +180,7 @@ public class UpgradeTest extends CardDAVTest {
         assertContains(contactUid, vCards);
 	}
 
+	@Test
 	public void testUpgradeWithGAB_10_7() throws Throwable {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
 		/*

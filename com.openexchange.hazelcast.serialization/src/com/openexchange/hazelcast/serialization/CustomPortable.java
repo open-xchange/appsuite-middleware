@@ -137,10 +137,7 @@ public interface CustomPortable extends Portable {
      * <li><code>  23</code>: com.openexchange.session.reservation.impl.portable.PortableReservation</li>
      * <li><code>  24</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
      * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
-     * <li><code>  25</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>     *
-     * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
-     * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
-     *
+     * <li><code>  25</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>
      *
      * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
      * <li><code>  102</code>: com.openexchange.push.impl.portable.PortablePushUser</li>
@@ -153,9 +150,12 @@ public interface CustomPortable extends Portable {
      * <li><code>  107</code>: com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken</li>
      * <li><code>  108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
      *
+     * <li><code>  200</code>: com.openexchange.office.hazelcast.serialization.PortableID</li>
+     * <li><code>  201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
+     *
      * <li><code>  300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
      * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
-     * 
+     *
      * <li><code>  400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
      * <li><code>  401</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp</li>>
      * </ul>

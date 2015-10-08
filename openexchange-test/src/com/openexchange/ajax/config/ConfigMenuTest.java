@@ -113,7 +113,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
         final String origTimeZone = getResponse.getString();
-        String[] zones = Arrays.remove(TimeZone.getAvailableIDs());
+        String[] zones = Arrays.remove(TimeZone.getAvailableIDs(), origTimeZone);
         final String testTimeZone = zones[RAND.nextInt(zones.length)];
         SetRequest setRequest = new SetRequest(Tree.TimeZone, testTimeZone);
         try {
@@ -138,7 +138,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         try {
             getClient().execute(setRequest);
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", testBeta, getResponse.getBoolean());
+            assertEquals("Written beta attribute isn't returned from server.", testBeta, getResponse.getBoolean());
         } finally {
             setRequest = new SetRequest(Tree.Beta, B(beta));
             getClient().execute(setRequest);

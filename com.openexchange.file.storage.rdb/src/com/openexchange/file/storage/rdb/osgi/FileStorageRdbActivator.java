@@ -70,6 +70,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.lock.LockService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -135,6 +136,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              */
             final NearRegistryServiceTracker<FileStorageService> fileStorageServiceTracker = new NearRegistryServiceTracker<FileStorageService>(context, FileStorageService.class);
             rememberTracker(fileStorageServiceTracker);
+            trackService(LockService.class);
             openTrackers();
             /*
              * Initialize and register services

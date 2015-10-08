@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,20 +87,10 @@ public interface FileStorageFolder extends FileStorageConstants {
     public static final String CAPABILITY_SORT = "sort";
 
     /**
-     * The capability identifier for subscription support.
-     */
-    public static final String CAPABILITY_SUBSCRIPTION = "subscription";
-
-    /**
-     * The capability identifier for publication support.
-     */
-    public static final String CAPABILITY_PUBLICATION = "publication";
-
-    /**
      * All known capabilities in a set.
      */
     public static final Set<String> ALL_CAPABILITIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
-        CAPABILITY_PERMISSIONS, CAPABILITY_PUBLICATION, CAPABILITY_QUOTA, CAPABILITY_SORT, CAPABILITY_SUBSCRIPTION }
+        CAPABILITY_PERMISSIONS, CAPABILITY_QUOTA, CAPABILITY_SORT }
     )));
 
     /**
@@ -122,6 +113,14 @@ public interface FileStorageFolder extends FileStorageConstants {
      * @return The name
      */
     String getName();
+
+    /**
+     * Gets the locale-sensitive display name of folder.
+     *
+     * @param locale The locale
+     * @return The localized name, or <code>null</code> if not available
+     */
+    String getLocalizedName(Locale locale);
 
     /**
      * Gets the permission for currently logged-in user accessing this folder
@@ -233,5 +232,19 @@ public interface FileStorageFolder extends FileStorageConstants {
      * Gets dynamic metadata
      */
     Map<String, Object> getMeta();
+
+    /**
+     * Gets the identifier of the entity who created this folder.
+     *
+     * @return The entity, or <code>-1</code> if not available
+     */
+    int getCreatedBy();
+
+    /**
+     * Gets the identifier of the entity who updated this folder.
+     *
+     * @return The entity, or <code>-1</code> if not available
+     */
+    int getModifiedBy();
 
 }

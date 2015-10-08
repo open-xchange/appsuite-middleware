@@ -51,18 +51,24 @@ package com.openexchange.groupware.attach;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import com.openexchange.groupware.filestore.FilestoreLocationUpdater;
+import java.util.Set;
+import com.openexchange.database.Databases;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
 /**
  * {@link AttachmentFilestoreLocationUpdater}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class AttachmentFilestoreLocationUpdater implements FilestoreLocationUpdater {
+public class AttachmentFilestoreLocationUpdater implements FileLocationHandler {
 
     /**
      * Initializes a new {@link AttachmentFilestoreLocationUpdater}.
@@ -71,19 +77,48 @@ public class AttachmentFilestoreLocationUpdater implements FilestoreLocationUpda
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.filestore.FilestoreLocationUpdater#updateFilestoreLocation(java.util.Map, int, java.sql.Connection)
-     */
     @Override
-    public void updateFilestoreLocation(Map<String, String> fileMapping, int ctxId, Connection con) throws SQLException {
-        PreparedStatement stmt = con.prepareStatement("UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?");
-        for (String old : fileMapping.keySet()) {
-            stmt.setString(1, fileMapping.get(old));
-            stmt.setInt(2, ctxId);
-            stmt.setString(3, old);
-            stmt.addBatch();
+    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?");
+            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
+                stmt.setString(1, entry.getValue());
+                stmt.setInt(2, contextId);
+                stmt.setString(3, entry.getKey());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        stmt.executeBatch();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws SQLException {
+        // Files for attachment are always stored in context-related storage
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT file_id FROM prg_attachment WHERE cid = ?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+            Set<String> locations = new LinkedHashSet<String>();
+            do {
+                locations.add(rs.getString(1));
+            } while (rs.next());
+            return locations;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

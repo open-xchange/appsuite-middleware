@@ -49,95 +49,32 @@
 
 package com.openexchange.apps.manifests.json;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AllAction}
+ * {@link AllAction} - Get all manifests from server. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
 
-    private final JSONArray manifests;
-    private final ServiceLookup services;
-    private final ServerConfigServicesLookup registry;
+    private final ManifestBuilder manifestBuilder;
 
-    public AllAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+    public AllAction(ManifestBuilder manifestBuilder) {
         super();
-        this.manifests = manifests;
-        this.services = services;
-        this.registry = registry;
+        this.manifestBuilder = manifestBuilder;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return new AJAXRequestResult(getManifests(session, manifests, services, registry), "json");
+        return new AJAXRequestResult(manifestBuilder.buildManifests(session), "json");
     }
 
-    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services, ServerConfigServicesLookup registry) throws OXException {
-        manifests = new JSONArray(manifests);
-
-        JSONArray result = new JSONArray();
-        for(ManifestContributor contributors: registry.getContributors()) {
-            try {
-                JSONArray additionalManifests = contributors.getAdditionalManifests(session);
-                if (additionalManifests != null) {
-                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
-                        manifests.put(additionalManifests.get(i));
-                    }
-                }
-            } catch (OXException x) {
-                // TODO: Logging
-                x.printStackTrace();
-            } catch (JSONException x) {
-                // TODO: Logging
-                x.printStackTrace();
-            }
-        }
-
-        try {
-            if (session.isAnonymous()) {
-                // Deliver no apps and only plugins with the namespace 'signin'
-
-                for (int i = 0, size = manifests.length(); i < size; i++) {
-                    JSONObject definition = manifests.getJSONObject(i);
-                    result.put(new JSONObject(definition));
-                }
-
-            } else {
-                CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(session.getUserId(), session.getContextId(), true, true);
-
-                Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
-                for (Capability capability : capabilities) {
-                    capMap.put(capability.getId(), capability);
-                }
-
-                for (int i = 0, size = manifests.length(); i < size; i++) {
-                    JSONObject definition = manifests.getJSONObject(i);
-                    result.put(new JSONObject(definition));
-                }
-            }
-        } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
-        }
-        return result;
-    }
 }

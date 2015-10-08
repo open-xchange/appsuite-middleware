@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,7 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
@@ -127,16 +129,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     public CompositingFileAccessTest() {
         super(new SimSession());
-    }
-
-    @Override
-    protected FileStorageService getFileStorageService(final String serviceId) {
-        if (this.serviceId == null) {
-            this.serviceId = serviceId;
-        } else {
-            this.serviceId2 = serviceId;
-        }
-        return this;
     }
 
     @Test
@@ -368,7 +360,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
 
         final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
@@ -390,10 +381,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
-// fails if enabled ???
-//        fileAccess.expectCall("getAccountAccess").andReturn(this);
-//        fileAccess.expectCall("getAccountAccess").andReturn(this);
-// ???
         removeVersion(fileId.toUniqueID(), versions);
 
         verifyAccount();
@@ -522,11 +509,11 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
 
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andReturn(tuple);
+        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.<File.Field>emptyList()).andReturn(tuple);
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.<File.Field>emptyList());
 
         verifyAccount();
         fileAccess.assertAllWereCalled();
@@ -620,7 +607,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, EMPTY_INPUT_STREAM, 1337, null);
+        move(file, EMPTY_INPUT_STREAM, 1337, null, true);
 
         verifyAccount(); // Store on destination account then
         verifyAccount2(); // Remove from source account
@@ -662,7 +649,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
+        move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
 
         fileAccess.assertAllWereCalled();
 
@@ -702,7 +689,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, null, 1337, null);
+        move(file, null, 1337, null, true);
 
         fileAccess.assertAllWereCalled();
 
@@ -744,7 +731,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
-        move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
+        move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID), true); // Title and FolderID have been changed
 
         fileAccess.assertAllWereCalled();
 
@@ -927,11 +914,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         return this;
     }
 
-    @Override
-    protected List<FileStorageService> getAllFileStorageServices() {
-        return Arrays.asList((FileStorageService) this, this);
-    }
-
     /*
      * (non-Javadoc)
      * @see com.openexchange.file.storage.FileStorageAccountManager#addAccount(com.openexchange.file.storage.FileStorageAccount,
@@ -1078,6 +1060,33 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
             public void postEvent(Event arg0) {
                 // Nothing to do
 
+            }
+        };
+    }
+
+    @Override
+    protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
+        final FileStorageService thisService = this;
+        return new FileStorageServiceRegistry() {
+
+            @Override
+            public FileStorageService getFileStorageService(String id) throws OXException {
+                if (serviceId == null) {
+                    serviceId = id;
+                } else {
+                    serviceId2 = id;
+                }
+                return thisService;
+            }
+
+            @Override
+            public List<FileStorageService> getAllServices() throws OXException {
+                return Arrays.asList(thisService, thisService);
+            }
+
+            @Override
+            public boolean containsFileStorageService(String id) {
+                return true;
             }
         };
     }

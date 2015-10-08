@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -60,29 +62,26 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug23612Test} 
- * 
- * "Shown as" status of "absent" or "temporary" lost after updating appointment in iCal client 
- * 
+ * {@link Bug23612Test}
+ *
+ * "Shown as" status of "absent" or "temporary" lost after updating appointment in iCal client
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23612Test extends CalDAVTest {
 
-	public Bug23612Test(String name) {
-		super(name);
-	}
-	
+	@Test
     public void testUpdateAppointment() throws Exception {
         for (int shownAs : new int[] { Appointment.FREE, Appointment.TEMPORARY, Appointment.RESERVED, Appointment.ABSENT }) {
-            this.updateAppointment(shownAs);      
+            this.updateAppointment(shownAs);
         }
     }
-    
+
 	private void updateAppointment(int appointmentShownAs) throws Exception {
         /*
          * fetch sync token for later synchronization
          */
-        SyncToken syncToken = new SyncToken(super.fetchSyncToken());        
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
          * create appointment on server
          */
@@ -105,13 +104,13 @@ public class Bug23612Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
         if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE", 
+            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
                 iCalResource.getVEvent().getTransp());
-        }        
+        }
         /*
          * update appointment on client
          */
-        iCalResource.getVEvent().setSummary(appointment.getTitle() + "_edit");        
+        iCalResource.getVEvent().setSummary(appointment.getTitle() + "_edit");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server

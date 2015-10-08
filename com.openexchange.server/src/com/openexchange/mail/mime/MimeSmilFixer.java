@@ -207,7 +207,7 @@ public final class MimeSmilFixer {
         final int count = multipart.getCount();
         final ContentType mpContentType = new ContentType(multipart.getContentType());
         if (mpContentType.startsWith("multipart/related")) {
-            if ("application/smil".equals(mpContentType.getParameter(toLowerCase("type")))) {
+            if ("application/smil".equals(mpContentType.getParameter(com.openexchange.java.Strings.toLowerCase("type")))) {
                 final MimeMultipart mixedMultipart = new MimeMultipart("mixed");
                 for (int i = 0; i < count; i++) {
                     final BodyPart bodyPart = multipart.getBodyPart(i);
@@ -395,18 +395,4 @@ public final class MimeSmilFixer {
         }
         return isWhitespace;
     }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

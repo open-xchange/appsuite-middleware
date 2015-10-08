@@ -60,9 +60,9 @@ import com.openexchange.java.Strings;
  */
 public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = {
+    public static final int[] DEFAULT_COLUMNS = {
         FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY };
+        FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS };
 
     private final String parentFolder;
 
@@ -73,6 +73,8 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
     private final Modules[] allowedModules;
 
     private final boolean failOnError;
+
+    private boolean altNames = false;
 
     public ListRequest(final API api, final String parentFolder, final int[] columns, final boolean ignoreMail, final Modules[] allowedModules, final boolean failOnError) {
         super(api);
@@ -132,10 +134,17 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         if (null != allowedModules && allowedModules.length > 0) {
             params.add(new Parameter("allowed_modules", Strings.join(allowedModules, ",")));
         }
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public ListParser getParser() {
         return new ListParser(columns, failOnError);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

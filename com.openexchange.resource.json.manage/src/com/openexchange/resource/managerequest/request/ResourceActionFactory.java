@@ -77,7 +77,7 @@ public class ResourceActionFactory implements AJAXActionServiceFactory {
      */
     public ResourceActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractResourceAction>(5);
+        actions = new ConcurrentHashMap<String, AbstractResourceAction>(5, 0.9f, 1);
         actions.put("new", new com.openexchange.resource.managerequest.request.actions.NewAction(services));
         actions.put("update", new com.openexchange.resource.managerequest.request.actions.UpdateAction(services));
         actions.put("delete", new com.openexchange.resource.managerequest.request.actions.DeleteAction(services));

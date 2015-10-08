@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.action;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -58,20 +59,26 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.json.DriveShareJSONParser;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,12 +88,51 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractDriveAction implements AJAXActionService {
 
+    private final DriveShareJSONParser parser;
+
+    /**
+     * Initializes a new {@link AbstractDriveShareAction}.
+     */
+    protected AbstractDriveAction() {
+        super();
+        this.parser = new DriveShareJSONParser();
+    }
+
+    /**
+     * Gets the drive share parser.
+     *
+     * @return The parser
+     */
+    protected DriveShareJSONParser getShareParser() {
+        return parser;
+    }
+
+    /**
+     * Gets the drive service.
+     *
+     * @return The drive service
+     * @throws OXException if the service is unavailable
+     */
     protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
+        return requireService(DriveService.class, Services.get());
+    }
+
+    /**
+     * Gets the default share service.
+     *
+     * @return The share service
+     * @throws OXException if the service is unavailable
+     */
+    protected ShareService getShareService() throws OXException {
+        return requireService(ShareService.class, Services.get());
     }
 
     protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
         return Services.getService(DriveSubscriptionStore.class, true);
+    }
+
+    protected ConfigurationService getConfigService() throws OXException {
+        return Services.getService(ConfigurationService.class, true);
     }
 
     protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException;
@@ -122,6 +168,12 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         String device = requestData.getParameter("device");
         if (false == Strings.isEmpty(device)) {
             driveSession.setDeviceName(device);
+        }
+        /*
+         * extract meta override parameter if present
+         */
+        if (requestData.containsParameter("driveMeta")) {
+            driveSession.setUseDriveMeta(requestData.getParameter("driveMeta", Boolean.class));
         }
         /*
          * extract push token if present
@@ -196,43 +248,58 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @return The extracted host data
      */
     private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
-        // TODO: "always-on" osgi service to reliably getting host data?
         /*
-         * try session parameter first
+         * get host data from reuest context or session parameter
          */
-        HostData hostData = (HostData)session.getParameter(HostnameService.PARAM_HOST_DATA);
-        if (null == hostData) {
-            /*
-             * build up hostdata from request
-             */
-            final boolean secure = requestData.isSecure();
-            final String route = requestData.getRoute();
-            final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
-            final String host = determineHost(requestData, session);
-            hostData = new HostData() {
-
-                @Override
-                public boolean isSecure() {
-                    return secure;
-                }
-
-                @Override
-                public String getRoute() {
-                    return route;
-                }
-
-                @Override
-                public int getPort() {
-                    return port;
-                }
-
-                @Override
-                public String getHost() {
-                    return host;
-                }
-            };
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (null != requestContext) {
+            return requestContext.getHostData();
         }
-        return hostData;
+        HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+        if (null != hostData) {
+            return hostData;
+        }
+        /*
+         * build up hostdata from request as fallback
+         */
+        final boolean secure = requestData.isSecure();
+        final String httpSessionID = requestData.getRoute();
+        final String route = Tools.extractRoute(httpSessionID);
+        final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
+        final String host = determineHost(requestData, session);
+        final String prefix = Services.getService(DispatcherPrefixService.class).getPrefix();
+        return new HostData() {
+
+            @Override
+            public String getHTTPSession() {
+                return httpSessionID;
+            }
+
+            @Override
+            public boolean isSecure() {
+                return secure;
+            }
+
+            @Override
+            public String getRoute() {
+                return route;
+            }
+
+            @Override
+            public int getPort() {
+                return port;
+            }
+
+            @Override
+            public String getHost() {
+                return host;
+            }
+
+            @Override
+            public String getDispatcherPrefix() {
+                return prefix;
+            }
+        };
     }
 
     private static String determineHost(AJAXRequestData requestData, ServerSession session) {
@@ -242,7 +309,11 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          */
         HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
         if (null != hostnameService) {
-            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            if (session.getUser().isGuest()) {
+                hostName = hostnameService.getGuestHostname(session.getUserId(), session.getContextId());
+            } else {
+                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+            }
         }
         /*
          * Get hostname from request

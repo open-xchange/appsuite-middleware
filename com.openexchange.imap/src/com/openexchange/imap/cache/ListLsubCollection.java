@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +79,7 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -128,9 +130,10 @@ final class ListLsubCollection implements Serializable {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
+     * @param ignoreSubscriptions Whether to ignore subscriptions
      * @throws MessagingException If a messaging error occurs
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    protected ListLsubCollection(IMAPFolder imapFolder, String[] shared, String[] user, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
@@ -141,7 +144,7 @@ final class ListLsubCollection implements Serializable {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(false, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(false, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
     /**
@@ -152,9 +155,10 @@ final class ListLsubCollection implements Serializable {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
+     * @param ignoreSubscriptions Whether to ignore subscriptions
      * @throws OXException If initialization fails
      */
-    protected ListLsubCollection(final IMAPStore imapStore, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    protected ListLsubCollection(IMAPStore imapStore, String[] shared, String[] user, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         super();
         listMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
         lsubMap = new NonBlockingHashMap<String, ListLsubEntryImpl>();
@@ -165,7 +169,55 @@ final class ListLsubCollection implements Serializable {
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
-        init(false, imapStore, doStatus, doGetAcl);
+        init(false, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
+    }
+
+    @Override
+    public String toString() {
+        return toString(false);
+    }
+
+    /**
+     * Generates a string representation
+     *
+     * @param lsub <code>true</code> to include LSUB entries; otherwise LIST
+     * @return The string
+     */
+    public String toString(boolean lsub) {
+        StringBuilder builder = new StringBuilder(1024);
+        String lf = System.getProperty("line.separator");
+        builder.append("ListLsubCollection:");
+
+        SortedMap<String, ListLsubEntry> sm = new TreeMap<String, ListLsubEntry>(lsub ? lsubMap : listMap);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Draft:");
+        sm = new TreeMap<String, ListLsubEntry>(draftsEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Spam:");
+        sm = new TreeMap<String, ListLsubEntry>(junkEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Sent:");
+        sm = new TreeMap<String, ListLsubEntry>(sentEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Trash:");
+        sm = new TreeMap<String, ListLsubEntry>(trashEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        return builder.toString();
     }
 
     private void checkDeprecated() {
@@ -344,9 +396,9 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws OXException If re-initialization fails
      */
-    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void reinit(final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         clear();
-        init(true, imapStore, doStatus, doGetAcl);
+        init(true, imapStore, doStatus, doGetAcl, ignoreSubscriptions);
     }
 
     /**
@@ -357,14 +409,14 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MessagingException If a messaging error occurs
      */
-    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         clear();
-        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
-    private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    private void init(final boolean clearMaps, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         try {
-            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, imapStore);
+            init(clearMaps, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, ignoreSubscriptions, imapStore);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -416,7 +468,7 @@ final class ListLsubCollection implements Serializable {
         });
     }
 
-    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, final IMAPStore imapStore) throws MessagingException {
+    private void init(boolean clearMaps, IMAPFolder imapFolder, boolean doStatus, boolean doGetAcl, boolean ignoreSubscriptions, IMAPStore imapStore) throws MessagingException {
         if (clearMaps) {
             listMap.clear();
             lsubMap.clear();
@@ -424,6 +476,8 @@ final class ListLsubCollection implements Serializable {
             junkEntries.clear();
             sentEntries.clear();
             trashEntries.clear();
+        } else if (ignoreSubscriptions) {
+            lsubMap.clear();
         }
         final boolean debug = LOG.isDebugEnabled();
         final long st = debug ? System.currentTimeMillis() : 0L;
@@ -439,18 +493,20 @@ final class ListLsubCollection implements Serializable {
             }
 
         });
-        /*
-         * Perform LSUB "" "*"
-         */
-        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        if (!ignoreSubscriptions) {
+            /*
+             * Perform LSUB "" "*"
+             */
+            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                doListLsubCommand(protocol, true);
-                return null;
-            }
+                @Override
+                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                    doListLsubCommand(protocol, true);
+                    return null;
+                }
 
-        });
+            });
+        }
         /*
          * Perform LIST "" "*"
          */
@@ -463,6 +519,9 @@ final class ListLsubCollection implements Serializable {
             }
 
         });
+        if (ignoreSubscriptions) {
+            lsubMap.putAll(listMap);
+        }
         if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
             /*
              * Perform LIST (SPECIAL-USE) "" "*"
@@ -500,10 +559,12 @@ final class ListLsubCollection implements Serializable {
                 LOG.debug(sb.toString());
             }
         }
-        /*
-         * Consistency check
-         */
-        checkConsistency(imapStore);
+        if (!ignoreSubscriptions) {
+            /*
+             * Consistency check
+             */
+            checkConsistency(imapStore);
+        }
         /*
          * Status if enabled
          */
@@ -752,9 +813,9 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws OXException If update fails
      */
-    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void update(final String fullName, final IMAPStore imapStore, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws OXException {
         try {
-            update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
+            update(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl, ignoreSubscriptions);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -769,15 +830,15 @@ final class ListLsubCollection implements Serializable {
      * @param doGetAcl Whether ACL command shall be performed
      * @throws MessagingException If a messaging error occurs
      */
-    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, boolean ignoreSubscriptions) throws MessagingException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
-            init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+            init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
             return;
         }
         /*
          * Do a full re-build anyway...
          */
-        init(true, imapFolder, doStatus, doGetAcl, (IMAPStore) imapFolder.getStore());
+        init(true, imapFolder, doStatus, doGetAcl, ignoreSubscriptions, (IMAPStore) imapFolder.getStore());
     }
 
     /**
@@ -786,8 +847,9 @@ final class ListLsubCollection implements Serializable {
      * @param protocol The IMAP protocol
      */
     protected void doDummyLsub(final IMAPProtocol protocol) {
-        final Response[] r = performCommand(protocol, "LSUB \"\" \"\"");
-        final Response response = r[r.length - 1];
+        String command = "LSUB \"\" \"\"";
+        Response[] r = performCommand(protocol, command);
+        Response response = r[r.length - 1];
         if (response.isOK()) {
             /*
              * Dispatch remaining untagged responses
@@ -799,6 +861,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         } catch (final ProtocolException e) {
@@ -832,7 +895,8 @@ final class ListLsubCollection implements Serializable {
      */
     protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecualUse) throws ProtocolException {
         String command = "LIST";
-        Response[] r = performCommand(protocol, new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString());
+        String sCmd = new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
+        Response[] r = performCommand(protocol, sCmd);
         Response response = r[r.length - 1];
         if (response.isOK()) {
             for (int i = 0, len = r.length - 1; i < len; i++) {
@@ -864,6 +928,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -878,14 +943,13 @@ final class ListLsubCollection implements Serializable {
      */
     protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
         // Perform command
-        final String command = lsub ? "LSUB" : "LIST";
-        final Response[] r;
-        {
-            final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
-            r = performCommand(protocol, sCmd);
-            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
-        }
-        final Response response = r[r.length - 1];
+        String command = lsub ? "LSUB" : "LIST";
+        String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
+
+        Response[] r = performCommand(protocol, sCmd);
+        LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
+
+        Response response = r[r.length - 1];
         if (response.isOK()) {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
@@ -971,6 +1035,7 @@ final class ListLsubCollection implements Serializable {
             protocol.notifyResponseHandlers(r);
         } else {
             // Dispatch remaining untagged responses
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -1125,10 +1190,11 @@ final class ListLsubCollection implements Serializable {
         /*
          * Perform command: LIST "" ""
          */
-        final Response[] r = performCommand(protocol, "LIST \"\" \"\"");
-        final Response response = r[r.length - 1];
+        String command = "LIST \"\" \"\"";
+        Response[] r = performCommand(protocol, command);
+        Response response = r[r.length - 1];
         if (response.isOK()) {
-            final String cmd = "LIST";
+            String cmd = "LIST";
             for (int i = 0, len = r.length; i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
                     continue;
@@ -1157,6 +1223,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -1206,6 +1273,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder("LIST \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         return null; // Never reached if response is not OK
@@ -1248,6 +1316,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder("LSUB \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         return false; // Never reached if response is not OK
@@ -1506,6 +1575,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder(command).append(" \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         /*
@@ -1701,13 +1771,14 @@ final class ListLsubCollection implements Serializable {
     private static final TObjectIntHashMap<String> POS_MAP;
 
     static {
-        POS_MAP = new TObjectIntHashMap<String>(6);
-        POS_MAP.put("\\marked", 1);
-        POS_MAP.put("\\unmarked", 2);
-        POS_MAP.put("\\noselect", 3);
-        POS_MAP.put("\\noinferiors", 4);
-        POS_MAP.put("\\haschildren", 5);
-        POS_MAP.put("\\hasnochildren", 6);
+        TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(6);
+        map.put("\\marked", 1);
+        map.put("\\unmarked", 2);
+        map.put("\\noselect", 3);
+        map.put("\\noinferiors", 4);
+        map.put("\\haschildren", 5);
+        map.put("\\hasnochildren", 6);
+        POS_MAP = map;
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
@@ -1715,65 +1786,65 @@ final class ListLsubCollection implements Serializable {
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes) {
-        /*
+        /*-
+         * Parses responses like:
+         *
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          */
-        final String[] s = listResponse.readSimpleList();
-        /*
-         * Check attributes
-         */
-        final Set<String> attributes;
+
+        // Parse & check attributes
+        Set<String> attributes;
         ListLsubEntry.ChangeState changeState = ListLsubEntry.ChangeState.UNDEFINED;
         boolean canOpen = true;
         boolean hasInferiors = true;
         Boolean hasChildren = null;
-        if (s != null) {
-            /*
-             * Non-empty attribute list
-             */
-            if ((s.length <= 0) && (null != requiredAttributes)) {
-                // Cannot contain any required attribute
-                return null;
-            }
-
-            attributes = new HashSet<String>(s.length);
-            for (int i = s.length; i-- > 0;) {
-                String attr = Strings.asciiLowerCase(s[i]);
-                switch (POS_MAP.get(attr)) {
-                case 1:
-                    changeState = ListLsubEntry.ChangeState.CHANGED;
-                    break;
-                case 2:
-                    changeState = ListLsubEntry.ChangeState.UNCHANGED;
-                    break;
-                case 3:
-                    canOpen = false;
-                    break;
-                case 4:
-                    hasInferiors = false;
-                    break;
-                case 5:
-                    hasChildren = Boolean.TRUE;
-                    break;
-                case 6:
-                    hasChildren = Boolean.FALSE;
-                    break;
-                default:
-                    // Nothing
-                    break;
+        {
+            String[] s = listResponse.readSimpleList();
+            if (s == null) {
+                attributes = Collections.emptySet();
+                if (null != requiredAttributes) {
+                    // Cannot contain any required attribute
+                    return null;
                 }
-                attributes.add(attr);
-            }
-        } else {
-            attributes = Collections.emptySet();
-            if (null != requiredAttributes) {
-                // Cannot contain any required attribute
-                return null;
+            } else {
+                // Non-empty attribute list
+                if ((s.length <= 0) && (null != requiredAttributes)) {
+                    // Cannot contain any required attribute
+                    return null;
+                }
+
+                attributes = new HashSet<String>(s.length);
+                for (int i = s.length; i-- > 0;) {
+                    String attr = Strings.asciiLowerCase(s[i]);
+                    switch (POS_MAP.get(attr)) {
+                        case 1:
+                            changeState = ListLsubEntry.ChangeState.CHANGED;
+                            break;
+                        case 2:
+                            changeState = ListLsubEntry.ChangeState.UNCHANGED;
+                            break;
+                        case 3:
+                            canOpen = false;
+                            break;
+                        case 4:
+                            hasInferiors = false;
+                            break;
+                        case 5:
+                            hasChildren = Boolean.TRUE;
+                            break;
+                        case 6:
+                            hasChildren = Boolean.FALSE;
+                            break;
+                        default:
+                            // Nothing
+                            break;
+                    }
+                    attributes.add(attr);
+                }
             }
         }
-        /*
-         * Check against required attributes
-         */
+
+        // Check against required attributes
         if (null != requiredAttributes) {
             boolean containsAny = false;
             for (String requiredAttribute : requiredAttributes) {
@@ -1786,30 +1857,25 @@ final class ListLsubCollection implements Serializable {
                 return null;
             }
         }
-        /*
-         * Read separator character
-         */
+
+        // Read separator character
         char separator = '/';
         listResponse.skipSpaces();
         if (listResponse.readByte() == '"') {
             if ((separator = (char) listResponse.readByte()) == '\\') {
-                /*
-                 * Escaped separator character
-                 */
+                // Escaped separator character
                 separator = (char) listResponse.readByte();
             }
             listResponse.skip(1);
         } else {
             listResponse.skip(2);
         }
-        /*
-         * Read full name; decode the name (using RFC2060's modified UTF7)
-         */
+
+        // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
-        final String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
-        /*
-         * Return
-         */
+        String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
+
+        // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
     }
 
@@ -2306,8 +2372,9 @@ final class ListLsubCollection implements Serializable {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
+            StringBuilder sb = new StringBuilder(128).append("{ ").append(lsubMap == null ? "LSUB" : "LIST");
             sb.append(" fullName=\"").append(fullName).append('"');
+            sb.append(", subscribed=\"").append(isSubscribed()).append('"');
             sb.append(", parent=");
             if (null == parent) {
                 sb.append("null");
@@ -2401,7 +2468,7 @@ final class ListLsubCollection implements Serializable {
         if (String.valueOf(separator).equals(fullName)) {
             return ROOT_FULL_NAME;
         }
-        final String upperCase = toUpperCase(fullName);
+        final String upperCase = Strings.toUpperCase(fullName);
         if (INBOX.equals(upperCase)) {
             return INBOX;
         }
@@ -2410,19 +2477,4 @@ final class ListLsubCollection implements Serializable {
         }
         return fullName;
     }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
-
 }

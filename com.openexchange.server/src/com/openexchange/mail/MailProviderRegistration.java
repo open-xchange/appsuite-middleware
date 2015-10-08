@@ -54,7 +54,7 @@ package com.openexchange.mail;
  * {@link MailProviderRegistration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
 public interface MailProviderRegistration {
 

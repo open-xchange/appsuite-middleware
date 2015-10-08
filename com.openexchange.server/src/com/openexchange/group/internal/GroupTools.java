@@ -56,21 +56,16 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * Tool methods for groups.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupTools {
-
-    /**
-     * Cloneable object for group 0.
-     */
-    static final Group GROUP_ZERO;
+public class GroupTools {
 
     /**
      * Prevent instantiation
@@ -79,24 +74,36 @@ public final class GroupTools {
         super();
     }
 
-    public static Group getGroupZero(final Context ctx) throws OXException {
-        final Group retval;
-        try {
-            retval = (Group) GROUP_ZERO.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw UserExceptionCode.NOT_CLONEABLE.create(e, Group.class.getName());
-        }
-        final UserStorage ustor = UserStorage.getInstance();
-        retval.setMember(ustor.listAllUser(ctx));
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ALL_USERS));
-        return retval;
+    /**
+     * Gets the static "All users" group (group <code>0</code>), containing all regular users in the context.
+     *
+     * @param context The context to get the all users group for
+     * @return The all users group
+     */
+    public static Group getGroupZero(Context context) throws OXException {
+        Group group = new Group();
+        group.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
+        group.setMember(UserStorage.getInstance().listAllUser(null, context, false, false));
+        group.setLastModified(new Date());
+        User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
+        group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.ALL_USERS));
+        return group;
     }
 
-    static {
-        GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(GroupStorage.GROUP_ZERO_IDENTIFIER);
+    /**
+     * Gets the static "Guests" group (group {@link Integer#MAX_VALUE}), containing all guest users in the context.
+     *
+     * @param context The context to get the guest group for
+     * @return The guest group
+     */
+    public static Group getGuestGroup(Context context) throws OXException {
+        Group group = new Group();
+        group.setIdentifier(GroupStorage.GUEST_GROUP_IDENTIFIER);
+        group.setMember(UserStorage.getInstance().listAllUser(null, context, true, true));
+        group.setLastModified(new Date());
+        User admin = UserStorage.getInstance().getUser(context.getMailadmin(), context);
+        group.setDisplayName(StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage())).getString(Groups.GUEST_GROUP));
+        return group;
     }
+
 }

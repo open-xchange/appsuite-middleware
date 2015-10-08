@@ -441,7 +441,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean includePrivateAppointmentsOfSharedFolderOwner = false;;
 
-    private static CalendarCollection recColl = new CalendarCollection();
+    private static final CalendarCollection recColl = new CalendarCollection();
 
     final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder) throws SQLException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
@@ -456,7 +456,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         cdao.setObjectID(oid);
         cdao.setContext(ctx);
         int check_special_action = action;
-        if (action == UPDATE && inFolder != action_folder) { // We move and this means to create a new object
+        if (action == UPDATE && inFolder != action_folder) {
+            // We move and this means to create a new object
             check_special_action = INSERT;
         }
         try {
@@ -678,12 +679,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsShownAs() && recColl.check(I(cdao.getShownAs()), I(edao.getShownAs())) && recColl.getFieldName(Appointment.SHOWN_AS) != null) {
             ucols[uc++] = Appointment.SHOWN_AS;
         }
-        if (cdao.containsStartDate() && recColl.check(
+        if (cdao.containsStartDate() && cdao.getStartDate() != null && recColl.check(
             Long.valueOf(cdao.getStartDate().getTime()),
             Long.valueOf(edao.getStartDate().getTime())) && recColl.getFieldName(CalendarObject.START_DATE) != null) {
             ucols[uc++] = CalendarObject.START_DATE;
         }
-        if (cdao.containsEndDate() && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
+        if (cdao.containsEndDate() && cdao.getEndDate() != null && recColl.check(Long.valueOf(cdao.getEndDate().getTime()), Long.valueOf(edao.getEndDate().getTime())) && recColl.getFieldName(CalendarObject.END_DATE) != null) {
             ucols[uc++] = CalendarObject.END_DATE;
         }
         if (cdao.containsLocation() && recColl.check(cdao.getLocation(), edao.getLocation()) && recColl.getFieldName(Appointment.LOCATION) != null) {
@@ -746,7 +747,38 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsFilename() && recColl.check(cdao.getFilename(), edao.getFilename()) && recColl.getFieldName(CommonObject.FILENAME) != null) {
             ucols[uc++] = CommonObject.FILENAME;
         }
+// Deactivated, because feature is postponed.
+//        if (cdao.containsTimezone() && recColl.check(cdao.getTimezone(), edao.getTimezone()) && recColl.getFieldName(CalendarDataObject.TIMEZONE) != null && canChangeTZ(cdao, edao)) {
+//            ucols[uc++] = CalendarDataObject.TIMEZONE;
+//        }
         return uc;
+    }
+
+    /**
+     * Checks, if it is allowed to change the timezone.
+     *
+     * @param cdao
+     * @param edao
+     * @return
+     */
+    private static boolean canChangeTZ(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (edao.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE) {
+            return false;
+        }
+
+        if (edao.getFullTime()) {
+            return false;
+        }
+
+        if (cdao.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE) {
+            return false;
+        }
+
+        if (cdao.getFullTime()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -957,7 +989,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         simpleDataCheck(cdao, edao, uid);
         fillUserParticipants(cdao);
-        recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        if (isInsert) {
+            recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
+        }
         return isInsert;
     }
 
@@ -1011,16 +1045,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     /* This fixes bug 16107 */
-    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) {
+    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) throws OXException {
         if (oldApp == null || newApp == null || !oldApp.getFullTime() || newApp.getFullTime() || newApp.getUntil() == null) {
             return;
         }
         newApp.setEndDate(calculateRealRecurringEndDate(newApp, oldApp));
     }
 
-    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) {
-        Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
-        return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime(), cdao.getRecurrenceCalculator());
+    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+        String tzid = cdao.getTimezone() == null ? edao.getTimezone() : cdao.getTimezone();
+        boolean fulltime = cdao.containsFullTime() ? cdao.getFullTime() : (edao != null ? edao.getFullTime() : false);
+        return cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? calculateImplictEndOfSeries(edao, tzid, fulltime) : calculateImplictEndOfSeries(cdao, tzid, fulltime);
     }
 
     /**
@@ -1039,6 +1074,24 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         }
         return null;
+    }
+
+    private static Date calculateImplictEndOfSeries(CalendarDataObject cdao, String tzid, boolean fulltime) throws OXException {
+        if (cdao.containsUntil() && cdao.getUntil() != null) {
+            return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), fulltime, cdao.getRecurrenceCalculator());
+        }
+        CalendarDataObject clone = cdao.clone();
+        RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
+        RecurringResultInterface rresult = rresults.getRecurringResult(rresults.size()-1);
+        Date retval = new Date(rresult.getEnd());
+
+        TimeZone tz = TimeZone.getTimeZone(tzid);
+        int startOffset = tz.getOffset(calculateRealRecurringStartDate(cdao).getTime());
+        int endOffset = tz.getOffset(retval.getTime());
+        if (!fulltime) {
+            retval.setTime(retval.getTime() + endOffset - startOffset);
+        }
+        return retval;
     }
 
     private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime, int recCal) {
@@ -1075,7 +1128,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         long endTime = cdao.getEndDate() == null ? edao.getEndDate().getTime() : cdao.getEndDate().getTime();
         final int startTimeZoneOffset = tz.getOffset(startTime);
         startTime = startTime % Constants.MILLI_DAY;
-        endTime = endTime % Constants.MILLI_DAY + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
+        endTime = endTime % Constants.MILLI_DAY;
         // FIXME daylight saving time offset
         cdao.setStartDate(recColl.calculateRecurringDate(startDate, startTime, startTimeZoneOffset - startDateZoneOffset));
         cdao.setEndDate(recColl.calculateRecurringDate(endDate, endTime, startTimeZoneOffset - startDateZoneOffset));
@@ -1600,7 +1653,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         if (co_rs != null) {
             try {
                 co_rs.close();
@@ -1745,8 +1798,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
             cdao.setRecurrenceID(edao.getObjectID());
-            if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
+            if (!cdao.containsStartDate()) {
                 cdao.setStartDate(edao.getStartDate());
+            }
+            if (!cdao.containsEndDate()) {
                 if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
                     calculateEndDateForNoType(cdao, edao);
                 } else {
@@ -1786,6 +1841,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.changeRecurrenceString(cdao);
             }
             cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+            correctStartAndEndDate(cdao);
             cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
@@ -1795,6 +1851,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return CalendarCollectionService.RECURRING_EXCEPTION_DELETE;
         }
         return CalendarCollectionService.RECURRING_NO_ACTION;
+    }
+
+    private void correctStartAndEndDate(CalendarDataObject cdao) throws OXException {
+        RecurringResultsInterface results = recColl.calculateFirstRecurring(cdao);
+        RecurringResultInterface result = results.getRecurringResult(0);
+        if (cdao.getStartDate().getTime() != result.getStart()) {
+            cdao.setStartDate(new Date(result.getStart()));
+        }
+        if (cdao.getEndDate().getTime() != result.getEnd()) {
+            cdao.setEndDate(new Date(result.getEnd()));
+        }
     }
 
     private void calculateEndDateForNoType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
@@ -1942,7 +2009,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-            //checkAndRemoveRecurrenceFields(cdao);
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
             cdao.setRecurrence(edao.getRecurrence());
             /*
              * Return specified recurring action unchanged

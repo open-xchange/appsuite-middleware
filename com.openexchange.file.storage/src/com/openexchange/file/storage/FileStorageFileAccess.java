@@ -183,6 +183,16 @@ public interface FileStorageFileAccess extends TransactionAware {
     public static final int NOT_SET = -11;
 
     /**
+     * Indicates that all fields of a File are affected. Useful for save operations.
+     */
+    public static final List<File.Field> ALL_FIELDS = null;
+
+    /**
+     * Indicates that no fields of a File are affected. Useful for save operations.
+     */
+    public static final List<File.Field> NO_FIELDS = Collections.emptyList();
+
+    /**
      * Denotes a {@link SortDirection}
      */
     public static enum SortDirection {

@@ -86,6 +86,10 @@ public final class VCardMailPartDataSource extends MailPartDataSource {
         final MailPart mailPart;
         {
             final FullnameArgument arg = prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            if (null == arg) {
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[0]);
+            }
+
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);
             final String sequenceId = dataArguments.get(ARGS[2]);

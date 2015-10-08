@@ -67,6 +67,7 @@ import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
@@ -141,17 +142,40 @@ public class GroupDispatcher implements ComponentHandle {
      * otherwise processing is delegated to {@link #processStanza(Stanza)}
      *
      * @param stanza
-     * @throws OXException
      */
     @Override
-    public void process(Stanza stanza) throws OXException {
-        if (isDisposed) {
-            LOG.debug("Discarding Stanza as GroupDispatcher {} is already disposed: {}", groupId, stanza);
-        } else {
+    public void process(Stanza stanza) {
+        try {
+            if (isDisposed) {
+                LOG.debug("Discarding Stanza as GroupDispatcher {} is already disposed: {}", groupId, stanza);
+                throw RealtimeExceptionCodes.GROUP_DISPOSED.create(groupId);
+            }
             stanza.trace("Arrived in group dispatcher: " + groupId);
             if (!handleGroupCommand(stanza)) {
                 processStanza(stanza);
             }
+        } catch(RealtimeException re){
+            handleException(stanza, re);
+        } catch(Throwable t) {
+            handleException(stanza, RealtimeExceptionCodes.STANZA_PROCESSING_FAILED.create(t, groupId, stanza.getFrom(), stanza.getTo()));
+        }
+    }
+
+    /**
+     * Handle the exception by logging it and informing the sender about it.
+     * 
+     * @param stanza The Stanza that caused and Exception
+     * @param e The caused exception
+     */
+    private void handleException(Stanza stanza, RealtimeException exception) {
+        LOG.error("", exception);
+        ID sender = stanza.getFrom();
+        stanza.setFrom(groupId);
+        stanza.setError(exception);
+        try {
+            relayToID(stanza, sender);
+        } catch (OXException e1) {
+            LOG.error("Failed to inform sender about exception: {} because of {}", exception, e1);
         }
     }
 
@@ -181,7 +205,7 @@ public class GroupDispatcher implements ComponentHandle {
      */
     protected boolean isWhitelisted(ID sender) {
         if(
-            sender != null 
+            sender != null
             && sender.isInternal()
           ) {
             return true;
@@ -191,7 +215,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     private boolean handleGroupCommand(Stanza stanza) throws OXException {
         Optional<GroupCommand> groupCommand = stanza.getSinglePayload(new ElementPath("group", "command"), GroupCommand.class);
-        
+
         if (!groupCommand.isPresent()) {
             return false;
         }
@@ -202,8 +226,8 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Send a copy of a {@link Stanza} {@link Stanza} to all members of this group excluding a given set of users.
-     * 
-     * @param stanza The stanza to send 
+     *
+     * @param stanza The stanza to send
      * @param inResponseTo The stanza we are responding to
      * @param excluded The {@link Set} of users to be excluded when sending
      * @throws OXException
@@ -215,7 +239,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding a given set of users. "As
      * response" means we add a special tracer and the log messages of the {@link Stanza} we are responding to.
-     * 
+     *
      * @param stanza The stanza to send
      * @param inResponseTo The stanza we are responding to
      * @param excluded The {@link Set} of users to be excluded when sending
@@ -245,7 +269,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Send a copy of a {@link Stanza} to all members of this group excluding the client that sent the this {@link Stanza}.
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -256,8 +280,8 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Send a copy of a {@link Stanza} as response to another {@link Stanza} to all members of this group excluding the client that sent
      * this {@link Stanza}.
-     * 
-     * @param stanza The stanza to send 
+     *
+     * @param stanza The stanza to send
      * @param inResponseTo The stanza we are responding to
      * @throws OXException
      */
@@ -267,7 +291,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Send a {@link Stanza} to just one specific recipient
-     * 
+     *
      * @param stanza The {@link Stanza} to send
      * @param id The {@link ID} of the recipient
      * @throws OXException
@@ -293,7 +317,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Add a member to this group. Can be invoked by sending the following message to this groups address.
-     * 
+     *
      * <pre>
      * {   element:     "message"
      *   , selector:    "mygroupSelector"
@@ -302,22 +326,21 @@ public class GroupDispatcher implements ComponentHandle {
      *   , payloads:    [ { namespace: 'group', element: 'command', data: 'join' } ]
      * }
      * </pre>
-     * 
+     *
      * A selector provided in this stanza will be added to all stanzas sent by this group, so clients can know the message was part of a
      * given group. Trying to join an already disposed GroupDispatcher will result in a RealtimeExceptionCodes.STANZA_RECIPIENT_UNAVAILABLE
      * Exception being thrown so the client can try to join again.
-     * 
+     *
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
      * @throws OXException
      */
     public void join(ID id, String stamp, Stanza stanza) throws OXException {
         if(isDisposed) {
-            throw RealtimeExceptionCodes.STANZA_RECIPIENT_UNAVAILABLE.create(groupId);
+            throw RealtimeExceptionCodes.GROUP_DISPOSED.create(groupId);
         }
         if (idsRef.get().contains(id)) {
-            LOG.info("{} is already a member of {}.", id, groupId);
-            return;
+            throw RealtimeExceptionCodes.ALREADY_MEMBER.create(groupId);
         }
 
         beforeJoin(id, stanza);
@@ -363,6 +386,14 @@ public class GroupDispatcher implements ComponentHandle {
      * "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace: 'group', element: 'command', data: 'leave' } ], }
      */
     public void leave(ID id, Stanza stanza) throws OXException {
+        //check if the sender is a member at all
+        Set<ID> members = idsRef.get();
+        if(!members.contains(id)) {
+            if(members.isEmpty()) {
+                dispose();
+            }
+            throw RealtimeExceptionCodes.NOT_A_MEMBER.create(id);
+        }
         beforeLeave(id, stanza);
 
         LOG.debug("{} is leaving {}", id, groupId);
@@ -449,6 +480,7 @@ public class GroupDispatcher implements ComponentHandle {
         copy.setTo(to);
         copy.setFrom(stanza.getFrom());
         copy.setTracer(stanza.getTracer());
+        copy.setSelector(stanza.getSelector());
         copyPayload(stanza, copy);
 
         return copy;
@@ -464,7 +496,7 @@ public class GroupDispatcher implements ComponentHandle {
         }
         copy.setPayloads(copyList);
     }
-    
+
     /**
      * Subclasses can override this method to determine whether a potential participant is allowed to join this group.
      *
@@ -472,7 +504,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @return true, if the participant may join this group, false otherwise
      * @see ID#toSession()
      */
-    
+
     protected boolean mayJoin(ID id, Stanza stanza) {
         return mayJoin(id);
     }
@@ -480,19 +512,19 @@ public class GroupDispatcher implements ComponentHandle {
     protected boolean mayJoin(ID id) {
         return true;
     }
-    
+
     /**
      * Callback that is called before an ID joins the group. Override this to be notified of a member about to join the group.
      */
     protected void beforeJoin(ID id, Stanza stanza) {
         beforeJoin(id);
     }
-    
+
     protected void beforeJoin(ID id) {
         // Empty method
     }
-    
-    
+
+
 
     /**
      * Callback that is called after a new member has joined the group.
@@ -500,7 +532,7 @@ public class GroupDispatcher implements ComponentHandle {
     protected void onJoin(ID id, Stanza stanza) {
         onJoin(id);
     }
-    
+
     protected void onJoin(ID id) {
         // Empty method
     }
@@ -511,7 +543,7 @@ public class GroupDispatcher implements ComponentHandle {
     protected void firstJoined(ID id, Stanza stanza) {
         firstJoined(id);
     }
-    
+
     protected void firstJoined(ID id) {
 
     }
@@ -522,7 +554,7 @@ public class GroupDispatcher implements ComponentHandle {
     protected void beforeLeave(ID id, Stanza stanza) {
         beforeLeave(id);
     }
-    
+
     protected void beforeLeave(ID id) {
         // Empty method
     }
@@ -533,7 +565,7 @@ public class GroupDispatcher implements ComponentHandle {
     protected void onLeave(ID id, Stanza stanza) {
         onLeave(id);
     }
-    
+
     protected void onLeave(ID id) {
         // Empty method
     }
@@ -552,7 +584,7 @@ public class GroupDispatcher implements ComponentHandle {
             LOG.info("Caught exception during onDispose, trying to continue.", e);
         }
     }
-    
+
     protected void onDispose(ID id) throws OXException {
         // Empty method
     }
@@ -561,7 +593,7 @@ public class GroupDispatcher implements ComponentHandle {
      * Called for a stanza if no other handler is found.
      */
     protected void defaultAction(Stanza stanza) {
-        LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
+        LOG.warn("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
     /**
@@ -577,9 +609,9 @@ public class GroupDispatcher implements ComponentHandle {
      * }
      * </pre>
      * </code>
-     *  
-     * @param stanza The Stanza containing the inactive client identified by {@link ElementPath} 'com.openexchange.realtime.client' and the {@link Duration} of inactivity identified by 
-     * 'com.openexchange.realtime.client.inactivity'. 
+     *
+     * @param stanza The Stanza containing the inactive client identified by {@link ElementPath} 'com.openexchange.realtime.client' and the {@link Duration} of inactivity identified by
+     * 'com.openexchange.realtime.client.inactivity'.
      * @throws OXException
      */
     public void handleInactivityNotice(Stanza stanza) throws OXException {}
@@ -649,7 +681,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Do a global cleanup for a given ID
-     * 
+     *
      * @param id the ID
      */
     private void doGlobalCleanup(ID id) {

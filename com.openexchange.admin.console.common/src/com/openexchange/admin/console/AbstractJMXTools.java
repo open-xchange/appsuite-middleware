@@ -251,7 +251,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
                 return "";
             }
     }
-    
+
     protected static Object doOperation(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
         final String[] split = fullqualifiedoperationname.split("!");
         if (2 == split.length) {

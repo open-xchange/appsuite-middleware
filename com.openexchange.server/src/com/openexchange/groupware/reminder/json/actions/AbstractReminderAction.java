@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -305,4 +306,20 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         }
         return nextReminder;
     }
+
+    /**
+     * Safely deletes given reminder.
+     *
+     * @param reminder The reminder
+     * @param userId The associated user
+     * @param reminderSql The reminder SQL
+     */
+    protected static void deleteReminderSafe(ReminderObject reminder, int userId, ReminderService reminderSql) {
+        try {
+            reminderSql.deleteReminder(reminder.getTargetId(), userId, reminder.getModule());
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
 }

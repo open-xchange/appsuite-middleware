@@ -71,8 +71,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -1111,6 +1109,62 @@ public final class OXFolderSQL {
     }
 
     /**
+     * Gets the identifiers of all permission entities belonging to one of the supplied folder identifiers.
+     *
+     * @param folderIDs The folder identifiers to get the permission entities for
+     * @param readConnection A connection with read capability, or <code>null</code> to fetch from pool dynamically
+     * @param context The context
+     * @param includeGroups <code>true</code> to also include group permissions, <code>false</code>, otherwise
+     * @return The entity IDs, or an empty list if none were found
+     */
+    public static List<Integer> getPermissionEntities(List<Integer> folderIDs, Connection readConnection, Context context, boolean includeGroups) throws OXException, SQLException {
+        /*
+         * build statement
+         */
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM oxfolder_permissions WHERE cid=? AND fuid");
+        if (1 == folderIDs.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < folderIDs.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        if (false == includeGroups) {
+            stringBuilder.append(" AND group_flag=0");
+        }
+        List<Integer> entityIDs = new ArrayList<Integer>();
+        boolean closeReadConnection = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            /*
+             * acquire local read connection if not supplied
+             */
+            if (null == readConnection) {
+                readConnection = DBPool.pickup(context);
+                closeReadConnection = true;
+            }
+            /*
+             * execute query
+             */
+            stmt = readConnection.prepareStatement(stringBuilder.toString());
+            stmt.setInt(1, context.getContextId());
+            for (int i = 0; i < folderIDs.size(); i++) {
+                stmt.setInt(i + 2, folderIDs.get(i).intValue());
+            }
+            rs = executeQuery(stmt);
+            while (rs.next()) {
+                entityIDs.add(Integer.valueOf(rs.getInt(1)));
+            }
+        } finally {
+            closeResources(rs, stmt, closeReadConnection ? readConnection : null, true, context);
+        }
+        return entityIDs;
+    }
+
+    /**
      * Gets the identifiers of all parent folders in the tree down to the root folder.
      *
      * @param folderId The ID of the folder to get the path for
@@ -1404,6 +1458,56 @@ public final class OXFolderSQL {
             if (closeWriteCon && writeCon != null) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
+        }
+    }
+
+    /**
+     * Transforms an existing folder into a default folder of a certain type by setting the <code>default_flag</code> to <code>1</code>.
+     *
+     * @param connection A (writable) connection to the database, or <code>null</code> to fetch one on demand
+     * @param context The context
+     * @param folderID The identifier of the folder to mark as default folder
+     * @param type The type to apply for the folder
+     * @param folderName The name to apply for the folder
+     * @param lastModified The last modification timestamp to apply for the folder
+     */
+    static void markAsDefaultFolder(Connection connection, Context context, int folderID, int type, String folderName, long lastModified) throws SQLException, OXException {
+        Connection writeCon = connection;
+        boolean closeWriteCon = false;
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean startedTransaction = false;
+        try {
+            if (writeCon == null) {
+                writeCon = DBPool.pickupWriteable(context);
+                closeWriteCon = true;
+            }
+            startedTransaction = writeCon.getAutoCommit();
+            if (startedTransaction) {
+                writeCon.setAutoCommit(false);
+                rollback = true;
+            }
+            lock(folderID, context.getContextId(), writeCon);
+            stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET type=?,default_flag=1,fname=?,changing_date=? WHERE cid=? AND fuid=?;");
+            stmt.setInt(1, type);
+            stmt.setString(2, folderName);
+            stmt.setLong(3, lastModified);
+            stmt.setInt(4, context.getContextId());
+            stmt.setInt(5, folderID);
+            executeUpdate(stmt);
+            if (startedTransaction) {
+                writeCon.commit();
+                rollback = false;
+                writeCon.setAutoCommit(true);
+            }
+        } finally {
+            if (startedTransaction && rollback) {
+                if (null != writeCon) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+            }
+            closeResources(null, stmt, closeWriteCon ? writeCon : null, false, context);
         }
     }
 
@@ -2003,67 +2107,6 @@ public final class OXFolderSQL {
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
-        }
-    }
-
-    private static final Lock NEXTSERIAL_LOCK = new ReentrantLock();
-
-    /**
-     * Fetches an unique id from underlying storage. NOTE: This method assumes that given writable connection is set to auto-commit! In any
-     * case the <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT mechanisms will be canceled.
-     *
-     * @param ctx The context
-     * @param callWriteConArg A writable connection
-     * @return A unique folder id from underlying storage
-     * @throws SQLException If a SQL error occurs
-     * @throws OXException If writable connection cannot be obtained from/put back into pool
-     */
-    public static int getNextSerial(final Context ctx, final Connection callWriteConArg) throws SQLException, OXException {
-        NEXTSERIAL_LOCK.lock();
-        try {
-            Connection callWriteCon = callWriteConArg;
-            boolean closeCon = false;
-            boolean isAuto = false;
-            try {
-                try {
-                    if (callWriteCon == null) {
-                        callWriteCon = DBPool.pickupWriteable(ctx);
-                        closeCon = true;
-                    }
-                    isAuto = callWriteCon.getAutoCommit();
-                    if (isAuto) {
-                        callWriteCon.setAutoCommit(false); // BEGIN
-                    } else {
-                        /*
-                         * Commit connection to ensure an unique ID is going to be returned
-                         */
-                        callWriteCon.commit();
-                    }
-                    final int id = IDGenerator.getId(ctx, Types.FOLDER, callWriteCon);
-                    if (isAuto) {
-                        callWriteCon.commit(); // COMMIT
-                        callWriteCon.setAutoCommit(true);
-                    } else {
-                        /*
-                         * Commit connection to ensure an unique ID is going to be returned
-                         */
-                        callWriteCon.commit();
-                    }
-                    return id;
-                } finally {
-                    if (closeCon && callWriteCon != null) {
-                        DBPool.pushWrite(ctx, callWriteCon);
-                    }
-                }
-            } catch (final OXException e) {
-                if (isAuto && callWriteCon != null) {
-                    callWriteCon.rollback(); // ROLLBACK
-                    callWriteCon.setAutoCommit(true);
-                }
-                throw e;
-            }
-        } finally {
-            NEXTSERIAL_LOCK.unlock();
         }
     }
 

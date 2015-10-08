@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -115,6 +116,10 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     protected Map<String, Object> properties;
 
+    protected int createdBy;
+
+    protected int modifiedBy;
+
     private Map<String, Object> meta = new HashMap<String, Object>();
 
     /**
@@ -124,6 +129,8 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
         super();
         fileCount = -1;
         properties = Collections.emptyMap();
+        createdBy = -1;
+        modifiedBy = -1;
     }
 
     /**
@@ -192,6 +199,11 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      */
     public void setName(final String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return null;
     }
 
     @Override
@@ -538,14 +550,32 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
-    
+
     @Override
     public Map<String, Object> getMeta() {
         return this.meta;
     }
-    
+
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
     }
-    
+
+    @Override
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    @Override
+    public int getModifiedBy() {
+        return this.modifiedBy;
+    }
+
+    public void setModifiedBy(int modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
 }

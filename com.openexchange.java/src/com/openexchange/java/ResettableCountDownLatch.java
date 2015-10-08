@@ -55,7 +55,7 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 /**
  * {@link ResettableCountDownLatch} - Mainly a copy of Doug Lea's great {@link CountDownLatch} implementation, but extended by
- * {@link #reset()} method that allows to reset the latch to ints initial state.
+ * {@link #reset()} method that allows to reset the latch to its initial state.
  *
  * @author Doug Lea; mainly...
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> {@link #reset()}

@@ -64,7 +64,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
-import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
@@ -73,6 +72,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,6 +91,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "allowed_modules", description = "An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
     @Parameter(name = "errorOnDuplicateName", description = "An optional flag to enable or disable (default) check for duplicate folder names within returned folder response (since v6.20.1). If a duplicate folder name is detected, an appropriate error is returned as response.")
 }, responseDescription = "Response with timestamp: An array with data for all folders, which have the folder with the requested object ID as parent. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class ListAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_LIST;
@@ -117,22 +119,8 @@ public final class ListAction extends AbstractFolderAction {
         if (null == parentId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("parent");
         }
-        int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
 
-        // Ensure ID is contained
-        {
-            boolean found = false;
-            final int idCol = FolderField.ID.getColumn();
-            for (int i = 0; !found && i < columns.length; i++) {
-                found = (idCol == columns[i]);
-            }
-            if (!found) {
-                final int[] tmp = columns;
-                columns = new int[tmp.length + 1];
-                System.arraycopy(tmp, 0, columns, 1, tmp.length);
-                columns[0] = idCol;
-            }
-        }
+        int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
 
         final boolean all;
         {
@@ -140,7 +128,7 @@ public final class ListAction extends AbstractFolderAction {
             all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         boolean filterDuplicateNames = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
         if (!filterDuplicateNames) {
             filterDuplicateNames = parseBoolean(request.getParameter("errOnDuplName"), false);
@@ -169,6 +157,11 @@ public final class ListAction extends AbstractFolderAction {
             final Date dNull = null;
             return new AJAXRequestResult(new JSONArray(0), dNull).addWarnings(subfoldersResponse.getWarnings());
         }
+
+        // Used to filter out folders that must not be visible due to insufficient scope
+        boolean checkOAuthScope = isOAuthRequest(request);
+        OAuthGrant grant = getOAuthGrant(request);
+
         /*
          * length > 0
          */
@@ -180,6 +173,10 @@ public final class ListAction extends AbstractFolderAction {
             final Map<String, UserizedFolder> id2folder = new HashMap<String, UserizedFolder>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
+                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), grant)) {
+                    continue;
+                }
+
                 Locale locale = userizedFolder.getLocale();
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
@@ -212,6 +209,18 @@ public final class ListAction extends AbstractFolderAction {
             }
             subfolders = ret.toArray(new UserizedFolder[0]);
             length = subfolders.length;
+        } else {
+            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>(length);
+            for (int i = 0; i < length; i++) {
+                final UserizedFolder userizedFolder = subfolders[i];
+                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), grant)) {
+                    continue;
+                }
+
+                ret.add(userizedFolder);
+            }
+            subfolders = ret.toArray(new UserizedFolder[0]);
+            length = subfolders.length;
         }
 
         // Determine last-modified time stamp
@@ -226,7 +235,7 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(request, columns, subfolders, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */

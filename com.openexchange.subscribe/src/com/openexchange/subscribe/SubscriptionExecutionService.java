@@ -49,20 +49,55 @@
 
 package com.openexchange.subscribe;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link SubscriptionExecutionService}
+ * {@link SubscriptionExecutionService} - The subscription service.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 @SingletonService
 public interface SubscriptionExecutionService {
-    public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException;
-    public int executeSubscription(ServerSession session, int subscriptionId) throws OXException;
-    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws OXException;
+
+    /**
+     * Executes the denoted subscription
+     *
+     * @param sourceId The source identifier
+     * @param session The associated session
+     * @param subscriptionId The identifier of the subscription to execute
+     * @return The number of stored data elements
+     * @throws OXException If subscription cannot be executed
+     */
+    int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException;
+
+    /**
+     * Executes the denoted subscription
+     *
+     * @param session The associated session
+     * @param subscriptionId The identifier of the subscription to execute
+     * @return The number of stored data elements
+     * @throws OXException If subscription cannot be executed
+     */
+    int executeSubscription(ServerSession session, int subscriptionId) throws OXException;
+
+    /**
+     * Executes the specified subscriptions
+     * <p>
+     * The caller may influence whether a fall-back to one-by-one storing is performed by passing a {@code Collection} instance for
+     * <code>optErrors</code> parameter.
+     *
+     * @param subscriptionsToRefresh The subscriptions to execute
+     * @param session The associated session
+     * @param optErrors The optional {@code Collection} instance for collecting possible errors;
+     *                  if set to non-<code>null</code> a fall-back to one-by-one storing is performed in case batch-store fails
+     * @return The number of stored data elements
+     * @throws OXException If subscriptions cannot be executed
+     */
+    int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session, Collection<OXException> optErrors) throws OXException;
+
 }

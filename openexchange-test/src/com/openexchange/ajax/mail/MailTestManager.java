@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -69,6 +70,8 @@ import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.ImportMailRequest;
+import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.ajax.mail.actions.MailSearchRequest;
 import com.openexchange.ajax.mail.actions.MailSearchResponse;
 import com.openexchange.ajax.mail.actions.MoveMailRequest;
@@ -211,6 +214,23 @@ public class MailTestManager {
         markCopyInInboxIfNecessary(mail);
 
         return mail;
+    }
+
+    /**
+     * Imports a mail either into the test mails folder or into the INBOX, if not specified.
+     * After the succeful import folder and mail id are set on the TestMail object.
+     * @param mail The mail
+     */
+    public void importMail(TestMail mail) throws OXException, IOException, JSONException {
+        String folder = mail.getFolder();
+        if (folder == null) {
+            folder = "default0/INBOX";
+        }
+
+        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.toRFC822String().getBytes());
+        ImportMailRequest request = new ImportMailRequest(folder, 0, true, true, new ByteArrayInputStream[] { mailStream });
+        ImportMailResponse response = client.execute(request);
+        mail.setFolderAndID(response.getIds()[0]);
     }
 
     /**

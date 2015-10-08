@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.user.copy.osgi;
 
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -96,6 +97,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
 }

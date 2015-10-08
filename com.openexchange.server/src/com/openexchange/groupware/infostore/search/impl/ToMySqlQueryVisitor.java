@@ -58,6 +58,7 @@ import java.util.Set;
 import org.owasp.esapi.codecs.MySQLCodec;
 import org.owasp.esapi.codecs.MySQLCodec.Mode;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
@@ -88,6 +89,7 @@ import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -97,112 +99,65 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  */
 public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
-    private final StringBuilder sb;
-
-    private final MySQLCodec codec;
-
-    private final Metadata sortedBy;
-
-    private final int dir;
-
-    private final int userId;
-
-    private final int start;
-
-    private final int end;
-
     private static final String INFOSTORE = "infostore.";
-
     private static final String DOCUMENT = "infostore_document.";
-
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ";
-
     private static final char[] IMMUNE = new char[] { ' ', '%', '_' };
     private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
+    private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
+
+    private final StringBuilder sb;
+    private final MySQLCodec codec;
+    private final Metadata sortedBy;
+    private final int dir;
+    private final int start;
+    private final int end;
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
-     * @param cols
+     * 
+     * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
+     * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
+     * @param contextId The context identifier
+     * @param userId The identifier of the requesting user
+     * @param cols The metadata to include in the results
+     * @param sortedBy The field used to sort the results
+     * @param dir The sort direction
+     * @param start The start of the requested range
+     * @param end The end of the requested range
      */
-    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols) {
-        this(allFolderIds, ownFolderIds, contextId, userId, cols, null, SearchEngineImpl.NOT_SET);
-    }
-
-    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final int start, final int end) {
-        this(allFolderIds, ownFolderIds, contextId, userId, cols, null, SearchEngineImpl.NOT_SET, start, end);
-    }
-
-    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final Metadata sortedBy, final int dir) {
-        this(allFolderIds, ownFolderIds, contextId, userId, cols, sortedBy, dir, -1, -1);
-    }
-
-    public ToMySqlQueryVisitor(final int[] allFolderIds, final int[] ownFolderIds, final int contextId, final int userId, final String cols, final Metadata sortedBy, final int dir, final int start, final int end) {
+    public ToMySqlQueryVisitor(List<Integer> readAllFolders, List<Integer> readOwnFolders, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
         super();
         this.sb = new StringBuilder(8192);
         this.codec = new MySQLCodec(Mode.STANDARD);
         this.sortedBy = sortedBy;
         this.dir = dir;
-        this.userId = userId;
         this.start = start;
         this.end = end;
         sb.append(cols);
-        sb.append(PREFIX).append(contextId).append(" AND ");
-        appendInString(allFolderIds, ownFolderIds, sb);
-    }
-
-    private void appendInString(final int[] allFolderIds, final int[] ownFolderIds, final StringBuilder sb) {
-        boolean needOr = false;
-        if (null != allFolderIds && 0 < allFolderIds.length) {
-            if (null != ownFolderIds && ownFolderIds.length > 0) {
-                needOr = true;
-                sb.append('(');
-            }
-            if (1 == allFolderIds.length) {
-                sb.append(INFOSTORE).append("folder_id = ").append(allFolderIds[0]);
-            } else {
-                sb.append(INFOSTORE).append("folder_id IN ");
-                sb.append(appendFolders(allFolderIds));
-            }
-        }
-        if (null != ownFolderIds) {
-            final int length = ownFolderIds.length;
-            if (length > 0) {
-                if (needOr) {
-                    sb.append(" OR ");
-                }
-                if (1 == length) {
-                    sb.append('(').append(INFOSTORE).append("folder_id = ").append(ownFolderIds[0]);
-                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(')');
-                } else {
-                    sb.append('(').append(INFOSTORE).append("folder_id IN ");
-                    sb.append(appendFolders(ownFolderIds));
-                    sb.append(" AND ").append(INFOSTORE).append("created_by = ").append(userId).append(')');
-                }
-                if (needOr) {
-                    sb.append(')');
-                }
-            }
-        }
+        sb.append(PREFIX).append(contextId);
+        SearchEngineImpl.appendFolders(sb, contextId, userId, readAllFolders, readOwnFolders);        
         sb.append(" AND ");
     }
-
-    private String appendFolders(final int[] folders) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        sb.append(folders[0]);
-        for (int i = 1; i < folders.length; i++) {
-            sb.append(',').append(folders[i]);
-        }
-        sb.append(')');
-        return sb.toString();
+    
+    protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
+        this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
+            null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
+            contextId, userId, cols, sortedBy, dir, start, end);
     }
-
+    
+    protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols) {
+        this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
+            null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
+            contextId, userId, cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
+    }
+    
     public String getMySqlQuery() {
-        if (null != sortedBy && dir != SearchEngineImpl.NOT_SET) {
+        if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
             sb.append(" ORDER BY ").append(sortedBy.getName());
-            if (dir == SearchEngineImpl.ASC) {
+            if (dir == InfostoreSearchEngine.ASC) {
                 sb.append(" ASC");
-            } else if (dir == SearchEngineImpl.DESC) {
+            } else if (dir == InfostoreSearchEngine.DESC) {
                 sb.append(" DESC");
             }
         }
@@ -211,8 +166,6 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
         return sb.toString();
     }
-
-    private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
 
     private static List<SearchTerm<?>> prepareTerms(List<SearchTerm<?>> terms) {
         if (null == terms) {

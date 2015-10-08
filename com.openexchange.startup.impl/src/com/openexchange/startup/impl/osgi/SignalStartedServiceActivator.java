@@ -49,12 +49,11 @@
 
 package com.openexchange.startup.impl.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
+import com.openexchange.database.migration.DBMigrationMonitorService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.SignalStartedServiceImpl;
 
 /**
  * {@link SignalStartedServiceActivator}
@@ -62,43 +61,36 @@ import com.openexchange.startup.impl.SignalStartedServiceImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public final class SignalStartedServiceActivator implements BundleActivator {
+public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
-    private volatile ServiceRegistration<SignalStartedService> registration;
+    private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
 
     /**
      * Initializes a new {@link SignalStartedServiceActivator}.
      */
     public SignalStartedServiceActivator() {
         super();
+        signalStartedRegistrationRef = new AtomicReference<ServiceRegistration<SignalStartedService>>();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
-        try {
-            registration = context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null);
-            logger.info("Open-Xchange Server initialized. The server should be up and running...");
-        } catch (final Exception e) {
-            logger.error("Error while starting bundle com.openexchange.startup.impl", e);
-            throw e;
-        }
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(SignalStartedServiceActivator.class);
-        try {
-            ServiceRegistration<SignalStartedService> registration = this.registration;
-            if (null != registration) {
-                logger.info("Stopping Open-Xchange Server...");
-                registration.unregister();
-                this.registration = null;
-            }
-        } catch (final Exception e) {
-            logger.error("Error while stopping bundle com.openexchange.startup.impl", e);
-            throw e;
+    protected void startBundle() throws Exception {
+        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(signalStartedRegistrationRef, context));
+        openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        ServiceRegistration<SignalStartedService> signalStartedRegistration = signalStartedRegistrationRef.getAndSet(null);
+        if (signalStartedRegistration != null) {
+            signalStartedRegistration.unregister();
         }
+        super.stopBundle();
     }
 
 }

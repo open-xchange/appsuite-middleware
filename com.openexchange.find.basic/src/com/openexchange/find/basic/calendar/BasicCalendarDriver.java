@@ -56,10 +56,12 @@ import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -92,6 +94,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -136,8 +139,16 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
-        return ALL_FOLDER_TYPES;
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return ALL_FOLDER_TYPES;
+        }
+
+        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+        types.add(FolderType.PRIVATE);
+        types.add(FolderType.PUBLIC);
+        return types;
     }
 
     @Override
@@ -147,33 +158,36 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
          */
         List<Facet> facets = new ArrayList<Facet>();
         String prefix = autocompleteRequest.getPrefix();
-        if (false == Strings.isEmpty(prefix)) {
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             /*
              * add prefix-aware field facets
              */
-            List<String> prefixTokens = tokenize(prefix);
-            if (!prefixTokens.isEmpty()) {
-                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withSimpleDisplayItem(prefix)
-                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
-                    .build());
-                facets.add(newSimpleBuilder(CalendarFacetType.SUBJECT)
-                    .withFormattableDisplayItem(CalendarStrings.SUBJECT, prefix)
-                    .withFilter(Filter.of(CalendarFacetType.SUBJECT.getId(), prefixTokens))
-                    .build());
-                facets.add(newSimpleBuilder(CalendarFacetType.DESCRIPTION)
-                    .withFormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix)
-                    .withFilter(Filter.of(CalendarFacetType.DESCRIPTION.getId(), prefixTokens))
-                    .build());
-                facets.add(newSimpleBuilder(CalendarFacetType.LOCATION)
-                    .withFormattableDisplayItem(CalendarStrings.LOCATION, prefix)
-                    .withFilter(Filter.of(CalendarFacetType.LOCATION.getId(), prefixTokens))
-                    .build());
-                facets.add(newSimpleBuilder(CalendarFacetType.ATTACHMENT_NAME)
-                    .withFormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix)
-                    .withFilter(Filter.of(CalendarFacetType.ATTACHMENT_NAME.getId(), prefixTokens))
-                    .build());
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
             }
+
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(CalendarFacetType.SUBJECT)
+                .withFormattableDisplayItem(CalendarStrings.SUBJECT, prefix)
+                .withFilter(Filter.of(CalendarFacetType.SUBJECT.getId(), prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(CalendarFacetType.DESCRIPTION)
+                .withFormattableDisplayItem(CalendarStrings.DESCRIPTION, prefix)
+                .withFilter(Filter.of(CalendarFacetType.DESCRIPTION.getId(), prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(CalendarFacetType.LOCATION)
+                .withFormattableDisplayItem(CalendarStrings.LOCATION, prefix)
+                .withFilter(Filter.of(CalendarFacetType.LOCATION.getId(), prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(CalendarFacetType.ATTACHMENT_NAME)
+                .withFormattableDisplayItem(CalendarStrings.ATTACHMENT_NAME, prefix)
+                .withFilter(Filter.of(CalendarFacetType.ATTACHMENT_NAME.getId(), prefixTokens))
+                .build());
         }
         /*
          * add participants facet dynamically

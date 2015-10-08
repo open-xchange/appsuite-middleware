@@ -80,6 +80,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
@@ -91,6 +92,22 @@ import com.openexchange.search.SearchTerm;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Executor {
+
+    /*-
+     *
+     * Maybe a feasible way to include distribution lists
+     * ==================================================
+     *
+     *
+     * SELECT field65 as email1, field66 as email2, field67 as email3, '' as email4 FROM prg_contacts
+     *    WHERE prg_contacts.cid=1337 AND (field65 LIKE '%nonexistent1@nowhere.com%' OR field66 LIKE '%nonexistent1@nowhere.com%' OR field67 LIKE '%nonexistent1@nowhere.com%')
+     *
+     * UNION
+     *
+     * SELECT '' as email1, '' as email2, '' as email3, field04 as email4 FROM prg_dlist
+     *    WHERE prg_dlist.cid=1337 AND field04 LIKE '%nonexistent1@nowhere.com%';
+     *
+     */
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Executor.class);
 
@@ -199,6 +216,27 @@ public class Executor {
         }
     }
 
+    public Contact selectSingleGuestContact(Connection connection, Table table, int contextID, int userID, ContactField[] fields)
+        throws SQLException, OXException {
+    StringBuilder stringBuilder = new StringBuilder(256);
+    stringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+        .append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=? AND ")
+        .append(Mappers.CONTACT.get(ContactField.INTERNAL_USERID).getColumnLabel()).append("=?;");
+    PreparedStatement stmt = null;
+    ResultSet resultSet = null;
+    try {
+        stmt = connection.prepareStatement(stringBuilder.toString());
+        stmt.setInt(1, contextID);
+        stmt.setInt(2, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        stmt.setInt(3, userID);
+        resultSet = logExecuteQuery(stmt);
+        return new ContactReader(contextID, connection, resultSet).readContact(fields);
+    } finally {
+        closeSQLStuff(resultSet, stmt);
+    }
+}
+
     /**
      *
      * @param connection
@@ -275,7 +313,7 @@ public class Executor {
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder StringBuilder = new StringBuilder(1024);
         StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
@@ -418,8 +456,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause());
+        StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {
@@ -452,8 +489,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause());
+        StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {

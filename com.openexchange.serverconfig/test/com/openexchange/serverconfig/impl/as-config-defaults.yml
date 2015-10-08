@@ -1,0 +1,39 @@
+default:
+    pageTitle: 'App Suite. '
+
+    pageHeaderPrefix: 'OX'
+    pageHeader: 'App Suite'
+
+    productName: 'OX App Suite'
+    productNameMail: 'OX Mail'
+
+    contact: 'Open-Xchange AG, Rollnerstr. 14, D-90408 Nürnberg, E-Mail: info@open-xchange.com'
+
+    forgotPassword: false
+
+    copyright: '(c) 2015 Open-Xchange.'
+
+    staySignedIn: true
+
+    # Defines basic styling for notification mails. If you
+    # override these you must all mandatory elements!
+    notificationMails:
+        # Call to actions are often shown as buttons. Their
+        # appearance can be configured in terms of font color,
+        # background color and border color.
+        # Mandatory!
+        button:
+            textColor: '#ffffff'
+            backgroundColor: '#3c73aa'
+            borderColor: '#356697'
+        # Notification mails can contain a footer section consisting of
+        # a text and logo/image. To omit footers at all, you can omit this
+        # section.
+        footer:
+            # Images are referenced via their file name below 
+            # '/opt/open-xchange/templates'. If you don't want any image 
+            # to be included, omit this key.
+            image: 'ox_logo_claim_blue_small.png'
+            # The footer text can be customized. If no text shall be
+            # displayed, omit this key.
+            text: ''

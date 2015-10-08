@@ -255,15 +255,14 @@ public class AbstractFolderTest extends AbstractAJAXSession {
     }
 
     /**
-     * @param inFolder Folder id to use for the request
      * @param cols Columns to use for the request
      * @param lastModified The timestamp of the last update of the requested folders
      * @param ignore what kind of updates to ignore
      * @return The UpdatesResponse containg new, modified and deleted folders
      * @throws Exception
      */
-    public FolderUpdatesResponse listModifiedFolders(final int inFolder, int[] cols, final Date lastModified, Ignore ignore) throws Exception {
-        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_NEW, inFolder, cols, -1, null, lastModified, ignore);
+    public FolderUpdatesResponse listModifiedFolders(int[] cols, final Date lastModified, Ignore ignore) throws Exception {
+        final UpdatesRequest request = new UpdatesRequest(EnumAPI.OX_NEW, cols, -1, null, lastModified, ignore);
         final FolderUpdatesResponse response = client.execute(request);
         return response;
     }

@@ -76,6 +76,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
@@ -95,7 +96,6 @@ import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -111,7 +111,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 
 /**
@@ -168,12 +167,12 @@ public final class NewAction extends AbstractMailAction {
                         maxSize = -1L;
                     } else {
                         LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                        int globalQuota;
+                        long globalQuota;
                         try {
-                            globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
-                        } catch (final OXException e) {
+                            globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE).longValue();
+                        } catch (OXException e) {
                             LOG.error("", e);
-                            globalQuota = 0;
+                            globalQuota = 0L;
                         }
                         maxSize = globalQuota <= 0 ? -1L : globalQuota;
                     }
@@ -261,7 +260,8 @@ public final class NewAction extends AbstractMailAction {
                         CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
                         space.addCleanUp(msgref);
                     }
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -291,7 +291,7 @@ public final class NewAction extends AbstractMailAction {
                     // Apply composition space state(s)
                     mailInterface.openFor(folder);
                     if (null != csid) {
-                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
                         CompositionSpaces.destroy(csid, session);
                     }
 
@@ -388,7 +388,7 @@ public final class NewAction extends AbstractMailAction {
 
                 // Apply composition space state(s)
                 if (null != csid) {
-                    CompositionSpaces.applyCompositionSpace(csid, session, null);
+                    CompositionSpaces.applyCompositionSpace(csid, session, null, isDraftAction(sendType));
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -427,6 +427,10 @@ public final class NewAction extends AbstractMailAction {
         return result;
     }
 
+    private boolean isDraftAction(ComposeType sendType) {
+        return ComposeType.DRAFT_EDIT.equals(sendType);
+    }
+
     private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
@@ -456,7 +460,7 @@ public final class NewAction extends AbstractMailAction {
         QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         PutNewMailData data;
         {
-            MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
+            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), null);
             message.removeHeader("x-original-headers");
             if (newMessageId) {
                 message.removeHeader("Message-ID");
@@ -475,7 +479,7 @@ public final class NewAction extends AbstractMailAction {
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
         final JSONValue responseData;
         if (folder == null) {
-            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail());
+            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail(), req.getRequest());
         } else {
             String[] ids;
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
@@ -527,7 +531,7 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
+    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m, AJAXRequestData request) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -579,8 +583,27 @@ public final class NewAction extends AbstractMailAction {
                 sentMail = ma;
                 oxError = e;
             }
+            /*
+             * User settings
+             */
+            final UserSettingMail usm = session.getUserSettingMail();
+            usm.setNoSave(true);
+            {
+                String paramName = "copy2Sent";
+                if (request.containsParameter(paramName)) { // Provided as URL parameter
+                    String sCopy2Sent = request.getParameter(paramName);
+                    if (null != sCopy2Sent) {
+                        if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                            usm.setNoCopyIntoStandardSentFolder(false);
+                        } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                            // Explicitly deny copy to sent folder
+                            usm.setNoCopyIntoStandardSentFolder(true);
+                        }
+                    }
+                }
+            }
             JSONObject responseData = null;
-            if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
+            if (!usm.isNoCopyIntoStandardSentFolder()) {
                 /*
                  * Copy in sent folder allowed
                  */

@@ -52,9 +52,10 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map.Entry;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.Mapping;
@@ -82,14 +83,38 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		this.mappings = createMappings();
 	}
 
-	@Override
-	public O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException {
-		final O object = this.newInstance();
-	    for (final E field : fields) {
-	    	get(field).set(resultSet, object);
-	    }
-	    return object;
-	}
+    @Override
+    public O fromResultSet(final ResultSet resultSet, final E[] fields) throws OXException, SQLException {
+        final O object = this.newInstance();
+        for (final E field : fields) {
+            get(field).set(resultSet, object);
+        }
+        return object;
+    }
+
+    @Override
+    public O fromResultSet(final ResultSet resultSet, final E[] fields, String columnLabelPrefix) throws OXException, SQLException {
+        final O object = this.newInstance();
+        for (final E field : fields) {
+            DbMapping<? extends Object, O> mapping = get(field);
+            String columnLabel = null == columnLabelPrefix ? mapping.getColumnLabel() : columnLabelPrefix + mapping.getColumnLabel();
+            mapping.set(resultSet, object, columnLabel);
+        }
+        return object;
+    }
+
+    @Override
+    public List<O> listFromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException {
+        List<O> list = new ArrayList<O>();
+        while (resultSet.next()) {
+            O object = this.newInstance();
+            for (E field : fields) {
+                get(field).set(resultSet, object);
+            }
+            list.add(object);
+        }
+        return list;
+    }
 
 	@Override
 	public void setParameters(final PreparedStatement stmt, final O object, final E[] fields) throws SQLException, OXException {
@@ -138,20 +163,51 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 		return columnsParamsBuilder.toString();
 	}
 
-	@Override
-	public String getColumns(final E[] fields) throws OXException {
-		if (null == fields) {
-			throw new IllegalArgumentException("fields");
-		}
-		final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
-		if (null != fields && 0 < fields.length) {
-			columnsBuilder.append(get(fields[0]).getColumnLabel());
-			for (int i = 1; i < fields.length; i++) {
-				columnsBuilder.append(',').append(get(fields[i]).getColumnLabel());
-			}
-		}
-		return columnsBuilder.toString();
-	}
+    @Override
+    public String getColumns(final E[] fields) throws OXException {
+        return getColumns(fields, null);
+    }
+
+    @Override
+    public String getColumns(final E[] fields, String columnLabelPrefix) throws OXException {
+        if (null == fields) {
+            throw new IllegalArgumentException("fields");
+        }
+        final StringBuilder columnsBuilder = new StringBuilder(10 * fields.length);
+        if (null != fields && 0 < fields.length) {
+            if (null != columnLabelPrefix) {
+                columnsBuilder.append(columnLabelPrefix);
+            }
+            columnsBuilder.append(get(fields[0]).getColumnLabel());
+            for (int i = 1; i < fields.length; i++) {
+                columnsBuilder.append(',');
+                if (null != columnLabelPrefix) {
+                    columnsBuilder.append(columnLabelPrefix);
+                }
+                columnsBuilder.append(get(fields[i]).getColumnLabel());
+            }
+        }
+        return columnsBuilder.toString();
+    }
+
+    /**
+     * Gets a string to be used as parameter values in <code>INSERT</code>- or
+     * <code>UPDATE</code>-statements.
+     *
+     * @param count the number of parameters
+     * @return the parameter string without surrounding parentheses, e.g.
+     * "?,?,?,?"
+     */
+    public String getParameters(int count) {
+        StringBuilder stringBuilder = new StringBuilder(2 * count);
+        if (0 < count) {
+            stringBuilder.append('?');
+            for (int i = 1; i < count; i++) {
+                stringBuilder.append(",?");
+            }
+        }
+        return stringBuilder.toString();
+    }
 
 	@Override
 	protected EnumMap<E, ? extends Mapping<? extends Object, O>> getMappings() {

@@ -146,7 +146,7 @@ public final class TransportProviderRegistry {
     /**
      * Gets the transport provider appropriate for specified protocol.
      *
-     * @param protocol The mail protocol
+     * @param protocol The transport protocol
      * @return The appropriate transport provider
      */
     public static TransportProvider getTransportProvider(final String protocol) {

@@ -54,10 +54,12 @@ import java.util.Iterator;
 import java.util.Vector;
 
 /**
- *
+ * A simple POJO that holds metadata information about an SQL table
+ * 
  * @author cutmasta
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TableObject {
+public class TableObject implements Comparable<String> {
 
     // table name
     private String name = null;
@@ -76,7 +78,7 @@ public class TableObject {
         columns = new Vector<TableColumnObject>();
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -84,11 +86,11 @@ public class TableObject {
         this.columns.add(to);
     }
 
-    public void removeColumn(TableColumnObject to){
+    public void removeColumn(TableColumnObject to) {
         this.columns.remove(to);
     }
 
-    public Vector<TableColumnObject> getColumns(){
+    public Vector<TableColumnObject> getColumns() {
         return this.columns;
     }
 
@@ -96,40 +98,40 @@ public class TableObject {
         this.name = name;
     }
 
-    public void setDataRow(TableRowObject tc){
+    public void setDataRow(TableRowObject tc) {
         this.table_rows.add(tc);
     }
 
-    public TableRowObject getDataRow(int position){
+    public TableRowObject getDataRow(int position) {
         return table_rows.get(position);
     }
 
-    public int getDataRowCount(){
+    public int getDataRowCount() {
         return table_rows.size();
     }
 
-    public void addCrossReferenceTable(String reference_table){
+    public void addCrossReferenceTable(String reference_table) {
         this.xreferencetables.add(reference_table);
     }
 
-    public void removeCrossReferenceTable(String reference_table){
+    public void removeCrossReferenceTable(String reference_table) {
         this.xreferencetables.remove(reference_table);
     }
 
-    public Iterator<String> getCrossReferenceTables(){
+    public Iterator<String> getCrossReferenceTables() {
         return this.xreferencetables.iterator();
     }
 
-    public boolean hasCrossReferences(){
+    public boolean hasCrossReferences() {
         //System.out.println(this.name+"--> "+xreferencetables.size());
-        if(xreferencetables.size()>0){
+        if (xreferencetables.size() > 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public boolean hasCrossReference2Table(TableObject checkref){
+    public boolean hasCrossReference2Table(TableObject checkref) {
         return this.xreferencetables.contains(checkref.getName());
     }
 
@@ -137,24 +139,29 @@ public class TableObject {
         this.referencedby.add(table_name);
     }
 
-    public void removeReferencedBy(String reference_table){
+    public void removeReferencedBy(String reference_table) {
         this.referencedby.remove(reference_table);
     }
 
-    public Iterator<String> getReferencedByTables(){
+    public Iterator<String> getReferencedByTables() {
         return this.referencedby.iterator();
     }
 
-    public boolean isReferencedByTables(){
+    public boolean isReferencedByTables() {
         //System.out.println(this.name+"--> "+referencedby.size());
-        if(referencedby.size()>0){
+        if (referencedby.size() > 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
     public boolean isReferencedBy(final TableObject checkref) {
         return referencedby.contains(checkref.getName());
+    }
+
+    @Override
+    public int compareTo(String o) {
+        return name.compareTo(o);
     }
 }

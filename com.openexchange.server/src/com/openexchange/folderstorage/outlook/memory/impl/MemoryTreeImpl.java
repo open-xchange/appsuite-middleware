@@ -94,9 +94,9 @@ public final class MemoryTreeImpl implements MemoryTree {
     public MemoryTreeImpl(final int treeId) {
         super();
         this.treeId = treeId;
-        folderMap = new ConcurrentHashMap<String, MemoryFolder>(128);
-        parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128);
-        folder2parentMap = new ConcurrentHashMap<String, String>(128);
+        folderMap = new ConcurrentHashMap<String, MemoryFolder>(128, 0.9f, 1);
+        parentMap = new ConcurrentHashMap<String, Set<MemoryFolder>>(128, 0.9f, 1);
+        folder2parentMap = new ConcurrentHashMap<String, String>(128, 0.9f, 1);
         crud = new MemoryCRUDImpl(folderMap, parentMap, folder2parentMap);
     }
 
@@ -341,7 +341,7 @@ public final class MemoryTreeImpl implements MemoryTree {
      */
     private static final class FolderNameComparator implements Comparator<String> {
 
-        private static final ConcurrentMap<Locale, FolderNameComparator> CACHE = new ConcurrentHashMap<Locale, FolderNameComparator>(16);
+        private static final ConcurrentMap<Locale, FolderNameComparator> CACHE = new ConcurrentHashMap<Locale, FolderNameComparator>(16, 0.9f, 1);
 
         protected static FolderNameComparator valueOf(final Locale locale) {
             if (null == locale) {
@@ -377,7 +377,7 @@ public final class MemoryTreeImpl implements MemoryTree {
      */
     private static final class MemoryFolderComparator implements Comparator<MemoryFolder> {
 
-        private static final ConcurrentMap<Locale, MemoryFolderComparator> CACHE = new ConcurrentHashMap<Locale, MemoryFolderComparator>(16);
+        private static final ConcurrentMap<Locale, MemoryFolderComparator> CACHE = new ConcurrentHashMap<Locale, MemoryFolderComparator>(16, 0.9f, 1);
 
         protected static MemoryFolderComparator valueOf(final Locale locale) {
             if (null == locale) {
@@ -418,7 +418,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     private static final class PrivateSubfolderIDComparator implements Comparator<String[]> {
 
-        private static final ConcurrentMap<Locale, PrivateSubfolderIDComparator> CACHE = new ConcurrentHashMap<Locale, PrivateSubfolderIDComparator>(16);
+        private static final ConcurrentMap<Locale, PrivateSubfolderIDComparator> CACHE = new ConcurrentHashMap<Locale, PrivateSubfolderIDComparator>(16, 0.9f, 1);
 
         protected static PrivateSubfolderIDComparator valueOf(final Locale locale) {
             if (null == locale) {

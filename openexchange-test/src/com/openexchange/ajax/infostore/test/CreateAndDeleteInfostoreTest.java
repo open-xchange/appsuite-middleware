@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.infostore.test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -57,9 +56,9 @@ import java.util.Map;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.test.TestInit;
 
 /**
@@ -75,9 +74,9 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
 
-        DocumentMetadata expected = new DocumentMetadataImpl();
-        expected.setCreationDate(new Date());
-        expected.setFolderId(folder.getObjectID());
+        File expected = new DefaultFile();
+        expected.setCreated(new Date());
+        expected.setFolderId(String.valueOf(folder.getObjectID()));
         expected.setTitle("InfostoreCreateDeleteTest Item");
         expected.setLastModified(new Date());
         final Map<String, Object> meta = new LinkedHashMap<String, Object>(2);
@@ -87,7 +86,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         infoMgr.newAction(expected);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
 
-        DocumentMetadata actual = infoMgr.getAction(expected.getId());
+        File actual = infoMgr.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
         infoMgr.deleteAction(expected);
@@ -99,17 +98,17 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
         fMgr.insertFolderOnServer(folder);
 
-        DocumentMetadata expected = new DocumentMetadataImpl();
-        expected.setCreationDate(new Date());
-        expected.setFolderId(folder.getObjectID());
+        File expected = new DefaultFile();
+        expected.setCreated(new Date());
+        expected.setFolderId(String.valueOf(folder.getObjectID()));
         expected.setTitle("InfostoreCreateDeleteTest File");
         expected.setLastModified(new Date());
-        new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
         infoMgr.newAction(expected);//TODO, upload);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
 
-        DocumentMetadata actual = infoMgr.getAction(expected.getId());
+        File actual = infoMgr.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
 
         infoMgr.deleteAction(expected);
@@ -122,32 +121,32 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         fMgr.insertFolderOnServer(folder);
 
         {
-            DocumentMetadata expected = new DocumentMetadataImpl();
-            expected.setCreationDate(new Date());
-            expected.setFolderId(folder.getObjectID());
+            File expected = new DefaultFile();
+            expected.setCreated(new Date());
+            expected.setFolderId(String.valueOf(folder.getObjectID()));
             expected.setTitle("InfostoreCreateDeleteTest File1");
             expected.setLastModified(new Date());
-            File file = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+            java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
             infoMgr.newAction(expected, file);
             assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
 
-            DocumentMetadata actual = infoMgr.getAction(expected.getId());
+            File actual = infoMgr.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
         }
 
         {
-            DocumentMetadata expected = new DocumentMetadataImpl();
-            expected.setCreationDate(new Date());
-            expected.setFolderId(folder.getObjectID());
+            File expected = new DefaultFile();
+            expected.setCreated(new Date());
+            expected.setFolderId(String.valueOf(folder.getObjectID()));
             expected.setTitle("InfostoreCreateDeleteTest File2");
             expected.setLastModified(new Date());
-            File file = new File(TestInit.getTestProperty("webdavPropertiesFile"));
+            java.io.File file = new java.io.File(TestInit.getTestProperty("webdavPropertiesFile"));
 
             infoMgr.newAction(expected, file);
             assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());
 
-            DocumentMetadata actual = infoMgr.getAction(expected.getId());
+            File actual = infoMgr.getAction(expected.getId());
             assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
         }
     }

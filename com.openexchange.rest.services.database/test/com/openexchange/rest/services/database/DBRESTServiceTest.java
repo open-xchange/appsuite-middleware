@@ -52,8 +52,6 @@ package com.openexchange.rest.services.database;
 import static com.openexchange.database.DatabaseMocking.connection;
 import static com.openexchange.database.DatabaseMocking.verifyConnection;
 import static com.openexchange.database.DatabaseMocking.whenConnection;
-import static com.openexchange.java.util.NativeBuilders.list;
-import static com.openexchange.java.util.NativeBuilders.map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -67,81 +65,88 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.DatabaseMocking.QueryStubBuilder;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.OXRESTService.HALT;
-import com.openexchange.rest.services.Response;
-import com.openexchange.rest.services.database.DBRESTService.Environment;
+import com.openexchange.rest.services.database.DatabaseRESTService;
+import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
 import com.openexchange.rest.services.database.migrations.VersionChecker;
+import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.rest.services.database.transactions.Transaction;
-import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 import com.openexchange.server.MockingServiceLookup;
 
 /**
  * {@link DBRESTServiceTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DBRESTServiceTest {
 
     private DatabaseService dbs;
-    private TransactionKeeper txs;
+    private InMemoryTransactionKeeper txs;
     private VersionChecker versionChecker;
+    private DatabaseEnvironment environment;
 
     private Connection con;
 
-    private DBRESTService service;
+    private DatabaseRESTService service;
 
     private final int ctxId = 42;
-
-    private AJAXRequestData req;
 
     private final int readPoolId = 1;
     private final int writePoolId = 2;
     private final String schema = "mySchema";
     private final int partitionId = 0;
 
+    private UriInfo uriInfo;
+    private HttpHeaders httpHeaders;
+    MultivaluedMap<String, String> mmap;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setup() {
         MockingServiceLookup services = new MockingServiceLookup();
 
         con = connection();
 
         versionChecker = mock(VersionChecker.class);
-        txs = mock(TransactionKeeper.class);
+        txs = mock(InMemoryTransactionKeeper.class);
         dbs = services.mock(DatabaseService.class);
+        
+        environment = mock(DatabaseEnvironment.class);
+        
+        service = new DatabaseRESTService(services, new DatabaseEnvironment(txs, versionChecker));
 
-        req = mock(AJAXRequestData.class);
+        mmap = mock(MultivaluedMap.class);
 
-        service = new DBRESTService();
-        service.setContext(new Environment(txs, versionChecker));
-        service.setServices(services);
-        service.setRequest(req);
+        uriInfo = mock(UriInfo.class);
+        when(uriInfo.getQueryParameters()).thenReturn(mmap);
+
+        httpHeaders = mock(HttpHeaders.class);
     }
 
     @Test
     public void singleUpdateToConfigDB() throws OXException, JSONException, SQLException {
         when(dbs.getWritable()).thenReturn(con);
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(1);
 
-        service.before();
-        service.updateConfigDB();
-        service.after();
+        Response response = service.updateConfigDB(httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
 
         assertEquals(1, result.getInt("updated"));
 
@@ -154,26 +159,23 @@ public class DBRESTServiceTest {
     public void updateInConfigDBWithSubstitutions() throws OXException, SQLException, JSONException {
         when(dbs.getWritable()).thenReturn(con);
 
-        data(map()
-            .put("update", map()
-                .put("query", "UPDATE someTable SET someColumn = ? WHERE someIdentifier = ?")
-                .put("params", list()
-                    .add("someValue", 12)
-                    .build())
-                .build())
-            .build()
-        );
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "UPDATE someTable SET someColumn = ? WHERE someIdentifier = ?");
+            q.put("params", new JSONArray("['someValue', 12]"));
+
+            body.put("update", q);
+        }
 
         whenConnection(con).isQueried("UPDATE someTable SET someColumn = ? WHERE someIdentifier = ?")
             .withParameter("someValue")
             .andParameter(12)
             .thenReturnModifiedRows(1);
 
-        service.before();
-        service.updateConfigDB();
-        service.after();
+        Response response = service.updateConfigDB(httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("update");
+        JSONObject result = getQueryResult(response, "update");
 
         assertEquals(1, result.getInt("updated"));
 
@@ -182,19 +184,16 @@ public class DBRESTServiceTest {
         verify(dbs).backWritable(con);
     }
 
-
     @Test
     public void singleUpdateToOXDB() throws Exception {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(1);
 
-        service.before();
-        service.updateOXDB(ctxId);
-        service.after();
+        Response response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
 
         assertEquals(1, result.getInt("updated"));
 
@@ -207,14 +206,12 @@ public class DBRESTServiceTest {
     public void queryInOXDBSlave() throws Exception {
         when(dbs.getReadOnly(ctxId)).thenReturn(con);
 
-        data("SELECT * FROM myTable WHERE user = 12");
-        whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = 12").thenReturnColumns("id folder displayName").andRow(12, 13, "Charlie").andRow(13, 13, "Linus");
+        String body = "SELECT * FROM myTable WHERE user = 12";
+        whenConnection(con).isQueried(body).thenReturnColumns("id folder displayName").andRow(12, 13, "Charlie").andRow(13, 13, "Linus");
 
-        service.before();
-        service.queryOXDB(ctxId);
-        service.after();
+        Response response = service.queryOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
         JSONArray rows = result.getJSONArray("rows");
 
         assertEquals(2, rows.length());
@@ -237,14 +234,12 @@ public class DBRESTServiceTest {
 
         when(dbs.getWritableMonitored(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(1);
 
-        service.before();
-        service.updateInMonitoredConnection(readPoolId, writePoolId, schema);
-        service.after();
+        Response response = service.updateInMonitoredConnection(readPoolId, writePoolId, schema, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
 
         assertEquals(1, result.getInt("updated"));
 
@@ -257,14 +252,12 @@ public class DBRESTServiceTest {
     public void queryInMonitoredDB() throws Exception {
         when(dbs.getReadOnlyMonitored(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
 
-        data("SELECT * FROM myTable WHERE user = 12");
-        whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = 12").thenReturnColumns("id folder displayName").andRow(12, 13, "Charlie").andRow(13, 13, "Linus");
+        String body = "SELECT * FROM myTable WHERE user = 12";
+        whenConnection(con).isQueried(body).thenReturnColumns("id folder displayName").andRow(12, 13, "Charlie").andRow(13, 13, "Linus");
 
-        service.before();
-        service.queryInMonitoredConnection(readPoolId, writePoolId, schema);
-        service.after();
+        Response response = service.queryInMonitoredConnection(readPoolId, writePoolId, schema, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
         JSONArray rows = result.getJSONArray("rows");
 
         assertEquals(2, rows.length());
@@ -294,14 +287,12 @@ public class DBRESTServiceTest {
         Transaction tx = new Transaction(con, txs);
         when(txs.newTransaction(con)).thenReturn(tx);
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        param("keepOpen", true, boolean.class);
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        param("keepOpen", "true");
 
-        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(1);
 
-        service.before();
-        service.updateInMonitoredConnection(readPoolId, writePoolId, schema);
-        service.after();
+        Response response = service.updateInMonitoredConnection(readPoolId, writePoolId, schema, httpHeaders, uriInfo, body);
 
         assertNotNull(tx.getParameter("monitoredMetadata"));
 
@@ -310,12 +301,10 @@ public class DBRESTServiceTest {
         tx.setConnection(con);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        data("UPDATE someOtherTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        whenConnection(con).isQueried("UPDATE someOtherTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenReturnModifiedRows(1);
+        body = "UPDATE someOtherTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(1);
 
-        service.before();
-        service.queryTransaction(tx.getID());
-        service.after();
+        service.queryTransaction(tx.getID(), httpHeaders, uriInfo, body);
 
         verify(dbs).backWritableMonitored(readPoolId, writePoolId, schema, partitionId, con);
     }
@@ -324,17 +313,15 @@ public class DBRESTServiceTest {
     public void numberOfRowsExceedsLimit() throws Exception {
         when(dbs.getReadOnly(ctxId)).thenReturn(con);
 
-        data("SELECT * FROM myTable WHERE user = 12");
-        QueryStubBuilder queryBuilder = whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = 12").thenReturnColumns("id folder displayName");
-        for(int i = 0; i < 1100; i++) {
-            queryBuilder.andRow(i, i*2, "Charlie");
+        String body = "SELECT * FROM myTable WHERE user = 12";
+        QueryStubBuilder queryBuilder = whenConnection(con).isQueried(body).thenReturnColumns("id folder displayName");
+        for (int i = 0; i < 1100; i++) {
+            queryBuilder.andRow(i, i * 2, "Charlie");
         }
 
-        service.before();
-        service.queryOXDB(ctxId);
-        service.after();
+        Response response = service.queryOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("result");
+        JSONObject result = getQueryResult(response, "result");
         JSONArray rows = result.getJSONArray("rows");
 
         assertEquals(1000, rows.length());
@@ -345,25 +332,23 @@ public class DBRESTServiceTest {
     public void queryInOXDBMaster() throws Exception {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
-        data(map().put("query", map()
-            .put("query", "SELECT * FROM myTable WHERE user = ?")
-            .put("params", list()
-                .add(12)
-                .build())
-            .put("resultSet", true)
-            .build())
-        .build());
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "SELECT * FROM myTable WHERE user = ?");
+            q.put("params", new JSONArray("[12]"));
+            q.put("resultSet", true);
+            body.put("query", q);
+        }
 
         whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = ?").withParameter(12)
             .thenReturnColumns("id folder displayName")
             .andRow(12, 13, "Charlie")
             .andRow(13, 13, "Linus");
 
-        service.before();
-        service.updateOXDB(ctxId);
-        service.after();
+        Response response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("query");
+        JSONObject result = getQueryResult(response, "query");
         JSONArray rows = result.getJSONArray("rows");
 
         assertEquals(2, rows.length());
@@ -377,21 +362,17 @@ public class DBRESTServiceTest {
     public void batchReadInOXDB() throws Exception {
         when(dbs.getReadOnly(ctxId)).thenReturn(con);
 
-        data(map()
-            .put("query", map()
-                .put("query", "SELECT * FROM myTable WHERE user = ?")
-                .put("params", list()
-                    .add(12)
-                    .build())
-                .build())
-            .put("query2", map()
-                .put("query", "SELECT * FROM myOtherTable WHERE user = ?")
-                .put("params", list()
-                    .add(12)
-                    .build())
-                .build())
-            .build()
-        );
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "SELECT * FROM myTable WHERE user = ?");
+            q.put("params", new JSONArray("[12]"));
+            body.put("q1", q);
+            q = new JSONObject();
+            q.put("query", "SELECT * FROM myOtherTable WHERE user = ?");
+            q.put("params", new JSONArray("[12]"));
+            body.put("q2", q);
+        }
 
         whenConnection(con).isQueried("SELECT * FROM myTable WHERE user = ?").withParameter(12)
             .thenReturnColumns("id folder displayName")
@@ -403,24 +384,21 @@ public class DBRESTServiceTest {
             .andRow(24, 23, "Charlie")
             .andRow(25, 23, "Linus");
 
-        service.before();
-        service.queryOXDB(ctxId);
-        service.after();
+        Response response = service.queryOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("query");
+        JSONObject result = getQueryResult(response, "q1");
         JSONArray rows = result.getJSONArray("rows");
 
         assertEquals(2, rows.length());
         assertEquals(12, rows.getJSONObject(0).getInt("id"));
         assertEquals(13, rows.getJSONObject(1).getInt("id"));
 
-        result = getQueryResult("query2");
+        result = getQueryResult(response, "q2");
         rows = result.getJSONArray("rows");
 
         assertEquals(2, rows.length());
         assertEquals(24, rows.getJSONObject(0).getInt("id"));
         assertEquals(25, rows.getJSONObject(1).getInt("id"));
-
 
         verify(con).setAutoCommit(true);
         verify(con).commit();
@@ -431,23 +409,17 @@ public class DBRESTServiceTest {
     public void batchWriteInOXDB() throws Exception {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
-        data(map()
-            .put("update1", map()
-                .put("query", "UPDATE myTable SET displayName = ? WHERE id = ?")
-                .put("params", list()
-                    .add("newDisplayName1")
-                    .add(12)
-                    .build())
-                .build())
-            .put("update2", map()
-                .put("query", "UPDATE myTable SET displayName = ? WHERE id = ?")
-                .put("params", list()
-                    .add("newDisplayName2")
-                    .add(13)
-                    .build())
-                .build())
-            .build()
-        );
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "UPDATE myTable SET displayName = ? WHERE id = ?");
+            q.put("params", new JSONArray("['newDisplayName1', 12]"));
+            body.put("u1", q);
+            q = new JSONObject();
+            q.put("query", "UPDATE myTable SET displayName = ? WHERE id = ?");
+            q.put("params", new JSONArray("['newDisplayName2', 13]"));
+            body.put("u2", q);
+        }
 
         whenConnection(con).isQueried("UPDATE myTable SET displayName = ? WHERE id = ?")
             .withParameter("newDisplayName1")
@@ -459,14 +431,12 @@ public class DBRESTServiceTest {
             .withParameter(13)
             .thenReturnModifiedRows(2);
 
-        service.before();
-        service.updateOXDB(ctxId);
-        service.after();
+        Response response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
 
-        JSONObject result = getQueryResult("update1");
+        JSONObject result = getQueryResult(response, "u1");
         assertEquals(1, result.getInt("updated"));
 
-        result = getQueryResult("update2");
+        result = getQueryResult(response, "u2");
         assertEquals(2, result.getInt("updated"));
 
         verify(con).setAutoCommit(true);
@@ -479,49 +449,48 @@ public class DBRESTServiceTest {
         when(dbs.getWritable()).thenReturn(con);
 
         // Start the transaction with a select
-        param("keepOpen", true, boolean.class);
-        data(map()
-            .put("query", map()
-                .put("query", "SELECT FOR UPDATE value FROM table WHERE key = ?")
-                .put("params", list().add(12).build())
-                .put("resultSet", true)
-                .build())
-        .build());
+        param("keepOpen", "true");
+
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "SELECT FOR UPDATE value FROM table WHERE key = ?");
+            q.put("params", new JSONArray("[12]"));
+            q.put("resultSet", true);
+            body.put("query", q);
+        }
 
         whenConnection(con).isQueried("SELECT FOR UPDATE value FROM table WHERE key = ?").withParameter(12).thenReturnColumns("value").withRow(5);
 
         Transaction tx = new Transaction(con, txs);
         when(txs.newTransaction(con)).thenReturn(tx);
 
-        service.before();
-        service.updateConfigDB();
-        service.after();
+        Response response = service.updateConfigDB(httpHeaders, uriInfo, body);
 
         verify(dbs, never()).backWritable(ctxId, con);
         verify(con, never()).commit();
         verify(con, never()).setAutoCommit(true);
 
-        String txId = getTransactionID();
+        String txId = getTransactionID(response);
         assertEquals(tx.getID(), txId);
 
         // Now Update
         newRequest();
 
-        data(map()
-            .put("update", map()
-                .put("query", "UPDATE table SET value = ? WHERE key = ?")
-                .put("params", list().add(10, 12).build())
-                .build())
-        .build());
+        body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "UPDATE table SET value = ? WHERE key = ?");
+            q.put("params", new JSONArray("[10, 12]"));
+            body.put("query", q);
+        }
 
         tx.setConnection(con);
         when(txs.getTransaction(txId)).thenReturn(tx);
 
         whenConnection(con).isQueried("UPDATE table SET value = ? WHERE key = ?").withParameter(10).andParameter(12).thenReturnModifiedRows(1);
 
-        service.before();
-        service.queryTransaction(txId);
-        service.after();
+        service.queryTransaction(txId, httpHeaders, uriInfo, body);
 
         verifyConnection(con).receivedQuery("UPDATE table SET value = ? WHERE key = ?").withParameter(10).andParameter(12);
         verify(dbs).backWritable(con);
@@ -533,49 +502,47 @@ public class DBRESTServiceTest {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
         // Start the transaction with a select
-        param("keepOpen", true, boolean.class);
-        data(map()
-            .put("query", map()
-                .put("query", "SELECT FOR UPDATE value FROM table WHERE key = ?")
-                .put("params", list().add(12).build())
-                .put("resultSet", true)
-                .build())
-        .build());
+        param("keepOpen", "true");
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "SELECT FOR UPDATE value FROM table WHERE key = ?");
+            q.put("params", new JSONArray("[12]"));
+            q.put("resultSet", true);
+            body.put("query", q);
+        }
 
         whenConnection(con).isQueried("SELECT FOR UPDATE value FROM table WHERE key = ?").withParameter(12).thenReturnColumns("value").withRow(5);
 
         Transaction tx = new Transaction(con, txs);
         when(txs.newTransaction(con)).thenReturn(tx);
 
-        service.before();
-        service.updateOXDB(ctxId);
-        service.after();
+        Response response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
 
         verify(dbs, never()).backWritable(ctxId, con);
         verify(con, never()).commit();
         verify(con, never()).setAutoCommit(true);
 
-        String txId = getTransactionID();
+        String txId = getTransactionID(response);
         assertEquals(tx.getID(), txId);
 
         // Now Update
         newRequest();
 
-        data(map()
-            .put("update", map()
-                .put("query", "UPDATE table SET value = ? WHERE key = ?")
-                .put("params", list().add(10, 12).build())
-                .build())
-        .build());
+        body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "UPDATE table SET value = ? WHERE key = ?");
+            q.put("params", new JSONArray("[10, 12]"));
+            body.put("query", q);
+        }
 
         tx.setConnection(con);
         when(txs.getTransaction(txId)).thenReturn(tx);
 
         whenConnection(con).isQueried("UPDATE table SET value = ? WHERE key = ?").withParameter(10).andParameter(12).thenReturnModifiedRows(1);
 
-        service.before();
-        service.queryTransaction(txId);
-        service.after();
+        service.queryTransaction(txId, httpHeaders, uriInfo, body);
 
         verifyConnection(con).receivedQuery("UPDATE table SET value = ? WHERE key = ?").withParameter(10).andParameter(12);
         verify(dbs).backWritable(ctxId, con);
@@ -589,7 +556,7 @@ public class DBRESTServiceTest {
         Transaction tx = new Transaction(con, txs);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        service.rollback(tx.getID());
+        service.rollbackTransaction(tx.getID(), httpHeaders, uriInfo);
 
         verify(txs).rollback(tx.getID());
     }
@@ -600,7 +567,7 @@ public class DBRESTServiceTest {
         Transaction tx = new Transaction(con, txs);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        service.commit(tx.getID());
+        service.commitTransaction(tx.getID(), httpHeaders, uriInfo);
 
         verify(txs).commit(tx.getID());
     }
@@ -609,31 +576,24 @@ public class DBRESTServiceTest {
     public void testUnknownTransaction() throws Exception {
         when(txs.getTransaction("unnknownTransaction")).thenReturn(null);
         try {
-            service.queryTransaction("unknownTransaction");
+            service.queryTransaction("unknownTransaction", httpHeaders, uriInfo, new JSONObject());
             fail("Not halted");
-        } catch (HALT h) {
-            assertEquals(404, service.getResponse().getStatus());
+        } catch (WebApplicationException e) {
+            assertEquals(404, e.getResponse().getStatus());
         }
 
         try {
-            service.queryTransaction("unknownTransaction");
+            service.commitTransaction("unknownTransaction", httpHeaders, uriInfo);
             fail("Not halted");
-        } catch (HALT h) {
-            assertEquals(404, service.getResponse().getStatus());
+        } catch (WebApplicationException e) {
+            assertEquals(404, e.getResponse().getStatus());
         }
 
         try {
-            service.commit("unknownTransaction");
+            service.rollbackTransaction("unknownTransaction", httpHeaders, uriInfo);
             fail("Not halted");
-        } catch (HALT h) {
-            assertEquals(404, service.getResponse().getStatus());
-        }
-
-        try {
-            service.rollback("unknownTransaction");
-            fail("Not halted");
-        } catch (HALT h) {
-            assertEquals(404, service.getResponse().getStatus());
+        } catch (WebApplicationException e) {
+            assertEquals(404, e.getResponse().getStatus());
         }
     }
 
@@ -641,90 +601,78 @@ public class DBRESTServiceTest {
     public void testFailingStatement() throws Exception {
         when(dbs.getWritable(ctxId)).thenReturn(con);
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
-        whenConnection(con).isQueried("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12").thenFail();
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
+        whenConnection(con).isQueried(body).thenFail();
 
+        Response response = null;
         try {
-            service.before();
-            service.updateOXDB(ctxId);
+            response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
             fail("Should have halted on SQL Error");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
-        JSONObject response = getResponseObject();
-        assertEquals("Kabooom!", response.getString("error"));
+        JSONObject j = getResponseObject(response);
+        assertEquals("Kabooom!", j.getString("error"));
 
         verify(con).rollback();
         verify(dbs).backWritable(ctxId, con);
     }
 
-
     @Test
-    public void testFailingStatementRollsBackRunningTransaction() throws Exception{
+    public void testFailingStatementRollsBackRunningTransaction() throws Exception {
         Transaction tx = new Transaction(con, txs);
 
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
-
-        data(map()
-            .put("update", map()
-                     .put("query", "UPDATE table SET column = 'value' WHERE cid = ?")
-                     .put("params", list().add(1).build())
-                .build())
-        .build());
+        JSONObject body = new JSONObject();
+        {
+            JSONObject q = new JSONObject();
+            q.put("query", "UPDATE table SET column = 'value' WHERE cid = ?");
+            q.put("params", new JSONArray("[1]"));
+            body.put("query", q);
+        }
         whenConnection(con).isQueried("UPDATE table SET column = 'value' WHERE cid = ?").withParameter(1).thenFail();
 
         try {
-            service.before();
-            service.queryTransaction(tx.getID());
+            service.queryTransaction(tx.getID(), httpHeaders, uriInfo, body);
             fail("Should have halted on SQL Error");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
         }
 
         verify(txs).rollback(tx.getID());
     }
-
 
     @Test
     public void versionNegotiationFails() throws OXException {
         when(dbs.getWritable(ctxId)).thenReturn(con);
         when(versionChecker.isUpToDate(anyObject(), eq(con), eq("com.openexchange.myModule"), eq("2"))).thenReturn("1");
 
-        data("UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12");
+        String body = "UPDATE someTable SET someColumn = 'someValue' WHERE someIdentifier = 12";
         header("x-ox-db-module", "com.openexchange.myModule");
         header("x-ox-db-version", "2");
 
+        Response response;
         try {
-            service.before();
-            service.updateOXDB(ctxId);
+            response = service.updateOXDB(ctxId, httpHeaders, uriInfo, body);
             fail("Should have halted");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
-        assertEquals(409, service.getResponse().getStatus());
-        assertEquals("1", service.getResponse().getHeader("X-OX-DB-VERSION"));
+        assertEquals(409, response.getStatus());
+        assertEquals("1", response.getHeaderString("X-OX-DB-VERSION"));
     }
 
     @Test
     public void migration() throws OXException, SQLException {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
 
-        service.before();
-        service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
-        service.after();
+        Response response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
 
         verify(con).setAutoCommit(false);
-        verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        verifyConnection(con).receivedQuery(body);
         verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
         verify(con).commit();
         verify(con).setAutoCommit(true);
@@ -737,18 +685,16 @@ public class DBRESTServiceTest {
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
         whenConnection(con).isQueried("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))").thenFail();
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        Response response;
         try {
-            service.before();
-            service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
+            response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
             fail("Should have halted");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
-        assertEquals(400, service.getResponse().getStatus());
+        assertEquals(400, response.getStatus());
 
         verify(con).setAutoCommit(false);
         verify(con).rollback();
@@ -761,18 +707,16 @@ public class DBRESTServiceTest {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(false);
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        Response response;
         try {
-            service.before();
-            service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
+            response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
             fail("Should have halted");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
-        assertEquals(423, service.getResponse().getStatus());
+        assertEquals(423, response.getStatus());
 
         verify(versionChecker, never()).updateVersion(con, "com.openexchange.myModule", "1", "2");
         verify(versionChecker, never()).unlock(con, "com.openexchange.myModule");
@@ -784,19 +728,17 @@ public class DBRESTServiceTest {
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
         when(versionChecker.updateVersion(con, "com.openexchange.myModule", "1", "2")).thenReturn("2");
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        Response response;
         try {
-            service.before();
-            service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
+            response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
             fail("Should have halted");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
-        assertEquals(409, service.getResponse().getStatus());
-        assertEquals("2", service.getResponse().getHeader("X-OX-DB-VERSION"));
+        assertEquals(409, response.getStatus());
+        assertEquals("2", response.getHeaderString("X-OX-DB-VERSION"));
 
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
     }
@@ -809,42 +751,34 @@ public class DBRESTServiceTest {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
 
-        whenConnection(con).isQueried("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))").thenReturnModifiedRows(0);
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(0);
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
-        param("keepOpen", true, boolean.class);
+        param("keepOpen", "true");
 
-        service.before();
-        service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
-        service.after();
+        Response response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
 
-        String txId = getTransactionID();
+        String txId = getTransactionID(response);
         assertEquals(tx.getID(), txId);
 
         verify(con, never()).commit();
         verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
         verify(versionChecker, never()).unlock(con, "com.openexchange.myModule");
 
-
-
         newRequest();
 
-        data("CREATE TABLE myModule_myTable2 (myAttribute TEXT)");
-        whenConnection(con).isQueried("CREATE TABLE myModule_myTable2 (myAttribute TEXT)").thenReturnModifiedRows(0);
+        body = "CREATE TABLE myModule_myTable2 (myAttribute TEXT)";
+        whenConnection(con).isQueried(body).thenReturnModifiedRows(0);
 
         tx.setConnection(con);
         when(txs.getTransaction(txId)).thenReturn(tx);
 
-        service.before();
-        service.queryTransaction(txId);
-        service.after();
+        service.queryTransaction(txId, httpHeaders, uriInfo, body);
 
         verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable2 (myAttribute TEXT)");
         verify(txs).commit(txId);
         verify(con).setAutoCommit(true);
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
-
-
     }
 
     @Test
@@ -857,26 +791,22 @@ public class DBRESTServiceTest {
 
         whenConnection(con).isQueried("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))").thenReturnModifiedRows(0);
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
-        param("keepOpen", true, boolean.class);
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        param("keepOpen", "true");
 
-        service.before();
-        service.migrate(ctxId, "1", "2", "com.openexchange.myModule");
-        service.after();
+        Response response = service.migrate(ctxId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
 
-        String txId = getTransactionID();
+        String txId = getTransactionID(response);
         assertEquals(tx.getID(), txId);
 
         verify(con, never()).commit();
         verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
         verify(versionChecker, never()).unlock(con, "com.openexchange.myModule");
 
-
-
         newRequest();
 
-        data("CREATE TABLE myModule_myTable2 (myAttribute TEXT)");
-        param("keepOpen", true, boolean.class);
+        body = "CREATE TABLE myModule_myTable2 (myAttribute TEXT)";
+        param("keepOpen", "true");
 
         whenConnection(con).isQueried("CREATE TABLE myModule_myTable2 (myAttribute TEXT)").thenFail();
 
@@ -884,13 +814,10 @@ public class DBRESTServiceTest {
         when(txs.getTransaction(txId)).thenReturn(tx);
 
         try {
-            service.before();
-            service.queryTransaction(txId);
+            service.queryTransaction(txId, httpHeaders, uriInfo, body);
             fail("Should have halted on error");
-        } catch (HALT h) {
-
-        } finally {
-            service.after();
+        } catch (WebApplicationException e) {
+            response = e.getResponse();
         }
 
         verify(txs).rollback(txId);
@@ -902,11 +829,9 @@ public class DBRESTServiceTest {
     public void migrateMonitored() throws Exception {
         when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
 
-        service.before();
-        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule");
-        service.after();
+        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
 
         verify(con).setAutoCommit(false);
         verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
@@ -924,12 +849,10 @@ public class DBRESTServiceTest {
         when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
         when(versionChecker.lock(eq(con), eq("com.openexchange.myModule"), anyLong(), anyLong())).thenReturn(true);
 
-        data("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
-        param("keepOpen", true, boolean.class);
+        String body = "CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
+        param("keepOpen", "true");
 
-        service.before();
-        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule");
-        service.after();
+        service.migrateMonitored(readPoolId, writePoolId, schema, partitionId, "1", "2", "com.openexchange.myModule", httpHeaders, uriInfo, body);
 
         verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
         verify(versionChecker).updateVersion(con, "com.openexchange.myModule", "1", "2");
@@ -939,11 +862,9 @@ public class DBRESTServiceTest {
         tx.setConnection(con);
         when(txs.getTransaction(tx.getID())).thenReturn(tx);
 
-        data("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
+        body = "CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))";
 
-        service.before();
-        service.queryTransaction(tx.getID());
-        service.after();
+        service.queryTransaction(tx.getID(), httpHeaders, uriInfo, body);
 
         verifyConnection(con).receivedQuery("CREATE TABLE myModule_myTable2 (greeting varchar(128), cid int(10), uid int(10), PRIMARY KEY (cid, uid))");
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
@@ -954,22 +875,17 @@ public class DBRESTServiceTest {
     public void forcedUnlock() throws OXException {
         when(dbs.getForUpdateTask(ctxId)).thenReturn(con);
 
-        service.before();
-        service.unlock(ctxId, "com.openexchange.myModule");
-        service.after();
+        service.unlock(ctxId, "com.openexchange.myModule", httpHeaders, uriInfo);
 
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
         verify(dbs).backForUpdateTask(ctxId, con);
     }
 
-
     @Test
     public void forceUnlockMonitoredSchema() throws OXException {
         when(dbs.getWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId)).thenReturn(con);
 
-        service.before();
-        service.unlockMonitored(readPoolId, writePoolId, schema, partitionId, "com.openexchange.myModule");
-        service.after();
+        service.unlockMonitored(readPoolId, writePoolId, schema, partitionId, "com.openexchange.myModule", httpHeaders, uriInfo);
 
         verify(versionChecker).unlock(con, "com.openexchange.myModule");
         verify(dbs).backWritableMonitoredForUpdateTask(readPoolId, writePoolId, schema, partitionId, con);
@@ -978,60 +894,38 @@ public class DBRESTServiceTest {
 
     @Test
     public void insertPartitionIds() throws Exception {
-        data(list().add(1,2,3,4,5).build());
+        JSONArray body = new JSONArray("[1, 2, 3, 4, 5]");
 
-        service.before();
-        service.insertPartitionIds(writePoolId, schema);
-        service.after();
+        service.insertPartitionIds(writePoolId, schema, httpHeaders, uriInfo, body);
 
-        verify(dbs).initPartitions(writePoolId, schema, 1,2,3,4,5);
+        verify(dbs).initPartitions(writePoolId, schema, 1, 2, 3, 4, 5);
     }
 
     private void newRequest() {
         setup();
     }
 
-    private void data(Object data) {
-        when(req.getData()).thenReturn(data);
-    }
-
-    private void data(Map map) throws JSONException {
-        data(JSONCoercion.coerceToJSON(map));
-    }
-
-    private void data(List list) throws JSONException {
-        data(JSONCoercion.coerceToJSON(list));
-    }
-
     private void param(String name, String value) {
-        when(req.getParameter(name)).thenReturn(value);
-        when(req.isSet(name)).thenReturn(true);
-    }
-
-    private <T> void param(String name, T value, Class<T> type) throws OXException {
-        when(req.getParameter(name, type)).thenReturn(value);
-        when(req.isSet(name)).thenReturn(true);
+        when(mmap.getFirst(name)).thenReturn(value);
+        when(mmap.get(name)).thenReturn(Collections.singletonList(value));
     }
 
     private void header(String name, String value) {
-        when(req.getHeader(name)).thenReturn(value);
+        when(httpHeaders.getHeaderString(name)).thenReturn(value);
     }
 
-    private JSONObject getQueryResult(String qName) throws JSONException {
-        Response response = service.getResponse();
-        JSONObject jsonObject = new JSONObject(response.getBody().iterator().next());
+    private JSONObject getQueryResult(Response response, String qName) throws JSONException {
+        JSONObject jsonObject = new JSONObject((JSONObject) response.getEntity());
         JSONObject results = jsonObject.getJSONObject("results");
         return results.getJSONObject(qName);
     }
 
-    private JSONObject getResponseObject() throws JSONException {
-        Response response = service.getResponse();
-        return new JSONObject(response.getBody().iterator().next());
+    private JSONObject getResponseObject(Response response) throws JSONException {
+        return new JSONObject((JSONObject) response.getEntity());
     }
 
-    private String getTransactionID() throws JSONException {
-        Response response = service.getResponse();
-        JSONObject jsonObject = new JSONObject(response.getBody().iterator().next());
+    private String getTransactionID(Response response) throws JSONException {
+        JSONObject jsonObject = new JSONObject((JSONObject) response.getEntity());
         return jsonObject.optString("tx");
     }
 

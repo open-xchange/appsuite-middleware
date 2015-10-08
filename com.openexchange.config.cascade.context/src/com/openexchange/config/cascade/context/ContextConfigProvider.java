@@ -55,31 +55,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ContextConfigProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    /**
-     * Initializes a new {@link ContextConfigProvider}.
-     *
-     * @param contexts The context service
-     */
-    public ContextConfigProvider(ContextService contexts) {
-        super(contexts);
+    public ContextConfigProvider(ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    public String getScope() {
+    	return "context";
     }
 
     @Override
     public BasicProperty get(String property, Context ctx, int user) throws OXException {
-        return new BasicPropertyImpl(property, ctx);
+        return new BasicPropertyImpl(property, ctx, services);
     }
 
     @Override

@@ -337,5 +337,23 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
         }
         UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
+        /*
+         * invalidate capabilities caches, too (yes, ugly)
+         */
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                cacheService.getCache("Capabilities").removeFromGroup(userId, String.valueOf(ctx.getContextId()));
+            } catch (Exception e) {
+                LOG.warn("Error invalidating \"Capabilities\" cache for user {} in context {}: {}",
+                    Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), e.getMessage(), e);
+            }
+            try {
+                cacheService.getCache("CapabilitiesUser").removeFromGroup(userId, String.valueOf(ctx.getContextId()));
+            } catch (final Exception e) {
+                LOG.warn("Error invalidating \"CapabilitiesUser\" cache for user {} in context {}: {}",
+                    Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), e.getMessage(), e);
+            }
+        }
     }
 }

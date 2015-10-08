@@ -252,132 +252,133 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
 
     public enum Constants implements CSVConstants {
-        CONTEXTID(INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_LONG, true),
-        adminuser(INITIAL_CONSTANTS_VALUE + 1, OPT_NAME_ADMINUSER_LONG, false),
-        adminpass(INITIAL_CONSTANTS_VALUE + 2, OPT_NAME_ADMINPASS_LONG, false),
-        USERNAME(INITIAL_CONSTANTS_VALUE + 3, OPT_USERNAME_LONG, true),
-        DISPLAYNAME(INITIAL_CONSTANTS_VALUE + 4, OPT_DISPLAYNAME_LONG, true),
-        GIVENNAME(INITIAL_CONSTANTS_VALUE + 5,OPT_GIVENNAME_LONG, true),
-        SURNAME(INITIAL_CONSTANTS_VALUE + 6,OPT_SURNAME_LONG, true),
-        PASSWORD(INITIAL_CONSTANTS_VALUE + 7,OPT_PASSWORD_LONG, true),
-        EMAIL(INITIAL_CONSTANTS_VALUE + 8,OPT_PRIMARY_EMAIL_LONG, true),
-        LANGUAGE(INITIAL_CONSTANTS_VALUE + 9,OPT_LANGUAGE_LONG, false),
-        timezone(INITIAL_CONSTANTS_VALUE + 10,OPT_TIMEZONE_LONG, false),
-        THEME(INITIAL_CONSTANTS_VALUE + 11,OPT_ADD_GUI_SETTING_LONG, false),
-        department(INITIAL_CONSTANTS_VALUE + 12,OPT_DEPARTMENT_LONG, false),
-        company(INITIAL_CONSTANTS_VALUE + 13,OPT_COMPANY_LONG, false),
-        MAILALIAS(INITIAL_CONSTANTS_VALUE + 14,OPT_ALIASES_LONG, false),
-        EMAIL1(INITIAL_CONSTANTS_VALUE + 15,OPT_EMAIL1_LONG, false),
-        mailenabled(INITIAL_CONSTANTS_VALUE + 16,OPT_MAILENABLED_LONG, false),
-        birthday(INITIAL_CONSTANTS_VALUE + 17,OPT_BIRTHDAY_LONG, false),
-        anniversary(INITIAL_CONSTANTS_VALUE + 18,OPT_ANNIVERSARY_LONG, false),
-        branches(INITIAL_CONSTANTS_VALUE + 19,OPT_BRANCHES_LONG, false),
-        business_category(INITIAL_CONSTANTS_VALUE + 20,OPT_BUSINESS_CATEGORY_LONG, false),
-        postal_code_business(INITIAL_CONSTANTS_VALUE + 21,OPT_POSTAL_CODE_BUSINESS_LONG, false),
-        state_business(INITIAL_CONSTANTS_VALUE + 22,OPT_STATE_BUSINESS_LONG, false),
-        street_business(INITIAL_CONSTANTS_VALUE + 23,OPT_STREET_BUSINESS_LONG, false),
-        telephone_callback(INITIAL_CONSTANTS_VALUE + 24,OPT_TELEPHONE_CALLBACK_LONG, false),
-        city_home(INITIAL_CONSTANTS_VALUE + 25,OPT_CITY_HOME_LONG, false),
-        commercial_register(INITIAL_CONSTANTS_VALUE + 26,OPT_COMMERCIAL_REGISTER_LONG, false),
-        country_home(INITIAL_CONSTANTS_VALUE + 27,OPT_COUNTRY_HOME_LONG, false),
-        email2(INITIAL_CONSTANTS_VALUE + 28,OPT_EMAIL2_LONG, false),
-        email3(INITIAL_CONSTANTS_VALUE + 29,OPT_EMAIL3_LONG, false),
-        employeetype(INITIAL_CONSTANTS_VALUE + 30,OPT_EMPLOYEETYPE_LONG, false),
-        fax_business(INITIAL_CONSTANTS_VALUE + 31,OPT_FAX_BUSINESS_LONG, false),
-        fax_home(INITIAL_CONSTANTS_VALUE + 32,OPT_FAX_HOME_LONG, false),
-        fax_other(INITIAL_CONSTANTS_VALUE + 33,OPT_FAX_OTHER_LONG, false),
-        imapserver(INITIAL_CONSTANTS_VALUE + 34,OPT_IMAPSERVER_LONG, false),
-        imaplogin(INITIAL_CONSTANTS_VALUE + 35,OPT_IMAPLOGIN_LONG, false),
-        smtpserver(INITIAL_CONSTANTS_VALUE + 36,OPT_SMTPSERVER_LONG, false),
-        instant_messenger1(INITIAL_CONSTANTS_VALUE + 37,OPT_INSTANT_MESSENGER1_LONG, false),
-        instant_messenger2(INITIAL_CONSTANTS_VALUE + 38,OPT_INSTANT_MESSENGER2_LONG, false),
-        telephone_ip(INITIAL_CONSTANTS_VALUE + 39,OPT_TELEPHONE_IP_LONG, false),
-        telephone_isdn(INITIAL_CONSTANTS_VALUE + 40,OPT_TELEPHONE_ISDN_LONG, false),
-        mail_folder_drafts_name(INITIAL_CONSTANTS_VALUE + 41,OPT_MAIL_FOLDER_DRAFTS_NAME_LONG, false),
-        mail_folder_sent_name(INITIAL_CONSTANTS_VALUE + 42,OPT_MAIL_FOLDER_SENT_NAME_LONG, false),
-        mail_folder_spam_name(INITIAL_CONSTANTS_VALUE + 43,OPT_MAIL_FOLDER_SPAM_NAME_LONG, false),
-        mail_folder_trash_name(INITIAL_CONSTANTS_VALUE + 44,OPT_MAIL_FOLDER_TRASH_NAME_LONG, false),
-        manager_name(INITIAL_CONSTANTS_VALUE + 45,OPT_MANAGER_NAME_LONG, false),
-        marital_status(INITIAL_CONSTANTS_VALUE + 46,OPT_MARITAL_STATUS_LONG, false),
-        cellular_telephone1(INITIAL_CONSTANTS_VALUE + 47,OPT_CELLULAR_TELEPHONE1_LONG, false),
-        cellular_telephone2(INITIAL_CONSTANTS_VALUE + 48,OPT_CELLULAR_TELEPHONE2_LONG, false),
-        info(INITIAL_CONSTANTS_VALUE + 49,OPT_INFO_LONG, false),
-        nickname(INITIAL_CONSTANTS_VALUE + 50,OPT_NICKNAME_LONG, false),
-        number_of_children(INITIAL_CONSTANTS_VALUE + 51,OPT_NUMBER_OF_CHILDREN_LONG, false),
-        note(INITIAL_CONSTANTS_VALUE + 52,OPT_NOTE_LONG, false),
-        number_of_employee(INITIAL_CONSTANTS_VALUE + 53,OPT_NUMBER_OF_EMPLOYEE_LONG, false),
-        telephone_pager(INITIAL_CONSTANTS_VALUE + 54,OPT_TELEPHONE_PAGER_LONG, false),
-        password_expired(INITIAL_CONSTANTS_VALUE + 55,OPT_PASSWORD_EXPIRED_LONG, false),
-        telephone_assistant(INITIAL_CONSTANTS_VALUE + 56,OPT_TELEPHONE_ASSISTANT_LONG, false),
-        telephone_business1(INITIAL_CONSTANTS_VALUE + 57,OPT_TELEPHONE_BUSINESS1_LONG, false),
-        telephone_business2(INITIAL_CONSTANTS_VALUE + 58,OPT_TELEPHONE_BUSINESS2_LONG, false),
-        telephone_car(INITIAL_CONSTANTS_VALUE + 59,OPT_TELEPHONE_CAR_LONG, false),
-        telephone_company(INITIAL_CONSTANTS_VALUE + 60,OPT_TELEPHONE_COMPANY_LONG, false),
-        telephone_home1(INITIAL_CONSTANTS_VALUE + 61,OPT_TELEPHONE_HOME1_LONG, false),
-        telephone_home2(INITIAL_CONSTANTS_VALUE + 62,OPT_TELEPHONE_HOME2_LONG, false),
-        telephone_other(INITIAL_CONSTANTS_VALUE + 63,OPT_TELEPHONE_OTHER_LONG, false),
-        position(INITIAL_CONSTANTS_VALUE + 64,OPT_POSITION_LONG, false),
-        postal_code_home(INITIAL_CONSTANTS_VALUE + 65,OPT_POSTAL_CODE_HOME_LONG, false),
-        profession(INITIAL_CONSTANTS_VALUE + 66,OPT_PROFESSION_LONG, false),
-        telephone_radio(INITIAL_CONSTANTS_VALUE + 67,OPT_TELEPHONE_RADIO_LONG, false),
-        room_number(INITIAL_CONSTANTS_VALUE + 68,OPT_ROOM_NUMBER_LONG, false),
-        sales_volume(INITIAL_CONSTANTS_VALUE + 69,OPT_SALES_VOLUME_LONG, false),
-        city_other(INITIAL_CONSTANTS_VALUE + 70,OPT_CITY_OTHER_LONG, false),
-        country_other(INITIAL_CONSTANTS_VALUE + 71,OPT_COUNTRY_OTHER_LONG, false),
-        middle_name(INITIAL_CONSTANTS_VALUE + 72,OPT_MIDDLE_NAME_LONG, false),
-        postal_code_other(INITIAL_CONSTANTS_VALUE + 73,OPT_POSTAL_CODE_OTHER_LONG, false),
-        state_other(INITIAL_CONSTANTS_VALUE + 74,OPT_STATE_OTHER_LONG, false),
-        street_other(INITIAL_CONSTANTS_VALUE + 75,OPT_STREET_OTHER_LONG, false),
-        spouse_name(INITIAL_CONSTANTS_VALUE + 76,OPT_SPOUSE_NAME_LONG, false),
-        state_home(INITIAL_CONSTANTS_VALUE + 77,OPT_STATE_HOME_LONG, false),
-        street_home(INITIAL_CONSTANTS_VALUE + 78,OPT_STREET_HOME_LONG, false),
-        suffix(INITIAL_CONSTANTS_VALUE + 79,OPT_SUFFIX_LONG, false),
-        tax_id(INITIAL_CONSTANTS_VALUE + 80,OPT_TAX_ID_LONG, false),
-        telephone_telex(INITIAL_CONSTANTS_VALUE + 81,OPT_TELEPHONE_TELEX_LONG, false),
-        title(INITIAL_CONSTANTS_VALUE + 82,OPT_TITLE_LONG, false),
-        telephone_ttytdd(INITIAL_CONSTANTS_VALUE + 83,OPT_TELEPHONE_TTYTDD_LONG, false),
-        UPLOADFILESIZELIMIT(INITIAL_CONSTANTS_VALUE + 84,OPT_UPLOADFILESIZELIMIT_LONG, false),
-        uploadfilesizelimitperfile(INITIAL_CONSTANTS_VALUE + 85,OPT_UPLOADFILESIZELIMITPERFILE_LONG, false),
-        url(INITIAL_CONSTANTS_VALUE + 86,OPT_URL_LONG, false),
-        userfield01(INITIAL_CONSTANTS_VALUE + 87,OPT_USERFIELD01_LONG, false),
-        userfield02(INITIAL_CONSTANTS_VALUE + 88,OPT_USERFIELD02_LONG, false),
-        userfield03(INITIAL_CONSTANTS_VALUE + 89,OPT_USERFIELD03_LONG, false),
-        userfield04(INITIAL_CONSTANTS_VALUE + 90,OPT_USERFIELD04_LONG, false),
-        userfield05(INITIAL_CONSTANTS_VALUE + 91,OPT_USERFIELD05_LONG, false),
-        userfield06(INITIAL_CONSTANTS_VALUE + 92,OPT_USERFIELD06_LONG, false),
-        userfield07(INITIAL_CONSTANTS_VALUE + 93,OPT_USERFIELD07_LONG, false),
-        userfield08(INITIAL_CONSTANTS_VALUE + 94,OPT_USERFIELD08_LONG, false),
-        userfield09(INITIAL_CONSTANTS_VALUE + 95,OPT_USERFIELD09_LONG, false),
-        userfield10(INITIAL_CONSTANTS_VALUE + 96,OPT_USERFIELD10_LONG, false),
-        userfield11(INITIAL_CONSTANTS_VALUE + 97,OPT_USERFIELD11_LONG, false),
-        userfield12(INITIAL_CONSTANTS_VALUE + 98,OPT_USERFIELD12_LONG, false),
-        userfield13(INITIAL_CONSTANTS_VALUE + 99,OPT_USERFIELD13_LONG, false),
-        userfield14(INITIAL_CONSTANTS_VALUE + 100,OPT_USERFIELD14_LONG, false),
-        userfield15(INITIAL_CONSTANTS_VALUE + 101,OPT_USERFIELD15_LONG, false),
-        userfield16(INITIAL_CONSTANTS_VALUE + 102,OPT_USERFIELD16_LONG, false),
-        userfield17(INITIAL_CONSTANTS_VALUE + 103,OPT_USERFIELD17_LONG, false),
-        userfield18(INITIAL_CONSTANTS_VALUE + 104,OPT_USERFIELD18_LONG, false),
-        userfield19(INITIAL_CONSTANTS_VALUE + 105,OPT_USERFIELD19_LONG, false),
-        userfield20(INITIAL_CONSTANTS_VALUE + 106,OPT_USERFIELD20_LONG, false),
-        city_business(INITIAL_CONSTANTS_VALUE + 107,OPT_CITY_BUSINESS_LONG, false),
-        country_business(INITIAL_CONSTANTS_VALUE + 108,OPT_COUNTRY_BUSINESS_LONG, false),
-        assistant_name(INITIAL_CONSTANTS_VALUE + 109,OPT_ASSISTANT_NAME_LONG, false),
-        telephone_primary(INITIAL_CONSTANTS_VALUE + 110,OPT_TELEPHONE_PRIMARY_LONG, false),
-        categories(INITIAL_CONSTANTS_VALUE + 111,OPT_CATEGORIES_LONG, false),
-        PASSWORDMECH(INITIAL_CONSTANTS_VALUE + 112,OPT_PASSWORDMECH_LONG, false),
-        mail_folder_confirmed_ham_name(INITIAL_CONSTANTS_VALUE + 113,OPT_MAIL_FOLDER_CONFIRMED_HAM_NAME_LONG, false),
-        mail_folder_confirmed_spam_name(INITIAL_CONSTANTS_VALUE + 114,OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, false),
-        DEFAULTSENDERADDRESS(INITIAL_CONSTANTS_VALUE + 115,OPT_DEFAULTSENDERADDRESS_LONG, false),
-        gui_spam_filter_capabilities_enabled(INITIAL_CONSTANTS_VALUE + 116,OPT_GUI_LONG, false);
+        CONTEXTID(OPT_NAME_CONTEXT_LONG, true),
+        adminuser(OPT_NAME_ADMINUSER_LONG, false),
+        adminpass(OPT_NAME_ADMINPASS_LONG, false),
+        USERNAME(OPT_USERNAME_LONG, true),
+        DISPLAYNAME(OPT_DISPLAYNAME_LONG, true),
+        GIVENNAME(OPT_GIVENNAME_LONG, true),
+        SURNAME(OPT_SURNAME_LONG, true),
+        PASSWORD(OPT_PASSWORD_LONG, true),
+        EMAIL(OPT_PRIMARY_EMAIL_LONG, true),
+        LANGUAGE(OPT_LANGUAGE_LONG, false),
+        timezone(OPT_TIMEZONE_LONG, false),
+        THEME(OPT_ADD_GUI_SETTING_LONG, false),
+        department(OPT_DEPARTMENT_LONG, false),
+        company(OPT_COMPANY_LONG, false),
+        MAILALIAS(OPT_ALIASES_LONG, false),
+        EMAIL1(OPT_EMAIL1_LONG, false),
+        mailenabled(OPT_MAILENABLED_LONG, false),
+        birthday(OPT_BIRTHDAY_LONG, false),
+        anniversary(OPT_ANNIVERSARY_LONG, false),
+        branches(OPT_BRANCHES_LONG, false),
+        business_category(OPT_BUSINESS_CATEGORY_LONG, false),
+        postal_code_business(OPT_POSTAL_CODE_BUSINESS_LONG, false),
+        state_business(OPT_STATE_BUSINESS_LONG, false),
+        street_business(OPT_STREET_BUSINESS_LONG, false),
+        telephone_callback(OPT_TELEPHONE_CALLBACK_LONG, false),
+        city_home(OPT_CITY_HOME_LONG, false),
+        commercial_register(OPT_COMMERCIAL_REGISTER_LONG, false),
+        country_home(OPT_COUNTRY_HOME_LONG, false),
+        email2(OPT_EMAIL2_LONG, false),
+        email3(OPT_EMAIL3_LONG, false),
+        employeetype(OPT_EMPLOYEETYPE_LONG, false),
+        fax_business(OPT_FAX_BUSINESS_LONG, false),
+        fax_home(OPT_FAX_HOME_LONG, false),
+        fax_other(OPT_FAX_OTHER_LONG, false),
+        imapserver(OPT_IMAPSERVER_LONG, false),
+        imaplogin(OPT_IMAPLOGIN_LONG, false),
+        smtpserver(OPT_SMTPSERVER_LONG, false),
+        instant_messenger1(OPT_INSTANT_MESSENGER1_LONG, false),
+        instant_messenger2(OPT_INSTANT_MESSENGER2_LONG, false),
+        telephone_ip(OPT_TELEPHONE_IP_LONG, false),
+        telephone_isdn(OPT_TELEPHONE_ISDN_LONG, false),
+        mail_folder_drafts_name(OPT_MAIL_FOLDER_DRAFTS_NAME_LONG, false),
+        mail_folder_sent_name(OPT_MAIL_FOLDER_SENT_NAME_LONG, false),
+        mail_folder_spam_name(OPT_MAIL_FOLDER_SPAM_NAME_LONG, false),
+        mail_folder_trash_name(OPT_MAIL_FOLDER_TRASH_NAME_LONG, false),
+        manager_name(OPT_MANAGER_NAME_LONG, false),
+        marital_status(OPT_MARITAL_STATUS_LONG, false),
+        cellular_telephone1(OPT_CELLULAR_TELEPHONE1_LONG, false),
+        cellular_telephone2(OPT_CELLULAR_TELEPHONE2_LONG, false),
+        info(OPT_INFO_LONG, false),
+        nickname(OPT_NICKNAME_LONG, false),
+        number_of_children(OPT_NUMBER_OF_CHILDREN_LONG, false),
+        note(OPT_NOTE_LONG, false),
+        number_of_employee(OPT_NUMBER_OF_EMPLOYEE_LONG, false),
+        telephone_pager(OPT_TELEPHONE_PAGER_LONG, false),
+        password_expired(OPT_PASSWORD_EXPIRED_LONG, false),
+        telephone_assistant(OPT_TELEPHONE_ASSISTANT_LONG, false),
+        telephone_business1(OPT_TELEPHONE_BUSINESS1_LONG, false),
+        telephone_business2(OPT_TELEPHONE_BUSINESS2_LONG, false),
+        telephone_car(OPT_TELEPHONE_CAR_LONG, false),
+        telephone_company(OPT_TELEPHONE_COMPANY_LONG, false),
+        telephone_home1(OPT_TELEPHONE_HOME1_LONG, false),
+        telephone_home2(OPT_TELEPHONE_HOME2_LONG, false),
+        telephone_other(OPT_TELEPHONE_OTHER_LONG, false),
+        position(OPT_POSITION_LONG, false),
+        postal_code_home(OPT_POSTAL_CODE_HOME_LONG, false),
+        profession(OPT_PROFESSION_LONG, false),
+        telephone_radio(OPT_TELEPHONE_RADIO_LONG, false),
+        room_number(OPT_ROOM_NUMBER_LONG, false),
+        sales_volume(OPT_SALES_VOLUME_LONG, false),
+        city_other(OPT_CITY_OTHER_LONG, false),
+        country_other(OPT_COUNTRY_OTHER_LONG, false),
+        middle_name(OPT_MIDDLE_NAME_LONG, false),
+        postal_code_other(OPT_POSTAL_CODE_OTHER_LONG, false),
+        state_other(OPT_STATE_OTHER_LONG, false),
+        street_other(OPT_STREET_OTHER_LONG, false),
+        spouse_name(OPT_SPOUSE_NAME_LONG, false),
+        state_home(OPT_STATE_HOME_LONG, false),
+        street_home(OPT_STREET_HOME_LONG, false),
+        suffix(OPT_SUFFIX_LONG, false),
+        tax_id(OPT_TAX_ID_LONG, false),
+        telephone_telex(OPT_TELEPHONE_TELEX_LONG, false),
+        title(OPT_TITLE_LONG, false),
+        telephone_ttytdd(OPT_TELEPHONE_TTYTDD_LONG, false),
+        UPLOADFILESIZELIMIT(OPT_UPLOADFILESIZELIMIT_LONG, false),
+        uploadfilesizelimitperfile(OPT_UPLOADFILESIZELIMITPERFILE_LONG, false),
+        url(OPT_URL_LONG, false),
+        userfield01(OPT_USERFIELD01_LONG, false),
+        userfield02(OPT_USERFIELD02_LONG, false),
+        userfield03(OPT_USERFIELD03_LONG, false),
+        userfield04(OPT_USERFIELD04_LONG, false),
+        userfield05(OPT_USERFIELD05_LONG, false),
+        userfield06(OPT_USERFIELD06_LONG, false),
+        userfield07(OPT_USERFIELD07_LONG, false),
+        userfield08(OPT_USERFIELD08_LONG, false),
+        userfield09(OPT_USERFIELD09_LONG, false),
+        userfield10(OPT_USERFIELD10_LONG, false),
+        userfield11(OPT_USERFIELD11_LONG, false),
+        userfield12(OPT_USERFIELD12_LONG, false),
+        userfield13(OPT_USERFIELD13_LONG, false),
+        userfield14(OPT_USERFIELD14_LONG, false),
+        userfield15(OPT_USERFIELD15_LONG, false),
+        userfield16(OPT_USERFIELD16_LONG, false),
+        userfield17(OPT_USERFIELD17_LONG, false),
+        userfield18(OPT_USERFIELD18_LONG, false),
+        userfield19(OPT_USERFIELD19_LONG, false),
+        userfield20(OPT_USERFIELD20_LONG, false),
+        city_business(OPT_CITY_BUSINESS_LONG, false),
+        country_business(OPT_COUNTRY_BUSINESS_LONG, false),
+        assistant_name(OPT_ASSISTANT_NAME_LONG, false),
+        telephone_primary(OPT_TELEPHONE_PRIMARY_LONG, false),
+        categories(OPT_CATEGORIES_LONG, false),
+        PASSWORDMECH(OPT_PASSWORDMECH_LONG, false),
+        mail_folder_confirmed_ham_name(OPT_MAIL_FOLDER_CONFIRMED_HAM_NAME_LONG, false),
+        mail_folder_confirmed_spam_name(OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, false),
+        DEFAULTSENDERADDRESS(OPT_DEFAULTSENDERADDRESS_LONG, false),
+        gui_spam_filter_capabilities_enabled(OPT_GUI_LONG, false),
+        add_config(OPT_CONFIG_LONG, false),
+        remove_config(OPT_REMOVE_CONFIG_LONG, false),
+        ;
 
         private final String string;
-
         private final int index;
-
         private boolean required;
 
-        private Constants(final int index, final String string, final boolean required) {
-            this.index = index;
+        private Constants(String string, boolean required) {
+            this.index = INITIAL_CONSTANTS_VALUE + ordinal();
             this.string = string;
             this.required = required;
         }
@@ -407,7 +408,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     final static protected UserModuleAccess NO_RIGHTS_ACCESS = new UserModuleAccess();
 
-    protected static final String ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR = "You can\u00b4t specify access combination name AND single access attributes simultaneously!";
+    protected static final String ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR = "You must not specify access combination name AND single access attributes simultaneously!";
 
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "userid";
@@ -439,6 +440,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
     protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
+
+    protected static final String OPT_PERSONAL = "personal";
 
     protected static final String OPT_QUOTA_MODULE = "quota-module";
     protected static final String OPT_QUOTA_VALUE = "quota-value";
@@ -624,6 +627,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption capsToAdd = null;
     protected CLIOption capsToRemove = null;
     protected CLIOption capsToDrop = null;
+
+    protected CLIOption personal = null;
 
     protected CLIOption quotaModule = null;
     protected CLIOption quotaValue = null;
@@ -940,7 +945,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true","1","yes","y","on")));
 
     private static boolean parseBool(final String parameter) {
-        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && BOOL_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
     protected static Credentials getCreds(final String[] nextLine, final int[] idarray) {
@@ -1028,19 +1033,20 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         final int m3 = idarray[Constants.THEME.getIndex()];
-        if (-1 != m3) {
-            if (nextLine[m3].length() > 0) {
-                final String addguival = nextLine[m3].trim();
-                if( addguival.length() == 0 ) {
+        if (m3 >= 0) {
+            String theme = nextLine[m3];
+            if (theme.length() > 0) {
+                final String addguival = theme.trim();
+                if (addguival.length() == 0) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
                 }
-                if(addguival.indexOf('=') < 0 ) {
+                int idx = addguival.indexOf('=');
+                if (idx <= 0) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
                 }
-                final int idx = addguival.indexOf('=');
-                final String key = addguival.substring(0, idx).trim();
-                final String val = addguival.substring(idx+1, addguival.length()).trim();
-                if(key.length() == 0 || val.length() == 0) {
+                String key = addguival.substring(0, idx).trim();
+                String val = addguival.substring(idx + 1, addguival.length()).trim();
+                if (key.length() == 0 || val.length() == 0) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (key or val empty)");
                 }
                 user.addGuiPreferences(key, val);
@@ -1683,16 +1689,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
-        if (-1 != m2) {
-            if (nextLine[m2].length() > 0) {
-                final String string = nextLine[m2];
-                final String[] split = string.split(",");
-                final HashSet<String> aliases = new HashSet<String>(Arrays.asList(split));
-                final String primaryEmail = user.getPrimaryEmail();
+        if (m2 >= 0) {
+            String mailAlias = nextLine[m2];
+            if (mailAlias.length() > 0) {
+                HashSet<String> aliases = new HashSet<String>(Arrays.asList(mailAlias.split(" *, *")));
+                String primaryEmail = user.getPrimaryEmail();
                 if (null != primaryEmail) {
                     aliases.add(primaryEmail);
                 }
-                final String email1 = user.getEmail1();
+                String email1 = user.getEmail1();
                 if (null != email1) {
                     aliases.add(email1);
                 }
@@ -1708,11 +1713,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return user;
     }
 
-    protected static void setValue(final String[] nextLine, final int[] idarray, final CSVConstants constant, final MethodStringClosure closure) throws InvalidDataException, ParseException {
-        final int i = idarray[constant.getIndex()];
-        if (-1 != i) {
-            if (nextLine[i].length() > 0) {
-                closure.callMethod(nextLine[i]);
+    protected static void setValue(String[] nextLine, int[] idarray, CSVConstants constant, MethodStringClosure closure) throws InvalidDataException, ParseException {
+        int i = idarray[constant.getIndex()];
+        if (i >= 0) {
+            String value = nextLine[i];
+            if (value.length() > 0) {
+                closure.callMethod(value);
             } else {
                 if (constant.isRequired()) {
                     throw new InvalidDataException("Field " + constant.getString() + " required but not set.");
@@ -1723,9 +1729,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     private void setValue(final String[] nextLine, final int[] idarray, final CSVConstants constant, final MethodDateClosure closure) throws InvalidDataException, ParseException {
         final int i = idarray[constant.getIndex()];
-        if (-1 != i) {
-            if (nextLine[i].length() > 0) {
-                final Date stringToDate = stringToDate(nextLine[i]);
+        if (i >= 0) {
+            String value = nextLine[i];
+            if (value.length() > 0) {
+                final Date stringToDate = stringToDate(value);
                 if (null != stringToDate) {
                     closure.callMethod(stringToDate);
                 }
@@ -1792,6 +1799,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
 
+    protected void setPersonal(final AdminParser parser) {
+        this.personal = setLongOpt(parser,OPT_PERSONAL,"The personal of user's mail address or special value \"NULL\" to drop the personal (if any)", true, false, false);
+    }
+
     protected void setCapsToAdd(final AdminParser parser) {
         this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_ADD,"The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false,false);
     }
@@ -1833,11 +1844,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setConfigOption(final AdminParser adminParser){
-        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.facebook=false|true'", false, false);
+        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
     }
 
     protected final void setRemoveConfigOption(final AdminParser adminParser){
-        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.facebook'", false, false);
+        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
 
     /**
@@ -1851,6 +1862,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final HashSet<String> returntypes = new HashSet<String>();
         returntypes.add(JAVA_LANG_STRING);
         returntypes.add(JAVA_LANG_INTEGER);
+        returntypes.add(JAVA_LANG_LONG);
         returntypes.add(JAVA_LANG_BOOLEAN);
         returntypes.add(JAVA_UTIL_DATE);
         returntypes.add(JAVA_UTIL_HASH_SET);
@@ -1917,7 +1929,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return null;
         }
         final String tmp = object.toString().trim();
-        return isEmpty(tmp) ? null : tmp;
+        return com.openexchange.java.Strings.isEmpty(tmp) ? null : tmp;
     }
 
     public Long parseAndSetQuotaValue(final AdminParser parser) throws InvalidDataException {
@@ -1933,6 +1945,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         } catch (NumberFormatException e) {
             throw new InvalidDataException("Quota value must be a number.");
         }
+    }
+
+    public String parseAndSetPersonal(final AdminParser parser) {
+        if (null == personal) {
+            setPersonal(parser);
+        }
+        Object object = parser.getOptionValue(personal);
+        if (null == object) {
+            return null;
+        }
+        return object.toString().trim();
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
@@ -1958,7 +1981,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
         String s = (String) parser.getOptionValue(cliOption);
-        if (isEmpty(s)) {
+        if (com.openexchange.java.Strings.isEmpty(s)) {
             return Collections.emptySet();
         }
         s = s.trim();
@@ -1967,7 +1990,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1976,7 +1999,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(0, s.length() - 1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1985,8 +2008,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final Set<String> set = new HashSet<String>(arr.length);
         for (String element : arr) {
             final String cap = element;
-            if (!isEmpty(cap)) {
-                set.add(toLowerCase(cap));
+            if (!com.openexchange.java.Strings.isEmpty(cap)) {
+                set.add(com.openexchange.java.Strings.toLowerCase(cap));
             }
         }
         return set;
@@ -2054,12 +2077,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void prepareConstantsMap() {
-        this.constantsMap = new HashMap<String, CSVConstants>();
+        HashMap<String, CSVConstants> constantsMap = new HashMap<String, CSVConstants>();
+        this.constantsMap = constantsMap;
         for (final Constants value : Constants.values()) {
-            this.constantsMap.put(value.getString(), value);
+            constantsMap.put(value.getString(), value);
         }
         for (final AccessCombinations value : AccessCombinations.values()) {
-            this.constantsMap.put(value.getString(), value);
+            constantsMap.put(value.getString(), value);
         }
     }
 
@@ -3426,52 +3450,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final int[] csvParsingCommon(final CSVReader reader) throws IOException, InvalidDataException {
-        String [] nextLine;
         prepareConstantsMap();
-        final int[] idarray = new int[this.constantsMap.size()];
-        for (int i = 0; i < idarray.length; i++) {
+
+        int[] idarray = new int[this.constantsMap.size()];
+        for (int i = idarray.length; i-- > 0;) {
             idarray[i] = -1;
         }
-        // First read the columnnames, we will use them later on like the parameter names for the clts
-        if (null != (nextLine = reader.readNext())) {
-            for (int i = 0; i < nextLine.length; i++) {
-                final CSVConstants constant = getConstantFromString(nextLine[i]);
-                if (null != constant) {
-                    idarray[constant.getIndex()] = i;
-                }
-            }
-        } else {
+
+        // First read the column names, we will use them later on like the parameter names for the clts
+        String [] nextLine = reader.readNext();
+        if (null == nextLine) {
             throw new InvalidDataException("no columnnames found");
+        }
+
+        for (int i = 0; i < nextLine.length; i++) {
+            final CSVConstants constant = getConstantFromString(nextLine[i]);
+            if (null != constant) {
+                idarray[constant.getIndex()] = i;
+            }
         }
 
         checkRequired(idarray);
         return idarray;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

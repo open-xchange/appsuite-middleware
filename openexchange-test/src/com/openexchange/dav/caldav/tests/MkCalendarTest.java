@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.tests;
 
+import static org.junit.Assert.*;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -57,6 +58,7 @@ import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
+import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -65,22 +67,19 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link MkCalendarTest}
- * 
- * Tests the MKCALENDAR command via the CalDAV interface 
- * 
+ *
+ * Tests the MKCALENDAR command via the CalDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class MkCalendarTest extends CalDAVTest {
 
-	public MkCalendarTest(String name) {
-		super(name);
-	}	
-	
     /**
      * Tests if the necessary MKCALENDAR method is listed in the 'Allow' response header.
-     *  
+     *
      * @throws Exception
      */
+	@Test
     public void testOptions() throws Exception {
         OptionsMethod options = null;
         try {
@@ -91,7 +90,8 @@ public class MkCalendarTest extends CalDAVTest {
             release(options);
         }
     }
-    
+
+	@Test
     public void testCreateCalendar() throws Exception {
         /*
          * perform mkcalendar request
@@ -174,7 +174,7 @@ public class MkCalendarTest extends CalDAVTest {
         props.add(PropertyNames.SYNC_TOKEN);
         props.add(PropertyNames.XMPP_SERVER);
         props.add(PropertyNames.XMPP_URI);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/", 
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/caldav/",
                 DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
@@ -191,5 +191,5 @@ public class MkCalendarTest extends CalDAVTest {
         }
         assertNotNull("no response for new folder", folderResponse);
     }
-    
+
 }

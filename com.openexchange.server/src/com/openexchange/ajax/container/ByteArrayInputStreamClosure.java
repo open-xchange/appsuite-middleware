@@ -50,7 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
-import com.openexchange.ajax.container.IFileHolder.InputStreamClosure;
+import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.java.Streams;
 
 /**

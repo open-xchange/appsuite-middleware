@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -127,19 +126,13 @@ public class OXFolderTools {
                 fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
             }
             if (!fo.getEffectiveUserPermission(userId, userConfig).isFolderVisible()) {
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
             return fo.getType(userId);
         } catch (final RuntimeException e) {
-            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId),
-                Integer.valueOf(ctx.getContextId()),
-                e);
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), e);
         } catch (final OXException e) {
-            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId),
-                Integer.valueOf(ctx.getContextId()),
-                e);
+            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), e);
         }
     }
 
@@ -170,33 +163,18 @@ public class OXFolderTools {
                 try {
                     return folderObj.getEffectiveUserPermission(userId, userConfig);
                 } catch (final RuntimeException e) {
-                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e,
-                        OXFolderUtility.getFolderName(folderId, ctx),
-                        Integer.valueOf(ctx.getContextId()),
-                        e);
+                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), e);
                 } catch (final OXException e) {
-                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e,
-                        OXFolderUtility.getFolderName(folderId, ctx),
-                        Integer.valueOf(ctx.getContextId()),
-                        e);
+                    throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(e, Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), e);
                 }
             }
         }
         /*
          * Fetch from storage
          */
-        final EffectivePermission retval = new EffectivePermission(userId, folderId, getFolderTypeFromDB(
-            folderId,
-            userId,
-            userConfig,
-            ctx,
-            con), getFolderModule(folderId, ctx, con), getFolderOwner(folderId, ctx, con), userConfig);
+        final EffectivePermission retval = new EffectivePermission(userId, folderId, getFolderTypeFromDB(folderId, userId, userConfig, ctx, con), getFolderModule(folderId, ctx, con), getFolderOwner(folderId, ctx, con), userConfig);
         retval.setEntity(userId);
-        retval.setAllPermission(
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        retval.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -256,9 +234,7 @@ public class OXFolderTools {
                     }
                 }
                 if (!retval.setAllPermission(fp_highest, orp_highest, owp_highest, odp_highest)) {
-                    throw OXFolderExceptionCode.NO_EFFECTIVE_PERMISSION.create(Integer.valueOf(folderId),
-                        Integer.valueOf(userId),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NO_EFFECTIVE_PERMISSION.create(Integer.valueOf(folderId), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
                 }
                 retval.setFolderAdmin(folderAdmin);
             } finally {
@@ -323,9 +299,7 @@ public class OXFolderTools {
         if (retval != 0) {
             return retval;
         }
-        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
-            getUserName(user, ctx),
-            Integer.valueOf(ctx.getContextId()));
+        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), user, Integer.valueOf(ctx.getContextId()));
     }
 
     /**
@@ -410,14 +384,10 @@ public class OXFolderTools {
                 if (rs.next()) {
                     retval = rs.getInt(1);
                     if (rs.wasNull()) {
-                        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
-                            getUserName(user, ctx),
-                            Integer.valueOf(ctx.getContextId()));
+                        throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), user, Integer.valueOf(ctx.getContextId()));
                     }
                 } else {
-                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module),
-                        getUserName(user, ctx),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), user, ctx, Integer.valueOf(ctx.getContextId()));
                 }
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -561,11 +531,7 @@ public class OXFolderTools {
      * only folders of a certain type or module)
      */
     private final static String getSQLUserVisibleFolders(final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String groupBy, final String orderBy) {
-        final StringBuilder retValBuilder = new StringBuilder("SELECT ").append(fields).append(" FROM oxfolder_tree AS ot ").append(
-            "JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE (((ot.permission_flag = ").append(
-            FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append(
-            "((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ").append(OCLPermission.NO_PERMISSIONS).append(
-            " AND op.permission_id IN ").append(permissionIds).append(")))");
+        final StringBuilder retValBuilder = new StringBuilder("SELECT ").append(fields).append(" FROM oxfolder_tree AS ot ").append("JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE (((ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ").append(OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(")))");
         if (OXFolderProperties.isIgnoreSharedAddressbook()) {
             retValBuilder.append(" AND (ot.fuid !=").append(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).append(')');
         }
@@ -588,13 +554,7 @@ public class OXFolderTools {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances, which represent all user-visible root folders
      */
     public static SearchIterator getUserRootFoldersIterator(final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            "AND (ot.type = ?) AND (ot.parent = ?)",
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER by ot.fuid");
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), "AND (ot.type = ?) AND (ot.parent = ?)", OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -649,16 +609,8 @@ public class OXFolderTools {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's private folder.
      */
     private static SearchIterator getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(
-            " AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append(
-            (since == null ? STR_EMPTY : " AND (changing_date > ?)"));
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, groups),
-            StringCollection.getSqlInString(accessibleModules),
-            condBuilder.toString(),
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER by ot.fuid");
+        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -691,15 +643,8 @@ public class OXFolderTools {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's public folder.
      */
     private static SearchIterator getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PUBLIC).append(") AND (ot.parent = ?)").append(
-            (since == null ? STR_EMPTY : " AND (changing_date > ?)"));
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, groups),
-            StringCollection.getSqlInString(accessibleModules),
-            condBuilder.toString(),
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER by ot.fuid");
+        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PUBLIC).append(") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -743,17 +688,10 @@ public class OXFolderTools {
         final boolean shared = parentFolder.isShared(userId);
         final StringBuilder condBuilder = new StringBuilder();
         if (shared) {
-            condBuilder.append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(
-                ") ");
+            condBuilder.append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(") ");
         }
         condBuilder.append("AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            condBuilder.toString(),
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER by ot.fuid");
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -786,19 +724,12 @@ public class OXFolderTools {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances of user-visible shared folders.
      */
     public static SearchIterator getVisibleSharedFolders(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int owner, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(
-            " AND ot.created_from != ").append(userId).append(')');
+        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(')');
         if (owner > -1) {
             condBuilder.append(" AND (ot.created_from = ").append(owner).append(')');
         }
         condBuilder.append(since == null ? STR_EMPTY : " AND (changing_date > ?)");
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            condBuilder.toString(),
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER BY ot.fuid");
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -886,19 +817,7 @@ public class OXFolderTools {
         try {
             readCon = DBPool.pickup(ctx);
             final StringBuilder sb = new StringBuilder();
-            sb.append("SELECT ").append(FolderObjectIterator.getFieldsForSQL("ot")).append(" FROM oxfolder_tree AS ot ").append(
-                "LEFT JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid ").append(" AND ot.cid = ? AND op.cid = ? ").append(
-                "WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(") OR (ot.permission_flag = ").append(
-                FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?) OR (op.admin_flag = 1 AND op.permission_id = ?) ").append(
-                " OR (op.fp > 0 AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, groups)).append("))").append(
-                " AND ot.parent NOT IN (SELECT ot2.fuid FROM oxfolder_tree AS ot2 LEFT JOIN oxfolder_permissions AS op2 ON ot2.fuid = op2.fuid ").append(
-                " AND ot2.cid = ? AND op2.cid = ? ").append(" WHERE ((ot2.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(
-                ") OR (ot2.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot2.created_from = ?)").append(
-                " OR (op2.admin_flag = 1 AND op2.permission_id = ?) ").append(" OR (op2.fp > 0 AND op2.permission_id IN ").append(
-                StringCollection.getSqlInString(userId, groups)).append(")) AND ot2.type != ").append(FolderObject.PRIVATE).append(
-                ") AND ot.type != ").append(FolderObject.PRIVATE).append(" AND ot.module = ").append(module).append(" AND ot.module IN ").append(
-                StringCollection.getSqlInString(userConfig.getAccessibleModules())).append(
-                OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
+            sb.append("SELECT ").append(FolderObjectIterator.getFieldsForSQL("ot")).append(" FROM oxfolder_tree AS ot ").append("LEFT JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid ").append(" AND ot.cid = ? AND op.cid = ? ").append("WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(") OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?) OR (op.admin_flag = 1 AND op.permission_id = ?) ").append(" OR (op.fp > 0 AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, groups)).append("))").append(" AND ot.parent NOT IN (SELECT ot2.fuid FROM oxfolder_tree AS ot2 LEFT JOIN oxfolder_permissions AS op2 ON ot2.fuid = op2.fuid ").append(" AND ot2.cid = ? AND op2.cid = ? ").append(" WHERE ((ot2.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(") OR (ot2.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot2.created_from = ?)").append(" OR (op2.admin_flag = 1 AND op2.permission_id = ?) ").append(" OR (op2.fp > 0 AND op2.permission_id IN ").append(StringCollection.getSqlInString(userId, groups)).append(")) AND ot2.type != ").append(FolderObject.PRIVATE).append(") AND ot.type != ").append(FolderObject.PRIVATE).append(" AND ot.module = ").append(module).append(" AND ot.module IN ").append(StringCollection.getSqlInString(userConfig.getAccessibleModules())).append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
             stmt = readCon.prepareStatement(sb.toString());
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
@@ -944,9 +863,7 @@ public class OXFolderTools {
                     /*
                      * Starting folder is not visible to user
                      */
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId), getUserName(
-                        userId,
-                        ctx), Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folderId), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
                 }
                 return;
             }
@@ -968,12 +885,7 @@ public class OXFolderTools {
                     final StringHelper strHelper = StringHelper.valueOf(locale);
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
-                final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
-                    "u:" + fo.getCreatedBy(),
-                    creatorDisplayName,
-                    FolderObject.SYSTEM_MODULE,
-                    true,
-                    FolderObject.SYSTEM_TYPE);
+                final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject("u:" + fo.getCreatedBy(), creatorDisplayName, FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
                 folderList.add(virtualOwnerFolder);
                 /*
                  * Set folder to system shared folder
@@ -989,21 +901,20 @@ public class OXFolderTools {
                 folderList.add(fo);
                 final int virtualParent;
                 switch (fo.getModule()) {
-                case FolderObject.TASK:
-                    virtualParent = FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID;
-                    break;
-                case FolderObject.CALENDAR:
-                    virtualParent = FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID;
-                    break;
-                case FolderObject.CONTACT:
-                    virtualParent = FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID;
-                    break;
-                case FolderObject.INFOSTORE:
-                    virtualParent = FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
-                    break;
-                default:
-                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
-                        Integer.valueOf(ctx.getContextId()));
+                    case FolderObject.TASK:
+                        virtualParent = FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID;
+                        break;
+                    case FolderObject.CALENDAR:
+                        virtualParent = FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID;
+                        break;
+                    case FolderObject.CONTACT:
+                        virtualParent = FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID;
+                        break;
+                    case FolderObject.INFOSTORE:
+                        virtualParent = FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID;
+                        break;
+                    default:
+                        throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
                 checkForSpecialFolder(folderList, virtualParent, locale, ctx);
                 return;
@@ -1031,46 +942,29 @@ public class OXFolderTools {
         final boolean publicParent;
         final FolderObject specialFolder;
         switch (folderId) {
-        case FolderObject.SYSTEM_LDAP_FOLDER_ID:
-            specialFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
-            specialFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale));
-            publicParent = true;
-            break;
-        case FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.getFolderString(
-                FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID,
-                locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
-            publicParent = true;
-            break;
-        case FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
-            publicParent = true;
-            break;
-        case FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
-            publicParent = true;
-            break;
-        case FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID:
-            specialFolder = FolderObject.createVirtualFolderObject(
-                FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID,
-                FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale),
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
-            publicParent = false;
-            break;
-        default:
-            return false;
+            case FolderObject.SYSTEM_LDAP_FOLDER_ID:
+                specialFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
+                specialFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale));
+                publicParent = true;
+                break;
+            case FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID:
+                specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                publicParent = true;
+                break;
+            case FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID:
+                specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                publicParent = true;
+                break;
+            case FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID:
+                specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                publicParent = true;
+                break;
+            case FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID:
+                specialFolder = FolderObject.createVirtualFolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, locale), FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+                publicParent = false;
+                break;
+            default:
+                return false;
         }
         folderList.add(specialFolder);
         final int parentId = publicParent ? FolderObject.SYSTEM_PUBLIC_FOLDER_ID : FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
@@ -1130,13 +1024,7 @@ public class OXFolderTools {
         ResultSet rs = null;
         try {
             readCon = DBPool.pickup(ctx);
-            stmt = readCon.prepareStatement(getSQLUserVisibleFolders(
-                FolderObjectIterator.getFieldsForSQL("ot"),
-                StringCollection.getSqlInString(userId, memberInGroups),
-                StringCollection.getSqlInString(accessibleModules),
-                condBuilder.toString(),
-                OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-                "ORDER BY ot.fuid"));
+            stmt = readCon.prepareStatement(getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid"));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, userId);
@@ -1164,13 +1052,7 @@ public class OXFolderTools {
      * Returns a <code>SearchIterator</code> of <code>FolderObject</code> instances of a certain module
      */
     public static SearchIterator getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int module, final Connection readConArg, final Context ctx) throws OXException, SearchIteratorException {
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            "AND (ot.module = ?)",
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER BY ot.fuid");
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), "AND (ot.module = ?)", OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid");
         final Connection readCon;
         final boolean closeReadCon = (readConArg == null);
         if (closeReadCon) {
@@ -1204,14 +1086,7 @@ public class OXFolderTools {
      */
     public static SearchIterator getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
         final String fields = FolderObjectIterator.getFieldsForSQL("ot");
-        final StringBuilder sqlBuilder = new StringBuilder("SELECT ").append(fields).append(
-            " FROM del_oxfolder_tree AS ot JOIN del_oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append(
-            "WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(" OR (ot.permission_flag = ").append(
-            FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append(
-            "((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(
-            StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(
-            StringCollection.getSqlInString(accessibleModules)).append(')').append(
-            OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
+        final StringBuilder sqlBuilder = new StringBuilder("SELECT ").append(fields).append(" FROM del_oxfolder_tree AS ot JOIN del_oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(" OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(StringCollection.getSqlInString(accessibleModules)).append(')').append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1243,18 +1118,11 @@ public class OXFolderTools {
      * since a given date.
      */
     public static SearchIterator getModifiedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final boolean userFoldersOnly, final Context ctx) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (changing_date > ?) AND (module IN ").append(
-            FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
+        final StringBuilder condBuilder = new StringBuilder("AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES).append(')');
         if (userFoldersOnly) {
             condBuilder.append(" AND (ot.created_from = ").append(userId).append(") ");
         }
-        final String sqlSelectStr = getSQLUserVisibleFolders(
-            FolderObjectIterator.getFieldsForSQL("ot"),
-            StringCollection.getSqlInString(userId, memberInGroups),
-            StringCollection.getSqlInString(accessibleModules),
-            condBuilder.toString(),
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
-            "ORDER by ot.fuid");
+        final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1280,17 +1148,14 @@ public class OXFolderTools {
         return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
     }
 
-    private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append("SELECT ").append(
-        FolderObjectIterator.getFieldsForSQL("ot")).append(" FROM oxfolder_tree AS ot").append(" WHERE (cid = ?) ").toString();
+    private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append("SELECT ").append(FolderObjectIterator.getFieldsForSQL("ot")).append(" FROM oxfolder_tree AS ot").append(" WHERE (cid = ?) ").toString();
 
     /**
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which represent <b>all</b> modified folders since a
      * given date.
      */
     public static SearchIterator getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException, SearchIteratorException {
-        final String sqlSelectStr = new StringBuilder(300).append(SQL_SELECT_FOLDERS_START).append(
-            "AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES).append(") ").append(
-            OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null).append(" ORDER by ot.fuid").toString();
+        final String sqlSelectStr = new StringBuilder(300).append(SQL_SELECT_FOLDERS_START).append("AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES).append(") ").append(OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null).append(" ORDER by ot.fuid").toString();
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1349,9 +1214,7 @@ public class OXFolderTools {
                     }
                     return fo;
                 }
-                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(FolderObject.INFOSTORE), getUserName(
-                    userId,
-                    ctx), Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             } finally {
                 closeResources(rs, stmt, createCon ? readCon : null, true, ctx);
             }
@@ -1519,44 +1382,40 @@ public class OXFolderTools {
                  * User may only delete own objects. Check if folder contains foreign objects which must not be deleted.
                  */
                 switch (fo.getModule()) {
-                case FolderObject.TASK:
-                    final Tasks tasks = Tasks.getInstance();
-                    return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
-                case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                    return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
-                case FolderObject.CONTACT:
-                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
-                    return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.INFOSTORE:
-                    final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-                    return !db.hasFolderForeignObjects(
-                        fo.getObjectID(),
-                        ServerSessionAdapter.valueOf(session, ctx));
-                default:
-                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
-                        Integer.valueOf(ctx.getContextId()));
+                    case FolderObject.TASK:
+                        final Tasks tasks = Tasks.getInstance();
+                        return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
+                    case FolderObject.CALENDAR:
+                        final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                        return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+                    case FolderObject.CONTACT:
+                        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                        return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
+                    case FolderObject.INFOSTORE:
+                        final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+                        return !db.hasFolderForeignObjects(fo.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
+                    default:
+                        throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
             } else {
                 /*
                  * No delete permission: Return true if folder is empty
                  */
                 switch (fo.getModule()) {
-                case FolderObject.TASK:
-                    final Tasks tasks = Tasks.getInstance();
-                    return tasks.isFolderEmpty(ctx, fo.getObjectID());
-                case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                    return calSql.isFolderEmpty(userId, fo.getObjectID());
-                case FolderObject.CONTACT:
-                    ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
-                    return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.INFOSTORE:
-                    final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-                    return db.isFolderEmpty(fo.getObjectID(), ctx);
-                default:
-                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
-                        Integer.valueOf(ctx.getContextId()));
+                    case FolderObject.TASK:
+                        final Tasks tasks = Tasks.getInstance();
+                        return tasks.isFolderEmpty(ctx, fo.getObjectID());
+                    case FolderObject.CALENDAR:
+                        final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                        return calSql.isFolderEmpty(userId, fo.getObjectID());
+                    case FolderObject.CONTACT:
+                        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                        return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
+                    case FolderObject.INFOSTORE:
+                        final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+                        return db.isFolderEmpty(fo.getObjectID(), ctx);
+                    default:
+                        throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
                 }
             }
         } catch (final SQLException e) {

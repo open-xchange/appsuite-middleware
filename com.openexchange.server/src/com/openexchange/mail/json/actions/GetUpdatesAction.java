@@ -123,6 +123,7 @@ public final class GetUpdatesAction extends AbstractMailAction {
                 int contextId = session.getContextId();
                 MailServletInterface mailInterface = getMailInterface(req);
 
+                columns = prepareColumns(columns);
                 if (!bIgnoreModified) {
                     final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
                     final MailFieldWriter[] writers = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));

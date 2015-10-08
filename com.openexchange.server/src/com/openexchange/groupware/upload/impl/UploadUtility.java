@@ -597,7 +597,7 @@ public final class UploadUtility {
                             File file = new File(filename);
                             if (file.getName().startsWith(prefix) && file.lastModified() < stamp) {
                                 logger.debug("Found expired file entry {}. Deleting...", filename);
-                                if (!file.delete()) {
+                                if (!file.delete() && file.exists()) {
                                     logger.warn("Temporary file could not be deleted: {}", file.getPath());
                                 }
                             }

@@ -1,6 +1,5 @@
 package com.openexchange.ajax.contact;
 
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.Contact;
 

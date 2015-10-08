@@ -53,6 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.impl.ConfigCascade;
@@ -68,15 +69,15 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class ConfigCascadeActivator extends HousekeepingActivator{
 
-    // private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
+    private boolean configured;
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigCascadeActivator.class);
-
-    private boolean configured = false;
-
-    //private ConfigCascade configCascade;
-
-    // private final int INFINITY = 10;
+    /**
+     * Initializes a new {@link ConfigCascadeActivator}.
+     */
+    public ConfigCascadeActivator() {
+        super();
+        configured = false;
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,8 +86,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigCascade configCascade = new ConfigCascade();
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigCascadeActivator.class);
 
+        final ConfigCascade configCascade = new ConfigCascade();
         final ServiceTracker<StringParser, StringParser> stringParsers = track(StringParser.class);
 
         configCascade.setStringParser(new StringParser() {
@@ -95,7 +97,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             public <T> T parse(final String s, final Class<T> t) {
                 final StringParser parser = stringParsers.getService();
                 if(parser == null) {
-                    LOG.error("Could not find suitable string parser in OSGi system");
+                    logger.error("Could not find suitable string parser in OSGi system");
                     return null;
                 }
                 return parser.parse(s, t);
@@ -107,10 +109,10 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         track(TrackingProvider.createFilter("server", context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
 
             @Override
-            public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
-                final ConfigProviderService provider = context.getService(reference);
+            public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
+                ConfigProviderService provider = context.getService(reference);
                 if (isServerProvider(reference)) {
-                    final String scopes = getScopes(provider);
+                    String scopes = getScopes(provider);
                     configure(scopes, configCascade);
                     configCascade.setProvider("server", provider);
                     registerService(ConfigViewFactory.class, configCascade);
@@ -119,12 +121,12 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             }
 
             @Override
-            public void modifiedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+            public void modifiedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
                 // IGNORE
             }
 
             @Override
-            public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+            public void removedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
                 context.ungetService(reference);
             }
         });
@@ -133,46 +135,41 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     }
 
     @Override
-    public <S> void registerService(final java.lang.Class<S> clazz, final S service) {
+    public <S> void registerService(java.lang.Class<S> clazz, S service) {
         super.registerService(clazz, service);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        // Merely calls super?
-        super.stopBundle();
-    }
-
     boolean isServerProvider(final ServiceReference<?> reference) {
-        final Object scope = reference.getProperty("scope");
-        return scope != null && scope.equals("server");
+        Object scope = reference.getProperty("scope");
+        return "server".equals(scope);
     }
 
-    String getScopes(final ConfigProviderService config) {
+    String getScopes(ConfigProviderService config) {
         try {
             return config.get("com.openexchange.config.cascade.scopes", ConfigProviderService.NO_CONTEXT, ConfigProviderService.NO_USER).get();
-        } catch (final OXException e) {
-            LOG.error("", e);
+        } catch (OXException e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigCascadeActivator.class);
+            logger.error("", e);
         }
         return null;
     }
 
-    void configure(final String scopes, final ConfigCascade cascade) {
+    synchronized void configure(String scopes, ConfigCascade cascade) {
         if (configured) {
             return;
         }
         final String scops = scopes == null ? "user, context, server" : scopes;
         configured = true;
 
-        final String[] searchPath = scops.split("\\s*,\\s*");
+        String[] searchPath = scops.split("\\s*,\\s*");
         cascade.setSearchPath(searchPath);
 
-        for (final String scope : searchPath) {
+        for (String scope : searchPath) {
             if ("server".equals(scope)) {
                 continue;
             }
 
-            final TrackingProvider trackingProvider = new TrackingProvider(scope, context);
+            TrackingProvider trackingProvider = new TrackingProvider(scope, context);
             rememberTracker(trackingProvider);
             cascade.setProvider(scope, trackingProvider);
             trackingProvider.open();

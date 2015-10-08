@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link FileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since Open-Xchange v6.18.2
  */
 public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
@@ -75,6 +76,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
+    /**
+     * %1$s protocol error occurred: %2$s
+     */
+    PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 5),
     /**
      * A JSON occurred: %1$s
      */
@@ -207,6 +212,106 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The file \"%1$s\" cannot be moved to \"%2$s\".
      */
     FILE_MOVE_NOT_SUPPORTED("The file \"%1$s\" cannot be moved to \"%2$s\".", Category.CATEGORY_USER_INPUT, 37, FileStorageExceptionMessages.FILE_MOVE_NOT_SUPPORTED_MSG),
+    /**
+     * No administrative file access exists for service "%1$s"
+     */
+    ADMIN_FILE_ACCESS_NOT_AVAILABLE("No administrative file access exists for service \"%1$s\"", Category.CATEGORY_ERROR, 38),
+    /**
+     * File version %1$s of file %2$s not found in folder %3$s.
+     */
+    FILE_VERSION_NOT_FOUND("File version %1$s of file %2$s not found in folder %3$s.", Category.CATEGORY_USER_INPUT, 39, FileStorageExceptionMessages.FILE_VERSION_NOT_EXISTS_MSG),
+    /**
+     * The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_NOTES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 40, FileStorageExceptionMessages.LOSS_OF_NOTES_MSG),
+    /**
+     * All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_VERSIONS("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 41, FileStorageExceptionMessages.LOSS_OF_VERSIONS_MSG),
+    /**
+     * The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_CATEGORIES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 42, FileStorageExceptionMessages.LOSS_OF_CATEGORIES_MSG),
+    /**
+     * The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
+     */
+    LOSS_OF_FILE_SHARES("Metadata of file \"%4$s\" not supported in target folder \"%5$s\"", CATEGORY_WARNING, 43, FileStorageExceptionMessages.LOSS_OF_FILE_SHARES_MSG),
+    /**
+     * The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
+     */
+    LOSS_OF_FOLDER_SHARES("Metadata of folder \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 44, FileStorageExceptionMessages.LOSS_OF_FOLDER_SHARES_MSG),
+    /**
+     * The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details. | File update aborted: %2$s
+     */
+    FILE_UPDATE_ABORTED("File update aborted: %2$s", Category.CATEGORY_CONFLICT, 45, FileStorageExceptionMessages.FILE_UPDATE_ABORTED_MSG),
+    /**
+     * Versioning not supported by '%1$s' file storage.
+     */
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by '%1$s' file storage.", Category.CATEGORY_ERROR, 46, null),
+    /**
+     * The %1$s URL does not denote a file: %2$s
+     */
+    NOT_A_FILE("The %1$s URL does not denote a file: %2$s", CATEGORY_USER_INPUT, 47, FileStorageExceptionMessages.NOT_A_FILE_MSG),
+    /**
+     * The %1$s URL does not denote a directory: %2$s
+     */
+    NOT_A_FOLDER("The %1$s URL does not denote a directory: %2$s", CATEGORY_USER_INPUT, 48, FileStorageExceptionMessages.NOT_A_FOLDER_MSG),
+    /**
+     * Missing file name.
+     */
+    MISSING_FILE_NAME("Missing file name.", CATEGORY_USER_INPUT, 49, FileStorageExceptionMessages.MISSING_FILE_NAME_MSG),
+    /**
+     * Update denied for %1$s resource: %2$s
+     */
+    UPDATE_DENIED("Update denied for \"%1$s\" resource: %2$s", CATEGORY_USER_INPUT, 50, FileStorageExceptionMessages.UPDATE_DENIED_MSG),
+    /**
+     * Delete denied for \"%1$s\" resource: %2$s
+     */
+    DELETE_DENIED("Delete denied for \"%1$s\" resource: %2$s", CATEGORY_PERMISSION_DENIED, 51, FileStorageExceptionMessages.DELETE_DENIED_MSG),
+    /**
+     * Invalid property "%1$s". Should be "%2$s".
+     */
+    INVALID_PROPERTY("Invalid property \"%1$s\". Should be \"%2$s\".", CATEGORY_ERROR, 52, null),
+    /**
+     * Invalid \"%1$s\" property \"%2$s\".
+     */
+    INVALID_TYPE_PROPERTY("Invalid \"%1$s\" property \"%2$s\".", CATEGORY_ERROR, 53, null),
+    /**
+     * Missing configuration for %1$s account "%2$s".
+     */
+    MISSING_CONFIG("Missing configuration for %1$s account \"%2$s\".", Category.CATEGORY_CONFIGURATION, 54, FileStorageExceptionMessages.MISSING_CONFIG_MSG),
+    /**
+     * "The %1$s resource does not exist: %2$s"
+     */
+    NOT_FOUND("The %1$s resource does not exist: %2$s", Category.CATEGORY_ERROR, 55, FileStorageExceptionMessages.NOT_FOUND_MSG),
+    /**
+     * Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s
+     */
+    AUTHENTICATION_FAILED("Authentication failed for the file storage account with identifier %1$s (service: %2$s): %3$s", Category.CATEGORY_CONFIGURATION, 56),
+    /**
+     * The file %1$s doesn't have any content.
+     */
+    NO_CONTENT("The file %1$s doesn't have any content.", Category.CATEGORY_ERROR, 57, FileStorageExceptionMessages.NO_CONTENT_MSG),
+    /**
+     * Individual permissions are not supported in account \"%1$s\". | No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)
+     */
+    NO_PERMISSION_SUPPORT("No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)", Category.CATEGORY_ERROR, 58, FileStorageExceptionMessages.NO_PERMISSION_SUPPORT_MSG),
+    /**
+     * Saving notes for file \"%1$s\" is not supported in account \"%2$s\". | Metadata of file \"%3$s\" not supported in target folder \"%4$s\"
+     */
+    NO_NOTES_SUPPORT("Metadata of file \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 59, FileStorageExceptionMessages.NO_NOTES_SUPPORT_MSG),
+    /**
+     * Assigning categories to file \"%1$s\" is not supported in account \"%2$s\". | Metadata of file \"%3$s\" not supported in target folder \"%4$s\"
+     */
+    NO_CATEGORIES_SUPPORT("Metadata of file \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 60, FileStorageExceptionMessages.NO_CATEGORIES_SUPPORT_MSG),
+    /**
+     * The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details. | File save aborted: %2$s
+     */
+    FILE_SAVE_ABORTED("File save aborted: %2$s", Category.CATEGORY_CONFLICT, 61, FileStorageExceptionMessages.FILE_SAVE_ABORTED_MSG),
+    /**
+     * Invalid permissions (%1$d) for entity \"%2$d\" on object \"%3$s\".
+     */
+    INVALID_OBJECT_PERMISSIONS("Invalid permissions (%1$d) for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 62),
 
     ;
 

@@ -56,8 +56,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -70,7 +73,7 @@ import com.openexchange.tx.TransactionAware;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface IDBasedFileAccess extends TransactionAware {
+public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
 
     /**
      * Gets a value indicating whether a specific account supports one or more capabilities.
@@ -123,6 +126,18 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
+
+    /**
+     * Saves metadata for a file.
+     *
+     * @param document The metadata to save
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The (fully qualified) unique identifier of the saved file
+     * @throws OXException If operation fails
+     */
+    String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreWarnings) throws OXException ;
 
     /**
      * Copies a file from the source to the destination.
@@ -203,28 +218,40 @@ public interface IDBasedFileAccess extends TransactionAware {
     Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
 
     /**
-     * Saves file metadata and binary content. To update an existing file, the file's identifier must be set accordingly. For new files,
-     * the file ID should be set to <code>FileStorageFileAccess#NEW</code> (i.e. <code>null</code>).
+     * Saves file metadata and binary content.
+     * <p/>
+     * <b>Notes:</b>
+     * <ul>
+     * <li>To update an existing file, the file's identifier must be set accordingly</li>
+     * <li>For new files, the file ID should be set to {@link FileStorageFileAccess#NEW} (i.e. <code>null</code>)</li>
+     * <li>Warnings regarding potential data loss are available via {@link #getWarnings()}</li>
+     * </ul>
      *
      * @param document The metadata to save
-     * @param data The binary content, or <code>null</code> when saving metadata only
+     * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass
-     *        <code>FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER</code> for new files or
-     *        <code>FileStorageFileAccess#DISTANT_FUTURE</code> to circumvent the check
+     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
     String saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
 
     /**
-     * Saves file and binary content. To update an existing file, the file's identifier must be set accordingly. For new files,
-     * the file ID should be set to <code>FileStorageFileAccess#NEW</code> (i.e. <code>null</code>).
+     * Saves file metadata and binary content.
+     * <p/>
+     * <b>Notes:</b>
+     * <ul>
+     * <li>To update an existing file, the file's identifier must be set accordingly</li>
+     * <li>For new files, the file ID should be set to {@link FileStorageFileAccess#NEW} (i.e. <code>null</code>)</li>
+     * <li>Warnings regarding potential data loss are available via {@link #getWarnings()}</li>
+     * </ul>
      *
      * @param document The metadata to save
-     * @param data The binary content, or <code>null</code> when saving metadata only
+     * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass
-     *        <code>FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER</code> for new files or
-     *        <code>FileStorageFileAccess#DISTANT_FUTURE</code> to circumvent the check
+     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
@@ -232,19 +259,53 @@ public interface IDBasedFileAccess extends TransactionAware {
     String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
-     * Save the file metadata, optionally without creating a new version.
+     * Saves file metadata and binary content, optionally without creating a new version.
      * <p/>
-     * <b>Note:</b> Only available if the underlying account supports the {@link FileStorageCapability#IGNORABLE_VERSION} capability.
+     * <b>Notes:</b>
+     * <ul>
+     * <li>To update an existing file, the file's identifier must be set accordingly</li>
+     * <li>For new files, the file ID should be set to {@link FileStorageFileAccess#NEW} (i.e. <code>null</code>)</li>
+     * <li>Setting <code>ignoreVersion</code> to <code>true</code> requires the {@link FileStorageCapability#IGNORABLE_VERSION}</li>
+     * <li><code>ignoreVersion</code> is only considered during update operations, not for new files
+     * <li>Warnings regarding potential data loss are available via {@link #getWarnings()}</li>
+     * </ul>
      *
      * @param document The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
+     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
     String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
+
+    /**
+     * Saves file metadata and binary content, optionally without creating a new version.
+     * <p/>
+     * <b>Notes:</b>
+     * <ul>
+     * <li>To update an existing file, the file's identifier must be set accordingly</li>
+     * <li>For new files, the file ID should be set to {@link FileStorageFileAccess#NEW} (i.e. <code>null</code>)</li>
+     * <li>Setting <code>ignoreVersion</code> to <code>true</code> requires the {@link FileStorageCapability#IGNORABLE_VERSION}</li>
+     * <li><code>ignoreVersion</code> is only considered during update operations, not for new files
+     * <li>Warnings regarding potential data loss are available via {@link #getWarnings()}</li>
+     * </ul>
+     *
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
+     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
+     * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @return The (fully qualified) unique identifier of the saved file
+     * @throws OXException If operation fails
+     */
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings) throws OXException;
 
     /**
      * Save file metadata and content. Since the actual version is modified, the version number is not increased.
@@ -361,6 +422,33 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException If operation fails
      */
     TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
+
+    /**
+     * Lists a folders content loading only the fields given and sorting by a certain field either ascending or descending.
+     *
+     * @param folderId The folder whose contents to list
+     * @param fields The fields to load
+     * @param sort The field to sort by
+     * @param order The sorting direction
+     * @param range The optional range
+     * @return The documents
+     * @throws OXException If operation fails
+     */
+    TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order, Range range) throws OXException;
+
+    /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity.
+     * <p/><b>Note:</b>
+     * Only available if at least one underlying account supports the {@link FileStorageCapability#OBJECT_PERMISSIONS} capability.
+     *
+     * @param fields The fields to load, or <code>null</code> to load all fields
+     * @param sort The field to sort by, or <code>null</code> for no specific sort order
+     * @param order The sorting direction, or <code>null</code> for no specific sort order
+     * @return The shared documents of all accounts, or an empty iterator if there are none, or no storage supports object permissions
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException;
 
     /**
      * List all versions of a document

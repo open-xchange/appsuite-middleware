@@ -135,7 +135,7 @@ public class SessionStorageConfiguration {
                     names.add(tmp.substring(prev));
                 }
 
-                remoteParameterNames = new ArrayList<String>(names);
+                remoteParameterNames = Collections.unmodifiableList(new ArrayList<String>(names));
             }
         }
     }

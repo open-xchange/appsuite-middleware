@@ -64,6 +64,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -77,6 +78,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.Collections;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -175,15 +177,15 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         try {
             runner.get();
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            throw TaskExceptionCode.THREAD_ISSUE.create(e);
         } catch (final ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, OXException.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(TaskIterator2.class);
+            logger.error("Failed to close search iterator", e.getCause());
         }
     }
 
@@ -344,6 +346,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         } catch (final SQLException e) {
             exc = TaskExceptionCode.SQL_ERROR.create(e);
         } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             exc = TaskExceptionCode.THREAD_ISSUE.create(t);
         } finally {
             preread.finished();

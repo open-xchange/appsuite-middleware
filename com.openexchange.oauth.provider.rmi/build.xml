@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.oauth.provider.rmi overrides">
+
+    <description>
+        Symlinks OAuth provider RMI client JAR to lib directory.
+    </description>
+
+    <import file="build-project.xml"/>
+
+    <target name="postInstall">
+        <mkdir dir="${destDir}/${prefix}/${libDir}"/>
+        <symlink resource="${bundlesDir}/${Bundle-SymbolicName}.jar" link="${destDir}/${prefix}/${libDir}/${Bundle-SymbolicName}.jar" overwrite="true"/>
+        <antcall target="javadoc">
+            <reference refid="sourceDirs"/>
+        </antcall>
+    </target>
+
+    <target name="javadoc">
+        <if>
+            <equals arg1="1.8" arg2="${ant.java.version}"/>
+            <then>
+                <property name="additionalJavadocParam" value="-Xdoclint:none"/>
+            </then>
+            <else>
+                <property name="additionalJavadocParam" value=""/>
+            </else>
+        </if>
+        <!-- property name="printablePath" refid="sourceDirs"/>
+        <echo message="${printablePath}"/ -->
+        <javadoc failonerror="true" destdir="javadoc" author="true" public="true" Windowtitle="Open-Xchange OAuth Provider Interface" additionalparam="${additionalJavadocParam}">
+            <Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
+            <sourcepath refid="sourceDirs"/>
+            <sourcepath path="${mainSrcDir}"/>
+            <fileset dir="${mainSrcDir}" defaultexcludes="yes"/>
+            <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+        </javadoc>
+    </target>
+
+</project>

@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import junit.framework.TestCase;
 import org.mockito.Mockito;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
@@ -82,6 +83,8 @@ public class Bug22838Test extends TestCase {
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         SessionStorageService sessionStorageService = Mockito.mock(SessionStorageService.class);
         serviceLookup.add(SessionStorageService.class, sessionStorageService);
+        EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
+        serviceLookup.add(EventAdmin.class, eventAdmin);
         com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
 
         SessionHandler.init(config);

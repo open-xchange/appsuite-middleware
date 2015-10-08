@@ -68,7 +68,7 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     /**
      * The identifier for Google Drive file storage service.
      */
-    public static final String ID = "com.openexchange.file.storage.googledrive";
+    public static final String ID = "googledrive";
 
     /**
      * The special MIME type marking a file as a directory.
@@ -104,6 +104,6 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     /**
      * The default fields to query.
      */
-    public static final String FIELDS_DEFAULT = "id,title,createdDate,modifiedDate,mimeType,fileSize,downloadUrl,description,version";
+    public static final String FIELDS_DEFAULT = "id,parents/id,modifiedDate,mimeType,explicitlyTrashed,labels/trashed";
 
 }

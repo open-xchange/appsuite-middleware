@@ -60,13 +60,13 @@ import com.openexchange.ajax.framework.Params;
  */
 public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreResponse> {
 
-    private int id;
+    private String id;
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -74,7 +74,7 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
         super();
     }
 
-    public GetInfostoreRequest(int id) {
+    public GetInfostoreRequest(String id) {
         this();
         setId(id);
     }

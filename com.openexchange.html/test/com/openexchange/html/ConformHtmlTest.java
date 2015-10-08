@@ -49,46 +49,15 @@
 
 package com.openexchange.html;
 
-import java.util.Map;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
  * {@link ConformHtmlTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConformHtmlTest {
-
-    private HtmlService service;
-
-    public ConformHtmlTest() {
-        super();
-    }
-
-    @Before
-    public void setUp() {
-        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
-
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
-
-        htmlEntityMap.put("apos", Character.valueOf('\''));
-
-        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
-    }
-
-    @After
-    public void tearDown() {
-        service = null;
-    }
-
+public class ConformHtmlTest extends AbstractSanitizing {
     @Test
     public void testConformHtml() {
         String content = "<table><tr>\n" +
@@ -98,7 +67,7 @@ public class ConformHtmlTest {
             "</tr>\n" +
             "</table>";
 
-        String test = service.getConformHTML(content, "us-ascii");
+        String test = getHtmlService().getConformHTML(content, "us-ascii");
 
         Assert.assertTrue("Missing DOCTYPE declaration", test.startsWith("<!DOCTYPE html"));
         Assert.assertTrue("Missing <head> section.", test.indexOf("<head>") >= 0);
@@ -110,7 +79,7 @@ public class ConformHtmlTest {
     public void testConformHtml2() {
         String content = "<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>";
 
-        String test = service.getConformHTML(content, "us-ascii");
+        String test = getHtmlService().getConformHTML(content, "us-ascii");
 
         Assert.assertTrue("Unexpected HTML content", test.indexOf("<br>") > 0);
         Assert.assertTrue("Unexpected HTML content", test.indexOf("</br>") < 0);

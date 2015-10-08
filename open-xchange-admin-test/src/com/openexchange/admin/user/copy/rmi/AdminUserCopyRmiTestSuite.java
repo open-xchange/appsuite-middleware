@@ -64,7 +64,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     RoundtripTest.class,
     UserCopyTest.class,
-    MailAttachmentFolderTest.class
+//temporary removal    MailAttachmentFolderTest.class
 })
 public class AdminUserCopyRmiTestSuite {
 

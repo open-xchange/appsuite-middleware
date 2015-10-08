@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.infostore.validation;
 
+import junit.framework.TestCase;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import junit.framework.TestCase;
 
 /**
  * {@link FilenamesMayNotContainSlashesValidatorTest}
@@ -76,7 +76,7 @@ public class FilenamesMayNotContainSlashesValidatorTest extends TestCase {
     private DocumentMetadataValidation validateFilename(String filename) {
         DocumentMetadata document = new DocumentMetadataImpl();
         document.setFileName(filename);
-        return new FilenamesMayNotContainSlashesValidator().validate(document);
+        return new FilenamesMayNotContainSlashesValidator().validate(null, document);
     }
 
 }

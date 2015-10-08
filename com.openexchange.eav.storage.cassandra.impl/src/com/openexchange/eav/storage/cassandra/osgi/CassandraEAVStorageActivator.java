@@ -49,7 +49,6 @@
 package com.openexchange.eav.storage.cassandra.osgi;
 
 import java.io.File;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.EAVStorage;
 import com.openexchange.eav.storage.cassandra.impl.CassandraEAVStorageImpl;

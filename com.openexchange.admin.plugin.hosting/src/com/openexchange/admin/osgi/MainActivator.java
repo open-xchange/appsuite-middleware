@@ -70,7 +70,7 @@ public class MainActivator extends CompositeBundleActivator {
     @Override
     protected BundleActivator[] getActivators() {
         return new BundleActivator[] {
-            new com.openexchange.admin.osgi.Activator(),
+            new com.openexchange.admin.osgi.PluginHostingActivator(),
             new com.openexchange.admin.schemamove.osgi.SchemaMoveActivator(),
         };
     }

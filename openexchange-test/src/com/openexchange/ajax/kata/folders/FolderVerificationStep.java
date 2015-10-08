@@ -120,7 +120,6 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
     private void checkViaUpdates(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         UpdatesRequest updates = new UpdatesRequest(EnumAPI.OX_OLD,
-            folder.getParentFolderID(),
             FolderObject.ALL_COLUMNS,
             -1,
             Order.ASCENDING,

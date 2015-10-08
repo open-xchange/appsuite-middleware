@@ -52,6 +52,7 @@ package com.openexchange.realtime.json.osgi;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -68,6 +69,7 @@ import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.json.actions.RealtimeActions;
+import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.json.impl.RTJSONHandler;
 import com.openexchange.realtime.json.management.ManagementHouseKeeper;
@@ -159,7 +161,10 @@ public class RTJSONActivator extends AJAXModuleActivator {
         } catch (OXException oxe) {
             LOG.error("Failed to expose ManagementObjects", oxe);
         }
-
+        /*
+         * register an additional file field providing the realtime resource identifier
+         */
+        registerService(AdditionalFileField.class, new ResourceIDField());
         /*
          * Register all RealtimeJanitor services contained in this bundle
          */

@@ -71,12 +71,14 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.servlet.services.PasswordChangeServletServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeServletTest}
@@ -85,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.6.2
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ SessionUtility.class, PasswordChangeServletServiceRegistry.class, AJAXServlet.class, Tools.class })
+@PrepareForTest({ SessionUtility.class, AJAXServlet.class, Tools.class })
 public class PasswordChangeServletTest {
 
     @Mock
@@ -98,13 +100,19 @@ public class PasswordChangeServletTest {
     private ServerSession session;
 
     @Mock
-    private ServiceRegistry serviceRegistry;
+    private ServiceLookup serviceLookup;
 
     @Mock
     private PasswordChangeService passwordChangeService;
 
     @Mock
     private ContextService contextService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private User user;
 
     private final String requestBody = "{\"old_password\":\"secret\",\"new_password\":\"secret1\",\"new_password2\":\"secret1\"}";
 
@@ -122,16 +130,16 @@ public class PasswordChangeServletTest {
         Map<String, List<String>> map = Collections.emptyMap();
         PowerMockito.when(Tools.copyHeaders((HttpServletRequest) Matchers.any())).thenReturn(map);
 
-        PowerMockito.mockStatic(PasswordChangeServletServiceRegistry.class);
-        PowerMockito.when(PasswordChangeServletServiceRegistry.getServiceRegistry()).thenReturn(serviceRegistry);
-        PowerMockito.when(serviceRegistry.getService(PasswordChangeService.class)).thenReturn(passwordChangeService);
-
-        PowerMockito.when(serviceRegistry.getService(ContextService.class)).thenReturn(contextService);
+        PowerMockito.when(serviceLookup.getService(PasswordChangeService.class)).thenReturn(passwordChangeService);
+        PowerMockito.when(serviceLookup.getService(ContextService.class)).thenReturn(contextService);
+        PowerMockito.when(serviceLookup.getService(UserService.class)).thenReturn(userService);
+        PowerMockito.when(userService.getUser(Matchers.anyInt(), (Context) Matchers.any())).thenReturn(user);
+        PowerMockito.when(user.isGuest()).thenReturn(Boolean.FALSE);
     }
 
     @Test
     public void testActionPutUpdate_everythingFine_callPasswordChangeServiceOnce() throws JSONException, IOException, OXException {
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.times(1)).perform((PasswordChangeEvent) Matchers.any());
@@ -141,7 +149,7 @@ public class PasswordChangeServletTest {
     public void testActionPutUpdate_oldPasswordMissing_doNotUpdate() throws JSONException, IOException, OXException {
         PowerMockito.when(AJAXServlet.getBody((HttpServletRequest) Matchers.any())).thenReturn("{\"new_password\":\"secret1\",\"new_password2\":\"secret1\"}");
 
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.never()).perform((PasswordChangeEvent) Matchers.any());
@@ -151,7 +159,7 @@ public class PasswordChangeServletTest {
     public void testActionPutUpdate_newPassword1Missing_doNotUpdate() throws JSONException, IOException, OXException {
         PowerMockito.when(AJAXServlet.getBody((HttpServletRequest) Matchers.any())).thenReturn("{\"old_password\":\"secret\",\"new_password2\":\"secret1\"}");
 
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.never()).perform((PasswordChangeEvent) Matchers.any());
@@ -161,7 +169,7 @@ public class PasswordChangeServletTest {
     public void testActionPutUpdate_newPassword2Missing_doNotUpdate() throws JSONException, IOException, OXException {
         PowerMockito.when(AJAXServlet.getBody((HttpServletRequest) Matchers.any())).thenReturn("{\"old_password\":\"secret\",\"new_password1\":\"secret1\"}");
 
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.never()).perform((PasswordChangeEvent) Matchers.any());
@@ -169,9 +177,9 @@ public class PasswordChangeServletTest {
 
     @Test
     public void testActionPutUpdate_contextServiceAbsent_doNotUpdate() throws JSONException, IOException, OXException {
-        PowerMockito.when(serviceRegistry.getService(ContextService.class)).thenReturn(null);
+        PowerMockito.when(serviceLookup.getService(ContextService.class)).thenReturn(null);
 
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.never()).perform((PasswordChangeEvent) Matchers.any());
@@ -179,9 +187,9 @@ public class PasswordChangeServletTest {
 
     @Test
     public void testActionPutUpdate_passwordChangeServiceAbsent_doNotUpdate() throws JSONException, IOException, OXException {
-        PowerMockito.when(serviceRegistry.getService(PasswordChangeService.class)).thenReturn(null);
+        PowerMockito.when(serviceLookup.getService(PasswordChangeService.class)).thenReturn(null);
 
-        PasswordChangeServlet servlet = new PasswordChangeServlet();
+        PasswordChangeServlet servlet = new PasswordChangeServlet(serviceLookup);
         servlet.actionPutUpdate(request, response);
 
         Mockito.verify(passwordChangeService, Mockito.never()).perform((PasswordChangeEvent) Matchers.any());

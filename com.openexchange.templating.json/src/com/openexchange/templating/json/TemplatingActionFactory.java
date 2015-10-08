@@ -75,7 +75,7 @@ public class TemplatingActionFactory implements AJAXActionServiceFactory {
      */
     public TemplatingActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
         actions.put("names", new NamesAction(services));
         actions.put("provide", new AssetProvideAction(services));
     }

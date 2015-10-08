@@ -49,8 +49,6 @@
 
 package com.openexchange.passwordchange;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +58,7 @@ import java.util.regex.PatternSyntaxException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.Cache;
@@ -70,22 +69,26 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link PasswordChangeService} - Performs changing a user's password
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
 public abstract class PasswordChangeService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeService.class);
@@ -140,27 +143,33 @@ public abstract class PasswordChangeService {
      * @throws OXException If old password is invalid
      */
     protected void check(final PasswordChangeEvent event) throws OXException {
-        /*
-         * verify mandatory parameters
-         */
-        if (Strings.isEmpty(event.getOldPassword())) {
-            throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
-        }
-        if (Strings.isEmpty(event.getNewPassword())) {
-            throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
-        }
-        /*
-         * Verify old password prior to applying new one
-         */
-        final AuthenticationService authenticationService = Authentication.getService();
-        if (authenticationService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
-        }
+        User user;
         try {
+            /*
+             * Verify old password prior to applying new one
+             */
+            final AuthenticationService authenticationService = Authentication.getService();
+            if (authenticationService == null) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
+            }
+            UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+            }
             /*
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
+            user = userService.getUser(session.getUserId(), session.getContextId());
+            /*
+             * verify mandatory parameters
+             */
+            if (Strings.isEmpty(event.getOldPassword()) && !user.isGuest()) {
+                throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
+            }
+            if (Strings.isEmpty(event.getNewPassword()) && false == user.isGuest()) {
+                throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
+            }
 
             Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
             {
@@ -173,11 +182,17 @@ public abstract class PasswordChangeService {
                     properties.put("cookies", cookies);
                 }
             }
-
-            UserStorage.getStorageUser(session);
-            authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
+            if (!user.isGuest()) {
+                authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
+            } else {
+                BasicAuthenticationService basicService = Authentication.getBasicService();
+                if (basicService == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
+                }
+                basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
+            }
         } catch (final OXException e) {
-            if ("LGI-0006".equals(e.getErrorCode())) {
+            if (e.equalsCode(6, "LGI")) {
                 /*
                  * Verification of old password failed
                  */
@@ -188,38 +203,40 @@ public abstract class PasswordChangeService {
         /*
          * Check min/max length restrictions
          */
-        final int len = event.getNewPassword().length();
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
-        if (property > 0 && len < property) {
-            throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
-        }
-        property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
-        if (property > 0 && len > property) {
-            throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
-        }
-        /*
-         * Check against "allowed" pattern if defined
-         */
-        String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
-        if (false == Strings.isEmpty(allowedPattern)) {
-            try {
-                if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
-                    String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");
-                    throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
-                }
-            } catch (PatternSyntaxException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
+        if (false == user.isGuest()) {
+            final int len = event.getNewPassword().length();
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
+            if (property > 0 && len < property) {
+                throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
             }
+            property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
+            if (property > 0 && len > property) {
+                throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
+            }
+            /*
+             * Check against "allowed" pattern if defined
+             */
+            String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
+            if (false == Strings.isEmpty(allowedPattern)) {
+                try {
+                    if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
+                        String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");
+                        throw UserExceptionCode.NOT_ALLOWED_PASSWORD.create(allowedPatternHint);
+                    }
+                } catch (PatternSyntaxException e) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.passwordchange.allowedPattern");
+                }
+            }
+            /*
+             * No validation of new password since admin daemon does no validation, too
+             */
+            /*-
+             * if (!validatePassword(event.getNewPassword())) {
+             *     throw new OXException(OXException.Code.INVALID_PASSWORD);
+             * }
+             */
         }
-        /*
-         * No validation of new password since admin daemon does no validation, too
-         */
-        /*-
-         * if (!validatePassword(event.getNewPassword())) {
-         *     throw new OXException(OXException.Code.INVALID_PASSWORD);
-         * }
-         */
     }
 
     /**
@@ -256,7 +273,7 @@ public abstract class PasswordChangeService {
          */
         final SessiondService sessiondService = serviceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());
@@ -304,30 +321,6 @@ public abstract class PasswordChangeService {
             } catch (final OXException e) {
                 // Ignore
             }
-        }
-    }
-
-    /**
-     * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     *
-     * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
-     * @param newPassword The new password to encode
-     * @return The encoded password
-     * @throws OXException If encoding the new password fails
-     */
-    protected static final String getEncodedPassword(final String mech, final String newPassword) throws OXException {
-        try {
-            final String cryptedPassword = PasswordMechanism.getEncodedPassword(mech, newPassword);
-            if (null == cryptedPassword) {
-                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(mech == null ? "" : mech);
-            }
-            return cryptedPassword;
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Error encrypting password according to CRYPT mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        } catch (final NoSuchAlgorithmException e) {
-            LOG.error("Error encrypting password according to SHA mechanism", e);
-            throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
 

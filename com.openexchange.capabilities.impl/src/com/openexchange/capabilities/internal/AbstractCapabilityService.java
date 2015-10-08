@@ -51,22 +51,26 @@ package com.openexchange.capabilities.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -74,25 +78,30 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentEnumMap;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -158,7 +167,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     // ------------------------------------------------------------------------------------------------ //
 
     private static final ConcurrentEnumMap<Permission, Capability> P2CAPABILITIES = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
-    private static final ConcurrentMap<String, Capability> CAPABILITIES = new ConcurrentHashMap<String, Capability>(96);
+    private static final ConcurrentMap<String, Capability> CAPABILITIES = new ConcurrentHashMap<String, Capability>(96, 0.9f, 1);
 
     /**
      * Gets the singleton capability for given identifier
@@ -222,7 +231,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     public AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
         super();
         this.services = services;
-        declaredCapabilities = new ConcurrentHashMap<String, Object>(32);
+        declaredCapabilities = new ConcurrentHashMap<String, Object>(32, 0.9f, 1);
         this.registry = registry;
     }
 
@@ -295,15 +304,608 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
+    @Override
+    public CapabilitySet getCapabilities(int userId, int contextId) throws OXException {
+        return getCapabilities(userId, contextId, false, true);
+    }
+
+    @Override
+    public CapabilitySet getCapabilities(int userId, int contextId, boolean alignPermissions, boolean allowCache) throws OXException {
+        return getCapabilities(userId, contextId, null, alignPermissions, allowCache);
+    }
+
+    @Override
+    public CapabilitySet getCapabilities(Session session) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), session, false, true);
+    }
+
+    @Override
+    public CapabilitySet getCapabilities(Session session, boolean alignPermissions) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), session, alignPermissions, true);
+    }
+
     /**
-     * Gets the capabilities tree showing which capability comes from which source
+     * Gets the capabilities.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The capabilities tree
-     * @throws OXException If capabilities tree cannot be returned
+     * @param userId The user ID or <code>-1</code>
+     * @param contextId The context ID or <code>-1</code>
+     * @param session The session; must either belong to the user and context ID or be <code>null</code>
+     * @param alignPermissions Whether permission-bound capabilities shall be removed from the resulting set if the services
+     *                         which define/require those are unavailable (e.g. a user has the <code>editpassword</code> permission
+     *                         set, but no PasswordChangeService is available).
+     * @param allowCache Whether the capabilities may be looked up from cache
+     * @return
+     * @throws OXException
      */
-    public Map<String, Map<String, Set<String>>> getCapabilitiesTree(int userId, int contextId) throws OXException {
+    private CapabilitySet getCapabilities(int userId, int contextId, Session session, boolean alignPermissions, boolean allowCache) throws OXException {
+        final CapabilitySet cachedCapabilitySet = allowCache ? optCachedCapabilitySet(userId, contextId) : null;
+        if (null != cachedCapabilitySet) {
+            if (alignPermissions) {
+                alignPermissions(cachedCapabilitySet);
+            }
+            return cachedCapabilitySet;
+        }
+
+        User user = null;
+        Context context = null;
+        if (contextId > 0) {
+            context = requireService(ContextService.class, services).getContext(contextId);
+            if (userId > 0) {
+                user = requireService(UserService.class, services).getUser(userId, context);
+            }
+        }
+
+        /*
+         * Never ever re-order the apply methods!
+         */
+        CapabilitySet capabilities = new CapabilitySet(64);
+        applyAutoLogin(capabilities);
+        applyUserPermissions(capabilities, user, context);
+        applyConfiguredCapabilities(capabilities, user, context, allowCache);
+        if (session == null) {
+            applyDeclaredCapabilities(capabilities, ServerSessionAdapter.valueOf(userId, contextId)); // Code smell level: Ninja...
+        } else {
+            applyDeclaredCapabilities(capabilities, session);
+        }
+        applyGuestFilter(capabilities, user);
+
+        if (userId > 0 && contextId > 0 && (session == null || !session.isTransient())) {
+            // Put in cache
+            final Cache cache = optCache();
+            if (null != cache) {
+                cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), capabilities.clone(), false);
+            }
+        }
+
+        if (alignPermissions) {
+            alignPermissions(capabilities);
+        }
+
+        return capabilities;
+    }
+
+    /**
+     * Checks if autologin is enabled and adds the according capability to the passed set, if so.
+     *
+     * @param capabilities The capability set
+     */
+    private void applyAutoLogin(CapabilitySet capabilities) {
+        if (autologin()) {
+            capabilities.add(CAP_AUTO_LOGIN);
+        }
+    }
+
+    /**
+     * Adds the capabilities that represent user permissions to the passed set, if a valid user and context are given.
+     *
+     * @param capabilities The capability set
+     * @param user The user; if <code>null</code>, calling this method is a no-op
+     * @param context The context; if <code>null</code>, calling this method is a no-op
+     * @throws OXException
+     */
+    private void applyUserPermissions(CapabilitySet capabilities, User user, Context context) throws OXException {
+        if (user == null || context == null) {
+            return;
+        }
+
+        final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(user.getId(), context.getContextId());
+        userPermissionBits.setGroups(user.getGroups());
+
+        // Capabilities by user permission bits
+        for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
+            capabilities.add(getCapability(p));
+        }
+
+        // Webmail
+        if (user.getId() == context.getMailadmin()) {
+            final boolean adminMailLoginEnabled = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
+            if (!adminMailLoginEnabled) {
+                capabilities.remove(getCapability(Permission.WEBMAIL));
+            }
+        }
+
+        // Portal - stick to positive "portal" capability only
+        capabilities.remove("denied_portal");
+        if (userPermissionBits.hasPortal()) {
+            capabilities.add(getCapability("portal"));
+        } else {
+            capabilities.remove("portal");
+        }
+        // Free-Busy
+        if (userPermissionBits.hasFreeBusy()) {
+            capabilities.add(getCapability("freebusy"));
+        } else {
+            capabilities.remove("freebusy");
+        }
+        // Conflict-Handling
+        if (userPermissionBits.hasConflictHandling()) {
+            capabilities.add(getCapability("conflict_handling"));
+        } else {
+            capabilities.remove("conflict_handling");
+        }
+        // Participants-Dialog
+        if (userPermissionBits.hasParticipantsDialog()) {
+            capabilities.add(getCapability("participants_dialog"));
+        } else {
+            capabilities.remove("participants_dialog");
+        }
+        // Group-ware
+        if (userPermissionBits.hasGroupware()) {
+            capabilities.add(getCapability("groupware"));
+        } else {
+            capabilities.remove("groupware");
+        }
+        // PIM
+        if (userPermissionBits.hasPIM()) {
+            capabilities.add(getCapability("pim"));
+        } else {
+            capabilities.remove("pim");
+        }
+        // Spam
+        if (userPermissionBits.hasWebMail()) {
+            UserSettingMail mailSettings = UserSettingMailStorage.getInstance().getUserSettingMail(user.getId(), context);
+            if (null != mailSettings && mailSettings.isSpamEnabled()) {
+                capabilities.add(getCapability("spam"));
+            } else {
+                capabilities.remove("spam");
+            }
+        }
+        // Global Address Book
+        if (userPermissionBits.isGlobalAddressBookEnabled()) {
+            capabilities.add(getCapability("gab"));
+        } else {
+            capabilities.remove("gab");
+        }
+    }
+
+    /**
+     * Adds all capabilities that have been specified via any mechanism of configuration to the passed set. Such capabilities are:
+     *
+     * <ul>
+     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config cascade</li>
+     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config cascade</li>
+     *  <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
+     *  <li>context-specific capabilities contained in the context_capabilities database table</li>
+     *  <li>user-specific capabilities contained in the user_capabilities database table</li>
+     * </ul>
+     *
+     * @param capabilities The capability set
+     * @param user The user; if <code>null</code>, all config cascade lookups are performed with user ID <code>-1</code>;
+     *             if the user is a guest, the configure guest capability mode is considered.
+     * @param context The context; if <code>null</code>, all config cascade lookups are performed with context ID <code>-1</code>
+     * @param allowCache Whether caching of loaded capabilities is allowed
+     * @throws OXException
+     */
+    private void applyConfiguredCapabilities(CapabilitySet capabilities, User user, Context context, boolean allowCache) throws OXException {
+        int userId = -1;
+        int contextId = -1;
+        if (context != null) {
+            contextId = context.getContextId();
+        }
+
+        if (user != null) {
+            userId = user.getId();
+            if (user.isGuest()) {
+                GuestCapabilityMode capMode = getGuestCapabilityMode(user, context);
+                if (capMode == GuestCapabilityMode.INHERIT) {
+                    applyConfigCascade(capabilities, user.getCreatedBy(), contextId);
+                    applyContextCapabilities(capabilities, contextId, allowCache);
+                    applyUserCapabilities(capabilities, user.getCreatedBy(), contextId, allowCache);
+                    applyUserCapabilities(capabilities, userId, contextId, allowCache);
+                } else if (capMode == GuestCapabilityMode.STATIC) {
+                    applyStaticGuestCapabilities(capabilities, user, context);
+                    applyUserCapabilities(capabilities, userId, contextId, allowCache);
+                } else if (capMode == GuestCapabilityMode.DENY_ALL) {
+                    applyUserCapabilities(capabilities, userId, contextId, allowCache);
+                }
+            } else {
+                applyConfigCascade(capabilities, userId, contextId);
+                applyContextCapabilities(capabilities, contextId, allowCache);
+                applyUserCapabilities(capabilities, userId, contextId, allowCache);
+            }
+        } else {
+            applyConfigCascade(capabilities, userId, contextId);
+            applyContextCapabilities(capabilities, contextId, allowCache);
+        }
+    }
+
+    /**
+     * Adds all capabilities that have been specified via config cascade properties to the passed set.
+     *
+     * <ul>
+     *  <li>capabilities specified via the <code>permissions</code> property - looked up via config cascade</li>
+     *  <li>capabilities specified as properties with a <code>com.openexchange.capability.</code> prefix - looked up via config cascade</li>
+     *  <li>capabilities that depend on whether a feature is enabled via a configuration property (e.g. <code>com.openexchange.caldav.enabled => caldav</code>)</li>
+     * </ul>
+     *
+     * @param capabilities The capability set
+     * @param userId The user ID for config cascade lookups
+     * @param contextId The context ID for config cascade lookups
+     * @throws OXException
+     */
+    private void applyConfigCascade(CapabilitySet capabilities, int userId, int contextId) throws OXException {
+        // Permission properties
+        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            final ConfigView view = configViews.getView(userId, contextId);
+            final String property = PERMISSION_PROPERTY;
+            for (final String scope : configViews.getSearchPath()) {
+                final String permissions = view.property(property, String.class).precedence(scope).get();
+                if (permissions != null) {
+                    for (String permissionModifier : P_SPLIT.split(permissions)) {
+                        if (!isEmpty(permissionModifier)) {
+                            permissionModifier = permissionModifier.trim();
+                            final char firstChar = permissionModifier.charAt(0);
+                            if ('-' == firstChar) {
+                                capabilities.remove(permissionModifier.substring(1));
+                            } else {
+                                if ('+' == firstChar) {
+                                    capabilities.add(getCapability(permissionModifier.substring(1)));
+                                } else {
+                                    capabilities.add(getCapability(permissionModifier));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            final Map<String, ComposedConfigProperty<String>> all = view.all();
+            for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                final String propName = entry.getKey();
+                if (propName.startsWith("com.openexchange.capability.")) {
+                    boolean value = Boolean.parseBoolean(entry.getValue().get());
+                    String name = toLowerCase(propName.substring(28));
+                    if (value) {
+                        capabilities.add(getCapability(name));
+                    } else {
+                        capabilities.remove(name);
+                    }
+                }
+            }
+
+            // Check for a property handler
+            for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
+                final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
+                if (null != composedConfigProperty) {
+                    entry.getValue().handleProperty(composedConfigProperty.get(), capabilities);
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds all capabilities that are specified as <code>context_capabilities</code> DB entries to the passed set.
+     *
+     * @param capabilities The capability set
+     * @param contextId The context ID; if negative calling this method is a no-op
+     * @param allowCache Whether caching of loaded capabilities is allowed
+     * @throws OXException
+     */
+    private void applyContextCapabilities(CapabilitySet capabilities, int contextId, boolean allowCache) throws OXException {
+        if (contextId > 0) {
+            final Set<String> set = new HashSet<String>();
+            final Set<String> removees = new HashSet<String>();
+            for (final String sCap : getContextCaps(contextId, allowCache)) {
+                if (!isEmpty(sCap)) {
+                    final char firstChar = sCap.charAt(0);
+                    if ('-' == firstChar) {
+                        final String val = toLowerCase(sCap.substring(1));
+                        set.remove(val);
+                        removees.add(val);
+                    } else {
+                        if ('+' == firstChar) {
+                            set.add(toLowerCase(sCap.substring(1)));
+                        } else {
+                            set.add(toLowerCase(sCap));
+                        }
+                    }
+                }
+            }
+            // Merge them into result set
+            for (final String sCap : removees) {
+                capabilities.remove(sCap);
+            }
+            for (final String sCap : set) {
+                capabilities.add(getCapability(sCap));
+            }
+        }
+    }
+
+    /**
+     * Adds all capabilities that are specified as <code>user_capabilities</code> DB entries to the passed set.
+     *
+     * @param capabilities The capability set
+     * @param userId The user ID; if negative calling this method is a no-op
+     * @param contextId The context ID; if negative calling this method is a no-op
+     * @param allowCache Whether caching of loaded capabilities is allowed
+     * @throws OXException
+     */
+    private void applyUserCapabilities(CapabilitySet capabilities, int userId, int contextId, boolean allowCache) throws OXException {
+        if (contextId > 0 && userId > 0) {
+            final Set<String> set = new HashSet<String>();
+            final Set<String> removees = new HashSet<String>();
+            for (final String sCap : getUserCaps(userId, contextId, allowCache)) {
+                if (!isEmpty(sCap)) {
+                    final char firstChar = sCap.charAt(0);
+                    if ('-' == firstChar) {
+                        final String val = toLowerCase(sCap.substring(1));
+                        set.remove(val);
+                        removees.add(val);
+                    } else {
+                        if ('+' == firstChar) {
+                            final String cap = toLowerCase(sCap.substring(1));
+                            set.add(cap);
+                            removees.remove(cap);
+                        } else {
+                            final String cap = toLowerCase(sCap);
+                            set.add(cap);
+                            removees.remove(cap);
+                        }
+                    }
+                }
+            }
+            // Merge them into result set
+            for (final String sCap : removees) {
+                capabilities.remove(sCap);
+            }
+            for (final String sCap : set) {
+                capabilities.add(getCapability(sCap));
+            }
+        }
+    }
+
+    /**
+     * Adds all capabilities to the passed set, which are specified via {@link CapabilityService#declareCapability(String)}.
+     * Every declared capability is checked against the registered {@link CapabilityChecker}s.
+     *
+     * @param capabilities The capability set
+     *
+     * @param session The session; either a real one or a synthetic one, but never <code>null</code>
+     * @throws OXException
+     */
+    private void applyDeclaredCapabilities(CapabilitySet capabilities, Session session) throws OXException {
+        for (String cap : declaredCapabilities.keySet()) {
+            if (check(cap, session, capabilities)) {
+                capabilities.add(getCapability(cap));
+            } else {
+                capabilities.remove(cap);
+            }
+        }
+    }
+
+    /**
+     * If the passed user is a guest user, the <code>guest</code> capability is set. Additionally
+     * the capabilities <code>share_links</code> and <code>invite_guests</code> are removed.
+     *
+     * @param capabilities The capability set
+     * @param user The user; if <code>null</code>, calling this method is a no-op
+     * @throws OXException
+     */
+    private void applyGuestFilter(CapabilitySet capabilities, User user) throws OXException {
+        if (user == null) {
+            return;
+        }
+
+        if (user.isGuest()) {
+            capabilities.add(getCapability("guest"));
+            capabilities.remove(getCapability("share_links"));
+            capabilities.remove(getCapability("invite_guests"));
+            if (!Strings.isEmpty(user.getMail())) {
+                capabilities.add(getCapability("edit_password"));
+            }
+        }
+    }
+
+    /**
+     * A user might have some permission bits set that belong to services which are (currently or generally) unavailable.
+     * This method removes those permissions from the passed capability set.
+     *
+     * @param capabilities The capability set
+     */
+    protected void alignPermissions(CapabilitySet capabilities) {
+        final PermissionAvailabilityServiceRegistry registry = this.registry;
+        if (registry != null) {
+            final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
+            for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
+                if (!serviceList.containsKey(p)) {
+                    capabilities.remove(p.getCapabilityName());
+                }
+            }
+        } else {
+            LOG.warn("Registry not initialized. Cannot check permissions for JSON requests");
+        }
+    }
+
+    /**
+     * Applies the statically configured capabilities to the passed capability set.
+     *
+     * @param capabilities The capability set
+     * @param user The guest user
+     * @param context The context
+     * @throws OXException
+     */
+    private void applyStaticGuestCapabilities(CapabilitySet capabilities, User user, Context context) throws OXException {
+        ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            ConfigView view = configViews.getView(user.getId(), context.getContextId());
+            String value = view.opt("com.openexchange.share.staticGuestCapabilities", String.class, "");
+            if (Strings.isNotEmpty(value)) {
+                List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
+                for (String cap : staticCapabilities) {
+                    capabilities.add(getCapability(cap));
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the capability mode for the given guest user.
+     *
+     * @param user The guest user
+     * @param context The context
+     * @return The mode
+     * @throws OXException
+     */
+    private GuestCapabilityMode getGuestCapabilityMode(User user, Context context) throws OXException {
+        ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            ConfigView view = configViews.getView(user.getId(), context.getContextId());
+            String value = view.opt("com.openexchange.share.guestCapabilityMode", String.class, "static");
+            for (GuestCapabilityMode mode : GuestCapabilityMode.values()) {
+                if (mode.name().toLowerCase().equals(value)) {
+                    return mode;
+                }
+            }
+        }
+
+        return GuestCapabilityMode.STATIC;
+    }
+
+    private static enum GuestCapabilityMode {
+        DENY_ALL, STATIC, INHERIT;
+    }
+
+    private boolean check(String cap, Session session, CapabilitySet allCapabilities) throws OXException {
+        final Map<String, List<CapabilityChecker>> checkers = getCheckers();
+
+        List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
+        if (null != list && !list.isEmpty()) {
+            for (CapabilityChecker checker : list) {
+                try {
+                    if (checker instanceof DependentCapabilityChecker) {
+                        DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
+                        if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                            return false;
+                        }
+                    } else if (!checker.isEnabled(cap, session)) {
+                        return false;
+                    }
+                } catch (final Exception e) {
+                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
+                }
+            }
+        }
+
+        list = checkers.get("*");
+        if (null != list && !list.isEmpty()) {
+            for (CapabilityChecker checker : list) {
+                if (checker instanceof DependentCapabilityChecker) {
+                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
+                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                        return false;
+                    }
+                } else if (!checker.isEnabled(cap, session)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets all currently known capabilities.
+     *
+     * @return All capabilities
+     */
+    public Set<Capability> getAllKnownCapabilities() {
+        return new HashSet<Capability>(CAPABILITIES.values());
+    }
+
+    @Override
+    public boolean declareCapability(String capability) {
+        boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
+
+        if (added) {
+            final Cache optCache = optCache();
+            if (null != optCache) {
+                try {
+                    optCache.localClear();
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+        }
+
+        return added;
+    }
+
+    @Override
+    public boolean undeclareCapability(String capability) {
+        boolean removed = null != declaredCapabilities.remove(capability);
+
+        if (removed) {
+            final Cache optCache = optCache();
+            if (null != optCache) {
+                try {
+                    optCache.localClear();
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+        }
+
+        return removed;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ConfigurationProperty> getConfigurationSource(int userId, int contextId, String searchPattern) throws OXException {
+        List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>();
+
+        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            final ConfigView view = configViews.getView(userId, contextId);
+
+            if (view != null) {
+                Map<String, ComposedConfigProperty<String>> all = view.all();
+
+                for (Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                    String key = entry.getKey();
+
+                    if (!StringUtils.containsIgnoreCase(key, searchPattern)) {
+                        continue;
+                    }
+                    if ((entry.getValue().getScope() == null) && (entry.getValue().get() == null)) {
+                        LOG.info("Scope and value for property {} null. Going to ignore it", key);
+                        continue;
+                    }
+                    properties.add(new ConfigurationProperty(entry.getValue().getScope(), key, entry.getValue().get()));
+                }
+            }
+        }
+        return properties;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Map<String, Set<String>>> getCapabilitiesSource(int userId, int contextId) throws OXException {
         Map<String, Map<String, Set<String>>> sets = new LinkedHashMap<String, Map<String, Set<String>>>(6);
 
         {
@@ -467,352 +1069,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return sets;
     }
 
-    @Override
-    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters, final boolean allowCache) throws OXException {
-        // Initialize server session
-        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
-
-        // Create capability set
-        CapabilitySet capabilities = new CapabilitySet(64);
-
-        // What about autologin?
-        if (autologin()) {
-            capabilities.add(CAP_AUTO_LOGIN);
-        }
-
-        // ------------- Combined capabilities/permissions ------------ //
-        if (!serverSession.isAnonymous()) {
-            // Check cache
-            final CapabilitySet cachedCapabilitySet = allowCache ? optCachedCapabilitySet(userId, contextId) : null;
-            if (null != cachedCapabilitySet) {
-                capabilities = cachedCapabilitySet;
-                if (computeCapabilityFilters) {
-                    applyUIFilter(capabilities);
-                }
-                return capabilities;
-            }
-            // Obtain user permissions
-            final Context context = serverSession.getContext();
-            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
-            // Capabilities by user permission bits
-            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(getCapability(p));
-            }
-            // Apply capabilities for non-transient sessions
-            if (!serverSession.isTransient()) {
-                userPermissionBits.setGroups(serverSession.getUser().getGroups());
-                // Webmail
-                if (serverSession.getUserId() == context.getMailadmin()) {
-                    final boolean adminMailLoginEnabled = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
-                    if (!adminMailLoginEnabled) {
-                        capabilities.remove(getCapability(Permission.WEBMAIL));
-                    }
-                }
-                // Portal - stick to positive "portal" capability only
-                capabilities.remove("denied_portal");
-                if (userPermissionBits.hasPortal()) {
-                    capabilities.add(getCapability("portal"));
-                } else {
-                    capabilities.remove("portal");
-                }
-                // Free-Busy
-                if (userPermissionBits.hasFreeBusy()) {
-                    capabilities.add(getCapability("freebusy"));
-                } else {
-                    capabilities.remove("freebusy");
-                }
-                // Conflict-Handling
-                if (userPermissionBits.hasConflictHandling()) {
-                    capabilities.add(getCapability("conflict_handling"));
-                } else {
-                    capabilities.remove("conflict_handling");
-                }
-                // Participants-Dialog
-                if (userPermissionBits.hasParticipantsDialog()) {
-                    capabilities.add(getCapability("participants_dialog"));
-                } else {
-                    capabilities.remove("participants_dialog");
-                }
-                // Group-ware
-                if (userPermissionBits.hasGroupware()) {
-                    capabilities.add(getCapability("groupware"));
-                } else {
-                    capabilities.remove("groupware");
-                }
-                // PIM
-                if (userPermissionBits.hasPIM()) {
-                    capabilities.add(getCapability("pim"));
-                } else {
-                    capabilities.remove("pim");
-                }
-                // Spam
-                {
-                    UserSettingMail mailSettings = serverSession.getUserSettingMail();
-                    if (null != mailSettings && mailSettings.isSpamEnabled()) {
-                        capabilities.add(getCapability("spam"));
-                    } else {
-                        capabilities.remove("spam");
-                    }
-                }
-                // Global Address Book
-                if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
-                    capabilities.add(getCapability("gab"));
-                } else {
-                    capabilities.remove("gab");
-                }
-                // Permission properties
-                final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-                if (configViews != null) {
-                    final ConfigView view = configViews.getView(userId, contextId);
-                    final String property = PERMISSION_PROPERTY;
-                    for (final String scope : configViews.getSearchPath()) {
-                        final String permissions = view.property(property, String.class).precedence(scope).get();
-                        if (permissions != null) {
-                            for (String permissionModifier : P_SPLIT.split(permissions)) {
-                                if (!isEmpty(permissionModifier)) {
-                                    permissionModifier = permissionModifier.trim();
-                                    final char firstChar = permissionModifier.charAt(0);
-                                    if ('-' == firstChar) {
-                                        capabilities.remove(permissionModifier.substring(1));
-                                    } else {
-                                        if ('+' == firstChar) {
-                                            capabilities.add(getCapability(permissionModifier.substring(1)));
-                                        } else {
-                                            capabilities.add(getCapability(permissionModifier));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    final Map<String, ComposedConfigProperty<String>> all = view.all();
-                    for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                        final String propName = entry.getKey();
-                        if (propName.startsWith("com.openexchange.capability.")) {
-                            boolean value = Boolean.parseBoolean(entry.getValue().get());
-                            String name = toLowerCase(propName.substring(28));
-                            if (value) {
-                                capabilities.add(getCapability(name));
-                            } else {
-                                capabilities.remove(name);
-                            }
-                        }
-                    }
-
-                    // Check for a property handler
-                    for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
-                        final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
-                        if (null != composedConfigProperty) {
-                            entry.getValue().handleProperty(composedConfigProperty.get(), capabilities);
-                        }
-                    }
-
-                }
-            }
-        }
-
-        // ---------------- Now the ones from database ------------------ //
-        {
-            if (contextId > 0) {
-                final Set<String> set = new HashSet<String>();
-                final Set<String> removees = new HashSet<String>();
-                // Context-sensitive
-                for (final String sCap : getContextCaps(contextId, allowCache)) {
-                    if (!isEmpty(sCap)) {
-                        final char firstChar = sCap.charAt(0);
-                        if ('-' == firstChar) {
-                            final String val = toLowerCase(sCap.substring(1));
-                            set.remove(val);
-                            removees.add(val);
-                        } else {
-                            if ('+' == firstChar) {
-                                set.add(toLowerCase(sCap.substring(1)));
-                            } else {
-                                set.add(toLowerCase(sCap));
-                            }
-                        }
-                    }
-                }
-                // User-sensitive
-                if (userId > 0) {
-                    for (final String sCap : getUserCaps(userId, contextId, allowCache)) {
-                        if (!isEmpty(sCap)) {
-                            final char firstChar = sCap.charAt(0);
-                            if ('-' == firstChar) {
-                                final String val = toLowerCase(sCap.substring(1));
-                                set.remove(val);
-                                removees.add(val);
-                            } else {
-                                if ('+' == firstChar) {
-                                    final String cap = toLowerCase(sCap.substring(1));
-                                    set.add(cap);
-                                    removees.remove(cap);
-                                } else {
-                                    final String cap = toLowerCase(sCap);
-                                    set.add(cap);
-                                    removees.remove(cap);
-                                }
-                            }
-                        }
-                    }
-                }
-                // Merge them into result set
-                for (final String sCap : removees) {
-                    capabilities.remove(sCap);
-                }
-                for (final String sCap : set) {
-                    capabilities.add(getCapability(sCap));
-                }
-            }
-        }
-
-        // Now the declared ones
-        for (String cap : declaredCapabilities.keySet()) {
-            if (check(cap, serverSession, capabilities)) {
-                capabilities.add(getCapability(cap));
-            } else {
-                capabilities.remove(cap);
-            }
-        }
-
-        // Put in cache
-        if (!serverSession.isAnonymous() && !serverSession.isTransient()) {
-            final Cache cache = optCache();
-            if (null != cache) {
-                cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), capabilities.clone(), false);
-            }
-        }
-
-        if (computeCapabilityFilters) {
-            applyUIFilter(capabilities);
-        }
-
-//        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//        System.out.println("AbstractCapabilityService.getCapabilities()");
-//        new Throwable().printStackTrace(System.out);
-//        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-
-        return capabilities;
-    }
-
-    /**
-     * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
-     *
-     * @param capabilitiesToFilter - the capabilities the filter should be applied on
-     */
-    protected void applyUIFilter(CapabilitySet capabilitiesToFilter) {
-        final PermissionAvailabilityServiceRegistry registry = this.registry;
-        if (registry != null) {
-            final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
-            for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
-                if (!serviceList.containsKey(p)) {
-                    capabilitiesToFilter.remove(p.getCapabilityName());
-                }
-            }
-        } else {
-            LOG.warn("Registry not initialized. Cannot check permissions for JSON requests");
-        }
-    }
-
-    @Override
-    public CapabilitySet getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, false, true);
-    }
-
-    @Override
-    public CapabilitySet getCapabilities(final Session session) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId());
-    }
-
-    @Override
-    public CapabilitySet getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters, true);
-    }
-
-    private boolean check(String cap, Session session, CapabilitySet allCapabilities) throws OXException {
-        final Map<String, List<CapabilityChecker>> checkers = getCheckers();
-
-        List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
-        if (null != list && !list.isEmpty()) {
-            for (CapabilityChecker checker : list) {
-                try {
-                    if (checker instanceof DependentCapabilityChecker) {
-                        DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                        if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
-                            return false;
-                        }
-                    } else if (!checker.isEnabled(cap, session)) {
-                        return false;
-                    }
-                } catch (final Exception e) {
-                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
-                }
-            }
-        }
-
-        list = checkers.get("*");
-        if (null != list && !list.isEmpty()) {
-            for (CapabilityChecker checker : list) {
-                if (checker instanceof DependentCapabilityChecker) {
-                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
-                        return false;
-                    }
-                } else if (!checker.isEnabled(cap, session)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Gets all currently known capabilities.
-     *
-     * @return All capabilities
-     */
-    public Set<Capability> getAllKnownCapabilities() {
-        return new HashSet<Capability>(CAPABILITIES.values());
-    }
-
-    @Override
-    public boolean declareCapability(String capability) {
-        boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
-
-        if (added) {
-            final Cache optCache = optCache();
-            if (null != optCache) {
-                try {
-                    optCache.localClear();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            }
-        }
-
-        return added;
-    }
-
-    @Override
-    public boolean undeclareCapability(String capability) {
-        boolean removed = null != declaredCapabilities.remove(capability);
-
-        if (removed) {
-            final Cache optCache = optCache();
-            if (null != optCache) {
-                try {
-                    optCache.localClear();
-                } catch (final Exception e) {
-                    // ignore
-                }
-            }
-        }
-
-        return removed;
-    }
-
     /**
      * Gets the available capability checkers.
      *
@@ -933,7 +1189,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             super();
             this.userId = userId;
             this.contextId = contextId;
-            parameters = new ConcurrentHashMap<String, Object>(8);
+            parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
         }
 
         @Override

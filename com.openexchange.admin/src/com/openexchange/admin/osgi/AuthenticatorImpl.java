@@ -92,6 +92,10 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
         return configService.getBoolProperty("MASTER_AUTHENTICATION_DISABLED", false);
     }
 
+    private com.openexchange.admin.rmi.dataobjects.Credentials toCreds(Credentials authdata) {
+        return new com.openexchange.admin.rmi.dataobjects.Credentials(authdata.getLogin(), authdata.getPassword());
+    }
+
     @Override
     public boolean isContextAuthenticationDisabled() throws OXException {
         ConfigurationService configService = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -104,7 +108,7 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     @Override
     public void doAuthentication(final Credentials authdata) throws OXException {
         try {
-            new BasicAuthenticator().doAuthentication(new com.openexchange.admin.rmi.dataobjects.Credentials(authdata.getLogin(), authdata.getPassword()));
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata));
         } catch (final InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
@@ -119,7 +123,7 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     @Override
     public void doAuthentication(final Credentials authdata, final int contextId) throws OXException {
         try {
-            new BasicAuthenticator().doAuthentication(new com.openexchange.admin.rmi.dataobjects.Credentials(authdata.getLogin(), authdata.getPassword()), new Context(Integer.valueOf(contextId)));
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
         } catch (final InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());
@@ -138,7 +142,7 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     @Override
     public void doUserAuthentication(final Credentials authdata, final int contextId) throws OXException {
         try {
-            new BasicAuthenticator().doUserAuthentication(new com.openexchange.admin.rmi.dataobjects.Credentials(authdata.getLogin(), authdata.getPassword()), new Context(Integer.valueOf(contextId)));
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(toCreds(authdata), new Context(Integer.valueOf(contextId)));
         } catch (final InvalidCredentialsException e) {
             final OXException oxe = OXException.general(e.getMessage());
             oxe.setStackTrace(e.getStackTrace());

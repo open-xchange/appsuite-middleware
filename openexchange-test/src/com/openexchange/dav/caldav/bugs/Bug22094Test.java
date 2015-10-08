@@ -49,11 +49,13 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -63,21 +65,19 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link NewTest} - appointments can not be moved between calendars via iCal 
- * 
+ * {@link NewTest} - appointments can not be moved between calendars via iCal
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22094Test extends CalDAVTest {
 
-	public Bug22094Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testMoveAppointment() throws Exception {
 		/*
 		 * create target folder for move on server
 		 */
-		FolderObject subfolder = super.createFolder("move test");
+		FolderObject subfolder = super.createFolder("move test" + System.currentTimeMillis());
+		super.rememberForCleanUp(subfolder);
 		String subfolderID = Integer.toString(subfolder.getObjectID());
 		/*
 		 * create appointment in default folder on client
@@ -86,7 +86,7 @@ public class Bug22094Test extends CalDAVTest {
     	Date start = TimeTools.D("next thursday at 7:15");
     	Date end = TimeTools.D("next thursday at 11:30");
     	String title = "move test";
-		String iCal = 
+		String iCal =
 				"BEGIN:VCALENDAR" + "\r\n" +
 				"VERSION:2.0" + "\r\n" +
 				"PRODID:-//Apple Inc.//iCal 5.0.2//EN" + "\r\n" +
@@ -144,7 +144,7 @@ public class Bug22094Test extends CalDAVTest {
          */
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() +  iCalResource.getHref(), 
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() +  iCalResource.getHref(),
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
@@ -171,5 +171,5 @@ public class Bug22094Test extends CalDAVTest {
         assertNotNull("appointment not found in target folder on server", appointment);
         assertEquals("folder ID wrong", subfolder.getObjectID(), appointment.getParentFolderID());
 	}
-	
+
 }

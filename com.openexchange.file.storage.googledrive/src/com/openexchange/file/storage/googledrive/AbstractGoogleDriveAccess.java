@@ -56,6 +56,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.File.Labels;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.session.Session;
@@ -104,7 +105,7 @@ public abstract class AbstractGoogleDriveAccess {
                 } catch (HttpResponseException e) {
                     throw handleHttpResponseError(null, e);
                 } catch (IOException e) {
-                    throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
             }
             rootFolderIdentifier = rootFolderId;
@@ -112,11 +113,17 @@ public abstract class AbstractGoogleDriveAccess {
         return rootFolderId;
     }
 
+    /** Status code (400) indicating the request sent by the client was syntactically incorrect. */
+    protected static final int SC_BAD_REQUEST = 400;
+
     /** Status code (401) indicating that the request requires HTTP authentication. */
-    private static final int SC_UNAUTHORIZED = 401;
+    protected static final int SC_UNAUTHORIZED = 401;
 
     /** Status code (404) indicating that the requested resource is not available. */
-    private static final int SC_NOT_FOUND = 404;
+    protected static final int SC_NOT_FOUND = 404;
+
+    /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
+    protected static final int SC_CONFLICT = 409;
 
     /**
      * Handles given HTTP response error.
@@ -125,16 +132,16 @@ public abstract class AbstractGoogleDriveAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    public static OXException handleHttpResponseError(String identifier, HttpResponseException e) {
+    public OXException handleHttpResponseError(String identifier, HttpResponseException e) {
         if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return GoogleDriveExceptionCodes.NOT_FOUND.create(e, identifier);
+            return FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, identifier, "");
         }
 
         if (SC_UNAUTHORIZED == e.getStatusCode()) {
-            return GoogleDriveExceptionCodes.UNLINKED_ERROR.create();
+            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
         }
 
-        return GoogleDriveExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(e.getStatusCode()), e.getStatusMessage());
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
     }
 
     /**
@@ -146,7 +153,7 @@ public abstract class AbstractGoogleDriveAccess {
      * @throws IOException If check fails
      */
     protected static boolean isTrashed(String id, Drive drive) throws IOException {
-        Labels labels = drive.files().get(id).execute().getLabels();
+        Labels labels = drive.files().get(id).setFields("labels/trashed").execute().getLabels();
         if (null == labels) {
             return false;
         }
@@ -173,7 +180,7 @@ public abstract class AbstractGoogleDriveAccess {
     protected void checkIfTrashed(com.google.api.services.drive.model.File file) throws OXException {
         Boolean explicitlyTrashed = file.getExplicitlyTrashed();
         if (null != explicitlyTrashed && explicitlyTrashed.booleanValue()) {
-            throw GoogleDriveExceptionCodes.NOT_FOUND.create(file.getId());
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(file.getId(), "");
         }
     }
 

@@ -61,23 +61,22 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.database.RESTDBErrorCodes;
+import com.openexchange.rest.services.database.DatabaseRESTErrorCodes;
 import com.openexchange.tools.sql.DBUtils;
-
 
 /**
  * The {@link DBVersionChecker} implements the VersionChecker interface. It caches version data for a schema and module for 30 minutes.
+ * 
  * @see VersionChecker
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DBVersionChecker implements VersionChecker {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(DBVersionChecker.class);
-    
+
     private Cache<Key, String> versionCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
-    
-    
+
     @Override
     public String isUpToDate(Object id, final Connection con, final String module, String versionId) throws OXException {
         try {
@@ -93,7 +92,7 @@ public class DBVersionChecker implements VersionChecker {
             if (version.equals(versionId)) {
                 return null;
             }
-            
+
             return version;
         } catch (ExecutionException e) {
             if (e.getCause() instanceof OXException) {
@@ -101,7 +100,7 @@ public class DBVersionChecker implements VersionChecker {
             }
             LOG.error(e.getCause().getMessage(), e.getCause());
         }
-        
+
         return "";
     }
 
@@ -109,14 +108,17 @@ public class DBVersionChecker implements VersionChecker {
     public String updateVersion(Connection con, String module, String oldVersionId, String newVersionId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        
+
         try {
             if (oldVersionId.equals("")) {
                 stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaVersion (module, version) VALUES (?, ?)");
                 stmt.setString(1, module);
                 stmt.setString(2, newVersionId);
+
+                int update = stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
                 
-                if (1 == stmt.executeUpdate()) {
+                if (update == 1) {
                     return null;
                 }
             }
@@ -125,27 +127,27 @@ public class DBVersionChecker implements VersionChecker {
             stmt.setString(1, newVersionId);
             stmt.setString(2, module);
             stmt.setString(3, oldVersionId);
-            
+
             if (stmt.executeUpdate() > 0) {
                 return null;
             }
-            
+
             stmt = con.prepareStatement("SELECT version FROM serviceSchemaVersion WHERE module = ?");
             stmt.setString(1, module);
-            
+
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getString("version");
             }
-            
-            throw RESTDBErrorCodes.VERSION_MUST_BE_KNOWN.create(module);
+
+            throw DatabaseRESTErrorCodes.VERSION_MUST_BE_KNOWN.create(module);
         } catch (SQLException x) {
             try {
                 con.rollback();
             } catch (SQLException e) {
                 // IGNORE
             }
-            throw RESTDBErrorCodes.SQL_ERROR.create(x.getMessage());
+            throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
             try {
                 con.commit();
@@ -156,11 +158,12 @@ public class DBVersionChecker implements VersionChecker {
             DBUtils.closeSQLStuff(rs);
         }
     }
-    
+
     private static final class LoadVersion implements Callable<String> {
+
         private Connection con;
         private String module;
-        
+
         public LoadVersion(Connection con, String module) {
             super();
             this.con = con;
@@ -180,15 +183,16 @@ public class DBVersionChecker implements VersionChecker {
                 }
                 return "";
             } catch (SQLException x) {
-                throw RESTDBErrorCodes.SQL_ERROR.create(x.getMessage());
+                throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(query, stmt);
             }
         }
-        
+
     }
-    
+
     private static final class Key {
+
         private String module;
         private Object connectionKey;
 
@@ -236,10 +240,10 @@ public class DBVersionChecker implements VersionChecker {
         try {
             // DELETE STALE LOCKS
             stmt = con.prepareStatement("DELETE FROM serviceSchemaMigrationLock WHERE module = ? AND expires <= ?");
-            stmt.setString(1,  module);
+            stmt.setString(1, module);
             stmt.setLong(2, now);
             stmt.executeUpdate();
-            
+
             // FIND LOCK
             stmt.close();
             stmt = con.prepareStatement("SELECT 1 FROM serviceSchemaMigrationLock WHERE module = ?");
@@ -248,16 +252,16 @@ public class DBVersionChecker implements VersionChecker {
             if (rs.next()) {
                 return false;
             }
-            
+
             //   CREATE LOCK
             stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)");
             stmt.setString(1, module);
             stmt.setLong(2, expires);
             // RETURN TRUE IF INSERT WAS SUCCESSFUL
             return stmt.executeUpdate() == 1;
-            
+
         } catch (SQLException x) {
-            throw RESTDBErrorCodes.SQL_ERROR.create(x.getMessage());
+            throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -271,7 +275,7 @@ public class DBVersionChecker implements VersionChecker {
             stmt.setString(1, module);
             stmt.executeUpdate();
         } catch (SQLException x) {
-            throw RESTDBErrorCodes.SQL_ERROR.create(x.getMessage());
+            throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -279,7 +283,7 @@ public class DBVersionChecker implements VersionChecker {
 
     @Override
     public boolean touchLock(Connection con, String module, long expires) throws OXException {
-        
+
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE serviceSchemaMigrationLock SET expires = ? WHERE module = ?");
@@ -287,7 +291,7 @@ public class DBVersionChecker implements VersionChecker {
             stmt.setString(2, module);
             return stmt.executeUpdate() > 0;
         } catch (SQLException x) {
-            throw RESTDBErrorCodes.SQL_ERROR.create(x.getMessage());
+            throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

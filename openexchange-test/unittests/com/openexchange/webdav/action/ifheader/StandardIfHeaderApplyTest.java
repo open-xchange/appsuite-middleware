@@ -55,9 +55,9 @@ import java.util.Date;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -219,7 +219,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
+            public WebdavMethod[] getOptions() throws WebdavProtocolException {
                 return null;
             }
 
@@ -427,7 +427,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
                 return null;
             }
             @Override
-            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
+            public WebdavMethod[] getOptions() throws WebdavProtocolException {
                 return null;
             }
 

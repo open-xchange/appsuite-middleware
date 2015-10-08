@@ -56,6 +56,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link Tools}
@@ -93,6 +96,23 @@ public class Tools {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
+    }
+
+    /**
+     * Obtains a service from the given {@link ServiceLookup} and returns it. If the
+     * service is not available, {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} is thrown.
+     * @param serviceClass The service class to obtain
+     * @param serviceLookup The service lookup to obtain the service from
+     * @return The service
+     * @throws OXException if the service is not available
+     */
+    public static <T> T requireService(Class<T> serviceClass, ServiceLookup serviceLookup) throws OXException {
+        T service = serviceLookup.getService(serviceClass);
+        if (service == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(serviceClass.getName());
+        }
+
+        return service;
     }
 
     private Tools() {

@@ -81,6 +81,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
@@ -600,6 +601,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
+            LogProperties.dropTempFiles();
             completedTaskCount += w.completedTasks.get();
             workers.remove(w);
             if (--poolSize > 0) {
@@ -1251,9 +1253,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 final String lineSeparator = this.lineSeparator;
                 final long maxRunningTime = this.maxRunningTime;
                 final TaskInfo poison = this.poison;
+                final long minWaitTimeNanos = TimeUnit.MILLISECONDS.toNanos(minWaitTime);
                 for (;;) {
                     try {
-                        Thread.sleep(minWaitTime);
+                        LockSupport.parkNanos(minWaitTimeNanos);
                         if (tasks.isEmpty()) {
                             final ReentrantLock lock = this.lock;
                             lock.lockInterruptibly();
@@ -1309,6 +1312,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         if (poisoned) {
                             return;
                         }
+                    } catch (InterruptedException e) {
+                        LOG.debug("Watcher run interrupted", e);
                     } catch (final Exception e) {
                         LOG.error("Watcher run aborted due to an exception!", e);
                     }
@@ -1658,7 +1663,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             {
                 Map<String, Object> mdc = customFutureTask.getMdc();
                 if (null != mdc) {
-                    mdc.remove(LogProperties.Name.TEMP_FILE.getName());
                     MDC.setContextMap(mdc);
                 }
             }
@@ -2503,14 +2507,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Deletes tracked temporary files.
      */
     static void deleteTempFiles() {
-        String[] tempFiles = LogProperties.getTempFileProperty();
+        String[] tempFiles = LogProperties.getAndRemoveTempFiles();
         if (null != tempFiles) {
             for (String path : tempFiles) {
                 File f = new File(path);
                 f.delete();
             }
         }
-        LogProperties.removeTempFileProperty();
     }
 
 }

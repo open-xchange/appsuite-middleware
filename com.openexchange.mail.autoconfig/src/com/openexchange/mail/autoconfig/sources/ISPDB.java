@@ -53,25 +53,29 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.DefaultHttpClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
-import com.openexchange.mail.autoconfig.tools.TrustAllAdapter;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -85,13 +89,21 @@ public class ISPDB extends AbstractConfigSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ISPDB.class);
 
-    private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
+    private static final String PROPERTY_ISPDB_URL = "com.openexchange.mail.autoconfig.ispdb";
+    private static final String PROPERTY_ISPDB_PROXY = "com.openexchange.mail.autoconfig.ispdb.proxy";
+    private static final String PROPERTY_ISPDB_PROXY_LOGIN = "com.openexchange.mail.autoconfig.ispdb.proxy.login";
+    private static final String PROPERTY_ISPDB_PROXY_PASSWORD = "com.openexchange.mail.autoconfig.ispdb.proxy.password";
 
     // -------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
     private final Cache<String, Autoconfig> autoConfigCache;
 
+    /**
+     * Initializes a new {@link ISPDB}.
+     *
+     * @param services The service look-up
+     */
     public ISPDB(ServiceLookup services) {
         super();
         this.services = services;
@@ -103,7 +115,7 @@ public class ISPDB extends AbstractConfigSource {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
 
-        String sUrl = view.get(locationProperty, String.class);
+        String sUrl = view.get(PROPERTY_ISPDB_URL, String.class);
         if (sUrl == null) {
             return null;
         }
@@ -128,54 +140,107 @@ public class ISPDB extends AbstractConfigSource {
             return null;
         }
 
-        HttpClient client = new HttpClient();
-        int timeout = 3000;
-        client.getParams().setSoTimeout(timeout);
-        client.getParams().setIntParameter("http.connection.timeout", timeout);
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-
-        GetMethod getMethod;
-
-        if (url.getProtocol().equalsIgnoreCase("https")) {
-            int port = url.getPort();
-            if (port == -1) {
-                port = 443;
+        DefaultHttpClient httpclient = HttpClients.getHttpClient("Open-Xchange ISPDB Client");
+        try {
+            HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
+            if (null != proxy) {
+                httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
             }
 
-            Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
-            client.getHostConfiguration().setHost(url.getHost(), port, https);
+            int port = url.getPort();
+            if (port < 0) {
+                port = url.getProtocol().equalsIgnoreCase("https") ? 443 : 80;
+            }
 
-            getMethod = new GetMethod(url.getFile());
+            HttpHost target = new HttpHost(url.getHost(), port, url.getProtocol());
+            HttpGet req = new HttpGet(url.getPath());
 
-            getMethod.getParams().setSoTimeout(timeout);
-            getMethod.setQueryString(url.getQuery());
-        } else {
-            getMethod = new GetMethod(sUrl);
-        }
+            LOG.info("Executing request retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
+            HttpResponse rsp = httpclient.execute(target, req);
 
-        try {
-
-            int httpCode = client.executeMethod(getMethod);
-
+            int httpCode = rsp.getStatusLine().getStatusCode();
             if (httpCode != 200) {
-                LOG.info("Could not retrieve config XML. Return code was: {}", httpCode);
+                LOG.info("Could not retrieve config XML. Return code was: {}", rsp.getStatusLine());
                 return null;
             }
 
-            ClientConfig clientConfig = new AutoconfigParser().getConfig(getMethod.getResponseBodyAsStream());
-
+            // Read & parse response
+            ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
-
             autoConfigCache.put(sUrl, autoconfig);
-
             return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig);
-        } catch (HttpException e) {
+        } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
         } catch (IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        } finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
+    }
+
+    private HttpHost getHttpProxyIfEnabled(DefaultHttpClient client, ConfigView view) throws OXException {
+        ComposedConfigProperty<String> property = view.property(PROPERTY_ISPDB_PROXY, String.class);
+        if (!property.isDefined()) {
+            return null;
+        }
+
+        // Get & check proxy setting
+        String proxy = property.get();
+        if (false != Strings.isEmpty(proxy)) {
+            return null;
+        }
+
+        // Parse & apply proxy settings
+        try {
+            URL proxyUrl;
+            {
+                String sProxyUrl = Strings.asciiLowerCase(proxy.trim());
+                if (sProxyUrl.startsWith("://")) {
+                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 4).append("http").append(sProxyUrl).toString();
+                } else if (false == sProxyUrl.startsWith("http://") && false == sProxyUrl.startsWith("https://")) {
+                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 7).append("http://").append(sProxyUrl).toString();
+                }
+                proxyUrl = new URL(sProxyUrl);
+            }
+
+            boolean isHttps = proxyUrl.getProtocol().equalsIgnoreCase("https");
+            int prxyPort = proxyUrl.getPort();
+            if (prxyPort == -1) {
+                prxyPort = isHttps ? 443 : 80;
+            }
+
+            HttpHost httpHost = new HttpHost(proxyUrl.getHost(), prxyPort, proxyUrl.getProtocol());
+
+            ComposedConfigProperty<String> propLogin = view.property(PROPERTY_ISPDB_PROXY_LOGIN, String.class);
+            if (propLogin.isDefined()) {
+                ComposedConfigProperty<String> propPassword = view.property(PROPERTY_ISPDB_PROXY_PASSWORD, String.class);
+                if (propPassword.isDefined()) {
+                    String proxyLogin = propLogin.get();
+                    String proxyPassword = propPassword.get();
+                    if (false == Strings.isEmpty(proxyLogin) && false == Strings.isEmpty(proxyPassword)) {
+                        proxyLogin = proxyLogin.trim();
+                        proxyPassword = proxyPassword.trim();
+
+                        Credentials credentials = new UsernamePasswordCredentials(proxyLogin, proxyPassword);
+                        client.getCredentialsProvider().setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), credentials);
+                    }
+                }
+            }
+
+            return httpHost;
+        } catch (MalformedURLException e) {
+            LOG.warn("Unable to parse proxy URL: {}", proxy, e);
+            return null;
+        } catch (NumberFormatException e) {
+            LOG.warn("Invalid proxy setting: {}", proxy, e);
+            return null;
+        } catch (RuntimeException e) {
+            LOG.warn("Could not apply proxy: {}", proxy, e);
             return null;
         }
     }

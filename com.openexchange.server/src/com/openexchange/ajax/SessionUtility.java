@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
@@ -69,9 +70,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.Header;
-import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ClientWhitelist;
@@ -103,6 +104,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.uadetector.UserAgentParser;
 
 
 /**
@@ -471,21 +473,32 @@ public final class SessionUtility {
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return The session result
-     * @throws OXException If the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static SessionResult<ServerSession> getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
         return getSession(hashSource, req, resp, sessionId, sessiondService);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param source defines how the cookie should be found
      * @param req The associated HTTP request
@@ -493,22 +506,40 @@ public final class SessionUtility {
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return The session result
-     * @throws SessionException If the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
         return getSession(source, req, resp, sessionId, sessiondService, null);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param source defines how the cookie should be found
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
+     * @param optChecker The {@link SessionSecretChecker} to verify the secret cookie.
+     *        May be <code>null</code> to use the default.
      * @return The session result
-     * @throws SessionException If the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
         Session session = sessiondService.getSession(sessionId);
@@ -590,7 +621,7 @@ public final class SessionUtility {
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
             if (null == cookies.get(cookieName)) {
-                final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
+                final boolean restored = LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName());
                 if (restored) {
                     LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, userAgent);
                 }
@@ -621,7 +652,16 @@ public final class SessionUtility {
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session, final boolean logInfo) throws OXException {
-        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
+        String[] additionalsForHash;
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            /*
+             * inject context- and user-id to allow parallel guest sessions
+             */
+            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+        } else {
+            additionalsForHash = null;
+        }
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"), additionalsForHash);
         if (secret == null || !session.getSecret().equals(secret)) {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
@@ -657,6 +697,43 @@ public final class SessionUtility {
      * @return The secret string or <tt>null</tt>
      */
     public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
+        return extractSecret(hashSource, req, hash, client, originalUserAgent, (String[])null);
+    }
+
+    /**
+     * Extracts the secret string from the cookies supplied with the HTTP servlet request, based on the remembered hash-, client-
+     * and original user-agent-values stored in the session.
+     *
+     * @param hashSource The hash source for the secret cookie
+     * @param request The underlying HTTP servlet request
+     * @return The secret string, or <code>null</code> if no matching secret cookie was found in the request
+     */
+    public static String extractSecret(CookieHashSource hashSource, HttpServletRequest request, Session session) {
+        String hash = session.getHash();
+        String client = session.getClient();
+        String originalUserAgent = (String) session.getParameter("user-agent");
+        String[] additionalsForHash;
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+        } else {
+            additionalsForHash = null;
+        }
+        return extractSecret(hashSource, request, hash, client, originalUserAgent, additionalsForHash);
+    }
+
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     *
+     * @param hashSource The hash source for the secret cookie
+     * @param req The HTTP Servlet request object.
+     * @param hash The remembered hash from session.
+     * @param client The remembered client from the session.
+     * @param originalUserAgent The original <tt>'User-Agent'</tt> associated with session
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
+     * @return The secret string or <tt>null</tt>
+     */
+    public static String extractSecret(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent, String...additionalsForHash) {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             if (cookies.isEmpty()) {
@@ -664,7 +741,7 @@ public final class SessionUtility {
             } else {
                 final String secretPrefix = SECRET_PREFIX;
                 final StringBuilder tmp = new StringBuilder(256);
-                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client)).toString();
+                final String expectedSecretCookieName = tmp.append(secretPrefix).append(getHash(hashSource, req, hash, client, additionalsForHash)).toString();
 
                 // Look-up Cookie by expected name
                 Cookie cookie = cookies.get(expectedSecretCookieName);
@@ -731,8 +808,7 @@ public final class SessionUtility {
         if (null == userAgent) {
             return false;
         }
-        BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
+        return ServerServiceRegistry.getServize(UserAgentParser.class).matches(userAgent, UserAgentFamily.IE, 11);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -744,14 +820,16 @@ public final class SessionUtility {
      * @param req The HTTP request
      * @param hash The previously remembered hash
      * @param client The client identifier
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
      * @return The appropriate hash
      */
-    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client) {
+    public static String getHash(final CookieHashSource hashSource, final HttpServletRequest req, final String hash, final String client, String[] additionalsForHash) {
         if (CookieHashSource.REMEMBER == hashSource) {
             return hash;
         }
         // Default is calculate
-        return HashCalculator.getInstance().getHash(req, client);
+        return HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), client, additionalsForHash);
     }
 
     /**
@@ -784,7 +862,31 @@ public final class SessionUtility {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, getPublicSessionCookieName(req)));
+        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, LoginServlet.getShareCookieName(req), getPublicSessionCookieName(req)));
+    }
+
+    /**
+     * Removes the Open-Xchange cookies belonging to a specific session. This includes
+     * <ul>
+     * <li>A cookie named "open-xchange-session-<code>{session.getHash()}</code>"</li>
+     * <li>A cookie named "open-xchange-secret-<code>{session.getHash()}</code>"</li>
+     * <li>A cookie named "open-xchange-public-session-<code>{HashCalculator.getUserAgentHash(request)}</code>" matching the sessions alternative identifier</li>
+     * <li>A cookie named "open-xchange-share-<code>{HashCalculator.getUserAgentHash(request)}</code>" in case of a guest session</li>
+     * </ul>
+     *
+     * @param session The session to remove the cookies for
+     * @param request The HTTP request
+     * @param response The HTTP response
+     */
+    public static void removeOXCookies(Session session, HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+        String sessionHash = session.getHash();
+        removeCookie(cookies, response, SESSION_PREFIX + sessionHash);
+        removeCookie(cookies, response, SECRET_PREFIX + sessionHash);
+        removeCookie(cookies, response, getPublicSessionCookieName(request), (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID));
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            removeCookie(cookies, response, LoginServlet.getShareCookieName(request));
+        }
     }
 
     /**
@@ -888,6 +990,38 @@ public final class SessionUtility {
             }
         }
         return null;
+    }
+
+    /**
+     * Removes a cookie matching a specific name by setting appropriate headers in the response.
+     *
+     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param response The response for instructing the client to remove the cookie
+     * @param name The name of the cookie to remove
+     * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
+     */
+    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name) {
+        return removeCookie(setCookies, response, name, null);
+    }
+
+    /**
+     * Removes a cookie matching a specific name (and optional value) by setting appropriate headers in the response.
+     *
+     * @param setCookies The currently set cookies in the client as carried with the corresponding request
+     * @param response The response for instructing the client to remove the cookie
+     * @param name The name of the cookie to remove
+     * @param value The value of the cookie to remove, or <code>null</code> to only match by name
+     * @return <code>true</code> if a matching cookie is was found and is going to be removed, <code>false</code>, otherwise
+     */
+    private static boolean removeCookie(Map<String, Cookie> setCookies, HttpServletResponse response, String name, String value) {
+        if (null != setCookies && 0 < setCookies.size()) {
+            Cookie cookie = setCookies.get(name);
+            if (null != cookie && (null == value || value.equals(cookie.getValue()))) {
+                removeCookie(cookie, response);
+                return true;
+            }
+        }
+        return false;
     }
 
     // ------------------------------------- Private constructor -------------------------------------------------- //

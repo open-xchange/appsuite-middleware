@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Loxandra Bundle
 Bundle-SymbolicName: com.openexchange.loxandra
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.contact,
  com.openexchange.contact.storage,
  com.openexchange.exception,

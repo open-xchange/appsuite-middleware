@@ -54,6 +54,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -66,6 +67,7 @@ import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -78,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
@@ -87,11 +90,12 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class, SessiondService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class, SessiondService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
         SERVICES.set(this);
 
         PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);

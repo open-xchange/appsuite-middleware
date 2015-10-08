@@ -52,6 +52,8 @@ package com.openexchange.publish.online.infostore;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -66,6 +68,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -117,12 +120,8 @@ public class InfostorePublicationServlet extends HttpServlet {
             // create a new HttpSession if it's missing
             req.getSession(true);
             super.service(new CountingHttpServletRequest(req), resp);
-        } catch (final RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                resp.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        } catch (RateLimitedException e) {
+            e.send(resp);
         }
     }
 
@@ -145,34 +144,46 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final String[] path = SPLIT.split(req.getRequestURI(), 0);
-            final Context ctx = getContext(path);
-            final String secret = getSecret(path);
-            final Publication publication = getPublication(secret, ctx);
+            String[] path = SPLIT.split(req.getRequestURI(), 0);
+            Context ctx = getContext(path);
+            String secret = getSecret(path);
+            Publication publication = getPublication(secret, ctx);
             if (publication == null || !publication.isEnabled()) {
                 resp.getWriter().println("Not Found");
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            final DocumentMetadata document = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
-            final InputStream is = loadContent(publication);
+
+            // Existing and enabled as well
+            DocumentMetadata document = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
+            InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
             if (mustSelfDestruct(publication)) {
                 destroy(publication);
                 if (mustDestroyDocument(publication) && !hasMorePublications(publication.getContext(), document)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(new PublicationSession(publication), publication.getContext());
+                    ServerSession session = ServerSessionAdapter.valueOf(new PublicationSession(publication), publication.getContext());
                     destroy(session, document);
                 }
             }
 
-        } catch (final Exception x) {
+        } catch (Exception x) {
             LOG.error("", x);
             try {
-                resp.getWriter().print(x.toString());
+                getWriterSafe(resp).print(x.toString());
             } catch (Exception e) {
-                LOG.error("", e);
+                // Ignore
             }
+        }
+    }
+
+    private PrintWriter getWriterSafe(HttpServletResponse resp) throws IOException {
+        try {
+            return resp.getWriter();
+        } catch (IllegalStateException e) {
+            // Illegal attempt to call getWriter() after getOutputStream has already been called.
+            ServletOutputStream outputStream = resp.getOutputStream();
+            return new PrintWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), true);
         }
     }
 
@@ -212,14 +223,19 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
+        ServletOutputStream out = null;
         try {
-            final ServletOutputStream out = resp.getOutputStream();
-            final int buflen = 65536;
-            final byte[] buf = new byte[buflen];
+            int buflen = 65536;
+            byte[] buf = new byte[buflen];
             for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                if (null == out) {
+                    out = resp.getOutputStream();
+                }
                 out.write(buf, 0, read);
             }
-            out.flush();
+            if (null != out) {
+                out.flush();
+            }
         } finally {
             Streams.close(is);
         }

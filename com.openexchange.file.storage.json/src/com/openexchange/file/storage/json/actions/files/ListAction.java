@@ -58,6 +58,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.FilteringTimedResult;
 import com.openexchange.groupware.results.TimedResult;
@@ -73,7 +74,7 @@ import com.openexchange.groupware.results.TimedResult;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for infoitems are defined in Common object data and Detailed infoitem data.")
 }, requestBody = "An array with object IDs of requested infoitems. ",
 responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class ListAction extends AbstractFileAction {
+public class ListAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
@@ -81,14 +82,13 @@ public class ListAction extends AbstractFileAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        List<Field> columns = request.getColumns();
+        List<Field> columns = request.getFieldsToLoad();
         boolean copy = false;
         if(!columns.contains(File.Field.FOLDER_ID)) {
             columns = new ArrayList<File.Field>(columns);
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-
         if(!columns.contains(File.Field.ID)) {
             if(!copy) {
                 columns = new ArrayList<File.Field>(columns);
@@ -101,14 +101,15 @@ public class ListAction extends AbstractFileAction {
 
         // This is too complicated. We'd rather have layers below here aggressively check folders.
 
-        final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
+        final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(ids, columns)) {
             private int threshhold = 0;
 
             @Override
             protected boolean accept(File thing) throws OXException {
                 int i = threshhold;
                 while(i < ids.size()) {
-                    if(ids.get(i).equals(thing.getId())) {
+                    FileID fileID = new FileID(ids.get(i));
+                    if(fileID.toUniqueID().equals(thing.getId())) {
                         threshhold = i+1;
                         break;
                     }

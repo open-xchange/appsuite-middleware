@@ -177,18 +177,18 @@ public class Filestore implements Serializable {
     }
 
     /**
-     * Returns the maximum amount of contexts of this filestore object
+     * Returns the maximum amount of contexts/users of this filestore object
      *
-     * @return An {@link Integer} containing the maximum amoung of contexts
+     * @return An {@link Integer} containing the maximum number of contexts/users
      */
     public Integer getMaxContexts() {
         return this.maxContexts;
     }
 
     /**
-     * Sets the maximum amount of contexts for this filestore object
+     * Sets the maximum amount of contexts/users for this filestore object
      *
-     * @param maxContexts A {@link String} containing the maximum amount of contexts
+     * @param maxContexts The maximum number of contexts/users
      */
     public void setMaxContexts(final Integer maxContexts) {
         this.maxContexts = maxContexts;
@@ -261,17 +261,26 @@ public class Filestore implements Serializable {
     }
 
     /**
-     * @return the reserved
+     * Gets the reserved file store space in mega bytes (MB). <b>Applies only to context-associated file storages!</b>
+     * <p>
+     * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
+     *
+     * @return The reserved space in MB
      */
     public final Long getReserved() {
         return reserved;
     }
 
     /**
-     * @param reserved the reserved to set
+     * Sets the reserved file store space in mega bytes (MB). <b>Applies only to context-associated file storages!</b>
+     * <p>
+     * &lt;average-filestore-space&gt; * &lt;number-of-filestore-contexts&gt;
+     *
+     * @param reserved the reserved space in MB to set
      */
     public final void setReserved(Long reserved) {
         this.reserved = reserved;
+        reservedset = true;
     }
 
     /**

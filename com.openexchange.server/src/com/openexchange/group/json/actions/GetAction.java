@@ -50,11 +50,8 @@
 package com.openexchange.group.json.actions;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import java.util.Date;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -86,16 +83,8 @@ public final class GetAction extends AbstractGroupAction {
 
     @Override
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        final int groupId = req.checkInt(PARAMETER_ID);
-        Date timestamp = new Date(0);
-        final Group group = GroupStorage.getInstance().getGroup(groupId, req.getSession().getContext());
-        // Write it as JSON
-        final GroupWriter groupWriter = new GroupWriter();
-        final JSONObject retval = new JSONObject(8);
-        groupWriter.writeGroup(group, retval);
-        // Output
-        timestamp = group.getLastModified();
-        return new AJAXRequestResult(retval, timestamp, "json");
+        Group group = GroupStorage.getInstance().getGroup(req.checkInt(PARAMETER_ID), req.getSession().getContext());
+        return new AJAXRequestResult(group, group.getLastModified(), "group");
     }
 
 }

@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -135,11 +136,34 @@ public abstract class TaskAction implements AJAXActionService {
     protected int[] removeVirtualColumns(final int[] columns) {
         final TIntList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
-            if (col != DataObject.LAST_MODIFIED_UTC) {
+            if (Task.START_TIME == col) {
+                tmp.add(CalendarObject.START_DATE);
+            } else  if (Task.END_TIME == col) {
+                tmp.add(CalendarObject.END_DATE);
+            } else if (col != DataObject.LAST_MODIFIED_UTC) {
                 tmp.add(col);
             }
         }
         return tmp.toArray();
+    }
+    
+    /**
+     * Gets the column identifier to use for sorting the results if defined. If a virtual identifier is passed from the client, it is
+     * implicitly mapped to the corresponding real column identifier.
+     * 
+     * @param request The task request to get the order by information
+     * @return The column identifier to use for sorting the results, or {@link TaskRequest#NOT_FOUND} if not set
+     */
+    protected int getOrderBy(TaskRequest request) throws OXException {
+        int sort = request.optInt(AJAXServlet.PARAMETER_SORT);
+        if (TaskRequest.NOT_FOUND != sort) {
+            if (Task.START_TIME == sort) {
+                return Task.START_DATE;
+            } else if (Task.END_TIME == sort) {
+                return Task.END_DATE;
+            }
+        }
+        return sort;
     }
 
     /**

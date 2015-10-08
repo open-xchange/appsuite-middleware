@@ -49,24 +49,31 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.json.FolderField;
-import com.openexchange.folder.json.parser.FolderParser;
+import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,9 +87,11 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "Object ID of the updated folder."),
     @Parameter(name = "timestamp", description = "Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail."),
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
+    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
+    @Parameter(name = "cascadePermissions", description = "(Optional. Defaults to false) Flag to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.")
 }, requestBody = "Folder object as described in Common folder data and Detailed folder data. Only modified fields are present.",
-responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
+    responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
+@OAuthAction(OAuthAction.CUSTOM)
 public final class UpdateAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -123,39 +132,94 @@ public final class UpdateAction extends AbstractFolderAction {
                 }
             }
         }
-        /*
-         * Parse folder object
-         */
-        final JSONObject folderObject = (JSONObject) request.requireData();
-        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
-        folder.setID(id);
-        try {
-            final String fieldName = FolderField.SUBSCRIBED.getName();
-            if (folderObject.hasAndNotNull(fieldName) && 0 == folderObject.getInt(fieldName)) {
-                /*
-                 * TODO: Remove this ugly hack to fix broken UI behavior which send "subscribed":0 for db folders
-                 */
-                try {
-                    Integer.parseInt(id);
-                    folder.setSubscribed(true);
-                } catch (final NumberFormatException e) {
-                    // Ignore
-                }
+        final boolean cascadePermissions;
+        {
+            final String inherit = request.getParameter("cascadePermissions");
+            if (inherit == null) {
+                cascadePermissions = false;
+            } else {
+                cascadePermissions = Boolean.parseBoolean(inherit);
             }
-        } catch (final JSONException e) {
-            // Ignore
         }
-        folder.setTreeID(treeId);
+        /*
+         * Parse request body
+         */
+        UpdateData updateData = parseRequestBody(treeId, id, request, session);
+        ParsedFolder folder = updateData.getFolder();
         /*
          * Update
          */
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request, false);
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
+        FolderServiceDecorator decorator = new FolderServiceDecorator()
+            .put("permissions", request.getParameter("permissions"))
+            .put("altNames", request.getParameter("altNames"))
+            .put("autorename", request.getParameter("autorename"))
+            .put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
+            .put("cascadePermissions", Boolean.valueOf(cascadePermissions))
+            .put("ignoreWarnings", Boolean.valueOf(ignoreWarnings))
+            .put(id, folderService);
+
+        boolean notify = updateData.notifyPermissionEntities() && folder.getPermissions() != null && folder.getPermissions().length > 0;
+        UserizedFolder original = null;
+        if (notify) {
+            original = folderService.getFolder(treeId, id, session, decorator);
+        }
+
+        final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, decorator);
+        List<OXException> warnings = new ArrayList<>(response.getWarnings());
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */
         final String newId = folder.getID();
-        return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(response.getWarnings());
+        if (notify) {
+            warnings.addAll(sendNotifications(updateData.getNotificationData(), original, folderService.getFolder(treeId, newId, session, decorator), session, request.getHostData()));
+        }
+
+        Date lastModified = null != newId ? folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC() : null;
+        AJAXRequestResult result = new AJAXRequestResult(newId, lastModified);
+        result.addWarnings(warnings);
+        if (null == newId && null != warnings && 0 < warnings.size() && false == ignoreWarnings) {
+            result.setException(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED.create(
+                getFolderNameSafe(session, folder, id, treeId, folderService), id));
+        }
+        return result;
+    }
+
+    private static String getFolderNameSafe(Session session, Folder folder, String folderID, String treeID, FolderService folderService) {
+        if (null != folder && false == Strings.isEmpty(folder.getName())) {
+            return folder.getName();
+        }
+        String id = null != folderID ? folderID : null != folder ? folder.getID() : null;
+        if (null != id && null != folderService) {
+            String tree = null != treeID ? treeID : getDefaultTreeIdentifier();
+            try {
+                UserizedFolder userizedFolder = folderService.getFolder(tree, id, session, null);
+                if (null != userizedFolder) {
+                    return userizedFolder.getName();
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for folder {}: {}", id, e.getMessage(), e);
+            }
+        }
+        return "";
+    }
+
+    @OAuthScopeCheck
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+        String treeId = request.getParameter("tree");
+        if (null == treeId) {
+            treeId = getDefaultTreeIdentifier();
+        }
+
+        final String id = request.getParameter("id");
+        if (null == id) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+        }
+
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
+        return mayWriteViaOAuthRequest(contentType, grant);
     }
 
 }

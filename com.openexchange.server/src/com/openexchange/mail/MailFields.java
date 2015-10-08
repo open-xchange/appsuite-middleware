@@ -201,6 +201,19 @@ public final class MailFields {
         }
     }
 
+    /**
+     * Gets the byte array representation.
+     *
+     * @return The byte array representation
+     */
+    public byte[] toByteArray() {
+        byte[] bytes = new byte[arr.length];
+        for (int i = bytes.length; i-- > 0;) {
+            bytes[i] = arr[i] ? (byte) 1 : 0;
+        }
+        return bytes;
+    }
+
     @Override
     public String toString() {
         return Arrays.toString(toArray());
@@ -264,11 +277,18 @@ public final class MailFields {
      * Removes specified {@link MailField} constant.
      *
      * @param mailField The mail field to remove
+     * @return <code>true</code> if specified {@link MailField} constant was contained; otherwise <code>false</code>
      */
-    public void removeMailField(MailField mailField) {
-        if (mailField != null) {
-            arr[mailField.ordinal()] = false;
+    public boolean removeMailField(MailField mailField) {
+        if (mailField == null) {
+            return false;
         }
+        int ordinal = mailField.ordinal();
+        if (arr[ordinal]) {
+            arr[ordinal] = false;
+            return true;
+        }
+        return false;
     }
 
     /**

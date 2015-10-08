@@ -55,14 +55,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -79,116 +83,83 @@ public class SimInfostoreFacade implements InfostoreFacade {
 
     private final Map<Integer, byte[]> files = new HashMap<Integer, byte[]>();
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#countDocuments(long, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public int countDocuments(long folderId, ServerSession session) throws OXException {
         // Nothing to do
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#exists(int, int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public boolean exists(int id, int version, ServerSession session) throws OXException {
         // Nothing to do
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDelta(long, long, com.openexchange.groupware.infostore.utils.Metadata[], boolean, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, ServerSession session) throws OXException, SearchIteratorException, OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDelta(long, long, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.infostore.utils.Metadata, int, boolean, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, ServerSession session) throws OXException, SearchIteratorException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocument(int, int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public InputStream getDocument(int id, int version, ServerSession session) throws OXException {
         return new ByteArrayInputStream(files.get(id));
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocumentMetadata(int, int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocuments(long, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocuments(long, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocuments(long, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.infostore.utils.Metadata, int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getDocuments(int[], com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException {
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getVersions(int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(List<IDTuple> ids, Metadata[] columns, ServerSession session) throws IllegalAccessException, OXException {
+        // Nothing to do
+        return null;
+    }
+
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getVersions(int, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#getVersions(int, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.groupware.infostore.utils.Metadata, int, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, ServerSession session) throws OXException {
         // Nothing to do
@@ -218,7 +189,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int[] removeDocument(int[] ids, long date, ServerSession session) throws OXException {
+    public List<IDTuple> removeDocument(List<IDTuple> ids, long date, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
@@ -235,33 +206,33 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
-    public int saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
-    public int saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
@@ -341,14 +312,69 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
         // Nothing to do
-        return 0;
+        return null;
     }
 
     @Override
-    public int[] moveDocuments(ServerSession session, int[] ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
         return ids;
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return null;
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        return null;
     }
 
 }

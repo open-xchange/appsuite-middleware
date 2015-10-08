@@ -53,6 +53,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -62,6 +63,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -77,6 +79,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "Contact object as described in Common object data and Detailed contact data. The field id is not included. To add some contact image the PUT command must be replaced with a POST command and all data must be provided within a multipart/form-data body. The normal request body must be placed into a form field named json while the image file must be placed in a file field named file. The response is then an HTML page as described in section File uploads.",
 responseDescription = "A json objekt with attribute id of the newly created contact.")
+@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 public class NewAction extends ContactAction {
 
     /**
@@ -97,7 +100,7 @@ public class NewAction extends ContactAction {
             Object imageObject = json.opt("image1");
             if (imageObject instanceof String) {
                 imageBase64 = (String) imageObject;
-                if (isEmpty(imageBase64)) {
+                if (Strings.isEmpty(imageBase64)) {
                     imageBase64 = null;
                 } else {
                     json.remove("image1");
@@ -118,7 +121,7 @@ public class NewAction extends ContactAction {
 		}
 
         if (containsImage) {
-            if (!json.has("image1") || !isEmpty(json.opt("image1").toString())) {
+            if (!json.has("image1") || !Strings.isEmpty(json.opt("image1").toString())) {
                 RequestTools.setImageData(request, contact);
             }
         } else if (null != imageBase64) {
@@ -140,18 +143,4 @@ public class NewAction extends ContactAction {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

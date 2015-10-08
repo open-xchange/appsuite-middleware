@@ -57,12 +57,12 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
-import com.openexchange.config.cascade.context.osgi.Services;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link BasicPropertyImplementation}
@@ -73,6 +73,7 @@ final class BasicPropertyImpl implements BasicProperty {
 
     private static final String DYNAMIC_ATTR_PREFIX = ContextConfigProvider.DYNAMIC_ATTR_PREFIX;
 
+    private final ServiceLookup services;
     private boolean loaded;
     private String value;
     private final int contextId;
@@ -84,12 +85,14 @@ final class BasicPropertyImpl implements BasicProperty {
      *
      * @param property The property name
      * @param context The associated context
+     * @param services The associated service look-up
      */
-    BasicPropertyImpl(String property, Context context) {
+    BasicPropertyImpl(String property, Context context, ServiceLookup services) {
         super();
         loaded = false;
         this.property = property;
         this.contextId = context.getContextId();
+        this.services = services;
         forceLoad(context);
     }
 
@@ -122,7 +125,7 @@ final class BasicPropertyImpl implements BasicProperty {
         }
 
         // Require service
-        ContextService contextService = Services.optService(ContextService.class);
+        ContextService contextService = services.getOptionalService(ContextService.class);
         if (null == contextService) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
@@ -168,7 +171,7 @@ final class BasicPropertyImpl implements BasicProperty {
 
     private void load() throws OXException {
         if (!loaded) {
-            ContextService contextService = Services.optService(ContextService.class);
+            ContextService contextService = services.getOptionalService(ContextService.class);
             if (null == contextService) {
                 throw ServiceExceptionCode.absentService(ContextService.class);
             }

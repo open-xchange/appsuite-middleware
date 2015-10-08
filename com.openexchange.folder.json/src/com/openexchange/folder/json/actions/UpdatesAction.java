@@ -70,6 +70,7 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -87,6 +88,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, responseDescription = "Response with timestamp: An array with data for new, modified and deleted folders. New and modified folders are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted folders (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class UpdatesAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATES;
@@ -130,7 +132,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             includeMail = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
@@ -167,14 +169,14 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONArray resultArray = FolderWriter.writeMultiple2Array(request, columns, result[0], Constants.ADDITIONAL_FOLDER_FIELD_LIST);
 
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
+                    request,
                     new int[] { FolderField.ID.getColumn() },
                     result[1],
-                    session,
                     Constants.ADDITIONAL_FOLDER_FIELD_LIST);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {

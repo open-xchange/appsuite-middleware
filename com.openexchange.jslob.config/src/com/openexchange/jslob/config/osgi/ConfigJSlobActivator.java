@@ -52,9 +52,11 @@ package com.openexchange.jslob.config.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.config.ConfigJSlobReloadable;
 import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
@@ -90,6 +92,6 @@ public final class ConfigJSlobActivator extends HousekeepingActivator {
         openTrackers();
         // Register service
         registerService(JSlobService.class, service);
+        registerService(Reloadable.class, new ConfigJSlobReloadable(service));
     }
-
 }

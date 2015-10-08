@@ -165,6 +165,12 @@ public class MockUser implements User {
 
     private Locale locale;
 
+    private int filestoreId = -1;
+    private String filestoreName;
+    private String[] filestorageAuth;
+    private long fileStorageQuota;
+    private int fileStorageOwner;
+
     private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public MockUser(int id) {
@@ -569,4 +575,85 @@ public class MockUser implements User {
     public void setLocale(final Locale locale) {
         this.locale = locale;
     }
+
+    @Override
+    public int getCreatedBy() {
+        return 0;
+    }
+
+    @Override
+    public boolean isGuest() {
+        return false;
+    }
+
+    @Override
+    public int getFilestoreId() {
+        return filestoreId;
+    }
+
+    /**
+     * Sets the file storage identifier
+     *
+     * @param filestoreId The identifier
+     */
+    public void setFilestoreId(int filestoreId) {
+        this.filestoreId = filestoreId;
+    }
+
+    @Override
+    public String getFilestoreName() {
+        return filestoreName;
+    }
+
+    /**
+     * Sets the file storage name serving as appendeix to base URI.
+     *
+     * @param filestoreName The name
+     */
+    public void setFilestoreName(String filestoreName) {
+        this.filestoreName = filestoreName;
+    }
+
+    /**
+     * Sets the optional file storage credentials
+     *
+     * @param filestoreAuth The credentials
+     */
+    public void setFilestoreAuth(String[] filestoreAuth) {
+        this.filestorageAuth = filestoreAuth;
+    }
+
+    @Override
+    public String[] getFileStorageAuth() {
+        return filestorageAuth.clone();
+    }
+
+    @Override
+    public long getFileStorageQuota() {
+        return fileStorageQuota;
+    }
+
+    /**
+     * Sets the file storage quota
+     *
+     * @param fileStorageQuota The quota
+     */
+    public void setFileStorageQuota(long fileStorageQuota) {
+        this.fileStorageQuota = fileStorageQuota;
+    }
+
+    @Override
+    public int getFileStorageOwner() {
+        return fileStorageOwner;
+    }
+
+    /**
+     * Sets the file storage owner
+     *
+     * @param fileStorageOwner The file storage owner to set
+     */
+    public void setFileStorageOwner(int fileStorageOwner) {
+        this.fileStorageOwner = fileStorageOwner;
+    }
+
 }

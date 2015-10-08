@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.threadsort;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -62,6 +63,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -293,9 +295,9 @@ public final class ThreadSortUtil {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                 final Response[] r;
                 {
-                    final String command = new StringBuilder("THREAD REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -318,12 +320,15 @@ public final class ThreadSortUtil {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(
                         response.toString()).toString());
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
                 }
                 return toUnifiedThreadResponse(retval);

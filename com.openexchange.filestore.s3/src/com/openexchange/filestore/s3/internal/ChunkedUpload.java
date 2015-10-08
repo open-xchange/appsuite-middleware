@@ -57,8 +57,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
  * {@link ChunkedUpload}

@@ -49,6 +49,7 @@
 
 package com.openexchange.kerberos;
 
+import java.io.Serializable;
 import javax.security.auth.Subject;
 
 /**
@@ -56,7 +57,7 @@ import javax.security.auth.Subject;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ClientPrincipal {
+public interface ClientPrincipal extends Serializable {
 
     String getName();
 

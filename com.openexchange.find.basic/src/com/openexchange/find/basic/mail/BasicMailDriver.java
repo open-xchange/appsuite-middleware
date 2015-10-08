@@ -61,8 +61,8 @@ import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_MONTH;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_WEEK;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_YEAR;
-import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.common.CommonFacetType.DATE;
+import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.common.CommonStrings.LAST_MONTH;
 import static com.openexchange.find.common.CommonStrings.LAST_WEEK;
 import static com.openexchange.find.common.CommonStrings.LAST_YEAR;
@@ -76,20 +76,20 @@ import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AbstractFindRequest;
@@ -207,7 +207,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
         return FOLDER_TYPE_NOT_SUPPORTED;
     }
 
@@ -219,10 +219,17 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, Boolean.TRUE);
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
         List<Facet> facets = new ArrayList<Facet>(5);
-        List<String> prefixTokens = Collections.emptyList();
-        if (!prefix.isEmpty()) {
-            prefixTokens = tokenize(prefix);
+        List<String> prefixTokens = null;
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
             addSimpleFacets(facets, prefix, prefixTokens);
+        } else {
+            prefixTokens = Collections.emptyList();
         }
 
         MailFolder folder = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<MailFolder>() {
@@ -294,7 +301,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         } finally {
             MailAccess.closeInstance(mailAccess);
             long diff = System.currentTimeMillis() - start;
-            LOG.info("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
+            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
         }
     }
 
@@ -447,7 +454,37 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return null;
     }
 
-    private SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
+    /**
+     * Checks given fields.
+     * <ul>
+     * <li>Add MailField.ID if MailField.ORIGINAL_ID is contained
+     * <li>Add MailField.FOLDER_ID if MailField.ORIGINAL_FOLDER_ID is contained
+     * </ul>
+     *
+     * @param mailFields The fields to check
+     * @return The checked fields
+     */
+    protected static MailField[] prepareColumns(MailField[] mailFields) {
+        MailField[] fields = mailFields;
+
+        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(fields));
+        if (set.contains(MailField.ORIGINAL_FOLDER_ID) && !set.contains(MailField.FOLDER_ID)) {
+            MailField[] tmp = fields;
+            fields = new MailField[tmp.length + 1];
+            fields[0] = MailField.FOLDER_ID;
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+        if (set.contains(MailField.ORIGINAL_ID) && !set.contains(MailField.ID)) {
+            MailField[] tmp = fields;
+            fields = new MailField[tmp.length + 1];
+            fields[0] = MailField.ID;
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+
+        return fields;
+    }
+
+    protected SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
         List<String> queryFields = searchMailBody ? Constants.QUERY_FIELDS_BODY : Constants.QUERY_FIELDS;
         SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
 

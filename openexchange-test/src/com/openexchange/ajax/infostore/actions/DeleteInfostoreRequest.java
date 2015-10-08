@@ -64,24 +64,24 @@ import com.openexchange.ajax.framework.Params;
  */
 public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfostoreResponse> {
 
-    private List<Integer> ids, folders;
+    private List<String> ids, folders;
 
     private Date timestamp;
     private Boolean hardDelete;
 
-    public void setIds(List<Integer> ids) {
+    public void setIds(List<String> ids) {
         this.ids = ids;
     }
 
-    public List<Integer> getIds() {
+    public List<String> getIds() {
         return ids;
     }
 
-    public void setFolders(List<Integer> folders) {
+    public void setFolders(List<String> folders) {
         this.folders = folders;
     }
 
-    public List<Integer> getFolders() {
+    public List<String> getFolders() {
         return folders;
     }
 
@@ -101,7 +101,7 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
         return hardDelete;
     }
 
-    public DeleteInfostoreRequest(List<Integer> ids, List<Integer> folders,Date timestamp) {
+    public DeleteInfostoreRequest(List<String> ids, List<String> folders, Date timestamp) {
         this();
         setIds(ids);
         setFolders(folders);
@@ -110,14 +110,14 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
 
     public DeleteInfostoreRequest() {
         super();
-        setIds(new LinkedList<Integer>());
-        setFolders(new LinkedList<Integer>());
+        setIds(new LinkedList<String>());
+        setFolders(new LinkedList<String>());
     }
 
-    public DeleteInfostoreRequest(int id, int folder, Date timestamp) {
+    public DeleteInfostoreRequest(String id, String folder, Date timestamp) {
         this();
-        setIds(Arrays.asList(Integer.valueOf(id)));
-        setFolders(Arrays.asList(Integer.valueOf(folder)));
+        setIds(Arrays.asList(id));
+        setFolders(Arrays.asList(folder));
         setTimestamp(timestamp);
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.imap.util;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.Store;
+import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -101,11 +102,11 @@ public final class ImapUtility {
     public static String appendCommandInfo(final String info, final String fullName, final String store) {
         final StringBuilder sb = new StringBuilder(info);
         boolean parenthesis = true;
-        if (!isEmpty(fullName)) {
+        if (!com.openexchange.java.Strings.isEmpty(fullName)) {
             sb.append(" (folder=\"").append(fullName).append('"');
             parenthesis = false;
         }
-        if (!isEmpty(store)) {
+        if (!com.openexchange.java.Strings.isEmpty(store)) {
             if (parenthesis) {
                 sb.append(" (");
                 parenthesis = false;
@@ -175,16 +176,52 @@ public final class ImapUtility {
         return sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0;
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+    /**
+     * Prepares the IMAP command for logging purpose.
+     *
+     * @param imapCommand The IMAP command to prepare
+     * @param args The command arguments
+     * @return The prepared IMAP command
+     */
+    public static String prepareImapCommandForLogging(String imapCommand, Argument args) {
+        if (null == args) {
+            return prepareImapCommandForLogging(imapCommand);
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+
+        return (null == imapCommand ? null : prepareImapCommandForLogging(new StringBuilder(imapCommand).append(' ').append(args).toString()));
+    }
+
+    /**
+     * Prepares the IMAP command for logging purpose.
+     *
+     * @param imapCommand The IMAP command to prepare
+     * @return The prepared IMAP command
+     */
+    public static String prepareImapCommandForLogging(String imapCommand) {
+        if (null == imapCommand) {
+            return "NIL";
         }
-        return isWhitespace;
+        if (imapCommand.startsWith("FETCH ")) {
+            int openParenthesis = imapCommand.indexOf('(', 6);
+            if (openParenthesis <= 32) {
+                return surroundWithSingleQuotes(imapCommand);
+            }
+            return new StringBuilder(imapCommand.length()).append('\'').append("FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
+        } else if (imapCommand.startsWith("UID FETCH ")) {
+            int openParenthesis = imapCommand.indexOf('(', 6);
+            if (openParenthesis <= 36) {
+                return surroundWithSingleQuotes(imapCommand);
+            }
+            return new StringBuilder(imapCommand.length()).append('\'').append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
+        } else if (imapCommand.startsWith("UID EXPUNGE ")) {
+            return imapCommand.length() > 32 ? "'UID EXPUNGE ...'" : surroundWithSingleQuotes(imapCommand);
+        } else {
+            return surroundWithSingleQuotes(imapCommand);
+        }
+    }
+
+    private static String surroundWithSingleQuotes(String imapCommand) {
+        return new StringBuilder(imapCommand.length() + 2).append('\'').append(imapCommand).append('\'').toString();
     }
 
 }

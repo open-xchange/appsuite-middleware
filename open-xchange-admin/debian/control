@@ -2,14 +2,14 @@ Source: open-xchange-admin
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-admin
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}, mysql-client (>=5.0), sed
+Depends: ${misc:Depends}, virtual-mysql-client | mysql-client (>=5.0) | mariadb-client (>= 5.5), bzip2, util-linux
 Replaces: open-xchange-admin-plugin-hosting, open-xchange-admin-lib, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-doc, open-xchange-admin-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc
 Conflicts: open-xchange-admin-plugin-hosting, open-xchange-admin-lib, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-doc, open-xchange-admin-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc
 Description: The Open-Xchange backend administration extension

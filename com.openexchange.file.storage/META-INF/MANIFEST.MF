@@ -2,10 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Bundle
 Bundle-SymbolicName: com.openexchange.file.storage
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.datatypes.genericonf,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.config,
+ com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.results,
@@ -18,6 +27,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.secret,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.share,
+ com.openexchange.share.recipient,
  com.openexchange.tools.id,
  com.openexchange.tools.iterator,
  com.openexchange.tx,

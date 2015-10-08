@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;

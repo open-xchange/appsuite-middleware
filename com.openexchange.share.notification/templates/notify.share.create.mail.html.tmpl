@@ -1,0 +1,43 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+</head>
+<body>
+ <#escape x as x?html>
+  
+  <#-- user (email) has shared item "foo" with you (and left you a message:) -->
+  <p id="has_shared_items">
+    ${has_shared_items}
+  </p>
+  
+  <#if user_message?has_content>
+    <p id="user_message"><cite>${user_message}</cite></p>
+  </#if>
+  
+  <#-- view item_type button -->
+  <p id="view_items" style="padding:10px 0;margin:20px 0;">
+    <@styledButton link=view_items_link>${view_items_label}</@styledButton>
+  </p>
+  
+  <#-- if the sharing user specified a password -->
+  <#if use_password?has_content>
+    <p id="use_password">
+      ${use_password}<br>
+      ${password}
+    </p>
+  </#if>
+  
+  <#-- if the sharing user specified an expiration date -->
+  <#if will_expire?has_content>
+  	<p id="will_expire">${will_expire}</p>
+  </#if>
+  
+ </#escape>
+ 
+ <#include "notify.common.footer.html.tmpl">
+ 
+</body>
+</html>

@@ -50,8 +50,6 @@
 package com.openexchange.realtime.dispatch.osgi;
 
 import java.util.Collection;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -79,21 +77,6 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        context.addFrameworkListener(new FrameworkListener() {
-
-            @Override
-            public void frameworkEvent(FrameworkEvent event) {
-                if (event.getBundle().getSymbolicName().toLowerCase().startsWith("com.openexchange.realtime.dispatch")) {
-                    int eventType = event.getType();
-                    if (eventType == FrameworkEvent.ERROR) {
-                        LOG.error(event.toString(), event.getThrowable());
-                    } else {
-                        LOG.info(event.toString(), event.getThrowable());
-                    }
-                }
-            }
-        });
-
         RealtimeServiceRegistry.SERVICES.set(this);
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);

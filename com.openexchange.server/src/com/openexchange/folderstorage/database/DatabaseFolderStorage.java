@@ -49,8 +49,12 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.extractIDs;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
+import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
+import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
 import static com.openexchange.groupware.container.FolderObject.SYSTEM_MODULE;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
@@ -73,12 +77,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -120,14 +126,20 @@ import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
 import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.outlook.sql.Delete;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.folderstorage.type.SystemType;
+import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -136,7 +148,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
@@ -144,6 +155,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -152,7 +165,6 @@ import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
-import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -194,7 +206,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
         //private final int contextId;
 
-        protected NonClosingConnectionProvider(final ConnectionMode connection/*, final DatabaseService databaseService, final int contextId*/) {
+        protected NonClosingConnectionProvider(final ConnectionMode connection/* , final DatabaseService databaseService, final int contextId */) {
             super();
             this.connection = connection;
             //this.databaseService = databaseService;
@@ -310,6 +322,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
                 con = databaseService.getWritable(contextId);
                 mode = Mode.WRITE_AFTER_READ;
+                close = true;
                 // Query again...
                 nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
                 if (null == nonExistingParents || 0 == nonExistingParents.length) {
@@ -369,9 +382,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public ContentType[] getSupportedContentTypes() {
-        return new ContentType[] {
-            TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
-            InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
+        return new ContentType[] { TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(), InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
     }
 
     @Override
@@ -391,30 +402,31 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (null == con) {
             return;
         }
-        if (WRITEES.contains(con.readWrite)) {
-            try {
-                con.connection.commit();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.autocommit(con.connection);
+
+        if (!con.controlledExternally) {
+            if (WRITEES.contains(con.readWrite)) {
+                try {
+                    con.connection.commit();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.autocommit(con.connection);
+                    final DatabaseService databaseService = services.getService(DatabaseService.class);
+                    if (null != databaseService) {
+                        con.close(databaseService, params.getContext().getContextId());
+                    }
+                }
+            } else {
                 final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
-                    con.close(databaseService, params.getContext().getContextId());
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
-                final FolderType folderType = getFolderType();
-                params.putParameter(folderType, PARAM_CONNECTION, null);
-                params.markCommitted();
             }
-        } else {
-            final DatabaseService databaseService = services.getService(DatabaseService.class);
-            if (null != databaseService) {
-                databaseService.backReadOnly(params.getContext(), con.connection);
-            }
-            final FolderType folderType = getFolderType();
-            params.putParameter(folderType, PARAM_CONNECTION, null);
-            params.markCommitted();
         }
+
+        final FolderType folderType = getFolderType();
+        params.putParameter(folderType, PARAM_CONNECTION, null);
+        params.markCommitted();
     }
 
     @Override
@@ -486,8 +498,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     /*
                      * Determine folder type by examining parent folder
                      */
-                    createMe.setType(getFolderType(
-                        createMe.getModule(), createMe.getParentFolderID(), storageParameters.getContext(), con));
+                    createMe.setType(getFolderType(createMe.getModule(), createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
@@ -509,11 +520,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     oclPerm.setEntity(p.getEntity());
                     oclPerm.setGroupPermission(p.isGroup());
                     oclPerm.setFolderAdmin(p.isAdmin());
-                    oclPerm.setAllPermission(
-                        p.getFolderPermission(),
-                        p.getReadPermission(),
-                        p.getWritePermission(),
-                        p.getDeletePermission());
+                    oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
@@ -539,12 +546,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     permissions.add(newMaxPermissionFor(userId));
                 }
                 if (!isSystem) {
-                    final TIntSet ignore = new TIntHashSet(2); ignore.add(userId);
+                    final TIntSet ignore = new TIntHashSet(4);
+                    ignore.add(userId);
+                    ignore.add(OCLPermission.ALL_GUESTS);
                     if (isShared) {
                         ignore.add(parent.getCreatedBy());
                     }
                     for (final OCLPermission permission : parentPermissions) {
-                        if (permission.getSystem() <= 0 && (permission.isGroupPermission() || !ignore.contains(permission.getEntity()))) {
+                        if ((permission.getSystem() <= 0) && !ignore.contains(permission.getEntity())) {
                             permissions.add(permission);
                         }
                     }
@@ -591,10 +600,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         return oclPerm;
     }
 
-    private static final int[] PUBLIC_FOLDER_IDS =
-        {
-            FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
-            FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
+    private static final int[] PUBLIC_FOLDER_IDS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     /**
      * Determines the target folder type for new folders below a parent folder.
@@ -705,10 +711,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.CONTACT, con, context);
             } else if (InfostoreContentType.getInstance().equals(contentType)) {
                 if (TrashType.getInstance().equals(type)) {
-                    folderId = OXFolderSQL.getUserDefaultFolder(
-                        session.getUserId(), FolderObject.INFOSTORE, getTypeByFolderType(type), con, context);
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.TRASH, con, context);
+                } else if (DocumentsType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.DOCUMENTS, con, context);
+                } else if (TemplatesType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.TEMPLATES, con, context);
+                } else if (VideosType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.VIDEOS, con, context);
+                } else if (MusicType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.MUSIC, con, context);
+                } else if (PicturesType.getInstance().equals(type)) {
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, FolderObject.PICTURES, con, context);
                 } else {
-                    folderId = OXFolderSQL.getUserDefaultFolder(session.getUserId(), FolderObject.INFOSTORE, con, context);
+                    folderId = OXFolderSQL.getUserDefaultFolder(user.getId(), FolderObject.INFOSTORE, con, context);
                 }
             }
             if (-1 == folderId) {
@@ -880,9 +895,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }
 
-    private static final int[] VIRTUAL_IDS = {
-        FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-        FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
+    private static final int[] VIRTUAL_IDS = { FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
     @Override
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
@@ -891,15 +904,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
 
             final DatabaseFolder retval;
 
@@ -943,8 +948,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
                 }
 
-                final FolderObject fo =
-                    FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
                 retval = new DatabaseFolder(fo);
             }
             retval.setTreeID(treeId);
@@ -992,15 +996,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
             /*
              * Either from working or from backup storage type
@@ -1033,19 +1028,25 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * Batch load
                  */
-                provider = getConnection(Mode.READ, storageParameters);
-                final Connection con = provider.getConnection();
-                if (!map.isEmpty()) {
-                    final Session session = storageParameters.getSession();
-                    for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con, storageParameters)) {
-                        if (null != folderObject) {
-                            final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userPermissionBits, ctx, session, altNames, con);
+                if (0 < map.size()) {
+                    provider = getConnection(Mode.READ, storageParameters);
+                    try {
+                        Connection con = provider.getConnection();
+                        Session session = storageParameters.getSession();
+                        UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
+                        for (FolderObject folder : getFolderObjects(map.keys(), ctx, con, storageParameters)) {
+                            if (null != folder) {
+                                int index = map.get(folder.getObjectID());
+                                ret[index] = DatabaseFolderConverter.convert(folder, user, userPermissionBits, ctx, session, altNames, con);
+                            }
+                        }
+                    } finally {
+                        if (null != provider) {
+                            provider.close();
+                            provider = null;
                         }
                     }
                 }
-                provider.close();
-                provider = null;
                 /*
                  * Set proper tree identifier
                  */
@@ -1064,9 +1065,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     if (null != folder) {
                         l.add(folder);
                     } else {
-                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(
-                            Integer.valueOf(folderIdentifiers.get(i)),
-                            treeId));
+                        storageParameters.addWarning(FolderExceptionErrorMessage.NOT_FOUND.create(Integer.valueOf(folderIdentifiers.get(i)), treeId));
                     }
                 }
                 return l;
@@ -1080,15 +1079,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
             provider = getConnection(Mode.READ, storageParameters);
             final Connection con = provider.getConnection();
-            final List<FolderObject> folders =
-                OXFolderBatchLoader.loadFolderObjectsFromDB(
-                    list.toArray(),
-                    ctx,
-                    con,
-                    true,
-                    false,
-                    "del_oxfolder_tree",
-                    "del_oxfolder_permissions");
+            final List<FolderObject> folders = OXFolderBatchLoader.loadFolderObjectsFromDB(list.toArray(), ctx, con, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
             provider.close();
             provider = null;
             final int size = folders.size();
@@ -1120,32 +1111,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
+        final User user = storageParameters.getUser();
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
             final Connection con = provider.getConnection();
-            final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
-            final List<FolderObject> list =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
-                    userId,
-                    user.getGroups(),
-                    userPermissionBits.getAccessibleModules(),
-                    iType,
-                    new int[] { iModule },
-                    ctx,
-                    con)).asList();
+            final List<FolderObject> list = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, user.getGroups(), userPermissionBits.getAccessibleModules(), iType, new int[] { iModule }, ctx, con)).asList();
             if (FolderObject.PRIVATE == iType) {
                 /*
                  * Remove shared ones manually
@@ -1173,41 +1148,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
             }
             /*
-             * Localize folder names
+             * localize & sort folders
              */
-            {
-                StringHelper stringHelper = null;
-                for (final FolderObject folderObject : list) {
-                    /*
-                     * Check if folder is user's default folder and set locale-sensitive name
-                     */
-                    if (folderObject.isDefaultFolder()) {
-                        final int module = folderObject.getModule();
-                        if (FolderObject.CALENDAR == module) {
-                            {
-                                if (null == stringHelper) {
-                                    stringHelper = StringHelper.valueOf(user.getLocale());
-                                }
-                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                            }
-                        } else if (FolderObject.CONTACT == module) {
-                            {
-                                if (null == stringHelper) {
-                                    stringHelper = StringHelper.valueOf(user.getLocale());
-                                }
-                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                            }
-                        } else if (FolderObject.TASK == module) {
-                            {
-                                if (null == stringHelper) {
-                                    stringHelper = StringHelper.valueOf(user.getLocale());
-                                }
-                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
-                            }
-                        }
-                    }
-                }
-            }
+            localizeFolderNames(list, user.getLocale());
             if (FolderObject.PRIVATE == iType) {
                 /*
                  * Sort them by default-flag and name: <user's default folder>, <aaa>, <bbb>, ... <zzz>
@@ -1244,16 +1187,40 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 Collections.sort(list, new FolderNameComparator(user.getLocale(), storageParameters.getContext()));
             }
             /*
-             * Extract IDs
+             * return sortable identifiers
              */
-            final SortableId[] ret = new SortableId[list.size()];
-            for (int i = 0; i < ret.length; i++) {
-                final FolderObject folderObject = list.get(i);
-                final String id = String.valueOf(folderObject.getObjectID());
-                ret[i] = new DatabaseId(id, i, folderObject.getFolderName());
-            }
-            return ret;
+            return extractIDs(list);
         } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+            /*
+             * load & filter user shared folders of content type
+             */
+            Connection connection = provider.getConnection();
+            User user = storageParameters.getUser();
+            UserPermissionBits userPermissionBits = getUserPermissionBits(connection, storageParameters);
+            searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), getModuleByContentType(contentType), storageParameters.getContext(), connection);
+            List<FolderObject> folders = getUserSharedFolders(searchIterator, connection, storageParameters);
+            /*
+             * localize / sort folders & return their sortable identifiers
+             */
+            if (0 == folders.size()) {
+                return new SortableId[0];
+            }
+            localizeFolderNames(folders, user.getLocale());
+            if (1 < folders.size()) {
+                Collections.sort(folders, new FolderObjectComparator(user.getLocale(), storageParameters.getContext()));
+            }
+            return extractIDs(folders);
+        } finally {
+            SearchIterators.close(searchIterator);
             provider.close();
         }
     }
@@ -1262,22 +1229,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
         try {
+            final User user = storageParameters.getUser();
+            final Context ctx = storageParameters.getContext();
             final Connection con = provider.getConnection();
-
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
-                final List<FolderIdNamePair> subfolderIds =
-                    SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
+                final List<FolderIdNamePair> subfolderIds = SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final FolderIdNamePair props : subfolderIds) {
@@ -1289,7 +1246,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final String[] sa : subfolderIds) {
@@ -1302,19 +1259,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * A virtual database folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
-                final List<String[]> subfolderIds =
-                    VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userPermissionBits, ctx, con);
+                final List<String[]> subfolderIds = VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1328,17 +1273,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system private folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1353,17 +1287,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system shared folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1378,17 +1301,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system public folder
                  */
-                final User user = storageParameters.getUser();
-                final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userPermissionBits;
-                {
-                    final Session s = storageParameters.getSession();
-                    if (s instanceof ServerSession) {
-                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                    } else {
-                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                    }
-                }
                 final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
@@ -1403,10 +1315,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 /*
                  * The system infostore folder
                  */
-                User user = storageParameters.getUser();
-                Context ctx = storageParameters.getContext();
                 final Session s = storageParameters.getSession();
-                UserPermissionBits userPermissionBits = (s instanceof ServerSession) ? ((ServerSession) s).getUserPermissionBits() : UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
 
                 List<String[]> l = null;
                 if (REAL_TREE_ID.equals(treeId)) {
@@ -1616,23 +1525,27 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return;
         }
 
-        params.putParameter(getFolderType(), PARAM_CONNECTION, null);
-        if (con.isWritable()) {
-            try {
-                DBUtils.rollback(con.connection);
-            } finally {
-                DBUtils.autocommit(con.connection);
+        if (!con.controlledExternally) {
+            params.putParameter(getFolderType(), PARAM_CONNECTION, null);
+            if (con.isWritable()) {
+                try {
+                    DBUtils.rollback(con.connection);
+                } finally {
+                    DBUtils.autocommit(con.connection);
+                    final DatabaseService databaseService = services.getService(DatabaseService.class);
+                    if (null != databaseService) {
+                        con.close(databaseService, params.getContext().getContextId());
+                    }
+                }
+            } else {
                 final DatabaseService databaseService = services.getService(DatabaseService.class);
                 if (null != databaseService) {
-                    con.close(databaseService, params.getContext().getContextId());
+                    databaseService.backReadOnly(params.getContext(), con.connection);
                 }
             }
-        } else {
-            final DatabaseService databaseService = services.getService(DatabaseService.class);
-            if (null != databaseService) {
-                databaseService.backReadOnly(params.getContext(), con.connection);
-            }
         }
+
+        params.putParameter(getFolderType(), PARAM_CONNECTION, null);
     }
 
     @Override
@@ -1646,9 +1559,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final DatabaseService databaseService = services.getService(DatabaseService.class);
             final Context context = parameters.getContext();
-            ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
-            if (null != con) {
-                if (con.supports(mode)) {
+            ConnectionMode connectionMode = parameters.getParameter(folderType, PARAM_CONNECTION);
+            if (null != connectionMode) {
+                if (connectionMode.supports(mode)) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1657,34 +1570,62 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(folderType, PARAM_CONNECTION, null);
-                if (con.isWritable()) {
-                    try {
-                        con.connection.commit();
-                    } catch (final Exception e) {
-                        // Ignore
-                        DBUtils.rollback(con.connection);
+                if (!connectionMode.controlledExternally) {
+                    parameters.putParameter(folderType, PARAM_CONNECTION, null);
+                    if (connectionMode.isWritable()) {
+                        try {
+                            connectionMode.connection.commit();
+                        } catch (final Exception e) {
+                            // Ignore
+                            DBUtils.rollback(connectionMode.connection);
+                        }
+                        DBUtils.autocommit(connectionMode.connection);
                     }
-                    DBUtils.autocommit(con.connection);
+                    connectionMode.close(databaseService, context.getContextId());
                 }
-                con.close(databaseService, context.getContextId());
             }
+
+            Connection connection = null;
+            FolderServiceDecorator decorator = parameters.getDecorator();
+            if (decorator != null) {
+                Object obj = decorator.getProperty(Connection.class.getName());
+                if (obj != null && obj instanceof Connection) {
+                    connection = (Connection) obj;
+                }
+            }
+
             if (WRITEES.contains(mode)) {
-                con = new ConnectionMode(databaseService.getWritable(context), mode);
-                con.connection.setAutoCommit(false);
+                if (connection == null || connection.isReadOnly()) {
+                    connectionMode = new ConnectionMode(databaseService.getWritable(context), mode);
+                    connectionMode.connection.setAutoCommit(false);
+                } else {
+                    connectionMode = new ConnectionMode(connection, mode, true);
+                }
             } else {
-                con = new ConnectionMode(databaseService.getReadOnly(context), mode);
+                if (connection == null) {
+                    connectionMode = new ConnectionMode(databaseService.getReadOnly(context), mode);
+                } else {
+                    connectionMode = new ConnectionMode(connection, mode, true);
+                }
             }
             // Put to parameters
-            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
+            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, connectionMode)) {
                 // Success
             } else {
                 // Fail
-                if (con.isWritable()) {
-                    con.connection.setAutoCommit(true);
+                if (!connectionMode.controlledExternally) {
+                    if (connectionMode.isWritable()) {
+                        connectionMode.connection.setAutoCommit(true);
+                    }
+                    connectionMode.close(databaseService, context.getContextId());
                 }
-                con.close(databaseService, context.getContextId());
             }
+
+            if (TransactionManager.isManagedTransaction(parameters)) {
+                TransactionManager.getTransactionManager(parameters).transactionStarted(this);
+                return false;
+            }
+
             return true;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -1706,10 +1647,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(id)) {
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
-                    OXFolderUtility.getUserName(session.getUserId(), context),
-                    UserStorage.getInstance().getUser(owner, context).getDisplayName(),
-                    Integer.valueOf(context.getContextId()));
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(Integer.valueOf(session.getUserId()), UserStorage.getInstance().getUser(owner, context).getDisplayName(), Integer.valueOf(context.getContextId()));
             }
 
             final int folderId = Integer.parseInt(id);
@@ -1719,8 +1657,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
              */
             {
                 final Date clientLastModified = storageParameters.getTimeStamp();
-                if (null != clientLastModified && getFolderAccess(context, con).getFolderLastModified(folderId).after(
-                    clientLastModified)) {
+                if (null != clientLastModified && getFolderAccess(context, con).getFolderLastModified(folderId).after(clientLastModified)) {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
             }
@@ -1780,11 +1717,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     oclPerm.setEntity(p.getEntity());
                     oclPerm.setGroupPermission(p.isGroup());
                     oclPerm.setFolderAdmin(p.isAdmin());
-                    oclPerm.setAllPermission(
-                        p.getFolderPermission(),
-                        p.getReadPermission(),
-                        p.getWritePermission(),
-                        p.getDeletePermission());
+                    oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
                     oclPerm.setSystem(p.getSystem());
                     oclPermissions[i] = oclPerm;
                 }
@@ -1822,16 +1755,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
-
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
             final boolean retval;
 
             if (StorageType.WORKING.equals(storageType)) {
@@ -1904,7 +1828,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         } finally {
             provider.close();
         }
-    } // End of containsFolder()
+    }// End of containsFolder()
 
     @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
@@ -1913,11 +1837,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
 
-            final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(
-                    timeStamp == null ? new Date(0) : timeStamp,
-                    ctx,
-                    con)).asQueue();
+            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(timeStamp == null ? new Date(0) : timeStamp, ctx, con)).asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iterator = q.iterator();
             final String[] ret = new String[size];
@@ -1929,7 +1849,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         } finally {
             provider.close();
         }
-    } // End of getModifiedFolderIDs()
+    }// End of getModifiedFolderIDs()
 
     @Override
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
@@ -1938,24 +1858,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits;
-            {
-                final Session s = storageParameters.getSession();
-                if (s instanceof ServerSession) {
-                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
-                } else {
-                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
-                }
-            }
+            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
 
-            final Queue<FolderObject> q =
-                ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(
-                    timeStamp,
-                    user.getId(),
-                    user.getGroups(),
-                    userPermissionBits.getAccessibleModules(),
-                    ctx,
-                    con)).asQueue();
+            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(timeStamp, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), ctx, con)).asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iterator = q.iterator();
             final String[] ret = new String[size];
@@ -1968,7 +1873,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             provider.close();
         }
 
-    } // End of getDeletedFolderIDs()
+    }// End of getDeletedFolderIDs()
 
     /*-
      * ############################# HELPER METHODS #############################
@@ -2020,9 +1925,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         for (int index = 0; index < length; index++) {
             final int folderId = folderIds[index];
             final FolderObject fo = cacheManager.getFolderObject(folderId, ctx);
-            if (null == fo) { // Cache miss
+            if (null == fo) {// Cache miss
                 toLoad.put(folderId, index);
-            } else { // Cache hit
+            } else {// Cache hit
                 ret[index] = fo;
             }
         }
@@ -2046,20 +1951,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
     private ConnectionProvider getConnection(final Mode mode, final StorageParameters storageParameters) throws OXException {
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
-            return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
+            return new NonClosingConnectionProvider(connection/* , databaseService, context.getContextId() */);
         }
         final Context context = storageParameters.getContext();
         final DatabaseService databaseService = services.getService(DatabaseService.class);
         connection = WRITEES.contains(mode) ? new ConnectionMode(databaseService.getWritable(context), mode) : new ConnectionMode(databaseService.getReadOnly(context), mode);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
-    }
-
-    private static <T> T getParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws OXException {
-        final T parameter = optParameter(clazz, name, parameters);
-        if (null == parameter) {
-            throw OXFolderExceptionCode.MISSING_PARAMETER.create(name);
-        }
-        return parameter;
     }
 
     private static <T> T optParameter(final Class<T> clazz, final String name, final StorageParameters parameters) throws OXException {
@@ -2101,23 +1998,103 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         if (TrashType.getInstance().equals(type)) {
             return FolderObject.TRASH;
         }
+        if (DocumentsType.getInstance().equals(type)) {
+            return FolderObject.DOCUMENTS;
+        }
+        if (TemplatesType.getInstance().equals(type)) {
+            return FolderObject.TEMPLATES;
+        }
+        if (MusicType.getInstance().equals(type)) {
+            return FolderObject.MUSIC;
+        }
+        if (PicturesType.getInstance().equals(type)) {
+            return FolderObject.PICTURES;
+        }
+        if (VideosType.getInstance().equals(type)) {
+            return FolderObject.VIDEOS;
+        }
         return FolderObject.SYSTEM_TYPE;
     }
 
     private static int getTypeByFolderTypeWithShared(final Type type) {
-        if (PrivateType.getInstance().equals(type)) {
-            return FolderObject.PRIVATE;
-        }
-        if (PublicType.getInstance().equals(type)) {
-            return FolderObject.PUBLIC;
-        }
         if (SharedType.getInstance().equals(type)) {
             return FolderObject.SHARED;
         }
-        if (TrashType.getInstance().equals(type)) {
-            return FolderObject.TRASH;
+        return getTypeByFolderType(type);
+    }
+
+    /**
+     * Reads the supplied search iterator and filters those folders that are considered as "shared" by the user, i.e. non-public folders
+     * of the user that have been shared to at least one other entity.
+     *
+     * @param searchIterator The search iterator to process
+     * @param connection An opened database connection to use
+     * @param storageParameters The storage parameters as passed from the client
+     * @return The shared folders of the user
+     */
+    private static List<FolderObject> getUserSharedFolders(SearchIterator<FolderObject> searchIterator, Connection connection, StorageParameters storageParameters) throws OXException {
+        List<FolderObject> folders = new ArrayList<FolderObject>();
+        Set<Integer> knownPrivateFolders = new HashSet<Integer>();
+        while (searchIterator.hasNext()) {
+            /*
+             * only include shared, non-public folders created by the user
+             */
+            FolderObject folder = searchIterator.next();
+            if (folder.getCreatedBy() == storageParameters.getUserId()) {
+                OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
+                if (null != permissions && 1 < permissions.length && considerPrivate(folder, knownPrivateFolders, connection, storageParameters)) {
+                    folders.add(folder);
+                }
+            }
         }
-        return FolderObject.SYSTEM_TYPE;
+        return folders;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied folder can be considered as a "private" one, i.e. it is marked directly as such, or is
+     * an infostore folder somewhere in the "private" subtree below the user's personal default infostore folder.
+     *
+     * @param folder The folder to check
+     * @param knownPrivateFolders A set of already known private folders (from previous checks)
+     * @param connection An opened database connection to use
+     * @param storageParameters The storage parameters as passed from the client
+     * @return <code>true</code> if the folder can be considered as "public", <code>false</code>, otherwise
+     */
+    private static boolean considerPrivate(FolderObject folder, Set<Integer> knownPrivateFolders, Connection connection, StorageParameters storageParameters) throws OXException {
+        if (FolderObject.INFOSTORE == folder.getModule()) {
+            /*
+             * infostore folders are always of "public" type, so check if they're somewhere below the personal subtree
+             */
+            List<Integer> seenFolders = new ArrayList<Integer>();
+            FolderObject currentFolder = folder;
+            do {
+                Integer id = I(currentFolder.getObjectID());
+                seenFolders.add(id);
+                if (knownPrivateFolders.contains(id) || knownPrivateFolders.contains(I(currentFolder.getParentFolderID())) || currentFolder.isDefaultFolder() && FolderObject.PUBLIC == currentFolder.getType()) {
+                    /*
+                     * folder or its parent is a previously recognized "private" folder, or the user's personal infostore folder is reached
+                     */
+                    knownPrivateFolders.addAll(seenFolders);
+                    return true;
+                } else {
+                    /*
+                     * check parent folder if there are more parent folders available
+                     */
+                    if (FolderObject.MIN_FOLDER_ID < currentFolder.getParentFolderID()) {
+                        currentFolder = getFolderObject(currentFolder.getParentFolderID(), storageParameters.getContext(), connection, storageParameters);
+                    } else {
+                        currentFolder = null;
+                        return false;
+                    }
+                }
+            } while (null != currentFolder);
+            return false;
+        } else {
+            /*
+             * always consider non-infostore "private" folders as private
+             */
+            return FolderObject.PRIVATE == folder.getType(storageParameters.getUserId());
+        }
     }
 
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
@@ -2153,7 +2130,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                                 d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
                             } catch (OXException e) {
                                 d2 = null;
-                            };
+                            }
+                            ;
                             return collator.compare(d1, d2);
                         }
                     }
@@ -2171,7 +2149,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return (id1 < id2 ? -1 : (id1 == id2 ? 0 : 1));
         }
 
-    } // End of FolderObjectComparator
+    }// End of FolderObjectComparator
 
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
@@ -2209,14 +2187,15 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
                     } catch (OXException e) {
                         d2 = null;
-                    };
+                    }
+                    ;
                     return collator.compare(d1, d2);
                 }
             }
             return collator.compare(folderName1, folderName2);
         }
 
-    } // End of FolderNameComparator
+    }// End of FolderNameComparator
 
     private static final class FileStorageAccountComparator implements Comparator<FileStorageAccount> {
 
@@ -2232,7 +2211,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return collator.compare(o1.getDisplayName(), o2.getDisplayName());
         }
 
-    } // End of FileStorageAccountComparator
+    }// End of FileStorageAccountComparator
 
     public static final class ConnectionMode {
 
@@ -2247,18 +2226,35 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         public Mode readWrite;
 
         /**
+         * Whether this connection is in a transactional state controlled by an outer scope.
+         */
+        public boolean controlledExternally;
+
+        /**
          * Initializes a new {@link ConnectionMode}.
          *
          * @param connection
          * @param readWrite
          */
         public ConnectionMode(final Connection connection, final Mode readWrite) {
+            this(connection, readWrite, false);
+        }
+
+        /**
+         * Initializes a new {@link ConnectionMode}.
+         *
+         * @param connection
+         * @param readWrite
+         * @param controlledExternally
+         */
+        public ConnectionMode(final Connection connection, final Mode readWrite, final boolean controlledExternally) {
             super();
             this.connection = connection;
             this.readWrite = readWrite;
+            this.controlledExternally = controlledExternally;
         }
 
-        public boolean isWritable () {
+        public boolean isWritable() {
             return WRITEES.contains(readWrite);
         }
 
@@ -2279,12 +2275,14 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
          * @param contextId The context identifier
          */
         public void close(final DatabaseService databaseService, final int contextId) {
-            if (Mode.WRITE == readWrite) {
-                databaseService.backWritable(contextId, connection);
-            } else if (Mode.WRITE_AFTER_READ == readWrite) {
-                databaseService.backWritableAfterReading(contextId, connection);
-            } else {
-                databaseService.backReadOnly(contextId, connection);
+            if (!controlledExternally) {
+                if (Mode.WRITE == readWrite) {
+                    databaseService.backWritable(contextId, connection);
+                } else if (Mode.WRITE_AFTER_READ == readWrite) {
+                    databaseService.backWritableAfterReading(contextId, connection);
+                } else {
+                    databaseService.backReadOnly(contextId, connection);
+                }
             }
         }
     }

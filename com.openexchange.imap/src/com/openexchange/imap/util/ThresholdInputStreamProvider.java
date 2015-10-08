@@ -49,23 +49,12 @@
 
 package com.openexchange.imap.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.config.IMAPReloadable;
-import com.openexchange.imap.services.Services;
-import com.openexchange.java.Streams;
-import com.openexchange.log.LogProperties;
-import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link ThresholdInputStreamProvider} - Backs data in a <code>byte</code> array as long as specified threshold is not exceeded, but
@@ -75,23 +64,8 @@ import com.openexchange.mail.MailExceptionCode;
  */
 public final class ThresholdInputStreamProvider implements Closeable, InputStreamProvider {
 
-    /** The default in-memory threshold of 500KB. */
-    public static final int DEFAULT_IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
-
-    /** The in-memory buffer where data is stored */
-    private ByteArrayOutputStream buf;
-
-    /** The number of valid bytes that were already written */
-    private long count;
-
-    /** The temporary file to stream to if threshold exceeded */
-    private File tempFile;
-
-    /** The in-memory threshold */
-    private final int threshold;
-
-    /** The initial capacity */
-    private final int initalCapacity;
+    /** The backing file holder */
+    private final ThresholdFileHolder sink;
 
     /**
      * Initializes a new {@link ThresholdInputStreamProvider} with default threshold and default initial capacity.
@@ -117,9 +91,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      */
     public ThresholdInputStreamProvider(final int threshold, final int initalCapacity) {
         super();
-        count = 0;
-        this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
-        this.initalCapacity = initalCapacity > 0 ? initalCapacity : 2048;
+        sink = new ThresholdFileHolder(threshold, initalCapacity, true);
     }
 
     /**
@@ -128,7 +100,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @return An {@link OutputStream} that writes data into this file holder
      */
     public OutputStream asOutputStream() {
-        return new TransferringOutStream(this);
+        return sink.asOutputStream();
     }
 
     /**
@@ -142,16 +114,13 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws IndexOutOfBoundsException If illegal arguments are specified
      */
     public ThresholdInputStreamProvider write(final byte[] bytes, final int off, final int len) throws IOException {
-        if (bytes == null) {
+        try {
+            sink.write(bytes, off, len);
             return this;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            throw (cause instanceof IOException) ? (IOException) cause : new IOException(null == cause ? e : cause);
         }
-        if ((off < 0) || (off > bytes.length) || (len < 0) || ((off + len) > bytes.length) || ((off + len) < 0)) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (len == 0) {
-            return this;
-        }
-        return write(new com.openexchange.java.UnsynchronizedByteArrayInputStream(bytes, off, len));
     }
 
     /**
@@ -162,25 +131,13 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws IOException If write attempt fails
      */
     public ThresholdInputStreamProvider write(final byte[] bytes) throws IOException {
-        if (bytes == null) {
+        try {
+            sink.write(bytes);
             return this;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            throw (cause instanceof IOException) ? (IOException) cause : new IOException(null == cause ? e : cause);
         }
-        if (null == tempFile && null == buf && bytes.length > threshold) {
-            // Nothing written & content does exceed threshold
-            final File tempFile = newTempFile();
-            this.tempFile = tempFile;
-            OutputStream out = null;
-            try {
-                out = new FileOutputStream(tempFile);
-                out.write(bytes, 0, bytes.length);
-                out.flush();
-            } finally {
-                Streams.close(out);
-            }
-            return this;
-        }
-        // Deal with possible available content
-        return write(Streams.newByteArrayInputStream(bytes));
     }
 
     /**
@@ -193,57 +150,13 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws IOException If write attempt fails
      */
     public ThresholdInputStreamProvider write(final InputStream in) throws IOException {
-        if (null == in) {
-            return this;
-        }
-        OutputStream out = null;
         try {
-            File tempFile = this.tempFile;
-            long count = this.count;
-            if (null == tempFile) {
-                // Threshold not yet exceeded
-                ByteArrayOutputStream baos = buf;
-                if (null == baos) {
-                    baos = Streams.newByteArrayOutputStream(initalCapacity);
-                    this.buf = baos;
-                }
-                out = baos;
-                final int inMemoryThreshold = threshold;
-                final int buflen = 0xFFFF; // 64KB
-                final byte[] buffer = new byte[buflen];
-                for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
-                    // Count bytes
-                    count += len;
-                    if ((null == tempFile) && (count > inMemoryThreshold)) {
-                        // Stream to file because threshold is exceeded
-                        tempFile = newTempFile();
-                        this.tempFile = tempFile;
-                        out = new FileOutputStream(tempFile);
-                        out.write(baos.toByteArray());
-                        baos = null;
-                        buf = null;
-                    }
-                    out.write(buffer, 0, len);
-                }
-                out.flush();
-            } else {
-                // Threshold already exceeded. Stream to file.
-                out = new FileOutputStream(tempFile, true);
-                final int buflen = 0xFFFF; // 64KB
-                final byte[] buffer = new byte[buflen];
-                for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
-                    // Count bytes
-                    count += len;
-                    out.write(buffer, 0, len);
-                }
-                out.flush();
-            }
-            this.count = count;
-        } finally {
-            Streams.close(in);
-            Streams.close(out);
+            sink.write(in);
+            return this;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            throw (cause instanceof IOException) ? (IOException) cause : new IOException(null == cause ? e : cause);
         }
-        return this;
     }
 
     /**
@@ -252,17 +165,12 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @return The number of bytes
      */
     public long getCount() {
-        return count;
+        return sink.getCount();
     }
 
     @Override
     public void close() {
-        final File tempFile = this.tempFile;
-        if (null != tempFile) {
-            tempFile.delete();
-            this.tempFile = null;
-        }
-        this.buf = null;
+        sink.close();
     }
 
     @Override
@@ -282,52 +190,12 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws OXException If byte array cannot be returned for any reason
      */
     public byte[] toByteArray() throws OXException {
-        final ByteArrayOutputStream buf = this.buf;
-        if (null != buf) {
-            return buf.toByteArray();
-        }
-        final File tempFile = this.tempFile;
-        if (null == tempFile) {
-            final IOException e = new IOException("Already closed.");
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
-        InputStream in = null;
-        try {
-            in = new FileInputStream(tempFile);
-            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(in.available());
-            final int buflen = 0xFFFF; // 64KB
-            final byte[] buffer = new byte[buflen];
-            for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
-                baos.write(buffer, 0, len);
-            }
-            baos.flush();
-            return baos.toByteArray();
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(in);
-        }
+        return sink.toByteArray();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.imap.util.InputStreamProvider#getInputStream()
-     */
     @Override
     public InputStream getInputStream() throws OXException {
-        final ByteArrayOutputStream buf = this.buf;
-        if (null != buf) {
-            return Streams.asInputStream(buf);
-        }
-        final File tempFile = this.tempFile;
-        if (null == tempFile) {
-            final IOException e = new IOException("Already closed.");
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
-        try {
-            return new FileInputStream(tempFile);
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
+        return sink.getStream();
     }
 
     /**
@@ -336,84 +204,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @return The length or <code>-1</code>
      */
     public long getLength() {
-        final ByteArrayOutputStream buf = this.buf;
-        if (null != buf) {
-            return buf.size();
-        }
-        final File tempFile = this.tempFile;
-        if (null == tempFile) {
-            throw new IllegalStateException("Already closed.");
-        }
-        return tempFile.length();
-    }
-
-    private static final class TransferringOutStream extends OutputStream {
-
-        private final ThresholdInputStreamProvider fileHolder;
-
-        TransferringOutStream(final ThresholdInputStreamProvider fileHolder) {
-            super();
-            this.fileHolder = fileHolder;
-        }
-
-        @Override
-        public void write(final int b) throws IOException {
-            fileHolder.write(new byte[] { (byte) b });
-        }
-
-        @Override
-        public void write(final byte[] b, final int off, final int len) throws IOException {
-            fileHolder.write(b, off, len);
-        }
-    } // End of class TransferringOutStream
-
-    private static volatile File uploadDirectory;
-    private static File uploadDirectory() {
-        File tmp = uploadDirectory;
-        if (null == tmp) {
-            synchronized (ThresholdInputStreamProvider.class) {
-                tmp = uploadDirectory;
-                if (null == tmp) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    tmp = new File(null == service ? "/tmp" : service.getProperty("UPLOAD_DIRECTORY", "/tmp"));
-                    uploadDirectory = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    static {
-        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(final ConfigurationService configService) {
-                uploadDirectory = null;
-            }
-
-            @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
-            }
-        });
-    }
-
-    /**
-     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
-     * <ol>
-     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
-     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
-     * machine.
-     * </ol>
-     *
-     * @return An abstract pathname denoting a newly-created empty file
-     * @throws IOException If a file could not be created
-     */
-    private static File newTempFile() throws IOException {
-        final File tmpFile = File.createTempFile("open-xchange-imappart-", ".tmp", uploadDirectory());
-        tmpFile.deleteOnExit();
-        LogProperties.appendTempFileProperty(tmpFile);
-        return tmpFile;
+        return sink.getLength();
     }
 
 }

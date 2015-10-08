@@ -61,13 +61,32 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = {
+    public static final int[] DEFAULT_COLUMNS = {
         FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.TYPE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS,
-        FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY };
+        FolderObject.STANDARD_FOLDER, FolderObject.CREATED_BY, FolderObject.PERMISSIONS_BITS };
 
     private final String contentType;
 
     private final int[] columns;
+
+    private final boolean failOnError;
+
+    private boolean altNames = false;
+
+    /**
+     * Initializes a new {@link VisibleFoldersRequest}.
+     *
+     * @param api The API version to use
+     * @param contentType The content type as a string; e.g. "calendar", "contacts", or "tasks"
+     * @param columns The columns which shall be available in returned folder objects
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
+     */
+    public VisibleFoldersRequest(final API api, final String contentType, final int[] columns, boolean failOnError) {
+        super(api);
+        this.contentType = contentType;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
 
     /**
      * Initializes a new {@link VisibleFoldersRequest}.
@@ -77,9 +96,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
      * @param columns The columns which shall be available in returned folder objects
      */
     public VisibleFoldersRequest(final API api, final String contentType, final int[] columns) {
-        super(api);
-        this.contentType = contentType;
-        this.columns = columns;
+        this(api, contentType, columns, true);
     }
 
     /**
@@ -107,10 +124,17 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allVisible"));
         params.add(new Parameter(Folder.PARAMETER_CONTENT_TYPE, contentType));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (altNames) {
+            params.add(new Parameter("altNames", Boolean.toString(altNames)));
+        }
     }
 
     @Override
     public VisibleFoldersParser getParser() {
-        return new VisibleFoldersParser(columns, true);
+        return new VisibleFoldersParser(columns, failOnError);
+    }
+
+    public void setAltNames(boolean altNames) {
+        this.altNames = altNames;
     }
 }

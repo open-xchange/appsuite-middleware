@@ -107,7 +107,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
 
         @Override
-        public void close() throws com.openexchange.exception.OXException {
+        public void close() {
             // Nothing to close
         }
 
@@ -683,7 +683,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     @Override
-    public void close() throws com.openexchange.exception.OXException {
+    public void close() {
         if (isClosed) {
             return;
         }

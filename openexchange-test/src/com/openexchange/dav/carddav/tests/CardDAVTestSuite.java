@@ -49,30 +49,30 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    CurrentUserPrincipalTest.class,
+    OptionsTest.class,
+    CollectionsTest.class,
+    PrincipalPropertiesTest.class,
+    AddressbookPropertiesTest.class,
+    NewTest.class,
+    UpdateTest.class,
+    DeleteTest.class,
+    MoveTest.class,
+    UpgradeTest.class,
+    ImageTest.class,
+    CookieTest.class,
+})
 public final class CardDAVTestSuite {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.dav.carddav.tests.CardDAVTestSuite");
-        suite.addTestSuite(CurrentUserPrincipalTest.class);
-        suite.addTestSuite(OptionsTest.class);
-        suite.addTestSuite(CollectionsTest.class);
-        suite.addTestSuite(PrincipalPropertiesTest.class);
-        suite.addTestSuite(AddressbookPropertiesTest.class);
-        suite.addTestSuite(NewTest.class);
-        suite.addTestSuite(UpdateTest.class);
-        suite.addTestSuite(DeleteTest.class);
-        suite.addTestSuite(MoveTest.class);
-        suite.addTestSuite(UpgradeTest.class);
-        suite.addTestSuite(ImageTest.class);
-        suite.addTestSuite(CookieTest.class);
-        return suite;
-    }
 }

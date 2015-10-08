@@ -2,21 +2,24 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange OAuth Server Bundle
 Bundle-SymbolicName: com.openexchange.oauth.provider
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
  javax.servlet,
  javax.servlet.http,
  javax.servlet.resources
-Bundle-ClassPath: .,
- lib/oauth-googlecode.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.oauth.provider,
- com.openexchange.oauth.provider.v2,
- net.oauth,
- net.oauth.server,
- net.oauth.signature,
- net.oauth.signature.pem,
- net.oauth.v2,
- net.oauth.v2.server
+ com.openexchange.oauth.provider.annotations,
+ com.openexchange.oauth.provider.client,
+ com.openexchange.oauth.provider.exceptions,
+ com.openexchange.oauth.provider.grant,
+ com.openexchange.oauth.provider.scope,
+ com.openexchange.oauth.provider.tools

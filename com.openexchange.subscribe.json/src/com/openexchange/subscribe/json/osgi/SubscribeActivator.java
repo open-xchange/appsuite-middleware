@@ -66,20 +66,17 @@ import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
  */
 public class SubscribeActivator extends AJAXModuleActivator {
 
-	private static final Class<?>[] NEEDED = { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class };
+    }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED;
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        this.addService(SecretService.class, new WhiteboardSecretService(context));
 
-	@Override
-	protected void startBundle() throws Exception {
-//		registerService(SecretService.class, new WhiteboardSecretService(context));
-		this.addService(SecretService.class, new WhiteboardSecretService(context));
-
-		registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
-		registerModule(new SubscriptionActionFactory(this), "subscriptions");
-	}
+        registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
+        registerModule(new SubscriptionActionFactory(this), "subscriptions");
+    }
 
 }

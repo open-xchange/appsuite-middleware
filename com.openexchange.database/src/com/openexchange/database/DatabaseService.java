@@ -59,7 +59,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @SingletonService
-public interface DatabaseService extends ConfigDatabaseService {
+public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseService {
 
     /**
      * Returns a read only connection to the database of the specified context.

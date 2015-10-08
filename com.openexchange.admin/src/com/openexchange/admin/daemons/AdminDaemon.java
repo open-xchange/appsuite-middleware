@@ -53,7 +53,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -76,7 +78,12 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 
-public class AdminDaemon {
+/**
+ * {@link AdminDaemon} - The admin daemon.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AdminDaemon implements AdminDaemonService {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
@@ -141,7 +148,6 @@ public class AdminDaemon {
         set.add(regexHelper.literalPattern("com.openexchange.html"));
         set.add(regexHelper.literalPattern("com.openexchange.i18n"));
         set.add(regexHelper.literalPattern("com.openexchange.management"));
-        set.add(regexHelper.literalPattern("com.openexchange.messaging.facebook"));
         set.add(regexHelper.literalPattern("com.openexchange.messaging.generic"));
         set.add(regexHelper.literalPattern("com.openexchange.messaging"));
         set.add(regexHelper.literalPattern("com.openexchange.monitoring"));
@@ -272,7 +278,7 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug("{0} changed to {}", event.getBundle().getSymbolicName(), event.getType());
+                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), event.getType());
             }
         };
         context.addBundleListener(bl);
@@ -308,23 +314,53 @@ public class AdminDaemon {
         AdminDaemon.cache.initAccessCombinations();
     }
 
-    public void initRMI(final BundleContext context) {
+    /**
+     * Initializes & registers the RMI stubs
+     *
+     * @param context The associated bundle context
+     */
+    public void initRMI(BundleContext context) {
         try {
             final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
-            final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
-            final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
+            final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup();
+            final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
             final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
+            final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl(context);
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
             final OXPublication oxpublication = new OXPublication();
 
-            services.add(context.registerService(Remote.class, oxuser_v2, null));
-            services.add(context.registerService(Remote.class, oxgrp_v2, null));
-            services.add(context.registerService(Remote.class, oxres_v2, null));
-            services.add(context.registerService(Remote.class, oxlogin_v2, null));
-            services.add(context.registerService(Remote.class, oxadmincore, null));
-            services.add(context.registerService(Remote.class, oxtaskmgmt, null));
-            services.add(context.registerService(Remote.class, oxpublication, null));
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXUserInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxuser_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXGroupInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxgrp_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXResourceInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxres_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXLoginInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxlogin_v2, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXAdminCoreInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxadmincore, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXTaskMgmtInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxtaskmgmt, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXPublicationInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxpublication, properties));
+
+            properties = new Hashtable<String, Object>(2);
+            properties.put("RMIName", com.openexchange.admin.rmi.OXUtilInterface.RMI_NAME);
+            services.add(context.registerService(Remote.class, oxutil_v2, properties));
         } catch (final RemoteException e) {
             LOG.error("Error creating RMI registry!", e);
         } catch (final StorageException e) {

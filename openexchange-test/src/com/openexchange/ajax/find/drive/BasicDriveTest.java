@@ -49,14 +49,12 @@
 
 package com.openexchange.ajax.find.drive;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
@@ -74,6 +72,8 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreResponse;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
@@ -91,9 +91,8 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 
 /**
  * {@link BasicDriveTest}
@@ -103,13 +102,15 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
  */
 public class BasicDriveTest extends AbstractFindTest {
 
-    private DocumentMetadata metadata;
+    private File metadata;
+    private List<File> files;
 
     private FolderObject testFolder;
 
     private InfostoreTestManager manager;
 
     private static final String SEARCH = "BasicDriveTest";
+    private static final String SUBFOLDER_SEARCH = "jpg";
 
     /**
      * Initializes a new {@link BasicDriveTest}.
@@ -126,23 +127,25 @@ public class BasicDriveTest extends AbstractFindTest {
         client = new AJAXClient(User.User1);
         MailConfig.init();
         String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
-        File file = new File(testDataDir, "BasicDriveTest.tmp");
+        java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
-        testFolder = folderManager.generatePrivateFolder(folderName,
+        testFolder = folderManager.generatePrivateFolder(
+            folderName,
             FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(),
             client.getValues().getUserId());
         testFolder = folderManager.insertFolderOnServer(testFolder);
 
         manager = new InfostoreTestManager(client);
-        metadata = new DocumentMetadataImpl();
+        metadata = new DefaultFile();
         metadata.setFileName(file.getName());
         metadata.setTitle(file.getName());
         metadata.setDescription("Test file for testing new find api");
-        metadata.setFolderId(testFolder.getObjectID());
+        metadata.setFolderId(String.valueOf(testFolder.getObjectID()));
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
         manager.newAction(metadata, file);
+
     }
 
     @Override
@@ -161,6 +164,57 @@ public class BasicDriveTest extends AbstractFindTest {
         SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
+    
+    public void testSearchInSubFolders() throws Exception {
+
+        // Generate subfolders and files
+        int parentId = testFolder.getObjectID();
+        int fileCounter = 0;
+        final int num_of_subfolders = 3;
+        files = new LinkedList<File>();
+        for (int x = 0; x < num_of_subfolders; x++) {
+            FolderObject subfolder = folderManager.generatePrivateFolder(
+                "findApiDriveTestFolder_" + System.currentTimeMillis(),
+                FolderObject.INFOSTORE,
+                parentId,
+                client.getValues().getUserId());
+            subfolder = folderManager.insertFolderOnServer(subfolder);
+            parentId = subfolder.getObjectID();
+
+            File f = new DefaultFile();
+            String name = (fileCounter++) + ".jpg";
+            f.setFileName(name);
+            f.setTitle(name);
+            f.setDescription("No desc");
+            f.setFolderId(String.valueOf(parentId));
+            f.setMeta(Collections.singletonMap("key", (Object) "value"));
+            manager.newAction(f);
+            files.add(f);
+            f = new DefaultFile();
+            name = (fileCounter++) + ".jpg";
+            f.setFileName(name);
+            f.setTitle(name);
+            f.setDescription("No desc");
+            f.setFolderId(String.valueOf(parentId));
+            f.setMeta(Collections.singletonMap("key", (Object) "value"));
+            manager.newAction(f);
+            files.add(f);
+        }
+
+        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_NAME),
+            SUBFOLDER_SEARCH));
+        ActiveFacet fileNameFacet2 = new ActiveFacet(CommonFacetType.FOLDER, String.valueOf(testFolder.getObjectID()), new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_NAME),
+            SUBFOLDER_SEARCH));
+        List<ActiveFacet> facetList = new LinkedList<ActiveFacet>();
+        facetList.add(fileNameFacet);
+        facetList.add(fileNameFacet2);
+        QueryRequest request = new QueryRequest(0, 10, facetList, Module.DRIVE.getIdentifier());
+        QueryResponse response = client.execute(request);
+        SearchResult result = response.getSearchResult();
+        assertTrue("Found " + result.getSize() + " instead of " + files.size() + " files.", result.getSize() == files.size());
+    }
 
     public void testSizeFacet() throws Exception {
         verifyDocumentExists();
@@ -174,7 +228,7 @@ public class BasicDriveTest extends AbstractFindTest {
         assertTrue("Nothing found in file size test", result.getSize() > 0);
         for (Document d : result.getDocuments()) {
             PropDocument file = (PropDocument) d;
-            assertTrue("File is too small", (Integer)file.getProps().get("file_size")  >= 1024*1024);
+            assertTrue("File is too small", (Integer) file.getProps().get("file_size") >= 1024 * 1024);
         }
     }
 
@@ -184,7 +238,7 @@ public class BasicDriveTest extends AbstractFindTest {
         JSONArray foundFiles = (JSONArray) verificationResponse.getData();
         assertEquals("Wrong number of documents found via conventional search", 1, foundFiles.length());
         JSONArray desiredFile = foundFiles.getJSONArray(0);
-        assertEquals("Wrong id for file found via conventional search", metadata.getId(), Integer.parseInt(desiredFile.get(0).toString()));
+        assertEquals("Wrong id for file found via conventional search", metadata.getId(), desiredFile.get(0).toString());
         assertEquals("Wrong folder for file found via conventional search", testFolder.getObjectID(), Integer.parseInt(desiredFile.get(1).toString()));
         assertEquals("Wrong title for file found via conventional search", metadata.getTitle(), desiredFile.get(2).toString());
     }
@@ -278,7 +332,7 @@ public class BasicDriveTest extends AbstractFindTest {
             Field field = fields[i];
             Object listValue = listDocument[i];
             if (field == Field.META) {
-                Map<String, Object> asMap = ((JSONObject)listValue).asMap();
+                Map<String, Object> asMap = (Map<String, Object>) listValue;
                 assertTrue(asMap.equals(queryDocument.getProps().get(field.getName())));
             } else {
                 assertEquals("Unexpected value for field " + field.getName(), listValue, queryDocument.getProps().get(field.getName()));
@@ -300,12 +354,12 @@ public class BasicDriveTest extends AbstractFindTest {
         SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "Test" + " " + "api"));
         List<PropDocument> documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no document found", 0 < documents.size());
-        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+        assertNotNull("document not found", findByProperty(documents, "id", metadata.getId()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file for\""));
         documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no document found", 0 < documents.size());
-        assertNotNull("document not found", findByProperty(documents, "id", Integer.toString(metadata.getId())));
+        assertNotNull("document not found", findByProperty(documents, "id", metadata.getId()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.DRIVE, "\"Test file murks\""));
         documents = query(Module.DRIVE, Collections.singletonList(createActiveFacet(globalFacet)));
@@ -335,16 +389,16 @@ public class BasicDriveTest extends AbstractFindTest {
                 client.getValues().getUserId(),
                 client2.getValues().getUserId()));
 
-            DocumentMetadata[] documents = new DocumentMetadata[3];
-            documents[0] = new DocumentMetadataImpl(metadata);
+            File[] documents = new File[3];
+            documents[0] = new DefaultFile(metadata);
             documents[0].setTitle(randomUID());
-            documents[0].setFolderId(folders[0].getObjectID());
-            documents[1] = new DocumentMetadataImpl(metadata);
+            documents[0].setFolderId(String.valueOf(folders[0].getObjectID()));
+            documents[1] = new DefaultFile(metadata);
             documents[1].setTitle(randomUID());
-            documents[1].setFolderId(folders[1].getObjectID());
-            documents[2] = new DocumentMetadataImpl(metadata);
+            documents[1].setFolderId(String.valueOf(folders[1].getObjectID()));
+            documents[2] = new DefaultFile(metadata);
             documents[2].setTitle(randomUID());
-            documents[2].setFolderId(folders[2].getObjectID());
+            documents[2].setFolderId(String.valueOf(folders[2].getObjectID()));
             manager.newAction(documents[0]);
             manager.newAction(documents[1]);
             manager.newAction(documents[2]);
@@ -401,13 +455,13 @@ public class BasicDriveTest extends AbstractFindTest {
             FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(),
             client.getValues().getUserId()));
-        DocumentMetadata deletedDocument = new DocumentMetadataImpl(metadata);
+        File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
-        deletedDocument.setFolderId(deletedFolder.getObjectID());
+        deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
         folderManager.deleteFolderOnServer(deletedFolder);
-        FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();
-        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentFolderID())).getFolder();
+        Folder reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getStorageFolder();
+        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentID())).getFolder();
         assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
 
         List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle());
@@ -420,7 +474,7 @@ public class BasicDriveTest extends AbstractFindTest {
         ActiveFacet fileNameFacet = createActiveFacet((SimpleFacet) findByType(DriveFacetType.FILE_NAME, autocompleteResponse));
         List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(fileNameFacet);
-        facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getObjectID(), Filter.NO_FILTER));
+        facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getID(), Filter.NO_FILTER));
         List<PropDocument> documents = query(client, facets);
         assertEquals("Wrong number of documents", 1, documents.size());
         assertEquals("Wrong document", deletedDocument.getTitle(), (String) documents.get(0).getProps().get("title"));

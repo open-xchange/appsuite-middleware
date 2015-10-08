@@ -71,31 +71,75 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
-    private final OXAuthStorageInterface sqlAuth;
-    private final OXAuthStorageInterface fileAuth;
-    private final AdminCache cache;
-    private final BundleContext context;
-
     /**
-     * Use this constructor when additional bundles should be able to
-     * override login
-     * @throws StorageException  */
-    public BasicAuthenticator(final BundleContext context) throws StorageException {
-        super();
-        this.context = context;
-        sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
-        fileAuth = OXAuthStorageInterface.getInstanceFile();
-        cache = ClientAdminThread.cache;
+     * Creates an authenticator that <b>ignores</b> possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     *
+     * @return The authenticator instance
+     * @throws StorageException If instantiation fails
+     */
+    public static BasicAuthenticator createNonPluginAwareAuthenticator() throws StorageException {
+        return new BasicAuthenticator(false);
     }
 
     /**
-     * @throws StorageException  */
+     * Creates an authenticator that <b>respects</b> possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     *
+     * @return The authenticator instance
+     * @throws StorageException If instantiation fails
+     */
+    public static BasicAuthenticator createPluginAwareAuthenticator() throws StorageException {
+        return new BasicAuthenticator(true);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    private final OXAuthStorageInterface sqlAuth;
+    private final OXAuthStorageInterface fileAuth;
+    private final OXToolStorageInterface oxtool;
+    private final AdminCache cache;
+    private final boolean plugInAware;
+
+    /**
+     * Use this constructor in case additional bundles should be able to override login
+     *
+     * @param context The bundle context; needed to mark the authenticator as plugIn-aware
+     * @throws StorageException If instantiation fails
+     * @deprecated Use {@link #createPluginAwareAuthenticator(BundleContext)}
+     */
+    @Deprecated
+    public BasicAuthenticator(BundleContext context) throws StorageException {
+        this(context != null);
+    }
+
+    /**
+     * Use this constructor in case no additional bundles should be able to override login!
+     *
+     * @throws StorageException If instantiation fails
+     * @deprecated Use {@link #createNonPluginAwareAuthenticator()}
+     */
+    @Deprecated
     public BasicAuthenticator() throws StorageException {
+        this(false);
+    }
+
+    /**
+     * Initializes a new {@link BasicAuthenticator}.
+     *
+     * @param plugInAware Whether the authenticator should respect possibly registered {@link BasicAuthenticatorPluginInterface} instances.
+     */
+    private BasicAuthenticator(boolean plugInAware) throws StorageException {
         super();
-        this.context = null;
+        this.plugInAware = plugInAware;
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
+        oxtool = OXToolStorageInterface.getInstance();
         cache = ClientAdminThread.cache;
+        if (null == cache) {
+            // Obviously not properly initialized.
+            StorageException e = new StorageException("Open-Xchange Admin not properly initialized.");
+            LOG.error("Probably start-up of bundle \"com.openexchange.admin\" failed. Please check log files and/or bundle status via \"/opt/open-xchange/sbin/listbundles\" command-line tool.", e);
+            throw e;
+        }
     }
 
     /**
@@ -122,7 +166,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         }
         // only let other plugins authenticate, when we have the BundleContext
         // AND when
-        if( this.context != null && doPluginAuth) {
+        if( plugInAware && doPluginAuth) {
             // Trigger plugin extensions
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -157,6 +201,27 @@ public class BasicAuthenticator extends OXCommonImpl {
        ClientAdminThread.cache.removeAdminCredentials(ctx);
     }
 
+    public boolean isMasterOfContext(final Credentials creds, final Context ctx) throws InvalidCredentialsException {
+        if( ! ClientAdminThread.cache.isAllowMasterOverride() ) {
+            return false;
+        }
+        if( ClientAdminThread.cache.isMasterAdmin(creds) ) {
+            return true;
+        }
+        if( plugInAware ) {
+            // Trigger plugin extensions
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final BasicAuthenticatorPluginInterface authplug : pluginInterfaces.getBasicAuthenticatorPlugins().getServiceList()) {
+                    final String bundlename = authplug.getClass().getName();
+                    LOG.debug("Calling isMasterOfContext for plugin: {}", bundlename);
+                    return authplug.isMasterOfContext(creds, ctx);
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!
@@ -188,7 +253,9 @@ public class BasicAuthenticator extends OXCommonImpl {
 
         // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
-            if (!sqlAuth.authenticate(authdata, ctx)) {
+            if( isMasterOfContext(authdata, ctx) ) {
+                doAuthentication(authdata);
+            } else if (!oxtool.existsUserName(ctx, authdata.getLogin()) || !sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
                 LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);

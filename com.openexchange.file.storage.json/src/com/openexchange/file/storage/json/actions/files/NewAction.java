@@ -49,7 +49,11 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -57,6 +61,7 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.java.Strings;
@@ -70,13 +75,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Actions({@Action(method = RequestMethod.PUT, name = "new", description = "Create an infoitem via PUT", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included.",
-responseDescription = "Object ID of the newly created infoitem."),
+responseDescription = "FolderID/ObjectID of the newly created infoitem."),
 @Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
     @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
 }, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
-responseDescription = "Object ID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
+responseDescription = "FolderID/ObjectID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
 public class NewAction extends AbstractWriteAction {
 
     @Override
@@ -92,17 +97,37 @@ public class NewAction extends AbstractWriteAction {
         }
 
         file.setId(FileStorageFileAccess.NEW);
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
 
+        String newId;
         if (request.hasUploads()) {
-            fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+            // Save file metadata with binary payload
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings);
         } else {
-            fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+            // Save file metadata without binary payload
+            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings);
         }
-
-        if (request.extendedResponse()) {
-            return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
+        
+        List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
+        if (request.notifyPermissionEntities() && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0) {
+            File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), null, modified, request.getSession(), request.getRequestData().getHostData()));
         }
-        return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
+        
+        // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
+        AJAXRequestResult result;
+        if (null != newId && request.extendedResponse()) {
+            result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        }
+       
+        result.addWarnings(warnings);
+        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+            String name = getFilenameSave(file, null, fileAccess);
+            result.setException(FileStorageExceptionCodes.FILE_SAVE_ABORTED.create(name, name));
+        }
+        return result;
     }
 
 }

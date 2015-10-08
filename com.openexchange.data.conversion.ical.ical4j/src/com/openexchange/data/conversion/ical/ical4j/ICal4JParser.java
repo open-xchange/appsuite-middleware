@@ -53,12 +53,15 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,6 +105,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringReader;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -463,7 +467,7 @@ public class ICal4JParser implements ICalParser {
             		}
             	}
             }
-            final StringReader chunkedReader = new StringReader(
+            final UnsynchronizedStringReader chunkedReader = new UnsynchronizedStringReader(
             	workaroundFor19463(
             	workaroundFor16895(
             	workaroundFor16613(
@@ -477,7 +481,12 @@ public class ICal4JParser implements ICalParser {
             	removeAnnoyingWhitespaces(chunk.toString()
                 )))))))))))
             ); // FIXME: Encoding?
-            return builder.build(chunkedReader);
+            try {
+                return builder.build(chunkedReader);
+            } catch (NullPointerException e) {
+                LOG.warn(composeErrorMessage(e, chunkedReader.getString()), e);
+                throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
+            }
         } catch (final IOException e) {
             if (null == exceptions) {
                 LOG.error("", e);
@@ -682,5 +691,36 @@ public class ICal4JParser implements ICalParser {
 	public void setLimit(int amount) {
 		this.limit = amount;
 	}
+
+	private String composeErrorMessage(Exception e, String ical) {
+        final StringBuilder sb = new StringBuilder(ical.length() + 256);
+        sb.append("Parsing of iCal content failed: ");
+        sb.append(e.getMessage());
+        if (LOG.isDebugEnabled()) {
+            sb.append(". Affected iCal content:").append('\n');
+            dumpIcal(ical, sb);
+        }
+        return sb.toString();
+    }
+
+	private void dumpIcal(String ical, StringBuilder sb) {
+        String[] lines = Strings.splitByCRLF(ical);
+        DecimalFormat df = new DecimalFormat("0000");
+        int count = 1;
+        for (final String line : lines) {
+            sb.append(df.format(count++)).append(' ').append(line).append('\n');
+        }
+        OutputStreamWriter writer = null;
+        try {
+            File file = File.createTempFile("parsefailed", ".ics", new File(System.getProperty("java.io.tmpdir")));
+            writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            writer.write(ical);
+            writer.flush();
+        } catch (IOException e) {
+            LOG.error("Problem writing not parsable iCal to tmp directory.", e);
+        } finally {
+            Streams.close(writer);
+        }
+    }
 
 }

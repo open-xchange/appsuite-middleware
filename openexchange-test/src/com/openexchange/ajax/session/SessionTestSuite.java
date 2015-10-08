@@ -79,6 +79,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(Bug34928Test.class);
         tests.addTest(new JUnit4TestAdapter(Bug35129Test.class));
         tests.addTestSuite(Bug36484Test.class);
+        tests.addTestSuite(Bug40821Test.class);
         return tests;
     }
 }

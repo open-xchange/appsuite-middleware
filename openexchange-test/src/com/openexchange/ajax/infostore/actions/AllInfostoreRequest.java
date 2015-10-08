@@ -69,6 +69,10 @@ public class AllInfostoreRequest extends AbstractAllRequest<AbstractColumnsRespo
         super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, true);
     }
 
+    public AllInfostoreRequest(final int folderId, final int[] columns, final int sort, final Order order, boolean failOnError) {
+        super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, failOnError);
+    }
+
     public AllInfostoreRequest(final String folderId, final int[] columns, final int sort, final Order order) {
         super(AbstractInfostoreRequest.INFOSTORE_URL, folderId, columns, sort, order, true);
     }

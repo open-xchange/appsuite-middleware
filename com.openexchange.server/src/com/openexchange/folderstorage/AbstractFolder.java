@@ -84,6 +84,8 @@ public abstract class AbstractFolder implements Folder, Serializable {
 
     protected String parent;
 
+    protected String accountId;
+
     protected Permission[] permissions;
 
     protected String[] subfolders;
@@ -249,6 +251,16 @@ public abstract class AbstractFolder implements Folder, Serializable {
     @Override
     public String getParentID() {
         return parent;
+    }
+
+    @Override
+    public String getAccountID() {
+        return accountId;
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override

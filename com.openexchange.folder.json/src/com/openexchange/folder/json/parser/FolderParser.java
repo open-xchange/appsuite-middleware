@@ -49,8 +49,11 @@
 
 package com.openexchange.folder.json.parser;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,9 +62,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
-import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.java.Enums;
+import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link FolderParser} - Parses a folder from JSON data.
@@ -84,10 +90,11 @@ public final class FolderParser {
      * Parses a folder from given JSON object.
      *
      * @param folderJsonObject The JSON object containing folder data
+     * @param timeZone The timezone to use
      * @return The parsed folder
      * @throws OXException If parsing folder fails
      */
-    public Folder parseFolder(final JSONObject folderJsonObject) throws OXException {
+    public ParsedFolder parseFolder(final JSONObject folderJsonObject, TimeZone timeZone) throws OXException {
         try {
             final ParsedFolder folder = new ParsedFolder();
 
@@ -100,7 +107,7 @@ public final class FolderParser {
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.FOLDER_NAME.getName())) {
-                folder.setName(folderJsonObject.getString(FolderField.FOLDER_NAME.getName()));
+                folder.setName(folderJsonObject.getString(FolderField.FOLDER_NAME.getName()).trim());
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.MODULE.getName())) {
@@ -148,8 +155,7 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.PERMISSIONS_BITS.getName())) {
                 final JSONArray jsonArr = folderJsonObject.getJSONArray(FolderField.PERMISSIONS_BITS.getName());
-                final Permission[] permissions = parsePermission(jsonArr);
-                folder.setPermissions(permissions);
+                folder.setPermissions(parsePermission(jsonArr, timeZone).toArray(new Permission[0]));
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
@@ -176,40 +182,16 @@ public final class FolderParser {
      * Parses permissions from given JSON array.
      *
      * @param permissionsAsJSON The JSON array containing permissions data
+     * @param timeZone The timezone to use
      * @return The parsed permissions
      * @throws OXException If parsing permissions fails
      */
-    public static Permission[] parsePermission(final JSONArray permissionsAsJSON) throws OXException {
+    public static List<Permission> parsePermission(final JSONArray permissionsAsJSON, TimeZone timeZone) throws OXException {
         try {
             final int numberOfPermissions = permissionsAsJSON.length();
-            final Permission[] perms = new Permission[numberOfPermissions];
+            final List<Permission> perms = new ArrayList<Permission>(numberOfPermissions);
             for (int i = 0; i < numberOfPermissions; i++) {
-                final JSONObject elem = permissionsAsJSON.getJSONObject(i);
-
-                if (!elem.hasAndNotNull(FolderField.ENTITY.getName())) {
-                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
-                }
-                final int entity = elem.getInt(FolderField.ENTITY.getName());
-
-                final ParsedPermission oclPerm = new ParsedPermission();
-                oclPerm.setEntity(entity);
-                if (!elem.has(FolderField.BITS.getName())) {
-                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
-                }
-                final int[] permissionBits = parsePermissionBits(elem.getInt(FolderField.BITS.getName()));
-                oclPerm.setFolderPermission(permissionBits[0]);
-                oclPerm.setReadPermission(permissionBits[1]);
-                oclPerm.setWritePermission(permissionBits[2]);
-                oclPerm.setDeletePermission(permissionBits[3]);
-
-                oclPerm.setAdmin(permissionBits[4] > 0 ? true : false);
-
-                if (!elem.has(FolderField.GROUP.getName())) {
-                    throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
-                }
-                oclPerm.setGroup(elem.getBoolean(FolderField.GROUP.getName()));
-
-                perms[i] = oclPerm;
+                perms.add(parsePermission(permissionsAsJSON.getJSONObject(i), timeZone));
             }
             return perms;
         } catch (final JSONException e) {
@@ -217,29 +199,57 @@ public final class FolderParser {
         }
     }
 
-    private static final int[] mapping = { 0, 2, 4, -1, 8 };
-
     /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     * Parses a single permission from JSON.
+     *
+     * @param jsonObject The JSON object to parse
+     * @param timeZone The timezone to use
+     * @return The parsed permission
      */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final int[] parsePermissionBits(final int bitsArg) {
-        int bits = bitsArg;
-        final int[] retval = new int[5];
-        for (int i = retval.length - 1; i >= 0; i--) {
-            final int shiftVal = (i * 7); // Number of bits to be shifted
-            retval[i] = bits >> shiftVal;
-            bits -= (retval[i] << shiftVal);
-            if (retval[i] == MAX_PERMISSION) {
-                retval[i] = Permission.MAX_PERMISSION;
-            } else if (i < (retval.length - 1)) {
-                retval[i] = mapping[retval[i]];
-            } else {
-                retval[i] = retval[i];
+    private static Permission parsePermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
+        Permission permission;
+        /*
+         * check for external guest permissions
+         */
+        RecipientType type = Enums.parse(RecipientType.class, jsonObject.optString("type"), null);
+        if (null != type && (RecipientType.ANONYMOUS == type || RecipientType.GUEST == type)) {
+            /*
+             * parse as guest permission entity
+             */
+            ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
+            parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
+            permission = parsedGuestPermission;
+        } else {
+            /*
+             * parse as already known permission entity
+             */
+            ParsedPermission parsedPermission = new ParsedPermission();
+            if (false == jsonObject.has(FolderField.ENTITY.getName())) {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }
+            parsedPermission.setEntity(jsonObject.getInt(FolderField.ENTITY.getName()));
+            if (jsonObject.has(FolderField.GROUP.getName())) {
+                parsedPermission.setGroup(jsonObject.getBoolean(FolderField.GROUP.getName()));
+            } else if (null != type) {
+                parsedPermission.setGroup(RecipientType.GROUP == type);
+            } else {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.GROUP.getName());
+            }
+            permission = parsedPermission;
         }
-        return retval;
+        /*
+         * apply common properties
+         */
+        if (false == jsonObject.hasAndNotNull(FolderField.BITS.getName())) {
+            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.BITS.getName());
+        }
+        int[] permissionBits = Permissions.parsePermissionBits(jsonObject.getInt(FolderField.BITS.getName()));
+        permission.setFolderPermission(permissionBits[0]);
+        permission.setReadPermission(permissionBits[1]);
+        permission.setWritePermission(permissionBits[2]);
+        permission.setDeletePermission(permissionBits[3]);
+        permission.setAdmin(permissionBits[4] > 0 ? true : false);
+        return permission;
     }
 
 }

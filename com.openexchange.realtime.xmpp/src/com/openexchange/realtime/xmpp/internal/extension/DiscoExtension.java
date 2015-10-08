@@ -58,7 +58,6 @@ import com.openexchange.realtime.xmpp.XMPPDelivery;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
 import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DiscoExtension}

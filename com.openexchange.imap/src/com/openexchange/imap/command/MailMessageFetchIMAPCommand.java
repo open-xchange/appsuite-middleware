@@ -57,9 +57,11 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.FetchProfile;
@@ -76,6 +78,7 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -142,9 +145,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -153,7 +157,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false);
+        command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
         seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
@@ -176,9 +180,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -187,7 +192,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false);
+        command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = messageCount;
         uid2index = null;
@@ -208,9 +213,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -227,11 +233,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
@@ -511,7 +517,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
-        for (int j = 0; j < itemCount; j++) {
+        for (int j = itemCount; j-- > 0;) {
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
@@ -555,6 +561,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
+        } else if (item instanceof X_REAL_UID) {
+            return X_REAL_UID_ITEM_HANDLER;
+        } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
+            return X_MAILBOX_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -689,34 +699,23 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            final InternetHeaders h;
+            List<Header> headers;
             {
-                final InputStream headerStream;
-                if (item instanceof BODY) {
-                    /*
-                     * IMAP4rev1
-                     */
-                    headerStream = ((BODY) item).getByteArrayInputStream();
-                } else {
-                    /*
-                     * IMAP4
-                     */
-                    headerStream = ((RFC822DATA) item).getByteArrayInputStream();
-                }
-                h = new InternetHeaders();
+                InputStream headerStream = item instanceof BODY ? ((BODY) item).getByteArrayInputStream() : ((RFC822DATA) item).getByteArrayInputStream();
                 if (null == headerStream) {
                     logger.debug("Cannot retrieve headers from message #{} in folder {}", msg.getSeqnum(), msg.getFolder());
+                    headers = Collections.emptyList();
                 } else {
-                    h.load(headerStream);
+                    headers = InternetHeaders.parse(headerStream);
                 }
             }
-            final Set<String> headerFields = new HashSet<String>(this.headerFields);
-            for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
-                final Header hdr = (Header) e.nextElement();
-                final String name = hdr.getName();
+
+            Set<String> headerFields = new HashSet<String>(this.headerFields);
+            for (Header hdr : headers) {
+                String name = hdr.getName();
                 headerFields.remove(Strings.toLowerCase(name));
                 {
-                    final HeaderHandler headerHandler = hh.get(name);
+                    HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
                         headerHandler.handle(hdr, msg);
                     }
@@ -1137,11 +1136,40 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
+    private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            long originalUid = ((X_REAL_UID) item).uid;
+            msg.setOriginalUid(originalUid);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
+    private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            msg.setOriginalFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
         MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
         MAP.put(UID.class, UID_ITEM_HANDLER);
+        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
@@ -1163,14 +1191,30 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     public static final FetchProfile.Item ENVELOPE_ONLY = new MimeStorageUtility.FetchItem("ENVELOPE_ONLY");
 
     /**
+     * This is the INTERNALDATE item.
+     */
+    public static final FetchProfile.Item INTERNALDATE = new MimeStorageUtility.FetchItem("INTERNALDATE");
+
+    /**
+     * This is the X-MAILBOX item.
+     */
+    public static final FetchProfile.Item ORIGINAL_MAILBOX = MimeStorageUtility.ORIGINAL_MAILBOX;
+
+    /**
+     * This is the X-REAL-UID item.
+     */
+    public static final FetchProfile.Item ORIGINAL_UID = MimeStorageUtility.ORIGINAL_UID;
+
+    /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
      *
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @param serverInfo The IMAP server information
      * @return The FETCH items to craft a FETCH command
      */
-    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody) {
+    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
         StringBuilder command = new StringBuilder(128);
         boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
@@ -1188,6 +1232,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 command.append("ENVELOPE INTERNALDATE");
             }
             sizeIncluded = false;
+        } else if (fp.contains(INTERNALDATE)) {
+            command.append("INTERNALDATE");
+            sizeIncluded = false;
         } else {
             command.append("INTERNALDATE");
             sizeIncluded = false;
@@ -1201,6 +1248,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean uidIncluded = fp.contains(UIDFolder.FetchProfileItem.UID);
         if (uidIncluded) {
             command.append(" UID");
+        }
+
+        // Decide per IMAP server
+        if (fp.contains(ORIGINAL_MAILBOX)) {
+            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+                command.append(" X-MAILBOX");
+            } else if (!uidIncluded) {
+                command.append(" UID");
+            }
+        }
+
+        // Decide per IMAP server
+        if (fp.contains(ORIGINAL_UID)) {
+            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+                command.append(" X-REAL-UID");
+            }
         }
 
         boolean allHeaders = (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody);

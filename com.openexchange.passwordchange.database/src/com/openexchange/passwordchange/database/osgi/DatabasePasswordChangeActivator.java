@@ -49,12 +49,12 @@
 
 package com.openexchange.passwordchange.database.osgi;
 
-import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
-import com.openexchange.user.UserService;
 
 /**
  * {@link DatabasePasswordChangeActivator}
@@ -70,49 +70,49 @@ public final class DatabasePasswordChangeActivator extends HousekeepingActivator
         super();
     }
 
-    private static final Class<?>[] NEEDED_SERVICES = { UserService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        getServiceRegistry().removeService(clazz);
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        /*
-         * (Re-)Initialize service registry with available services
-         */
-        {
-            final ServiceRegistry registry = getServiceRegistry();
-            registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (final Class<?> classe : classes) {
-                final Object service = getService(classe);
-                if (null != service) {
-                    registry.addService(classe, service);
-                }
+        // Track BasicPasswordChangeService and re-distribute it as regular password change service
+        final BundleContext context = this.context;
+        track(BasicPasswordChangeService.class, new ServiceTrackerCustomizer<BasicPasswordChangeService, BasicPasswordChangeService>() {
+
+            @Override
+            public BasicPasswordChangeService addingService(ServiceReference<BasicPasswordChangeService> reference) {
+                BasicPasswordChangeService basicService = context.getService(reference);
+
+                // Re-Distribute as regular password change service
+                registerService(PasswordChangeService.class, basicService);
+
+                return basicService;
             }
-        }
-        registerService(PasswordChangeService.class, new DatabasePasswordChange(), null);
+
+            @Override
+            public void modifiedService(ServiceReference<BasicPasswordChangeService> reference, BasicPasswordChangeService service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<BasicPasswordChangeService> reference, BasicPasswordChangeService service) {
+                unregisterServices();
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
-        /*
-         * Clear service registry
-         */
-        getServiceRegistry().clearRegistry();
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public void unregisterServices() {
+        super.unregisterServices();
     }
 
 }

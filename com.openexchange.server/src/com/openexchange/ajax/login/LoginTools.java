@@ -55,6 +55,8 @@ import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.REDIRECT_URL;
+import static com.openexchange.ajax.fields.LoginFields.SHARE_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
 import static com.openexchange.login.Interface.HTTP_JSON;
@@ -74,6 +76,8 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -154,6 +158,23 @@ public final class LoginTools {
         return parseParameter(req, APPSECRET);
     }
 
+    public static String parseRedirectUrl(HttpServletRequest req) throws OXException {
+        return parseParameter(req, REDIRECT_URL, "");
+    }
+
+    public static String parseAutoLogin(HttpServletRequest req, String defaultAutoLogin) {
+        return parseParameter(req, LoginFields.AUTOLOGIN_PARAM, defaultAutoLogin);
+    }
+
+    public static String parseLanguage(HttpServletRequest req) {
+        return parseParameter(req, LoginFields.LANGUAGE_PARAM, "");
+    }
+
+    public static boolean parseStoreLanguage(HttpServletRequest req) {
+        final String value = req.getParameter(LoginFields.STORE_LANGUAGE);
+        return Boolean.parseBoolean(value);
+    }
+
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
         final String value = req.getParameter(paramName);
         if (null == value) {
@@ -189,7 +210,39 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
     }
 
+    /**
+     * Parses a login request based on the supplied servlet request and credentials.
+     *
+     * @param req The underlying servlet request
+     * @param login The provided login name
+     * @param password The provided password
+     * @param strict <code>true</code> to fail on missing version- or client-parameter in the request, <code>false</code>, otherwise
+     * @param defaultClient The client identifier to use as fallback if the request does provide contain the "client" parameter
+     * @param forceHTTPS
+     * @param requiredAuthId <code>true</code> to fail on missing authId-parameter in the request, <code>false</code>, otherwise
+     * @return The parsed login request
+     * @throws OXException
+     */
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId) throws OXException {
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS, requiredAuthId, (String[])null);
+    }
+
+    /**
+     * Parses a login request based on the underlying servlet request and provided user credentials.
+     *
+     * @param req The underlying servlet request
+     * @param login The provided login name
+     * @param password The provided password
+     * @param strict <code>true</code> to fail on missing version- or client-parameter in the request, <code>false</code>, otherwise
+     * @param defaultClient The client identifier to use as fallback if the request does provide contain the "client" parameter
+     * @param forceHTTPS
+     * @param requiredAuthId <code>true</code> to fail on missing authId-parameter in the request, <code>false</code>, otherwise
+     * @param additionalsForHash Additional values to include when calculating the client-specific hash for the cookie names, or
+     *                           <code>null</code> if not needed
+     * @return The parsed login request
+     * @throws OXException
+     */
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId, String...additionalsForHash) throws OXException {
         final String authId = parseAuthId(req, requiredAuthId);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
@@ -216,22 +269,14 @@ public final class LoginTools {
             LogProperties.putProperty(LogProperties.Name.LOGIN_VERSION, version);
         }
         // Return
-        return new LoginRequestImpl(
-            login,
-            password,
-            clientIP,
-            userAgent,
-            authId,
-            client,
-            version,
-            HashCalculator.getInstance().getHash(req, userAgent, client),
-            HTTP_JSON,
-            headers,
-            cookies,
-            Tools.considerSecure(req, forceHTTPS),
-            req.getServerName(),
-            req.getServerPort(),
-            httpSessionId);
+        LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(login).password(password).clientIP(clientIP);
+        b.userAgent(userAgent).authId(authId).client(client).version(version);
+        b.hash(HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash));
+        b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
+        b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        b.language(parseLanguage(req));
+        b.storeLanguage(parseStoreLanguage(req));
+        return b.build();
     }
 
     public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin, boolean requiredAuthId) throws OXException {
@@ -272,4 +317,20 @@ public final class LoginTools {
             }
         }
     }
+
+    public static String[] parseShareInformation(HttpServletRequest req) throws OXException {
+        String token = req.getParameter(SHARE_TOKEN);
+        if (Strings.isNotEmpty(token)) {
+            ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
+            if (null == shareService) {
+                return null;
+            }
+            GuestInfo guest = shareService.resolveGuest(token);
+            int contextId = guest.getContextID();
+            int guestId = guest.getGuestID();
+            return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        }
+        return null;
+    }
+
 }

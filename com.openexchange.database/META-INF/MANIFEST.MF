@@ -2,12 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database Connection Pooling
 Bundle-SymbolicName: com.openexchange.database
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.mysql.jdbc,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.common.base,
+ com.mysql.jdbc,
  com.openexchange.caching,
  com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.database.migration,
+ com.openexchange.database.migration.resource.accessor,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,
@@ -22,6 +26,8 @@ Import-Package: com.mysql.jdbc,
  javax.management,
  javax.management.openmbean,
  javax.management.remote,
+ liquibase.changelog,
+ liquibase.resource,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,

@@ -99,6 +99,7 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         contexctId = session.getContextId();
         final String fullname = MailFolder.DEFAULT_FOLDER_ID;
         id = MailFolderUtility.prepareFullname(mailAccount.getId(), fullname);
+        accountId = id;
         /*
          * Set proper name
          */

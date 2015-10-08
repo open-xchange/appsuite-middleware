@@ -92,8 +92,8 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -197,7 +197,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     public Set<String> call() throws OXException {
                         Set<String> set = (Set<String>) session.getParameter(PARAM_POP3_STORAGE_FOLDERS);
                         if (null == set) {
-                            set = getPOP3StorageFolders0(session);
+                            set = getPOP3StorageFolders0(session.getContextId(), session.getUserId());
                             session.setParameter(PARAM_POP3_STORAGE_FOLDERS, set);
                         }
                         return set;
@@ -213,15 +213,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return set;
     }
 
-    static Set<String> getPOP3StorageFolders0(final Session session) throws OXException {
-        final int contextId = session.getContextId();
+    /**
+     * Gets the POP3 storage folders for specified user.
+     *
+     * @param user The user
+     * @param context The context
+     * @return The POP3 storage folder full names
+     * @throws OXException If an error occurs
+     */
+    @SuppressWarnings("unchecked")
+    public static Set<String> getPOP3StorageFolders(final User user, final Context context) throws OXException {
+        return getPOP3StorageFolders0(context.getContextId(), user.getId());
+    }
+
+    static Set<String> getPOP3StorageFolders0(int contextId, int userId) throws OXException {
         final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND name = ?");
             stmt.setInt(1, contextId);
-            stmt.setInt(2, session.getUserId());
+            stmt.setInt(2, userId);
             stmt.setString(3, "pop3.path");
             rs = stmt.executeQuery();
             final Set<String> set = new HashSet<String>(4);
@@ -288,7 +300,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Full names for: Trash, Sent, Drafts, and Spam
              */
             {
-                final Session session = SessiondService.SERVICE_REFERENCE.get().getAnyActiveSessionForUser(userId, contextId);
+                SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                Session session = null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
                 if (null != session) {
                     String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
                     String[] fullNames = raw ? null : MailSessionCache.getInstance(session).<String[]> getParameter(id, parameterName);
@@ -1850,18 +1863,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void updateProperty(final int contextId, final int userId, final int accountId, final String name, final String newValue, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
-            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            if (transportProps) {
+                stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            } else {
+                stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            }
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, name);
             stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = null;
 
             if (null != newValue && newValue.length() > 0) {
-                closeSQLStuff(stmt);
-                stmt = con.prepareStatement("INSERT INTO "+table+" (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                if (transportProps) {
+                    stmt = con.prepareStatement("INSERT INTO user_transport_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                } else {
+                    stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                }
                 pos = 1;
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, userId);
@@ -1869,6 +1890,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, newValue);
                 stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
             }
         } finally {
             closeSQLStuff(stmt);
@@ -1878,8 +1901,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void deleteProperties(final int contextId, final int userId, final int accountId, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
-            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ?");
+            if (transportProps) {
+                stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            } else {
+                stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            }
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1928,6 +1954,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             // Check prerequisites
             checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {accountId}), userId, contextId, con);
+
             // Check protocol mismatch
             {
                 final MailAccount storageVersion = getMailAccount(accountId, userId, contextId, con);
@@ -2097,6 +2124,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(userId), I(contextId));
             }
             checkDuplicateMailAccount(mailAccount, null, userId, contextId, con);
+
             // Check name
             if (!isValid(name)) {
                 throw MailAccountExceptionCodes.INVALID_NAME.create(name);
@@ -2500,50 +2528,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return false;
         }
         return protocol1.equalsIgnoreCase(protocol2);
-    }
-
-    private boolean isMailTransportAuth(MailAccountDescription mailAccount, int userId, int contextId, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT value FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, userId);
-            stmt.setInt(3, mailAccount.getId());
-            stmt.setString(4, "transport.auth");
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                return true;
-            }
-            String sTransportAuth = result.getString(1);
-            return null == sTransportAuth || TransportAuth.MAIL.getId().equals(sTransportAuth);
-        } catch (SQLException e) {
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    private static boolean checkTransportServer(final String server, final InetAddress addr, final AbstractMailAccount current) {
-        final String transportServer = current.getTransportServer();
-        if (isEmpty(transportServer)) {
-            return false;
-        }
-        if (null == addr) {
-            /*
-             * Check by server string
-             */
-            return server.equalsIgnoreCase(transportServer);
-        }
-        try {
-            return addr.equals(InetAddress.getByName(IDNA.toASCII(transportServer)));
-        } catch (final UnknownHostException e) {
-            LOG.warn("", e);
-            /*
-             * Check by server string
-             */
-            return server.equalsIgnoreCase(transportServer);
-        }
     }
 
     @Override
@@ -3020,29 +3004,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * Checks if specified name contains an invalid character.
      *
      * @param name The name to check
-     * @return <code>true</code> if name contains an invalid character; otherwsie <code>false</code>
+     * @return <code>true</code> if name contains an invalid character; otherwise <code>false</code>
      */
     private static boolean isValid(final String name) {
         /*
          * TODO: Re-think about invalid characters
          */
-        if (null == name || 0 == name.length()) {
-            return false;
-        }
-
-        if (true) {
-            return true;
-        }
-
-        final int len = name.length();
-        boolean valid = true;
-        boolean isWhitespace = true;
-        for (int i = 0; valid && i < len; i++) {
-            final char c = name.charAt(i);
-            valid = (Arrays.binarySearch(CHARS_INVALID, c) < 0);
-            isWhitespace = Strings.isWhitespace(c);
-        }
-        return !isWhitespace && valid;
+        return (null != name && 0 != name.length());
     }
 
 }

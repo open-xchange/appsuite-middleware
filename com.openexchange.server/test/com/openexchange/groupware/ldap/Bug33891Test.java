@@ -158,7 +158,7 @@ public class Bug33891Test {
     @Test
     public void test() throws OXException {
         SimContext simContext = new SimContext(1);
-        cachingUserStorage.updateUserInternal(mockedUser, simContext);
+        cachingUserStorage.updateUserInternal(null, mockedUser, simContext);
         Mockito.verify(mockedUserStorage).updateUser(mockedUser, simContext);
     }
 }

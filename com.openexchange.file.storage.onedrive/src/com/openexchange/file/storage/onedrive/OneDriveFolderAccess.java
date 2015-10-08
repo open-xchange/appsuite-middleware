@@ -57,6 +57,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -86,6 +87,7 @@ import com.openexchange.session.Session;
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess {
 
     private static volatile Boolean optimisticSubfolderCheck;
+
     private static boolean optimisticSubfolderCheck() {
         Boolean tmp = optimisticSubfolderCheck;
         if (null == tmp) {
@@ -132,7 +134,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         try {
             List<NameValuePair> qparams = initiateQueryString();
             //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-            HttpGet method = new HttpGet(buildUri(oneDriveFolderId+"/files", qparams));
+            HttpGet method = new HttpGet(buildUri(oneDriveFolderId + "/files", qparams));
             request = method;
 
             JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
@@ -225,6 +227,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
 
@@ -245,7 +252,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
                         //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         httpResponse = execute(method, httpClient);
@@ -291,20 +298,18 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpPost request = null;
                 try {
-                    HttpMove method = new HttpMove(buildUri(toOneDriveFolderId(toCreate.getParentId()), null));
-                    request = method;
-                    method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", toCreate.getName())));
-
-                    JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+                    request = new HttpPost(buildUri(toOneDriveFolderId(toCreate.getParentId()), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
                     return jResponse.getString("id");
+                } catch (HttpResponseException e) {
+                    throw handleHttpResponseError(toCreate.getParentId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
-
             }
         });
     }
@@ -322,44 +327,25 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, final String newName) throws OXException {
-        return perform(new OneDriveClosure<String>() {
+        String id = perform(new OneDriveClosure<String>() {
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpMove request = null;
                 try {
-                    {
-                        HttpMove method = new HttpMove(buildUri(toOneDriveFolderId(folderId), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(newParentId))));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    if (null != newName) {
-                        HttpPut method = new HttpPut(buildUri(toOneDriveFolderId(folderId), null));
-                        request = method;
-                        method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                        method.setHeader("Content-Type", "application/json");
-                        method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    return folderId;
+                    request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(newParentId))));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return jResponse.getString("id");
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
             }
         });
+        return null != newName ? renameFolder(id, newName) : id;
     }
 
     @Override
@@ -368,21 +354,15 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
+                HttpPut request = null;
                 try {
-                    HttpPut method = new HttpPut(buildUri(toOneDriveFolderId(folderId), null));
-                    request = method;
-                    method.setHeader("Authorization", "Bearer " + oneDriveAccess.getAccessToken());
-                    method.setHeader("Content-Type", "application/json");
-                    method.setEntity(asHttpEntity(new JSONObject(2).put("name", newName)));
-
-                    handleHttpResponse(execute(method, httpClient), Void.class);
-                    reset(request);
-                    request = null;
-
-                    return folderId;
+                    request = new HttpPut(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+                    request.setHeader("Content-Type", "application/json");
+                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName)));
+                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                    return jResponse.getString("id");
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -412,7 +392,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
                     return folderId;
                 } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, e);
+                    throw handleHttpResponseError(folderId, account.getId(), e);
                 } finally {
                     reset(request);
                 }
@@ -444,7 +424,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                         List<NameValuePair> qparams = initiateQueryString();
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
                         qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid+"/files", qparams));
+                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
                         request = method;
 
                         JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
@@ -504,22 +484,50 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
-    public Quota getStorageQuota(final String folderId) throws OXException {
-        return Type.STORAGE.getUnlimited();
+    public Quota getStorageQuota(String folderId) throws OXException {
+        return perform(new OneDriveClosure<Quota>() {
+
+            @Override
+            protected Quota doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                HttpGet request = null;
+                try {
+                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
+                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(
+                        execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
+                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
+                } finally {
+                    if (null != request) {
+                        request.releaseConnection();
+                    }
+                }
+            }
+        });
     }
 
     @Override
-    public Quota getFileQuota(final String folderId) throws OXException {
+    public Quota getFileQuota(String folderId) throws OXException {
         return Type.FILE.getUnlimited();
     }
 
     @Override
-    public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        final Quota[] ret = new Quota[types.length];
-        for (int i = 0; i < types.length; i++) {
-            ret[i] = types[i].getUnlimited();
+    public Quota[] getQuotas(String folder, Type[] types) throws OXException {
+        if (null == types) {
+            return null;
         }
-        return ret;
+        Quota[] quotas = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            switch (types[i]) {
+                case FILE:
+                    quotas[i] = getFileQuota(folder);
+                    break;
+                case STORAGE:
+                    quotas[i] = getStorageQuota(folder);
+                    break;
+                default:
+                    throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Quota " + types[i]);
+            }
+        }
+        return quotas;
     }
 
 }

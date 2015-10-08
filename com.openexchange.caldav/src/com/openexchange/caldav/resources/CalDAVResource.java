@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav.resources;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +58,8 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -74,7 +75,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     public static final String EXTENSION_ICS = ".ics";
     public static final String CONTENT_TYPE = "text/calendar";
 
-    private String iCalFile = null;
+    private byte[] iCalFile = null;
     private TimeZone timeZone = null;
     protected final GroupwareCaldavFactory factory;
     protected CalDAVFolderCollection<T> parent;
@@ -89,12 +90,16 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     protected abstract void move(CalDAVFolderCollection<T> target) throws OXException;
 
-    protected String getICalFile() throws WebdavProtocolException {
+    protected byte[] getICalFile() throws WebdavProtocolException {
         if (null == this.iCalFile) {
+            String iCal;
             try {
-                this.iCalFile = this.generateICal();
+                iCal = this.generateICal();
             } catch (OXException e) {
                 throw protocolException(e);
+            }
+            if (null != iCal) {
+                this.iCalFile = iCal.getBytes(Charsets.UTF_8);
             }
         }
         return iCalFile;
@@ -132,7 +137,8 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public Long getLength() throws WebdavProtocolException {
-        return new Long(null != getICalFile() ? getICalFile().getBytes().length : 0);
+        byte[] iCalFile = getICalFile();
+        return new Long(null != iCalFile ? iCalFile.length : 0);
     }
 
     @Override
@@ -142,16 +148,24 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public InputStream getBody() throws WebdavProtocolException {
-        String body = this.getICalFile();
-        LOG.trace(body);
-        return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
+        byte[] iCalFile = getICalFile();
+        if (null != iCalFile) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("iCal file: {}", new String(iCalFile, Charsets.UTF_8));
+            }
+            return Streams.newByteArrayInputStream(iCalFile);
+        }
+        return null;
     }
 
     @Override
     protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
         if (CaldavProtocol.CAL_NS.getURI().equals(namespace) && "calendar-data".equals(name)) {
             WebdavProperty property = new WebdavProperty(namespace, name);
-            property.setValue(getICalFile());
+            byte[] iCalFile = getICalFile();
+            if (null != iCalFile) {
+                property.setValue(new String(iCalFile, Charsets.UTF_8));
+            }
             return property;
         }
         return null;

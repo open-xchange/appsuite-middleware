@@ -49,12 +49,6 @@
 
 package com.openexchange.ajax.session.actions;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
 import com.openexchange.ajax.framework.Header;
 
 /**
@@ -65,15 +59,22 @@ import com.openexchange.ajax.framework.Header;
  */
 public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
-    final boolean locationNeeded;
+    private final boolean cookiesNeeded;
+    private final boolean locationNeeded;
+    private final boolean failOnNonRedirect;
 
-    public EmptyHttpAuthRequest() {
-        this(true);
-    }
-
-    public EmptyHttpAuthRequest(boolean locationNeeded) {
+    /**
+     * Initializes a new {@link EmptyHttpAuthRequest}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     * @param locationNeeded <code>true</code> to fail if the response contains no <code>Location</code> header, <code>false</code>, otherwise
+     * @param failOnNonRedirect <code>true</code> to fail if the response status code is anything else than <code>HTTP 302</code>, <code>false</code>, otherwise
+     */
+    public EmptyHttpAuthRequest(boolean cookiesNeeded, boolean locationNeeded, boolean failOnNonRedirect) {
         super(null, null);
+        this.cookiesNeeded = cookiesNeeded;
         this.locationNeeded = locationNeeded;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     @Override
@@ -83,33 +84,7 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
     @Override
     public HttpAuthParser getParser() {
-        return new HttpAuthParser() {
-
-            @Override
-            public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-                setStatusCode(resp.getStatusLine().getStatusCode());
-                setReasonPhrase(resp.getStatusLine().getReasonPhrase());
-                if (locationNeeded) {
-                    parseLocationHeader(resp);
-                } else {
-                    org.apache.http.Header[] headers = resp.getHeaders("Location");
-                    if (headers.length > 0) {
-                        setLocation(headers[0].getValue());
-                    }
-                }
-                if (HttpServletResponse.SC_MOVED_TEMPORARILY == getStatusCode()) {
-                    return EntityUtils.toString(resp.getEntity());
-                }
-                return null;
-            }
-
-            @Override
-            public HttpAuthResponse parse(String body) throws JSONException {
-                if (locationNeeded) {
-                    return super.parse(body);
-                }
-                return createResponse(getLocation());
-            }
-        };
+        return new HttpAuthParser(cookiesNeeded, locationNeeded, failOnNonRedirect);
     }
+    
 }

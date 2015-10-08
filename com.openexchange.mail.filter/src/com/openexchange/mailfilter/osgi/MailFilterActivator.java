@@ -94,8 +94,8 @@ public class MailFilterActivator extends HousekeepingActivator {
                 EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(final Event event) {
-                        final String topic = event.getTopic();
+                    public void handleEvent(Event event) {
+                        String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
                             Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
                             if (null != contextId) {
@@ -109,7 +109,7 @@ public class MailFilterActivator extends HousekeepingActivator {
                 };
 
                 Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, dict);
             }
 

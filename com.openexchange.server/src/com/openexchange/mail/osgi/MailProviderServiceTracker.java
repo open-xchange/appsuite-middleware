@@ -51,7 +51,6 @@ package com.openexchange.mail.osgi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;

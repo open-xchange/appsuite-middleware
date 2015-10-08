@@ -203,6 +203,16 @@ public abstract class OXUserStorageInterface {
     public abstract void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws StorageException;
 
     /**
+     * Changes the personal part of specified user's E-Mail address.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param personal The personal to set or <code>null</code> to drop the personal information (if any)
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public abstract void changeMailAddressPersonal(Context ctx, User user, String personal) throws StorageException;
+
+    /**
      * Gets the current capabilities for denoted user.
      *
      * @param ctx The context
@@ -219,7 +229,36 @@ public abstract class OXUserStorageInterface {
      * @param usrdata User containing user data.
      * @throws StorageException
      */
-    public abstract void change(final Context ctx,final User usrdata) throws StorageException;
+    public abstract void change(Context ctx, User usrdata) throws StorageException;
+
+    /**
+     * Enables denoted user.
+     *
+     * @param userId The user identifier
+     * @param context The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void enableUser(int userId, Context ctx) throws StorageException;
+
+    /**
+     * Disables denoted user.
+     *
+     * @param userId The user identifier
+     * @param context The context
+     * @throws StorageException If operation fails
+     */
+    public abstract void disableUser(int userId, Context ctx) throws StorageException;
+
+    /**
+     * Switches user's <code>mailenabled</code> flag.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param value The value
+     * @param con The connection to use
+     * @throws StorageException If operation fails
+     */
+    public abstract void setUserEnabled(int userId, int contextId, boolean value, Connection con) throws StorageException;
 
     /**
      * Changes last modified data in database
@@ -259,6 +298,18 @@ public abstract class OXUserStorageInterface {
     public abstract User[] list(final Context ctx, final String search_pattern) throws StorageException;
 
     /**
+     * Retrieve all user objects for a given context. Which match the given search_pattern
+     *
+     * @param ctx numerical context identifier
+     * @param includeGuests List guest users too
+     * @param excludeUsers List only guest users
+     * @return User[] containing user ids.
+     * @throws StorageException
+     *
+     */
+    public abstract User[] list(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
+
+    /**
      * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
      *
      * @param ctx The context
@@ -266,6 +317,17 @@ public abstract class OXUserStorageInterface {
      * @throws StorageException
      */
     public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException;
+
+    /**
+     * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
+     *
+     * @param ctx The context
+     * @param includeGuests List guest users too
+     * @param excludeUsers List only guest users
+     * @return User[] containing user identifier
+     * @throws StorageException
+     */
+    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern, final boolean includeGuests, final boolean excludeUsers) throws StorageException;
 
     /**
      * Delete an user or multiple from given context in given connection

@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -66,6 +67,7 @@ import com.openexchange.server.ServiceExceptionCode;
 public final class Authentication {
 
     private static final AtomicReference<AuthenticationService> SERVICE_REF = new AtomicReference<AuthenticationService>();
+    private static final AtomicReference<BasicAuthenticationService> BASIC_SERVICE_REF = new AtomicReference<BasicAuthenticationService>();
 
     private Authentication() {
         super();
@@ -141,11 +143,25 @@ public final class Authentication {
         return SERVICE_REF.get();
     }
 
-    public static boolean setService(final AuthenticationService service) {
+    public static boolean setService(AuthenticationService service) {
         return SERVICE_REF.compareAndSet(null, service);
     }
 
-    public static boolean dropService(final AuthenticationService service) {
+    public static boolean dropService(AuthenticationService service) {
         return SERVICE_REF.compareAndSet(service, null);
     }
+
+    /**
+     * Gets the registered {@link BasicAuthenticationService}.
+     *
+     * @return The registered {@link BasicAuthenticationService} or <code>null</code>
+     */
+    public static BasicAuthenticationService getBasicService() {
+        return BASIC_SERVICE_REF.get();
+    }
+
+    public static void setBasicService(BasicAuthenticationService service) {
+        BASIC_SERVICE_REF.set(service);
+    }
+
 }

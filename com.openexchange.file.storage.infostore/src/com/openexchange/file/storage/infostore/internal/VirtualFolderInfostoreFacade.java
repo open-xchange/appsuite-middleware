@@ -49,26 +49,25 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
-
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.results.AbstractTimedResult;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.DeltaImpl;
+import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -86,14 +85,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, ServerSession session) throws OXException {
-        final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
-        return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
+        return Results.emptyDelta();
     }
 
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, ServerSession session) throws OXException {
-        final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
-        return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
+        return Results.emptyDelta();
     }
 
     @Override
@@ -107,55 +104,82 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public InputStream getDocument(final int id, final int version, ServerSession session) throws OXException {
-        virtualFolder(); return null;
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentAndMetadata getDocumentAndMetadata(long folderId, int id, int version, String clientETag, ServerSession session) throws OXException {
+        throw virtualFolder();
     }
 
     @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession sessions) throws OXException {
-        virtualFolder();
-        return null;
+        throw virtualFolder();
     }
 
     @Override
-    public DocumentMetadata getDocumentMetadata(final int id, final int version,
-            ServerSession session)
-            throws OXException {
-        virtualFolder(); return null;
+    public DocumentMetadata getDocumentMetadata(final int id, final int version, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(long folderId, int id, int version, ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
+        throw virtualFolder();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+    public TimedResult<DocumentMetadata> getDocuments(final List<IDTuple> ids, final Metadata[] columns, ServerSession session) {
+        return Results.emptyTimedResult();
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, ServerSession session) {
-        return new EmptyTimedResult();
+        return Results.emptyTimedResult();
     }
 
     @Override
@@ -169,25 +193,28 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void lock(final int id, final long diff, final ServerSession session)
-            throws OXException {
+    public void lock(final int id, final long diff, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void removeDocument(final long folderId, final long date,
-            final ServerSession session) throws OXException {
+    public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public int[] removeDocument(final int[] ids, final long date, final ServerSession session) {
+    public List<IDTuple> removeDocument(final List<IDTuple> ids, final long date, final ServerSession session) {
         return ids;
     }
 
     @Override
-    public int[] moveDocuments(ServerSession session, int ids[], long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException {
         return ids;
+    }
+
+    @Override
+    public void removeDocuments(List<IDTuple> ids, Context context) throws OXException {
+        virtualFolder();
     }
 
     @Override
@@ -201,32 +228,37 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
+    public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
     @Override
-    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+    public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
     @Override
-    public int saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
     @Override
-    public int saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Context context) throws OXException {
         throw virtualFolder();
     }
 
     @Override
-    public int saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
+    public IDTuple saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 
@@ -274,59 +306,6 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         throw InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER.create();
     }
 
-    private class EmptyTimedResult extends AbstractTimedResult<DocumentMetadata> {
-
-        public EmptyTimedResult() {
-            super(new SearchIterator<DocumentMetadata>() {
-
-                @Override
-                public void addWarning(final OXException warning) {
-                    // Nothing to to.
-                }
-
-                @Override
-                public void close() throws OXException {
-                    // Nothing to do.
-                }
-
-                @Override
-                public OXException[] getWarnings() {
-                    return new OXException[0];
-                }
-
-                @Override
-                public boolean hasNext() throws OXException {
-                    return false;
-                }
-
-                public boolean hasSize() {
-                    return true;
-                }
-
-                @Override
-                public boolean hasWarnings() {
-                    return false;
-                }
-
-                @Override
-                public DocumentMetadata next() throws OXException {
-                    return null;
-                }
-
-                @Override
-                public int size() {
-                    return 0;
-                }
-            });
-        }
-
-        @Override
-        protected long extractTimestamp(final DocumentMetadata object) {
-            return 0;
-        }
-
-    }
-
     @Override
     public void touch(final int id, final ServerSession session) throws OXException {
         virtualFolder();
@@ -345,6 +324,21 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     @Override
     public Quota getStorageQuota(ServerSession session) throws OXException {
         return Quota.getUnlimitedQuota(Type.STORAGE);
+    }
+
+    @Override
+    public boolean exists(int id, int version, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException {
+        return false;
+    }
+
+    @Override
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
+        return Results.emptyTimedResult();
     }
 
 }

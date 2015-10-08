@@ -11,13 +11,15 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.mail.MessagingException;
-
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -34,9 +36,7 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
-import com.openexchange.rest.services.OXRESTService;
-import com.openexchange.rest.services.annotations.PUT;
-import com.openexchange.rest.services.annotations.ROOT;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
@@ -51,16 +51,19 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-@ROOT("/http-notify/v1/")
-public class DovecotPushRESTService extends OXRESTService<Void> {
-	
-	private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
+@Path("/http-notify/v1/")
+public class DovecotPushRESTService {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushRESTService.class);
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link DovecotPushRESTService}.
      */
-    public DovecotPushRESTService() {
+    public DovecotPushRESTService(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /**
@@ -71,15 +74,12 @@ public class DovecotPushRESTService extends OXRESTService<Void> {
      *
      * Notifies about passed event.<br>
      */
-    @PUT("/notify")
-    public Object notifyMethod() throws OXException {
-        Object obj = request.getData();
-        if (!(obj instanceof JSONObject)) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-
-        JSONObject data = (JSONObject) obj;
-        if (data.isEmpty()) {
+    @PUT
+    @Path("/notify")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public JSONObject notify(JSONObject data) throws OXException {
+        if (data == null || data.isEmpty()) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
@@ -198,7 +198,7 @@ public class DovecotPushRESTService extends OXRESTService<Void> {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private void setEventProperties(long uid, String fullName, String from, String subject, Map<String, Object> props) {
         props.put(PushEventConstants.PROPERTY_IDS, Long.toString(uid));
 

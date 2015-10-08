@@ -85,6 +85,7 @@ public final class Autoboxing {
      * Short method name for unboxing an {@link Integer} object.
      * @param integer {@link Integer} to unbox.
      * @return the int value
+     * @throws NullPointerException If passed {@code java.lang.Integer} instance is <code>null</code>
      */
     public static int i(final Integer integer) {
         return integer.intValue();

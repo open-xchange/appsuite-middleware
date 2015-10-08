@@ -68,6 +68,15 @@ public interface FolderI18nNamesService {
      * @return The localized folder names
      * @throws OXException If name look-up fails
      */
-    public Set<String> getI18nNamesFor(final int... modules) throws OXException;
+    Set<String> getI18nNamesFor(int... modules) throws OXException;
+
+    /**
+     * Gets all known localized folder names in a module for the supplied (default, untranslated) folder strings.
+     *
+     * @param module The module of the folders
+     * @return The localized folder names, combined with the the default names in a set
+     * @throws OXException If name look-up fails
+     */
+    Set<String> getI18nNamesFor(int module, String...folderStrings) throws OXException;
 
 }

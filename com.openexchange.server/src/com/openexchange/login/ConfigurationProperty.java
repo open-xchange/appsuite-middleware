@@ -49,6 +49,7 @@
 
 package com.openexchange.login;
 
+import com.openexchange.configuration.InitProperty;
 import com.openexchange.sessiond.SessiondProperty;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.sessiond.SessiondProperty;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ConfigurationProperty {
+public enum ConfigurationProperty implements InitProperty {
 
     /**
      * Configures if some user is able to reenter his existing session after closing the browser tab or the complete browser. Setting this
@@ -73,7 +74,7 @@ public enum ConfigurationProperty {
      * <p>
      * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
      */
-    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml"),
+    HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "open-xchange-appsuite"),
 
     /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version
@@ -137,10 +138,12 @@ public enum ConfigurationProperty {
         this.defaultValue = defaultValue;
     }
 
+    @Override
     public String getPropertyName() {
         return propertyName;
     }
 
+    @Override
     public String getDefaultValue() {
         return defaultValue;
     }

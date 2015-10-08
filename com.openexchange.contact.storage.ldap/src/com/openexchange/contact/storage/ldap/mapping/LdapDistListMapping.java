@@ -77,7 +77,7 @@ public abstract class LdapDistListMapping extends LdapMapping<DistributionListEn
             try {
                 values = attribute.getAll();
                 while (values.hasMoreElements()) {
-                    String value = (String)values.nextElement();
+                    String value = (String) values.nextElement();
                     if (null != value) {
                         /*
                          * set the display name to the member attribute value temporary; will be
@@ -100,7 +100,7 @@ public abstract class LdapDistListMapping extends LdapMapping<DistributionListEn
 
     @Override
     public String encode(DistributionListEntryObject[] value, LdapIDResolver idResolver) throws OXException {
-        throw new UnsupportedOperationException("unable to encode distribution list members");
+        return (value.length == 1) ? Tools.escapeLDAPSearchFilter(value[0].getEmailaddress()) : null;
+        //throw LdapExceptionCodes.SEARCHING_IN_DISTRIBUTION_LISTS_NOT_SUPPORTED.create();
     }
-
 }

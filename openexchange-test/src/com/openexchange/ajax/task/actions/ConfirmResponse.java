@@ -51,6 +51,7 @@ package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link ConfirmResponse}
@@ -61,5 +62,12 @@ public class ConfirmResponse extends AbstractAJAXResponse {
 
     protected ConfirmResponse(Response response) {
         super(response);
+    }
+
+
+    public void fillTask(Task... tasks) {
+        for (Task task : tasks) {
+            task.setLastModified(getTimestamp());
+        }
     }
 }

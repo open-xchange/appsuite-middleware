@@ -64,19 +64,19 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link FSFolderAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
+public class FSFolderAccess extends AbstractFileStorageFolderAccess {
 
     private final File directory;
     private final Session session;
 
     /**
-     * Initializes a new {@link FSFolderAccess}.
+     * Initialises a new {@link FSFolderAccess}.
+     * 
      * @param file
      * @param session
      */
@@ -92,7 +92,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         }
         java.io.File dir = new java.io.File(directory, folderId);
         if (!dir.getParentFile().equals(directory)) {
-            throw OXException.general(("No directory traversal, please"));
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("No directory traversal, please");
         }
 
         return dir;
@@ -183,24 +183,22 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         return subfolders;
     }
 
-
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         return getFolder(FileStorageFolder.ROOT_FULLNAME);
     }
 
-
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
         new File(toDirectory(toCreate.getParentId()), toCreate.getName()).mkdirs();
-        return toCreate.getParentId() +"/"+toCreate.getName();
+        return toCreate.getParentId() + "/" + toCreate.getName();
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         File dir = toDirectory(identifier);
         File dest = new File(dir.getParentFile(), toUpdate.getName());
-        if(!dir.getName().equals(toUpdate.getName())) {
+        if (!dir.getName().equals(toUpdate.getName())) {
             // Move
             dir.renameTo(dest);
         }
@@ -260,7 +258,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         File dir = toDirectory(folderId);
         List<FileStorageFolder> path = new ArrayList<FileStorageFolder>();
 
-        while(!dir.equals(directory)) {
+        while (!dir.equals(directory)) {
             path.add(initFolder(getFolderId(dir), dir));
             dir = dir.getParentFile();
         }
@@ -269,7 +267,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
 
     private String getFolderId(File dir) {
         List<String> components = new ArrayList<String>();
-        while(!dir.equals(directory)) {
+        while (!dir.equals(directory)) {
             components.add(dir.getName());
             dir = dir.getParentFile();
         }

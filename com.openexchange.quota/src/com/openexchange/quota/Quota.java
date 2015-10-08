@@ -137,4 +137,33 @@ public class Quota {
         return usage;
     }
 
+    /**
+     * Returns if the currently used quota is exceeded.
+     *
+     * @return true if exceeded, otherwise false
+     */
+    public boolean isExceeded() {
+        return (limit > 0) && (usage >= limit);
+    }
+
+    /**
+     * Returns if adding additional quota will exceed the limit.
+     *
+     * @return true if the quota limit will exceed, otherwise false
+     */
+    public boolean willExceed(long quotaToAdd) {
+        if (isUnlimited()) {
+            return false;
+        }
+        return (usage + quotaToAdd) > limit;
+    }
+
+    /**
+     * Returns if the limit is set to unlimited (com.openexchange.quota.Quota.UNLIMITED)
+     *
+     * @return true if UNLIMITED, otherwise false
+     */
+    public boolean isUnlimited() {
+        return limit <= UNLIMITED;
+    }
 }

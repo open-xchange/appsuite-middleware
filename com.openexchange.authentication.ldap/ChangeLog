@@ -1,3 +1,8 @@
+* 2015-04-24 - choeger@open-xchange.com
+ 
+ - Bugfix #37787 - ldap subtree search switch can only be switched off when search attribute is set to "uid",
+   including SCR-2499, Cleanup ldap authentication bundle settings
+
 * 2014-07-02 - wolfgang.rosenauer@open-xchange.com
 
  - Allow to search for the full login info (e.g. for mail attribute)

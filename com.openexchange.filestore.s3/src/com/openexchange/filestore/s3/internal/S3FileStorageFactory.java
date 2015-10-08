@@ -63,32 +63,35 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3EncryptionClient;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
  * {@link S3FileStorageFactory}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorageFactory implements FileStorageFactoryCandidate {
+public class S3FileStorageFactory implements FileStorageProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
 
@@ -98,11 +101,18 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     private static final String S3_SCHEME = "s3";
 
     /**
-     * The expected pattern for file store names - hard-coded at
-     * com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.create(Context, User, UserModuleAccess) ,
-     * so expect nothing else.
+     * The expected pattern for file store names associated with a context - defined by
+     * com.openexchange.filestore.FileStorages.getNameForContext(int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_store"</code>
      */
     private static final Pattern CTX_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_store");
+
+    /**
+     * The expected pattern for file store names associated with a user - defined by
+     * com.openexchange.filestore.FileStorages.getNameForUser(int, int) ,
+     * so expect nothing else; e.g. <code>"57462_ctx_5_user_store"</code>
+     */
+    private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
 
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
@@ -166,7 +176,7 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
     /**
      * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
      *
-     * @param uri The filestore ID
+     * @param filestoreID The filestore ID
      * @return The client
      * @throws OXException
      */
@@ -180,18 +190,20 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
         /*
          * instantiate client
          */
+        ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID);
         AmazonS3Client client = null;
         String encryption = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption", "none");
         if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
             /*
              * use default AmazonS3Client
              */
-            client = new AmazonS3Client(credentials);
+            client = new AmazonS3Client(credentials, clientConfiguration);
         } else {
             /*
              * use AmazonS3EncryptionClient
              */
-            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID, encryption));
+            client = new AmazonS3EncryptionClient(
+                credentials, getEncryptionMaterials(filestoreID, encryption), clientConfiguration, new CryptoConfiguration());
         }
         /*
          * configure client
@@ -210,7 +222,18 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
             client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         }
+
+
         return client;
+    }
+
+    private ClientConfiguration getClientConfiguration(String filestoreID) {
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        String signerOverride = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".signerOverride", "S3SignerType");
+        if (false == Strings.isEmpty(signerOverride)) {
+            clientConfiguration.setSignerOverride(signerOverride);
+        }
+        return clientConfiguration;
     }
 
     private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode) throws OXException {
@@ -241,8 +264,8 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
             inputStream = new FileInputStream(pathToKeyStore);
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(inputStream, passwordChars);
-            while (keyStore.aliases().hasMoreElements()) {
-                String alias = keyStore.aliases().nextElement();
+            for (Enumeration<String> aliases = keyStore.aliases(); aliases.hasMoreElements();) {
+                String alias = aliases.nextElement();
                 if (keyStore.isKeyEntry(alias)) {
                     Key key = keyStore.getKey(alias, passwordChars);
                     if (null != key && PrivateKey.class.isInstance(key)) {
@@ -254,17 +277,17 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
                 }
             }
         } catch (FileNotFoundException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (KeyStoreException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (NoSuchAlgorithmException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (CertificateException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (IOException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (UnrecoverableKeyException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } finally {
             Streams.close(inputStream);
         }
@@ -272,7 +295,7 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
         }
         if (null == publicKey) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No public key found in " + pathToKeyStore);
         }
         return new KeyPair(publicKey, privateKey);
     }
@@ -325,16 +348,25 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        Matcher matcher = CTX_STORE_PATTERN.matcher(path);
-        if (false == matcher.matches()) {
-            throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
-        }
         /*
          * Remove underscore characters to be conform to bucket name & prefix restrictions
          * http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html /
          * http://docs.aws.amazon.com/AmazonS3/latest/dev/ListingKeysHierarchy.html
          */
-        return matcher.group(1) + "ctxstore";
+        if (path.endsWith("ctx_store")) {
+            Matcher matcher = CTX_STORE_PATTERN.matcher(path);
+            if (false == matcher.matches()) {
+                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
+            }
+            return new StringBuilder(16).append(matcher.group(1)).append("ctxstore").toString();
+        }
+
+        // Expect user store identifier
+        Matcher matcher = USER_STORE_PATTERN.matcher(path);
+        if (false == matcher.matches()) {
+            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+        }
+        return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
     }
 
     /**

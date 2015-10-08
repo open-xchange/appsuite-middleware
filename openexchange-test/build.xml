@@ -49,9 +49,11 @@
 
     <target name="compile-common">
         <mkdir dir="${build}"/>
+        <property file=".settings/org.eclipse.jdt.core.prefs"/>
+        <echo message="Java compiler source ${org.eclipse.jdt.core.compiler.source} and target ${org.eclipse.jdt.core.compiler.codegen.targetPlatform}."/>
         <property name="printablePath" refid="classpath"/>
         <echo message="Classpath for compiling: ${printablePath}"/>
-        <javac srcdir="${srcCommon}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.6" compiler="javac1.6" target="1.6">
+        <javac srcdir="${srcCommon}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="${org.eclipse.jdt.core.compiler.source}" target="${org.eclipse.jdt.core.compiler.codegen.targetPlatform}">
             <classpath>
                 <path refid="classpath"/>
             </classpath>
@@ -60,7 +62,9 @@
 
     <target name="compile-specific">
         <mkdir dir="${build}"/>
-        <javac srcdir="${testSrc}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.6" compiler="javac1.6" target="1.6">
+        <property file=".settings/org.eclipse.jdt.core.prefs"/>
+        <echo message="Java compiler source ${org.eclipse.jdt.core.compiler.source} and target ${org.eclipse.jdt.core.compiler.codegen.targetPlatform}."/>
+        <javac srcdir="${testSrc}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="${org.eclipse.jdt.core.compiler.source}" target="${org.eclipse.jdt.core.compiler.codegen.targetPlatform}">
             <classpath>
                 <path refid="classpath"/>
                 <pathelement location="${build}"/>

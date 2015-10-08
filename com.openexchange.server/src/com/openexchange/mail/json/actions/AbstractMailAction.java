@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -72,9 +72,9 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -84,6 +84,7 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.AddressUtility;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -105,8 +106,6 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
-    private final ServiceLookup services;
-
     public static final @NonNull int[] FIELDS_ALL_ALIAS = new int[] { 600, 601 };
 
     public static final @NonNull int[] FIELDS_LIST_ALIAS = new int[] { 600, 601, 614, 602, 611, 603, 612, 607, 652, 610, 608, 102 };
@@ -114,6 +113,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     public static final @NonNull Column[] COLUMNS_ALL_ALIAS = new Column[] { Column.field(600), Column.field(601) };
 
     public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614), Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610), Column.field(608), Column.field(102) };
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link AbstractMailAction}.
@@ -197,6 +198,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
+
         try {
             return perform(new MailRequest(requestData, session));
         } catch (final IllegalStateException e) {
@@ -209,6 +211,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
             requestData.cleanUploads();
+
         }
     }
 
@@ -256,72 +259,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     public static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            addrs.addAll(Arrays.asList(mail.getFrom()));
-            addrs.addAll(Arrays.asList(mail.getTo()));
-            addrs.addAll(Arrays.asList(mail.getCc()));
-            addrs.addAll(Arrays.asList(mail.getBcc()));
-            // Strip by aliases
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
+            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
 
-            }
             if (!addrs.isEmpty()) {
-                // Add addresses
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    /**
-     * Triggers the contact collector for specified JSON mail's addresses.
-     *
-     * @param session The session
-     * @param mail The JSON mail
-     * @throws OXException
-     */
-    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
-        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-            try {
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
-                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
-                // Strip by aliases
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final UserSettingMail usm = session.getUserSettingMail();
-                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
-                }
-                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
-                validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
-                }
-                addrs.removeAll(validAddrs);
-            } catch (final AddressException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            } catch (final JSONException e) {
-                LOG.warn("Contact collector could not be triggered", e);
-            }
-            if (!addrs.isEmpty()) {
-                // Add addresses
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
         }
@@ -472,4 +412,33 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return com.openexchange.java.Strings.isEmpty(string);
     }
 
+    /**
+     * Checks given columns.
+     * <ul>
+     * <li>Add MailField.ID if MailField.ORIGINAL_ID is contained
+     * <li>Add MailField.FOLDER_ID if MailField.ORIGINAL_FOLDER_ID is contained
+     * </ul>
+     *
+     * @param columns The columns to check
+     * @return The checked columns in its mail field representation
+     */
+    protected static int[] prepareColumns(int[] columns) {
+        int[] fields = columns;
+
+        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(MailField.getMatchingFields(fields)));
+        if (set.contains(MailField.ORIGINAL_FOLDER_ID) && !set.contains(MailField.FOLDER_ID)) {
+            int[] tmp = fields;
+            fields = new int[tmp.length + 1];
+            fields[0] = MailListField.FOLDER_ID.getField();
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+        if (set.contains(MailField.ORIGINAL_ID) && !set.contains(MailField.ID)) {
+            int[] tmp = fields;
+            fields = new int[tmp.length + 1];
+            fields[0] = MailListField.ID.getField();
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+
+        return fields;
+    }
 }

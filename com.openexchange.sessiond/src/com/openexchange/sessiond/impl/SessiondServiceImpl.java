@@ -142,9 +142,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         SessionHandler.removeContextSessions(contextId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         SessionHandler.removeContextSessionsGlobal(contextIds);
@@ -199,7 +196,15 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         if (null == sessionId) {
             return null;
         }
-        SessionControl sessionControl = SessionHandler.getSession(sessionId, true);
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
+        /*-
+         *
+        if (!considerSessionStorage && null == sessionControl) {
+            // No local session found. Maybe available in session storage...
+            sessionControl = SessionHandler.getSession(sessionId, false, true);
+        }
+         *
+         */
         if (null == sessionControl) {
             if ("unset".equalsIgnoreCase(sessionId)) {
                 LOG.debug("Session not found. ID: {}", sessionId);
@@ -217,6 +222,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             return false;
         }
         return SessionHandler.isActive(sessionId);
+    }
+
+    @Override
+    public List<String> getActiveSessionIDs() {
+        return SessionHandler.getActiveSessionIDs();
     }
 
     @Override

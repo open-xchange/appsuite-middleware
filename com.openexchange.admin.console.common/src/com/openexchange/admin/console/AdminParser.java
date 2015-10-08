@@ -83,10 +83,12 @@ public class AdminParser extends CLIParser {
 
     private static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
 
+    private static final String OPT_RESPONSETIMEOUT_LONG = "responsetimeout";
+
     private final ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
 
     private String appname = null;
-    
+
     private String usage = "";
 
     private CLIOption csvImportOption = null;
@@ -94,6 +96,8 @@ public class AdminParser extends CLIParser {
     final private CLIOption helpoption;
 
     final private CLIOption envoption;
+
+    final CLIOption responseTimeoutOption;
 
     private final CLIOption checkuniquenessoption;
 
@@ -196,6 +200,7 @@ public class AdminParser extends CLIParser {
         this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
         this.checkuniquenessoption = this.addOption(OPT_CHECK_UNIQUENESS, "Checks if short parameters are unique", false, false, true);
         this.noNewlineOption = this.addOption(OPT_NAME_NONEWLINE_LONG, OPT_NAME_NONEWLINE_DESCRIPTION, false, false, false);
+        this.responseTimeoutOption = this.addOption(OPT_RESPONSETIMEOUT_LONG, OPT_RESPONSETIMEOUT_LONG, "response timeout in seconds for reading response from the backend (default 0s; infinite)", false, true);
     }
 
 
@@ -355,7 +360,7 @@ public class AdminParser extends CLIParser {
             return retval;
         }
     }
-    
+
     public final CLIOption addOption(final char shortForm, final String longForm, final String description, final NeededQuadState needed) {
         final CLIOption retval = this.addBooleanOption(shortForm, longForm);
         this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
@@ -392,6 +397,31 @@ public class AdminParser extends CLIParser {
             printUsage();
             System.exit(0);
         }
+
+        {
+            String value = (String) this.getOptionValue(this.responseTimeoutOption);
+            if (null != value) {
+                try {
+                    int responseTimeout = Integer.parseInt(value) * 1000;
+                    if (responseTimeout > 0) {
+                        /*
+                         * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                         * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                         * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                         * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                         *
+                         * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                         * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                         * zero indicates an infinite timeout. The default value is zero (no timeout).
+                         */
+                        System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout));
+                    }
+                } catch (NumberFormatException e) {
+                    throw new CLIIllegalOptionValueException(responseTimeoutOption, value, e);
+                }
+            }
+        }
+
         if (null != this.getOptionValue(this.envoption)) {
             printEnvUsage();
             System.exit(0);
@@ -638,11 +668,11 @@ public class AdminParser extends CLIParser {
     public Map<String, Map<String, String>> getDynamicArguments() {
         return dynamicMaps;
     }
-    
+
     public void setUsage(String usage) {
         this.usage = usage;
     }
-    
+
     public String getUsage() {
         return usage;
     }

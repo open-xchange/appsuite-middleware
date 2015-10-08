@@ -129,6 +129,12 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // %2$d is replaced with the server identifier.
     public static final String INSERT_FAILED_MSG = "Inserting or updating database assignment for context %1$d and server %2$d failed!";
 
+    // %1$s is replaced with more details about the invalid configuration
+    public static final String INVALID_GLOBALDB_CONFIGURATION_MSG = "Invalid configuration for global databases: %1$s";
+
+    // %1$s is replaced with the context group name
+    public static final String NO_GLOBALDB_CONFIG_FOR_GROUP_MSG = "No global database for context group \"%1$s\" found.";
+
     private DBPoolingExceptionStrings() {
         super();
     }

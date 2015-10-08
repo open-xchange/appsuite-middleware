@@ -49,9 +49,6 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
@@ -105,15 +102,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
              */
             final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.ios.");
             if (null != access) {
-                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
                 registerService(IOSAPNCertificateProvider.class, new IOSAPNCertificateProvider() {
 
                     @Override
                     public APNAccess getAccess() {
                         return access;
                     }
-                }, dictionary);
+                }, 1);
                 LOG.info("Successfully registered APN certificate provider for iOS.");
             } else {
                 LOG.info("No APN access confgiured for iOS, skipping certificate provider registration.");
@@ -138,15 +133,13 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
              */
             final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.macos.");
             if (null != access) {
-                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
-                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
                 registerService(MacOSAPNCertificateProvider.class, new MacOSAPNCertificateProvider() {
 
                     @Override
                     public APNAccess getAccess() {
                         return access;
                     }
-                }, dictionary);
+                }, 1);
                 LOG.info("Successfully registered APN certificate provider for Mac OS.");
             } else {
                 LOG.info("No APN access confgiured for Mac OS, skipping certificate provider registration.");

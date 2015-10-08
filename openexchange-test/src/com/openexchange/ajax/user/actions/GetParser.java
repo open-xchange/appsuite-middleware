@@ -50,6 +50,7 @@
 package com.openexchange.ajax.user.actions;
 
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -79,18 +80,29 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     @Override
     public GetResponse parse(final String body) throws JSONException {
         final GetResponse retval = super.parse(body);
-        try {
-            Contact contact = UserParser.parseUserContact((JSONObject) retval.getData(), timeZone);
-            retval.setContact(contact);
-            final UserImpl4Test user = new UserImpl4Test();
-            user.setId(userId);
-            user.setDisplayName(contact.getDisplayName());
-            user.setGivenName(contact.getGivenName());
-            user.setSurname(contact.getSurName());
-            user.setMail(contact.getEmail1());
-            retval.setUser(user);
-        } catch (OXException e) {
-            throw new JSONException(e);
+        if (false == retval.hasError() && null != retval.getData()) {
+            try {
+                JSONObject data = (JSONObject) retval.getData();
+                Contact contact = UserParser.parseUserContact(data, timeZone);
+                retval.setContact(contact);
+                final UserImpl4Test user = new UserImpl4Test();
+                user.setId(userId);
+                user.setDisplayName(contact.getDisplayName());
+                user.setGivenName(contact.getGivenName());
+                user.setSurname(contact.getSurName());
+                user.setMail(contact.getEmail1());
+                JSONArray jGroups = data.optJSONArray("groups");
+                if (jGroups != null) {
+                    int[] groups = new int[jGroups.length()];
+                    for (int i = 0; i < jGroups.length(); i++) {
+                        groups[i] = jGroups.getInt(i);
+                    }
+                    user.setGroups(groups);
+                }
+                retval.setUser(user);
+            } catch (OXException e) {
+                throw new JSONException(e);
+            }
         }
         return retval;
     }

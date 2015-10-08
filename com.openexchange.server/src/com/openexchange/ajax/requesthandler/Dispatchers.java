@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
@@ -65,6 +66,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.6.1
  */
 public class Dispatchers {
+
+    private static final AtomicReference<DispatcherPrefixService> DPS_REF = new AtomicReference<DispatcherPrefixService>();
 
     /**
      * Initializes a new {@link Dispatchers}.
@@ -126,7 +129,7 @@ public class Dispatchers {
         if (req.getRequestURI().startsWith(prefix)) {
             // Common dispatcher action - Try to determine if JSON is expected or not
             AJAXRequestDataTools requestDataTools = AJAXRequestDataTools.getInstance();
-            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String module = requestDataTools.getModule(prefix, req);
             AJAXActionServiceFactory factory = DispatcherServlet.getDispatcher().lookupFactory(module);
             if (factory != null) {
                 return isApiOutputExpectedFor(optActionFor(requestDataTools.getAction(req), factory));
@@ -139,10 +142,15 @@ public class Dispatchers {
      * Gets the dispatcher's path prefix
      *
      * @return The prefix
+     * @throws IllegalStateException If the AJAX framework has not been initialized yet
      */
     public static String getPrefix() {
-        String prefix = DispatcherServlet.getPrefix();
-        return prefix == null ? DefaultDispatcherPrefixService.DEFAULT_PREFIX : prefix;
+        DispatcherPrefixService dispatcherPrefixService = DPS_REF.get();
+        if (dispatcherPrefixService == null) {
+            throw new IllegalStateException(Dispatchers.class.getName() + " has not been initialized. DispatcherPrefixService is not set!");
+        }
+
+        return dispatcherPrefixService.getPrefix();
     }
 
     private static AJAXActionService optActionFor(String sAction, final AJAXActionServiceFactory factory) {
@@ -174,6 +182,13 @@ public class Dispatchers {
         }
 
         return true;
+    }
+
+    /**
+     * Only to be used by the AJAX framework initializer!
+     */
+    public static void setDispatcherPrefixService(DispatcherPrefixService service) {
+        DPS_REF.set(service);
     }
 
 }

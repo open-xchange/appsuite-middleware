@@ -46,12 +46,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Clients use a FetchProfile to list the Message attributes that 
+ * Clients use a FetchProfile to list the Message attributes that
  * it wishes to prefetch from the server for a range of messages.<p>
  *
- * Messages obtained from a Folder are light-weight objects that 
+ * Messages obtained from a Folder are light-weight objects that
  * typically start off as empty references to the actual messages.
- * Such a Message object is filled in "on-demand" when the appropriate 
+ * Such a Message object is filled in "on-demand" when the appropriate
  * get*() methods are invoked on that particular Message. Certain
  * server-based message access protocols (Ex: IMAP) allow batch
  * fetching of message attributes for a range of messages in a single
@@ -62,7 +62,7 @@ import java.util.Set;
  * to the server. <p>
  *
  * Note that implementations are not obligated to support
- * FetchProfiles, since there might be cases where the backend service 
+ * FetchProfiles, since there might be cases where the backend service
  * does not allow easy, efficient fetching of such profiles. <p>
  *
  * Sample code that illustrates the use of a FetchProfile is given
@@ -90,7 +90,7 @@ public class FetchProfile {
      * This inner class is the base class of all items that
      * can be requested in a FetchProfile. The items currently
      * defined here are <code>ENVELOPE</code>, <code>CONTENT_INFO</code>
-     * and <code>FLAGS</code>. The <code>UIDFolder</code> interface 
+     * and <code>FLAGS</code>. The <code>UIDFolder</code> interface
      * defines the <code>UID</code> Item as well. <p>
      *
      * Note that this class only has a protected constructor, therby
@@ -169,20 +169,20 @@ public class FetchProfile {
             return getClass().getName() + "[" + name + "]";
         }
     } // End of class Item
-    
+
     // -----------------------------------------------------------------------------------
-    
+
     private final List<Item> specials; // specials
     private final Set<String> headers; // set of header names
 
     /**
      * Create an empty FetchProfile.
      */
-    public FetchProfile() { 
+    public FetchProfile() {
         specials = new LinkedList<Item>();
         headers = new LinkedHashSet<String>();
     }
-    
+
     /**
      * Add the given special item as one of the attributes to
      * be prefetched.
@@ -213,7 +213,7 @@ public class FetchProfile {
      * @param   item    the Item to test
      * @return true if the fetch profile contains the given special item
      */
-    public boolean contains(Item item) { 
+    public boolean contains(Item item) {
         return specials.contains(item);
     }
 
@@ -223,12 +223,12 @@ public class FetchProfile {
      * @param   headerName  the header to test
      * @return  true if the fetch profile contains the given header name
      */
-    public boolean contains(String headerName) { 
+    public boolean contains(String headerName) {
         return headers.contains(headerName);
     }
 
     /**
-     * Get the items set in this profile. 
+     * Get the items set in this profile.
      *
      * @return      items set in this profile
      */
@@ -237,7 +237,7 @@ public class FetchProfile {
     }
 
     /**
-     * Get the names of the header-fields set in this profile. 
+     * Get the names of the header-fields set in this profile.
      *
      * @return      headers set in this profile
      */

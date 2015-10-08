@@ -70,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -82,6 +83,8 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemInfostoreFolder {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class);
 
     /**
      * Initializes a new {@link SystemInfostoreFolder}.
@@ -168,7 +171,7 @@ public final class SystemInfostoreFolder {
                         // Check if there are shared files -- discard if there are none
                         final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
                         subfolders.remove(getDefaultInfoStoreFolderId(session, ctx));
-                        if (!subfolders.isEmpty()) {
+                        if (!subfolders.isEmpty() || 0 < new OXFolderAccess(ctx).getItemCount(fo, session, ctx)) {
                             subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
                         }
                     } else if (altNames) {
@@ -177,7 +180,14 @@ public final class SystemInfostoreFolder {
                         subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
                     }
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                    /*
+                     * only include public infostore root folder if there are visible subfolders, or user is able to create those
+                     */
+                    EffectivePermission effectivePermission = fo.getEffectiveUserPermission(user.getId(), userPerm, con);
+                    if (effectivePermission.canCreateSubfolders() ||
+                        0 < OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userPerm.getAccessibleModules(), ctx, con).size()) {
+                        subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                    }
                 } else if (FolderObject.TRASH == fo.getType() && fo.isDefaultFolder()) {
                     subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(
                         altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME)));
@@ -234,7 +244,7 @@ public final class SystemInfostoreFolder {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
+            LOGGER.debug("", e);
             return false;
         }
     }
@@ -246,7 +256,7 @@ public final class SystemInfostoreFolder {
             return Integer.parseInt(tmp);
         }
         try {
-            final int id = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
+            final int id = new OXFolderAccess(ctx).getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE);
             if (session instanceof PutIfAbsent) {
                 ((PutIfAbsent) session).setParameterIfAbsent(paramName, Integer.toString(id));
             } else {
@@ -254,7 +264,7 @@ public final class SystemInfostoreFolder {
             }
             return id;
         } catch (final OXException e) {
-            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).error("", e);
+            LOGGER.debug("", e);
             return -1;
         }
     }

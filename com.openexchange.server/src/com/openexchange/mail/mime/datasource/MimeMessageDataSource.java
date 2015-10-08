@@ -340,7 +340,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             if (contentType.startsWith("multipart/")) {
                 final Multipart m = MimeMessageUtility.multipartFrom(mimePart);
                 final String subType = parseSubType(m.getContentType());
-                final org.apache.james.mime4j.dom.Multipart mime4jMultipart = new MultipartImpl(null == subType ? "mixed" : toLowerCase(subType));
+                final org.apache.james.mime4j.dom.Multipart mime4jMultipart = new MultipartImpl(null == subType ? "mixed" : com.openexchange.java.Strings.toLowerCase(subType));
                 // A multipart may have a preamble
                 mime4jMultipart.setPreamble("This is a multi-part message in MIME format.");
                 final int count = m.getCount();
@@ -396,7 +396,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         if (null == sContentType) {
             return null;
         }
-        if (toLowerCase(sContentType).startsWith("message/rfc822")) {
+        if (com.openexchange.java.Strings.toLowerCase(sContentType).startsWith("message/rfc822")) {
             return new MessageImpl();
         }
         try {
@@ -432,19 +432,6 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         } catch (final Exception e) {
             return null;
         }
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     // --------------------------------- Helper class -------------------------------------- //

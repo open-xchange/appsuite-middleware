@@ -51,30 +51,43 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.folder.json.FolderField;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private final API api;
     private AllowedModules[] allowedModules;
+    private final TimeZone timeZone;
 
     protected AbstractFolderRequest(final API api) {
+        this(api, null);
+    }
+
+    protected AbstractFolderRequest(final API api, TimeZone timeZone) {
         super();
         this.api = api;
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -92,25 +105,63 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         if (folder.containsFolderName()) {
             jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
         }
-        final JSONArray jsonPerms = new JSONArray();
-        for (final OCLPermission perm : folder.getPermissions()) {
-            final JSONObject jsonPermission = new JSONObject();
-            jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
-            jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
-            jsonPermission.put(FolderFields.BITS, FolderTest.createPermissionBits(
-                perm.getFolderPermission(),
-                perm.getReadPermission(),
-                perm.getWritePermission(),
-                perm.getDeletePermission(),
-                perm.isFolderAdmin()));
-            jsonPerms.put(jsonPermission);
+        if (folder.containsPermissions()) {
+            final JSONArray jsonPerms = new JSONArray();
+            for (final OCLPermission perm : folder.getPermissions()) {
+                final JSONObject jsonPermission = new JSONObject();
+                if (OCLGuestPermission.class.isInstance(perm)) {
+                    OCLGuestPermission guestPerm = (OCLGuestPermission) perm;
+                    ShareRecipient recipient = guestPerm.getRecipient();
+                    jsonPermission.put("type", recipient.getType());
+                    switch (recipient.getType()) {
+                    case ANONYMOUS:
+                        AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
+                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
+                        if (null != anonymousRecipient.getExpiryDate()) {
+                            long date = anonymousRecipient.getExpiryDate().getTime();
+                            if (null != timeZone) {
+                                date += timeZone.getOffset(date);
+                            }
+                            jsonPermission.put(FolderField.EXPIRY_DATE.getName(), date);
+                        }
+                        break;
+                    case GUEST:
+                        GuestRecipient guestRecipient = (GuestRecipient) recipient;
+                        jsonPermission.putOpt(FolderField.EMAIL_ADDRESS.getName(), guestRecipient.getEmailAddress());
+                        jsonPermission.putOpt(FolderField.PASSWORD.getName(), guestRecipient.getPassword());
+                        jsonPermission.putOpt(FolderField.DISPLAY_NAME.getName(), guestRecipient.getDisplayName());
+                        jsonPermission.putOpt(FolderField.CONTACT_FOLDER_ID.getName(), guestRecipient.getContactFolder());
+                        jsonPermission.putOpt(FolderField.CONTACT_ID.getName(), guestRecipient.getContactID());
+                        break;
+                    default:
+                        Assert.fail("Unsupported recipient: " + recipient.getType());
+                        break;
+                    }
+                } else {
+                    jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
+                    jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
+                }
+                jsonPermission.put(FolderFields.BITS, Permissions.createPermissionBits(
+                    perm.getFolderPermission(),
+                    perm.getReadPermission(),
+                    perm.getWritePermission(),
+                    perm.getDeletePermission(),
+                    perm.isFolderAdmin()));
+                jsonPerms.put(jsonPermission);
+            }
+            jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
         }
-        jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
         if (folder.containsModule()) {
             jsonFolder.put(FolderFields.MODULE, convertModule(folder.getModule()));
         }
         if (folder.containsType()) {
             jsonFolder.put(FolderFields.TYPE, folder.getType());
+        }
+        if (folder.containsParentFolderID()) {
+            jsonFolder.put(FolderFields.FOLDER_ID, folder.getParentFolderID());
+        }
+        if (folder.containsMeta()) {
+            jsonFolder.put(FolderFields.META, JSONCoercion.coerceToJSON(folder.getMeta()));
         }
 
         return jsonFolder;

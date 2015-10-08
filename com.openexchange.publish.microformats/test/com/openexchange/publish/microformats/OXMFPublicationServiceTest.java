@@ -57,6 +57,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.java.util.Pair;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.session.Session;
@@ -67,7 +68,7 @@ import com.openexchange.templating.TemplatingHelper;
 
 /**
  * {@link OXMFPublicationServiceTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXMFPublicationServiceTest extends TestCase {
@@ -479,6 +480,11 @@ public class OXMFPublicationServiceTest extends TestCase {
 
         @Override
         public TemplatingHelper createHelper(final Object rootObject, final Session session, boolean createCopy) {
+            return null;
+        }
+
+        @Override
+        public Pair<String, String> encodeTemplateImage(String imageName) throws OXException {
             return null;
         }
     }

@@ -67,6 +67,14 @@ public interface OXUserServicePortType {
         ChangeCapabilities parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
 
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:changeMailAddressPersonal", output = "urn:changeMailAddressPersonalResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeMailAddressPersonalStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeMailAddressPersonalInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeMailAddressPersonalInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeMailAddressPersonalNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeMailAddressPersonalRemoteException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:changeMailAddressPersonalNoSuchUserException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:changeMailAddressPersonalDatabaseUpdateException")})
+    @WebMethod(action = "urn:changeMailAddressPersonal")
+    public void changeMailAddressPersonal(
+        @WebParam(partName = "parameters", name = "changeMailAddressPersonal", targetNamespace = "http://soap.admin.openexchange.com")
+        ChangeMailAddressPersonal parameters
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
+
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:createByModuleAccessName", output = "urn:createByModuleAccessNameResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createByModuleAccessNameStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createByModuleAccessNameInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:createByModuleAccessNameInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:createByModuleAccessNameNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createByModuleAccessNameRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:createByModuleAccessNameDatabaseUpdateException")})
     @RequestWrapper(localName = "createByModuleAccessName", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.CreateByModuleAccessName")
@@ -194,6 +202,108 @@ public interface OXUserServicePortType {
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.user.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:moveUserFilestore", output = "urn:moveUserFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:moveUserFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:moveUserFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:moveUserFilestoreInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:moveUserFilestoreNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:moveUserFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:moveUserFilestoreNoSuchFilestoreException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:moveUserFilestoreDatabaseUpdateException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:moveUserFilestoreNoSuchUserException")})
+    @RequestWrapper(localName = "moveUserFilestore", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.MoveUserFilestore")
+    @WebMethod(action = "urn:moveUserFilestore")
+    @ResponseWrapper(localName = "moveUserFilestoreResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.MoveUserFilestoreResponse")
+    public java.lang.Integer moveUserFilestore(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "dst_filestore_id", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Filestore dstFilestoreId,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:moveFromUserFilestoreToMaster", output = "urn:moveFromUserFilestoreToMasterResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:moveFromUserFilestoreToMasterStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:moveFromUserFilestoreToMasterInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:moveFromUserFilestoreToMasterInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:moveFromUserFilestoreToMasterNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:moveFromUserFilestoreToMasterRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:moveFromUserFilestoreToMasterNoSuchFilestoreException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:moveFromUserFilestoreToMasterDatabaseUpdateException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:moveFromUserFilestoreToMasterNoSuchUserException")})
+    @RequestWrapper(localName = "moveFromUserFilestoreToMaster", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.MoveFromUserFilestoreToMaster")
+    @WebMethod(action = "urn:moveFromUserFilestoreToMaster")
+    @ResponseWrapper(localName = "moveFromUserFilestoreToMasterResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.MoveFromUserFilestoreToMasterResponse")
+    public java.lang.Integer moveFromUserFilestoreToMaster(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "masterUser", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User masterUser,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:moveFromMasterToUserFilestore", output = "urn:moveFromMasterToUserFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:moveFromMasterToUserFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:moveFromMasterToUserFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:moveFromMasterToUserFilestoreInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:moveFromMasterToUserFilestoreNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:moveFromMasterToUserFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:moveFromMasterToUserFilestoreNoSuchFilestoreException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:moveFromMasterToUserFilestoreDatabaseUpdateException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:moveFromMasterToUserFilestoreNoSuchUserException")})
+    @RequestWrapper(localName = "moveFromMasterToUserFilestore", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.MoveFromMasterToUserFilestore")
+    @WebMethod(action = "urn:moveFromMasterToUserFilestore")
+    @ResponseWrapper(localName = "moveFromMasterToUserFilestoreResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.MoveFromMasterToUserFilestoreResponse")
+    public java.lang.Integer moveFromMasterToUserFilestore(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "masterUser", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User masterUser,
+        @WebParam(name = "dst_filestore_id", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Filestore dstFilestoreId,
+        @WebParam(name = "max_quota", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.Long maxQuota,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:moveFromContextToUserFilestore", output = "urn:moveFromContextToUserFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:moveFromContextToUserFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:moveFromContextToUserFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:moveFromContextToUserFilestoreInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:moveFromContextToUserFilestoreNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:moveFromContextToUserFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:moveFromContextToUserFilestoreNoSuchFilestoreException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:moveFromContextToUserFilestoreDatabaseUpdateException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:moveFromContextToUserFilestoreNoSuchUserException")})
+    @RequestWrapper(localName = "moveFromContextToUserFilestore", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.MoveFromContextToUserFilestore")
+    @WebMethod(action = "urn:moveFromContextToUserFilestore")
+    @ResponseWrapper(localName = "moveFromContextToUserFilestoreResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.MoveFromContextToUserFilestoreResponse")
+    public java.lang.Integer moveFromContextToUserFilestore(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "dst_filestore_id", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Filestore dstFilestoreId,
+        @WebParam(name = "max_quota", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.Long maxQuota,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:moveFromUserToContextFilestore", output = "urn:moveFromUserToContextFilestoreResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:moveFromUserToContextFilestoreStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:moveFromUserToContextFilestoreInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:moveFromUserToContextFilestoreInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:moveFromUserToContextFilestoreNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:moveFromUserToContextFilestoreRemoteException"), @FaultAction(className = NoSuchFilestoreException_Exception.class, value = "urn:moveFromUserToContextFilestoreNoSuchFilestoreException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:moveFromUserToContextFilestoreDatabaseUpdateException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:moveFromUserToContextFilestoreNoSuchUserException")})
+    @RequestWrapper(localName = "moveFromUserToContextFilestore", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.MoveFromUserToContextFilestore")
+    @WebMethod(action = "urn:moveFromUserToContextFilestore")
+    @ResponseWrapper(localName = "moveFromUserToContextFilestoreResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.MoveFromUserToContextFilestoreResponse")
+    public java.lang.Integer moveFromUserToContextFilestore(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:list", output = "urn:listResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:listDatabaseUpdateException")})

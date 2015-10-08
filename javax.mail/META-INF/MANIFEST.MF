@@ -5,10 +5,16 @@ Bundle-SymbolicName: javax.mail
 Bundle-Version: 1.5.2
 Bundle-Vendor: Oracle
 Bundle-License: http://www.sun.com/cddl, https://glassfish.dev.java.net/public/CDDL+GPL.html
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.tools.ssl,
  com.sun.net,
  com.sun.net.ssl,
+ gnu.trove,
+ gnu.trove.list,
+ gnu.trove.list.array,
+ gnu.trove.list.linked,
+ gnu.trove.procedure,
+ gnu.trove.procedure.array,
  javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,

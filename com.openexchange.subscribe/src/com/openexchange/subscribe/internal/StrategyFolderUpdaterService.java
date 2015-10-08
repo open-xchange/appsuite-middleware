@@ -102,7 +102,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T
                 if (null != element) {
                     final T bestMatch = findBestMatch(element, dataInFolder, session);
                     if(bestMatch == null) {
-                        strategy.save(element, session);
+                        strategy.save(element, session, errors);
                     } else {
                         strategy.update(bestMatch, element, session);
                     }

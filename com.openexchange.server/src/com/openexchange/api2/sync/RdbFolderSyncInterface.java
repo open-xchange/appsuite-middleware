@@ -50,8 +50,6 @@
 package com.openexchange.api2.sync;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -103,43 +101,27 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.api2.sync.FolderSyncInterface#deleteFolderContent(int)
-     */
     @Override
     public int clearFolder(final FolderObject folder, final Date clientLastModified) throws OXException {
         try {
             if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
-                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(
-                    getUserName(session, user),
-                    getFolderName(folder),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(Integer.valueOf(session.getUserId()), Integer.valueOf(folder.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
             if (!folder.exists(ctx)) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folder.getObjectID(), ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
             if (clientLastModified != null && oxfolderAccess.getFolderLastModified(folder.getObjectID()).after(clientLastModified)) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folder.getObjectID(), ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
             final EffectivePermission effectivePerm = folder.getEffectiveUserPermission(userId, userConfiguration);
             if (!effectivePerm.hasModuleAccess(folder.getModule())) {
-                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(
-                    getUserName(session, user),
-                    folderModule2String(folder.getModule()),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(Integer.valueOf(session.getUserId()), folderModule2String(folder.getModule()), Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
                 if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(
-                        Integer.valueOf(folder.getObjectID()),
-                        getUserName(session, user),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(session.getUserId()), Integer.valueOf(ctx.getContextId()));
                 }
-                throw OXFolderExceptionCode.NOT_VISIBLE.create(
-                    Integer.valueOf(folder.getObjectID()),
-                    getUserName(session, user),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(session.getUserId()), Integer.valueOf(ctx.getContextId()));
             }
             final long lastModified = System.currentTimeMillis();
             OXFolderManager.getInstance(session, oxfolderAccess).clearFolder(folder, false, lastModified);

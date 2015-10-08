@@ -111,7 +111,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
                     return id;
                 }
             } catch (SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+                throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } finally {
                 databaseService.backReadOnly(contextID, connection);
             }
@@ -156,7 +156,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
                 throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(contactID, folderID, contextID);
             }
         } catch (SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -168,12 +168,12 @@ public class DbIDResolver extends DefaultLdapIDResolver {
         try {
             this.contactIDs = loadIDs(connection, contextID, folderID);
         } catch (SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
         if (null != contactIDs) {
-            this.ldapIDs = new ConcurrentHashMap<Integer, String>(contactIDs.size());
+            this.ldapIDs = new ConcurrentHashMap<Integer, String>(contactIDs.size(), 0.9f, 1);
             for (Entry<String, Integer> entry : contactIDs.entrySet()) {
                 ldapIDs.put(entry.getValue(), entry.getKey());
             }

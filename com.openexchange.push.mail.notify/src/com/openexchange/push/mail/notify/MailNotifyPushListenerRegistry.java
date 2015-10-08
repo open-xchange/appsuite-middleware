@@ -89,7 +89,7 @@ public final class MailNotifyPushListenerRegistry {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
     private static enum StopResult {
-        NONE, RECONNECTED, STOPPED;
+        NONE, RECONNECTED, RECONNECTED_AS_PERMANENT, STOPPED;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -347,6 +347,9 @@ public final class MailNotifyPushListenerRegistry {
                     case RECONNECTED:
                         LOG.info("Reconnected UDP-based mail listener {} for user {} in context {} using another session", mboxId, I(userId), I(contextId));
                         return true;
+                    case RECONNECTED_AS_PERMANENT:
+                        LOG.info("Reconnected as permanent UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
+                        return true;
                     case STOPPED:
                         LOG.info("Stopped UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
                         return true;
@@ -388,7 +391,12 @@ public final class MailNotifyPushListenerRegistry {
                 }
             }
 
-            return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
+            if (!reconnected) {
+                return StopResult.STOPPED;
+            }
+
+            MailNotifyPushListener newListener = mboxId2Listener.get(mboxId);
+            return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
         }
 
         MailNotifyPushListener newListener = injectAnotherListenerFor(null, mboxId, userId, contextId);

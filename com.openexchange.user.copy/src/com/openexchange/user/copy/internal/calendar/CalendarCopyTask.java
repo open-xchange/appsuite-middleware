@@ -55,7 +55,6 @@ import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
 import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
 import static com.openexchange.user.copy.internal.CopyTools.setIntOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -69,7 +68,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -77,6 +75,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.sql.tools.SQLTools;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -365,7 +364,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             for (final Integer appointmentId : appointments.keySet()) {
                 int i = 1;
                 final CalendarDataObject appointment = appointments.get(appointmentId);
-                stmt.setTimestamp(i++, new Timestamp(appointment.getCreationDate().getTime()));
+                stmt.setTimestamp(i++, SQLTools.toTimestamp(appointment.getCreationDate()));
                 stmt.setInt(i++, dstUsrId);
                 stmt.setLong(i++, appointment.getLastModified().getTime());
                 stmt.setInt(i++, dstUsrId);

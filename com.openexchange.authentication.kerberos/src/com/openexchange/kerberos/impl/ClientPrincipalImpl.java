@@ -60,6 +60,8 @@ import com.openexchange.kerberos.KerberosUtils;
  */
 public final class ClientPrincipalImpl implements ClientPrincipal {
 
+    private static final long serialVersionUID = 4408781422388672382L;
+
     private Subject clientSubject;
     private Subject delegateSubject;
     private byte[] clientTicket;

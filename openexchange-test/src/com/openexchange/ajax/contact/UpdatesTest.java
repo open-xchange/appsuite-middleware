@@ -7,17 +7,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.contact.action.DeleteRequest;
-import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.contact.action.UpdateRequest;
-import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Contact;
 

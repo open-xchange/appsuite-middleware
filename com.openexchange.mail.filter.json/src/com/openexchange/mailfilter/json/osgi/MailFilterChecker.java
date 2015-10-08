@@ -78,7 +78,7 @@ public class MailFilterChecker implements CapabilityChecker {
     public boolean isEnabled(String capability, Session ses) throws OXException {
         if (this.capability.equals(capability)) {
             final ServerSession session = ServerSessionAdapter.valueOf(ses);
-            if (session.isAnonymous()) {
+            if (session.isAnonymous() || false == session.getUserPermissionBits().hasWebMail()) {
                 return false;
             }
         }

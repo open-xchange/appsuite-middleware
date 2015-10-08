@@ -274,7 +274,8 @@ public final class FolderCache {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
                 imapFullName = fullName;
             }
-            boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session).exists();
+            boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
+            boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
             if (!exists) {
                 // Check existence through EXAMINE
                 try {

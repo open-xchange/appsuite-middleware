@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Grizzly Bundle
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.cache,
  com.google.common.net,
  com.openexchange.config,
@@ -57,7 +57,6 @@ Bundle-ClassPath: .,
  lib/grizzly-comet-2.2.22-SNAPSHOT.jar,
  lib/grizzly-framework-2.2.22-SNAPSHOT.jar,
  lib/grizzly-http-2.2.22-SNAPSHOT.jar,
- lib/grizzly-http-ajp-2.2.22-SNAPSHOT.jar,
  lib/grizzly-http-server-2.2.22-SNAPSHOT.jar,
  lib/grizzly-http-servlet-2.2.22-SNAPSHOT.jar,
  lib/grizzly-portunif-2.2.22-SNAPSHOT.jar,

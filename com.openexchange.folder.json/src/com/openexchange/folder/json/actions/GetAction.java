@@ -65,6 +65,8 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, responseDescription = "An array with data for all folders at the root level of the folder structure. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class GetAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
@@ -107,7 +110,7 @@ public final class GetAction extends AbstractFolderAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Request subfolders from folder service
          */
@@ -119,10 +122,15 @@ public final class GetAction extends AbstractFolderAction {
                 folderId,
                 session,
                 new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session)));
+
+        if (isOAuthRequest(request) && !mayReadViaOAuthRequest(folder.getContentType(), getOAuthGrant(request))) {
+            throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(folder.getContentType()));
+        }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONObject jsonObject = FolderWriter.writeSingle2Object(request, null, folder, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         /*
          * Return appropriate result
          */

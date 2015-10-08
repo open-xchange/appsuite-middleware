@@ -101,10 +101,12 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                 Tools.dropForeignKey(con, "user_setting_server", foreignKey);
             }
 
+            dropOrphaned(con);
+
             Tools.createPrimaryKeyIfAbsent(con, "user_setting_server", new String[] { "cid", "user", column.name });
 
-            // Re-create foreign key
-            Tools.createForeignKey(con, "user_setting_server", new String[] {"cid", "user"}, "user", new String[] {"cid", "id"});
+            // Re-create foreign key ?
+            // Tools.createForeignKey(con, "user_setting_server", new String[] {"cid", "user"}, "user", new String[] {"cid", "id"});
 
             con.commit();
         } catch (SQLException e) {
@@ -116,6 +118,52 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
         } finally {
             DBUtils.autocommit(con);
             Database.backNoTimeout(cid, true, con);
+        }
+    }
+
+    private void dropOrphaned(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT uss.cid, user, hex(uuid) FROM user_setting_server AS uss LEFT JOIN user ON uss.cid = user.cid AND uss.user = user.id WHERE user.id IS NULL");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                return;
+            }
+
+            class Orphaned {
+                final UUID uuid;
+                final int cid;
+                final int user;
+
+                Orphaned(int cid, int user, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.user = user;
+                    this.uuid = uuid;
+                }
+            }
+
+            List<Orphaned> orphaneds = new LinkedList<Orphaned>();
+            do {
+                orphaneds.add(new Orphaned(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final Orphaned orphaned : orphaneds) {
+                stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid=? AND user=? AND ?=HEX(uuid)");
+                stmt.setInt(1, orphaned.cid);
+                stmt.setInt(2, orphaned.user);
+                stmt.setString(3, UUIDs.getUnformattedString(orphaned.uuid));
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -143,7 +191,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
                 }
             }
 
-            final List<Dup> dups = new LinkedList<Dup>();
+            List<Dup> dups = new LinkedList<Dup>();
             do {
                 dups.add(new Dup(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
             } while (rs.next());

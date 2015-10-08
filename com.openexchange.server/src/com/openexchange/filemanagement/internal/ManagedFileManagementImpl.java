@@ -49,6 +49,7 @@
 
 package com.openexchange.filemanagement.internal;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -70,10 +71,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFile;
@@ -81,7 +82,6 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileFilter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -94,7 +94,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
 
     private static final int DELAY = 120000;
 
@@ -141,7 +141,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
                 @Override
                 public boolean accept(File pathname) {
-                    return pathname.isFile() && pathname.getName().startsWith(defaultPrefix);
+                    return pathname.isFile() && pathname.getName().startsWith(defaultPrefix, 0);
                 }
             };
             this.logger = logger;
@@ -153,13 +153,20 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             try {
                 // Grab all existing files belonging to this JVM instance (at least those with default prefix)
                 Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
-                File directory = tmpDirReference.get();
-                if (!directory.canRead()) {
-                    logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
-                    return;
-                }
-                for (File tmpFile : directory.listFiles(defaultPrefixFilter)) {
-                    existentFiles.put(tmpFile.getName(), tmpFile);
+                {
+                    File directory = tmpDirReference.get();
+                    if (!directory.canRead()) {
+                        logger.warn("Unable to read directory {}. {} run aborted...", directory.getAbsolutePath(), FileManagementTask.class.getSimpleName());
+                        return;
+                    }
+                    File[] listedFiles = directory.listFiles(defaultPrefixFilter);
+                    if (listedFiles.length == 0) {
+                        // No files available at the moment
+                        return;
+                    }
+                    for (File tmpFile : listedFiles) {
+                        existentFiles.put(tmpFile.getName(), tmpFile);
+                    }
                 }
 
                 // Check for expired files
@@ -173,7 +180,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         int optTimeToLive = cur.optTimeToLive();
                         long timeElapsed = now - cur.getLastAccess();
                         if (cur.isDeleted() || (timeElapsed > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
-                        	File file = cur.getFilePlain();
+                            File file = cur.getFilePlain();
                             String fname = null != file && file.exists() ? file.getName() : "";
                             cur.delete();
                             iter.remove();
@@ -213,6 +220,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private final ConfigurationService cs;
     private final TimerService timer;
+    private final DispatcherPrefixService dispatcherPrefixService;
     private final ConcurrentMap<String, ManagedFileImpl> files;
     private final ReadWriteLock creationRwLock;
     private final PropertyListener propertyListener;
@@ -222,10 +230,11 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     /**
      * Initializes a new {@link ManagedFileManagementImpl}.
      */
-    public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer) {
+    public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer, DispatcherPrefixService dispatcherPrefixService) {
         super();
         this.cs = cs;
         this.timer = timer;
+        this.dispatcherPrefixService = dispatcherPrefixService;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
         creationRwLock = new ReentrantReadWriteLock();
 
@@ -323,8 +332,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         return createManagedFile(temporaryFile, -1);
     }
 
+    @Override
     public ManagedFile createManagedFile(final File temporaryFile, int ttl) throws OXException {
-        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl);
+        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl, dispatcherPrefixService.getPrefix());
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
@@ -458,10 +468,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 }
 
                 // Create ManagedFileImpl instance
-                if (Strings.isEmpty(id)) {
+                if (isEmpty(id)) {
                     id = UUID.randomUUID().toString();
                 }
-                mf = new ManagedFileImpl(this, id, tmpFile, optTtl);
+                mf = new ManagedFileImpl(this, id, tmpFile, optTtl, dispatcherPrefixService.getPrefix());
                 mf.setFileName(tmpFile.getName());
                 mf.setSize(tmpFile.length());
             } while (!tmpDirReference.compareAndSet(directory, directory));// Directory changed in the meantime
@@ -546,6 +556,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
 
+    @Override
     public ManagedFile optByID(String id) {
         ManagedFile mf = files.get(id);
         if (null != mf) {

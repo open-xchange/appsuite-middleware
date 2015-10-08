@@ -50,9 +50,9 @@
 package com.openexchange.ajax.session.actions;
 
 import java.io.IOException;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.message.BasicHeaderElementIterator;
@@ -79,8 +79,8 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
     }
 
     @Override
-    public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
-        String body = super.checkResponse(resp);
+    public String checkResponse(final HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        String body = super.checkResponse(resp, request);
         // Check for error messages
         try {
             super.getResponse(body);

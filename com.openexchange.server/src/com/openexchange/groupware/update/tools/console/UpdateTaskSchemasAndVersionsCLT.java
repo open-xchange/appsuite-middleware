@@ -59,16 +59,15 @@ import javax.management.MBeanServerConnection;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskSchemasAndVersionsCLT} - Command-Line access to get schemas and versions via update task toolkit.
@@ -85,6 +84,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+        toolkitOptions.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
     }
 
     private static void printHelp() {
@@ -126,6 +126,33 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                     }
                 }
             }
+            int responseTimeout = 0;
+            if (cmd.hasOption("responsetimeout")) {
+                final String val = cmd.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        responseTimeout = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println("responsetimeout parameter is not a number: " + val);
+                        printHelp();
+                        System.exit(1);
+                    }
+                }
+            }
+
+            if (responseTimeout > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 *
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
+            }
 
             String jmxLogin = null;
             if (cmd.hasOption('l')) {
@@ -141,7 +168,8 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+                String[] creds = new String[] { jmxLogin, jmxPassword };
+                environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");

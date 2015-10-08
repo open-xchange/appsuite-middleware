@@ -184,7 +184,7 @@ public class MailFolder implements Serializable, Cloneable {
     public MailFolder() {
         super();
         defaulFolderType = DefaultFolderType.NONE;
-        properties = new ConcurrentHashMap<String, Object>(4);
+        properties = new ConcurrentHashMap<String, Object>(4, 0.9f, 1);
         liveAccess = true;
     }
 

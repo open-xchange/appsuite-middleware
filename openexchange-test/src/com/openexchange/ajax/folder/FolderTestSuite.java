@@ -71,6 +71,7 @@ import com.openexchange.ajax.folder.api2.SubscribeTest;
 import com.openexchange.ajax.folder.api2.UpdateTest;
 import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
+import com.openexchange.ajax.infostore.test.Bug37211Test;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 
 /**
@@ -116,6 +117,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(UpdateTest.class);
         tests.addTestSuite(VisibleFoldersTest.class);
         tests.addTestSuite(SubscribeTest.class);
+        tests.addTestSuite(DefaultMediaFoldersTest.class);
 
         // Test for object counts for database folder
         tests.addTest(new JUnit4TestAdapter(ContactObjectCountTest.class));
@@ -145,6 +147,9 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug17225Test.class);
         tests.addTestSuite(Bug17261Test.class);
         tests.addTestSuite(Bug29853Test.class);
+        tests.addTestSuite(Bug37211Test.class);
+
+        tests.addTestSuite(PermissionsCascadeTest.class);
 
         return tests;
     }

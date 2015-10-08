@@ -58,7 +58,6 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.groupware.infostore.InfostoreExceptionMessages;
 
 /**
  * The error code enumeration for folders.
@@ -110,8 +109,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * Operation was canceled due to a missing folder attribute
      * </p>
      */
-    MISSING_FOLDER_ATTRIBUTE("Missing field %1$s in folder %2$s in context %3$s", OXFolderExceptionMessage.NO_FOLDER_NAME_MSG,
-        Category.CATEGORY_USER_INPUT, 7),
+    MISSING_FOLDER_ATTRIBUTE("Missing field %1$s in folder %2$s in context %3$s", OXFolderExceptionMessage.NO_FOLDER_NAME_MSG, Category.CATEGORY_USER_INPUT, 7),
     /**
      * Folder %1$s does not exist in context %2$s
      * <p>
@@ -141,16 +139,14 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * Default folder must not be renamed
      * </p>
      */
-    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s cannot be renamed in context %2$s",
-        OXFolderExceptionMessage.NO_DEFAULT_FOLDER_RENAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 11, Generic.NO_PERMISSION),
+    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s cannot be renamed in context %2$s", OXFolderExceptionMessage.NO_DEFAULT_FOLDER_RENAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 11, Generic.NO_PERMISSION),
     /**
      * A duplicate folder exists in parent folder %1$s in context %2$s
      * <p>
      * Rename aborted cause a duplicate folder exists beneath parent folder
      * </p>
      */
-    NO_DUPLICATE_FOLDER("A duplicate folder exists in parent folder %1$s in context %2$s",
-        OXFolderExceptionMessage.NO_DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
+    NO_DUPLICATE_FOLDER("A duplicate folder exists in parent folder %1$s in context %2$s", OXFolderExceptionMessage.NO_DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
     /**
      * Parent folder %1$s does not allow type %2$s in context %3$s
      * <p>
@@ -359,10 +355,13 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      */
     INVALID_ENTITY("Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s", MESSAGE, Category.CATEGORY_ERROR, 44),
     /**
+     * Invalid entity id %1$s detected in permissions of folder %2$s in context %3$s
+     */
+    INVALID_ENTITY_FROM_USER("Invalid entity id %1$s (%2$s) detected in permissions of folder %3$s in context %4$s", OXFolderExceptionMessage.INVALID_ENTITY_FROM_USER_MSG, Category.CATEGORY_USER_INPUT, INVALID_ENTITY.getNumber()),
+    /**
      * Folder %1$s must not be moved to one of its subfolders in context %2$s
      */
-    NO_SUBFOLDER_MOVE("Folder %1$s must not be moved to one of its subfolders in context %2$s",
-        OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),
+    NO_SUBFOLDER_MOVE("Folder %1$s must not be moved to one of its subfolders in context %2$s", OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),
     /**
      * An unexpected error occurred: %1$s
      * <p>
@@ -388,7 +387,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     FOLDER_CACHE_INITIALIZATION_FAILED("Folder cache (region name = %1$s) could not be initialized due to the following reason: %2$s",
         MESSAGE, Category.CATEGORY_ERROR, 51),
     /**
-     * Folder cache has not been enabled in config file %1$s
+     * Folder cache has not been enabled in config file 'foldercache.properties'
      */
     CACHE_NOT_ENABLED("Folder cache has not been enabled in config file 'foldercache.properties'", MESSAGE, Category.CATEGORY_ERROR, 52),
     /**
@@ -430,8 +429,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * Shared folder %1$s must not be updated in context %2$s
      */
-    NO_SHARED_FOLDER_UPDATE("Shared folder %1$s must not be updated in context %2$s",
-        OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
+    NO_SHARED_FOLDER_UPDATE("Shared folder %1$s must not be updated in context %2$s", OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
      * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
      */
@@ -547,8 +545,7 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
      */
-    DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.",
-        OXFolderExceptionMessage.DELETE_FAILED_LOCKED_DOCUMENTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 88),
+    DELETE_FAILED_LOCKED_DOCUMENTS("Delete cannot be performed because of locked documents in folder %1$s in context %2$s.", OXFolderExceptionMessage.DELETE_FAILED_LOCKED_DOCUMENTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 88),
     /**
      * Operation may only be performed for context administrator.
      */
@@ -569,6 +566,10 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * Unsupported character.
      */
     INVALID_CHARACTER_SIMPLE("Unsupported character", OXFolderExceptionMessage.INVALID_CHARACTER_SIMPLE_MSG, CATEGORY_USER_INPUT, 92 /* Yes, the same as INVALID_CHARACTER */),
+    /**
+     * The folder name \"%1$s\" is reserved. Please choose another name.
+     */
+    NO_RESERVED_FOLDER("The folder name \"%1$s\" is reserved. Please choose another name.", OXFolderExceptionMessage.NO_RESERVED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 93),
 
     ;
 

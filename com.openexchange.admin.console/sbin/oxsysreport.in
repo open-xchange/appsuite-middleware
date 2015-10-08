@@ -49,7 +49,7 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
-export PATH="${PATH}:/opt/open-xchange/sbin"
+export PATH="/opt/open-xchange/sbin:${PATH}"
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
@@ -83,13 +83,39 @@ EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
-PROCS='showruntimestats -a;showruntimestats -c;showruntimestats -g;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a;ps -eLf;java -version;listconfigdiff'
+READEREINGINE_CACHE_DIR=/var/spool/open-xchange/documentconverter/readerengine.cache
+PROCS='
+    df;
+    dmesg;
+    free;
+    getmissingservices;
+    java -version;
+    listbundles;
+    listconfigdiff;
+    listservices;
+    mount;
+    netstat -putane;
+    ox_java_vm_limits;
+    ps -eLf;
+    ps faux;
+    readerengine_cache_overview;
+    report -o -d;
+    route -n;
+    showruntimestats -a;
+    showruntimestats -c;
+    showruntimestats -f;
+    showruntimestats -g;
+    showruntimestats -y;
+    top -bHn 1;
+    ulimit -a;
+    uname -a'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
 OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
+OTHER_CONFIGS="/etc/security/limits.conf"
 
 ###############################################################################
 #                                   Functions                                 #
@@ -123,6 +149,8 @@ clean_up(){
 }
 
 collect_command_output() {
+   # Drop leading blanks from commands
+   PROCS=$(echo ${PROCS} | sed 's|;[[:blank:]]*|;|g')
    echo "Collecting output of system tools into $(normalize_path ${TMP}/${LOGDIR}/commands)"
    cd /${TMP}
    OIFS=${IFS}
@@ -135,6 +163,15 @@ collect_command_output() {
    done
    IFS=${OIFS}
    cd - > /dev/null 2>&1
+}
+
+ox_java_vm_limits() {
+    PROC_LIMITS="/proc/$(get_ox_java_pid)/limits";
+    if [ -f "${PROC_LIMITS}" ]; then
+        cat ${PROC_LIMITS};
+    else
+        echo "File does not exist: ${PROC_LIMITS}"
+    fi
 }
 
 collect_httpd_configs() {
@@ -176,6 +213,24 @@ collect_httpd_configs() {
             ALL_EXCLUDED="${_tmp_exclude_status} ${ALL_EXCLUDED}"
         fi
     done
+}
+
+readerengine_cache_overview() {
+    if [ -d "${READEREINGINE_CACHE_DIR}" ]; then
+        echo "Show readerengine disc usage (du -ks):"
+        du -ks "$(dirname ${READEREINGINE_CACHE_DIR})/"*
+        echo
+
+        echo "Listing the ten oldest modified cache files (ls -ltr | head -n 10):"
+        ls -ltr "${READEREINGINE_CACHE_DIR}" | head -n 10
+        echo
+
+        echo "Listing the ten newest modified cache files (ls -lt | head -n 10):"
+        ls -lt "${READEREINGINE_CACHE_DIR}" | head -n 10
+        echo
+    else
+    echo "Skipping, readerengine cache does not exist: ${READEREINGINE_CACHE_DIR}"
+    fi
 }
 
 collect_logs() {
@@ -416,7 +471,7 @@ exclude_secret_ox_config_files() {
 # This function removes every file which is not whitelisted.
     local _ox_config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-exclude)
-    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names'
+    local _whitelist='\.properties.*$|\.yml$|\.xml$|\.yaml$|\.sh$|\.ccf$|\.types$|\.sql$|\.txt$|\.name$|\.perfMap$|folder-reserved-names|readerengine.*list'
     find ${_ox_config_copy} -type f | \
         egrep -v "${_whitelist}" | \
         sed 's| |// |g' >> ${_tmp_exclude_status}

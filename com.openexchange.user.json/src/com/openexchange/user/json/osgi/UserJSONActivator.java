@@ -49,18 +49,22 @@
 
 package com.openexchange.user.json.osgi;
 
+import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.guest.GuestService;
+import com.openexchange.share.ShareService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContactResultConverter;
 import com.openexchange.user.json.actions.UserActionFactory;
+import com.openexchange.user.json.anonymizer.ContactAnonymizerService;
+import com.openexchange.user.json.anonymizer.UserAnonymizerService;
 import com.openexchange.user.json.actions.UserMeActionFactory;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link UserJSONActivator} - Activator for JSON user interface.
@@ -68,11 +72,6 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UserJSONActivator extends AJAXModuleActivator {
-
-    /**
-     * The {@link DefaultDeferringURLService} reference.
-     */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
 
     /**
      * Initializes a new {@link UserJSONActivator}.
@@ -89,41 +88,28 @@ public class UserJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            PREFIX.set(getService(DispatcherPrefixService.class));
-            /*
-             * Register user action factory
-             */
-            registerModule(UserActionFactory.getInstance(), Constants.MODULE);
-            /*
-             * Register user/me action factory
-             */
-            registerModule(UserMeActionFactory.getInstance(), Constants.MODULE_ME);
+            Services.setServiceLookup(this);
+
+            registerModule(new UserActionFactory(this), Constants.MODULE);
+            registerModule(new UserMeActionFactory(this), Constants.MODULE_ME);
+
             /*
              * Register result converter
              */
             registerService(ResultConverter.class, new UserContactResultConverter());
-            /*
-             * User service tracker
-             */
-            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(
-                context,
-                ServiceRegistry.getInstance(),
-                UserService.class));
-            /*
-             * Contact service tracker
-             */
-            track(ContactService.class, new RegistryServiceTrackerCustomizer<ContactService>(
-                    context,
-                    ServiceRegistry.getInstance(),
-                    ContactService.class));
-            track(DatabaseService.class, new RegistryServiceTrackerCustomizer<DatabaseService>(
-                context,
-                ServiceRegistry.getInstance(),
-                DatabaseService.class));
+            registerService(AnonymizerService.class.getName(), new UserAnonymizerService());
+            registerService(AnonymizerService.class.getName(), new ContactAnonymizerService());
+
+            trackService(DispatcherPrefixService.class);
+            trackService(UserService.class);
+            trackService(ContactService.class);
+            trackService(DatabaseService.class);
+            trackService(ContactUserStorage.class);
+            trackService(ShareService.class);
+            trackService(GuestService.class);
             openTrackers();
-        } catch (final Exception e) {
-            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class);
-            LOG.error("", e);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class).error("Failed to start bundle {}", context.getBundle().getSymbolicName(), e);
             throw e;
         }
     }
@@ -131,7 +117,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        PREFIX.set(null);
+        Services.setServiceLookup(null);
     }
 
 }

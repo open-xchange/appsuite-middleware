@@ -57,6 +57,7 @@ import com.box.boxjavalibv2.utils.ISO8601DateParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -90,6 +91,8 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override
@@ -134,7 +137,12 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                     setName(null == accountDisplayName ? dir.getName() : accountDisplayName);
                 } else {
                     com.box.boxjavalibv2.dao.BoxFolder parent = dir.getParent();
-                    setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                    // A shared folder does not have a parent in the current user's "context"
+                    if (parent == null) {
+                        setParentId(FileStorageFolder.ROOT_FULLNAME);
+                    } else {
+                        setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                    }
                     setName(dir.getName());
                 }
 
@@ -173,7 +181,7 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                     setSubscribedSubfolders(hasSubfolders);
                 }
             } catch (final RuntimeException e) {
-                throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

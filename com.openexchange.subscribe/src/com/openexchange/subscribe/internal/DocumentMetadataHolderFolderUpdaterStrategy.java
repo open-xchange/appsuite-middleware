@@ -145,7 +145,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     }
 
     @Override
-    public void save(final DocumentMetadataHolder newElement, final Object session) throws OXException {
+    public void save(final DocumentMetadataHolder newElement, final Object session, Collection<OXException> errors) throws OXException {
         final InfostoreSession sess = (InfostoreSession) session;
         final InputStream file = grabFile(newElement);
         newElement.documentMetadata.setId(InfostoreFacade.NEW);

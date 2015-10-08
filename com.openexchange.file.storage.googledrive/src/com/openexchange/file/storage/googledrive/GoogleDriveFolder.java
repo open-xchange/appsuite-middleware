@@ -57,6 +57,7 @@ import com.google.api.services.drive.model.File;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -92,6 +93,8 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
         permission.setEntity(userId);
         permissions = Collections.<FileStoragePermission> singletonList(permission);
         ownPermission = permission;
+        createdBy = userId;
+        modifiedBy = userId;
     }
 
     @Override
@@ -141,8 +144,12 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                     setName(dir.getTitle());
                 }
 
-                creationDate = new Date(dir.getCreatedDate().getValue());
-                lastModifiedDate = new Date(dir.getModifiedDate().getValue());
+                if (null != dir.getCreatedDate()) {
+                    creationDate = new Date(dir.getCreatedDate().getValue());
+                }
+                if (null != dir.getModifiedDate()) {
+                    lastModifiedDate = new Date(dir.getModifiedDate().getValue());
+                }
 
                 {
                     final boolean hasSubfolders = hasSubfolder(dir.getId(), drive);
@@ -150,7 +157,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                     setSubscribedSubfolders(hasSubfolders);
                 }
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
@@ -163,6 +170,8 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
     private boolean hasSubfolder(String folderId, Drive drive) throws IOException {
         Drive.Children.List list = drive.children().list(folderId);
         list.setQ(QUERY_STRING_DIRECTORIES_ONLY);
+        list.setMaxResults(Integer.valueOf(1));
+        list.setFields("items/id");
         return !list.execute().getItems().isEmpty();
     }
 

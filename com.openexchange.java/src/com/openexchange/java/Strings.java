@@ -374,7 +374,7 @@ public class Strings {
      * Splits given string by comma separator.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByComma(final String s) {
         if (null == s) {
@@ -419,7 +419,7 @@ public class Strings {
      * Splits given string by CR?LF; yields line-wise output.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByCRLF(final String s) {
         if (null == s) {
@@ -428,13 +428,28 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
+    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+
+    /**
+     * Splits given string by tabs.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByTab(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_TAB.split(s, 0);
+    }
+
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * Splits given string by whitespaces.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByWhitespaces(final String s) {
         if (null == s) {
@@ -526,6 +541,16 @@ public class Strings {
     }
 
     /**
+     * Checks for a non-empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
+    }
+
+    /**
      * Fixes possible charset problem in given string.
      * <p>
      * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;
@@ -596,6 +621,49 @@ public class Strings {
             builder.append(connector);
         }
         return builder.substring(0, builder.length() - connector.length());
+    }
+
+    /**
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     *
+     * @param coll Collection to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
+        if (coll == null) {
+            return;
+        }
+        final int size = coll.size();
+        if (size == 0) {
+            return;
+        }
+        for (final Object obj : coll) {
+            if (obj == null) {
+                builder.append("null");
+            } else {
+                builder.append(obj.toString());
+            }
+            builder.append(connector);
+        }
+        builder.setLength(builder.length() - connector.length());
+    }
+
+    /**
+     * Joins an array of integers by connecting their String representations with a connector
+     *
+     * @param arr Integers to be connected
+     * @param connector Connector place between two objects
+     * @param builder The string builder to use
+     * @return connected strings or null if collection == null or empty string if collection is empty
+     */
+    public static void join(final int[] arr, final String connector, final StringBuilder builder) {
+        final List<Integer> list = new LinkedList<Integer>();
+        for (final int i : arr) {
+            list.add(Autoboxing.I(i));
+        }
+        join(list, connector, builder);
     }
 
     public static <T> String join(final T[] arr, final String connector) {
@@ -1188,6 +1256,19 @@ public class Strings {
         }
         s.append('$');
         return (s.toString());
+    }
+
+    /**
+     * Converts int[] to String[]
+     *
+     * @param arr int[] that should be converted
+     * @return String[] ints as String
+     */
+    public static String[] convert(final int[] arr) {
+        String connector = ";";
+        StringBuilder builder = new StringBuilder();
+        Strings.join(arr, connector, builder);
+        return builder.toString().split(connector);
     }
 
     private static boolean contains(char c, char[] charArray) {

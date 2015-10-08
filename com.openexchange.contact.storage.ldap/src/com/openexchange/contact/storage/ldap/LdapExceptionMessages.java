@@ -66,6 +66,7 @@ public final class LdapExceptionMessages implements LocalizableStrings {
     public final static String INITIAL_LDAP_ERROR_MSG = "Error while trying to create connection to LDAP server.";
     public final static String TOO_MANY_USER_RESULTS_MSG = "The LDAP search for the user contains too many results.";
     public final static String NO_USER_RESULTS_MSG = "The LDAP search for the user object \"%s\" gave no results.";
+    public final static String SEARCH_IN_DLISTS_NOT_SUPPORTED = "The LDAP search in distribution lists for specific attributes is not supported."; 
     /**
      * Prevent instantiation.
      */

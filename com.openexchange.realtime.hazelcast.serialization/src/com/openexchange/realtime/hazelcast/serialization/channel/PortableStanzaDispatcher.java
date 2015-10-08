@@ -72,17 +72,19 @@ import com.openexchange.realtime.dispatch.Utils;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
+import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link PortableStanzaDispatcher}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>, CustomPortable {
+public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, CustomPortable {
 
     private static final Logger LOG = LoggerFactory.getLogger(PortableStanzaDispatcher.class);
 
@@ -94,11 +96,11 @@ public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>,
 
     private Stanza stanza;
 
-    private Set<ID> targets;
+    private final Set<ID> targets;
 
     /**
      * Initializes a new {@link PortableStanzaDispatcher}.
-     * 
+     *
      * @throws OXException
      */
     public PortableStanzaDispatcher() {
@@ -108,7 +110,7 @@ public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>,
 
     /**
      * Initializes a new {@link PortableStanzaDispatcher}.
-     * 
+     *
      * @param stanza The stanza to dispatch
      * @throws OXException
      */
@@ -122,7 +124,7 @@ public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>,
     }
 
     @Override
-    public Map<ID, OXException> call() throws Exception {
+    public IDMap<OXException> call() throws Exception {
         stanza.trace("Received remote delivery. Dispatching locally");
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
         Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
@@ -147,7 +149,12 @@ public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>,
                 exceptions.remove(stanza.getTo());
             }
         }
-        return exceptions;
+        /*
+         * We can't return a basic java.util.Map that wraps a com.hazelcast.nio.serialization.Portable as hazelcast won't be able to
+         * deserialize the nested portables properly.
+         */
+        PortableIDToOXExceptionMap portableExceptions = new PortableIDToOXExceptionMap(exceptions);
+        return portableExceptions;
     }
 
     @Override
@@ -204,7 +211,7 @@ public class PortableStanzaDispatcher implements Callable<Map<ID, OXException>>,
     /**
      * Deserialize a {@link Stanza} from a byte array representation. Needs access to all the classes that make up a Stanza via proper OSGI
      * imports.
-     * 
+     *
      * @param stanzaBytes The byte array representation of the Stanza
      * @return The deserialzed {@link Stanza}
      * @throws IOException If reading the byte array fails

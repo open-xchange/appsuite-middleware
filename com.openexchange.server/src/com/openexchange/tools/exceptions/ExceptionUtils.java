@@ -66,159 +66,23 @@
 
 package com.openexchange.tools.exceptions;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
-import com.openexchange.log.LogProperties;
-
 /**
- * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
+ * This class exists for compatibility reasons. Consider using {@link com.openexchange.exception.ExceptionUtils}
+ * instead.
+ *
+ * @see com.openexchange.exception.ExceptionUtils
  */
 public class ExceptionUtils {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
-
-    private static final String MARKER = " ---=== /!\\ ===--- ";
-
     /**
-     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
+     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be re-thrown and swallows all others.
+     * This method simply delegates to {@link com.openexchange.exception.ExceptionUtils#handleThrowable(Throwable)}.
      *
      * @param t The <tt>Throwable</tt> to check
+     * @see com.openexchange.exception.ExceptionUtils#handleThrowable(Throwable)
      */
     public static void handleThrowable(final Throwable t) {
-        if (t instanceof ThreadDeath) {
-            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
-            if (null == taskProperties) {
-                LOG.error("{}Thread death{}", MARKER, MARKER, t);
-            } else {
-                final StringBuilder logBuilder = new StringBuilder(512);
-                final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
-                    final String propertyName = entry.getKey();
-                    final String value = entry.getValue();
-                    if (null != value) {
-                        sorted.put(propertyName, value);
-                    }
-                }
-                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                    logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
-                }
-                logBuilder.deleteCharAt(0);
-                logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
-                logBuilder.append(MARKER);
-                logBuilder.append("Thread death");
-                logBuilder.append(MARKER);
-                LOG.error(logBuilder.toString(), t);
-            }
-            throw (ThreadDeath) t;
-        }
-        if (t instanceof OutOfMemoryError) {
-            String message = t.getMessage();
-            if ("unable to create new native thread".equalsIgnoreCase(message)) {
-                // Dump all the threads to the log
-                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-                String ls = Strings.getLineSeparator();
-                LOG.info("{}Threads: {}", ls, threads.size());
-                StringBuilder sb = new StringBuilder(2048);
-                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
-                    Thread thread = mapEntry.getKey();
-                    sb.setLength(0);
-                    sb.append("        Thread: ").append(thread).append(ls);
-                    for (StackTraceElement elem : mapEntry.getValue()) {
-                        sb.append(elem).append(ls);
-                    }
-                    LOG.info(sb.toString());
-                }
-                sb = null; // Might help GC
-                LOG.info("{}    Thread dump finished{}", ls, ls);
-            } else if ("Java heap space".equalsIgnoreCase(message)) {
-                try {
-                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-
-                    Pair<Boolean, String> heapDumpArgs = checkHeapDumpArguments();
-
-                    // Is HeapDumpOnOutOfMemoryError enabled?
-                    if (!heapDumpArgs.getFirst().booleanValue() && !Boolean.TRUE.equals(System.getProperties().get("__heap_dump_created"))) {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                        // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
-                        String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
-                        String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
-
-                        String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
-                        server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
-                        System.getProperties().put("__heap_dump_created", Boolean.TRUE);
-                        LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
-                    }
-                } catch (Exception e) {
-                    // Failed for any reason...
-                }
-            }
-            logVirtualMachineError(t);
-            throw (OutOfMemoryError) t;
-        }
-        if (t instanceof VirtualMachineError) {
-            logVirtualMachineError(t);
-            throw (VirtualMachineError) t;
-        }
-        // All other instances of Throwable will be silently swallowed
-    }
-
-    private static void logVirtualMachineError(final Throwable t) {
-        Map<String, String> taskProperties = LogProperties.getPropertyMap();
-        if (null == taskProperties) {
-            LOG.error("{}The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.{}", MARKER, MARKER, t);
-        } else {
-            StringBuilder logBuilder = new StringBuilder(512);
-            Map<String, String> sorted = new TreeMap<String, String>();
-            for (Map.Entry<String, String> entry : taskProperties.entrySet()) {
-                String propertyName = entry.getKey();
-                String value = entry.getValue();
-                if (null != value) {
-                    sorted.put(propertyName, value);
-                }
-            }
-            for (Map.Entry<String, String> entry : sorted.entrySet()) {
-                logBuilder.append(Strings.getLineSeparator()).append(entry.getKey()).append('=').append(entry.getValue());
-            }
-            logBuilder.deleteCharAt(0);
-            logBuilder.append(Strings.getLineSeparator()).append(Strings.getLineSeparator());
-            logBuilder.append(MARKER);
-            logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
-            logBuilder.append(MARKER);
-            LOG.error(logBuilder.toString(), t);
-        }
-    }
-
-    private static Pair<Boolean, String> checkHeapDumpArguments() {
-        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-        List<String> arguments = runtimeMxBean.getInputArguments();
-        boolean heapDumpOnOOm = false;
-        String path = null;
-        for (String argument : arguments) {
-            if ("-XX:+HeapDumpOnOutOfMemoryError".equals(argument)) {
-                heapDumpOnOOm = true;
-            } else if (argument.startsWith("-XX:HeapDumpPath=")) {
-                path = argument.substring(17).trim();
-                File file = new File(path);
-                if (!file.exists() || !file.canWrite()) {
-                   path = null;
-                }
-            }
-        }
-        return new Pair<Boolean, String>(Boolean.valueOf(heapDumpOnOOm), path);
+        com.openexchange.exception.ExceptionUtils.handleThrowable(t);
     }
 
 }

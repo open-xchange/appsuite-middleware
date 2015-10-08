@@ -53,6 +53,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -61,10 +62,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.
@@ -86,8 +87,8 @@ public final class GetAction extends AbstractUserAction {
     /**
      * Initializes a new {@link GetAction}.
      */
-    public GetAction() {
-        super();
+    public GetAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -112,13 +113,22 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Obtain user from user service
          */
-        final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        final UserService userService = services.getService(UserService.class);
         final User user = userService.getUser(userId, session.getContext());
         /*
          * Obtain user's contact
          */
-        final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class, true);
-        final Contact contact = contactService.getUser(session, userId, contactFields);
+        Contact contact = null;
+        if (user.isGuest()) {
+            ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+            contact = contactUserStorage.getGuestContact(session.getContextId(), userId, contactFields);
+        } else {
+            ContactService contactService = services.getService(ContactService.class);
+            contact = contactService.getUser(session, userId, contactFields);
+        }
+        if (contact.getInternalUserId() != user.getId() || user.getContactId() != contact.getObjectID()) {
+//            throw UserC
+        }
         /*
          * Return appropriate result
          */

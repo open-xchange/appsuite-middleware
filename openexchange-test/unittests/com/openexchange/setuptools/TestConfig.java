@@ -63,6 +63,8 @@ public class TestConfig {
     private String participant1, participant2, participant3;
     private String resource1, resource2, resource3;
 
+    private final String oxAdminMaster, oxAdminMasterPwd;
+
     private String group;
 
     private final String contextName;
@@ -81,6 +83,9 @@ public class TestConfig {
         resource1 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT1);
         resource2 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT2);
         resource3 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT3);
+
+        oxAdminMaster = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER);
+        oxAdminMasterPwd = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);
 
         group = AJAXConfig.getProperty(AJAXConfig.Property.GROUP_PARTICIPANT);
 
@@ -115,11 +120,9 @@ public class TestConfig {
         this.thirdUser = thirdUser;
     }
 
-
     public String getFourthUser() {
         return fourthUser;
     }
-
 
     public void setFourthUser(final String fourthUser) {
         this.fourthUser = fourthUser;
@@ -179,5 +182,13 @@ public class TestConfig {
 
     public void setGroup(final String group) {
         this.group = group;
+    }
+
+    public String getOxAdminMaster() {
+        return oxAdminMaster;
+    }
+
+    public String getOxAdminMasterPwd() {
+        return oxAdminMasterPwd;
     }
 }

@@ -53,9 +53,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.TestCase;
-
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;

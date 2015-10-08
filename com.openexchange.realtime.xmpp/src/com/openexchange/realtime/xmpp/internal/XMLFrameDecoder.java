@@ -51,7 +51,6 @@ package com.openexchange.realtime.xmpp.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;

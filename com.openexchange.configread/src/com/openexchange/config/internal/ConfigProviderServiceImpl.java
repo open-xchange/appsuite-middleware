@@ -59,14 +59,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigProviderServiceImpl} - The implementation of ConfigProviderService for the scope <code>"server"</code>.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConfigProviderServiceImpl implements ConfigProviderService {
+public class ConfigProviderServiceImpl implements ReinitializableConfigProviderService {
 
     private static final String META = "meta";
 
@@ -79,6 +81,8 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private static final String PROTECTED = "protected";
 
     private static final String TRUE = "true";
+
+    // -------------------------------------------------------------------------------------------------------------------
 
     private final ConfigurationService configService;
     private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
@@ -114,6 +118,11 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             return alreadyDefined;
         }
         return retval;
+    }
+
+    @Override
+    public String getScope() {
+    	return "server";
     }
 
     @Override
@@ -233,6 +242,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
      *
      * @throws OXException If operation fails
      */
+    @Override
     public void reinit() throws OXException {
         properties.clear();
         init();

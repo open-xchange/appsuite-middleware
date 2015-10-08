@@ -59,4 +59,18 @@ public interface ICalSession {
 
     ZoneInfo getZoneInfo();
 
+    /**
+     * Sets the <code>X-WR-CALNAME</code> property in the underlying <code>VCALENDAR</code> component to the supplied value. According to
+     * <a href="http://msdn.microsoft.com/en-us/library/ee157721">MSDN</a>, this property...
+     * <ul>
+     * <li>MUST be omitted if the iCalendar represents a single appointment or meeting.</li>
+     * <li>SHOULD be set to the name of the folder representing the calendar being exported, if the iCal represents a calendar export</li>
+     * <li>SHOULD instead be set to a more descriptive locale-dependent string containing the owner's name (e.g. 'Elizabeth Andersen
+     * calendar' if the calendar is the owner's primary calendar</li>
+     * </ul>
+     *
+     * @param name The name to set
+     */
+    void setName(String name);
+
 }

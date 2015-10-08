@@ -30,7 +30,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     public void testUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        int id = createNew(getWebConversation(), getHostName(), sessionId, m(
+        String id = createNew(getWebConversation(), getHostName(), sessionId, m(
             "folder_id",
             ((Integer) folderId).toString(),
             "title",
@@ -83,7 +83,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     public void testUploadEmptyFile() throws IOException, JSONException, SAXException {
         File emptyFile = File.createTempFile("infostore-new-test", ".txt");
-        int id = createNew(getWebConversation(), getHostName(), sessionId, m(
+        String id = createNew(getWebConversation(), getHostName(), sessionId, m(
             "folder_id",
             ((Integer) folderId).toString(),
             "title",
@@ -122,7 +122,7 @@ public class NewTest extends InfostoreAJAXTest {
         }
 
         try {
-            final int id = createNew(getWebConversation(), getHostName(), sessionId, m(
+            final String id = createNew(getWebConversation(), getHostName(), sessionId, m(
                 "folder_id",
                 ((Integer) folderId).toString(),
                 "title",
@@ -148,7 +148,7 @@ public class NewTest extends InfostoreAJAXTest {
     // Bug 3928
     public void testVersionCommentForNewDocument() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final int id = createNew(getWebConversation(), getHostName(), sessionId, m(
+        final String id = createNew(getWebConversation(), getHostName(), sessionId, m(
             "folder_id",
             ((Integer) folderId).toString(),
             "title",
@@ -169,12 +169,12 @@ public class NewTest extends InfostoreAJAXTest {
     public void testUniqueFilenamesOnUpload() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
-        final int id = clean.get(0);
+        final String id = clean.get(0);
 
         Response res = update(getWebConversation(), getHostName(), sessionId, id, Long.MAX_VALUE, m(), upload, "text/plain");
         assertNoError(res);
 
-        final int id2 = createNew(getWebConversation(), getHostName(), sessionId, m(
+        final String id2 = createNew(getWebConversation(), getHostName(), sessionId, m(
             "title",
             "otherFile",
             "description",
@@ -208,7 +208,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     public void testTitleFromFilename() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final int id = createNew(
+        final String id = createNew(
             getWebConversation(),
             getHostName(),
             sessionId,
@@ -225,7 +225,7 @@ public class NewTest extends InfostoreAJAXTest {
 
     public void testTitleFromFilenameTheSameEvenIfFilenameIsChangedOnCollision() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final int id = createNew(
+        final String id = createNew(
             getWebConversation(),
             getHostName(),
             sessionId,
@@ -235,7 +235,7 @@ public class NewTest extends InfostoreAJAXTest {
         clean.add(id);
 
 
-        final int id2 = createNew(
+        final String id2 = createNew(
             getWebConversation(),
             getHostName(),
             sessionId,

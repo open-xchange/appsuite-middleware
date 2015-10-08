@@ -72,6 +72,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -129,7 +130,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, ContactStorage.class };
+        return new Class<?>[] { ContactService.class, ContactStorage.class, ConfigurationService.class };
     }
 
     @Override
@@ -158,7 +159,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     public boolean isEnabled(final String capability, final Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
                             final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous()) {
+                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
                                 return false;
                             }
                             return TransportProperties.getInstance().isPublishOnExceededQuota();

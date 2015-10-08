@@ -55,8 +55,10 @@ import java.util.List;
 import java.util.Set;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.Revision;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.osgi.Services;
@@ -75,6 +77,7 @@ public final class GoogleDriveFile extends DefaultFile {
      * @param folderId The folder identifier
      * @param id The file identifier
      * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder in the account
      */
     public GoogleDriveFile(String folderId, String id, int userId, String rootFolderId) {
         super();
@@ -122,9 +125,8 @@ public final class GoogleDriveFile extends DefaultFile {
                 final String name = file.getTitle();
                 setTitle(name);
                 setFileName(name);
-                setVersion(file.getVersion().toString());
-                final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
 
+                final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
                 if (set.contains(Field.CREATED)) {
                     DateTime createdDate = file.getCreatedDate();
                     if (null != createdDate) {
@@ -139,7 +141,7 @@ public final class GoogleDriveFile extends DefaultFile {
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     String contentType = file.getMimeType();
-                    if (isEmpty(contentType)) {
+                    if (com.openexchange.java.Strings.isEmpty(contentType)) {
                         final MimeTypeMap map = Services.getService(MimeTypeMap.class);
                         contentType = map.getContentType(name);
                     }
@@ -152,7 +154,7 @@ public final class GoogleDriveFile extends DefaultFile {
                     }
                 }
                 if (set.contains(Field.URL)) {
-                    setURL(file.getDownloadUrl());
+                    setURL(file.getWebContentLink());
                 }
                 if (set.contains(Field.COLOR_LABEL)) {
                     setColorLabel(0);
@@ -166,22 +168,64 @@ public final class GoogleDriveFile extends DefaultFile {
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
                 }
+                if (set.contains(Field.FILE_MD5SUM)) {
+                    setFileMD5Sum(file.getMd5Checksum());
+                }
             } catch (final RuntimeException e) {
-                throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+    /**
+     * Parses specified Google Drive revision.
+     *
+     * @param revision The Google Drive revision
+     * @param fields The fields to consider
+     * @throws OXException If parsing Google Drive file fails
+     * @return This Google Drive file with property set applied
+     */
+    public GoogleDriveFile parseRevision(Revision revision, List<Field> fields) throws OXException {
+        if (null != revision) {
+            try {
+                setVersion(revision.getId());
+                String name = revision.getOriginalFilename();
+                setTitle(name);
+                setFileName(name);
+                setVersion(revision.getId());
+
+                Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
+                if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
+                    DateTime modifiedDate = revision.getModifiedDate();
+                    if (null != modifiedDate) {
+                        setLastModified(new Date(modifiedDate.getValue()));
+                    }
+                }
+                if (set.contains(Field.FILE_MIMETYPE)) {
+                    String contentType = revision.getMimeType();
+                    if (com.openexchange.java.Strings.isEmpty(contentType)) {
+                        final MimeTypeMap map = Services.getService(MimeTypeMap.class);
+                        contentType = map.getContentType(name);
+                    }
+                    setFileMIMEType(contentType);
+                }
+                if (set.contains(Field.FILE_SIZE)) {
+                    Long fileSize = revision.getFileSize();
+                    if (null != fileSize) {
+                        setFileSize(fileSize.longValue());
+                    }
+                }
+                if (set.contains(Field.URL)) {
+                    setURL(revision.getDownloadUrl());
+                }
+                if (set.contains(Field.FILE_MD5SUM)) {
+                    setFileMD5Sum(revision.getMd5Checksum());
+                }
+            } catch (final RuntimeException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+        return this;
     }
 }

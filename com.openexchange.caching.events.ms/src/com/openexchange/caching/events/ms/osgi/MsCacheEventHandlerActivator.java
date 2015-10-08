@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.PortableMsService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.MultipleServiceTracker;
 
 /**
  * {@link MsCacheEventHandlerActivator}
@@ -70,8 +71,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandlerActivator.class);
 
     /**
      * Initializes a new {@link MsCacheEventHandlerActivator}.
@@ -82,50 +81,46 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheEventService.class };
+        return new Class<?>[] { };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandlerActivator.class);
+        logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
         registerService(CustomPortableFactory.class, new PortableCacheKeyFactory());
         registerService(CustomPortableFactory.class, new PortableCacheEventFactory());
+
         final BundleContext context = this.context;
-        final CacheEventService cacheEventService = getService(CacheEventService.class);
-        track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
+
+        MultipleServiceTracker tracker = new MultipleServiceTracker(context, CacheEventService.class, PortableMsService.class) {
 
             private volatile MsCacheEventHandler eventHandler;
 
             @Override
-            public PortableMsService addingService(ServiceReference<PortableMsService> reference) {
-                PortableMsService messagingService = context.getService(reference);
-                MsCacheEventHandler.setMsService(messagingService);
-                LOG.debug("Initializing messaging service cache event handler");
-                try {
-                    this.eventHandler = new MsCacheEventHandler(cacheEventService);
-                } catch (OXException e) {
-                    throw new IllegalStateException(
-                        e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
-                }
-                return messagingService;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
-                // Ignored
-            }
-
-            @Override
-            public void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
-                LOG.debug("Stopping messaging service cache event handler");
+            protected boolean serviceRemoved(Object service) {
+                logger.debug("Stopping messaging service cache event handler");
                 MsCacheEventHandler eventHandler = this.eventHandler;
                 if (null != eventHandler) {
                     eventHandler.stop();
                     this.eventHandler = null;
                 }
-                MsCacheEventHandler.setMsService(null);
+                return true;
             }
-        });
+
+            @Override
+            protected void onAllAvailable() {
+                logger.debug("Initializing messaging service cache event handler");
+                try {
+                    this.eventHandler = new MsCacheEventHandler(getTrackedService(PortableMsService.class), getTrackedService(CacheEventService.class));
+                } catch (OXException e) {
+                    throw new IllegalStateException(
+                        e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
+                }
+            }
+        };
+        rememberTracker(tracker.createTracker());
+
         track(CacheKeyService.class, new ServiceTrackerCustomizer<CacheKeyService, CacheKeyService>() {
 
             @Override
@@ -150,7 +145,8 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandlerActivator.class);
+        logger.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
 

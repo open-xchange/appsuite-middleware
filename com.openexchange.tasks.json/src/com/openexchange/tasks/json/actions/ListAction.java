@@ -49,8 +49,8 @@
 
 package com.openexchange.tasks.json.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,9 +66,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -81,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data. The alias \"list\" uses the predefined columnset [20, 1, 5, 2, 4, 209, 301, 101, 200, 309, 201, 202, 102].")
 }, requestBody = "An array of with object IDs of requested tasks. ",
 responseDescription = "Response with timestamp: An object containing all data of the requested task. The fields of the object are listed in Common object data, Detailed task and appointment data and Detailed task data. The field id is not included. ")
+@OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class ListAction extends TaskAction {
 
     /**
@@ -91,34 +95,33 @@ public class ListAction extends TaskAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
-     */
     @Override
-    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
         Date timestamp = new Date(0);
 
         Date lastModified = null;
 
-        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final int[] columnsToLoad = removeVirtualColumns(columns);
-        final JSONArray jData = (JSONArray) req.getRequest().requireData();
-        final int[][] objectIdAndFolderId = new int[jData.length()][2];
+        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        int[] columnsToLoad = removeVirtualColumns(columns);
+
+        JSONArray jData = (JSONArray) req.getRequest().requireData();
+        int[][] objectIdAndFolderId = new int[jData.length()][2];
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
             final JSONObject jObject = jData.getJSONObject(a);
             objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
         }
-        final int[] internalColumns = new int[columnsToLoad.length+1];
+
+        int[] internalColumns = new int[columnsToLoad.length+1];
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
-        final List<Task> taskList = new ArrayList<Task>();
         SearchIterator<Task> it = null;
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(req.getSession());
             it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 
+            List<Task> taskList = new LinkedList<Task>();
             while (it.hasNext()) {
                 final Task taskobject = it.next();
                 taskList.add(taskobject);
@@ -131,9 +134,7 @@ public class ListAction extends TaskAction {
             }
             return new AJAXRequestResult(taskList, timestamp, "task");
         } finally {
-            if(it!=null) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

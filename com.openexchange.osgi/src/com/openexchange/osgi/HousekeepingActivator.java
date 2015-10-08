@@ -50,10 +50,15 @@
 package com.openexchange.osgi;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -196,6 +201,21 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
+        context.addFrameworkListener(new FrameworkListener() {
+
+            @Override
+            public void frameworkEvent(FrameworkEvent event) {
+                if (event.getBundle().getSymbolicName().equalsIgnoreCase(context.getBundle().getSymbolicName())) {
+                    int eventType = event.getType();
+                    if (eventType == FrameworkEvent.ERROR) {
+                        LOG.error(event.toString(), event.getThrowable());
+                    } else {
+                        LOG.info(event.toString(), event.getThrowable());
+                    }
+                }
+            }
+        });
+
         // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
         if (!serviceTrackers.isEmpty()) {
             openTrackers();
@@ -214,6 +234,33 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected boolean hasRegisteredServices() {
         return !serviceRegistrations.isEmpty();
+    }
+
+    /**
+     * Gets the {@link ServiceRegistration} instance for specified service.
+     *
+     * @param clazz The service's class
+     * @return The {@link ServiceRegistration} instance or <code>null</code> if no such service has been registered
+     */
+    @SuppressWarnings("unchecked")
+    protected <S> ServiceRegistration<S> getServiceRegistrationFor(Class<S> clazz) {
+        for (Map.Entry<Object, ServiceRegistration<?>> entry : serviceRegistrations.entries()) {
+            if (clazz.isInstance(entry.getKey())) {
+                return (ServiceRegistration<S>) entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the {@link ServiceRegistration} instance for specified service.
+     *
+     * @param service The previously registered service
+     * @return The {@link ServiceRegistration} instance or <code>null</code> if no such service has been registered
+     */
+    @SuppressWarnings("unchecked")
+    protected <S> ServiceRegistration<S> getServiceRegistrationFor(S service) {
+        return (ServiceRegistration<S>) serviceRegistrations.get(service);
     }
 
     /**
@@ -236,6 +283,19 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected <S> void registerService(final Class<S> clazz, final S service) {
         registerService(clazz, service, null);
+    }
+
+    /**
+     * Registers specified service under the specified class, using the supplied service ranking.
+     *
+     * @param clazz The service's class
+     * @param service The service reference
+     * @param serviceRanking The value to configure the {@link Constants#SERVICE_RANKING} to
+     */
+    protected <S> void registerService(final Class<S> clazz, final S service, int serviceRanking) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(serviceRanking));
+        registerService(clazz, service, properties);
     }
 
     /**

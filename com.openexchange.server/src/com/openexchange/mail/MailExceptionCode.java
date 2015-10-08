@@ -525,7 +525,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Sending the message denied.
      */
     SEND_DENIED("Sending the message denied.", MailExceptionStrings.SEND_DENIED, CATEGORY_PERMISSION_DENIED, 96),
-
+    /**
+     * Default folder %1$s must not be updated
+     */
+    NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s must not be updated", MailExceptionStrings.NO_DEFAULT_FOLDER_UPDATE_MSG, CATEGORY_PERMISSION_DENIED, 97),
 
     ;
 

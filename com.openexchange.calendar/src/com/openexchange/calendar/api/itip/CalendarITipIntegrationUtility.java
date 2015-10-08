@@ -313,7 +313,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     public int getPrivateCalendarFolderId(final Session session) throws OXException {
         final Context ctx = contexts.getContext(session.getContextId());
         final OXFolderAccess acc = new OXFolderAccess(ctx);
-        return acc.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
+        return acc.getDefaultFolderID(session.getUserId(), FolderObject.CALENDAR);
     }
 
 

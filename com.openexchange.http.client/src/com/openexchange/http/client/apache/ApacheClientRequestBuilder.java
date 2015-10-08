@@ -64,38 +64,38 @@ import com.openexchange.http.client.internal.AbstractBuilder;
 
 public class ApacheClientRequestBuilder extends AbstractBuilder implements
 		HTTPRequestBuilder {
-	
-	private HttpState state;
-	
-	private ManagedFileManagement fileManager;
 
-	private ApacheHTTPClient client;
-	
+	private HttpState state;
+
+	private final ManagedFileManagement fileManager;
+
+	private final ApacheHTTPClient client;
+
 	public ApacheClientRequestBuilder(ManagedFileManagement mgmt, ApacheHTTPClient client) {
 		fileManager = mgmt;
 		this.client = client;
 	}
-	
+
 	@Override
     public HTTPPutRequestBuilder put() {
 		return new ApachePutRequestBuilder(this);
 	}
-	
+
 	@Override
     public HTTPPostRequestBuilder post() {
 		return new ApachePostRequestBuilder(this);
 	}
-	
+
 	@Override
     public HTTPMultipartPostRequestBuilder multipartPost() {
 		return new ApacheMultipartPostRequestBuilder(this, fileManager);
 	}
-	
+
 	@Override
     public HTTPGetRequestBuilder get() {
 		return new ApacheGetRequestBuilder(this);
 	}
-	
+
 	@Override
     public HTTPDeleteRequestBuilder delete() {
 		return new ApacheDeleteRequestBuilder(this);
@@ -108,11 +108,11 @@ public class ApacheClientRequestBuilder extends AbstractBuilder implements
 	HttpState getState() {
 		return state;
 	}
-	
+
 	void setState(HttpState state) {
 		this.state = state;
 	}
-	
-	
+
+
 
 }

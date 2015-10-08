@@ -77,6 +77,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 public class ITipConsistencyCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ITipConsistencyCalendar.class);
+    
     protected AppointmentSQLInterface delegate;
 
     private final UserService users;
@@ -518,11 +521,23 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
     @Override
     public CalendarDataObject setUserConfirmation(int objectId, int folderId, int optOccurrenceId, int userId, int confirm, String confirmMessage) throws OXException {
+        if (optOccurrenceId <= 0) {
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage));
+            return retval;
+        }
         return delegate.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirm, confirmMessage);
     }
 
     @Override
     public CalendarDataObject setExternalConfirmation(int objectId, int folderId, int optOccurrenceId, String mail, int confirm, String message) throws OXException {
+        if (optOccurrenceId <= 0) {
+            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
+            CalendarDataObject retval = new CalendarDataObject();
+            retval.setLastModified(setExternalConfirmation(objectId, folderId, mail, confirm, message));
+            return retval;
+        }
         return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
     }
 

@@ -53,6 +53,7 @@ import java.rmi.Remote;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
+import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXContext;
@@ -114,7 +115,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
     }
 
 }

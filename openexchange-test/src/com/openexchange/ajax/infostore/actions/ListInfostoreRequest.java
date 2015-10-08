@@ -58,7 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractListParser;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.file.storage.File;
 
 /**
  * {@link ListInfostoreRequest}
@@ -77,9 +77,14 @@ public class ListInfostoreRequest extends AbstractInfostoreRequest<ListInfostore
     }
 
     public ListInfostoreRequest(final List<ListItem> items, final int columns[]) {
+        this(items, columns, true);
+    }
+
+    public ListInfostoreRequest(final List<ListItem> items, final int columns[], boolean failOnError) {
         super();
         this.items = items;
         this.columns = columns;
+        setFailOnError(failOnError);
     }
 
     public void addItem(ListItem item) {
@@ -134,10 +139,8 @@ public class ListInfostoreRequest extends AbstractInfostoreRequest<ListInfostore
 
         private final String version;
 
-        public ListItem(DocumentMetadata metadata) {
-            this(Long.toString(metadata.getFolderId()),
-                 Integer.toString(metadata.getId()),
-                 Integer.toString(metadata.getVersion()));
+        public ListItem(File metadata) {
+            this(metadata.getFolderId(), metadata.getId(), metadata.getVersion());
         }
 
         public ListItem(String folderId, String id) {

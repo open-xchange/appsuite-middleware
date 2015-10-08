@@ -250,7 +250,7 @@ public class OXUtilMySQLStorageCommon {
         return null;
     }
 
-    private void initUpdateTaskTable(final Connection con, final int poolId, final String schema) throws StorageException {
+    private static void initUpdateTaskTable(final Connection con, final int poolId, final String schema) throws StorageException {
         final UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         final SchemaStore store = SchemaStore.getInstance();
         try {

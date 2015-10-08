@@ -49,9 +49,11 @@
 
 package com.openexchange.contact.storage.rdb.search;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
-import junit.framework.TestCase;
-import com.openexchange.exception.OXException;
+import org.junit.Test;
+import com.openexchange.java.SimpleTokenizer;
 
 /**
  * {@link AutoCompleteAdapterTest}
@@ -59,57 +61,52 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.8.0
  */
-public class AutoCompleteAdapterTest extends TestCase {
+public class AutoCompleteAdapterTest {
 
-    public void testTooManyPatterns() throws Exception {
-        String query = "eins zwei drei vier fuenf sechs";
-        OXException expected = null;
-        try {
-            new AutocompleteAdapter(query, null, null, 0, null, null, false);
-        } catch (OXException e) {
-            expected = e;
-        }
-        assertNotNull(expected);
-        assertEquals("CON-0263", expected.getErrorCode());
-    }
-
+    @Test
     public void testDetectWildcard() throws Exception {
         String query = "hund wu?st hallo* ot*to d?d?* * hier";
         assertPatterns(query, "%");
     }
 
+    @Test
     public void testExcludeDuplicatePatterns() throws Exception {
         String query = "hund wurst wurst hund hund hund wurst hund";
         assertPatterns(query, "hund%", "wurst%");
     }
 
+    @Test
     public void testExcludeRedundantPatterns_1() throws Exception {
         String query = "hund hundewurst hu hu husten hustenanfall";
         assertPatterns(query, "hu%");
     }
 
+    @Test
     public void testExcludeRedundantPatterns_2() throws Exception {
         String query = "hu*nd hundewurst hun husten hustenanfall";
         assertPatterns(query, "hu%nd%", "hun%", "husten%");
     }
 
+    @Test
     public void testShrinkWildcards_1() throws Exception {
         String query = "*********";
         assertPatterns(query, "%");
     }
 
+    @Test
     public void testShrinkWildcards_2() throws Exception {
         String query = "hu**n*****d*********";
         assertPatterns(query, "hu%n%d%");
     }
 
+    @Test
     public void testShrinkWildcards_() throws Exception {
         String query = "hu**n**\\***d*********";
         assertPatterns(query, "hu%n%\\%%d%");
     }
 
     private static void assertPatterns(String query, String...expectedPatterns) throws Exception {
-        List<String> patterns = AutocompleteAdapter.extractPatterns(query, false);
+        List<String> patterns = AutocompleteAdapter.preparePatterns(SimpleTokenizer.tokenize(query));
         if (null == expectedPatterns || 0 == expectedPatterns.length) {
             assertTrue(null == patterns || 0 == patterns.size());
         } else {

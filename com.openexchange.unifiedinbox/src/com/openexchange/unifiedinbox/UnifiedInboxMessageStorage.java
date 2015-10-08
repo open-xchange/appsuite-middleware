@@ -687,8 +687,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Create completion service for simultaneous access
             int length = accounts.size();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<List<MailMessage>>> completionService =
-                new UnifiedInboxCompletionService<List<List<MailMessage>>>(executor);
+            TrackingCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<List<List<MailMessage>>>(executor);
+            final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
             for (final MailAccount mailAccount : accounts) {
                 Session session = this.session;
                 completionService.submit(new LoggingCallable<List<List<MailMessage>>>(session) {
@@ -711,7 +711,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                             if (messageStorage instanceof ISimplifiedThreadStructure) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, null, max, sortField, order, checkedFields);
+                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields);
                                     List<List<MailMessage>> ret = new ArrayList<List<MailMessage>>(list.size());
                                     UnifiedInboxUID helper = new UnifiedInboxUID();
                                     for (List<MailMessage> list2 : list) {
@@ -750,9 +750,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             try {
                                 int allSort = MailSortField.RECEIVED_DATE.getField();
                                 int allOrder = OrderDirection.DESC.getOrder();
-                                msgArr = messageStorage.getThreadSortedMessages(fn, null, sortField, order, null, checkedFields);
+                                msgArr = messageStorage.getThreadSortedMessages(fn, applicableRange, sortField, order, null, checkedFields);
                             } catch (OXException e) {
-                                msgArr = messageStorage.getAllMessages(fn, null, sortField, order, checkedFields);
+                                msgArr = messageStorage.getAllMessages(fn, applicableRange, sortField, order, checkedFields);
                             }
                             List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
                             List<MailMessage> current = new LinkedList<MailMessage>();
@@ -868,6 +868,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                  * Reset end index if out of range
                  */
                 if (toIndex >= messages.size()) {
+                    if (fromIndex == 0) {
+                        return messages;
+                    }
                     toIndex = messages.size();
                 }
                 messages = messages.subList(fromIndex, toIndex);
@@ -951,20 +954,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 Collections.sort(list, listComparator);
             }
             // Check for index range
-            if (null != indexRange) {
-                int fromIndex = indexRange.start;
-                int toIndex = indexRange.end;
-                int size = list.size();
-                if ((fromIndex) > size) {
-                    // Return empty iterator if start is out of range
-                    return Collections.emptyList();
-                }
-                // Reset end index if out of range
-                if (toIndex >= size) {
-                    toIndex = size;
-                }
-                list = list.subList(fromIndex, toIndex);
-            }
+            list = sliceMessages(list, indexRange);
             /*
              * Apply account identifier
              */
@@ -974,6 +964,30 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         } finally {
             closeSafe(mailAccess);
         }
+    }
+
+    private static List<List<MailMessage>> sliceMessages(List<List<MailMessage>> listOfConversations, IndexRange indexRange) {
+        List<List<MailMessage>> list = listOfConversations;
+        // Check for index range
+        if (null != indexRange) {
+            int fromIndex = indexRange.start;
+            int toIndex = indexRange.end;
+            int size = list.size();
+            if ((fromIndex) > size) {
+                // Return empty iterator if start is out of range
+                return Collections.emptyList();
+            }
+            // Reset end index if out of range
+            if (toIndex >= size) {
+                if (fromIndex == 0) {
+                    return list;
+                }
+                toIndex = size;
+            }
+            list = list.subList(fromIndex, toIndex);
+        }
+        // Return list
+        return list;
     }
 
     private static <T> T getFrom(Future<T> f) throws OXException {
@@ -1138,6 +1152,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                  * Reset end index if out of range
                  */
                 if (toIndex >= messages.size()) {
+                    if (fromIndex == 0) {
+                        return messages.toArray(new MailMessage[messages.size()]);
+                    }
                     toIndex = messages.size();
                 }
                 messages = messages.subList(fromIndex, toIndex);
@@ -1272,6 +1289,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     executorContinuation = ExecutorContinuation.newContinuation(executor, responseGenerator);
                 }
                 // Submit tasks
+                final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
                 for (final MailAccount mailAccount : accounts) {
                     executorContinuation.submit(new LoggingCallable<Collection<MailMessage>>(session) {
 
@@ -1304,10 +1322,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 } else {
                                     IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                                     if (messageStorage instanceof IMailMessageStorageExt) {
-                                        accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields, headerNames);
+                                        accountMails = ((IMailMessageStorageExt) messageStorage).searchMessages(fn, applicableRange, sortField, orderDir, searchTerm, checkedFields, headerNames);
                                     } else {
                                         MailField[] checkedFields2 = MailFields.addIfAbsent(checkedFields, MailField.ID);
-                                        accountMails = messageStorage.searchMessages(fn, null, sortField, orderDir, searchTerm, checkedFields2);
+                                        accountMails = messageStorage.searchMessages(fn, applicableRange, sortField, orderDir, searchTerm, checkedFields2);
 
                                         if (null == accountMails || accountMails.length <= 0) {
                                             return Collections.emptyList();
@@ -1507,6 +1525,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                  * Reset end index if out of range
                  */
                 if (toIndex >= messages.size()) {
+                    if (fromIndex == 0) {
+                        return messages.toArray(new MailMessage[messages.size()]);
+                    }
                     toIndex = messages.size();
                 }
                 messages = messages.subList(fromIndex, toIndex);

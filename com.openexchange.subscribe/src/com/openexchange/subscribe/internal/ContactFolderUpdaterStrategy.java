@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.mail.internet.AddressException;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -67,6 +68,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
@@ -93,6 +96,14 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20, ContactField.CELLULAR_TELEPHONE1 };
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
+
+
+    /**
+     * Initializes a new {@link ContactFolderUpdaterStrategy}.
+     */
+    public ContactFolderUpdaterStrategy() {
+        super();
+    }
 
     @Override
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
@@ -164,7 +175,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-
+        // Nothing to do
     }
 
     @Override
@@ -202,19 +213,22 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     }
 
     @Override
-    public void save(final Contact newElement, final Object session) throws OXException {
+    public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
         Object sqlInterface = getFromSession(SQL_INTERFACE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
-        if (sqlInterface instanceof ContactService && targetFolderSession instanceof TargetFolderSession) {
+        if ((sqlInterface instanceof ContactService) && (targetFolderSession instanceof TargetFolderSession)) {
             TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
             newElement.setParentFolderID(target.getFolderIdAsInt());
+            ContactService contactService = (ContactService)sqlInterface;
+            TargetFolderSession tfs = (TargetFolderSession)targetFolderSession;
+
             int MAX_RETRIES = 5;
             for (int i = 0; i < MAX_RETRIES; i++) {
                 try {
-                    ((ContactService)sqlInterface).createContact((TargetFolderSession)targetFolderSession, target.getFolderId(), newElement);
+                    contactService.createContact(tfs, target.getFolderId(), newElement);
                     return;
                 } catch (OXException e) {
-                    if (handle(e, newElement)) {
+                    if (handle(e, newElement, errors)) {
                         continue;
                     }
                     throw e;
@@ -259,9 +273,10 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
      *
      * @param e The exception
      * @param contact The contact
+     * @param errors The optional errors
      * @return <code>true</code> if problematic data was corrected and the operation may be tried again, <code>false</code>, otherwise
      */
-    private boolean handle(OXException e, Contact contact) {
+    private boolean handle(OXException e, Contact contact, Collection<OXException> errors) {
         if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
             try {
                 return MappedTruncation.truncate(e.getProblematics(), contact);
@@ -276,6 +291,48 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
                 LOG.warn("error trying to handle incorrect strings", x);
             }
         }
+        if (ContactExceptionCodes.INVALID_EMAIL.equals(e)) {
+            if (contact.containsEmail1()) {
+                String value = contact.getEmail1();
+                if (false == Strings.isEmpty(value)) {
+                    try {
+                        new QuotedInternetAddress(value).validate();
+                    } catch (final AddressException x) {
+                        contact.setEmail1("");
+                        if (null != errors) {
+                            errors.add(e);
+                        }
+                    }
+                }
+            }
+            if (contact.containsEmail2()) {
+                String value = contact.getEmail2();
+                if (false == Strings.isEmpty(value)) {
+                    try {
+                        new QuotedInternetAddress(value).validate();
+                    } catch (final AddressException x) {
+                        contact.setEmail2("");
+                        if (null != errors) {
+                            errors.add(e);
+                        }
+                    }
+                }
+            }
+            if (contact.containsEmail3()) {
+                String value = contact.getEmail3();
+                if (false == Strings.isEmpty(value)) {
+                    try {
+                        new QuotedInternetAddress(value).validate();
+                    } catch (final AddressException x) {
+                        contact.setEmail3("");
+                        if (null != errors) {
+                            errors.add(e);
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
+
 }

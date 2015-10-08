@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.realtime.json.fields.ResourceIDField;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;
 
@@ -71,18 +72,19 @@ public class CopyTest extends InfostoreAJAXTest {
     }
 
     private final Set<String> skipKeys = new HashSet<String>(Arrays.asList(
-            Metadata.ID_LITERAL.getName(),
-            Metadata.CREATION_DATE_LITERAL.getName(),
-            Metadata.LAST_MODIFIED_LITERAL.getName(),
-            Metadata.LAST_MODIFIED_UTC_LITERAL.getName(),
-            Metadata.VERSION_LITERAL.getName(),
-            Metadata.CURRENT_VERSION_LITERAL.getName(),
-            Metadata.SEQUENCE_NUMBER_LITERAL.getName(),
-            Metadata.CONTENT_LITERAL.getName()
-    ));
+        Metadata.ID_LITERAL.getName(),
+        Metadata.CREATION_DATE_LITERAL.getName(),
+        Metadata.LAST_MODIFIED_LITERAL.getName(),
+        Metadata.LAST_MODIFIED_UTC_LITERAL.getName(),
+        Metadata.VERSION_LITERAL.getName(),
+        Metadata.CURRENT_VERSION_LITERAL.getName(),
+        Metadata.SEQUENCE_NUMBER_LITERAL.getName(),
+        Metadata.CONTENT_LITERAL.getName(),
+        new ResourceIDField().getColumnName()
+        ));
 
     public void testCopy() throws Exception {
-        final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m());
+        final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m());
         clean.add(id);
 
         Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
@@ -109,7 +111,7 @@ public class CopyTest extends InfostoreAJAXTest {
 
     public void testCopyFile() throws Exception {
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final int id = createNew(
+        final String id = createNew(
                 getWebConversation(),
                 getHostName(),
                 sessionId,
@@ -121,7 +123,7 @@ public class CopyTest extends InfostoreAJAXTest {
         );
         clean.add(id);
         //FIXME Bug 4120
-        final int copyId = copy(getWebConversation(),getHostName(),sessionId,id, Long.MAX_VALUE, m("filename" , "other.properties"));
+        final String copyId = copy(getWebConversation(),getHostName(),sessionId,id, String.valueOf(folderId), Long.MAX_VALUE, m("filename" , "other.properties"));
         clean.add(copyId);
 
         Response res = get(getWebConversation(),getHostName(), sessionId, id);
@@ -154,7 +156,7 @@ public class CopyTest extends InfostoreAJAXTest {
     }
 
     public void testModifyingCopy() throws Exception {
-        final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m("title" , "copy"));
+        final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("title" , "copy"));
         clean.add(id);
 
         Response res = get(getWebConversation(), getHostName(), sessionId, clean.get(0));
@@ -172,7 +174,7 @@ public class CopyTest extends InfostoreAJAXTest {
         for(final Iterator keys = orig.keys(); keys.hasNext();) {
             final String key = keys.next().toString();
             if(!skipKeys.contains(key) && !key.equals("title")) {
-                assertEquals(orig.get(key).toString(), copy.get(key).toString());
+                assertEquals(key + " seems to have a wrong value", orig.get(key).toString(), copy.get(key).toString());
             } else if (key.equals("title")) {
                 assertEquals("copy",copy.get(key));
             }
@@ -181,7 +183,7 @@ public class CopyTest extends InfostoreAJAXTest {
 
     public void testUploadCopy() throws Exception {
         final File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
-        final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0),Long.MAX_VALUE,m("title" , "copy"), upload, "text/plain");
+        final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE,m("title" , "copy"), upload, "text/plain");
         clean.add(id);
 
         final Response res = get(getWebConversation(), getHostName(), sessionId, id);
@@ -204,7 +206,7 @@ public class CopyTest extends InfostoreAJAXTest {
     //Bug 4269
     public void virtualFolderTest(int folderId) throws Exception{
         try {
-            final int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), Long.MAX_VALUE, m("folder_id" , ""+folderId));
+            final String id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0), String.valueOf(folderId), Long.MAX_VALUE, m("folder_id" , ""+folderId));
             clean.add(id);
             fail("Expected IOException");
         } catch (final JSONException x) {

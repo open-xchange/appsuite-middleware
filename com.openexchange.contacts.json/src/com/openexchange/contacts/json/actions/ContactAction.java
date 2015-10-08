@@ -55,7 +55,11 @@ import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -63,6 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -129,6 +134,32 @@ public abstract class ContactAction implements AJAXActionService {
     }
 
     /**
+     * Gets the vCard service.
+     *
+     * @return The vCard service
+     */
+    protected VCardService getVCardService() throws OXException {
+        try {
+            return serviceLookup.getService(VCardService.class);
+        } catch (IllegalStateException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(VCardService.class.getName());
+        }
+    }
+
+    /**
+     * Optionally gets the vCard storage service.
+     *
+     * @return The vCard storage service, or <code>null</code> if not available
+     */
+    protected VCardStorageService optVCardStorageService(int contextId) {
+        VCardStorageFactory vCardStorageFactory = serviceLookup.getOptionalService(VCardStorageFactory.class);
+        if (vCardStorageFactory != null) {
+            return vCardStorageFactory.getVCardStorageService(serviceLookup.getService(ConfigViewFactory.class), contextId);
+        }
+        return null;
+    }
+
+    /**
      * Gets the latest modification date of the contact compared to another date.
      *
      * @param lastModified the date to compare
@@ -147,13 +178,7 @@ public abstract class ContactAction implements AJAXActionService {
      * @throws OXException
      */
     protected static <T> void close(SearchIterator<T> searchIterator) {
-    	if (null != searchIterator) {
-    	    try {
-    	        searchIterator.close();
-    	    } catch (OXException e) {
-    	        LOG.warn("error closing search iterator", e);
-    	    }
-    	}
+        SearchIterators.close(searchIterator);
     }
 
     /**

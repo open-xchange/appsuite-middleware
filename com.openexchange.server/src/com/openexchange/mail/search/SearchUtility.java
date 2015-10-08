@@ -88,7 +88,7 @@ public final class SearchUtility {
         final MailField[] fields = MailField.getFields(searchFields);
         SearchTerm<?> retval = null;
         for (int i = 0; i < fields.length; i++) {
-            if (!isEmptyString(patterns[i])) {
+            if (!com.openexchange.java.Strings.isEmpty(patterns[i])) {
                 final SearchTerm<?> term;
                 switch (fields[i]) {
                 case FROM:
@@ -118,17 +118,4 @@ public final class SearchUtility {
         }
         return retval;
     }
-
-    private static boolean isEmptyString(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

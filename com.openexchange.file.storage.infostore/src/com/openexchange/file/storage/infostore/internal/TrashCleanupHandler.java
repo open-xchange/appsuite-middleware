@@ -51,7 +51,7 @@ package com.openexchange.file.storage.infostore.internal;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.infostore.Services;
+import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;

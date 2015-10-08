@@ -53,11 +53,13 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.image.ImageUtility;
 import com.openexchange.image.Mp3ImageDataSource;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 
@@ -74,11 +76,12 @@ public class ImageActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagedFileManagement.class };
+        return new Class<?>[] { ManagedFileManagement.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        ImageUtility.setDispatcherPrefixService(getService(DispatcherPrefixService.class));
         {
             InlineImageDataSource inlineDataSource = InlineImageDataSource.getInstance();
             Dictionary<String, Object> inlineProps = new Hashtable<String, Object>(1);

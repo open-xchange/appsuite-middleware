@@ -131,7 +131,7 @@ public interface WebdavResource {
 
 	WebdavLock getOwnLock(String token) throws WebdavProtocolException;
 
-	Protocol.WEBDAV_METHOD[] getOptions() throws WebdavProtocolException;
+	WebdavMethod[] getOptions() throws WebdavProtocolException;
 
 	boolean isLockNull();
 

@@ -86,7 +86,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
      */
     public OSGIFileStorageServiceRegistry() {
         super();
-        map = new ConcurrentHashMap<String, FileStorageService>(8);
+        map = new ConcurrentHashMap<String, FileStorageService>(8, 0.9f, 1);
     }
 
     /**

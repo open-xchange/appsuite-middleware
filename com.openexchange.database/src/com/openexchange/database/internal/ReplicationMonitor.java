@@ -53,6 +53,7 @@ import static com.openexchange.database.internal.DBUtils.autocommit;
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,8 +74,10 @@ public class ReplicationMonitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitor.class);
 
-    private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
-    private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);
+    private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this, true);
+    private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this, true);
+    private final FetchAndSchema TIMEOUT_NOSCHEMA = new TimeoutFetchAndSchema(this, false);
+    private final FetchAndSchema NOTIMEOUT_NOSCHEMA = new NotimeoutFetchAndSchema(this, false);
 
     private final AtomicLong masterConnectionsFetched = new AtomicLong();
     private final AtomicLong slaveConnectionsFetched = new AtomicLong();
@@ -93,6 +96,16 @@ public class ReplicationMonitor {
 
     Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
         return checkFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
+    }
+
+    Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write, boolean noSchema) throws OXException {
+        FetchAndSchema fetchAndSchema;
+        if (noTimeout) {
+            fetchAndSchema = noSchema ? NOTIMEOUT_NOSCHEMA : NOTIMEOUT;
+        } else {
+            fetchAndSchema = noSchema ? TIMEOUT_NOSCHEMA : TIMEOUT;
+        }
+        return checkFallback(pools, assign, fetchAndSchema, write);
     }
 
     private Connection checkFallback(Pools pools, AssignmentImpl assign, FetchAndSchema fetch, boolean write) throws OXException {
@@ -158,7 +171,7 @@ public class ReplicationMonitor {
                     throw createException(assign, true, e2);
                 }
             }
-            if (!write && assign.isTransactionInitialized()) {
+            if (!write && assign.isTransactionInitialized() && false == assign.isToConfigDB()) {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
@@ -209,10 +222,12 @@ public class ReplicationMonitor {
 
     private static boolean isUpToDate(final long masterTransaction, final long slaveTransaction) {
         // TODO handle overflow
+        LOG.trace("Replication monitor transaction position is {} on master and {} on slave.", L(masterTransaction), L(slaveTransaction));
         return slaveTransaction >= masterTransaction;
     }
 
     public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, ConnectionState state) {
+        // Determine pool identifier
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
@@ -241,6 +256,8 @@ public class ReplicationMonitor {
         } else {
             poolId = assign.getReadPoolId();
         }
+
+        // Get associated pool
         final ConnectionPool pool;
         try {
             pool = pools.getPool(poolId);
@@ -248,6 +265,17 @@ public class ReplicationMonitor {
             LOG.error("", e);
             return;
         }
+
+        // Apply state
+        if (con instanceof StateAware) {
+            StateAware stateAware = (StateAware) con;
+            ConnectionState connectionState = stateAware.getConnectionState();
+            connectionState.setUpdateCommitted(state.isUpdateCommitted());
+            connectionState.setUsedAsRead(state.isUsedAsRead());
+            connectionState.setUsedForUpdate(state.isUsedForUpdate());
+        }
+
+        // Return connection
         if (noTimeout) {
             pool.backWithoutTimeout(con);
         } else {
@@ -262,10 +290,6 @@ public class ReplicationMonitor {
     }
 
     private static long readTransaction(final Connection con, final int ctxId) throws OXException {
-        // If ctxId is 0, the connection leads to configdb, which does not have a replication monitor.
-        if (ctxId == 0) {
-            return 0;
-        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         final long retval;

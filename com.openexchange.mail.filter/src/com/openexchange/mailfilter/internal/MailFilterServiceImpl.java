@@ -68,7 +68,6 @@ import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -114,7 +113,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     }
 
-    private static final ConcurrentMap<Key, Object> LOCKS = new ConcurrentHashMap<Key, Object>(256);
+    private static final ConcurrentMap<Key, Object> LOCKS = new ConcurrentHashMap<Key, Object>(256, 0.9f, 1);
 
     /**
      * Gets the lock instance for specified session.
@@ -291,6 +290,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 List<Rule> rules = clientrulesandrequire.getRules();
                 RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
+                if(deletedrule == null) {
+                    throw MailFilterExceptionCode.BAD_POSITION.create(uid);
+                }
                 rules.remove(deletedrule.position);
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeScript(sieveHandler, activeScript, writeback);

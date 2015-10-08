@@ -54,40 +54,34 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class NewSubscriptionAction extends AbstractSubscribeAction {
 
+    /**
+     * Initializes a new {@link NewSubscriptionAction}.
+     */
     public NewSubscriptionAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
-        Subscription subscription = getSubscription(
-            subscribeRequest.getRequestData(),
-            subscribeRequest.getServerSession(),
-            services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+        Subscription subscription = getSubscription(subscribeRequest.getRequestData(), subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         subscription.setId(-1);
-        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
-        subscribeService.subscribe(subscription);
-        String urlPrefix = "";
-        {
-            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
-            if (serverUrl != null) {
-                urlPrefix = serverUrl;
-            }
+
+        SubscriptionSource subscriptionSource = subscription.getSource();
+        if (null == subscriptionSource) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("source");
         }
-        // JSONObject jsonTemp = new SubscriptionJSONWriter().write(
-        // subscription,
-        // subscription.getSource().getFormDescription(),
-        // urlPrefix,
-        // subscribeRequest.getTimeZone());
+
+        subscriptionSource.getSubscribeService().subscribe(subscription);
+
         return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");
     }
-
 }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.cookie.Cookie;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.session.actions.RedirectRequest;
 import com.openexchange.ajax.session.actions.RedirectResponse;
 import com.openexchange.ajax.session.actions.StoreRequest;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -91,7 +93,7 @@ public class RedirectTest extends AbstractAJAXSession {
         login = AJAXConfig.getProperty(Property.LOGIN) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password = AJAXConfig.getProperty(Property.PASSWORD);
         Init.injectProperty();
-        ConfigurationService configService = new ConfigurationImpl();
+        ConfigurationService configService = new ConfigurationImpl(Collections.<ReinitializableConfigProviderService> emptyList());
         final String value = configService.getProperty(
             ConfigurationProperty.INSECURE.getPropertyName(),
             ConfigurationProperty.INSECURE.getDefaultValue());

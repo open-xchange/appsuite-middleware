@@ -195,6 +195,10 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                         }
                     }
                 }
+            } catch (InterruptedException e) {
+                LOG.debug("Interrupted while checking for delayed JSlobs.", e);
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 LOG.error("Checking for delayed JSlobs failed", e);
             }

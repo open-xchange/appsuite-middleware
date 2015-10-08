@@ -50,40 +50,64 @@
 package com.openexchange.carddav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
+/**
+ * {@link CarddavActivator}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
 public class CarddavActivator extends HousekeepingActivator {
 
     private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
+        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            CardDAV.setServiceLookup(this);
-            CarddavPerformer.setServices(this);
-
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
-
-            CarddavPerformer performer = CarddavPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
+            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("starting bundle: \"com.openexchange.carddav\"");
+            /*
+             * prepare CardDAV performer & initialize global OSGi property mixin
+             */
+            CarddavPerformer performer = new CarddavPerformer(this);
+            OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-
+            /*
+             * register CardDAV servlet & WebDAV path
+             */
+            CardDAV servlet = new CardDAV(this, performer);
+            getService(HttpService.class).registerServlet("/servlet/dav/carddav", servlet, null, null);
             registerService(PathRegistration.class, new PathRegistration("carddav"));
-
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CARDDAV.getCapabilityName());
+                }
+            });
+            /*
+             * track vCard storage service
+             */
+            trackService(VCardStorageFactory.class);
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
@@ -93,13 +117,23 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
+        org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("stopping bundle: \"com.openexchange.carddav\"");
+        /*
+         * close OSGi property mixin
+         */
+        OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();
             this.mixin = null;
         }
+        /*
+         * unregister servlet
+         */
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister("/servlet/dav/carddav");
+        }
         super.stopBundle();
     }
-
 
 }

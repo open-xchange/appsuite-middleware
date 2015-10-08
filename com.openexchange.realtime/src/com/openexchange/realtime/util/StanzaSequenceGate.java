@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.management.StanzaSequenceGateMBean;
@@ -92,10 +91,18 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
     private final String name;
+    private final String lockScope;
     private final StanzaSequenceGateManagement managementObject;
 
-    public StanzaSequenceGate(String name) {
+    /**
+     * Initializes a new {@link StanzaSequenceGate}.
+     *
+     * @param name The unique name for this gate
+     */
+    protected StanzaSequenceGate(String name) {
+        super();
         this.name = name;
+        this.lockScope = new StringBuilder("gate-").append(name).toString();
         this.managementObject = new StanzaSequenceGateManagement(name);
         initManagementObject(managementObject);
     }
@@ -178,15 +185,15 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             return false;
         }
 
+        stanza.getSequencePrincipal().lock(lockScope);
         try {
-            stanza.getSequencePrincipal().lock("gate");
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
             /* We haven't recorded a threshold (upper bound of last known sequence number) for this principal, yet so we'll add one */
             if (threshold == null) {
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
                 if(meantime != null) {
-                    LOG.debug("Found another number: {}in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
+                    LOG.debug("Found another number: {} in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
                     threshold = meantime;
                 }
             }
@@ -286,7 +293,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                 }
             }
         } finally {
-            stanza.getSequencePrincipal().unlock("gate");
+            stanza.getSequencePrincipal().unlock(lockScope);
         }
 
     }
@@ -298,7 +305,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
      * @throws RealtimeException
      */
     public void resetThreshold(ID constructedId, long newSequence) throws RealtimeException {
-        constructedId.lock("gate");
+        constructedId.lock(lockScope);
         try {
             List<StanzaWithCustomAction> list = inboxes.get(constructedId);
             if (list != null) {
@@ -307,7 +314,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
             sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
             notifyManagementSequenceNumbers();
         } finally {
-            constructedId.unlock("gate");
+            constructedId.unlock(lockScope);
         }
     }
 

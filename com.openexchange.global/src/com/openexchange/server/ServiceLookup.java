@@ -62,6 +62,7 @@ public interface ServiceLookup {
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @throws ShutDownRuntimeException If system is currently shutting down
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
 
@@ -70,6 +71,7 @@ public interface ServiceLookup {
      *
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
+     * @throws ShutDownRuntimeException If system is currently shutting down
      */
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz);
 

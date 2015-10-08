@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.json.actions.AbstractReminderAction;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -65,7 +66,12 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(name = "reminder", description = "Provides the ability to fetch all active reminders for a user between two dates.")
+@OAuthModule
 public class ReminderActionFactory implements AJAXActionServiceFactory {
+
+    public static final String OAUTH_READ_SCOPE = "read_reminders";
+
+    public static final String OAUTH_WRITE_SCOPE = "write_reminders";
 
     private final Map<String, AbstractReminderAction> actions;
 
@@ -76,7 +82,7 @@ public class ReminderActionFactory implements AJAXActionServiceFactory {
      */
     public ReminderActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractReminderAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractReminderAction>(4, 0.9f, 1);
         actions.put("delete", new com.openexchange.groupware.reminder.json.actions.DeleteAction(services));
         actions.put("updates", new com.openexchange.groupware.reminder.json.actions.UpdatesAction(services));
         actions.put("range", new com.openexchange.groupware.reminder.json.actions.RangeAction(services));

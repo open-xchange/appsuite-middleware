@@ -49,12 +49,16 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -77,18 +81,8 @@ public class Bug25160Test extends CalDAVTest {
     private CalendarTestManager manager2;
     private FolderObject subfolder;
 
-    /**
-     * Initializes a new {@link Bug25160Test}.
-     *
-     * @param name The name
-     */
-    public Bug25160Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
         FolderObject calendarFolder = manager2.getClient().execute(
@@ -114,8 +108,8 @@ public class Bug25160Test extends CalDAVTest {
         subfolder = folder;
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != this.manager2) {
             if (null != subfolder) {
                 manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
@@ -125,9 +119,9 @@ public class Bug25160Test extends CalDAVTest {
                 manager2.getClient().logout();
             }
         }
-        super.tearDown();
     }
 
+    @Test
     public void testOwner() throws Exception {
         /*
          * discover current user principal

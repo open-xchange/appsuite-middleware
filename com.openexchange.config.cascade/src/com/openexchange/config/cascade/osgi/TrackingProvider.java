@@ -56,12 +56,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.LoggerFactory;
+
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
@@ -81,7 +83,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
      * @param context The bundle context
      * @return The filter expression
      */
-    public static Filter createFilter(final String scope, final BundleContext context) {
+    public static Filter createFilter(String scope, BundleContext context) {
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
         } catch (final InvalidSyntaxException e) {
@@ -90,7 +92,10 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         return null;
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------
+
     private final AtomicReference<List<Element>> elementsRef;
+	private final String scope;
 
     /**
      * Initializes a new {@link TrackingProvider}.
@@ -98,11 +103,17 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     public TrackingProvider(final String scope, final BundleContext context) {
         super(context, createFilter(scope, context), null);
         elementsRef = new AtomicReference<List<Element>>(Collections.<Element> emptyList());
+        this.scope = scope;
     }
 
     @Override
-    public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
-        final ConfigProviderService service = context.getService(reference);
+    public String getScope() {
+    	return scope;
+    }
+
+    @Override
+    public ConfigProviderService addingService(ServiceReference<ConfigProviderService> reference) {
+        ConfigProviderService service = context.getService(reference);
         @SuppressWarnings("unchecked") final Comparable<Object> comparable = (Comparable<Object>) reference.getProperty("priority");
 
         List<Element> expected;
@@ -118,12 +129,12 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     }
 
     @Override
-    public void modifiedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+    public void modifiedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
         // Ignore
     }
 
     @Override
-    public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+    public void removedService(ServiceReference<ConfigProviderService> reference, ConfigProviderService service) {
         List<Element> expected;
         List<Element> list;
         do {
@@ -137,7 +148,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     }
 
     @Override
-    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
+    public BasicProperty get(String property, int contextId, int userId) throws OXException {
         BasicProperty first = null;
         for (final Element e : elementsRef.get()) {
             final BasicProperty prop = e.configProviderService.get(property, contextId, userId);
@@ -156,7 +167,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
         final Set<String> allNames = new HashSet<String>();
         for (final Element e : elementsRef.get()) {
             allNames.addAll(e.configProviderService.getAllPropertyNames(contextId, userId));
@@ -174,14 +185,14 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         final Comparable<Object> comparable;
         final ConfigProviderService configProviderService;
 
-        Element(final ConfigProviderService configProviderService, final Comparable<Object> comparable) {
+        Element(ConfigProviderService configProviderService, Comparable<Object> comparable) {
             super();
             this.configProviderService = configProviderService;
             this.comparable = comparable;
         }
 
         @Override
-        public int compareTo(final Element o) {
+        public int compareTo(Element o) {
             final Comparable<Object> p1 = this.comparable;
             final Comparable<Object> p2 = o.comparable;
             return null == p1 ? (null == p2 ? 0 : -1) : (null == p2 ? 1 : p1.compareTo(p2));
@@ -196,7 +207,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
@@ -219,7 +230,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
 
         private final String property;
 
-        EmptyBasicProperty(final String property) {
+        EmptyBasicProperty(String property) {
             super();
             this.property = property;
         }
@@ -230,7 +241,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         }
 
         @Override
-        public String get(final String metadataName) throws OXException {
+        public String get(String metadataName) throws OXException {
             return null;
         }
 
@@ -240,12 +251,12 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         }
 
         @Override
-        public void set(final String value) throws OXException {
+        public void set(String value) throws OXException {
             throw new UnsupportedOperationException("Can't save setting " + property + ". No ConfigProvider is specified for this value");
         }
 
         @Override
-        public void set(final String metadataName, final String value) throws OXException {
+        public void set(String metadataName, final String value) throws OXException {
             throw new UnsupportedOperationException(
                 "Can't save metadata " + metadataName + " on property " + property + ". No ConfigProvider is specified for this value");
         }
@@ -255,4 +266,5 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
             return Collections.emptyList();
         }
     }
+
 }

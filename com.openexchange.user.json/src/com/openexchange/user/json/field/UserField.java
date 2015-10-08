@@ -571,7 +571,13 @@ public enum UserField {
     /**
      * The login info
      */
-    LOGIN_INFO(615, "login_info");
+    LOGIN_INFO(615, "login_info"),
+    /**
+     * The ID of the user who created the guest
+     */
+    GUEST_CREATED_BY(616, "guest_created_by"),
+
+    ;
 
     private final int column;
 
@@ -600,7 +606,8 @@ public enum UserField {
         return name;
     }
 
-    private static final EnumSet<UserField> USER_ONLY_FIELDS = EnumSet.of(ALIASES, TIME_ZONE, LOCALE, GROUPS, CONTACT_ID, LOGIN_INFO);
+    private static final EnumSet<UserField> USER_ONLY_FIELDS = EnumSet.of(
+        ALIASES, TIME_ZONE, LOCALE, GROUPS, CONTACT_ID, LOGIN_INFO, GUEST_CREATED_BY);
 
     /**
      * Gets the user-only field corresponding to given field number.
@@ -621,7 +628,8 @@ public enum UserField {
         return null != getUserOnlyField(field);
     }
 
-    public static final EnumSet<UserField> UNPROTECTED_FIELDS = EnumSet.of(ID, DISPLAY_NAME, FIRST_NAME, LAST_NAME, SECOND_NAME, SUFFIX);
+    public static final EnumSet<UserField> UNPROTECTED_FIELDS = EnumSet.of(
+        ID, DISPLAY_NAME, FIRST_NAME, LAST_NAME, SECOND_NAME, SUFFIX, GUEST_CREATED_BY);
 
     public static boolean isProtected(final int field) {
         for (final UserField uf : UNPROTECTED_FIELDS) {
@@ -666,6 +674,6 @@ public enum UserField {
             // From DataObject
             ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
             // From user
-            ALIASES, TIME_ZONE, LOCALE, GROUPS, CONTACT_ID, LOGIN_INFO };
+            ALIASES, TIME_ZONE, LOCALE, GROUPS, CONTACT_ID, LOGIN_INFO, GUEST_CREATED_BY };
 
 }

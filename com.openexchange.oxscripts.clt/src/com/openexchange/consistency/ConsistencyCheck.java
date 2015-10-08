@@ -46,12 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.MBeanException;
@@ -64,60 +70,45 @@ import javax.management.remote.JMXServiceURL;
 
 /**
  * CommandLineClient to run the consistency tool.
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
  */
 public class ConsistencyCheck {
 
     /**
-     * Used to identify if list is desired (listUnassigned or listMissing)
+     * Defines the actions of the CLT
      */
-    private static final String ACTION_LIST = "list";
+    private enum Action {
+        list, unassigned, missing, listUnassigned, listMissing, repair, repairconfigdb, checkconfigdb;
+    }
 
     /**
-     * Used to identify listUnassigned
+     * Defines the sources that are going to be used
      */
-    private static final String ACTION_UNASSIGNED = "unassigned";
+    private enum Source {
+        database, context, filestore, all;
+    }
 
     /**
-     * Used to identify listMissing
+     * Defines the policy for a 'repair' {@link Action}
      */
-    private static final String ACTION_MISSING = "missing";
+    private enum Policy {
+        missing_entry_for_file, missing_file_for_attachment, missing_file_for_infoitem, missing_file_for_snippet, missing_file_for_vcard;
+    }
 
-    private static final String ACTION_LIST_UNASSIGNED = "listUnassigned";
-
-    private static final String ACTION_LIST_MISSING = "listMissing";
-
-    private static final String ACTION_REPAIR = "repair";
-
-    private static final String ACTION_REPAIRCONFIGDB = "repairconfigdb";
-
-    private static final String ACTION_CHECKCONFIGDB = "checkconfigdb";
-
-    private static final String SOURCE_ALL = "all";
-
-    private static final String SOURCE_DATABASE = "database";
-
-    private static final String SOURCE_CONTEXT = "context";
-
-    private static final String SOURCE_FILESTORE = "filestore";
-
-    private static final String POLICY_MISSING_ENTRY_FOR_FILE = "missing_entry_for_file";
-
-    private static final String POLICY_MISSING_FILE_FOR_ATTACHMENT = "missing_file_for_attachment";
-
-    private static final String POLICY_MISSING_FILE_FOR_INFOITEM = "missing_file_for_infoitem";
-
-    private static final String POLICY_ACTION_DELETE = "delete";
-
-    private static final String POLICY_ACTION_CREATE_DUMMY = "create_dummy";
-
-    private static final String POLICY_ACTION_CREATE_ADMIN_INFOITEM = "create_admin_infoitem";
+    /**
+     * Defines an action for the desired {@link Policy}
+     */
+    private enum PolicyAction {
+        delete, create_dummy, create_admin_infoitem;
+    }
 
     private static final String LOCALHOST = "localhost";
 
     /**
      * Main method used for checkconsistency clt
-     * 
+     *
      * @param args - arguments provided by clt
      */
     public static void main(final String[] args) {
@@ -125,11 +116,12 @@ public class ConsistencyCheck {
         final Configuration config = new Configuration();
 
         lexer.noise("in");
-        if(lexer.consume("host")) {
+
+        if (lexer.consume("host")) {
             final String hostname = lexer.getCurrent();
             final String[] hostAndPort = hostname.split(":");
             config.setHost(hostAndPort[0]);
-            if(hostAndPort.length > 1) {
+            if (hostAndPort.length > 1) {
                 config.setPort(Integer.parseInt(hostAndPort[1]));
             }
             lexer.advance();
@@ -137,91 +129,117 @@ public class ConsistencyCheck {
             config.setHost(LOCALHOST);
         }
 
-        if (lexer.consume(ACTION_REPAIR)) {
-            config.setAction(ACTION_REPAIR);
-        } else if (lexer.consume(ACTION_LIST)) {
-            if (lexer.consume(ACTION_MISSING)) {
-                config.setAction(ACTION_LIST_MISSING);
-            } else if (lexer.consume(ACTION_UNASSIGNED)) {
-                config.setAction(ACTION_LIST_UNASSIGNED);
+        int responseTimeoutMillis = 0;
+        if (lexer.consume("responsetimeout")) {
+            final String value = lexer.getCurrent();
+            responseTimeoutMillis = Integer.parseInt(value) * 1000;
+            lexer.advance();
+        }
+        config.setResponseTimeoutMillis(responseTimeoutMillis);
+
+        if (lexer.consume(Action.repair.name())) {
+            config.setAction(Action.repair.name());
+        } else if (lexer.consume(Action.list.name())) {
+            if (lexer.consume(Action.missing.name())) {
+                config.setAction(Action.listMissing.name());
+            } else if (lexer.consume(Action.unassigned.name())) {
+                config.setAction(Action.listUnassigned.name());
             } else {
-                System.exit( dontKnowWhatToList() );
+                System.exit(dontKnowWhatToList());
             }
-        } else if (lexer.consume(ACTION_CHECKCONFIGDB)) {
-            config.setAction(ACTION_CHECKCONFIGDB);
-        } else if (lexer.consume(ACTION_REPAIRCONFIGDB)) {
-            config.setAction(ACTION_REPAIRCONFIGDB);
+        } else if (lexer.consume(Action.checkconfigdb.name())) {
+            config.setAction(Action.checkconfigdb.name());
+        } else if (lexer.consume(Action.repairconfigdb.name())) {
+            config.setAction(Action.repairconfigdb.name());
         } else {
-            System.exit( noaction() );
+            System.exit(noaction());
         }
         lexer.noise("files");
         lexer.noise("errors");
         lexer.noise("in");
 
-        if (!config.getAction().equals(ACTION_CHECKCONFIGDB) && !config.getAction().equals(ACTION_REPAIRCONFIGDB)) {
-            if (lexer.consume(SOURCE_DATABASE)) {
-                config.setSource(SOURCE_DATABASE);
-                if (! parseId(lexer, config)) {
-                    System.exit( noid() );
+        if (!config.getAction().equals(Action.checkconfigdb.name()) && !config.getAction().equals(Action.repairconfigdb.name())) {
+            if (lexer.consume(Source.database.name())) {
+                config.setSource(Source.database.name());
+                if (!parseId(lexer, config)) {
+                    System.exit(noid());
                 }
-            } else if (lexer.consume(SOURCE_FILESTORE)) {
-                config.setSource(SOURCE_FILESTORE);
-                if (! parseId(lexer, config)) {
-                    System.exit( noid() );
+            } else if (lexer.consume(Source.filestore.name())) {
+                config.setSource(Source.filestore.name());
+                if (!parseId(lexer, config)) {
+                    System.exit(noid());
                 }
-            } else if (lexer.consume(SOURCE_CONTEXT)) {
-                config.setSource(SOURCE_CONTEXT);
-                if (! parseId(lexer, config)) {
-                    System.exit( noid() );
+            } else if (lexer.consume(Source.context.name())) {
+                config.setSource(Source.context.name());
+                if (!parseId(lexer, config)) {
+                    System.exit(noid());
                 }
-            } else if (lexer.consume(SOURCE_ALL)) {
-                config.setSource(SOURCE_ALL);
+            } else if (lexer.consume(Source.all.name())) {
+                config.setSource(Source.all.name());
             } else {
-                System.exit( noproblemsource() );
+                System.exit(noproblemsource());
             }
 
             lexer.noise("with");
             lexer.noise("policies");
 
-            while(!lexer.eol()) {
-                if (lexer.consume(POLICY_MISSING_FILE_FOR_INFOITEM)) {
+            while (!lexer.eol()) {
+                if (lexer.consume(Policy.missing_file_for_infoitem.name())) {
                     lexer.noise(":");
-                    if(lexer.consume(POLICY_ACTION_CREATE_DUMMY)){
-                        config.addPolicy(POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_ACTION_CREATE_DUMMY);
-                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
-                        config.addPolicy(POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_ACTION_DELETE);
+                    if (lexer.consume(PolicyAction.create_dummy.name())) {
+                        config.addPolicy(Policy.missing_file_for_infoitem.name(), PolicyAction.create_dummy.name());
+                    } else if (lexer.consume(PolicyAction.delete.name())) {
+                        config.addPolicy(Policy.missing_file_for_infoitem.name(), PolicyAction.delete.name());
                     } else {
-                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
+                        System.exit(unknownAction(Policy.missing_file_for_infoitem.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
                     }
-                } else if (lexer.consume(POLICY_MISSING_FILE_FOR_ATTACHMENT)) {
+                } else if (lexer.consume(Policy.missing_file_for_attachment.name())) {
                     lexer.noise(":");
-                    if(lexer.consume(POLICY_ACTION_CREATE_DUMMY)){
-                        config.addPolicy(POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_ACTION_CREATE_DUMMY);
-                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
-                        config.addPolicy(POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_ACTION_DELETE);
+                    if (lexer.consume(PolicyAction.create_dummy.name())) {
+                        config.addPolicy(Policy.missing_file_for_attachment.name(), PolicyAction.create_dummy.name());
+                    } else if (lexer.consume(PolicyAction.delete.name())) {
+                        config.addPolicy(Policy.missing_file_for_attachment.name(), PolicyAction.delete.name());
                     } else {
-                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
+                        System.exit(unknownAction(Policy.missing_file_for_attachment.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
                     }
-                } else if (lexer.consume(POLICY_MISSING_ENTRY_FOR_FILE)) {
+                } else if (lexer.consume(Policy.missing_file_for_snippet.name())) {
                     lexer.noise(":");
-                    if (lexer.consume(POLICY_ACTION_CREATE_ADMIN_INFOITEM)) {
-                        config.addPolicy(POLICY_MISSING_ENTRY_FOR_FILE, POLICY_ACTION_CREATE_ADMIN_INFOITEM);
-                    } else if(lexer.consume(POLICY_ACTION_DELETE)) {
-                        config.addPolicy(POLICY_MISSING_ENTRY_FOR_FILE, POLICY_ACTION_DELETE);
+                    if (lexer.consume(PolicyAction.create_dummy.name())) {
+                        config.addPolicy(Policy.missing_file_for_snippet.name(), PolicyAction.create_dummy.name());
+                    } else if (lexer.consume(PolicyAction.delete.name())) {
+                        config.addPolicy(Policy.missing_file_for_snippet.name(), PolicyAction.delete.name());
                     } else {
-                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_INFOITEM, lexer.getCurrent(), POLICY_ACTION_CREATE_ADMIN_INFOITEM, POLICY_ACTION_DELETE));
+                        System.exit(unknownAction(Policy.missing_file_for_snippet.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
+                    }
+                } else if (lexer.consume(Policy.missing_entry_for_file.name())) {
+                    lexer.noise(":");
+                    if (lexer.consume(PolicyAction.create_admin_infoitem.name())) {
+                        config.addPolicy(Policy.missing_entry_for_file.name(), PolicyAction.create_admin_infoitem.name());
+                    } else if (lexer.consume(PolicyAction.delete.name())) {
+                        config.addPolicy(Policy.missing_entry_for_file.name(), PolicyAction.delete.name());
+                    } else {
+                        System.exit(unknownAction(Policy.missing_entry_for_file.name(), lexer.getCurrent(), PolicyAction.create_admin_infoitem.name(), PolicyAction.delete.name()));
+                    }
+                } else if (lexer.consume(Policy.missing_file_for_vcard.name())) {
+                    //VCard only supports removing references from the db.<br>
+                    // Removing files should be done by using the generic file removal call Policy.missing_entry_for_file.name() + PolicyAction.delete.name()<br>
+                    // In addition you are able to create files for the context admin to review them with Policy.missing_entry_for_file.name() + PolicyAction.create_admin_infoitem.name()
+                    lexer.noise(":");
+                    if (lexer.consume(PolicyAction.delete.name())) {
+                        config.addPolicy(Policy.missing_file_for_vcard.name(), PolicyAction.delete.name());
+                    } else {
+                        System.exit(unknownAction(Policy.missing_file_for_vcard.name(), lexer.getCurrent(), PolicyAction.delete.name()));
                     }
                 } else {
-                    System.exit(unknownCondition(lexer.getCurrent(), POLICY_MISSING_FILE_FOR_INFOITEM, POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_MISSING_ENTRY_FOR_FILE));
+                    System.exit(unknownCondition(lexer.getCurrent(), Policy.missing_file_for_infoitem.name(), Policy.missing_file_for_attachment.name(), Policy.missing_entry_for_file.name()));
                 }
             }
         }
 
         try {
             config.run();
-            System.out.println("Done");
         } catch (final Exception x) {
-            x.printStackTrace();
+            System.err.println("ERROR\n" + x.getCause().getMessage());
             System.exit(1);
         }
     }
@@ -237,7 +255,7 @@ public class ConsistencyCheck {
     }
 
     private static int dontKnowWhatToList() {
-        System.err.println("Please tell me what to list. Either \"list missing\" or \"list unassigned\".");
+        System.err.println("Please tell me what to list. Either \"" + Action.list + Action.missing + "\" or \"" + Action.list + Action.unassigned + "\".");
         return 6;
     }
 
@@ -269,21 +287,21 @@ public class ConsistencyCheck {
     }
 
     private static int noproblemsource() {
-        System.err.println("Please specify what to search for problems (either \"context [id]\" or \"filestore [id]\" or \"database [id]\" or \"all\".");
+        System.err.println("Please specify what to search for problems (either \"" + Source.context + " [id]\" or \"" + Source.filestore + " [id]\" or \"" + Source.database + " [id]\" or \"" + Source.all + "\".");
         return 2;
     }
 
     private static int noaction() {
         final String ls = System.getProperty("line.separator");
-        System.err.println("Please specify an action, either"+ls+"\"list missing\", \"list unassigned\", \"repair\", \"checkconfigdb\" or \"repairconfigdb\"" + ls +
-            "You can also specify the hostname of the open-xchange server, optionally."+ls +
+        System.err.println("Please specify an action, either" + ls + "\"" + Action.list + Action.missing + "\", \"" + Action.list + Action.unassigned + "\", \"" + Action.repair + "\", \"" + Action.checkconfigdb + "\" or \"" + Action.repairconfigdb + "\"" + ls +
+            "You can also specify the hostname of the open-xchange server, optionally." + ls +
             "Example:" + ls +
             "checkconsistency in host 10.10.10.10 list missing [...]");
         return 1;
     }
 
-
     private static class SimpleLexer {
+
         private final String[] args;
         private int index;
 
@@ -293,7 +311,7 @@ public class ConsistencyCheck {
         }
 
         public String getCurrent() {
-            if(eol()) {
+            if (eol()) {
                 return "";
             }
             return args[index];
@@ -321,7 +339,7 @@ public class ConsistencyCheck {
 
         public Matcher consume(final Pattern p) {
             final Matcher m = p.matcher(getCurrent());
-            if(!m.find()) {
+            if (!m.find()) {
                 return null;
             }
             advance();
@@ -339,6 +357,16 @@ public class ConsistencyCheck {
 
     private static final class Configuration {
 
+        private String host;
+        private int port = 9999;
+        private String action;
+        private String source;
+        private int sourceId;
+        private final Map<String, String> policies = new HashMap<String, String>();
+        private ConsistencyMBean consistency;
+        private JMXConnector jmxConnector;
+        private int responseTimeoutMillis = 0;
+
         /**
          * Initializes a new {@link ConsistencyCheck.Configuration}.
          */
@@ -350,14 +378,9 @@ public class ConsistencyCheck {
             return action;
         }
 
-        private String host;
-        private int port = 9999 ;
-        private String action;
-        private String source;
-        private int sourceId;
-        private final Map<String, String> policies = new HashMap<String,String>();
-        private ConsistencyMBean consistency;
-        private JMXConnector jmxConnector;
+        public void setResponseTimeoutMillis(int responseTimeoutMillis) {
+            this.responseTimeoutMillis = responseTimeoutMillis;
+        }
 
         public void setHost(final String host) {
             this.host = host;
@@ -380,64 +403,78 @@ public class ConsistencyCheck {
         }
 
         public void addPolicy(final String condition, final String action) {
-            if(policies.containsKey(condition)) {
-                throw new IllegalArgumentException("Condition "+condition+" already has an action assigned to it.");
+            if (policies.containsKey(condition)) {
+                throw new IllegalArgumentException("Condition " + condition + " already has an action assigned to it.");
             }
             policies.put(condition, action);
         }
 
         public void run() throws Exception {
-            if (ACTION_LIST_MISSING.equals(action)) {
+            if (Action.listMissing.name().equals(action)) {
                 listMissing();
-            } else if (ACTION_LIST_UNASSIGNED.equals(action)) {
+            } else if (Action.listUnassigned.name().equals(action)) {
                 listUnassigned();
-            } else if (ACTION_CHECKCONFIGDB.equals(action)) {
+            } else if (Action.checkconfigdb.name().equals(action)) {
                 checkAndRepairConfigDB(false);
-            } else if (ACTION_REPAIRCONFIGDB.equals(action)) {
+            } else if (Action.repairconfigdb.name().equals(action)) {
                 checkAndRepairConfigDB(true);
             } else {
                 repair();
             }
         }
 
-        private void listMissing() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
-
-            Map<Integer, List<String>> result = null;
+        private void listMissing() throws MBeanException {
+            Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
-                if (SOURCE_DATABASE.equals(source)) {
+
+                System.out.print("Fetching a list for ");
+                if (Source.database.name().equals(source)) {
+                    System.out.print("all mising files in database with the identifier '" + sourceId + "'...");
                     result = consistency.listMissingFilesInDatabase(sourceId);
-                } else if (SOURCE_FILESTORE.equals(source)) {
+                } else if (Source.filestore.name().equals(source)) {
+                    System.out.print("all mising files in filestore with the identifier '" + sourceId + "'...");
                     result = consistency.listMissingFilesInFilestore(sourceId);
-                } else if (SOURCE_CONTEXT.equals(source)) {
-                    result = new HashMap<Integer, List<String>>();
-                    result.put(Integer.valueOf(sourceId), consistency.listMissingFilesInContext(sourceId));
-                } else if (SOURCE_ALL.equals(source)) {
+                } else if (Source.context.name().equals(source)) {
+                    System.out.print("all mising files in context with the identifier '" + sourceId + "'...");
+                    result = new HashMap<MBeanEntity, List<String>>();
+                    result.put(new MBeanEntity(Integer.valueOf(sourceId)), consistency.listMissingFilesInContext(sourceId));
+                } else if (Source.all.name().equals(source)) {
+                    System.out.print("all mising files...");
                     result = consistency.listAllMissingFiles();
                 }
+                System.out.println(" OK.");
+
+                print(result);
             } finally {
                 disconnect();
             }
-
-            print(result);
         }
 
-        private void repair() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
-            if(policies.isEmpty()) {
-                System.out.println("Please specify a policy (either \"missing_entry_for_file\" or \"missing_file_for_attachment\" or \"missing_file_for_infoitem\").");
+        private void repair() throws MBeanException {
+            if (policies.isEmpty()) {
+                System.out.println("Please specify a policy (either \"" + Policy.missing_entry_for_file.name() + "\" or \"" + Policy.missing_file_for_attachment.name() + "\" or \"" + Policy.missing_file_for_infoitem.name() + "\" or \"" + Policy.missing_file_for_vcard.name() + "\").");
                 return;
             }
             try {
                 connect();
-                if (SOURCE_DATABASE.equals(source)) {
-                    consistency.repairFilesInDatabase(sourceId, getPolicyString());
-                } else if (SOURCE_FILESTORE.equals(source)) {
-                    consistency.repairFilesInFilestore(sourceId, getPolicyString());
-                } else if (SOURCE_CONTEXT.equals(source)) {
-                    consistency.repairFilesInContext(sourceId, getPolicyString());
-                } else if (SOURCE_ALL.equals(source)) {
-                    consistency.repairAllFiles(getPolicyString());
+
+                System.out.print("Repairing ");
+                String policyString = getPolicyString();
+                if (Source.database.name().equals(source)) {
+                    System.out.print("all files with policy '" + policyString + "' in the database with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInDatabase(sourceId, policyString);
+                } else if (Source.filestore.name().equals(source)) {
+                    System.out.print("all files with policy '" + policyString + "' in the filestore with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInFilestore(sourceId, policyString);
+                } else if (Source.context.name().equals(source)) {
+                    System.out.print("all files with policy '" + policyString + "' in the context with the identifier '" + sourceId + "'... ");
+                    consistency.repairFilesInContext(sourceId, policyString);
+                } else if (Source.all.name().equals(source)) {
+                    System.out.print("all files with policy '" + policyString + "'... ");
+                    consistency.repairAllFiles(policyString);
                 }
+                System.out.println(" OK.");
             } finally {
                 disconnect();
             }
@@ -445,10 +482,10 @@ public class ConsistencyCheck {
 
         private String getPolicyString() {
             final StringBuilder sb = new StringBuilder();
-            for(final String condition : policies.keySet()) {
+            for (final String condition : policies.keySet()) {
                 sb.append(condition).append(':').append(policies.get(condition)).append(',');
             }
-            sb.setLength(sb.length()-1);
+            sb.setLength(sb.length() - 1);
             return sb.toString();
         }
 
@@ -457,22 +494,41 @@ public class ConsistencyCheck {
                 try {
                     jmxConnector.close();
                 } catch (final Exception e) {
-                    // Ignore
+                    System.err.println(" Error while closing connection: '" + e.getMessage() + '.');
                 }
             }
         }
 
-        private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
-                + host + ":" + port + "/server");
+        private void connect() {
+            if (responseTimeoutMillis > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 * 
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeoutMillis));
+            }
+            MBeanServerConnection mbsc = null;
+            ObjectName name = null;
+            try {
+                JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
+                System.out.print("Connecting to '" + url + "'... ");
+                jmxConnector = JMXConnectorFactory.connect(url, null);
 
-            jmxConnector = JMXConnectorFactory.connect(url, null);
-
-            final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
-            final ObjectName name = MBeanNamer.getName();
+                mbsc = jmxConnector.getMBeanServerConnection();
+                name = MBeanNamer.getName();
+            } catch (Exception e) {
+                System.err.println("ERROR\n" + e.getMessage());
+                System.exit(1);
+            }
 
             consistency = new MBeanConsistency(mbsc, name);
+            System.out.println("OK.");
         }
 
         private void checkAndRepairConfigDB(final boolean repair) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
@@ -485,11 +541,11 @@ public class ConsistencyCheck {
                 disconnect();
             }
 
-            if( null != result && result.size() > 0) {
-                for(final String ctx : result) {
+            if (null != result && result.size() > 0) {
+                for (final String ctx : result) {
                     System.out.println(ctx);
                 }
-                if( ! repair ) {
+                if (!repair) {
                     System.out.println("Now run repairconfigdb to remove these inconsistent contexts from configdb");
                 }
             }
@@ -497,17 +553,17 @@ public class ConsistencyCheck {
 
         private void listUnassigned() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
 
-            Map<Integer, List<String>> result = null;
+            Map<MBeanEntity, List<String>> result = null;
             try {
                 connect();
-                if (SOURCE_DATABASE.equals(source)) {
+                if (Source.database.name().equals(source)) {
                     result = consistency.listUnassignedFilesInDatabase(sourceId);
-                } else if (SOURCE_FILESTORE.equals(source)) {
+                } else if (Source.filestore.name().equals(source)) {
                     result = consistency.listUnassignedFilesInFilestore(sourceId);
-                } else if (SOURCE_CONTEXT.equals(source)) {
-                    result = new HashMap<Integer, List<String>>();
-                    result.put(Integer.valueOf(sourceId), consistency.listUnassignedFilesInContext(sourceId));
-                } else if (SOURCE_ALL.equals(source)) {
+                } else if (Source.context.name().equals(source)) {
+                    result = new HashMap<MBeanEntity, List<String>>();
+                    result.put(new MBeanEntity(sourceId), consistency.listUnassignedFilesInContext(sourceId));
+                } else if (Source.all.name().equals(source)) {
                     result = consistency.listAllUnassignedFiles();
                 }
             } finally {
@@ -517,19 +573,102 @@ public class ConsistencyCheck {
             print(result);
         }
 
-        private void print(final Map<Integer, List<String>> result) {
+        private void print(final Map<MBeanEntity, List<String>> result) {
             if (null == result) {
+                System.out.println("No problems found.");
                 return;
             }
-            for(final Map.Entry<Integer, List<String>> entry : result.entrySet()) {
-                final int ctxId = entry.getKey().intValue();
-                final List<String> brokenFiles = entry.getValue();
-                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
-                for (final String brokenFile : brokenFiles) {
-                    System.out.println("\t"+brokenFile);
+
+            String formatter;
+            StringBuilder dashBuilder;
+            {
+                // Find the widest string of the keys
+                int widestEntityString;
+                List<String> entities = compileListOfEntities(result.keySet());
+                widestEntityString = fetchWidestString(entities);
+
+                // Find the widest string of the values
+                int widestHashString;
+                List<String> flattenedList = flattenList(result.values());
+                widestHashString = fetchWidestString(flattenedList);
+
+                // Compare both and get the widest
+                int widestString = (widestEntityString > widestHashString) ? widestEntityString : widestHashString;
+
+                formatter = "| %-" + widestString + "s   |%n";
+
+                dashBuilder = new StringBuilder();
+                for (int i = 0; i < widestString; i++) {
+                    dashBuilder.append("-");
                 }
-                System.out.println("I found " + brokenFiles.size() + " problem(s) in context " + ctxId);
+                dashBuilder.append("--+");
             }
+
+            for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
+                final List<String> brokenFiles = entry.getValue();
+                MBeanEntity entity = entry.getKey();
+
+                System.out.format("+--" + dashBuilder.toString() + "%n");
+                System.out.format(formatter, entity.toString());
+                System.out.format("+--" + dashBuilder.toString() + "%n");
+
+                for (final String brokenFile : brokenFiles) {
+                    System.out.format(formatter, brokenFile);
+                }
+
+                if (!brokenFiles.isEmpty()) {
+                    System.out.format("+--" + dashBuilder.toString() + "%n");
+                }
+                System.out.format(formatter, brokenFiles.size() + " problem(s) found");
+                System.out.format("+--" + dashBuilder.toString() + "%n%n");
+            }
+        }
+
+        /**
+         * @param keySet
+         * @return
+         */
+        private List<String> compileListOfEntities(Set<MBeanEntity> keySet) {
+            List<String> entities = new ArrayList<String>(keySet.size());
+            for (MBeanEntity entity : keySet) {
+                entities.add(entity.toString());
+            }
+            return entities;
+        }
+
+        /**
+         * Flattens the specified list
+         * 
+         * @param values A Collection with List of strings
+         * @return the flattened collection
+         */
+        private List<String> flattenList(Collection<List<String>> values) {
+            Iterator<List<String>> iterator = values.iterator();
+            List<String> flattenedList = new ArrayList<String>();
+            while (iterator.hasNext()) {
+                flattenedList.addAll(iterator.next());
+            }
+            return flattenedList;
+        }
+
+        /**
+         * Sort the results and fetch the length of the widest string
+         * 
+         * @param results The strings to sort
+         * @return The length of the widest string
+         */
+        private int fetchWidestString(List<String> results) {
+            int widestURL = 5;
+            Object[] a = results.toArray();
+            ListIterator<String> i = results.listIterator();
+            for (int j = 0; j < a.length; j++) {
+                String p = i.next();
+                if (widestURL < p.length()) {
+                    widestURL = p.length();
+                }
+                i.set((String) a[j]);
+            }
+            return widestURL;
         }
     }
 }

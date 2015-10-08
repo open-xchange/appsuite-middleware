@@ -50,11 +50,16 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.databaseold.Database;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.PerformParameters;
@@ -66,6 +71,8 @@ import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.UpdaterEventConstants;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link UpdateExecutor}
@@ -157,6 +164,7 @@ public final class UpdateExecutor {
                 scheduled.addAll(blocking ? separatedTasks.getBlocking() : separatedTasks.getBackground());
             }
             final int poolId = Database.resolvePool(contextId, true);
+
             // Perform updates
             for (final UpdateTask task : scheduled) {
                 final String taskName = task.getClass().getSimpleName();
@@ -184,6 +192,19 @@ public final class UpdateExecutor {
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }
+
+            // Post event for finished update(s)
+            {
+                EventAdmin service = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+                if (null != service) {
+                    Map<String, Object> eventProperties = new HashMap<String, Object>(6);
+                    eventProperties.put(UpdaterEventConstants.PROPERTY_SCHEMA, state.getSchema());
+                    eventProperties.put(UpdaterEventConstants.PROPERTY_POOL_ID, Integer.valueOf(poolId));
+                    eventProperties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
+                    service.postEvent(new Event(UpdaterEventConstants.TOPIC, eventProperties));
+                }
+            }
+
             LOG.info("Finished {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         } catch (final OXException e) {
             throw e;
@@ -217,10 +238,6 @@ public final class UpdateExecutor {
 
     private final void removeContexts() throws OXException {
         final int[] contextIds = Database.getContextsInSameSchema(contextId);
-        for (int i : contextIds) {
-            ContextStorage.getInstance().invalidateContext(i);
-
-        }
-//        ContextStorage.getInstance().invalidateContexts(contextIds);
+        ContextStorage.getInstance().invalidateContexts(contextIds);
     }
 }

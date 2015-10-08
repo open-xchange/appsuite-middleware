@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -64,7 +65,10 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(name = "config", description = "The config module is used to retrieve and set user-specific configuration.")
+@OAuthModule
 public class ConfigActionFactory implements AJAXActionServiceFactory {
+
+    public static final String OAUTH_WRITE_SCOPE = "write_userconfig";
 
     private final Map<String, AJAXActionService> actions;
 
@@ -75,7 +79,7 @@ public class ConfigActionFactory implements AJAXActionServiceFactory {
      */
     public ConfigActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
         actions.put("GET", new com.openexchange.config.json.actions.GETAction(services));
         actions.put("PUT", new com.openexchange.config.json.actions.PUTAction(services));
         actions.put("get_property", new com.openexchange.config.json.actions.GetPropertyAction(services));

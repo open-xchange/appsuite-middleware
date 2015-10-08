@@ -94,7 +94,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorage.class);
 
     private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
-        ContactField.OBJECT_ID, ContactField.DISPLAY_NAME,ContactField.SUR_NAME, ContactField.GIVEN_NAME
+        ContactField.OBJECT_ID, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };
     private static final Date FALLBACK_DATE = new Date(1000);
 
@@ -110,11 +110,11 @@ public class LdapContactStorage extends DefaultContactStorage {
      * @throws OXException
      */
     public LdapContactStorage(LdapConfig config) throws OXException {
-    	super();
-    	this.config = config;
-    	this.factory = new LdapFactory(config);
+        super();
+        this.config = config;
+        this.factory = new LdapFactory(config);
         this.mapper = new LdapMapper(config.getContactMappingFile(), LdapConfig.CONFIG_PREFIX);
-    	LOG.debug("LdapContactStorage initialized.");
+        LOG.debug("LdapContactStorage initialized.");
     }
 
     public int getFolderID() throws OXException {
@@ -576,4 +576,8 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
     }
 
+    @Override
+    public boolean supports(ContactField... fields) {
+        return false;
+    }
 }

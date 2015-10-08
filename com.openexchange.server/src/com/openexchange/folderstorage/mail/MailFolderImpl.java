@@ -203,6 +203,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider, final MailAccess<?, ?> mailAccess) throws OXException {
         super();
         this.accountId = accountId;
+        super.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
         userId = user.getId();
         contextId = context.getContextId();
         fullName = mailFolder.getFullname();
@@ -387,7 +388,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             permissionBits |= BIT_USER_FLAG;
         }
         final int canRename = mp.canRename();
-        if (canRename > 0 && !STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
+        if ((canRename > 0 || (mp.isFolderAdmin() && canRename < 0)) && !STANDARD_FOLDER_TYPES.contains(this.mailFolderType)) {
             // Rename only allowed to non-standard folders
             permissionBits |= BIT_RENAME_FLAG;
         }

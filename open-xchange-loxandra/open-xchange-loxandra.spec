@@ -2,14 +2,22 @@
 Name:          open-xchange-loxandra
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
+%endif
 BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
-License:       GPL-2.0 
+License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2

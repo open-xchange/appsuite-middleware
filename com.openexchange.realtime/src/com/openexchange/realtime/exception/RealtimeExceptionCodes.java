@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.exception;
 
-import static com.openexchange.realtime.exception.RealtimeExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -123,7 +122,7 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
     STANZA_POLICY_VIOLATION("", CATEGORY_SERVICE_DOWN, 13, null),
 
     /** The recipient you tried to reach is currently unavailable: %1$s */
-    STANZA_RECIPIENT_UNAVAILABLE(STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_TRY_AGAIN, 14, STANZA_RECIPIENT_UNAVAILABLE_MSG),
+    STANZA_RECIPIENT_UNAVAILABLE("The recipient you tried to reach is currently unavailable: %1$s", CATEGORY_TRY_AGAIN, 14, null),
 
     STANZA_REDIRECT("", CATEGORY_SERVICE_DOWN, 15, null),
 
@@ -164,7 +163,7 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
         STANZA_INTERNAL_SERVER_ERROR),
 
     /** Your session is invalid */
-    SESSION_INVALID("Your session is invalid.", CATEGORY_ERROR, 1005, RealtimeExceptionMessages.SESSION_INVALID_MSG,
+    SESSION_INVALID("Your session is invalid.", CATEGORY_ERROR, 1005, null,
         STANZA_NOT_ACCEPTABLE, STANZA_NOT_ACCEPTABLE),
 
     /** Invalid sequence detected.*/
@@ -176,8 +175,39 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
 
     /** You are no member of the GroupDispatcher: %1$s. Please join first. */
     NOT_A_MEMBER("You are no member of the GroupDispatcher: %1$s. Please join first.", CATEGORY_ERROR, 1008,
-        RealtimeExceptionMessages.NOT_A_MEMBER_MSG, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
-    ;
+        null, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+
+    /** The request didn't yield any response. */
+    RESULT_MISSING("The request didn't yield any response.", CATEGORY_ERROR, 1009, null,
+        null, null),
+
+    /** The GroupDispatcher was already disposed. */
+    GROUP_DISPOSED("The GroupDispatcher %1$s was already disposed.", CATEGORY_ERROR, 1010, null,
+        null, null),
+
+    /** The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s. */
+    STANZA_PROCESSING_FAILED("The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.", CATEGORY_ERROR, 1011, null,
+        null, null),
+
+   /** Joining the GroupDispatcher %1$s failed. */
+   JOIN_FAILED("Joining the GroupDispatcher %1$s failed.", CATEGORY_ERROR, 1012, null,
+            null, null),
+
+   /** The GroupDispatcher failed to process the Stanza */
+   LEAVE_FAILED("Leaving the GroupDispatcher %1$s failed.", CATEGORY_ERROR, 1013, null,
+            null, null),
+
+   /** ResponseChannel timed out while simulating synchronous behaviour. */
+   RESPONSE_AWAIT_TIMEOUT("ResponseChannel timed out while simulating synchronous behaviour.", CATEGORY_ERROR, 1014, null,
+       null, null),
+
+    /** You are already a member of the GroupDispatcher %1$s. */
+    ALREADY_MEMBER("You are already a member of the GroupDispatcher %1$s", CATEGORY_ERROR, 1015, null, null, null),
+
+    /** GroupDispatcher denies to create another component handle for the given ID %1$s */
+    COMPONENT_HANDLE_CREATION_DENIED("GroupDispatcher denies to create another component handle for the given ID %1$s", CATEGORY_ERROR, 1016, null, null, null),
+
+     ;
 
     private int number;
 

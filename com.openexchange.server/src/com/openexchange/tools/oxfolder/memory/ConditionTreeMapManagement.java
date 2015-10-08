@@ -185,19 +185,34 @@ public final class ConditionTreeMapManagement {
      * @return The tree map or <code>null</code>
      * @throws OXException If returning tree map fails
      */
-    public ConditionTreeMap optMapFor(int contextId) throws OXException {
+    public ConditionTreeMap optMapFor(final int contextId) throws OXException {
+        return optMapFor(contextId, true);
+    }
+
+    /**
+     * Gets the tree map for given context identifier if already initialized.
+     *
+     * @param contextId The context identifier
+     * @param triggerLoad Whether to trigger asynchronous loading of the condition tree map if none is available yet
+     * @return The tree map or <code>null</code>
+     * @throws OXException If returning tree map fails
+     */
+    public ConditionTreeMap optMapFor(final int contextId, final boolean triggerLoad) throws OXException {
         if (!enabled) {
             return null;
         }
-        Future<ConditionTreeMap> f = context2maps.get(Integer.valueOf(contextId));
-        if (null == f) {
+        final Future<ConditionTreeMap> f = context2maps.get(Integer.valueOf(contextId));
+        if (null != f) {
+            return timedFrom(f, 1000);
+        }
+
+        if (triggerLoad) {
             /*
              * Submit a task for tree map initialization
              */
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadTreeMapRunnable(contextId, LOG)));
-            return null;
         }
-        return timedFrom(f, 1000);
+        return null;
     }
 
     protected ConditionTreeMap getFrom(Future<ConditionTreeMap> f) throws OXException {

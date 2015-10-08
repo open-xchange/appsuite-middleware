@@ -3,13 +3,20 @@
 Name:          open-xchange-core
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
+%endif
 BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -174,7 +181,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -Dant.java.version.override=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 mkdir -p %{buildroot}/var/log/open-xchange
 mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
@@ -184,7 +191,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %pre
@@ -220,6 +227,9 @@ COCONFFILES="excludedupdatetasks.properties foldercache.properties transport.pro
 for FILE in ${COCONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/common /opt/open-xchange/etc $FILE
 done
+
+# Fix for bug 25999
+ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-1297
 rm -f /opt/open-xchange/etc/sessioncache.ccf
@@ -365,21 +375,6 @@ fi
 pfile=/opt/open-xchange/etc/foldercache.properties
 if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
     ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
-fi
-
-# SoftwareChange_Request-1335
-pfile=/opt/open-xchange/etc/paths.perfMap
-if ! grep "modules/mail/defaultaddress" $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   cp $pfile $ptmp
-   cat<<EOF >> $ptmp
-modules/mail/defaultaddress > io.ox/mail//defaultaddress
-modules/mail/sendaddress > io.ox/mail//sendaddress
-EOF
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
 fi
 
 # SoftwareChange_Request-1330
@@ -844,21 +839,30 @@ if [ \( -e /opt/open-xchange/etc/file-logging.properties \) -a \( ! \( -e /opt/o
     </appender>
 </configuration>
 EOF
-    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-    rm -f /opt/open-xchange/etc/logback.xml.new
+    if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+        cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new
+    fi
+
     MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         TMPFILE=$(mktemp)
+
         /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+            rm -f /opt/open-xchange/etc/logback.xml.new
+        fi
+
+        rm -f $TMPFILE
     fi
 fi
-rm -f /opt/open-xchange/etc/file-logging.properties
+[ -e /opt/open-xchange/etc/file-logging.properties ] && rm -f /opt/open-xchange/etc/file-logging.properties
+
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
 <configuration>
@@ -867,20 +871,29 @@ if [ -e /opt/open-xchange/etc/log4j.xml ]; then
     </appender>
 </configuration>
 EOF
-    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+        cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new
+    fi
+
     MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         TMPFILE=$(mktemp)
+
         /opt/open-xchange/sbin/extractLog4JModifications -i /opt/open-xchange/etc/log4j.xml | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
         /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+            rm -f /opt/open-xchange/etc/logback.xml.new
+        fi
+
+        rm -f $TMPFILE
     fi
+    rm -f /opt/open-xchange/etc/log4j.xml
 fi
-rm -f /opt/open-xchange/etc/log4j.xml
 
 # SoftwareChange_Request-1773
 ox_add_property com.openexchange.hazelcast.network.symmetricEncryption false /opt/open-xchange/etc/hazelcast.properties
@@ -957,8 +970,10 @@ cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.
     <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator"/>
 </configuration>
 EOF
-cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
-rm -f /opt/open-xchange/etc/logback.xml.new
+if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
+    cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
+fi
 
 # SoftwareChange_Request-1990
 ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
@@ -1041,10 +1056,6 @@ ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xc
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
-VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.login $PFILE)
-if [ "open-xchange" = "$VALUE" ]; then
-    ox_set_property com.openexchange.rest.services.basic-auth.login "" $PFILE
-fi
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
 if [ "secret" = "$VALUE" ]; then
     ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
@@ -1161,20 +1172,25 @@ if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
     ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
 fi
 
-# SoftwareChange_Request-2444
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
-
-# v7.6.2 update tasks start here
-
-# Deletes remnants for removed Facebook subscription
-!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
-EOF
-fi
-
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
+# SoftwareChange_Request-2464
+ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
+
+# SoftwareChange_Request-2470
+ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
+
+# SoftwareChange_Request-2530
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+
+# SoftwareChange_Request-2541
+VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
+if [ "5000" = "$VALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
+fi
 
 # SoftwareChange_Request-2546
 VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
@@ -1192,17 +1208,34 @@ if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2568
+ox_add_property com.openexchange.contact.storeVCards true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/etc/contact.properties
+
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
+
+# SoftwareChange_Request-2652
+ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
+
+# SoftwareChange_Request-2662
+ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
 
 # SoftwareChange_Request-2665
 ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
+# SoftwareChange_Request-2672
+ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
+
 #SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
-PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
-for FILE in $PROTECT
+PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
+for FILE in "${PROTECT[@]}"
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
 done
@@ -1238,19 +1271,32 @@ exit 0
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
-%doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
+* Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
 * Wed Sep 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-12 (2671)
+* Thu Aug 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-08-17 (2666)
+* Wed Aug 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
 * Tue Aug 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1269,6 +1315,10 @@ Build for patch 2015-06-29 (2578)
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1377,6 +1427,8 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
+* Wed Nov 05 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release
 * Tue Nov 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Marcus Klein <marcus.klein@open-xchange.com>

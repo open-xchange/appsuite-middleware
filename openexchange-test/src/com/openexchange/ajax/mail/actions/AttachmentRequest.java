@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -85,7 +86,7 @@ public final class AttachmentRequest extends AbstractMailRequest<AttachmentRespo
 		}
 
 		@Override
-		public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+		public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
 		    assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
 		    Header contentType = resp.getFirstHeader("Content-Type");
 		    if (Strings.asciiLowerCase(contentType.getValue()).startsWith("text/")) {

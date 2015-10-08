@@ -64,8 +64,6 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator(),
         new com.openexchange.json.cache.impl.osgi.JsonCacheActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
         new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
         new com.openexchange.groupware.filestore.osgi.FilestoreActivator(),
         new com.openexchange.context.osgi.ContextActivator(),
@@ -96,13 +94,16 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
         new com.openexchange.contact.osgi.ContactServiceActivator(),
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
+        new com.openexchange.ajax.noop.osgi.NoopActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator(),
         new FolderUpdaterRegistryDependencyActivator(),
         new com.openexchange.image.osgi.ImageActivator(),
         new com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.ResourceCacheActivator(),
         new com.openexchange.report.osgi.ReportActivator(),
         new com.openexchange.groupware.update.tasks.quota.QuotaGWActivator(),
-        new PingActivator(),
+        new com.openexchange.server.osgi.PingActivator(),
+        new com.openexchange.passwordchange.osgi.PasswordChangeActivator(),
+        new com.openexchange.ajax.anonymizer.osgi.AnonymizerActivator(),
         new com.openexchange.server.osgi.inspector.SessionInspectorChainActivator()
     };
 

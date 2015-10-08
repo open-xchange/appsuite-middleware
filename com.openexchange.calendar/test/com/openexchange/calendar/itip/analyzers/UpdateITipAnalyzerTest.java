@@ -1011,7 +1011,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         ITipAnalysis analysis =  new UpdateITipAnalyzer(utility, null).analyze(msg, null, null, session);
 
         List<ITipChange> changes = analysis.getChanges();
-        assertEquals(0, changes.size());
+        assertEquals(1, changes.size());
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());

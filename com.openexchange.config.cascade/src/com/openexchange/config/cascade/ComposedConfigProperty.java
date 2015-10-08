@@ -68,5 +68,7 @@ public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
 
     @Override
     public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws OXException;
+    
+    public String getScope() throws OXException;
 
 }

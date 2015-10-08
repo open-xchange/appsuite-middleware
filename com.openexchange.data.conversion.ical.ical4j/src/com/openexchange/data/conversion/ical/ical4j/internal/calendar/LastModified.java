@@ -72,7 +72,7 @@ public class LastModified <T extends CalendarComponent, U extends CalendarObject
 
     @Override
     public boolean isSet(final U calendar) {
-        return calendar.containsLastModified();
+        return calendar.containsLastModified() && calendar.getLastModified() != null;
     }
 
     @Override

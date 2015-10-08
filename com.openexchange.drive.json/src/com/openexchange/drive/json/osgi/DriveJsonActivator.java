@@ -54,6 +54,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -62,6 +64,10 @@ import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.notification.ShareNotificationService;
 
 /**
  * {@link DriveJsonActivator}
@@ -82,7 +88,8 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class,
-            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class
+            ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
+            ShareNotificationService.class, DatabaseService.class, ShareService.class
         };
     }
 
@@ -120,6 +127,8 @@ public class DriveJsonActivator extends AJAXModuleActivator {
                 }
             }
         });
+        trackService(DispatcherPrefixService.class);
+        trackService(HostnameService.class);
         openTrackers();
         /*
          * register blocking long polling listener factory if allowed by configuration

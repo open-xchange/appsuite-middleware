@@ -77,13 +77,10 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
 		final ServerSession session = subscribeRequest.getServerSession();
         Subscription subscription = getSubscription(subscribeRequest.getRequestData(), session, services.getService(SecretService.class).getSecret(session));
+
 		final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.update(subscription);
-        String urlPrefix = "";
-		if (subscribeRequest.getRequestData().getParameter("__serverURL") != null){
-			urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
-		}
-		return new AJAXRequestResult(Integer.valueOf(1), "json");
-	}
 
+        return new AJAXRequestResult(Integer.valueOf(1), "json");
+	}
 }

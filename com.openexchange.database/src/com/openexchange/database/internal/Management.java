@@ -64,16 +64,17 @@ import com.openexchange.management.ManagementService;
  */
 public final class Management {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Management.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Management.class);
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
+    private final Timer timer;
 
     private ManagementService managementService;
-
     private Overview overview;
 
-    Management() {
+    Management(Timer timer) {
         super();
+        this.timer = timer;
     }
 
     public void removeManagementService() {
@@ -92,18 +93,25 @@ public final class Management {
      * @param pool the pool to monitor.
      */
     private void registerPool(final String name, final ConnectionPool pool) {
-        try {
-            if (null != managementService) {
-                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
-                managementService.registerMBean(objName, pool);
-            }
-        } catch (final MalformedObjectNameException e) {
-            LOG.error("", e);
-        } catch (final NullPointerException e) {
-            LOG.error("", e);
-        } catch (final OXException e) {
-            LOG.error("", e);
+        final ManagementService service = managementService;
+        if (null == service) {
+            return;
         }
+        timer.addOnceTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                    service.registerMBean(objName, pool);
+                } catch (final MalformedObjectNameException e) {
+                    LOG.error("", e);
+                } catch (final NullPointerException e) {
+                    LOG.error("", e);
+                } catch (final OXException e) {
+                    LOG.error("", e);
+                }
+            }
+        });
     }
 
     public void registerMBeans() {
@@ -132,18 +140,25 @@ public final class Management {
      * @param name Name of the pool to remove.
      */
     private void unregisterMBean(final String name) {
-        try {
-            if (null != managementService) {
-                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
-                managementService.unregisterMBean(objName);
-            }
-        } catch (final MalformedObjectNameException e) {
-            LOG.error("", e);
-        } catch (final NullPointerException e) {
-            LOG.error("", e);
-        } catch (final OXException e) {
-            LOG.error("", e);
+        final ManagementService service = managementService;
+        if (null == service) {
+            return;
         }
+        timer.addOnceTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                    service.unregisterMBean(objName);
+                } catch (final MalformedObjectNameException e) {
+                    LOG.error("", e);
+                } catch (final NullPointerException e) {
+                    LOG.error("", e);
+                } catch (final OXException e) {
+                    LOG.error("", e);
+                }
+            }
+        });
     }
 
     public void unregisterMBeans() {

@@ -238,6 +238,9 @@ public final class Logic {
         }
         for (final int userId : group.getMember()) {
             if (!set.contains(userId)) {
+                if (UserStorage.getInstance().isGuest(userId, ctx)) {
+                    throw GroupExceptionCodes.NO_GUEST_USER_IN_GROUP.create(userId);
+                }
                 throw GroupExceptionCodes.NOT_EXISTING_MEMBER.create(Integer
                     .valueOf(userId));
             }

@@ -49,6 +49,10 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -56,10 +60,12 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -86,31 +92,50 @@ public class UpdateAction extends AbstractWriteAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
+        // Some checks and useful variables
         request.requireFileMetadata().require(Param.TIMESTAMP);
-        final File file = request.getFile();
+        File file = request.getFile();
         if (file.getId() == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-
+        FileID id = new FileID(file.getId());
         IDBasedFileAccess fileAccess = request.getFileAccess();
-        String fileId = file.getId();
-        if (request.hasUploads()) {
-            boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
-            if (ignoreVersion && (fileAccess instanceof IDBasedIgnorableVersionFileAccess)) {
-                IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
-                FileID id = new FileID(fileId);
-                if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
-                    fileId = ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
-                } else {
-                    fileId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
-                }
-            } else {
-                fileId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
-            }
-        } else {
-            fileId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+
+        String newId;
+        List<Field> columns = request.getSentColumns();
+        boolean notify = request.notifyPermissionEntities() && columns.contains(File.Field.OBJECT_PERMISSIONS) && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0;
+        File original = null;
+        if (notify) {
+            original = fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION);
         }
-        return request.extendedResponse() ? result(fileAccess.getFileMetadata(null == fileId ? file.getId() : fileId, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
+        if (request.hasUploads()) {
+            // Save file metadata with binary payload
+            boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings);
+        } else {
+            // Save file metadata without binary payload
+            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings);
+        }
+
+        List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
+        if (notify && null != newId) {
+            File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), original, modified, request.getSession(), request.getRequestData().getHostData()));
+        }
+        // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
+        AJAXRequestResult result;
+        if (null != newId && request.extendedResponse()) {
+            result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
+        }
+
+        result.addWarnings(warnings);
+        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+            result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
+        }
+        return result;
     }
 
 }

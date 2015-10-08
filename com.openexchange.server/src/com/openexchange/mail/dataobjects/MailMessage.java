@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -481,6 +482,18 @@ public abstract class MailMessage extends MailPart {
     private boolean b_messageId;
 
     /**
+     * The original folder identifier
+     */
+    private String originalFolder;
+    private boolean b_originalFolder;
+
+    /**
+     * The original identifier
+     */
+    private String originalId;
+    private boolean b_originalId;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -488,6 +501,23 @@ public abstract class MailMessage extends MailPart {
         priority = PRIORITY_NORMAL;
         colorLabel = COLOR_LABEL_NONE;
         accountId = MailAccount.DEFAULT_ID;
+    }
+
+    /**
+     * Removes the personal parts from given addresses
+     *
+     * @param addrs The addresses to remove the personals from
+     */
+    protected void removePersonalsFrom(Set<InternetAddress> addrs) {
+        if (null != addrs) {
+            for (InternetAddress addr : addrs) {
+                try {
+                    addr.setPersonal(null);
+                } catch (UnsupportedEncodingException e) {
+                    // Cannot occur
+                }
+            }
+        }
     }
 
     /**
@@ -574,6 +604,13 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Removes the personal parts from the <i>From</i> addresses.
+     */
+    public void removeFromPersonals() {
+        removePersonalsFrom(this.from);
+    }
+
+    /**
      * Adds an email address to <i>To</i>.
      *
      * @param addr The address
@@ -654,6 +691,13 @@ public abstract class MailMessage extends MailPart {
             }
         }
         return to == null ? EMPTY_ADDRS : to.toArray(new InternetAddress[to.size()]);
+    }
+
+    /**
+     * Removes the personal parts from the <i>To</i> addresses.
+     */
+    public void removeToPersonals() {
+        removePersonalsFrom(this.to);
     }
 
     /**
@@ -740,6 +784,13 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Removes the personal parts from the <i>Cc</i> addresses.
+     */
+    public void removeCcPersonals() {
+        removePersonalsFrom(this.cc);
+    }
+
+    /**
      * Adds an email address to <i>Bcc</i>
      *
      * @param addr The address
@@ -820,6 +871,13 @@ public abstract class MailMessage extends MailPart {
             }
         }
         return bcc == null ? EMPTY_ADDRS : bcc.toArray(new InternetAddress[bcc.size()]);
+    }
+
+    /**
+     * Removes the personal parts from the <i>Bcc</i> addresses.
+     */
+    public void removeBccPersonals() {
+        removePersonalsFrom(this.bcc);
     }
 
     /**
@@ -1474,6 +1532,74 @@ public abstract class MailMessage extends MailPart {
     public void setDispositionNotification(final InternetAddress dispositionNotification) {
         this.dispositionNotification = dispositionNotification;
         b_dispositionNotification = true;
+    }
+
+    /**
+     * Gets the original folder
+     *
+     * @return the original folder
+     */
+    public String getOriginalFolder() {
+        return originalFolder;
+    }
+
+    /**
+     * @return <code>true</code> if original folder is set; otherwise <code>false</code>
+     */
+    public boolean containsOriginalFolder() {
+        return b_originalFolder;
+    }
+
+    /**
+     * Removes the original folder
+     */
+    public void removeOriginalFolder() {
+        originalFolder = null;
+        b_originalFolder = false;
+    }
+
+    /**
+     * Sets the original folder
+     *
+     * @param originalFolder the original folder to set
+     */
+    public void setOriginalFolder(final String originalFolder) {
+        this.originalFolder = originalFolder;
+        b_originalFolder = true;
+    }
+
+    /**
+     * Gets the original identifier
+     *
+     * @return the original identifier
+     */
+    public String getOriginalId() {
+        return originalId;
+    }
+
+    /**
+     * @return <code>true</code> if original identifier is set; otherwise <code>false</code>
+     */
+    public boolean containsOriginalId() {
+        return b_originalId;
+    }
+
+    /**
+     * Removes the original identifier
+     */
+    public void removeOriginalId() {
+        originalId = null;
+        b_originalId = false;
+    }
+
+    /**
+     * Sets the original identifier
+     *
+     * @param originalId the original identifier to set
+     */
+    public void setOriginalId(final String originalId) {
+        this.originalId = originalId;
+        b_originalId = true;
     }
 
     /**

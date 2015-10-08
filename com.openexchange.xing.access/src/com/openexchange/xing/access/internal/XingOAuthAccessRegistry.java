@@ -52,7 +52,6 @@ package com.openexchange.xing.access.internal;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link XingOAuthAccessRegistry}

@@ -77,6 +77,8 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.permittance.Permittance;
+import com.openexchange.mail.api.permittance.Permitter;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
@@ -363,7 +365,26 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         // Check login attempt
         checkLogin(session, accountId);
 
-        // Occupy free slot
+        // Return instance
+        Permitter permitter = Permittance.acquireFor(accountId, session);
+        if (null == permitter) {
+            // Non-restricted
+            return doGetInstance(session, accountId);
+        }
+
+        // Acquire permit, then return instance
+        permitter.acquire();
+        try {
+            return doGetInstance(session, accountId);
+        } finally {
+            boolean lastOne = permitter.release();
+            if (lastOne) {
+                Permittance.release(permitter);
+            }
+        }
+    }
+
+    private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> doGetInstance(Session session, int accountId) throws OXException {
         Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == tmp || toBool(tmp)) {
             // Look-up cached, already connected instance
@@ -372,6 +393,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 return mailAccess;
             }
         }
+
+        // Initialize a new one
         MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
@@ -602,7 +625,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public boolean ping() throws OXException {
         try {
             final MailConfig mailConfig = getMailConfig();
-            if (mailConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()) {
+            if (mailConfig.isRequireTls() || mailConfig.getMailProperties().isEnforceSecureConnection()) {
                 if (!mailConfig.isSecure()) {
                     throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
                 }

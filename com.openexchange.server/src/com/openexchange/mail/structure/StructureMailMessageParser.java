@@ -905,7 +905,7 @@ public final class StructureMailMessageParser {
      */
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
         String filename = rawFileName;
-        if ((filename == null) || isEmptyString(filename)) {
+        if ((filename == null) || com.openexchange.java.Strings.isEmpty(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
             final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
@@ -916,25 +916,8 @@ public final class StructureMailMessageParser {
             filename = sb.toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
-            // try {
-            // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
-            // } catch (final Exception e) {
-            // LOG.error("", e);
-            // }
         }
         return filename;
-    }
-
-    private static boolean isEmptyString(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**
@@ -1105,13 +1088,4 @@ public final class StructureMailMessageParser {
     private static boolean isMessage(final String contentType) {
         return contentType.startsWith(PRIMARY_RFC822, 0);
     }
-
-    private static boolean isWinmailDat(final String fileName) {
-        if (isEmptyString(fileName)) {
-            return false;
-        }
-        final String toCheck = LocaleTools.toLowerCase(fileName);
-        return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
-    }
-
 }

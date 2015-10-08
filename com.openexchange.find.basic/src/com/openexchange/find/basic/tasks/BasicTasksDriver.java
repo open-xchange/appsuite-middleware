@@ -57,9 +57,11 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -84,6 +86,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -128,8 +131,16 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
     }
 
     @Override
-    protected Set<FolderType> getSupportedFolderTypes() {
-        return ALL_FOLDER_TYPES;
+    protected Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) {
+        UserPermissionBits userPermissionBits = session.getUserPermissionBits();
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return ALL_FOLDER_TYPES;
+        }
+
+        Set<FolderType> types = EnumSet.noneOf(FolderType.class);
+        types.add(FolderType.PRIVATE);
+        types.add(FolderType.PUBLIC);
+        return types;
     }
 
     @Override
@@ -162,34 +173,6 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<Facet> facets = new ArrayList<Facet>();
 
-        //add field facets
-        List<String> prefixTokens = Collections.emptyList();
-        if (false == Strings.isEmpty(prefix)) {
-            prefixTokens = tokenize(prefix);
-            if (!prefixTokens.isEmpty()) {
-                facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                    .withSimpleDisplayItem(prefix)
-                    .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
-                    .build());
-
-                facets.add(newSimpleBuilder(TasksFacetType.TASK_TITLE)
-                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_TITLE, prefixTokens))
-                    .build());
-
-                facets.add(newSimpleBuilder(TasksFacetType.TASK_DESCRIPTION)
-                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_DESCRIPTION, prefixTokens))
-                    .build());
-
-                facets.add(newSimpleBuilder(TasksFacetType.TASK_ATTACHMENT_NAME)
-                    .withFormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME, prefix)
-                    .withFilter(Filter.of(Constants.FIELD_ATTACHMENT_NAME, prefixTokens))
-                    .build());
-            }
-        }
-
-        //add participant facets
         List<FacetValue> participants = new ArrayList<FacetValue>(contacts.size());
         for(Contact c : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(c.getObjectID()));
@@ -203,9 +186,40 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
             participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c), queries));
         }
 
-        if (!prefix.isEmpty() && !prefixTokens.isEmpty()) {
+        //add field facets
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            /*
+             * add prefix-aware field facets
+             */
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
+                .build());
+
+            facets.add(newSimpleBuilder(TasksFacetType.TASK_TITLE)
+                .withFormattableDisplayItem(TasksStrings.FACET_TASK_TITLE, prefix)
+                .withFilter(Filter.of(Constants.FIELD_TITLE, prefixTokens))
+                .build());
+
+            facets.add(newSimpleBuilder(TasksFacetType.TASK_DESCRIPTION)
+                .withFormattableDisplayItem(TasksStrings.FACET_TASK_DESCRIPTION, prefix)
+                .withFilter(Filter.of(Constants.FIELD_DESCRIPTION, prefixTokens))
+                .build());
+
+            facets.add(newSimpleBuilder(TasksFacetType.TASK_ATTACHMENT_NAME)
+                .withFormattableDisplayItem(TasksStrings.FACET_TASK_ATTACHMENT_NAME, prefix)
+                .withFilter(Filter.of(Constants.FIELD_ATTACHMENT_NAME, prefixTokens))
+                .build());
+
             participants.add(buildParticipantFacet(prefix, new SimpleDisplayItem(prefix), tokenize(prefix)));
         }
+
         if (!participants.isEmpty()) {
             facets.add(newDefaultBuilder(TasksFacetType.TASK_PARTICIPANTS)
                 .withValues(participants)

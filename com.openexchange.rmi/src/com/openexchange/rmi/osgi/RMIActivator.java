@@ -50,57 +50,61 @@
 package com.openexchange.rmi.osgi;
 
 import java.rmi.Remote;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.rmi.internal.RMIUtility;
+import com.openexchange.startup.SignalStartedService;
 
 /**
  * {@link RMIService}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RMIActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
+    private volatile Registry registry;
 
-    private static volatile ServiceRegistry serviceRegistry;
-
-    private RMITrackerCustomizer rmiTrackerCustomizer;
+    /**
+     * Initializes a new {@link RMIActivator}.
+     */
+    public RMIActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        final Class<?>[] needed = new Class<?>[] { ConfigurationService.class };
-        return needed;
-    }
-
-    public static ServiceRegistry getServiceRegistry() {
-        return serviceRegistry;
+        return new Class<?>[] { ConfigurationService.class, SignalStartedService.class };
     }
 
     @Override
-    protected void startBundle() {
-        log.info("Starting bundle com.openexchange.rmi");
-        serviceRegistry = new ServiceRegistry();
-        for (final Class<?> clazz : getNeededServices()) {
-            final Object service = getService(clazz);
-            serviceRegistry.addService(clazz, service);
-        }
-        rmiTrackerCustomizer = new RMITrackerCustomizer(context);
-        track(Remote.class, rmiTrackerCustomizer);
+    protected void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
+        logger.info("Starting bundle com.openexchange.rmi");
+
+        // Create registry instance
+        final Registry registry = RMIUtility.createRegistry(getService(ConfigurationService.class));
+        this.registry = registry;
+
+        // Start tracker
+        track(Remote.class, new RMITrackerCustomizer(registry, context));
         openTrackers();
     }
 
     @Override
-    protected void stopBundle() {
-        log.info("Stopping bundle com.openexchange.rmi");
-        if (serviceRegistry != null) {
-            serviceRegistry.clearRegistry();
-            serviceRegistry = null;
+    protected void stopBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
+        logger.info("Stopping bundle com.openexchange.rmi");
+        super.stopBundle();
+
+        // De-register the registry
+        Registry registry = this.registry;
+        if (null != registry) {
+            UnicastRemoteObject.unexportObject(registry, true);
+            this.registry = null;
         }
-        if (rmiTrackerCustomizer != null) {
-            rmiTrackerCustomizer = null;
-        }
-        closeTrackers();
-        cleanUp();
     }
+
 }

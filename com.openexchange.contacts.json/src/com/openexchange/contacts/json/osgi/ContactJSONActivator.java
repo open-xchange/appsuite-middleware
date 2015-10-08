@@ -49,11 +49,23 @@
 
 package com.openexchange.contacts.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
+import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
+import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -64,13 +76,45 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactService.class };
+        return new Class[] { ContactService.class, VCardService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        /*
+         * register ajax module
+         */
         registerModule(new ContactActionFactory(this), "contacts");
+        /*
+         * register result converter & data handler
+         */
         registerService(ResultConverter.class, new ContactJSONResultConverter());
+        Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+        props.put("identifier", "com.openexchange.contact.json");
+        registerService(DataHandler.class, new ContactJSONDataHandler(this), props);
+        props = new Hashtable<String, Object>(1);
+        props.put("identifier", "com.openexchange.contact");
+        registerService(DataHandler.class, new ContactInsertDataHandler(this), props);
+        /*
+         * define oauth scopes
+         */
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.CONTACTS.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(ContactActionFactory.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.CONTACTS.getCapabilityName());
+            }
+        });
+        /*
+         * track vCard storage service
+         */
+        track(VCardStorageFactory.class);
+        openTrackers();
     }
 
 }

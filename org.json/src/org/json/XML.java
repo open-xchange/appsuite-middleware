@@ -24,7 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import java.util.Collections;
 import java.util.Set;
 
 
@@ -74,11 +73,11 @@ public class XML {
      * @param string The string to be escaped.
      * @return The escaped string.
      */
-    public static String escape(final String string) {
+    public static String escape(String string) {
         final StringBuilder sb = new StringBuilder();
         final int len = string.length();
         for (int i = 0; i < len; i++) {
-            final char c = string.charAt(i);
+            char c = string.charAt(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");

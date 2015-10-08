@@ -81,7 +81,7 @@ public class ServiceRegistry implements ServiceLookup {
      */
     public ServiceRegistry(final int initialCapacity) {
         super();
-        services = new ConcurrentHashMap<Class<?>, Object>(initialCapacity);
+        services = new ConcurrentHashMap<Class<?>, Object>(initialCapacity, 0.9f, 1);
     }
 
     /**

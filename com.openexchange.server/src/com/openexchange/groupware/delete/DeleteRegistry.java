@@ -71,7 +71,9 @@ import com.openexchange.preferences.UserSettingServerDeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
+import com.openexchange.tools.file.UserQuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
+import com.openexchange.tools.oxfolder.deletelistener.ObjectPermissionDeleteListener;
 
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
@@ -112,6 +114,9 @@ public final class DeleteRegistry {
      * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
+        if (null == instance) {
+            initInstance();
+        }
         return instance;
     }
 
@@ -175,10 +180,12 @@ public final class DeleteRegistry {
             new UserConfigurationDeleteListener(),
             new UserSettingMailDeleteListener(),
             new QuotaUsageDelete(),
+            new UserQuotaUsageDelete(),
             new AttachmentContextDelete(),
             new AttachmentDelDelete(),
             new CacheClearerOnContextDelete(),
             new SessionClearerOnContextDelete(),
+            new ObjectPermissionDeleteListener(),
             /*
              * Insert folder delete listener
              */

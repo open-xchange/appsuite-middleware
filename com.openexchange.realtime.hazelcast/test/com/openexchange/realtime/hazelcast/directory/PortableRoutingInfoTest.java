@@ -61,7 +61,7 @@ import com.hazelcast.core.IMap;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.realtime.directory.RoutingInfo;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.group.helper.DynamicPortableFactoryImpl;
+import com.openexchange.realtime.hazelcast.serialization.DynamicPortableFactoryImpl;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfo;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableRoutingInfoFactory;
 

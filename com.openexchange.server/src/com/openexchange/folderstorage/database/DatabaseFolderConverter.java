@@ -182,12 +182,16 @@ public final class DatabaseFolderConverter {
         final String key = "__ccf#";
         Integer ret = (Integer) session.getParameter(key);
         if (null == ret) {
-            Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
-            folderId = null == folderId ? Integer.valueOf(-1) : folderId;
+            Integer folderId = Integer.valueOf(getContactCollectorFolder(userId, contextId, con));
             session.setParameter(key, folderId);
             ret = folderId;
         }
         return ret.intValue();
+    }
+
+    private static int getContactCollectorFolder(final int userId, final int contextId, final Connection con) throws OXException {
+        Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
+        return null == folderId ? Integer.valueOf(-1) : folderId;
     }
 
     private static int getPublishedMailAttachmentsFolder(final Session session) {
@@ -272,6 +276,9 @@ public final class DatabaseFolderConverter {
                      */
                     final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
                     if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
+                        if (session == null) {
+                            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                        }
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             // Rename to default account name
@@ -297,73 +304,100 @@ public final class DatabaseFolderConverter {
                 /*
                  * A default folder: set locale-sensitive name
                  */
-                final int module = fo.getModule();
-                if (module == FolderObject.TASK) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
-                } else if (module == FolderObject.CONTACT) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
-                } else if (module == FolderObject.CALENDAR) {
-                    retval = new LocalizedDatabaseFolder(fo);
-                    retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
-                } else if (module == FolderObject.INFOSTORE) {
-                    if (preferDisplayName()) {
-                        final int ownerId = fo.getCreatedBy();
-                        if (user.getId() == ownerId) {
-                            // Requestor is owner
-                            retval = new LocalizedDatabaseFolder(fo);
-                            retval.setName(user.getDisplayName());
-                        } else {
-                            DatabaseFolder tmp = null;
-                            try {
-                                final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
-                                tmp = new LocalizedDatabaseFolder(fo);
-                                tmp.setName(owner.getDisplayName());
-                            } catch (final Exception ignore) {
-                                // Ignore
-                                tmp = new DatabaseFolder(fo);
-                            }
-                            retval = tmp;
+                String localizableName = null;
+                switch (fo.getModule()) {
+                    case FolderObject.TASK:
+                        localizableName = FolderStrings.DEFAULT_TASK_FOLDER_NAME;
+                        break;
+                    case FolderObject.CONTACT:
+                        localizableName = FolderStrings.DEFAULT_CONTACT_FOLDER_NAME;
+                        break;
+                    case FolderObject.CALENDAR:
+                        localizableName = FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME;
+                        break;
+                    case FolderObject.INFOSTORE:
+                        switch (fo.getType()) {
+                            case FolderObject.PUBLIC:
+                                if (preferDisplayName()) {
+                                    if (fo.getCreatedBy() == user.getId()) {
+                                        localizableName = user.getDisplayName();
+                                    } else {
+                                        try {
+                                            localizableName = UserStorage.getInstance().getUser(fo.getCreatedBy(), ctx).getDisplayName();
+                                        } catch (Exception e) {
+                                            org.slf4j.LoggerFactory.getLogger(DatabaseFolderConverter.class).error(
+                                                "error getting owner for folder {}", fo.getObjectID(), e);
+                                        }
+                                    }
+                                }
+                                break;
+                            case FolderObject.TRASH:
+                                localizableName = FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME;
+                                break;
+                            case FolderObject.DOCUMENTS:
+                                localizableName = FolderStrings.SYSTEM_USER_DOCUMENTS_FOLDER_NAME;
+                                break;
+                            case FolderObject.PICTURES:
+                                localizableName = FolderStrings.SYSTEM_USER_PICTURES_FOLDER_NAME;
+                                break;
+                            case FolderObject.VIDEOS:
+                                localizableName = FolderStrings.SYSTEM_USER_VIDEOS_FOLDER_NAME;
+                                break;
+                            case FolderObject.MUSIC:
+                                localizableName = FolderStrings.SYSTEM_USER_MUSIC_FOLDER_NAME;
+                                break;
+                            case FolderObject.TEMPLATES:
+                                localizableName = FolderStrings.SYSTEM_USER_TEMPLATES_FOLDER_NAME;
+                                break;
                         }
-                    } else {
-                        retval = new DatabaseFolder(fo);
-                    }
+                        break;
+                }
+                if (null != localizableName) {
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(localizableName);
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
-            } else if (folderId == getContactCollectorFolder(session, con)) {
-                // "Collected addresses" folder
-                retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-                retval.setDefault(true);
-                retval.setCacheable(true);
-                retval.setGlobal(false);
-            } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
-                retval = new LocalizedDatabaseFolder(fo);
-                retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
-                retval = new DatabaseFolder(fo);
-                /*-
-                 * If enabled performance need to be improved for:
-                 *
-                 * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
-                 */
-                final boolean checkIfVirtuallyReachable = false;
-                if (checkIfVirtuallyReachable) {
+                int contactCollectorFolder;
+                if (session != null) {
+                    contactCollectorFolder = getContactCollectorFolder(session, con);
+                } else {
+                    contactCollectorFolder = getContactCollectorFolder(user.getId(), ctx.getContextId(), con);
+                }
+                if (folderId == contactCollectorFolder) {
+                    // "Collected addresses" folder
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                    retval.setDefault(true);
+                    retval.setCacheable(true);
+                    retval.setGlobal(false);
+                } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
+                    retval = new LocalizedDatabaseFolder(fo);
+                    retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
+                } else {
+                    retval = new DatabaseFolder(fo);
                     /*-
-                     * Does it appear below virtual folder?:
+                     * If enabled performance need to be improved for:
                      *
-                     * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
-                     * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                     * VirtualListFolder.getVirtualListFolderSubfolders(int, User, UserConfiguration, Context, Connection)
                      */
-                    final int virtualParent = getPossibleVirtualParent(fo);
-                    if (virtualParent > 0) {
-                        final String sFolderId = Integer.toString(folderId);
-                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userPermissionBits, ctx, con)) {
-                            if (sFolderId.equals(arr[0])) {
-                                retval.setParentID(Integer.toString(virtualParent));
-                                break;
+                    final boolean checkIfVirtuallyReachable = false;
+                    if (checkIfVirtuallyReachable) {
+                        /*-
+                         * Does it appear below virtual folder?:
+                         *
+                         * FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+                         * FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
+                         */
+                        final int virtualParent = getPossibleVirtualParent(fo);
+                        if (virtualParent > 0) {
+                            final String sFolderId = Integer.toString(folderId);
+                            for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userPermissionBits, ctx, con)) {
+                                if (sFolderId.equals(arr[0])) {
+                                    retval.setParentID(Integer.toString(virtualParent));
+                                    break;
+                                }
                             }
                         }
                     }
@@ -423,6 +457,9 @@ public final class DatabaseFolderConverter {
             if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
                 boolean setChildren = true;
                 if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    if (session == null) {
+                        throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                    }
                     final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                     if (null != defaultAccount) {
                         /*
@@ -436,7 +473,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * User-sensitive loading of user infostore folder
                      */
-                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
+                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, con);
                     if (subfolders.isEmpty()) {
                         databaseFolder.setSubfolderIDs(new String[0]);
                         databaseFolder.setSubscribedSubfolders(false);
@@ -462,6 +499,9 @@ public final class DatabaseFolderConverter {
                 boolean setChildren = true;
                 if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
                     if (!InfostoreFacades.isInfoStoreAvailable()) {
+                        if (session == null) {
+                            throw FolderExceptionErrorMessage.MISSING_SESSION.create();
+                        }
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             /*

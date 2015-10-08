@@ -51,7 +51,6 @@ package com.openexchange.groupware.impl;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.ConcurrentTIntObjectHashMap;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,9 +77,7 @@ public final class IDGenerator {
 
     public static enum Implementations {
         NODBFUNCTION(new NoDBFunction()),
-        MYSQLFUNCTION(new MySQLFunction()),
-        PREPAREDSTATEMENT(new PreparedStatementImpl()),
-        CALLABLESTATEMENT(new CallableStatementImpl());
+        MYSQLFUNCTION(new MySQLFunction());
 
         private final Implementation impl;
 
@@ -211,188 +208,18 @@ public final class IDGenerator {
          * <p>
          * Depending on the implementation type, the parameter <code>sqlstring</code> must be as
          * following:
-         * <p>
-         * {@link Implementations#CALLABLESTATEMENT}:
-         * <code>{call get_configdb_id()}</code>
-         * <p>
          * {@link Implementations#NODBFUNCTION}:
          * <code>configdb_sequence</code>
          * <p>
          * {@link Implementations#MYSQLFUNCTION}:
          * <code>configdb_sequence</code>
          * <p>
-         * {@link Implementations#PREPAREDSTATEMENT}:
-         * <code>CALL get_configdb_id()</code>
          *
          * @param sql
          * @param type negative integer less then -1
          * @throws SQLException
          */
         void registerType(final String sql, final int type) throws SQLException;
-    }
-
-    /**
-     * This implementation uses the stored procedure and a callable statement to
-     * get unique identifier from the database.
-     */
-    static class CallableStatementImpl implements Implementation {
-
-        /**
-         * Maps the groupware types to sql functions.
-         */
-        private static final ConcurrentTIntObjectHashMap<String> TYPES;
-
-        /**
-         * Returns the appropriate unique identifier sql function for the type.
-         * @param type Type of the object thats needs a unique identifier.
-         * @return the sql function generating the unique identifier.
-         * @throws SQLException if no function for the type is defined.
-         */
-        private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(type);
-            if (null == retval) {
-                throw new SQLException("No function defined for type: " + type);
-            }
-            return retval;
-        }
-
-        @Override
-        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
-            int newId = -1;
-            CallableStatement call = null;
-            ResultSet result = null;
-            try {
-                call = con.prepareCall(getFunction(type));
-                if (-1 != contextId) {
-                    call.setInt(1, contextId);
-                }
-                boolean hasResults = call.execute();
-                while (hasResults) {
-                    result = call.getResultSet();
-                    if (result.next()) {
-                        newId = result.getInt(1);
-                    }
-                    hasResults = call.getMoreResults();
-                }
-            } finally {
-                closeSQLStuff(result, call);
-            }
-            if (-1 == newId) {
-                throw new SQLException("Function " + getFunction(type) + " returns no row for context " + contextId);
-            }
-            return newId;
-        }
-
-        @Override
-        public void registerType(final String sql, final int type) throws SQLException {
-            if (TYPES.containsKey(type)) {
-                throw new SQLException("Type " + type + " already in use");
-            }
-            TYPES.put(type, sql);
-        }
-
-        static {
-            final ConcurrentTIntObjectHashMap<String> tmp = new ConcurrentTIntObjectHashMap<String>();
-            tmp.put(-1, "{call get_configdb_id()}");
-            tmp.put(Types.APPOINTMENT, "{call get_calendar_id(?)}");
-            tmp.put(Types.CONTACT, "{call get_contact_id(?)}");
-            tmp.put(Types.FOLDER, "{call get_folder_id(?)}");
-            tmp.put(Types.TASK, "{call get_task_id(?)}");
-            tmp.put(Types.USER_SETTING, "{call get_gui_setting_id(?)}");
-            tmp.put(Types.REMINDER, "{call get_reminder_id(?)}");
-            tmp.put(Types.ICAL, "{call get_ical_id(?)}");
-            tmp.put(Types.PRINCIPAL, "{call get_principal_id(?)}");
-            tmp.put(Types.RESOURCE, "{call get_resource_id(?)}");
-            tmp.put(Types.INFOSTORE, "{call get_infostore_id(?)}");
-            tmp.put(Types.ATTACHMENT, "{call get_attachment_id(?)}");
-            tmp.put(Types.WEBDAV, "{call get_webdav_id(?)}");
-            tmp.put(Types.UID_NUMBER, "{call get_uid_number_id(?)}");
-            tmp.put(Types.GID_NUMBER, "{call get_gid_number_id(?)}");
-            tmp.put(Types.MAIL_SERVICE, "{call get_mail_service_id(?)}");
-            TYPES = tmp;
-        }
-    }
-
-    /**
-     * This implementation uses the stored procedure and a prepared statement to
-     * get unique identifier from the database.
-     */
-    static class PreparedStatementImpl implements Implementation {
-
-        /**
-         * Maps the groupware types to sql functions.
-         */
-        private static final ConcurrentTIntObjectHashMap<String> TYPES;
-
-        /**
-         * Returns the appropriate unique identifier sql function for the type.
-         * @param type Type of the object thats needs a unique identifier.
-         * @return the sql function generating the unique identifier.
-         * @throws SQLException if no function for the type is defined.
-         */
-        private String getFunction(final int type) throws SQLException {
-            final String retval = TYPES.get(type);
-            if (null == retval) {
-                throw new SQLException("No function defined for type: " + type);
-            }
-            return retval;
-        }
-
-        @Override
-        public int getId(final int contextId, final int type, final Connection con) throws SQLException {
-            int newId = -1;
-            PreparedStatement stmt = null;
-            ResultSet result = null;
-            try {
-                stmt = con.prepareStatement(getFunction(type));
-                if (-1 == contextId) {
-                    stmt.setInt(1, contextId);
-                }
-                result = stmt.executeQuery();
-                if (result.next()) {
-                    newId = result.getInt(1);
-                }
-            } finally {
-                closeSQLStuff(result, stmt);
-            }
-            if (-1 == newId) {
-                throw new SQLException("Function " + getFunction(type) + " returns no row for context " + contextId);
-            }
-            return newId;
-        }
-
-        static {
-            final ConcurrentTIntObjectHashMap<String> tmp = new ConcurrentTIntObjectHashMap<String>();
-            tmp.put(-1, "CALL get_configdb_id()");
-            tmp.put(Types.APPOINTMENT, "CALL get_calendar_id(?)");
-            tmp.put(Types.CONTACT, "CALL get_contact_id(?)");
-            tmp.put(Types.FOLDER, "CALL get_folder_id(?)");
-            tmp.put(Types.TASK, "CALL get_task_id(?)");
-            tmp.put(Types.USER_SETTING, "CALL get_gui_setting_id(?)");
-            tmp.put(Types.REMINDER, "CALL get_reminder_id(?)");
-            tmp.put(Types.ICAL, "CALL get_ical_id(?)");
-            tmp.put(Types.PRINCIPAL, "CALL get_principal_id(?)");
-            tmp.put(Types.RESOURCE, "CALL get_resource_id(?)");
-            tmp.put(Types.INFOSTORE, "CALL get_infostore_id(?)");
-            tmp.put(Types.ATTACHMENT, "CALL get_attachment_id(?)");
-            tmp.put(Types.WEBDAV, "CALL get_webdav_id(?)");
-            tmp.put(Types.UID_NUMBER, "CALL get_uid_number_id(?)");
-            tmp.put(Types.GID_NUMBER, "CALL get_gid_number_id(?)");
-            tmp.put(Types.MAIL_SERVICE, "CALL get_mail_service_id(?)");
-            tmp.put(Types.GENERIC_CONFIGURATION, "CALL get_genconf_id(?)");
-            tmp.put(Types.SUBSCRIPTION, "CALL get_subscriptions_id(?)");
-            tmp.put(Types.PUBLICATION, "CALL get_publications_id(?)");
-            tmp.put(Types.EAV_NODE, "CALL get_eav_id(?)");
-            TYPES = tmp;
-        }
-
-        @Override
-        public void registerType(final String sql, final int type) throws SQLException {
-            if (TYPES.containsKey(type)) {
-                throw new SQLException("Type " + type + " already in use");
-            }
-            TYPES.put(type, sql);
-        }
     }
 
     /**

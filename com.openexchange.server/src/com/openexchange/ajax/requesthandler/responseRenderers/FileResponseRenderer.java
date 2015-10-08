@@ -65,7 +65,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,12 +73,12 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.ajax.container.PushbackReadable;
-import com.openexchange.ajax.container.IFileHolder.RandomAccess;
-import com.openexchange.ajax.container.InputStreamReadable;
-import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
+import com.openexchange.ajax.fileholder.PushbackReadable;
+import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ImageUtils;
@@ -109,6 +108,7 @@ import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
+import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -144,8 +144,6 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final String VIEW = "view";
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
-
-    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
     private final AtomicReference<File> tmpDirReference;
 
@@ -566,7 +564,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                         // Copy full range.
-                        copy(documentData, outputStream, r.start, r.length);
+                        copy(documentData, outputStream);
                     } else if (ranges.size() == 1) {
 
                         // Return single part of file.
@@ -613,31 +611,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                             return;
                         }
                     } else {
-                        final int len = BUFLEN;
-                        final byte[] buf = new byte[len];
-                        if (length > 0) {
-                            // Check actual transferred number of bytes against provided length
-                            long count = 0L;
-                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                                outputStream.write(buf, 0, read);
-                                count += read;
-                            }
-                            if (length != count) {
-                                final StringBuilder sb = new StringBuilder("Transferred ").append((length > count ? "less" : "more"));
-                                sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
-                                sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
-                                LOG.warn(sb.toString());
-                            }
-                        } else {
-                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                                outputStream.write(buf, 0, read);
-                            }
-                        }
+                        // Copy full range.
+                        copy(documentData, outputStream);
                     }
                 }
                 outputStream.flush();
             } catch (final java.net.SocketException e) {
-                final String lmsg = toLowerCase(e.getMessage());
+                final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
                     LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
@@ -647,7 +627,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
             } catch (final IOException e) {
-                final String lcm = toLowerCase(e.getMessage());
+                final String lcm = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
                     /*-
                      * The client side has abruptly aborted the connection.
@@ -659,7 +639,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                      */
                     LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to input or output end-point while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final OXException e) {
@@ -760,7 +740,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Rotation/compression only required for JPEG
             if (!transform) {
-                final String formatName = toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
+                final String formatName = com.openexchange.java.Strings.toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
                 if (("jpeg".equals(formatName) || "jpg".equals(formatName)) && !DOWNLOAD.equalsIgnoreCase(delivery)) {
                     // Check for possible compression
                     transform = true;
@@ -995,7 +975,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @return The checked <i>Content-Disposition</i> value
      */
     private String checkedContentDisposition(final String contentDisposition, final IFileHolder file) {
-        final String ct = toLowerCase(file.getContentType()); // null-safe
+        final String ct = com.openexchange.java.Strings.toLowerCase(file.getContentType()); // null-safe
         if (null == ct || ct.startsWith("text/htm")) {
             final int pos = contentDisposition.indexOf(';');
             return pos > 0 ? "attachment" + contentDisposition.substring(pos) : "attachment";
@@ -1016,19 +996,6 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
-    }
-
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**
@@ -1056,7 +1023,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == contentType1 || null == contentType2) {
             return false;
         }
-        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+        return com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType2)));
     }
 
     private String detectMimeType(final InputStream in) throws IOException {
@@ -1086,8 +1053,9 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param start Start of the byte range.
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
+     * @throws OXException
      */
-    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
+    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException, OXException {
         if (inputStream instanceof IFileHolder.RandomAccess) {
             copy((IFileHolder.RandomAccess) inputStream, output, start, length);
             return;
@@ -1127,16 +1095,10 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
      */
-    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
-        int buflen = BUFLEN;
-        byte[] buffer = new byte[buflen];
-        int read;
-
+    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException, OXException {
         if (input.length() == length) {
             // Write full range.
-            while ((read = input.read(buffer, 0, buflen)) > 0) {
-                output.write(buffer, 0, read);
-            }
+            copy(input, output);
         } else {
             // Write partial range.
             input.seek(start);   // ----> OffsetOutOfRangeIOException
@@ -1157,6 +1119,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                 readMe.unread(bs[0] & 0xff);
             }
 
+            int buflen = BUFLEN;
+            byte[] buffer = new byte[buflen];
+            int read;
+
             while ((read = readMe.read(buffer, 0, buflen)) > 0) {
                 if ((toRead -= read) > 0) {
                     output.write(buffer, 0, read);
@@ -1164,6 +1130,33 @@ public class FileResponseRenderer implements ResponseRenderer {
                     output.write(buffer, 0, (int) toRead + read);
                     break;
                 }
+            }
+        }
+    }
+
+    /**
+     * Copies the given input to the given output.
+     *
+     * @param input The input to copy to the given output.
+     * @param output The output to copy from the given input.
+     * @throws IOException If something fails at I/O level.
+     */
+    private static void copy(Readable input, OutputStream output) throws IOException, OXException {
+        // Write full range.
+        if (IFileHolder.InputStreamClosure.class.isInstance(input)) {
+            InputStream stream = null;
+            try {
+                stream = ((IFileHolder.InputStreamClosure) input).newStream();
+                IOUtils.transfer(stream, output);
+            } finally {
+                Streams.close(stream);
+            }
+        } else {
+            int buflen = BUFLEN;
+            byte[] buffer = new byte[buflen];
+            int read;
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                output.write(buffer, 0, read);
             }
         }
     }

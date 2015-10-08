@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -68,12 +69,15 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -137,28 +141,81 @@ public final class OXFolderUtility {
      * @param ctx The context
      * @throws OXException If a duplicate folder exists
      */
-    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXException {
+    private static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderId) {
             if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
-                final String parentFolderName =
-                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+                final String parentFolderName = new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
                 /*
                  * A duplicate folder exists
                  */
-                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()), folderName);
+                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
-            if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
-                FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
-                locale).equalsIgnoreCase(folderName)) {
-                final String parentFolderName =
-                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+            if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
+                final String parentFolderName = new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
                 /*
                  * A duplicate folder exists
                  */
-                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()), folderName);
+                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
+        }
+    }
+
+    /**
+     * Performs various checks against conflicting duplicate folders on the same level or reserved folder names before saving a folder in
+     * the target folder.
+     *
+     * @param connection A (readable) database connection
+     * @param context The context
+     * @param user The user
+     * @param folderID The identifier of the folder being saved (to avoid conflicts with the folder itself), or <code>-1</code> for new folders
+     * @param module The groupware module of the folder
+     * @param parentFolderID The identifier of the parent folder to perform the checks in
+     * @param folderName The target folder name
+     * @param createdBy The identifier of the user who created the folder
+     * @throws OXException If check fails
+     */
+    public static void checkTargetFolderName(Connection connection, Context context, User user, int folderID, int module, int parentFolderID, String folderName, int createdBy) throws OXException {
+        /*
+         * check folder name string for invalid data
+         */
+        String result = Check.containsInvalidChars(folderName);
+        if (null != result) {
+            throw OXFolderExceptionCode.INVALID_DATA.create(result);
+        }
+        try {
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parentFolderID) {
+                TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, module, connection, context);
+                /*
+                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
+                 */
+                OXFolderAccess folderAccess = new OXFolderAccess(connection, context);
+                for (int fuid : folders.toArray()) {
+                    if (folderID == fuid) {
+                        continue;
+                    }
+                    FolderObject toCheck = folderAccess.getFolderObject(fuid);
+                    if (toCheck.getCreatedBy() == createdBy) {
+                        /*
+                         * User is already owner of a private folder with the same name located below system's private folder
+                         */
+                        throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
+                    }
+                }
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
+                /*
+                 * check localized names below public folder
+                 */
+                checki18nString(parentFolderID, folderName, user.getLocale(), context);
+            } else {
+                /*
+                 * by default, check for equally named folder on same level
+                 */
+                if (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context)) {
+                    throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
+                }
+            }
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -181,11 +238,9 @@ public final class OXFolderUtility {
             final int key = permission.getEntity();
             if (set.contains(key)) {
                 if (permission.isGroupPermission()) {
-                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(getGroupName(
-                        permission.getEntity(),
-                        ctx));
+                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(Integer.valueOf(permission.getEntity()));
                 }
-                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(getUserName(permission.getEntity(), ctx));
+                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(Integer.valueOf(permission.getEntity()));
             }
             set.add(key);
         }
@@ -242,19 +297,6 @@ public final class OXFolderUtility {
     }
 
     /**
-     * Checks for invalid characters in folder name
-     *
-     * @param checkMe The folder whose name shall be checked
-     * @throws OXException If folder name contains invalid characters
-     */
-    public static void checkFolderStringData(final FolderObject checkMe) throws OXException {
-        final String result;
-        if (checkMe.containsFolderName() && (result = Check.containsInvalidChars(checkMe.getFolderName())) != null) {
-            throw OXFolderExceptionCode.INVALID_DATA.create(result);
-        }
-    }
-
-    /**
      * Checks if permissions from given folder specify (at least) one folder admin and if creating user is the folder admin for his default
      * folders.
      *
@@ -275,9 +317,10 @@ public final class OXFolderUtility {
         for (int i = 0; i < permissionsSize; i++) {
             final OCLPermission oclPerm = iter.next();
             if (oclPerm.getEntity() < 0) {
-                throw OXFolderExceptionCode.INVALID_ENTITY.create(Integer.valueOf(oclPerm.getEntity()),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.INVALID_ENTITY.create(I(oclPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+            }
+            if (oclPerm.isGroupPermission() && GroupStorage.GUEST_GROUP_IDENTIFIER == oclPerm.getEntity()) {
+                throw OXFolderExceptionCode.INVALID_ENTITY_FROM_USER.create(I(oclPerm.getEntity()), new LocalizableArgument(Groups.GUEST_GROUP), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
             if (oclPerm.isFolderAdmin()) {
                 adminEntities.add(oclPerm.getEntity());
@@ -296,7 +339,7 @@ public final class OXFolderUtility {
                 final OCLPermission oclPerm = iter.next();
                 if (oclPerm.getEntity() == creator) {
                     if (!oclPerm.isFolderAdmin()) {
-                        warnings.add(OXFolderExceptionCode.CREATOR_STAYS_ADMIN.create(getUserName(creator, ctx), getFolderName(folderObj.getObjectID(), ctx)));
+                        warnings.add(OXFolderExceptionCode.CREATOR_STAYS_ADMIN.create(Integer.valueOf(creator), Integer.valueOf(folderObj.getObjectID())));
                     }
                     oclPerm.setFolderAdmin(true);
                     found = true;
@@ -307,11 +350,7 @@ public final class OXFolderUtility {
                 oclPerm.setEntity(creator);
                 oclPerm.setGroupPermission(false);
                 oclPerm.setFolderAdmin(true);
-                oclPerm.setAllPermission(
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS);
+                oclPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 oclPerm.setSystem(0);
                 final List<OCLPermission> nList = new ArrayList<OCLPermission>(folderObj.getPermissions());
                 nList.add(oclPerm);
@@ -322,9 +361,7 @@ public final class OXFolderUtility {
         if (adminEntities.isEmpty()) {
             throw OXFolderExceptionCode.NO_FOLDER_ADMIN.create();
         } else if (isDefaultFolder && !creatorIsAdmin) {
-            throw OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN.create(getUserName(creator, ctx), getFolderName(
-                folderObj.getObjectID(),
-                ctx));
+            throw OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN.create(Integer.valueOf(creator), Integer.valueOf(folderObj.getObjectID()));
         }
     }
 
@@ -350,8 +387,7 @@ public final class OXFolderUtility {
      */
     public static void checkPermissionsAgainstSessionUserConfig(FolderObject folder, UserPermissionBits permissionBits, Context context) throws OXException {
         List<OCLPermission> permissions = folder.getPermissions();
-        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() &&
-            (FolderObject.PRIVATE == folder.getType() || FolderObject.PUBLIC == folder.getType() && FolderObject.INFOSTORE == folder.getModule())) {
+        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() && (FolderObject.PRIVATE == folder.getType() || FolderObject.PUBLIC == folder.getType() && FolderObject.INFOSTORE == folder.getModule())) {
             /*
              * forbid any non-empty additional permission
              */
@@ -360,8 +396,7 @@ public final class OXFolderUtility {
                     /*
                      * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
                      */
-                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(
-                        getUserName(permissionBits.getUserId(), context), getFolderName(folder, context), Integer.valueOf(context.getContextId()));
+                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(Integer.valueOf(permissionBits.getUserId()), Integer.valueOf(folder.getObjectID()), I(context.getContextId()));
                 }
             }
         }
@@ -389,10 +424,7 @@ public final class OXFolderUtility {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
             for (final OCLPermission newPerm : newPerms) {
                 if (newPerm.isGroupPermission()) {
-                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw OXFolderExceptionCode.NO_GROUP_PERMISSION.create(null == i18nName ? getFolderName(
-                        folderId,
-                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NO_GROUP_PERMISSION.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
                 /*
                  * Only context admin may hold administer right and folder visibility change only
@@ -403,10 +435,7 @@ public final class OXFolderUtility {
             for (OCLPermission newPerm2 : newPerms) {
                 final OCLPermission newPerm = newPerm2;
                 if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
-                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                    throw OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION.create(null == i18nName ? getFolderName(
-                        folderId,
-                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.NO_INDIVIDUAL_PERMISSION.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
                 }
                 /*
                  * Only context admin may hold administer right and folder visibility change only
@@ -420,13 +449,8 @@ public final class OXFolderUtility {
         /*
          * Only context admin may hold administer right and folder visibility change only
          */
-        if ((toCheck.getEntity() == admin ? !toCheck.isFolderAdmin() : toCheck.isFolderAdmin()) || !checkObjectPermissions(
-            toCheck,
-            allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
-            final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-            throw OXFolderExceptionCode.FOLDER_VISIBILITY_PERMISSION_ONLY.create(null == i18nName ? getFolderName(
-                folderId,
-                ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+        if ((toCheck.getEntity() == admin ? !toCheck.isFolderAdmin() : toCheck.isFolderAdmin()) || !checkObjectPermissions(toCheck, allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
+            throw OXFolderExceptionCode.FOLDER_VISIBILITY_PERMISSION_ONLY.create(Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -434,15 +458,11 @@ public final class OXFolderUtility {
         return (p.getReadPermission() == allowedObjectPermissions[0]) && (p.getWritePermission() == allowedObjectPermissions[1]) && (p.getDeletePermission() == allowedObjectPermissions[2]);
     }
 
-    private static final int[] NO_OBJECT_PERMISSIONS =
-        { OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
+    private static final int[] NO_OBJECT_PERMISSIONS = { OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
 
     private static int[] maxAllowedObjectPermissions(final int folderId) {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
-            return new int[] {
-                OCLPermission.READ_ALL_OBJECTS,
-                OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS,
-                OCLPermission.NO_PERMISSIONS };
+            return new int[] { OCLPermission.READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
         } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
             return NO_OBJECT_PERMISSIONS;
         } else {
@@ -520,32 +540,50 @@ public final class OXFolderUtility {
         for (int i = 0; i < size; i++) {
             final OCLPermission assignedPerm = iter.next();
             if (!assignedPerm.isGroupPermission()) {
-                final OCLPermission maxApplicablePerm =
-                    getMaxApplicablePermission(folderObj, userConfigStorage.getUserConfiguration(assignedPerm.getEntity(), ctx));
+                final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userConfigStorage.getUserConfiguration(assignedPerm.getEntity(), ctx));
                 if (!isApplicable(maxApplicablePerm, assignedPerm)) {
-                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(getUserName(assignedPerm.getEntity(), ctx),
-                        getFolderName(folderObj),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
                 }
             }
         }
     }
 
-    private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserConfiguration userConfig) {
-        final EffectivePermission retval =
-            new EffectivePermission(
-                userConfig.getUserId(),
-                folderObj.getObjectID(),
-                folderObj.getType(userConfig.getUserId()),
-                folderObj.getModule(),
-                folderObj.getCreatedBy(),
-                userConfig);
+    /**
+     * Checks every <b>user permission</b> against user configuration settings
+     *
+     * @param con The current db connection
+     * @param folderObj The folder object
+     * @param ctx The context
+     * @throws OXException If a composed permission does not obey user's configuration
+     */
+    public static void checkPermissionsAgainstUserConfigs(final Connection con, final FolderObject folderObj, final Context ctx) throws OXException {
+        final int size = folderObj.getPermissions().size();
+        final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+        UserPermissionBitsStorage permissionBitsStorage = UserPermissionBitsStorage.getInstance();
+        for (int i = 0; i < size; i++) {
+            final OCLPermission assignedPerm = iter.next();
+            if (!assignedPerm.isGroupPermission()) {
+                final UserPermissionBits userPermissionBits = permissionBitsStorage.getUserPermissionBits(con, assignedPerm.getEntity(), ctx);
+                final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userPermissionBits);
+                if (!isApplicable(maxApplicablePerm, assignedPerm)) {
+                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                }
+            }
+        }
+    }
+
+    private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserPermissionBits permissionBits) {
+        final int userId = permissionBits.getUserId();
+        final EffectivePermission retval = new EffectivePermission(userId, folderObj.getObjectID(), folderObj.getType(userId), folderObj.getModule(), folderObj.getCreatedBy(), permissionBits);
         retval.setFolderAdmin(true);
-        retval.setAllPermission(
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        retval.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        return retval;
+    }
+
+    private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserConfiguration userConfig) {
+        final EffectivePermission retval = new EffectivePermission(userConfig.getUserId(), folderObj.getObjectID(), folderObj.getType(userConfig.getUserId()), folderObj.getModule(), folderObj.getCreatedBy(), userConfig);
+        retval.setFolderAdmin(true);
+        retval.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         return retval;
     }
 
@@ -579,19 +617,10 @@ public final class OXFolderUtility {
                  * In any case grant full access
                  */
                 cur.setFolderAdmin(true);
-                cur.setAllPermission(
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION,
-                    OCLPermission.ADMIN_PERMISSION);
+                cur.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
                 pownerFound = true;
             } else if (cur.isFolderAdmin()) {
-                throw OXFolderExceptionCode.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION.create(getUserName(userId, ctx),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()),
-                    getFolderName(parent));
+                throw OXFolderExceptionCode.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION.create(Integer.valueOf(userId), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(parent.getObjectID()));
             }
         }
         if (!pownerFound) {
@@ -601,18 +630,13 @@ public final class OXFolderUtility {
             final OCLPermission pownerPerm = new OCLPermission();
             pownerPerm.setEntity(parent.getCreatedBy());
             pownerPerm.setFolderAdmin(true);
-            pownerPerm.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            pownerPerm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
             ocls.add(pownerPerm);
         }
         folderObj.setPermissionsNoClone(ocls);
     }
 
-    private static final int[] SORTED_STD_MODULES =
-        { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.UNBOUND };
+    private static final int[] SORTED_STD_MODULES = { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.UNBOUND };
 
     /**
      * Checks specified new folder module against parent folder
@@ -651,24 +675,24 @@ public final class OXFolderUtility {
     public static boolean checkFolderTypeAgainstParentType(final FolderObject parentFolder, final int newFolderType) {
         final int enforcedType;
         switch (parentFolder.getObjectID()) {
-        case FolderObject.SYSTEM_PRIVATE_FOLDER_ID:
-            enforcedType = FolderObject.PRIVATE;
-            break;
-        case FolderObject.SYSTEM_PUBLIC_FOLDER_ID:
-            enforcedType = FolderObject.PUBLIC;
-            break;
-        case FolderObject.SYSTEM_INFOSTORE_FOLDER_ID:
-            enforcedType = FolderObject.PUBLIC;
-            break;
-        case FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID:
-            enforcedType = FolderObject.PUBLIC;
-            break;
-        case FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID:
-            enforcedType = FolderObject.PUBLIC;
-            break;
-        default:
-            enforcedType = parentFolder.getType();
-            break;
+            case FolderObject.SYSTEM_PRIVATE_FOLDER_ID:
+                enforcedType = FolderObject.PRIVATE;
+                break;
+            case FolderObject.SYSTEM_PUBLIC_FOLDER_ID:
+                enforcedType = FolderObject.PUBLIC;
+                break;
+            case FolderObject.SYSTEM_INFOSTORE_FOLDER_ID:
+                enforcedType = FolderObject.PUBLIC;
+                break;
+            case FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID:
+                enforcedType = FolderObject.PUBLIC;
+                break;
+            case FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID:
+                enforcedType = FolderObject.PUBLIC;
+                break;
+            default:
+                enforcedType = parentFolder.getType();
+                break;
         }
         return (newFolderType == enforcedType);
     }
@@ -850,8 +874,7 @@ public final class OXFolderUtility {
              * Resolve group
              */
             try {
-                final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
-                for (int member : members) {
+                for (int member : GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember()) {
                     retval.add(member);
                 }
             } catch (final OXException e) {
@@ -918,8 +941,7 @@ public final class OXFolderUtility {
             return STR_EMPTY;
         }
         if (u.getDisplayName() == null) {
-            return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(u.getId()).append(
-                ')').toString();
+            return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(u.getId()).append(')').toString();
         }
         return new StringBuilder().append(u.getDisplayName()).append(" (").append(u.getId()).append(')').toString();
     }
@@ -955,8 +977,7 @@ public final class OXFolderUtility {
     public static String getUserName(final ServerSession session) {
         final User u = session.getUser();
         if (u.getDisplayName() == null) {
-            return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(u.getId()).append(
-                ')').toString();
+            return new StringBuilder().append(u.getGivenName()).append(' ').append(u.getSurname()).append(" (").append(u.getId()).append(')').toString();
         }
         return new StringBuilder().append(u.getDisplayName()).append(" (").append(u.getId()).append(')').toString();
     }
@@ -999,14 +1020,14 @@ public final class OXFolderUtility {
      */
     public static String folderType2String(final int type) {
         switch (type) {
-        case FolderObject.PRIVATE:
-            return STR_TYPE_PRIVATE;
-        case FolderObject.PUBLIC:
-            return STR_TYPE_PUBLIC;
-        case FolderObject.SYSTEM_TYPE:
-            return STR_SYSTEM;
-        default:
-            return STR_UNKNOWN;
+            case FolderObject.PRIVATE:
+                return STR_TYPE_PRIVATE;
+            case FolderObject.PUBLIC:
+                return STR_TYPE_PUBLIC;
+            case FolderObject.SYSTEM_TYPE:
+                return STR_SYSTEM;
+            default:
+                return STR_UNKNOWN;
         }
     }
 
@@ -1028,20 +1049,20 @@ public final class OXFolderUtility {
      */
     public static String folderModule2String(final int module) {
         switch (module) {
-        case FolderObject.CALENDAR:
-            return STR_MODULE_CALENDAR;
-        case FolderObject.TASK:
-            return STR_MODULE_TASK;
-        case FolderObject.CONTACT:
-            return STR_MODULE_CONTACT;
-        case FolderObject.UNBOUND:
-            return STR_MODULE_UNBOUND;
-        case FolderObject.SYSTEM_MODULE:
-            return STR_SYSTEM;
-        case FolderObject.INFOSTORE:
-            return STR_MODULE_INFOSTORE;
-        default:
-            return STR_UNKNOWN;
+            case FolderObject.CALENDAR:
+                return STR_MODULE_CALENDAR;
+            case FolderObject.TASK:
+                return STR_MODULE_TASK;
+            case FolderObject.CONTACT:
+                return STR_MODULE_CONTACT;
+            case FolderObject.UNBOUND:
+                return STR_MODULE_UNBOUND;
+            case FolderObject.SYSTEM_MODULE:
+                return STR_SYSTEM;
+            case FolderObject.INFOSTORE:
+                return STR_MODULE_INFOSTORE;
+            default:
+                return STR_UNKNOWN;
         }
     }
 

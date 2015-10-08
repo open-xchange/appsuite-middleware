@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -123,25 +122,6 @@ final class MovePerformer extends AbstractPerformer {
 
     }
 
-    private static final class UpdateFolder extends AbstractFolder {
-
-        private static final long serialVersionUID = -6666991788068206301L;
-
-        public UpdateFolder() {
-            super();
-        }
-
-        @Override
-        public boolean isGlobalID() {
-            return false;
-        }
-
-        @Override
-        public boolean isCacheable() {
-            return false;
-        }
-    }
-
     private final String realTreeId = FolderStorage.REAL_TREE_ID;
 
     /**
@@ -193,27 +173,16 @@ final class MovePerformer extends AbstractPerformer {
         folderStorage.updateFolder(folder, storageParameters);
     }
 
-    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final List<FolderStorage> openedStorages) throws OXException {
+    void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
         /*
          * Check permission on folder
          */
         {
-            final Permission permission = effectivePermission(storageFolder);
+            Permission permission = effectivePermission(storageFolder);
             if (!permission.isAdmin()) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                    getFolderInfo4Error(storageFolder),
-                    getUserInfo4Error(),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(getFolderInfo4Error(storageFolder), getUserInfo4Error(), getContextInfo4Error());
             }
         }
-        /*
-         * Get subfolders
-         */
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(realTreeId, folder.getID());
-        if (null == realStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folder.getID());
-        }
-        checkOpenedStorage(realStorage, openedStorages);
         /*
          * Special handling for mail folders on root level
          */
@@ -276,13 +245,10 @@ final class MovePerformer extends AbstractPerformer {
          * Check permission on destination folder
          */
         {
-            final Folder destFolder = virtualStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
-            final Permission permission = effectivePermission(destFolder);
+            Folder destFolder = virtualStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
+            Permission permission = effectivePermission(destFolder);
             if (permission.getFolderPermission() < Permission.CREATE_SUB_FOLDERS) {
-                throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(
-                    getUserInfo4Error(),
-                    getFolderInfo4Error(destFolder),
-                    getContextInfo4Error());
+                throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(getUserInfo4Error(), getFolderInfo4Error(destFolder), getContextInfo4Error());
             }
         }
         /*
@@ -319,30 +285,32 @@ final class MovePerformer extends AbstractPerformer {
                     checkOpenedStorage(realStorage, openedStorages);
                     realStorage.updateFolder(folder, storageParameters);
                     final String newId = folder.getID();
-                    if (!parentEquality) {
-                        /*
-                         * Delete in virtual storage
-                         */
-                        virtualStorage.deleteFolder(treeId, oldId, storageParameters);
-                    }
-                    /*
-                     * Generate map
-                     */
-                    final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
-                    gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
-                    final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
-                    final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
-                    for (final Entry<String, String> entry : parentIDMap.entrySet()) {
-                        final Folder up = new UpdateFolder();
-                        final String id = entry.getKey();
-                        up.setID(id);
-                        up.setParentID(entry.getValue());
-                        up.setTreeID(treeId);
-                        final String newIdent = idMap.get(id);
-                        if (null != newIdent) {
-                            up.setNewID(newIdent);
+                    if (null != newId) {
+                        if (!parentEquality) {
+                            /*
+                             * Delete in virtual storage
+                             */
+                            virtualStorage.deleteFolder(treeId, oldId, storageParameters);
                         }
-                        virtualStorage.updateFolder(up, storageParameters);
+                        /*
+                         * Generate map
+                         */
+                        final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
+                        gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
+                        final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
+                        final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
+                        for (final Entry<String, String> entry : parentIDMap.entrySet()) {
+                            final Folder up = new UpdateFolder();
+                            final String id = entry.getKey();
+                            up.setID(id);
+                            up.setParentID(entry.getValue());
+                            up.setTreeID(treeId);
+                            final String newIdent = idMap.get(id);
+                            if (null != newIdent) {
+                                up.setNewID(newIdent);
+                            }
+                            virtualStorage.updateFolder(up, storageParameters);
+                        }
                     }
                 } else {
                     /*
@@ -442,7 +410,7 @@ final class MovePerformer extends AbstractPerformer {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
                  */
-                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(folder.getName());
+                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
         }
     }
@@ -455,17 +423,14 @@ final class MovePerformer extends AbstractPerformer {
         /*
          * Iterate subfolders
          */
-        for (final SortableId id : subfolders) {
-            final String subfolderId = id.getId();
-            final FolderInfo subfolder;
+        for (SortableId id : subfolders) {
+            String subfolderId = id.getId();
+            FolderInfo subfolder;
             if (check) {
-                final Folder f = storage.getFolder(treeId, subfolderId, params);
-                final Permission permission = effectivePermission(f);
+                Folder f = storage.getFolder(treeId, subfolderId, params);
+                Permission permission = effectivePermission(f);
                 if (!permission.isAdmin()) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
-                        getFolderInfo4Error(f),
-                        getUserInfo4Error(),
-                        getContextInfo4Error());
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(getFolderInfo4Error(f), getUserInfo4Error(), getContextInfo4Error());
                 }
                 subfolder = new FolderInfo(subfolderId, f.getName());
             } else {
@@ -522,34 +487,6 @@ final class MovePerformer extends AbstractPerformer {
                 fillParentIDMap(oldSubfolder, newSubfolder, map);
             }
         }
-    }
-
-    private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws OXException {
-        for (final FolderStorage openedStorage : openedStorages) {
-            if (openedStorage.equals(storage)) {
-                return;
-            }
-        }
-        if (storage.startTransaction(storageParameters, true)) {
-            openedStorages.add(storage);
-        }
-    }
-
-    private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {
-        final ListPerformer listPerformer;
-        if (null == session) {
-            listPerformer = new ListPerformer(user, context, null);
-        } else {
-            listPerformer = new ListPerformer(session, null);
-        }
-        listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
-        for (final UserizedFolder userizedFolder : subfolders) {
-            if (name.equals(userizedFolder.getName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws OXException {

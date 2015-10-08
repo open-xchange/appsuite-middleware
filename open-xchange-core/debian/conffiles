@@ -10,6 +10,7 @@ opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
+opt/open-xchange/etc/external-domains.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/findbasic.properties
 opt/open-xchange/etc/foldercache.properties
@@ -22,8 +23,6 @@ opt/open-xchange/etc/html-sanitizer.properties
 opt/open-xchange/etc/i18n.properties
 opt/open-xchange/etc/importerExporter.xml
 opt/open-xchange/etc/import.properties
-opt/open-xchange/etc/index.properties
-opt/open-xchange/etc/contextSets/index.yml
 opt/open-xchange/etc/infostore.properties
 opt/open-xchange/etc/javamail.properties
 opt/open-xchange/etc/jolokia.properties
@@ -34,13 +33,11 @@ opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/mailresolver.properties
-opt/open-xchange/etc/external-domains.properties
 opt/open-xchange/etc/management.properties
 opt/open-xchange/etc/messaging.properties
 opt/open-xchange/etc/mime.types
 opt/open-xchange/etc/noipcheck.cnf
 opt/open-xchange/etc/notification.properties
-opt/open-xchange/etc/oauth-provider.properties
 opt/open-xchange/etc/quota.properties
 opt/open-xchange/etc/contextSets/quota.yml
 opt/open-xchange/etc/ox-scriptconf.sh
@@ -56,6 +53,7 @@ opt/open-xchange/etc/secret.properties
 opt/open-xchange/etc/secrets
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessiond.properties
+opt/open-xchange/etc/share.properties
 opt/open-xchange/etc/snippets.properties
 opt/open-xchange/etc/subscribe.properties
 opt/open-xchange/etc/system.properties
@@ -71,3 +69,4 @@ opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
 opt/open-xchange/etc/tokenlogin-secrets
+opt/open-xchange/etc/globaldb.yml

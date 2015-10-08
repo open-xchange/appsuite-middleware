@@ -281,7 +281,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -310,7 +310,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -341,7 +341,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -372,7 +372,7 @@ public class GroupTest extends AbstractTest {
 
         // create user to add
 
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -415,7 +415,7 @@ public class GroupTest extends AbstractTest {
 
         // create user to add
 
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -461,7 +461,7 @@ public class GroupTest extends AbstractTest {
 
         // create user to add
 
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -669,7 +669,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -692,7 +692,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -718,7 +718,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 
@@ -749,7 +749,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("group id > 0 expected", createdgroup.getId() > 0);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline", ctx);
         final UserModuleAccess access = new UserModuleAccess();
         final User createduser = UserTest.addUser(ctx, usr, access);
 

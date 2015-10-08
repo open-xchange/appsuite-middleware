@@ -86,7 +86,7 @@ public final class contacts extends XmlServlet<ContactService> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(contacts.class);
+    static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(contacts.class);
 
     /**
      * Initializes a new {@link contacts}.
@@ -279,7 +279,6 @@ public final class contacts extends XmlServlet<ContactService> {
                 }
                 writeResponse(contactObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
-            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(contactObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

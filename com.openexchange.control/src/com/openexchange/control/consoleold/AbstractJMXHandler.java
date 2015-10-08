@@ -63,7 +63,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXAuthenticator;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
@@ -183,7 +182,8 @@ public abstract class AbstractJMXHandler {
             environment = null;
         } else {
             environment = new HashMap<String, Object>(1);
-            environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractConsoleJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
+            String[] creds = new String[] { jmxLogin, jmxPassword };
+            environment.put(JMXConnector.CREDENTIALS, creds);
         }
 
         jmxConnector = JMXConnectorFactory.connect(url, environment);

@@ -333,7 +333,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = rc.prepareStatement(SQL_SELECT_ACCOUNTS);
+            stmt = rc.prepareStatement("SELECT account FROM filestorageAccount WHERE cid = ? AND user = ? AND serviceId = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
@@ -757,7 +757,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 update.clear();
                 for (final String field : secretProperties) {
                     final String encrypted = (String) content.get(field);
-                    if (!isEmpty(encrypted)) {
+                    if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                         try {
                             // Try using the new secret. Maybe this account doesn't need the migration
                             cryptoService.decrypt(encrypted, newSecret);
@@ -828,7 +828,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 final String field = entry.getKey();
                 if (secretProperties.contains(field)) {
                     final String encrypted = entry.getValue().toString();
-                    if (!isEmpty(encrypted)) {
+                    if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
@@ -844,7 +844,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             }
         }
     }
-    
+
     public void removeUnrecoverableItems(final FileStorageService parentService, final String secret, final Session session) throws OXException {
         final Set<String> secretProperties = parentService.getSecretProperties();
         if (secretProperties.isEmpty()) {
@@ -857,10 +857,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         // Proceed...
         final Context ctx = getContext(session);
         final Map<String, Object> content = new HashMap<String, Object>();
-        
+
         List<FileStorageAccount> accountsToDelete = new ArrayList<FileStorageAccount>(confId2AccountMap.size());
         TIntArrayList confIdsToDelete = new TIntArrayList(confId2AccountMap.size());
-        
+
         for (final int confId : confId2AccountMap.keys()) {
             content.clear();
             genericConfStorageService.fill(ctx, confId, content);
@@ -868,7 +868,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 final String field = entry.getKey();
                 if (secretProperties.contains(field)) {
                     final String encrypted = entry.getValue().toString();
-                    if (!isEmpty(encrypted)) {
+                    if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
@@ -886,21 +886,8 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     }
                 }
             }
-            
+
             deleteAccounts(serviceId, accountsToDelete.toArray(new FileStorageAccount[accountsToDelete.size()]), confIdsToDelete.toArray(), session);
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

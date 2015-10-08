@@ -49,11 +49,15 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
@@ -76,28 +80,23 @@ public class Bug25672Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
-    public Bug25672Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != this.manager2) {
             this.manager2.cleanUp();
             if (null != manager2.getClient()) {
                 manager2.getClient().logout();
             }
         }
-        super.tearDown();
     }
 
+    @Test
 	public void testUpdateWithDeleteExceptions() throws Exception {
 		/*
 		 * fetch sync token for later synchronization

@@ -58,6 +58,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -101,12 +101,13 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
 
     @Override
     public InputStream getDocument(int id, int version, long offset, long length, ServerSession session) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        DocumentMetadata dm = load(id, version, session.getContext());
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, dm);
+        if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
-        final DocumentMetadata dm = load(id, version, session.getContext());
-        final FileStorage fs = getFileStorage(session.getContext());
+
+        com.openexchange.filestore.FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
         InputStream document;
         if (dm.getFilestoreLocation() == null) {
             document = Streams.newByteArrayInputStream(new byte[0]);
@@ -116,15 +117,14 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             document = fs.getFile(dm.getFilestoreLocation(), offset, length);
         }
 
-        fireEvent(FileStorageEventHelper.buildAccessEvent(
-            session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
+        fireEvent(FileStorageEventHelper.buildAccessEvent(session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
         return document;
     }
 
     @Override
-    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
+    public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        int result = super.saveDocument(document, data, sequenceNumber, session);
+        IDTuple result = super.saveDocument(document, data, sequenceNumber, session);
         if (wasCreation) {
             fireEvent(FileStorageEventHelper.buildCreateEvent(
                 session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName()));
@@ -142,9 +142,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     }
 
     @Override
-    protected int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
+    protected IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        int result = super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
+        IDTuple result = super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
         if (wasCreation) {
             /*
              * leads to

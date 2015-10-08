@@ -12,6 +12,7 @@ import com.openexchange.realtime.packet.StanzaTest;
 import com.openexchange.realtime.payload.FluidPayloadTreeNodeBuilderTest;
 import com.openexchange.realtime.payload.PayloadTreeNodeTest;
 import com.openexchange.realtime.payload.PayloadTreeTest;
+import com.openexchange.realtime.synthetic.RunLoopManagerTest;
 import com.openexchange.realtime.util.ElementPathTest;
 import com.openexchange.realtime.util.StanzaSequenceGateTest;
 
@@ -26,7 +27,8 @@ import com.openexchange.realtime.util.StanzaSequenceGateTest;
     FluidPayloadTreeNodeBuilderTest.class,
     PayloadTreeNodeTest.class,
     PayloadTreeTest.class,
-    StanzaTest.class
+    StanzaTest.class,
+    RunLoopManagerTest.class
 })
 public class UnitTests {
 

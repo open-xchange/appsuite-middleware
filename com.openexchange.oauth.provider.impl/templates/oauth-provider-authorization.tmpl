@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${title?html}</title>
+    <style>
+      <#include "oauth-provider-common-css.tmpl">
+      ul {
+        list-style: none;
+        padding: 5px;
+        background-color: #f3f3f3;
+      }
+      ul > li {
+        margin: 1ex 0;
+        font-style: italic;
+      }
+      footer {
+        text-align: center;
+      }
+      #auth-form {
+        border: 1px solid #ccc;
+        padding: 30px;
+      }
+      .app-img {
+        margin: auto;
+        width: 100%;
+      }
+      .app-img > .pure-img {
+        margin: auto;
+      }
+      p.intro {
+        padding: 0;
+        text-align: center;
+      }
+      @media screen and (min-width: 35.5em) {
+        .app-img {
+          margin: auto 0;
+          width: auto;
+        }
+        .app-img > .pure-img {
+          margin: 0;
+        }
+        p.intro {
+          padding-left: 2em;
+          text-align: left;
+        }
+        ul {
+          padding-top: 20px;
+          padding-bottom: 20px;
+          padding-right: 0px;
+          padding-left: 60px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <h1>${headline?html}</h1>
+      <p>${clientDescription?html}</p>
+
+      <div id="auth-form">
+        <header class="pure-g">
+          <div class="app-img pure-u-1 pure-u-sm-1-3">
+            <img class="pure-img" src="${iconURL}" alt="${iconAlternative?html}">
+          </div>
+          <div class="pure-u-1 pure-u-sm-2-3">
+            <p class="intro">${introPre?html}<a href="${clientWebsite}" target="_blank">${clientName?html}</a>${introPost?html}</p>
+          </div>
+        </header>
+
+        <div id="scope-descriptions">
+          <ul>
+            <#list scopeDescriptions as desc>
+            <li>${desc?html}</li>
+            </#list>
+          </ul>
+        </div>
+
+        <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded" class="pure-form pure-form-aligned">
+          <input name="client_id" type="hidden" value="${clientId}">
+          <input name="redirect_uri" type="hidden" value="${redirectURI}">
+          <input name="scope" type="hidden" value="${scopes}">
+          <input name="state" type="hidden" value="${state}">
+          <input name="csrf_token" type="hidden" value="${csrfToken}">
+          <input name="response_type" type="hidden" value="code">
+          <input name="session" type="hidden" value="${session}">
+          <input name="language" type="hidden" value="${language}">
+
+          <div class="pure-g">
+            <button class="pure-button pure-button-primary pure-u-1 pure-u-sm-1-2" type="submit" name="access_allowed" value="true" autofocus>${allowLabel?html}</button>
+            <button class="pure-button pure-u-1 pure-u-sm-1-2" type="submit" name="access_denied" value="true">${denyLabel?html}</button>
+          </div>
+        </form>
+      </div>
+
+      <footer id="footer">
+        <p>${footer?html}</p>
+      </footer>
+    </div>
+  </body>
+</html>

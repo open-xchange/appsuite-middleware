@@ -75,6 +75,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,13 +85,14 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "allVisible", description = "Get all visible folder of a certain module (since v6.18.2) ", parameters = {
+@Action(method = RequestMethod.GET, name = "allVisible", description = "Get all visible folder of a certain module (since v6.18.2) ", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "tree", description = "The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "content_type", description = "The desired content type (either numbers or strings; e.g. \"tasks\", \"calendar\", \"contacts\", \"mail\")"),
+    @Parameter(name = "content_type", description = "The desired content type (either numbers or strings; e.g. \"tasks\", \"calendar\", \"contacts\", \"mail\", \"infostore\")"),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for folders are defined in Common folder data and Detailed folder data.")
 }, requestBody = "None",
 responseDescription = "Response with timestamp: A JSON object containing three fields: \"private\", \"public\", and \"shared\". Each field is a JSON array with data for all folders. Each folder is itself described by an array.")
+@OAuthAction(OAuthAction.GRANT_ALL)
 public final class VisibleFoldersAction extends AbstractFolderAction {
 
     public static final String ACTION = "allVisible";
@@ -113,10 +116,14 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
              */
             treeId = getDefaultTreeIdentifier();
         }
-        final ContentType contentType = parseContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
+        final ContentType contentType = parseAndCheckContentTypeParameter(AJAXServlet.PARAMETER_CONTENT_TYPE, request);
         if (null == contentType) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
+        if (isOAuthRequest(request) && !mayReadViaOAuthRequest(contentType, getOAuthGrant(request))) {
+            throw new OAuthInsufficientScopeException();
+        }
+
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all;
         {
@@ -125,7 +132,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final String mailRootFolders = request.getParameter("mailRootFolders");
-        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final java.util.List<ContentType> allowedContentTypes = collectAllowedContentTypes(request);
         /*
          * Get folder service
          */
@@ -210,13 +217,13 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
             final JSONObject ret = new JSONObject(4);
             final AdditionalFolderFieldList additionalFolderFieldList = Constants.ADDITIONAL_FOLDER_FIELD_LIST;
             if (null != privateFolders && privateFolders.length > 0) {
-                ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, additionalFolderFieldList));
+                ret.put("private", FolderWriter.writeMultiple2Array(request, columns, privateFolders, additionalFolderFieldList));
             }
             if (null != publicFolders && publicFolders.length > 0) {
-                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, additionalFolderFieldList));
+                ret.put("public", FolderWriter.writeMultiple2Array(request, columns, publicFolders, additionalFolderFieldList));
             }
             if (null != sharedFolders && sharedFolders.length > 0) {
-                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, additionalFolderFieldList));
+                ret.put("shared", FolderWriter.writeMultiple2Array(request, columns, sharedFolders, additionalFolderFieldList));
             }
             /*
              * Gather possible warnings

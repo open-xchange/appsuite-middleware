@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.internal.AvailableModules;
+import com.openexchange.find.internal.MandatoryAccounts;
 import com.openexchange.find.internal.MandatoryFolders;
 import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
@@ -99,6 +100,10 @@ public class FindActivator extends HousekeepingActivator {
             final MandatoryFolders mandatoryFolders = new MandatoryFolders(driverManager);
             registerService(PreferencesItemService.class, mandatoryFolders);
             registerService(ConfigTreeEquivalent.class, mandatoryFolders);
+
+            final MandatoryAccounts mandatoryAccounts = new MandatoryAccounts(driverManager);
+            registerService(PreferencesItemService.class, mandatoryAccounts);
+            registerService(ConfigTreeEquivalent.class, mandatoryAccounts);
 
             final AvailableModules availableModules = new AvailableModules(driverManager);
             registerService(PreferencesItemService.class, availableModules);

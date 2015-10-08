@@ -82,8 +82,8 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
     }
 
     @Override
-    public void close() throws OXException {
-        delegate.close();
+    public void close() {
+        SearchIterators.close(delegate);
     }
 
     @Override

@@ -64,6 +64,11 @@ import java.util.List;
 import javax.mail.internet.SharedInputStream;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
+import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
+import com.openexchange.ajax.fileholder.FileRandomAccess;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
+import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
@@ -77,7 +82,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class ThresholdFileHolder implements IFileHolder {
 
-    /** The default in-memory threshold of 500KB. */
+    /** The default in-memory threshold of 500 KB. */
     public static final int DEFAULT_IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
 
     /** The in-memory buffer where data is stored */
@@ -110,19 +115,31 @@ public final class ThresholdFileHolder implements IFileHolder {
     /** The list for post-processing tasks */
     private final List<Runnable> tasks;
 
+    /** <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle */
+    private final boolean autoManaged;
+
     /**
-     * Initializes a new {@link ThresholdFileHolder} with default threshold and default initial capacity.
+     * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
      */
     public ThresholdFileHolder() {
         this(-1, -1);
     }
 
     /**
-     * Initializes a new {@link ThresholdFileHolder} with default initial capacity.
+     * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
+     *
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     */
+    public ThresholdFileHolder(boolean autoManaged) {
+        this(-1, -1, autoManaged);
+    }
+
+    /**
+     * Initializes a new {@link ThresholdFileHolder} with default initial capacity (64 KB).
      *
      * @param threshold The threshold
      */
-    public ThresholdFileHolder(final int threshold) {
+    public ThresholdFileHolder(int threshold) {
         this(threshold, -1);
     }
 
@@ -132,8 +149,20 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @param threshold The threshold
      * @param initalCapacity The initial capacity
      */
-    public ThresholdFileHolder(final int threshold, final int initalCapacity) {
+    public ThresholdFileHolder(int threshold, int initalCapacity) {
+        this(threshold, initalCapacity, true);
+    }
+
+    /**
+     * Initializes a new {@link ThresholdFileHolder}.
+     *
+     * @param threshold The threshold
+     * @param initalCapacity The initial capacity
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     */
+    public ThresholdFileHolder(int threshold, int initalCapacity, boolean autoManaged) {
         super();
+        this.autoManaged = autoManaged;
         count = 0;
         this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
         contentType = "application/octet-stream";
@@ -316,7 +345,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                     count += len;
                     if ((null == tempFile) && (count > inMemoryThreshold)) {
                         // Stream to file because threshold is exceeded
-                        tempFile = TmpFileFileHolder.newTempFile();
+                        tempFile = TmpFileFileHolder.newTempFile(autoManaged);
                         this.tempFile = tempFile;
                         out = new FileOutputStream(tempFile);
                         baos.writeTo(out);

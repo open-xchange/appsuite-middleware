@@ -49,15 +49,22 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link SystemRootFolder} - Gets the system shared folder.
@@ -65,8 +72,6 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemRootFolder {
-
-    private static final boolean preload = true;
 
     /**
      * Initializes a new {@link SystemRootFolder}.
@@ -85,21 +90,36 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final FolderObject fo = FolderObject.createVirtualFolderObject(FolderObject.SYSTEM_ROOT_FOLDER_ID, "root", FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
+        final OCLPermission guestPermission = new OCLPermission(GroupStorage.GUEST_GROUP_IDENTIFIER, FolderObject.SYSTEM_ROOT_FOLDER_ID);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.setGroupPermission(true);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
+        final FolderObject fo = FolderObject.createVirtualFolderObject(
+            FolderObject.SYSTEM_ROOT_FOLDER_ID,
+            "root",
+            FolderObject.SYSTEM_MODULE,
+            true,
+            FolderObject.SYSTEM_TYPE,
+            FolderObject.VIRTUAL_FOLDER_PERMISSION,
+            guestPermission);
         final DatabaseFolder retval = new DatabaseFolder(fo);
-        // Enforce getSubfolders() from storage
-        if (preload) {
-            final List<String> list = new ArrayList<String>(4);
-            list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-            list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-            list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-            list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-            retval.setSubfolderIDs(list.toArray(new String[list.size()]));
-        } else {
-            retval.setSubfolderIDs(null);
-            retval.setSubscribedSubfolders(true);
-        }
+        retval.setSubfolderIDs(null);
+        retval.setSubscribedSubfolders(true);
+
         return retval;
+    }
+
+    /**
+     * Gets the subfolder identifiers of database folder representing system root folder for given user.
+     *
+     * @return The subfolder identifiers of database folder representing system root folder for given user
+     */
+    public static List<String[]> getSystemRootFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
+        return getSystemRootFolderSubfolder(user.getLocale());
     }
 
     private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
@@ -109,7 +129,7 @@ public final class SystemRootFolder {
      *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+    private static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
         /*
          * The system root folder
          */

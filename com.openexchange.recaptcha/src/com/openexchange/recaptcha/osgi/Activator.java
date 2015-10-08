@@ -65,7 +65,8 @@ public class Activator extends HousekeepingActivator {
 
     private static final String ALIAS_APPENDIX = "recaptcha";
 
-    private ReCaptchaServlet servlet;
+    private volatile ReCaptchaServlet servlet;
+    private volatile String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -106,19 +107,21 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-
         cleanUp();
-
         unregisterServlet();
         ReCaptchaServiceRegistry.getInstance().clearRegistry();
     }
 
-    private void registerServlet() {
-        final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
-        final HttpService httpService = registry.getService(HttpService.class);
-        if(servlet == null) {
+    private synchronized void registerServlet() {
+        ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
+        HttpService httpService = registry.getService(HttpService.class);
+        if (servlet == null) {
             try {
-                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX, servlet = new ReCaptchaServlet(), null, null);
+                String alias = getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
+                ReCaptchaServlet servlet = new ReCaptchaServlet();
+                httpService.registerServlet(alias, servlet, null, null);
+                this.alias = alias;
+                this.servlet = servlet;
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -126,12 +129,17 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    private void unregisterServlet() {
-        final HttpService httpService = getService(HttpService.class);
-        if(httpService != null && servlet != null) {
-            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX);
-            servlet = null;
-            LOG.info("reCAPTCHA Servlet unregistered.");
+    private synchronized void unregisterServlet() {
+        HttpService httpService = getService(HttpService.class);
+        if (httpService != null) {
+            String alias = this.alias;
+            ReCaptchaServlet servlet = this.servlet;
+            if (servlet != null && null != alias) {
+                httpService.unregister(alias);
+                this.servlet = null;
+                this.alias = null;
+                LOG.info("reCAPTCHA Servlet unregistered.");
+            }
         }
     }
 

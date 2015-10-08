@@ -51,7 +51,6 @@ package com.openexchange.user.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,10 +59,10 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link SetAttributeAction} - Maps the action to an <tt>update</tt> action.
@@ -86,8 +85,8 @@ public final class SetAttributeAction extends AbstractUserAction {
     /**
      * Initializes a new {@link SetAttributeAction}.
      */
-    public SetAttributeAction() {
-        super();
+    public SetAttributeAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -101,7 +100,7 @@ public final class SetAttributeAction extends AbstractUserAction {
             /*
              * Get user service
              */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+            final UserService userService = services.getService(UserService.class);
             /*
              * Parse attribute JSON object
              */

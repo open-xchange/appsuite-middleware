@@ -283,13 +283,13 @@ public final class StringAppender {
      * @param sb the <tt>StringBuffer</tt> to append.
      * @return a reference to this object.
      */
-    public StringAppender append(StringBuffer sb) {
+    public StringAppender append(StringBuffer other) {
         if (first) {
             first = false;
         } else {
             sb.append(delim);
         }
-        sb.append(sb);
+        sb.append(other);
         return this;
     }
 
@@ -307,13 +307,13 @@ public final class StringAppender {
      * @param sb the <tt>StringBuilder</tt> to append.
      * @return a reference to this object.
      */
-    public StringAppender append(StringBuilder sb) {
+    public StringAppender append(StringBuilder other) {
         if (first) {
             first = false;
         } else {
             sb.append(delim);
         }
-        sb.append(sb);
+        sb.append(other);
         return this;
     }
 

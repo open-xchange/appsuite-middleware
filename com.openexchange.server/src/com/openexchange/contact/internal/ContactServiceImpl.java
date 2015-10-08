@@ -50,7 +50,6 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -60,7 +59,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -476,7 +474,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * check currently stored contact
          */
         final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED });
+                ContactField.LAST_MODIFIED, ContactField.VCARD_ID });
         Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
         if (storedContact.getCreatedBy() != userID) {
             Check.canDeleteAll(permission, session, folderID);
@@ -517,7 +515,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         try {
             searchIterator = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID });
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.VCARD_ID });
             while (searchIterator.hasNext()) {
                 Contact storedContact = searchIterator.next();
                 if (storedContact.getCreatedBy() != userID) {
@@ -577,7 +575,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID });
+            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID, ContactField.VCARD_ID });
             if (null != searchIterator) {
                 while (searchIterator.hasNext()) {
                     Contact storedContact = searchIterator.next();
@@ -1154,13 +1152,23 @@ public class ContactServiceImpl extends DefaultContactService {
                  */
                 return new ContactMergerator(Tools.getComparator(sortOptions), searchIterators);
             }
+        } catch (OXException e) {
+            throw e;
         } catch (Exception e) {
             if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
                 throw (OXException)e.getCause();
-            } else {
-                throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supports(Session session, String folderID, ContactField... fields) throws OXException {
+        final ContactStorage storage = Tools.getStorage(session, folderID);
+
+        return storage.supports(fields);
+    }
 }

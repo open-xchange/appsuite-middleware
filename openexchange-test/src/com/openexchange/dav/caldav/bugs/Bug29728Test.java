@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -67,10 +69,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug29728Test extends CalDAVTest {
 
-	public Bug29728Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testCreateSeriesWithDeleteExceptions() throws Exception {
 		/*
 		 * create appointment in default folder on client

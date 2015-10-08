@@ -1,0 +1,13 @@
+#!/bin/bash 
+set -euo pipefail
+
+cat << WARNING
+
+ERROR:
+
+Your current system JVM doesn't meet our minimum requirements.
+Please select a Java 7 compatible system JVM as your default.
+
+WARNING
+
+exit 1

@@ -131,7 +131,7 @@ public class SaneScriptTagsTest {
             "5ede2&amp;uid=2893158569&amp;nid=18+25\">Not my account</a>";
 
         String result = SaneScriptTags.saneScriptTags(str, new boolean[1]);
-
+        System.out.println(result);
         Assert.assertTrue("Link no more intact.", result.indexOf("Q%253Cscript%253D&amp;t=1") > 0);
     }
 

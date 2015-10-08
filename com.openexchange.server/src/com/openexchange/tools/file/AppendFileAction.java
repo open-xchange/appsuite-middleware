@@ -72,7 +72,7 @@ public class AppendFileAction extends FileStreamAction {
      * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
      * @param offset The offset in bytes where to append the data
      */
-    public AppendFileAction(FileStorage storage, InputStream data, String fileStorageID, long sizeHint, long offset) {
+    public AppendFileAction(com.openexchange.filestore.FileStorage storage, InputStream data, String fileStorageID, long sizeHint, long offset) {
         super(storage, data, sizeHint, false);
         this.fileStorageID = fileStorageID;
         this.offset = offset;
@@ -93,17 +93,17 @@ public class AppendFileAction extends FileStreamAction {
     }
 
     @Override
-    protected void store(FileStorage storage, InputStream stream) throws OXException {
+    protected void store(com.openexchange.filestore.FileStorage storage, InputStream stream) throws OXException {
         fileSize = storage.appendToFile(stream, fileStorageID, offset);
     }
 
     @Override
-    protected void store(QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
+    protected void store(com.openexchange.filestore.QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
         fileSize = storage.appendToFile(stream, fileStorageID, offset, sizeHint);
     }
 
     @Override
-    protected void undo(FileStorage storage) throws OXException {
+    protected void undo(com.openexchange.filestore.FileStorage storage) throws OXException {
         storage.setFileLength(offset, fileStorageID);
     }
 

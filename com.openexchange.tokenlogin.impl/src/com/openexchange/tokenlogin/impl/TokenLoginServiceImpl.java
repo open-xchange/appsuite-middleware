@@ -509,17 +509,23 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             if (useHzMap) {
                 return;
             } else {
-                final IMap<String, String> sessionHzMap = hzMap(sessionId2tokenMapName);
-                final IMap<String, String> tokenHzMap = hzMap(token2sessionIdMapName);
-
-                if (null == sessionHzMap || null == tokenHzMap) {
-                    LOG.trace("Hazelcast map for remote token logins is not available.");
-                } else {
-                    // This MUST be synchronous!
-                    sessionHzMap.putAll(sessionId2token);
-                    tokenHzMap.putAll(token2sessionId);
-                    sessionId2token.clear();
-                    token2sessionId.clear();
+                if (0 < sessionId2token.size()) {
+                    IMap<String, String> hzMap = hzMap(sessionId2tokenMapName);
+                    if (null == hzMap) {
+                        LOG.trace("Hazelcast map for remote token logins is not available.");
+                    } else {
+                        hzMap.putAll(sessionId2token);
+                        sessionId2token.clear();
+                    }
+                }
+                if (0 < token2sessionId.size()) {
+                    IMap<String, String> hzMap = hzMap(token2sessionIdMapName);
+                    if (null == hzMap) {
+                        LOG.trace("Hazelcast map for remote token logins is not available.");
+                    } else {
+                        hzMap.putAll(token2sessionId);
+                        token2sessionId.clear();
+                    }
                 }
                 useHzMap = true;
             }

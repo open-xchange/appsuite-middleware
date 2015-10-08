@@ -52,6 +52,7 @@ package com.openexchange.server;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
 
 /**
  * Suite for integrated unit tests of the com.openexchange.server bundle.
@@ -62,6 +63,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     com.openexchange.ajax.ProcessUploadStaticTest.class,
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
+    com.openexchange.ajax.writer.DataWriterTest.class,
+    com.openexchange.ajax.writer.TaskWriterTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
     com.openexchange.groupware.ldap.Bug33891Test.class,
@@ -69,7 +72,6 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacementTest.class,
     com.openexchange.login.internal.LoginPerformerTest.class,
     com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.versit.valuedefinitions.rfc2445.ListValueDefinitionTest.class,
     com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
@@ -99,7 +101,9 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.mailaccount.json.actions.ValidateActionTest.class,
     com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverterTest.class,
     com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class,
-    com.openexchange.mail.json.parser.MessageParserTest.class
+    com.openexchange.mail.json.parser.MessageParserTest.class,
+    OAuthDispatcherServletTest.class,
+    com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class
 })
 public class UnitTests {
 

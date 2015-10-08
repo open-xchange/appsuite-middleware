@@ -53,6 +53,7 @@ public class ServiceEventAdapter extends AbstractAdapter implements ServiceListe
         context.addServiceListener(this);
     }
 
+    @Override
     public void destroy(BundleContext context) {
         context.removeServiceListener(this);
     }
@@ -63,6 +64,7 @@ public class ServiceEventAdapter extends AbstractAdapter implements ServiceListe
      *
      * @param event The event to adapt.
      */
+    @Override
     public void serviceChanged(final ServiceEvent event)
     {
         final Dictionary properties = new Hashtable();

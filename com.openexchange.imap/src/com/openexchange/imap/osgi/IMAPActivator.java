@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -65,18 +66,22 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
+import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.ThreadableCache;
 import com.openexchange.imap.threader.ThreadableLoginHandler;
+import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.util.ExtAccountFolderField;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.FullnameArgument;
@@ -119,17 +124,7 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class };
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
+            EventAdmin.class, GroupService.class, ContextService.class };
     }
 
     @Override
@@ -164,7 +159,11 @@ public final class IMAPActivator extends HousekeepingActivator {
             trackService(FolderService.class);
             openTrackers();
             /*
-             * Initialize cache region
+             * Command provider
+             */
+            registerService(CommandProvider.class, new ListLsubCommandProvider());
+            /*
+             * Initialize cache regions
              */
             {
                 String regionName = ExtAccountFolderField.REGION_NAME;
@@ -185,6 +184,25 @@ public final class IMAPActivator extends HousekeepingActivator {
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
 
                 registerService(AdditionalFolderField.class, new ExtAccountFolderField());
+            }
+            {
+                final String regionName = ConversationCache.REGION_NAME;
+                final byte[] ccf = ("jcs.region."+regionName+"=\n" + // local only!
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=360\n" +
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                    "jcs.region."+regionName+".elementattributes.IdleTime=360\n" +
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+                ConversationCache.initInstance(this);
             }
             /*
              * Register login handler
@@ -238,6 +256,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
                                 IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
+                                ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
                             }
                         }
                     }
@@ -306,6 +325,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
+            ConversationCache.releaseInstance();
             IMAPStoreCache.shutDownInstance();
             ThreadableCache.getInstance().clear();
             Services.setServiceLookup(null);

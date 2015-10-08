@@ -52,15 +52,12 @@ package com.openexchange.http.grizzly.osgi;
 import java.util.concurrent.ExecutorService;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
-import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
@@ -80,6 +77,7 @@ import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -103,21 +101,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             trackService(DispatcherPrefixService.class);
 
             log.info("Starting Grizzly server.");
-            context.addFrameworkListener(new FrameworkListener() {
-
-                @Override
-                public void frameworkEvent(FrameworkEvent event) {
-                    if (event.getBundle().getSymbolicName().equalsIgnoreCase("com.openexchange.http.grizzly")) {
-                        int eventType = event.getType();
-                        if (eventType == FrameworkEvent.ERROR) {
-                            log.error(event.toString(), event.getThrowable());
-                        } else {
-                            log.info(event.toString(), event.getThrowable());
-                        }
-                    }
-                }
-            });
-
             ServletFilterRegistration.initInstance();
             {
                 ServiceTracker<Filter, FilterProxy> tracker = new ServiceTracker<Filter, FilterProxy>(context, Filter.class, new ServletFilterTracker(context));
@@ -144,13 +127,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             int maxBodySize = grizzlyConfig.getMaxBodySize();
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
-            
-            networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
 
-            if (grizzlyConfig.isAJPEnabled()) {
-                networkListener.registerAddOn(new AjpAddOn());
-                log.info("Enabled AJP for Grizzly server.");
-            }
+            networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
 
             // Set the transport
             {
@@ -192,19 +170,24 @@ public class GrizzlyActivator extends HousekeepingActivator {
             grizzly.start();
             log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
 
-            /*
-             * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
-             * getService() will get its own instance of HttpServiceImpl
-             */
-            registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
-            log.info("Registered OSGi HttpService for Grizzly server.");
+            if (grizzlyConfig.isShutdownFast()) {
+                /*-
+                 * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
+                 * getService() will get its own instance of HttpServiceImpl
+                 */
+                registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
+                log.info("Registered OSGi HttpService for Grizzly server.");
+            }
 
             registerService(Reloadable.class, grizzlyConfig);
+
+            // Track the thread control
+            track(ThreadControlService.class, new ThreadControlTracker(context));
 
             // Finally start listeners if server start-up is completed
             track(SignalStartedService.class, new StartUpTracker(grizzly, grizzlyConfig, context));
             openTrackers();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
         }
     }

@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.folderstorage.ContentType;
@@ -62,7 +63,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StoragePriority;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link CacheFolderStorageRegistry} - Cache's registry for folder storages.
@@ -96,7 +96,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
     private CacheFolderStorageRegistry() {
         super();
         registry = new ConcurrentHashMap<String, List<FolderStorage>>();
-        genStorages = new Java7ConcurrentLinkedQueue<FolderStorage>();
+        genStorages = new ConcurrentLinkedQueue<FolderStorage>();
     }
 
     /**

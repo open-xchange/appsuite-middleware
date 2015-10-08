@@ -61,7 +61,6 @@ import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
-import com.openexchange.find.basic.drive.BasicInfostoreDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.tasks.BasicTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
@@ -104,10 +103,6 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
-
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
-        registerService(ModuleSearchDriver.class, new BasicInfostoreDriver(), properties);
     }
 
     private Dictionary<String, Object> defaultProperties() {

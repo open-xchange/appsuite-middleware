@@ -106,9 +106,7 @@ public final class GetAction extends AbstractResourceAction {
             r.setDisplayName(u.getDisplayName());
             r.setLastModified(new Date(0));
         }
-        final Date timestamp = r.getLastModified();
-
-        return new AJAXRequestResult(com.openexchange.resource.json.ResourceWriter.writeResource(r), timestamp, "json");
+        return new AJAXRequestResult(r, r.getLastModified(), "resource");
 
 
     }

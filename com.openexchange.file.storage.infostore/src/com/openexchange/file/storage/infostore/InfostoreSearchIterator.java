@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -66,7 +67,8 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
 
     /**
      * Initializes a new {@link InfostoreSearchIterator}.
-     * @param deleted
+     *
+     * @param delegate The delegate iterator
      */
     public InfostoreSearchIterator(SearchIterator<DocumentMetadata> delegate) {
         this.delegate = delegate;
@@ -78,8 +80,8 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
     }
 
     @Override
-    public void close() throws OXException {
-        delegate.close();
+    public void close() {
+        SearchIterators.close(delegate);
     }
 
     @Override

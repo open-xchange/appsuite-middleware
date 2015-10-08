@@ -191,6 +191,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
 
+    public abstract boolean isGuestUser(Context ctx, int uid) throws StorageException;
+
     /**
      * This method will detect if a specified user exists. It check this through the user id and the
      * user name specified in the user object
@@ -410,6 +412,8 @@ public abstract class OXToolStorageInterface {
     public abstract int getUserIDByUsername(Context ctx, String userName) throws StorageException, NoSuchUserException;
 
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
+
+    public abstract boolean getIsGuestByUserID(final Context ctx, final int user_id) throws StorageException;
 
     public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
 

@@ -85,8 +85,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCalendar.class);
-
     private final AppointmentSQLInterface delegate;
 
     private final MailSenderService sender;
@@ -374,12 +372,6 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public CalendarDataObject setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
-        if (optOccurrenceId <= 0) {
-            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
-            CalendarDataObject retval = new CalendarDataObject();
-            retval.setLastModified(setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage));
-            return retval;
-        }
         CalendarDataObject retval = null;
         try {
             CalendarDataObject original = getObjectById(objectId);
@@ -396,12 +388,6 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public CalendarDataObject setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
-        if (optOccurrenceId <= 0) {
-            LOG.warn("No occurrence to set confirmation for found. Delegate set confirmation for whole series or one time appointment!");
-            CalendarDataObject retval = new CalendarDataObject();
-            retval.setLastModified(setExternalConfirmation(objectId, folderId, mail, confirm, message));
-            return retval;
-        }
         CalendarDataObject retval = null;
         try {
             CalendarDataObject original = getObjectById(objectId);

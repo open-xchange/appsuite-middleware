@@ -56,6 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since Open-Xchange v6.18.2
  */
 public final class FileStorageExceptionMessages implements LocalizableStrings {
@@ -65,6 +66,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The file you requested does not exist.
     public static final String FILE_NOT_EXISTS_MSG = "The file you requested does not exist.";
+
+    // The file version you requested does not exist.
+    public static final String FILE_VERSION_NOT_EXISTS_MSG = "The file version you requested does not exist.";
 
     // A folder named "%1$s" already exists below the parent folder "%2$s".
     public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
@@ -111,8 +115,46 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
     public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
 
+    // The %1$s URL does not denote a file: %2$s
+    public static final String NOT_A_FILE_MSG = "The %1$s URL does not denote a file: %1$s";
+
+    // The %1$s URL does not denote a directory: %2$s
+    public static final String NOT_A_FOLDER_MSG = "The %1$s URL does not denote a directory: %2$s";
+
+    // Missing file name.
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+
+    // Update denied for %1$s resource: %2$s
+    public static final String UPDATE_DENIED_MSG = "Update denied for \"%1$s\" resource: %2$s";
+
+    // Delete denied for \"%1$s\" resource: %2$s
+    public static final String DELETE_DENIED_MSG = "Delete denied for \"%1$s\" resource: %2$s";
+
+    // Missing configuration for %1$s account "%2$s".
+    // The first placeholder is filled with the name of file storage provider (e.g. "boxcom"), the latter one is filled with numeric identifier of the account.
+    // E.g. 'Missing configuration for boxcom account "3".'
+    public static final String MISSING_CONFIG_MSG = "Missing configuration for %1$s account \"%2$s\".";
+
+    // The provided %1$s resource does not exist: %2$s
+    public static final String NOT_FOUND_MSG = "The provided %1$s resource does not exist: %2$s";
+
+    // The file %1$s doesn't have any content.
+    public static final String NO_CONTENT_MSG = "The file %1$s doesn't have any content.";
+
     // The associated %2$s account does no more exist
     public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
+
+    // Individual permissions are not supported in account \"%1$s\".
+    public static final String NO_PERMISSION_SUPPORT_MSG = "Individual permissions are not supported in account \"%1$s\".";
+
+    // Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+    public static final String NO_NOTES_SUPPORT_MSG = "Saving notes for file \"%1$s\" is not supported in account \"%2$s\".";
+
+    // Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
+    public static final String NO_CATEGORIES_SUPPORT_MSG = "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".";
+
+    // The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
+    public static final String FILE_SAVE_ABORTED_MSG = "The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

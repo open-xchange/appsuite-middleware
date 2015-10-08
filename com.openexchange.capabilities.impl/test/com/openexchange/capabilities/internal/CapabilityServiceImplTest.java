@@ -78,7 +78,7 @@ public class CapabilityServiceImplTest {
     @Test
     public void testApplyJSONFilter_TrackerNull_ReturnWithoutCheckAndWithoutRemoving() {
         this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, null);
-        this.capabilityServiceImpl.applyUIFilter(this.capabilities);
+        this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
         Assert.assertEquals(7, this.capabilities.size());
     }
@@ -89,7 +89,7 @@ public class CapabilityServiceImplTest {
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(new ConcurrentHashMap<Permission, PermissionAvailabilityService>());
 
-        this.capabilityServiceImpl.applyUIFilter(this.capabilities);
+        this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
         Assert.assertEquals(4, this.capabilities.size());
     }
@@ -112,7 +112,7 @@ public class CapabilityServiceImplTest {
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
-        this.capabilityServiceImpl.applyUIFilter(this.capabilities);
+        this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
         Assert.assertEquals(7, this.capabilities.size());
     }
@@ -129,7 +129,7 @@ public class CapabilityServiceImplTest {
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
-        this.capabilityServiceImpl.applyUIFilter(this.capabilities);
+        this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
         Assert.assertEquals(5, this.capabilities.size());
     }
@@ -149,7 +149,7 @@ public class CapabilityServiceImplTest {
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
-        this.capabilityServiceImpl.applyUIFilter(this.capabilities);
+        this.capabilityServiceImpl.alignPermissions(this.capabilities);
 
         Assert.assertEquals(6, this.capabilities.size());
     }

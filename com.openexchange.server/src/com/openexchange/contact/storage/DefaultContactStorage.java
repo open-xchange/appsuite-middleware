@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -79,6 +78,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link DefaultContactStorage}
@@ -99,6 +99,26 @@ public abstract class DefaultContactStorage implements ContactStorage {
      */
     public DefaultContactStorage() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean create(Session session, String folderId, Contact contact, String vCard) throws OXException {
+        LOG.info("No appropriate implementation for storing VCard found. Will just create the contact.");
+        this.create(session, folderId, contact);
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean update(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException {
+        LOG.info("No appropriate implementation for storing VCard found. Will just update the contact.");
+        this.update(session, folderId, id, contact, lastRead);
+        return false;
     }
 
     @Override
@@ -223,6 +243,14 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     /**
+     * Default implementation that always returns <code>false</code>. Override if applicable for storage.
+     */
+    @Override
+    public boolean supports(ContactField... fields) {
+        return false;
+    }
+
+    /**
      * Constructs a search term to find contacts what have a value !=
      * <code>null</code> for the supplied date field, combined with an
      * additional restriction for the parent folder IDs. This does only work
@@ -344,13 +372,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
      * @param searchIterator The search iterator to close, or <code>null</code>
      */
     protected static <T> void close(SearchIterator<T> searchIterator) {
-        if (null != searchIterator) {
-            try {
-                searchIterator.close();
-            } catch (OXException e) {
-                LOG.warn("error closing search iterator", e);
-            }
-        }
+        SearchIterators.close(searchIterator);
     }
 
     /**

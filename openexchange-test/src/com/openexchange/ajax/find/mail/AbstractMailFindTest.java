@@ -125,7 +125,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         contact.setUid(randomUID());
         return contact;
     }
-    
+
     protected void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;

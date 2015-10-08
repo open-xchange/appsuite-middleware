@@ -306,6 +306,19 @@ public final class MessageUtility {
      * @throws IOException
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
+        return readMailPart(mailPart, charset, false);
+    }
+
+    /**
+     * Reads the stream content from given mail part.
+     *
+     * @param mailPart The mail part
+     * @param charset The charset encoding used to generate a {@link String} object from raw bytes
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @return the <code>String</code> read from mail part's stream
+     * @throws IOException
+     */
+    public static String readMailPart(final MailPart mailPart, final String charset, boolean errorOnNoContent) throws IOException, OXException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
 
             @Override
@@ -318,7 +331,7 @@ public final class MessageUtility {
             }
         };
         try {
-            return readStream(streamProvider, charset);
+            return readStream(streamProvider, charset, errorOnNoContent);
         } catch (final IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -353,7 +366,7 @@ public final class MessageUtility {
      * The unknown character: <code>'&#65533;'</code>
      */
     public static final char UNKNOWN = '\ufffd';
-
+    
     /**
      * Reads a string from given input stream using direct buffering.
      *
@@ -362,7 +375,20 @@ public final class MessageUtility {
      * @return The <code>String</code> read from input stream
      * @throws IOException If an I/O error occurs
      */
-    public static String readStream(final InputStreamProvider streamProvider, final String charset) throws IOException {
+    public static String readStream(InputStreamProvider streamProvider, String charset) throws IOException {
+        return readStream(streamProvider, charset, false);
+    }
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param streamProvider The input stream provider
+     * @param charset The charset
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readStream(InputStreamProvider streamProvider, String charset, boolean errorOnNoContent) throws IOException {
         if (null == streamProvider) {
             return STR_EMPTY;
         }
@@ -419,7 +445,7 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        final String retval = readStream0(streamProvider.getInputStream(), charset);
+        final String retval = readStream0(streamProvider.getInputStream(), charset, errorOnNoContent);
         if (true || retval.indexOf(UNKNOWN) < 0) {
             return retval;
         }
@@ -428,7 +454,7 @@ public final class MessageUtility {
         LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
         return new String(bytes, detectedCharset);
     }
-
+    
     /**
      * Reads a string from given input stream using direct buffering.
      *
@@ -437,7 +463,20 @@ public final class MessageUtility {
      * @return The <code>String</code> read from input stream
      * @throws IOException If an I/O error occurs
      */
-    public static String readStream(final InputStream inStream, final String charset) throws IOException {
+    public static String readStream(InputStream inStream, String charset) throws IOException {
+        return readStream(inStream, charset, false);
+    }
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param inStream The input stream
+     * @param charset The charset
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @return The <code>String</code> read from input stream
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readStream(InputStream inStream, String charset, boolean errorOnNoContent) throws IOException {
         if (null == inStream) {
             return STR_EMPTY;
         }
@@ -494,7 +533,7 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        return readStream0(inStream, charset);
+        return readStream0(inStream, charset, errorOnNoContent);
     }
 
     private static String readGB18030Bytes(final byte[] bytes) throws Error {
@@ -542,7 +581,7 @@ public final class MessageUtility {
         }
     }
 
-    private static String readStream0(final InputStream inStream, final String charset) throws IOException {
+    private static String readStream0(InputStream inStream, String charset, boolean errorOnNoContent) throws IOException {
         if (null == inStream) {
             return STR_EMPTY;
         }
@@ -568,7 +607,7 @@ public final class MessageUtility {
                 throw error;
             }
         } catch (final IOException e) {
-            if ("No content".equals(e.getMessage())) {
+            if (!errorOnNoContent && "No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
                  * Return the empty string in this case.
@@ -633,7 +672,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        final String lc = toLowerCase(charset);
+        final String lc = com.openexchange.java.Strings.toLowerCase(charset);
         if (!lc.startsWith("big", 0)) {
             return false;
         }
@@ -653,7 +692,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return GB2312.equals(toLowerCase(charset));
+        return GB2312.equals(com.openexchange.java.Strings.toLowerCase(charset));
     }
 
     private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
@@ -668,7 +707,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return SHIFT_JIS.contains(toLowerCase(charset));
+        return SHIFT_JIS.contains(com.openexchange.java.Strings.toLowerCase(charset));
     }
 
     /**
@@ -977,7 +1016,7 @@ public final class MessageUtility {
         final String st = null == subtype ? "plain" : subtype;
         final String objectMimeType = new StringBuilder(32).append("text/").append(st).append("; charset=").append(
             MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
-        final DataContentHandler dch = dchFor(toLowerCase(st));
+        final DataContentHandler dch = dchFor(com.openexchange.java.Strings.toLowerCase(st));
         if (null == dch) {
             // No object DCH for MIME type
             try {
@@ -1036,5 +1075,4 @@ public final class MessageUtility {
         }
         return builder.toString();
     }
-
 }

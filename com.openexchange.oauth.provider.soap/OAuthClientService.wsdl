@@ -1,0 +1,473 @@
+<?xml version="1.0" ?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+	xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:tns="http://soap.provider.oauth.openexchange.com"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http"
+	name="OAuthClientService" targetNamespace="http://soap.provider.oauth.openexchange.com">
+	<wsdl:types>
+		<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			xmlns:tns="http://soap.provider.oauth.openexchange.com"
+			elementFormDefault="qualified" targetNamespace="http://soap.provider.oauth.openexchange.com"
+			version="1.0">
+			<xs:element name="Exception">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="message" type="xs:string"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="disableClient">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="disableClientResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="success" type="xs:boolean"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="enableClient">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="enableClientResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="success" type="xs:boolean"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getClientById">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="getClientByIdResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="client" nillable="true" type="tns:Client"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="listClients">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="contextGroup" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="listClientsResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" minOccurs="0" name="client"
+							type="tns:ClientListData"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="registerClient">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="contextGroup" type="xs:string"></xs:element>
+						<xs:element name="clientData" nillable="true" type="tns:ClientData"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="registerClientResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="client" nillable="true" type="tns:Client"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="revokeClientSecret">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="revokeClientSecretResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="client" nillable="true" type="tns:Client"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="unregisterClient">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="unregisterClientResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="success" type="xs:boolean"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="updateClient">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="clientId" nillable="true" type="xs:string"></xs:element>
+						<xs:element name="clientData" nillable="true" type="tns:ClientData"></xs:element>
+						<xs:element name="credentials" nillable="true"
+							type="tns:Credentials"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="updateClientResponse">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="client" nillable="true" type="tns:Client"></xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:complexType name="ClientData">
+				<xs:sequence>
+					<xs:element name="name" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="description" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="contactAddress" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="website" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="defaultScope" nillable="true" type="xs:string"></xs:element>
+					<xs:element maxOccurs="unbounded" name="redirectURI"
+						nillable="true" type="xs:string"></xs:element>
+					<xs:element name="icon" nillable="true" type="tns:Icon"></xs:element>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="Icon">
+				<xs:sequence>
+					<xs:element name="mimeType" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="data" nillable="true" type="xs:string"></xs:element>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="Credentials">
+				<xs:sequence>
+					<xs:element name="login" type="xs:string"></xs:element>
+					<xs:element name="password" type="xs:string"></xs:element>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="Client">
+				<xs:sequence>
+					<xs:element name="id" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="name" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="description" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="contactAddress" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="website" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="defaultScope" nillable="true" type="xs:string"></xs:element>
+					<xs:element maxOccurs="unbounded" name="redirectURI"
+						nillable="true" type="xs:string"></xs:element>
+					<xs:element name="secret" nillable="true" type="xs:string"></xs:element>
+					<xs:element name="registrationDate" nillable="true"
+						type="xs:long"></xs:element>
+					<xs:element name="enabled" type="xs:boolean"></xs:element>
+					<xs:element name="icon" nillable="true" type="tns:Icon"></xs:element>
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="ClientListData">
+				<xs:sequence>
+					<xs:element name="id" type="xs:string"></xs:element>
+					<xs:element name="name" type="xs:string"></xs:element>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+	</wsdl:types>
+	<wsdl:message name="updateClientResponse">
+		<wsdl:part element="tns:updateClientResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="enableClient">
+		<wsdl:part element="tns:enableClient" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="registerClientResponse">
+		<wsdl:part element="tns:registerClientResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="disableClientResponse">
+		<wsdl:part element="tns:disableClientResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="revokeClientSecretResponse">
+		<wsdl:part element="tns:revokeClientSecretResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="getClientByIdResponse">
+		<wsdl:part element="tns:getClientByIdResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="unregisterClientResponse">
+		<wsdl:part element="tns:unregisterClientResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="listClients">
+		<wsdl:part element="tns:listClients" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="updateClient">
+		<wsdl:part element="tns:updateClient" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="unregisterClient">
+		<wsdl:part element="tns:unregisterClient" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="revokeClientSecret">
+		<wsdl:part element="tns:revokeClientSecret" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="disableClient">
+		<wsdl:part element="tns:disableClient" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="enableClientResponse">
+		<wsdl:part element="tns:enableClientResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="registerClient">
+		<wsdl:part element="tns:registerClient" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="listClientsResponse">
+		<wsdl:part element="tns:listClientsResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="getClientById">
+		<wsdl:part element="tns:getClientById" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="OAuthClientServiceException">
+		<wsdl:part element="tns:Exception" name="OAuthClientServiceException">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="OAuthClientServicePortType">
+		<wsdl:operation name="updateClient">
+			<wsdl:input message="tns:updateClient" name="updateClient"
+				wsam:Action="urn:updateClient" wsaw:Action="urn:updateClient">
+			</wsdl:input>
+			<wsdl:output message="tns:updateClientResponse" name="updateClientResponse"
+				wsam:Action="urn:updateClientResponse" wsaw:Action="urn:updateClientResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:updateClientException"
+				wsaw:Action="urn:updateClientException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="unregisterClient">
+			<wsdl:input message="tns:unregisterClient" name="unregisterClient"
+				wsam:Action="urn:unregisterClient" wsaw:Action="urn:unregisterClient">
+			</wsdl:input>
+			<wsdl:output message="tns:unregisterClientResponse" name="unregisterClientResponse"
+				wsam:Action="urn:unregisterClientResponse" wsaw:Action="urn:unregisterClientResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:unregisterClientException"
+				wsaw:Action="urn:unregisterClientException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="listClients">
+			<wsdl:input message="tns:listClients" name="listClients"
+				wsam:Action="urn:listClients" wsaw:Action="urn:listClients">
+			</wsdl:input>
+			<wsdl:output message="tns:listClientsResponse" name="listClientsResponse"
+				wsam:Action="urn:listClientsResponse" wsaw:Action="urn:listClientsResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:listClientsException"
+				wsaw:Action="urn:listClientsException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="enableClient">
+			<wsdl:input message="tns:enableClient" name="enableClient"
+				wsam:Action="urn:enableClient" wsaw:Action="urn:enableClient">
+			</wsdl:input>
+			<wsdl:output message="tns:enableClientResponse" name="enableClientResponse"
+				wsam:Action="urn:enableClientResponse" wsaw:Action="urn:enableClientResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:enableClientClientException"
+				wsaw:Action="urn:enableClientClientException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="registerClient">
+			<wsdl:input message="tns:registerClient" name="registerClient"
+				wsam:Action="urn:registerClient" wsaw:Action="urn:registerClient">
+			</wsdl:input>
+			<wsdl:output message="tns:registerClientResponse" name="registerClientResponse"
+				wsam:Action="urn:registerClientResponse" wsaw:Action="urn:registerClientResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:registerClientException"
+				wsaw:Action="urn:registerClientException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getClientById">
+			<wsdl:input message="tns:getClientById" name="getClientById"
+				wsam:Action="urn:getClientById" wsaw:Action="urn:getClientById">
+			</wsdl:input>
+			<wsdl:output message="tns:getClientByIdResponse" name="getClientByIdResponse"
+				wsam:Action="urn:getClientByIdResponse" wsaw:Action="urn:getClientByIdResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:getClientByIdException"
+				wsaw:Action="urn:getClientByIdException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="revokeClientSecret">
+			<wsdl:input message="tns:revokeClientSecret" name="revokeClientSecret"
+				wsam:Action="urn:revokeClientSecret" wsaw:Action="urn:revokeClientSecret">
+			</wsdl:input>
+			<wsdl:output message="tns:revokeClientSecretResponse"
+				name="revokeClientSecretResponse" wsam:Action="urn:revokeClientSecretResponse"
+				wsaw:Action="urn:revokeClientSecretResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:revokeClientSecretException"
+				wsaw:Action="urn:revokeClientSecretException">
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="disableClient">
+			<wsdl:input message="tns:disableClient" name="disableClient"
+				wsam:Action="urn:disableClient" wsaw:Action="urn:disableClient">
+			</wsdl:input>
+			<wsdl:output message="tns:disableClientResponse" name="disableClientResponse"
+				wsam:Action="urn:disableClientResponse" wsaw:Action="urn:disableClientResponse">
+			</wsdl:output>
+			<wsdl:fault message="tns:OAuthClientServiceException"
+				name="OAuthClientServiceException" wsam:Action="urn:disableClientException"
+				wsaw:Action="urn:disableClientException">
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="OAuthClientServiceSoapBinding" type="tns:OAuthClientServicePortType">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http"></soap:binding>
+		<wsdl:operation name="updateClient">
+			<soap:operation soapAction="urn:updateClient" style="document"></soap:operation>
+			<wsdl:input name="updateClient">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="updateClientResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="listClients">
+			<soap:operation soapAction="urn:listClients" style="document"></soap:operation>
+			<wsdl:input name="listClients">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="listClientsResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="unregisterClient">
+			<soap:operation soapAction="urn:unregisterClient"
+				style="document"></soap:operation>
+			<wsdl:input name="unregisterClient">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="unregisterClientResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="enableClient">
+			<soap:operation soapAction="urn:enableClient" style="document"></soap:operation>
+			<wsdl:input name="enableClient">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="enableClientResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="registerClient">
+			<soap:operation soapAction="urn:registerClient" style="document"></soap:operation>
+			<wsdl:input name="registerClient">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="registerClientResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getClientById">
+			<soap:operation soapAction="urn:getClientById" style="document"></soap:operation>
+			<wsdl:input name="getClientById">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="getClientByIdResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="revokeClientSecret">
+			<soap:operation soapAction="urn:revokeClientSecret"
+				style="document"></soap:operation>
+			<wsdl:input name="revokeClientSecret">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="revokeClientSecretResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="disableClient">
+			<soap:operation soapAction="urn:disableClient" style="document"></soap:operation>
+			<wsdl:input name="disableClient">
+				<soap:body use="literal"></soap:body>
+			</wsdl:input>
+			<wsdl:output name="disableClientResponse">
+				<soap:body use="literal"></soap:body>
+			</wsdl:output>
+			<wsdl:fault name="OAuthClientServiceException">
+				<soap:fault name="OAuthClientServiceException" use="literal"></soap:fault>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="OAuthClientService">
+		<wsdl:port binding="tns:OAuthClientServiceSoapBinding" name="OAuthClientServiceHttpSoap11Endpoint">
+			<soap:address location="http://localhost/webservices/OAuthClientService"></soap:address>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

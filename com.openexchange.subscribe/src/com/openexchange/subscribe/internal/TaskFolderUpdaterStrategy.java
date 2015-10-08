@@ -161,7 +161,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
     }
 
     @Override
-    public void save(final Task newElement, final Object session) throws OXException {
+    public void save(final Task newElement, final Object session, Collection<OXException> errors) throws OXException {
         final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());

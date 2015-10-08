@@ -53,28 +53,24 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.lang.Validate;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -130,6 +126,18 @@ public abstract class AbstractPerformer {
      * @throws OXException If passed session is invalid
      */
     protected AbstractPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+        this(session, null, folderStorageDiscoverer);
+    }
+
+    /**
+     * Initializes a new {@link AbstractPerformer} from given session.
+     *
+     * @param session The session
+     * @param storageParameters The {@link StorageParameters}. Must not be <code>null</code> and must contain a valid session.
+     * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
+     */
+    protected AbstractPerformer(final ServerSession session, final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super();
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
@@ -139,11 +147,6 @@ public abstract class AbstractPerformer {
         if (session.getUserId() <= 0 || (session.getContextId() <= 0)) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("Either user and/or context identifier is invalid.");
         }
-        // Pre-Initialize session
-        final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
-        if (null != userPermissionBits) {
-            userPermissionBits.isMultipleMailAccounts();
-        }
         context = session.getContext();
         if (null == context) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("Context is null.");
@@ -152,8 +155,13 @@ public abstract class AbstractPerformer {
         if (null == user) {
             throw FolderExceptionErrorMessage.INVALID_SESSION.create("User is null.");
         }
-        storageParameters = new StorageParametersImpl(session, user, context);
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+
+        if (storageParameters == null) {
+            this.storageParameters = new StorageParametersImpl(session, user, context);
+        } else {
+            this.storageParameters = storageParameters;
+        }
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
         check4Duplicates = true;
     }
 
@@ -181,7 +189,7 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
         check4Duplicates = true;
     }
 
@@ -194,81 +202,7 @@ public abstract class AbstractPerformer {
         this.check4Duplicates = check4Duplicates;
     }
 
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param openedStorages The list containing already opened folder storages
-     * @throws OXException If name look-up fails
-     */
-    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        final CheckForDuplicateResult result = getCheckForDuplicateResult(name, treeId, parentId, openedStorages);
-        if (null != result) {
-            throw result.error;
-        }
-    }
-
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param openedStorages The list containing already opened folder storages
-     * @return The check result or <code>null</code> if no duplicate/conflict found
-     * @throws OXException If name look-up fails
-     */
-    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        return getCheckForDuplicateResult(name, treeId, parentId, null, openedStorages);
-    }
-
-    /**
-     * Checks for duplicate folder through a LIST request.
-     *
-     * @param name The name to check for
-     * @param treeId The tree identifier
-     * @param parentId The parent identifier
-     * @param excludee The identifier of the folder to exclude
-     * @param openedStorages The list containing already opened folder storages
-     * @return The check result or <code>null</code> if no duplicate/conflict found
-     * @throws OXException If name look-up fails
-     */
-    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final String excludee, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        if (!check4Duplicates || null == name) {
-            return null;
-        }
-        /*
-         * Check for duplicate
-         */
-        final Locale locale = storageParameters.getUser().getLocale();
-        final String lcName = name.toLowerCase(locale).trim();
-        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
-            final String localizedName = userizedFolder.getLocalizedName(locale);
-            if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                checkOpenedStorage(realStorage, openedStorages);
-                final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(
-                    name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
-                return new CheckForDuplicateResult(userizedFolder.getID(), e);
-            }
-        }
-        /*
-         * Check against possible i18n conflicts
-         */
-        final FolderI18nNamesService namesService = FolderI18nNamesServiceImpl.getInstance();
-        final Set<String> i18nNames = namesService.getI18nNamesFor();
-        for (final String reservedName : i18nNames) {
-            if (reservedName.toLowerCase(locale).equals(lcName)) {
-                final OXException e = FolderExceptionErrorMessage.RESERVED_NAME.create(name);
-                return new CheckForDuplicateResult(null, e);
-            }
-        }
-        return null;
-    }
-
-    private void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+    protected void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         for (final FolderStorage openedStorage : openedStorages) {
             if (openedStorage.equals(storage)) {
                 return;
@@ -285,15 +219,8 @@ public abstract class AbstractPerformer {
      * @return The context information for an error message.
      */
     protected String getContextInfo4Error() {
-        final Context context = this.context == null ? session.getContext() : this.context;
-        if (null == context) {
-            return "";
-        }
-        final String name = context.getName();
-        if (null == name || 0 == name.length()) {
-            return String.valueOf(context.getContextId());
-        }
-        return new StringBuilder(16).append(name).append(" (").append(context.getContextId()).append(')').toString();
+        Context context = this.context == null ? session.getContext() : this.context;
+        return null == context ? "" : Integer.toString(context.getContextId());
     }
 
     /**
@@ -302,15 +229,8 @@ public abstract class AbstractPerformer {
      * @return The user information for an error message.
      */
     protected String getUserInfo4Error() {
-        final User user = this.user == null ? session.getUser() : this.user;
-        if (null == user) {
-            return "";
-        }
-        final String name = user.getDisplayName();
-        if (null == name || 0 == name.length()) {
-            return String.valueOf(user.getId());
-        }
-        return new StringBuilder(16).append(name).append(" (").append(user.getId()).append(')').toString();
+        User user = this.user == null ? session.getUser() : this.user;
+        return null == user ? "" : Integer.toString(user.getId());
     }
 
     /**
@@ -318,15 +238,8 @@ public abstract class AbstractPerformer {
      *
      * @return The folder information for an error message.
      */
-    protected String getFolderInfo4Error(final Folder folder) {
-        if (null == folder) {
-            return "";
-        }
-        final String name = folder.getLocalizedName(user == null ? session.getUser().getLocale() : user.getLocale());
-        if (null == name || 0 == name.length()) {
-            return folder.getID();
-        }
-        return new StringBuilder(16).append(name).append(" (").append(folder.getID()).append(')').toString();
+    protected String getFolderInfo4Error(Folder folder) {
+        return null == folder ? "" : folder.getID();
     }
 
     /**
@@ -336,7 +249,10 @@ public abstract class AbstractPerformer {
      * @param warning The warning to add
      */
     protected void addWarning(final OXException warning) {
-        warning.addCategory(Category.CATEGORY_WARNING);
+        if (false == Category.CATEGORY_WARNING.equals(warning.getCategory()) &&
+            (null == warning.getCategories() || false == warning.getCategories().contains(Category.CATEGORY_WARNING))) {
+            warning.addCategory(Category.CATEGORY_WARNING);
+        }
         warnings.put(warning, PRESENT);
     }
 
@@ -476,7 +392,7 @@ public abstract class AbstractPerformer {
     /**
      * Gets the session.
      *
-     * @return The session
+     * @return The session or <code>null</code>
      */
     public ServerSession getSession() {
         return session;
@@ -491,22 +407,40 @@ public abstract class AbstractPerformer {
         return folderStorageDiscoverer;
     }
 
-    /**
-     * A check-for-duplicate result.
-     */
-    protected static final class CheckForDuplicateResult {
+    protected static final class UpdateFolder extends AbstractFolder implements SetterAwareFolder {
 
-        protected final OXException error;
-        protected final String optFolderId;
+        private static final long serialVersionUID = -6666991788068206301L;
 
-        protected CheckForDuplicateResult(final String optFolderId, final OXException error) {
+        private boolean containsSubscribed;
+
+        /**
+         * Initializes a new {@link UpdateFolder}.
+         */
+        public UpdateFolder() {
             super();
-            Validate.notNull(error, "OXException must not be null!");
-
-            this.optFolderId = optFolderId;
-            this.error = error;
+            containsSubscribed = false;
         }
 
-    } // End of class CheckForDuplicateResult
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+
+        @Override
+        public boolean isCacheable() {
+            return false;
+        }
+
+        @Override
+        public boolean containsSubscribed() {
+            return containsSubscribed;
+        }
+
+        @Override
+        public void setSubscribed(boolean subscribed) {
+            super.setSubscribed(subscribed);
+            containsSubscribed = true;
+        }
+    }
 
 }

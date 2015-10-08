@@ -53,6 +53,8 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import java.sql.Connection;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
@@ -62,12 +64,13 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link CachingUserPermissionBitsStorage}
+ * {@inheritDoc}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -211,6 +214,15 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     }
 
     @Override
+    public UserPermissionBits getUserPermissionBits(Connection con, int userId, Context ctx) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(con, userId, ctx);
+        }
+        return get(con, cache, ctx, userId);
+    }
+
+    @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
         if (null == users || 0 == users.length) {
             return new UserPermissionBits[0];
@@ -267,6 +279,12 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         removeUserPermissionBits(userId, ctx);
     }
 
+    @Override
+    public void saveUserPermissionBits(Connection con, int permissionBits, int userId, Context ctx) throws OXException {
+        delegateStorage.saveUserPermissionBits(con, permissionBits, userId, ctx);
+        removeUserPermissionBits(userId, ctx);
+    }
+
     private UserPermissionBits get(Cache cache, int contextId, int userId) throws OXException {
         CacheKey key = getKey(userId, contextId, cache);
         Object object = cache.get(key);
@@ -274,11 +292,23 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             return ((UserPermissionBits) object).clone();
         }
 
-        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
-        if (null == contextService) {
-            throw ServiceExceptionCode.absentService(ContextService.class);
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("UserPermissionBits-").append(contextId).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object != null) {
+                return ((UserPermissionBits) object).clone();
+            }
+
+            ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+            if (null == contextService) {
+                throw ServiceExceptionCode.absentService(ContextService.class);
+            }
+            return load(cache, contextService.getContext(contextId), userId);
+        } finally {
+            lock.unlock();
         }
-        return load(cache, contextService.getContext(contextId), userId);
     }
 
     private UserPermissionBits get(Cache cache, Context ctx, int userId) throws OXException {
@@ -288,11 +318,39 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             return ((UserPermissionBits) object).clone();
         }
 
-        return load(cache, ctx, userId);
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("UserPermissionBits-").append(ctx.getContextId()).append('-').append(userId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object != null) {
+                return ((UserPermissionBits) object).clone();
+            }
+
+            return load(cache, ctx, userId);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private UserPermissionBits get(final Connection con, final Cache cache, final Context ctx, final int userId) throws OXException {
+        final CacheKey key = getKey(userId, ctx, cache);
+        final Object object = cache.get(key);
+        if (object != null) {
+            return ((UserPermissionBits) object).clone();
+        }
+
+        return load(con, cache, ctx, userId);
     }
 
     private UserPermissionBits load(Cache cache, Context ctx, int userId) throws OXException {
         UserPermissionBits perm = delegateStorage.getUserPermissionBits(userId, ctx);
+        cache.put(getKey(userId, ctx, cache), perm.clone(), false);
+        return perm;
+    }
+
+    private UserPermissionBits load(final Connection con, final Cache cache, final Context ctx, final int userId) throws OXException {
+        final UserPermissionBits perm = delegateStorage.getUserPermissionBits(con, userId, ctx);
         cache.put(getKey(userId, ctx, cache), perm.clone(), false);
         return perm;
     }
@@ -308,7 +366,9 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             CacheKey key = getKey(id, ctx, cache);
             Object object = cache.get(key);
             if (object == null) {
-                toLoad.add(id);
+                if (false == toLoad.contains(id)) {
+                    toLoad.add(id);
+                }
             } else {
                 map.put(id, ((UserPermissionBits) object).clone());
             }

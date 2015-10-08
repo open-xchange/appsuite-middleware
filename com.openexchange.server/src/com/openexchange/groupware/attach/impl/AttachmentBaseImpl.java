@@ -75,6 +75,11 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -87,7 +92,6 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -99,13 +103,11 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
-import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -656,7 +658,25 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             try {
                 rollbackDBTransaction();
             } catch (final OXException x2) {
-                x2.log(LOG);
+                switch (x2.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", x2);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", x2);
+                        break;
+                    case INFO:
+                        LOG.info("", x2);
+                        break;
+                    case WARNING:
+                        LOG.warn("", x2);
+                        break;
+                    case ERROR:
+                        LOG.error("", x2);
+                        break;
+                    default:
+                        break;
+                }
             }
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
@@ -1008,7 +1028,25 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 try {
                     rollback();
                 } catch (final OXException txe) {
-                    e.log(LOG);
+                    switch (e.getCategories().get(0).getLogLevel()) {
+                        case TRACE:
+                            LOG.trace("", e);
+                            break;
+                        case DEBUG:
+                            LOG.debug("", e);
+                            break;
+                        case INFO:
+                            LOG.info("", e);
+                            break;
+                        case WARNING:
+                            LOG.warn("", e);
+                            break;
+                        case ERROR:
+                            LOG.error("", e);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 throw AttachmentExceptionCodes.FILE_DELETE_FAILED.create(e, I(contextHolder.get().getContextId()));
             }
@@ -1029,9 +1067,14 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super.startTransaction();
     }
 
-    protected QuotaFileStorage getFileStorage(final Context ctx) throws OXException, OXException {
+    protected QuotaFileStorage getFileStorage(Context ctx) throws OXException, OXException {
         try {
-            return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+            if (null == storageService) {
+                throw AttachmentExceptionCodes.FILESTORE_DOWN.create();
+            }
+
+            return storageService.getQuotaFileStorage(ctx.getContextId());
         } catch (final OXException e) {
             throw AttachmentExceptionCodes.FILESTORE_DOWN.create(e);
         }
@@ -1166,9 +1209,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
 
         @Override
-        public void close() throws OXException {
+        public void close() {
             if (delegate != null) {
-                delegate.close();
+                SearchIterators.close(delegate);
                 return;
             }
             closeSQLStuff(rs, stmt);

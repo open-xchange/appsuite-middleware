@@ -100,7 +100,6 @@ public final class SnippetActivator extends HousekeepingActivator {
         }
     }
 
-    @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
         Services.setServiceLookup(null);

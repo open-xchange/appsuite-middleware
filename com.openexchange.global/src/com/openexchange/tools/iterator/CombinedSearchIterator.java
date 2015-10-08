@@ -106,9 +106,9 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         for (final SearchIterator<T> iter : iterators) {
-            iter.close();
+            SearchIterators.close(iter);
         }
     }
 

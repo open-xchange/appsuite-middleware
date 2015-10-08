@@ -132,7 +132,7 @@ final class Update {
         if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
             throw GroupExceptionCodes.NO_MODIFY_PERMISSION.create();
         }
-        if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
+        if (changed.getIdentifier() == GroupStorage.GROUP_ZERO_IDENTIFIER) {
             try {
                 throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
             } catch (final OXException e) {

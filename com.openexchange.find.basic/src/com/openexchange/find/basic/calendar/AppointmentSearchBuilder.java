@@ -71,7 +71,6 @@ import com.openexchange.find.calendar.CalendarFacetType;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.java.SearchStrings;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -360,7 +359,7 @@ public class AppointmentSearchBuilder {
 
     private static void checkPatternLength(String pattern) throws OXException {
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (null != pattern && 0 < minimumSearchCharacters && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
+        if (null != pattern && 0 < minimumSearchCharacters && pattern.length() < minimumSearchCharacters) {
             throw FindExceptionCode.QUERY_TOO_SHORT.create(Integer.valueOf(minimumSearchCharacters));
         }
     }

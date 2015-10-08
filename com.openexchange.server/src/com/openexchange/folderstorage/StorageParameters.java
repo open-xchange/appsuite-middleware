@@ -126,7 +126,7 @@ public interface StorageParameters {
     /**
      * Gets the session.
      *
-     * @return The session
+     * @return The session or <code>null</code>
      */
     Session getSession();
 

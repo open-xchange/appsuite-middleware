@@ -56,7 +56,6 @@ import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.Strings;
 
 /**
  * {@link HTMLUtils}
@@ -99,25 +98,11 @@ public final class HTMLUtils {
      */
     public static String decodeUrl(final String s, final String charset) {
         try {
-            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+            return com.openexchange.java.Strings.isEmpty(s) ? s : (com.openexchange.java.Strings.isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {
             return s;
         }
     }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

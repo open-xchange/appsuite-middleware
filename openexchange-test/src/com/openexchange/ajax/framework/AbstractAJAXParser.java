@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -108,8 +109,24 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         return response;
     }
 
-    public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
-        assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+    public String checkResponse(final HttpResponse resp, final HttpRequest request) throws ParseException, IOException {
+        if (HttpStatus.SC_OK != resp.getStatusLine().getStatusCode()) {
+            String entity = null;
+            try {
+                entity = EntityUtils.toString(resp.getEntity());
+            } catch (Exception e) {
+                // ignored
+            }
+            StringBuilder stringBuilder = new StringBuilder("Response code is not okay");
+            if (null != request) {
+                stringBuilder.append(" for [") .append(request.getRequestLine()).append(']');
+            }
+            stringBuilder.append(": ").append(resp.getStatusLine()).append(". ");
+            if (null != entity) {
+                stringBuilder.append("Server response: ").append(entity);
+            }
+            fail(stringBuilder.toString());
+        }
         return EntityUtils.toString(resp.getEntity());
     }
 

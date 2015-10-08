@@ -49,10 +49,8 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.DataObject;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

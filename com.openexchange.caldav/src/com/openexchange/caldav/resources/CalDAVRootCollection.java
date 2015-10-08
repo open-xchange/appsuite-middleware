@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -100,7 +101,8 @@ public class CalDAVRootCollection extends CommonCollection {
         super(factory, GroupwareCaldavFactory.ROOT_URL);
         this.factory = factory;
         super.includeProperties(
-            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO)
+            new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
+            new ScheduleDefaultCalendarURL(factory)
         );
     }
 

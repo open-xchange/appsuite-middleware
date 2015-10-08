@@ -2,11 +2,19 @@
 Name:          open-xchange-oauth
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
+%if 0%{?rhel_version} && 0%{?rhel_version} >= 700
+BuildRequires: ant
+%else
 BuildRequires: ant-nodeps
+%endif
 BuildRequires: open-xchange-core
-BuildRequires: java-devel >= 1.6.0
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 Version:       @OXVERSION@
-%define        ox_release 33
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -18,8 +26,6 @@ Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-http-deferrer = %{version}
 Obsoletes:     open-xchange-http-deferrer < %{version}
-Provides:      open-xchange-oauth-facebook = %{version}
-Obsoletes:     open-xchange-oauth-facebook < %{version}
 Provides:      open-xchange-oauth-json = %{version}
 Obsoletes:     open-xchange-oauth-json < %{version}
 Provides:      open-xchange-oauth-linkedin = %{version}
@@ -49,7 +55,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties facebookoauth.properties twitteroauth.properties yahoooauth.properties"
+CONFFILES="deferrer.properties oauth.properties twitteroauth.properties yahoooauth.properties"
 for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
@@ -60,7 +66,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
@@ -74,14 +80,6 @@ if [ ${1:-0} -eq 2 ]; then
            ox_set_property com.openexchange.oauth.yahoo true $pfile
        fi
     fi
-    pfile=/opt/open-xchange/etc/facebookoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.facebook $pfile; then
-       if grep -E '^com.openexchange.*INSERT_YOUR_API_KEY_HERE' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.facebook false $pfile
-       else
-           ox_set_property com.openexchange.oauth.facebook true $pfile
-       fi
-    fi
 
     # SoftwareChange_Request-2146
     PFILE=/opt/open-xchange/etc/xingoauth.properties
@@ -91,6 +89,22 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "$VALUE" = "false" ]; then
         ox_set_property com.openexchange.oauth.xing true $PFILE
     fi
+
+    # SoftwareChange_Request-2410
+    VALUE=$(ox_read_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties)
+    if [ "" != "$VALUE" ]; then
+        ox_add_property com.openexchange.oauth.twitter.apiKey "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+        ox_remove_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties
+    fi
+    VALUE=$(ox_read_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties)
+    if [ "" != "$VALUE" ]; then
+        ox_add_property com.openexchange.oauth.twitter.apiSecret "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+        ox_remove_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties
+    fi
+
+    # SoftwareChange_Request-2532
+    VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
+    ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
 fi
 
 %clean
@@ -103,28 +117,44 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
+%dir /opt/open-xchange/etc/settings/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/boxcomoauth.properties
+%config(noreplace) /opt/open-xchange/etc/deferrer.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/dropboxoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
+%config(noreplace) /opt/open-xchange/etc/oauth.properties
+%config(noreplace) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
-%config(noreplace) /opt/open-xchange/etc/*
-%dir /opt/open-xchange/etc/settings/
-%config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Fri Oct 02 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Sixth candidate for 7.8.0 release
 * Fri Sep 25 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
+* Fri Sep 25 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Fith candidate for 7.8.0 release
+* Fri Sep 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Fourth candidate for 7.8.0 release
 * Tue Sep 08 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-09-14 (2732)
+* Mon Sep 07 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Third candidate for 7.8.0 release
 * Wed Sep 02 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-09-01 (2726)
 * Mon Aug 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-08-24 (2674)
+* Fri Aug 21 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Second candidate for 7.8.0 release
 * Mon Aug 17 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-08-12 (2671)
+* Thu Aug 06 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-08-17 (2666)
+* Wed Aug 05 2015 Steffen Templin <marcus.klein@open-xchange.com>
+First release candidate for 7.8.0
 * Tue Aug 04 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-08-10 (2655)
 * Mon Aug 03 2015 Steffen Templin <marcus.klein@open-xchange.com>
@@ -143,6 +173,10 @@ Build for patch 2015-06-29 (2578)
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
+* Wed Jun 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
@@ -251,6 +285,8 @@ Build for patch 2014-11-17
 Build for patch 2014-11-17
 * Mon Nov 10 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-11-17
+* Wed Nov 05 2014 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.8.0 release
 * Tue Nov 04 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-11-10
 * Fri Oct 31 2014 Steffen Templin <marcus.klein@open-xchange.com>

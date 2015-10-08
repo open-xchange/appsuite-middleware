@@ -59,8 +59,8 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * This iterator prefetches the delegating iterator results if the server configuration contains <code>true</code> for the prefetch
@@ -94,8 +94,8 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws OXException {
-        impl.close();
+    public void close() {
+        SearchIterators.close(impl);
     }
 
     /**
@@ -158,14 +158,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * Iterator for the object.
          */
         private final SearchIterator<T> delegate;
-
         private Queue<T> data;
-
         private final List<OXException> warnings;
-
         private OXException oxExc;
-
-        private SearchIteratorException closeexc;
 
         /**
          * Default constructor.
@@ -197,22 +192,15 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
                     break;
                 }
             }
-            try {
-                delegate.close();
-            } catch (final SearchIteratorException e) {
-                closeexc = e;
-            }
+            SearchIterators.close(delegate);
         }
 
         /**
          * {@inheritDoc}
          */
         @Override
-        public void close() throws SearchIteratorException, OXException {
+        public void close() {
             data.clear();
-            if (null != closeexc) {
-                throw closeexc;
-            }
         }
 
         /**
@@ -303,8 +291,8 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
          * {@inheritDoc}
          */
         @Override
-        public void close() throws OXException {
-            delegate.close();
+        public void close() {
+            SearchIterators.close(delegate);
         }
 
         /**

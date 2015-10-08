@@ -193,4 +193,23 @@ public final class Arrays {
             array[array.length - i - 1] = t;
         }
     }
+
+    /**
+     * Gets a value indicating whether the supplied array contains an element that is "equal to" the supplied one.
+     *
+     * @param array The array to check
+     * @param t The element to lookup
+     * @return <code>true</code> if an equal element was found, <code>false</code>, otherwise
+     */
+    public static <T> boolean contains(T[] array, T t) {
+        if (null != t) {
+            for (int i = 0; i < array.length; i++) {
+                if (t.equals(array[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

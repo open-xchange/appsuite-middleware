@@ -53,6 +53,8 @@ import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.ajax.fileholder.ByteArrayRandomAccess;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;

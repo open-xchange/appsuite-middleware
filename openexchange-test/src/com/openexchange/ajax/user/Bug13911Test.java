@@ -50,7 +50,6 @@
 package com.openexchange.ajax.user;
 
 import java.util.Random;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;

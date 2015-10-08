@@ -68,6 +68,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     private static final String userAttributeTableName = "user_attribute";
     private static final String resourceTableName = "resource";
     private static final String delResourceTableName = "del_resource";
+    private static final String aliasTableName = "user_alias";
 
     private static final String createGroupsTable = "CREATE TABLE groups ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -108,8 +109,16 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "homeDirectory VARCHAR(128) NOT NULL,"
        + "loginShell VARCHAR(128) NOT NULL,"
+       + "guestCreatedBy INT4 UNSIGNED NOT NULL DEFAULT 0,"
+       + "filestore_id INT4 unsigned NOT NULL DEFAULT 0,"
+       + "filestore_owner INT4 unsigned NOT NULL DEFAULT 0,"
+       + "filestore_name VARCHAR(32) DEFAULT NULL,"
+       + "filestore_login VARCHAR(32) DEFAULT NULL,"
+       + "filestore_passwd VARCHAR(32) DEFAULT NULL,"
+       + "quota_max BIGINT(20) DEFAULT NULL,"
        + "PRIMARY KEY (cid, id),"
-       + "INDEX (cid, mail(255))"
+       + "INDEX `mailIndex` (cid, mail(255)),"
+       + "INDEX `guestCreatedByIndex` (cid, guestCreatedBy)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createDelUserTable = "CREATE TABLE del_user ("
@@ -131,6 +140,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "homeDirectory VARCHAR(128) NOT NULL DEFAULT '',"
        + "loginShell VARCHAR(128) NOT NULL DEFAULT '',"
+       + "guestCreatedBy INT4 UNSIGNED NOT NULL DEFAULT 0,"
+       + "filestore_id INT4 unsigned NOT NULL DEFAULT 0,"
+       + "filestore_owner INT4 unsigned NOT NULL DEFAULT 0,"
+       + "filestore_name VARCHAR(32) DEFAULT NULL,"
+       + "filestore_login VARCHAR(32) DEFAULT NULL,"
+       + "filestore_passwd VARCHAR(32) DEFAULT NULL,"
+       + "quota_max BIGINT(20) DEFAULT NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -158,7 +174,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         + "value TEXT NOT NULL,"
         + "uuid BINARY(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
-        + "INDEX (cid,name,value(20)),"
+        + "INDEX `attributeIndex` (cid,name,value(20)),"
         + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -186,6 +202,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
+    private static final String createAliasTable = "CREATE TABLE user_alias ( " // ---> Also specified in com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask
+        + "cid INT4 UNSIGNED NOT NULL, "
+        + "user INT4 UNSIGNED NOT NULL, "
+        + "alias VARCHAR(255) NOT NULL, "
+        + "PRIMARY KEY (cid, user, alias) "
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     /**
      * Initializes a new {@link CreateLdap2SqlTables}.
      */
@@ -202,13 +225,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     public String[] tablesToCreate() {
         return new String[] { groupsTableName, delGroupsTableName, userTableName, delUserTableName,
             groupsMemberTableName, login2UserTableName, userAttributeTableName, resourceTableName,
-            delResourceTableName };
+            delResourceTableName, aliasTableName };
     }
 
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
-            createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable };
+            createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable, createAliasTable };
     }
 
 }

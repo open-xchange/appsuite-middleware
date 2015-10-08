@@ -114,6 +114,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final JSONArray json = new JSONArray();
         try {
             // Read in parameters
             final ServerSession session = req.getSession();
@@ -193,7 +194,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                                         return true;
                                     }
 
-                                    move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
+                                    move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess, json);
                                 }
                             }
 
@@ -244,7 +245,8 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                         return new AJAXRequestResult(Boolean.TRUE, "native");
                     }
 
-                    move2Archive(msgs, fullName, archiveFullname, separator, mailAccess);
+                    move2Archive(msgs, fullName, archiveFullname, separator, mailAccess, json);
+
                 } finally {
                     if (null != mailAccess) {
                         mailAccess.close(true);
@@ -252,7 +254,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                 }
             }
 
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+            return new AJAXRequestResult(json, "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -260,12 +262,12 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
         }
     }
 
-    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, JSONArray result) throws OXException {
         Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
-        move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess);
+        move2Archive(msgs, fullName, archiveFullname, separator, cal, mailAccess, result);
     }
 
-    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    protected void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, JSONArray result) throws OXException {
         Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
         for (MailMessage mailMessage : msgs) {
             Date receivedDate = mailMessage.getReceivedDate();
@@ -284,6 +286,15 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
         for (Map.Entry<Integer, List<String>> entry : map.entrySet() ) {
             String sYear = entry.getKey().toString();
             String fn = archiveFullname + separator + sYear;
+            JSONObject obj = new JSONObject();
+            StringBuilder sb = new StringBuilder("default").append(mailAccess.getAccountId()).append(separator).append(fn);
+            try {
+                obj.put("id", sb.toString());
+                obj.put("created", !mailAccess.getFolderStorage().exists(fn));
+            } catch (JSONException e) {
+                throw MailExceptionCode.JSON_ERROR.create(e);
+            }
+            result.put(obj);
             if (!mailAccess.getFolderStorage().exists(fn)) {
                 final MailFolderDescription toCreate = new MailFolderDescription();
                 toCreate.setAccountId(accountId);

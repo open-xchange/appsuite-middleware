@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
-import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -78,13 +77,11 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -453,79 +450,102 @@ public class OXFolderAccess {
      * @return The user's default folder of given module
      * @throws OXException If operation fails
      */
-    public final FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
+    public FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
         return getDefaultFolder(userId, module, -1);
     }
 
     /**
-     * Determines user's default folder of given module.
+     * Determines user's default folder of given module and an optional folder type. Folders of module {@link FolderObject#INFOSTORE}
+     * are created implicitly if they not yet exist.
      *
      * @param userId The user ID
      * @param module The module
      * @param type The type, or <code>-1</code> if not applicable
-     * @return The user's default folder of given module
+     * @return The user's default folder of given module and type
      * @throws OXException If operation fails
      */
-    public final FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
+    public FolderObject getDefaultFolder(final int userId, final int module, final int type) throws OXException {
+        return getFolderObject(getDefaultFolderID(userId, module, type));
+    }
+
+    /**
+     * Determines the identifier of a user's default folder of given module.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @return The identifier of the user's default folder of given module
+     * @throws OXException If operation fails
+     */
+    public int getDefaultFolderID(final int userId, final int module) throws OXException {
+        return getDefaultFolderID(userId, module, -1);
+    }
+
+    /**
+     * Determines a user's default folder identifier of given module and an optional folder type. Folders of module
+     * {@link FolderObject#INFOSTORE} are created implicitly if they not yet exist.
+     *
+     * @param userId The user ID
+     * @param module The module
+     * @param type The type, or <code>-1</code> if not applicable
+     * @return The identifier of the user's default folder of given module and type
+     * @throws OXException If operation fails
+     */
+    public int getDefaultFolderID(int userId, int module, int type) throws OXException {
         try {
             /*
              * Read out default folder
              */
-            int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) :
-                OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
-            if (-1 == folderId) {
-                if (FolderObject.INFOSTORE != module) {
-                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
-                        folderModule2String(module),
-                        getUserName(userId, ctx),
-                        Integer.valueOf(ctx.getContextId()));
-                }
+            int folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx) : OXFolderSQL.getUserDefaultFolder(userId, module, type, readCon, ctx);
+            if (-1 != folderId) {
+                return folderId;
+            }
+            if (FolderObject.INFOSTORE != module) {
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            }
+            User user = UserStorage.getInstance().getUser(userId, ctx);
+            if (user.isGuest()) {
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(folderModule2String(module), Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            }
+            /*
+             * (Re-)Create default infostore folder on demand
+             */
+            Connection wc = DBPool.pickupWriteable(ctx);
+            boolean rollback = false;
+            boolean created = false;
+            try {
+                wc.setAutoCommit(false);
+                rollback = true;
                 /*
-                 * (Re-)Create default infostore / infostore trash folder on demand
+                 * Check existence again within this transaction to avoid race conditions
                  */
-                User user = UserStorage.getInstance().getUser(userId, ctx);
-                final Connection wc = DBPool.pickupWriteable(ctx);
-                boolean rollback = false;
-                boolean created = false;
-                try {
-                    wc.setAutoCommit(false);
-                    rollback = true;
+                folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) : OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
+                if (-1 == folderId) {
                     /*
-                     * Check existence again within this transaction to avoid race conditions
+                     * Not found, create default folder
                      */
-                    folderId = -1 == type ? OXFolderSQL.getUserDefaultFolder(userId, module, wc, ctx) :
-                        OXFolderSQL.getUserDefaultFolder(userId, module, type, wc, ctx);
-                    if (-1 == folderId) {
-                        /*
-                         * Not found, create default folder
-                         */
-                        if (FolderObject.TRASH == type) {
-                            folderId = new OXFolderAdminHelper().addUserTrashToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
-                        } else {
-                            folderId = new OXFolderAdminHelper().addUserToInfoStore(userId, user.getPreferredLanguage(), ctx.getContextId(), wc);
-                        }
-                        created = true;
-                    }
-                    wc.commit();
-                    rollback = false;
-                } finally {
-                    if (rollback) {
-                        DBUtils.rollback(wc);
-                    }
-                    DBUtils.autocommit(wc);
-                    if (created) {
-                        DBPool.closeWriterSilent(ctx, wc);
-                    } else {
-                        DBPool.closeWriterAfterReading(ctx, wc);
-                    }
+                    int folderType = -1 == type ? FolderObject.PUBLIC : type;
+                    folderId = InfoStoreFolderAdminHelper.addDefaultFolder(wc, ctx.getContextId(), userId, folderType, user.getLocale());
+                    created = true;
+                }
+                wc.commit();
+                rollback = false;
+            } finally {
+                if (rollback) {
+                    DBUtils.rollback(wc);
+                }
+                DBUtils.autocommit(wc);
+                if (created) {
+                    DBPool.closeWriterSilent(ctx, wc);
+                } else {
+                    DBPool.closeWriterAfterReading(ctx, wc);
                 }
             }
-            return getFolderObject(folderId);
-        } catch (final OXException e) {
+            return folderId;
+        } catch (OXException e) {
             throw e;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -607,8 +627,7 @@ public class OXFolderAccess {
                 }
                 return tasks.containsNotSelfCreatedTasks(session, readCon, folder.getObjectID());
             } else if (module == FolderObject.CALENDAR) {
-                final AppointmentSQLInterface calSql =
-                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                 if (readCon == null) {
                     return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID());
                 }
@@ -643,32 +662,24 @@ public class OXFolderAccess {
             final int userId = session.getUserId();
             final int module = folder.getModule();
             switch (module) {
-            case FolderObject.TASK: {
-                final Tasks tasks = Tasks.getInstance();
-                return readCon == null ? tasks.isFolderEmpty(ctx, folder.getObjectID()) : tasks.isFolderEmpty(
-                    ctx,
-                    readCon,
-                    folder.getObjectID());
-            }
-            case FolderObject.CALENDAR: {
-                final AppointmentSQLInterface calSql =
-                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                return readCon == null ? calSql.isFolderEmpty(userId, folder.getObjectID()) : calSql.isFolderEmpty(
-                    userId,
-                    folder.getObjectID(),
-                    readCon);
-            }
-            case FolderObject.CONTACT: {
-                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
-                return contactService.isFolderEmpty(session, String.valueOf(folder.getObjectID()));
-            }
-            case FolderObject.INFOSTORE: {
-                final InfostoreFacade db =
-                    new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                return db.isFolderEmpty(folder.getObjectID(), ctx);
-            }
-            default:
-                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
+                case FolderObject.TASK: {
+                    final Tasks tasks = Tasks.getInstance();
+                    return readCon == null ? tasks.isFolderEmpty(ctx, folder.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, folder.getObjectID());
+                }
+                case FolderObject.CALENDAR: {
+                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                    return readCon == null ? calSql.isFolderEmpty(userId, folder.getObjectID()) : calSql.isFolderEmpty(userId, folder.getObjectID(), readCon);
+                }
+                case FolderObject.CONTACT: {
+                    final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+                    return contactService.isFolderEmpty(session, String.valueOf(folder.getObjectID()));
+                }
+                case FolderObject.INFOSTORE: {
+                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                    return db.isFolderEmpty(folder.getObjectID(), ctx);
+                }
+                default:
+                    throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -690,59 +701,40 @@ public class OXFolderAccess {
         try {
             session.getUserId();
             switch (folder.getModule()) {
-            case FolderObject.TASK: {
-                return new TasksSQLImpl(session).countTasks(folder);
-            }
-            case FolderObject.CALENDAR: {
-                final AppointmentSqlFactoryService service =
-                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-                final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
-                return calSql.countObjectsInFolder(folder.getObjectID());
-            }
-            case FolderObject.CONTACT:
-                try {
-                    final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                    return contactService.countContacts(session, Integer.toString(folder.getObjectID()));
-                } catch (final OXException e) {
-                    if (ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
-                        return 0;
-                    }
-                    throw e;
+                case FolderObject.TASK: {
+                    return new TasksSQLImpl(session).countTasks(folder);
                 }
-            case FolderObject.INFOSTORE:
-                try {
-                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    return db.countDocuments(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
-                } catch (final OXException e) {
-                    if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
-                        return 0;
-                    }
-                    throw e;
+                case FolderObject.CALENDAR: {
+                    final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+                    final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
+                    return calSql.countObjectsInFolder(folder.getObjectID());
                 }
-            default:
-                return -1;
+                case FolderObject.CONTACT:
+                    try {
+                        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                        return contactService.countContacts(session, Integer.toString(folder.getObjectID()));
+                    } catch (final OXException e) {
+                        if (ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
+                            return 0;
+                        }
+                        throw e;
+                    }
+                case FolderObject.INFOSTORE:
+                    try {
+                        final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                        return db.countDocuments(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
+                    } catch (final OXException e) {
+                        if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
+                            return 0;
+                        }
+                        throw e;
+                    }
+                default:
+                    return -1;
             }
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
-    }
-
-    private UserPermissionBits getUserPermissions(final Session session, final Context ctx, final int userId, final User user) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserPermissionBits();
-        }
-        final UserPermissionBits bits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
-        if (null != user) {
-            bits.setGroups(user.getGroups());
-        }
-        return bits;
-    }
-
-    private User getUser(final Session session, final Context ctx, final int userId) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser();
-        }
-        return UserStorage.getInstance().getUser(userId, ctx);
     }
 
 }

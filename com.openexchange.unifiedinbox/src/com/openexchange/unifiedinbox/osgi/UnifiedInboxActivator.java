@@ -53,10 +53,15 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
@@ -64,7 +69,11 @@ import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.unifiedinbox.Enabled;
 import com.openexchange.unifiedinbox.UnifiedInboxMessageStorage;
 import com.openexchange.unifiedinbox.UnifiedInboxProvider;
@@ -90,9 +99,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class,
-            ThreadPoolService.class, ConfigViewFactory.class, UnifiedInboxManagement.class };
+        return new Class<?>[] { ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ContextService.class, ThreadPoolService.class, ConfigViewFactory.class, UnifiedInboxManagement.class, CapabilityService.class };
     }
 
     @Override
@@ -106,9 +113,11 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
             openTrackers();
 
             // Register service(s)
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
-            registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
+            {
+                Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+                dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+                registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
+            }
             registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
 
             // Detect what SynchronousQueue to use
@@ -129,6 +138,36 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
 
             // Register unified service
             registerService(UnifiedViewService.class, new UnifiedInboxMessageStorage());
+
+            // Register "unified-mailbox" capability
+            {
+                final ServiceLookup services = this;
+                final String sCapability = "unified-mailbox";
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
+                dictionary.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+                registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                    @Override
+                    public boolean isEnabled(String capability, Session session) throws OXException {
+                        if (sCapability.equals(capability)) {
+                            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                            if (serverSession.isAnonymous() || !serverSession.getUserPermissionBits().hasWebMail()) {
+                                return false;
+                            }
+
+                            ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
+                            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                            ComposedConfigProperty<Boolean> property = view.property("com.openexchange.unifiedinbox.enabled", boolean.class);
+                            // Either absent or "com.openexchange.unifiedinbox.enabled=true"
+                            return property.isDefined() ? property.get().booleanValue() : true;
+                        }
+
+                        return true;
+                    }
+                }, dictionary);
+
+                getService(CapabilityService.class).declareCapability(sCapability);
+            }
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

@@ -127,6 +127,14 @@ public interface SessiondService {
     /**
      * Removes all sessions belonging to given contexts from this and all other cluster nodes.
      *
+     * @param contextIds - Set with the context identifiers to remove sessions for
+     * @throws OXException - if removing session fails on one of the remote nodes
+     */
+    public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException;
+
+    /**
+     * Removes all sessions belonging to given contexts from this and all other cluster nodes.
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If removing session fails on one of the remote nodes
@@ -142,14 +150,6 @@ public interface SessiondService {
      * @throws OXException If an error occurs while removing
      */
     Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException;
-
-    /**
-     * Removes all sessions belonging to given contexts from this and all other cluster nodes.
-     *
-     * @param contextIds - Set with the context identifiers to remove sessions for
-     * @throws OXException - if removing session fails on one of the remote nodes
-     */
-    public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException;
 
     /**
      * Gets the number of active sessions belonging to given user in specified context.

@@ -84,8 +84,13 @@ public class CapabilityGetAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get capability
         String id = requestData.checkParameter("id");
-        CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
-            session.getUserId(), session.getContextId(), true, true);
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        CapabilitySet capabilities;
+        if (session == null || session.isAnonymous()) {
+            capabilities = capabilityService.getCapabilities(-1, -1, true, true);
+        } else {
+            capabilities = capabilityService.getCapabilities(session, true);
+        }
         Capability capability = null != capabilities ? capabilities.get(id) : null;
         return null == capability ? new AJAXRequestResult() : new AJAXRequestResult(capability, "capability");
     }

@@ -66,7 +66,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
             final String contextid = parameters.getContextid();
-            if (isEmpty(contextid)) {
+            if (com.openexchange.java.Strings.isEmpty(contextid)) {
                 throw new RemoteException_Exception("Missing context identifier.");
             }
             final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
@@ -98,7 +98,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
             final String contextid = parameters.getContextid();
-            if (isEmpty(contextid)) {
+            if (com.openexchange.java.Strings.isEmpty(contextid)) {
                 throw new RemoteException_Exception("Missing context identifier.");
             }
             final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
@@ -309,7 +309,17 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setFax_other(tmp);
         }
 
-        Integer itg = soapUser.getFolderTree();
+        Integer itg = soapUser.getFilestoreId();
+        if (itg != null) {
+            user.setFilestoreId(itg);
+        }
+
+        tmp = soapUser.getFilestoreName();
+        if (tmp != null) {
+            user.setFilestore_name(tmp);
+        }
+
+        itg = soapUser.getFolderTree();
         if (itg != null) {
             user.setFolderTree(itg);
         }
@@ -337,7 +347,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.IMAP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -439,6 +449,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setMarital_status(tmp);
         }
 
+        Long lng = soapUser.getMaxQuota();
+        if (null != lng) {
+            user.setMaxQuota(lng);
+        }
+
         tmp = soapUser.getMiddleName();
         if (tmp != null) {
             user.setMiddle_name(tmp);
@@ -527,7 +542,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         i = soapUser.getSmtpPort();
         if (i != null) {
             final String s = user.getSmtpServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.SMTP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -721,6 +736,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setUrl(tmp);
         }
 
+        lng = soapUser.getUsedQuota();
+        if (null != lng) {
+            user.setUsedQuota(lng);
+        }
+
         tmp = soapUser.getUserfield01();
         if (tmp != null) {
             user.setUserfield01(tmp);
@@ -886,6 +906,8 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setFaxBusiness(user.getFax_business());
         soapUser.setFaxHome(user.getFax_home());
         soapUser.setFaxOther(user.getFax_other());
+        soapUser.setFilestoreId(user.getFilestoreId());
+        soapUser.setFilestoreName(user.getFilestore_name());
         soapUser.setFolderTree(user.getFolderTree());
         soapUser.setGivenName(user.getGiven_name());
         soapUser.setGuiPreferencesForSoap(map2Soap(user.getGuiPreferences()));
@@ -908,6 +930,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setMailenabled(user.getMailenabled());
         soapUser.setManagerName(user.getManager_name());
         soapUser.setMaritalStatus(user.getMarital_status());
+        soapUser.setMaxQuota(user.getMaxQuota());
         soapUser.setMiddleName(user.getMiddle_name());
         soapUser.setName(user.getName());
         soapUser.setNickname(user.getNickname());
@@ -960,6 +983,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setUploadFileSizeLimit(user.getUploadFileSizeLimit());
         soapUser.setUploadFileSizeLimitPerFile(user.getUploadFileSizeLimitPerFile());
         soapUser.setUrl(user.getUrl());
+        soapUser.setUsedQuota(user.getUsedQuota());
         soapUser.setUserAttributes(mapmap2Soap(user.getUserAttributes()));
         soapUser.setUserfield01(user.getUserfield01());
         soapUser.setUserfield02(user.getUserfield02());
@@ -1508,17 +1532,4 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapMap.setEntries(entries);
         return soapMap;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

@@ -29,6 +29,18 @@ public interface OXContextServicePortType {
         Change parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:listQuota", output = "urn:listQuotaResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listQuotaStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listQuotaInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listQuotaInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listQuotaNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listQuotaRemoteException")})
+    @RequestWrapper(localName = "listQuota", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListQuota")
+    @WebMethod(action = "urn:listQuota")
+    @ResponseWrapper(localName = "listQuotaResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListQuotaResponse")
+    public java.util.List<com.openexchange.admin.soap.context.dataobjects.Quota> listQuota(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Context ctx,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
+
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeQuota", output = "urn:changeQuotaResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeQuotaStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeQuotaInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeQuotaInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeQuotaNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeQuotaRemoteException")})
     @WebMethod(action = "urn:changeQuota")
@@ -130,7 +142,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "access", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.UserModuleAccess access,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -154,7 +168,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "access_combination_name", targetNamespace = "http://soap.admin.openexchange.com")
         java.lang.String accessCombinationName,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -236,7 +252,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "admin_user", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.User adminUser,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        com.openexchange.admin.soap.context.dataobjects.Credentials auth,
+        @WebParam(name = "schema_select_strategy", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy schemaSelectStrategy
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, ContextExistsException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")

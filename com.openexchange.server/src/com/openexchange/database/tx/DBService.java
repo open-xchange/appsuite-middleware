@@ -52,18 +52,22 @@ package com.openexchange.database.tx;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
+import com.openexchange.database.provider.LoggingDBProvider;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tx.ConnectionHolder;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionExceptionCodes;
 import com.openexchange.tx.Undoable;
@@ -80,6 +84,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     private static final class ThreadState {
         protected final List<Undoable> undoables = new ArrayList<Undoable>();
         protected boolean preferWriteCon;
+        private boolean foreignTransaction;
+        private Connection foreignConnection;
         protected final Set<Connection> writeCons = new HashSet<Connection>();
 
         protected ThreadState() {
@@ -93,14 +99,22 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public void setProvider(final DBProvider provider) {
-        this.provider = new RequestDBProvider(provider);
+        this.provider = new RequestDBProvider(new LoggingDBProvider(provider));
         this.provider.setTransactional(true);
     }
 
+    /**
+     * Initializes a new {@link DBService}.
+     */
     public DBService() {
         super();
     }
 
+    /**
+     * Initializes a new {@link DBService}.
+     *
+     * @param provider The initial database provider instance
+     */
     public DBService(final DBProvider provider) {
         super();
         setProvider(provider);
@@ -109,32 +123,44 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         final ThreadState threadState = txState.get();
-        if(threadState != null && threadState.preferWriteCon) {
-            return getWriteConnection(ctx);
+        if(threadState != null) {
+            if (threadState.foreignTransaction) {
+                return threadState.foreignConnection;
+            } else if (threadState.preferWriteCon) {
+                return getWriteConnection(ctx);
+            }
         }
         return provider.getReadConnection(ctx);
     }
 
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
-        final Connection writeCon = provider.getWriteConnection(ctx);
         final ThreadState threadState = txState.get();
-        if(threadState != null && threadState.preferWriteCon) {
-            threadState.writeCons.add(writeCon);
-            return writeCon;
-        } else if(threadState != null){
-            threadState.preferWriteCon = true;
+        if(threadState != null) {
+            if (threadState.foreignTransaction) {
+                return threadState.foreignConnection;
+            } else if (threadState.preferWriteCon) {
+                final Connection writeCon = provider.getWriteConnection(ctx);
+                threadState.writeCons.add(writeCon);
+                return writeCon;
+            } else {
+                threadState.preferWriteCon = true;
+            }
         }
 
-        return writeCon;
+        return provider.getWriteConnection(ctx);
     }
 
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null && threadState.preferWriteCon && threadState.writeCons.contains(con)){
-            releaseWriteConnectionAfterReading(ctx,con);
-            return;
+        if(threadState != null) {
+            if (threadState.foreignTransaction) {
+                return;
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
+                releaseWriteConnectionAfterReading(ctx,con);
+                return;
+            }
         }
         provider.releaseReadConnection(ctx, con);
     }
@@ -142,8 +168,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null && threadState.preferWriteCon) {
-            threadState.writeCons.remove(con);
+        if(threadState != null) {
+            if (threadState.foreignTransaction) {
+                return;
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
+                threadState.writeCons.remove(con);
+            }
         }
         provider.releaseWriteConnection(ctx, con);
     }
@@ -151,8 +181,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
     @Override
     public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
         final ThreadState threadState = txState.get();
-        if(threadState != null && threadState.preferWriteCon) {
-            threadState.writeCons.remove(con);
+        if(threadState != null) {
+            if (threadState.foreignTransaction) {
+                return;
+            } else if (threadState.preferWriteCon && threadState.writeCons.contains(con)){
+                threadState.writeCons.remove(con);
+            }
         }
         provider.releaseWriteConnectionAfterReading(ctx, con);
     }
@@ -180,7 +214,18 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     @Override
     public void startTransaction() throws OXException {
-        txState.set(new ThreadState());
+        ThreadState threadState = new ThreadState();
+        Connection connection = ConnectionHolder.CONNECTION.get();
+        try {
+            if (connection != null && !connection.getAutoCommit() && !connection.isReadOnly()) {
+                threadState.foreignTransaction = true;
+                threadState.foreignConnection = connection;
+            }
+        } catch (SQLException e) {
+            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+        }
+
+        txState.set(threadState);
     }
 
     @Override
@@ -239,7 +284,13 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.setCommitsTransaction(false);
     }
 
-    protected void close(final PreparedStatement stmt, final ResultSet rs) {
+    /**
+     * Closes given SQL resources.
+     *
+     * @param stmt The optional statement to close
+     * @param rs The optional result set to close
+     */
+    public void close(PreparedStatement stmt, ResultSet rs) {
         DBUtils.closeSQLStuff(rs, stmt);
     }
 
@@ -266,8 +317,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if(dbTransaction) {
                 try {
                     rollbackDBTransaction();
-                } catch (final OXException x) {
-                    x.log(LOG);
+                } catch (OXException x) {
+                    log(x);
                 }
             }
             throw e;
@@ -275,8 +326,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if(dbTransaction) {
                 try {
                     finishDBTransaction();
-                } catch (final OXException x) {
-                    x.log(LOG);
+                } catch (final OXException e) {
+                    log(e);
                 }
             }
         }
@@ -290,5 +341,27 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     public boolean inTransaction(){
         return txState.get() != null;
+    }
+
+    private void log(OXException x) {
+        switch (x.getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                LOG.trace("", x);
+                break;
+            case DEBUG:
+                LOG.debug("", x);
+                break;
+            case INFO:
+                LOG.info("", x);
+                break;
+            case WARNING:
+                LOG.warn("", x);
+                break;
+            case ERROR:
+                LOG.error("", x);
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -52,39 +52,75 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractOAuthServiceMetaData.class);
+    protected enum OAuthPropertyID {
+        apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl
+    };
+
+    private final Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
 
     protected String id;
     protected String displayName;
-    protected String apiKey;
-    protected String apiSecret;
-    protected String consumerKey;
-    protected String consumerSecret;
-
-    protected String apiKeyName;
-    protected String apiSecretName;
-    protected String consumerKeyName;
-    protected String consumerSecretName;
+    protected boolean needsRequestToken = true;
+    protected boolean registerTokenBasedDeferrer = false;
 
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
      */
     protected AbstractOAuthServiceMetaData() {
         super();
+        properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length, 0.9f, 1);
+    }
+
+    /**
+     * Add an OAuthProperty
+     *
+     * @param prop The property's name
+     * @param value The property's value
+     */
+    protected void addOAuthProperty(OAuthPropertyID prop, OAuthConfigurationProperty value) {
+        properties.put(prop, value);
+    }
+
+    /**
+     * Get the specified OAuthProperty
+     *
+     * @param prop The property's name
+     * @return The property's value or null
+     */
+    protected OAuthConfigurationProperty getOAuthProperty(OAuthPropertyID prop) {
+        return properties.get(prop);
+    }
+
+    /**
+     * Get the configuration properties' names
+     *
+     * @return The configuration properties' names
+     */
+    protected String[] getConfigurationPropertyNames() {
+        String[] propNames = new String[properties.size()];
+        int i = 0;
+        for (OAuthConfigurationProperty prop : properties.values()) {
+            propNames[i++] = prop.getName();
+        }
+        return propNames;
     }
 
     @Override
@@ -99,18 +135,21 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public String getAPIKey() {
-        if (apiKey == null && apiKeyName != null) {
-            try {
-                return Services.getService(ConfigViewFactory.class).getView().get(apiKeyName, String.class);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't look-up API key name.", e);
-            }
-        }
-        return apiKey;
+        return getOAuthProperty(OAuthPropertyID.apiKey).getValue();
     }
 
     @Override
     public boolean isEnabled(final int userId, final int contextId) throws OXException {
+        /*
+         * disable for guests
+         */
+        User user = Services.getService(UserService.class).getUser(userId, contextId);
+        if (user.isGuest()) {
+            return false;
+        }
+        /*
+         * check config cascade for specific "enabled" property
+         */
         final ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
         final ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
         if (!property.isDefined()) {
@@ -130,98 +169,47 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     /**
-     * Used to look up the apiKey in the config cascade
+     * Get the OAuthProperty from the ConfigViewFactory
      *
-     * @param apiKeyName The apiKeyName to set
+     * @param session The session
+     * @param propertyId The property identifier
+     * @return The property's value
+     * @throws OXException
      */
-    public void setAPIKeyName(final String apiKeyName) {
-        this.apiKeyName = apiKeyName;
-    }
-
-
-    /**
-     * Used to look up the apiSecret in the config cascade
-     *
-     * @param apiSecretName The apiSecretName to set
-     */
-    public void setAPISecretName(final String apiSecretName) {
-        this.apiSecretName = apiSecretName;
-    }
-
-    /**
-     * Used to look up the consumerKey in the confic cascade
-     * @param consumerKeyName
-     */
-    public void setConsumerKeyName(final String consumerKeyName) {
-        this.consumerKeyName = consumerKeyName;
-    }
-
-    /**
-     * Used to look up the consumerSecret in the config cascade
-     *
-     * @param consumerSecretName The consumerSecretName to set
-     */
-    public void setConsumerSecretName(final String consumerSecretName) {
-        this.consumerSecretName = consumerSecretName;
+    private String getFromConfigViewFactory(final Session session, OAuthPropertyID propertyId) throws OXException {
+        OAuthConfigurationProperty oauthProperty = getOAuthProperty(propertyId);
+        if (session == null) {
+            return oauthProperty.getValue();
+        }
+        int context = 0, user = 0;
+        context = session.getContextId();
+        user = session.getUserId();
+        return Services.getService(ConfigViewFactory.class).getView(user, context).get(oauthProperty.getName(), String.class);
     }
 
     @Override
     public String getAPIKey(final Session session) throws OXException {
-        if (session == null || apiKeyName == null) {
-            return getAPIKey();
-        }
-        int context = 0, user = 0;
-        context = session.getContextId();
-        user = session.getUserId();
-        return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiKeyName, String.class);
+        return getFromConfigViewFactory(session, OAuthPropertyID.apiKey);
     }
 
     @Override
     public String getAPISecret() {
-        if (apiSecret == null && apiSecretName != null) {
-            try {
-                return Services.getService(ConfigViewFactory.class).getView().get(apiSecretName, String.class);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't look-up API secret name.", e);
-            }
-        }
-        return apiSecret;
+        return getOAuthProperty(OAuthPropertyID.apiSecret).getValue();
     }
-
 
     @Override
     public String getAPISecret(final Session session) throws OXException {
-        if (session == null || apiSecretName == null) {
-            return getAPISecret();
-        }
-        int context = 0, user = 0;
-        context = session.getContextId();
-        user = session.getUserId();
-        return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
+        return getFromConfigViewFactory(session, OAuthPropertyID.apiSecret);
     }
 
     @Override
     public String getConsumerKey() {
-        if (consumerKey == null && consumerKeyName != null) {
-            try {
-                return Services.getService(ConfigViewFactory.class).getView().get(consumerKeyName, String.class);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't look-up consumer key name.", e);
-            }
-        }
-        return consumerKey;
+        return getOAuthProperty(OAuthPropertyID.consumerKey).getValue();
     }
 
     @Override
     public String getConsumerSecret() {
-        if (consumerSecret == null && consumerSecretName != null) {
-            try {
-                return Services.getService(ConfigViewFactory.class).getView().get(consumerSecretName, String.class);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't look-up consumer secret name.", e);
-            }
-        }
-        return consumerSecret;
+        return getOAuthProperty(OAuthPropertyID.consumerKey).getValue();
     }
 
     /**
@@ -242,25 +230,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         this.displayName = displayName;
     }
 
-    /**
-     * Sets the API Key
-     * @deprecated: Implement {@link #getAPIKey(Session)} instead
-     * @param apiKey The API Key to set
-     */
-    public void setApiKey(final String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    /**
-     * Sets the API Secret
-     *
-     * @deprecated: Implement {@link #getAPISecret(Session)} instead.
-     * @param apiSecret The API Secret to set
-     */
-    public void setApiSecret(final String apiSecret) {
-        this.apiSecret = apiSecret;
-    }
-
     @Override
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
         // no-op
@@ -278,7 +247,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean needsRequestToken() {
-        return true;
+        return needsRequestToken;
     }
 
     @Override
@@ -303,7 +272,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     @Override
     public boolean registerTokenBasedDeferrer() {
-    	return false;
+        return registerTokenBasedDeferrer;
     }
 
     @Override

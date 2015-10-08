@@ -53,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -64,6 +63,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,15 +76,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
+import org.ho.yaml.exception.YamlException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.WildcardFilter;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -99,8 +103,6 @@ public final class ConfigurationImpl implements ConfigurationService {
      * The logger constant.
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
-
-    private final ConcurrentMap<String, Reloadable> reloadableServices;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -135,48 +137,39 @@ public final class ConfigurationImpl implements ConfigurationService {
      * ------------- Member stuff -------------
      */
 
+    private final ConcurrentMap<String, Reloadable> reloadableServices;
+
     private final Map<String, String> texts;
 
     private final File[] dirs;
 
-    /**
-     * Maps file paths of the .properties file to their properties.
-     */
+    /** Maps file paths of the .properties file to their properties. */
     private final Map<String, Properties> propertiesByFile;
 
-    /**
-     * Maps property names to their values.
-     */
+    /** Maps property names to their values. */
     private final Map<String, String> properties;
 
-    /**
-     * Maps property names to the file path of the .properties file containing the property.
-     */
+    /** Maps property names to the file path of the .properties file containing the property. */
     private final Map<String, String> propertiesFiles;
 
-    /**
-     * Maps objects to yaml filename, with a path
-     */
+    /** Maps objects to yaml filename, with a path */
+    private final Map<String, byte[]> yamlFiles;
 
-    final Map<String, Object> yamlFiles;
+    /** Maps filenames to whole file paths for yaml lookup */
+    private final Map<String, String> yamlPaths;
 
-    /**
-     * Maps filenames to whole file paths for yaml lookup
-     */
-    final Map<String, String> yamlPaths;
+    private final Map<String, byte[]> xmlFiles;
 
-    final Map<String, byte[]> xmlFiles;
-
-    /**
-     * The <code>ConfigProviderServiceImpl</code> reference.
-     */
+    /** The <code>ConfigProviderServiceImpl</code> reference. */
     private volatile ConfigProviderServiceImpl configProviderServiceImpl;
+
+    private final Collection<ReinitializableConfigProviderService> reinitQueue;
 
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
      */
-    public ConfigurationImpl() {
-        this(getDirectories());
+    public ConfigurationImpl(Collection<ReinitializableConfigProviderService> reinitQueue) {
+        this(getDirectories(), reinitQueue);
     }
 
     /**
@@ -184,14 +177,15 @@ public final class ConfigurationImpl implements ConfigurationService {
      *
      * @param directory The directory where property files are located
      */
-    public ConfigurationImpl(final String[] directories) {
+    public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
+        this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
         propertiesByFile = new HashMap<String, Properties>(256);
-        texts = new ConcurrentHashMap<String, String>(1024);
+        texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<String, Object>(64);
+        yamlFiles = new HashMap<String, byte[]>(64);
         yamlPaths = new HashMap<String, String>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<String, byte[]>(2048);
@@ -222,22 +216,12 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
-        final org.slf4j.Logger log = LOG;
         final FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
-                Object o = null;
-                try {
-                    o = Yaml.load(file);
-                } catch (final FileNotFoundException e) {
-                    // IGNORE
-                    return;
-                } catch (final RuntimeException x) {
-                    log.warn("Could not parse .yml file: {}", file.toString(), x);
-                }
                 yamlPaths.put(file.getName(), file.getPath());
-                yamlFiles.put(file.getPath(), o);
+                yamlFiles.put(file.getPath(), readFile(file).getBytes());
             }
 
         };
@@ -731,20 +715,31 @@ public final class ConfigurationImpl implements ConfigurationService {
             return null;
         }
 
-        return yamlFiles.get(path);
+        try {
+            return Yaml.load(Charsets.toString(yamlFiles.get(path), Charsets.UTF_8));
+        } catch (YamlException e) {
+            // Failed to load .yml file
+            throw new IllegalStateException("Failed to load YAML file '" + path + "'. Reason:" + e.getMessage(), e);
+        }
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<String, Object>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<String, byte[]>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<String, Object> entry = iter.next();
-                if (entry.getKey().startsWith(fldName)) {
-                    retval.put(entry.getKey(), entry.getValue());
+                final Entry<String, byte[]> entry = iter.next();
+                String pathName = entry.getKey();
+                if (pathName.startsWith(fldName)) {
+                    try {
+                        retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
+                    } catch (YamlException e) {
+                        // Failed to load .yml file
+                        throw new IllegalStateException("Failed to load YAML file '" + pathName + "'. Reason:" + e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -760,6 +755,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
         final Map<String, byte[]> oldXml = new HashMap<String, byte[]>(xmlFiles);
+        final Map<String, byte[]> oldYaml = new HashMap<String, byte[]>(yamlFiles);
 
         // Clear maps
         properties.clear();
@@ -773,27 +769,30 @@ public final class ConfigurationImpl implements ConfigurationService {
         // (Re-)load configuration
         loadConfiguration(getDirectories());
 
-        // Check if properties have been changed, abort if not
-        Set<String> changes = getChanges(oldPropertiesByFile, oldXml);
+        // Re-initialize config-cascade
+        reinitConfigCascade();
+
+        // Check if properties have been changed, execute only forced ones if not
+        Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
-            LOG.info("No changes in configuration files detected, nothing to do");
+            LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
+
+            // Trigger only forced ones
+            for (Reloadable reloadable : reloadableServices.values()) {
+                try {
+                    if (ForcedReloadable.class.isInstance(reloadable)) {
+                        reloadable.reloadConfiguration(this);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+                }
+            }
+
             return;
         }
 
         // Continue to reload
         LOG.info("Detected changes in the following configuration files: {}", changes);
-
-        // Re-initialize config-cascade
-        {
-            ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
-            if (configProvider != null) {
-                try {
-                    configProvider.reinit();
-                } catch (Exception e) {
-                    LOG.warn("Failed to re-initialize configuration provider for scope \"server\"", e);
-                }
-            }
-        }
 
         // Propagate reloaded configuration among Reloadables
         for (Reloadable reloadable : reloadableServices.values()) {
@@ -842,6 +841,32 @@ public final class ConfigurationImpl implements ConfigurationService {
          */
     }
 
+    private void reinitConfigCascade() {
+        ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+        boolean reinitMyProvider = true;
+
+        for (ReinitializableConfigProviderService reinit : reinitQueue) {
+            if (reinit == configProvider) {
+                reinitMyProvider = false;
+            }
+            try {
+                reinit.reinit();
+                LOG.info("Re-initialized configuration provider for scope \"{}\"", reinit.getScope());
+            } catch (Exception e) {
+                LOG.warn("Failed to re-initialize configuration provider for scope \"{}\"", reinit.getScope(), e);
+            }
+        }
+
+        if (reinitMyProvider && configProvider != null) {
+            try {
+                configProvider.reinit();
+                LOG.info("Re-initialized configuration provider for scope \"server\"");
+            } catch (Exception e) {
+                LOG.warn("Failed to re-initialize configuration provider for scope \"server\"", e);
+            }
+        }
+    }
+
     /**
      * Adds specified <code>Reloadable</code> instance.
      *
@@ -879,7 +904,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml) {
+    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml, Map<String, byte[]> oldYaml) {
         final Set<String> result = new HashSet<String>(oldPropertiesByFile.size());
         for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
             final String fileName = newEntry.getKey();
@@ -906,6 +931,19 @@ public final class ConfigurationImpl implements ConfigurationService {
         final Set<String> removedXml = new HashSet<String>(oldXml.keySet());
         removedXml.removeAll(xmlFiles.keySet());
         result.addAll(removedXml);
+
+        // ... and one more time for yamls
+        for (String filename : yamlFiles.keySet()) {
+            byte[] oldHash = oldYaml.get(filename);
+            byte[] newHash = yamlFiles.get(filename);
+            if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
+                result.add(filename);
+            }
+        }
+        final Set<String> removedYaml = new HashSet<String>(oldYaml.keySet());
+        removedYaml.removeAll(yamlFiles.keySet());
+        result.addAll(removedYaml);
+
         return result;
     }
 

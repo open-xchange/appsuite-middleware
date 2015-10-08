@@ -170,21 +170,6 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
     private boolean looksLikeMicrosoft(Calendar calendar) {
         Property property = calendar.getProperty("PRODID");
-        return null != property && null != property.getValue() && toLowerCase(property.getValue()).indexOf("microsoft") >= 0;
+        return null != property && null != property.getValue() && com.openexchange.java.Strings.toLowerCase(property.getValue()).indexOf("microsoft") >= 0;
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

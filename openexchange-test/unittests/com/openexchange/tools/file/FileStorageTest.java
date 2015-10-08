@@ -49,14 +49,12 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import junit.framework.TestCase;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.impl.LocalFileStorage;
 import com.openexchange.tools.RandomString;
-import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
  * Test for the file storage.
@@ -89,7 +87,7 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
-        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         rmdir(tempFile);
         assertNotNull("Can't create file storage.", storage);
     }
@@ -105,7 +103,7 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes(com.openexchange.java.Charsets.UTF_8));
-        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertNotNull("Can't create new file in file storage.", identifier);
@@ -120,7 +118,7 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
-        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertFalse(tempFile.exists());
@@ -144,7 +142,7 @@ public class FileStorageTest extends TestCase {
     public final void testExceptionOnUnknown() throws Throwable {
         File tempFile =  File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         try {
             storage.getFile("00/00/01");
             fail("Expected IOException");
@@ -164,7 +162,7 @@ public class FileStorageTest extends TestCase {
 
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
+        final com.openexchange.filestore.FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
 
         assertTrue( storage.deleteFile(identifier));

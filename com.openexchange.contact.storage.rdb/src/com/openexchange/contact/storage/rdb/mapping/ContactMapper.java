@@ -2213,7 +2213,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public DistributionListEntryObject[] get(ResultSet resultSet) throws SQLException {
+			public DistributionListEntryObject[] get(ResultSet resultSet, String columnLabel) throws SQLException {
 				return null;
 			}
 
@@ -2458,8 +2458,8 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public byte[] get(ResultSet resultSet) throws SQLException {
-				return resultSet.getBytes(this.getColumnLabel());
+			public byte[] get(ResultSet resultSet, String columnLabel) throws SQLException {
+				return resultSet.getBytes(columnLabel);
 			}
 
 			@Override
@@ -2882,6 +2882,29 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 			public void remove(Contact contact) {
 				contact.removeFilename();
 			}
+        });
+
+        mappings.put(ContactField.VCARD_ID, new VarCharMapping<Contact>("vCardId", "VCard ID") {
+
+            @Override
+            public void set(Contact contact, String value) {
+                contact.setVCardId(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsVCardId();
+            }
+
+            @Override
+            public String get(Contact contact) {
+                return contact.getVCardId();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeVCardId();;
+            }
         });
 
 		return mappings;

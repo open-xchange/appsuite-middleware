@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.osgi.Services;
@@ -178,7 +179,7 @@ public final class OneDriveFile extends DefaultFile {
                     setVersionComment(null);
                 }
             } catch (final RuntimeException e) {
-                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
@@ -264,7 +265,7 @@ public final class OneDriveFile extends DefaultFile {
                     setVersionComment(null);
                 }
             } catch (final RuntimeException e) {
-                throw OneDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;

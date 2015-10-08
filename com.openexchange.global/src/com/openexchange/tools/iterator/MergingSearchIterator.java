@@ -92,17 +92,9 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     }
 
     @Override
-    public void close() throws OXException {
-        OXException exception = null;
+    public void close() {
         for (final SearchIterator<T> iterator : iterators) {
-            try {
-                iterator.close();
-            } catch (final OXException x) {
-                exception = x;
-            }
-        }
-        if (exception != null) {
-            throw exception;
+            SearchIterators.close(iterator);
         }
     }
 

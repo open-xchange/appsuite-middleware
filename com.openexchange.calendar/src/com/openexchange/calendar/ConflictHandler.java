@@ -75,6 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * ConflictHandler
@@ -110,7 +111,7 @@ public class ConflictHandler {
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
             LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             return NO_CONFLICTS;
-        } else if (cdao.isSingle() && cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
+        } else if (cdao.isSingle() && cdao.getEndDate() != null && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past single apps should never conflict
         } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict
@@ -167,8 +168,24 @@ public class ConflictHandler {
             return resolveParticipantsRecurring();
         }
 
-        // Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)} for series appointments.
-        final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
+        CalendarDataObject clone = cdao.clone();
+        if (edao != null) {
+            try (CalendarOperation co = new CalendarOperation()) {
+                co.checkUpdateRecurring(clone, edao);
+            }
+        }
+        RecurringResultsInterface results;
+        if (edao == null || (0 == clone.getRecurrencePosition() && null == clone.getRecurrenceDatePosition() && recColl.detectTimeChange(clone, edao))) {
+            results = recColl.calculateRecurringIgnoringExceptions(cdao, 0, 0, 0);
+        } else {
+            results = recColl.calculateRecurring(cdao, 0, 0, 0);
+        }
+
+        if (results == null || results.size() < 1) {
+            LOG.debug("No occurrences for this appointment: " + cdao.toString());
+            return new CalendarDataObject[]{};
+        }
+
         final Date resultStart = new Date(results.getRecurringResult(0).getStart());
         final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
         final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);
@@ -186,8 +203,9 @@ public class ConflictHandler {
 	}
 
     private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
-        final long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
-        final RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
+        long now = System.currentTimeMillis();
+        final long limit = CalendarConfig.getSeriesConflictLimit() ? now + Constants.MILLI_YEAR : 0;
+        final RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, now, limit, 0);
         for (int i = 0; i < rresults.size(); i++) {
             final RecurringResultInterface recurringResult = rresults.getRecurringResult(i);
             final CalendarDataObject[] conflicts = resolveParticipantConflicts(new Date(recurringResult.getStart()), new Date(recurringResult.getEnd()));
@@ -264,22 +282,10 @@ public class ConflictHandler {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             if (close_connection) {
-                if (null != si) {
-                    try {
-                        si.close();
-                    } catch (final OXException sie) {
-                        LOG.error("Error closing SearchIterator" ,sie);
-                    }
-                }
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -402,21 +408,11 @@ public class ConflictHandler {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
-            if (close_connection && si != null) {
-                try {
-                    si.close();
-                } catch (final OXException sie) {
-                    LOG.error("Error closing SearchIterator" ,sie);
-                }
+            if (close_connection) {
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -505,21 +501,11 @@ public class ConflictHandler {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
-            if (close_connection && si != null) {
-                try {
-                    si.close();
-                } catch (final OXException sie) {
-                    LOG.error("Error closing SearchIterator" ,sie);
-                }
+            if (close_connection) {
+                SearchIterators.close(si);
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                if (null != private_folder_information) {
-                    try {
-                        private_folder_information.close();
-                    } catch (final OXException e) {
-                        // Ignore
-                    }
-                }
+                SearchIterators.close(private_folder_information);
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);

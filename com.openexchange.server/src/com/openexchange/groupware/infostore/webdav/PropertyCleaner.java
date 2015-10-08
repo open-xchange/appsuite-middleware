@@ -49,11 +49,16 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import static com.openexchange.file.storage.FileStorageEventHelper.createDebugMessage;
+import static com.openexchange.file.storage.FileStorageEventHelper.extractObjectId;
+import static com.openexchange.file.storage.FileStorageEventHelper.extractSession;
+import static com.openexchange.file.storage.FileStorageEventHelper.isInfostoreEvent;
+import static com.openexchange.file.storage.FileStorageEventHelper.isUpdateEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -102,15 +107,18 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
+        if (isInfostoreEvent(event) && isUpdateEvent(event)) {
             try {
-                ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                infoProperties.startTransaction();
-                infoProperties.removeAll(id, session.getContext());
-                infoProperties.commit();
+                FileID fileID = new FileID(extractObjectId(event));
+                if (FileID.INFOSTORE_SERVICE_ID.equals(fileID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(fileID.getAccountId())) {
+                    int objectID = Integer.parseInt(fileID.getFileId());
+                    ServerSession session = ServerSessionAdapter.valueOf(extractSession(event));
+                    infoProperties.startTransaction();
+                    infoProperties.removeAll(objectID, session.getContext());
+                    infoProperties.commit();
+                }
             } catch (OXException e) {
-                LOG.error("", e);
+                LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug("", e);
@@ -121,8 +129,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                     LOG.error("", e);
                 }
             }
-
-            LOG.debug("{}",new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
+            LOG.debug("{}", new Object() { @Override public String toString() { return createDebugMessage("UpdateEvent", event);}});
         }
     }
 }

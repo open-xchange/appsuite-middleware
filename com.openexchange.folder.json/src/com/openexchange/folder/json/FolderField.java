@@ -153,6 +153,10 @@ public enum FolderField {
      */
     SUPPORTED_CAPABILITIES(317, "supported_capabilities"),
     /**
+     * The folders account ID
+     */
+    ACCOUNT_ID(318, "account_id"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),
@@ -164,6 +168,34 @@ public enum FolderField {
      * The permission's group flag
      */
     GROUP(-1, "group"),
+    /**
+     * Mail address for an external permission
+     */
+    EMAIL_ADDRESS(-1, "email_address"),
+    /**
+     * Contact id for an external permission
+     */
+    CONTACT_ID(-1, "contact_id"),
+    /**
+     * Contact folder id for an external permission
+     */
+    CONTACT_FOLDER_ID(-1, "contact_folder"),
+    /**
+     * The date when an external permission should expire
+     */
+    EXPIRY_DATE(-1, "expiry_date"),
+    /**
+     * The date when an external permission should become active
+     */
+    ACTIVATION_DATE(-1, "activation_date"),
+    /**
+     * Display name for an external permission
+     */
+    DISPLAY_NAME(-1, "display_name"),
+    /**
+     * Password for an external permission
+     */
+    PASSWORD(-1, "password"),
     /**
      * The meta field
      */

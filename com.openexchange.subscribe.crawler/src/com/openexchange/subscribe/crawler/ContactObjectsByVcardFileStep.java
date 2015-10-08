@@ -49,24 +49,19 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.Vector;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link ContactObjectsByVcardFileStep}
@@ -93,7 +88,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
     @Override
     public void execute(final WebClient webClient) throws OXException {
         final Vector<Contact> contactObjects = new Vector<Contact>();
-        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        VCardService vCardService = workflow.getActivator().getVCardService();
 
         String pageString = input.getWebResponse().getContentAsString();
         LOG.debug("The page to scan for vCards is : {}", pageString);
@@ -105,19 +100,20 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
             vcardString = deleteUnwantedLines(vcardString, unwantedLines);
             pageString = pageString.substring(endIndex);
             try {
+                Contact contact;
+                VCardImport vCardImport = null;
+                InputStream inputStream = null;
                 final byte[] vcard = vcardString.getBytes(com.openexchange.java.Charsets.UTF_8);
-                final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-                VersitDefinition.Reader versitReader;
-                versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
-                final VersitObject versitObject = def.parse(versitReader);
-                final Contact contactObject = oxContainerConverter.convertContact(versitObject);
-                SANITIZER.sanitize(contactObject);
-                contactObjects.add(contactObject);
-            } catch (final VersitException e) {
-                LOG.error(e.toString());
-            } catch (final ConverterException e) {
-                LOG.error(e.toString());
-            } catch (final IOException e) {
+                try {
+                    inputStream = Streams.newByteArrayInputStream(vcard);
+                    vCardImport = vCardService.importVCard(inputStream, null, vCardService.createParameters());
+                    contact = vCardImport.getContact();
+                } finally {
+                    Streams.close(inputStream, vCardImport);
+                }
+                SANITIZER.sanitize(contact);
+                contactObjects.add(contact);
+            } catch (final OXException e) {
                 LOG.error(e.toString());
             }
 

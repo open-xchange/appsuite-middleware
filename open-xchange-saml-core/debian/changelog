@@ -1,3 +1,45 @@
+open-xchange-saml-core (7.8.0-6) stable; urgency=medium
+
+  * Sixth candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 Oct 2015 12:17:54 +0200
+
+open-xchange-saml-core (7.8.0-5) stable; urgency=medium
+
+  * Fith candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 25 Sep 2015 14:27:23 +0200
+
+open-xchange-saml-core (7.8.0-4) stable; urgency=medium
+
+  * Fourth candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 18 Sep 2015 11:07:31 +0200
+
+open-xchange-saml-core (7.8.0-3) stable; urgency=medium
+
+  * Third candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 07 Sep 2015 15:26:36 +0200
+
+open-xchange-saml-core (7.8.0-2) stable; urgency=medium
+
+  * Second candidate for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 Aug 2015 10:32:02 +0200
+
+open-xchange-saml-core (7.8.0-1) stable; urgency=medium
+
+  * First release candidate for 7.8.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Aug 2015 09:17:39 +0200
+
+open-xchange-saml-core (7.8.0-0) unstable; urgency=medium
+
+  * prepare for 7.8.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:16 +0100
+
 open-xchange-saml-core (7.6.2-9) stable; urgency=medium
 
   * Build for patch 2015-09-28  (2767)
@@ -56,13 +98,18 @@ open-xchange-saml-core (7.6.2-0) stable; urgency=medium
 
   * Prepare for 7.6.2 hotfix
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 14 July 2015 09:13:00 +0200
- 
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 14 Jul 2015 09:13:00 +0200
+
+open-xchange-saml-core (7.6.1-2) stable; urgency=medium
+
+  * Build for patch 2015-08-17 (2666)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 06 Aug 2015 10:57:09 +0200
 open-xchange-saml-core (7.6.1-1) stable; urgency=medium
 
-  * Build for patch 2015-05-12 (2478)
+  * Build for patch 2015-06-26 (2573)
 
- -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 08 May 2015 14:22:03 +0200
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 24 Jun 2015 12:08:35 +0200
 
 open-xchange-saml-core (7.6.1-0) stable; urgency=low
 

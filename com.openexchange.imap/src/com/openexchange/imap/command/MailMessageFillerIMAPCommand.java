@@ -62,6 +62,7 @@ import javax.mail.UIDFolder;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -95,7 +96,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     /**
      * Initializes a new {@link MailMessageFillerIMAPCommand}.
      */
-    public MailMessageFillerIMAPCommand(final Collection<MailMessage> messages, final boolean isRev1, final FetchProfile fp, final IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -117,11 +118,11 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         this.messages = tm;
         this.uids = tuids.toArray();
         if (length == messageCount) {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }

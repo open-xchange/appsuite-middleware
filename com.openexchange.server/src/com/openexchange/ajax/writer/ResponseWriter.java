@@ -87,6 +87,7 @@ import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Localizable;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.io.Jsonable;
@@ -805,6 +806,19 @@ public final class ResponseWriter {
      * @throws JSONException - if writing fails
      */
     public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale) throws JSONException {
+        writeException(exc, writer, locale, false);
+    }
+
+    /**
+     * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode is
+     * already set to writing a JSON object
+     *
+     * @param exc - the exception to write
+     * @param writer - the writer to write to
+     * @param locale The locale to use for internationalization of the error message
+     * @throws JSONException - if writing fails
+     */
+    public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
         writer.key(ERROR).value(exc.getDisplayMessage(locale));
         /*
          * Put argument JSON array for compatibility reasons
@@ -875,7 +889,7 @@ public final class ResponseWriter {
             writer.key(ResponseFields.ERROR_PARAMS).value(array);
         }
         // Write stack trace
-        if (includeStackTraceOnError()) {
+        if (includeStackTraceOnError || includeStackTraceOnError()) {
             writer.key(ERROR_STACK);
             writer.array();
             try {
@@ -948,6 +962,20 @@ public final class ResponseWriter {
                 throw new JSONException("Error while composing JSON", e);
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
+     *
+     * @param clientId the client ID to check
+     * @return <code>true</code> if the client denotes an USM client, <code>false</code>, otherwise
+     */
+    public static boolean isUsmEas(String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
+        }
+        String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
 }

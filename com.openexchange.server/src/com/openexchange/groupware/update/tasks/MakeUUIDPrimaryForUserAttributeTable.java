@@ -107,11 +107,13 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
                 Tools.dropForeignKey(con, "user_attribute", foreignKey);
             }
 
+            dropOrphaned(con);
+
             Tools.modifyColumns(con, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(con, "user_attribute", new String[] { "cid", "uuid" });
 
-            // Re-create foreign key
-            Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
+            // Re-create foreign key ?
+            // Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
 
             con.commit();
         } catch (SQLException e) {
@@ -123,6 +125,52 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         } finally {
             autocommit(con);
             Database.backNoTimeout(params.getContextId(), true, con);
+        }
+    }
+
+    private void dropOrphaned(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT attrs.cid, attrs.id, hex(uuid) FROM user_attribute AS attrs LEFT JOIN user ON attrs.cid = user.cid AND attrs.id = user.id WHERE user.id IS NULL");
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                return;
+            }
+
+            class Orphaned {
+                final UUID uuid;
+                final int cid;
+                final int user;
+
+                Orphaned(int cid, int user, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.user = user;
+                    this.uuid = uuid;
+                }
+            }
+
+            List<Orphaned> orphaneds = new LinkedList<Orphaned>();
+            do {
+                orphaneds.add(new Orphaned(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final Orphaned orphaned : orphaneds) {
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND ?=HEX(uuid)");
+                stmt.setInt(1, orphaned.cid);
+                stmt.setInt(2, orphaned.user);
+                stmt.setString(3, UUIDs.getUnformattedString(orphaned.uuid));
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -49,21 +49,21 @@
 
 package com.openexchange.ajax.infostore.actions;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.writer.InfostoreWriter;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.json.FileMetadataWriter;
+import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -92,30 +92,29 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
         return NO_HEADER;
     }
 
-    public String writeJSON(DocumentMetadata data) throws JSONException {
+    public JSONObject writeJSON(File data) throws JSONException {
         return convertToJSON(data, null);
     }
 
-    public String writeJSON(DocumentMetadata data,Metadata[] fields) throws JSONException {
+    public JSONObject writeJSON(File data, Field[] fields) throws JSONException {
         return convertToJSON(data,fields);
     }
 
-    public static String convertToJSON(DocumentMetadata data, Metadata[] fields) throws JSONException{
+    public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException{
+        FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
         if (fields == null) {
-            fields = Metadata.HTTPAPI_VALUES_ARRAY;
+            return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
         }
-        StringWriter results = new StringWriter();
-        InfostoreWriter writer = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
-        writer.writeLimited(data, fields, TimeZone.getDefault());
-        return results.getBuffer().toString();
+
+        return writer.writeSpecific(new TestFriendlyInfostoreRequest("UTC"), data, fields, null);
     }
 
-    public JSONArray writeFolderAndIDList(List<Integer> ids, List<Integer> folders) throws JSONException {
+    public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {
         JSONArray array = new JSONArray();
         for (int i = 0, length = ids.size(); i < length; i++) {
             JSONObject tuple = new JSONObject();
-            tuple.put(AJAXServlet.PARAMETER_ID, ids.get(i).intValue());
-            tuple.put(AJAXServlet.PARAMETER_FOLDERID, folders.get(i).intValue());
+            tuple.put(AJAXServlet.PARAMETER_ID, ids.get(i));
+            tuple.put(AJAXServlet.PARAMETER_FOLDERID, folders.get(i));
             array.put(tuple);
         }
         return array;

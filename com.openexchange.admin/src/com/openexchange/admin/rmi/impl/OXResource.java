@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
@@ -86,10 +85,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     private final BasicAuthenticator basicauth;
     private final OXResourceStorageInterface oxRes;
     private final AdminCache cache;
-    private final BundleContext context;
     private final PropertyHandler prop;
 
-    public OXResource(final BundleContext context) throws RemoteException, StorageException {
+    public OXResource() throws RemoteException, StorageException {
         super();
         try {
             oxRes = OXResourceStorageInterface.getInstance();
@@ -97,7 +95,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             LOGGER.error("", e);
             throw new RemoteException(e.getMessage());
         }
-        this.context = context;
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
         LOGGER.info("Class loaded: {}", this.getClass().getName());

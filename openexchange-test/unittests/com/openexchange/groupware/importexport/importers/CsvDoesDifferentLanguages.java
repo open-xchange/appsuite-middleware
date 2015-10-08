@@ -52,7 +52,6 @@ package com.openexchange.groupware.importexport.importers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
-import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,12 +62,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractContactTest;
-import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.importexport.importers.TestCSVContactImporter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import junit.framework.JUnit4TestAdapter;
 
 
 /**
@@ -166,7 +164,7 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
         List<String> data = list.get(1);
 
         CSVContactImporter importer = new TestCSVContactImporter();
-		
+
         boolean[] atLeastOneFieldInserted = new boolean[]{false};
         ContactSwitcher conSet = importer.getContactSwitcher();
         ImportResult result = new ImportResult();

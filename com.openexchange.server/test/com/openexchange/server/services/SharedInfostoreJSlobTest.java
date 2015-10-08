@@ -23,16 +23,18 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.InfostoreConfig;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
  * Unit tests for {@link SharedInfostoreJSlobTest}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
@@ -46,10 +48,13 @@ public class SharedInfostoreJSlobTest {
     private SharedInfostoreJSlob sharedInfostoreJSlob;
 
     @Mock
-    private Session session;
+    private ServerSession session;
 
     @Mock
     private QuotaFileStorage quotaFileStorage;
+
+    @Mock
+    private UserPermissionBits permissionBits;
 
     private Context context = new ContextImpl(999999);
 
@@ -67,6 +72,13 @@ public class SharedInfostoreJSlobTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        PowerMockito.mockStatic(ServerSessionAdapter.class);
+        PowerMockito.when(session.getContext()).thenReturn(context);
+        PowerMockito.when(session.getUserPermissionBits()).thenReturn(permissionBits);
+
+        PowerMockito.when(permissionBits.hasInfostore()).thenReturn(true);
+        PowerMockito.when(permissionBits.hasWebMail()).thenReturn(true);
+
         PowerMockito.mockStatic(ServerConfig.class);
         PowerMockito.when(ServerConfig.getInt((Property) Matchers.any())).thenReturn(this.maxBodySize);
 
@@ -78,9 +90,6 @@ public class SharedInfostoreJSlobTest {
 
         PowerMockito.mockStatic(FilestoreStorage.class);
         PowerMockito.when(FilestoreStorage.createURI(Matchers.eq(context))).thenReturn(new URI(""));
-
-        PowerMockito.mockStatic(ContextStorage.class);
-        PowerMockito.when(ContextStorage.getStorageContext(session)).thenReturn(context);
 
         PowerMockito.mockStatic(QuotaFileStorage.class);
         PowerMockito.when(QuotaFileStorage.getInstance((URI) Matchers.any(), Matchers.eq(context))).thenReturn(quotaFileStorage);

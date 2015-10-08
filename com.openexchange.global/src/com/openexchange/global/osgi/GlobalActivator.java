@@ -61,20 +61,23 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
-import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.interception.OXExceptionInterceptor;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceHolderInit;
 import com.openexchange.session.inspector.SessionInspectorChain;
 import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.inspector.internal.ServiceSet;
 import com.openexchange.session.inspector.internal.SessionInspectorChainImpl;
+import com.openexchange.startup.ThreadControlService;
+import com.openexchange.startup.impl.ThreadControl;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -91,8 +94,8 @@ public final class GlobalActivator implements BundleActivator {
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
-    private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
     private volatile ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
+    private volatile ServiceRegistration<ThreadControlService> threadControlRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
 
 
@@ -120,9 +123,6 @@ public final class GlobalActivator implements BundleActivator {
             OXExceptionInterceptorRegistration.initInstance();
             trackers.add(new ServiceTracker<OXExceptionInterceptor, OXExceptionInterceptor>(context, OXExceptionInterceptor.class, new OXExceptionInterceptorTracker(context)));
 
-            final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
-            trackers.add(metaContributors);
-
             // Session inspector chain
             {
                 ServiceSet<SessionInspectorService> serviceSet = new ServiceSet<SessionInspectorService>(context);
@@ -134,8 +134,11 @@ public final class GlobalActivator implements BundleActivator {
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+            PasswordMechFactoryImpl passwordMechFactoryImpl = new PasswordMechFactoryImpl();
+            passwordMechFactoryImpl.register(PasswordMech.BCRYPT, PasswordMech.CRYPT, PasswordMech.SHA);
+            context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
 
-            metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
+            threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
 
             logger.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -234,23 +237,24 @@ public final class GlobalActivator implements BundleActivator {
                 this.trackers = null;
             }
             ServiceHolderInit.getInstance().stop();
-            final Initialization initialization = this.initialization;
+
+            Initialization initialization = this.initialization;
             if (null != initialization) {
-                initialization.stop();
                 this.initialization = null;
+                initialization.stop();
             }
             shutdownStringParsers();
 
-            ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
-            if (null != metaContributorsRegistration) {
-                metaContributorsRegistration.unregister();
-                this.metaContributorsRegistration = null;
+            ServiceRegistration<ThreadControlService> threadControlRegistration = this.threadControlRegistration;
+            if (null != threadControlRegistration) {
+                this.threadControlRegistration = null;
+                threadControlRegistration.unregister();
             }
 
             ServiceRegistration<SessionInspectorChain> inspectorChainRegistration = this.inspectorChainRegistration;
             if (null != inspectorChainRegistration) {
-                inspectorChainRegistration.unregister();
                 this.inspectorChainRegistration = null;
+                inspectorChainRegistration.unregister();
             }
 
             OXExceptionInterceptorRegistration.dropInstance();

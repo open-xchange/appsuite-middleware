@@ -78,6 +78,7 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -126,12 +127,8 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             // create a new HttpSession if it's missing
             req.getSession(true);
             super.service(new CountingHttpServletRequest(req), resp);
-        } catch (final RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                resp.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        } catch (RateLimitedException e) {
+            e.send(resp);
         }
     }
 
@@ -166,12 +163,14 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
-            final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
+
             // Check if session is valid
+            String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
+            checkMailfilterAvailable(session);
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
@@ -233,12 +232,14 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
             }
             LogProperties.putSessionProperties(session);
             response.setLocale(session);
-            final String secret = SessionUtility.extractSecret(hashSource, req, session.getHash(), session.getClient());
+
             // Check if session is valid
+            String secret = SessionUtility.extractSecret(hashSource, req, session);
             if (!session.getSecret().equals(secret)) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
+            checkMailfilterAvailable(session);
 
             final AbstractRequest request = createRequest();
             request.setSession(session);
@@ -280,4 +281,12 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
     protected abstract AbstractRequest createRequest();
 
     protected abstract AbstractAction<?, ? extends AbstractRequest> getAction();
+
+    private void checkMailfilterAvailable(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == serverSession.getUserConfiguration().hasWebMail()) {
+            throw MailFilterExceptionCode.MAILFILTER_NOT_AVAILABLE.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+        }
+    }
+
 }

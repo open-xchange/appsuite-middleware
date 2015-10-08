@@ -50,7 +50,6 @@
 package com.openexchange.tools.servlet.http;
 
 import java.nio.charset.UnsupportedCharsetException;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -64,6 +63,11 @@ public final class Authorization {
 
     private static final String SPNEGO_AUTH = "negotiate";
 
+    /**
+     * Digest type for authorization.
+     */
+    private static final String DIGEST_AUTH = "digest";
+
     private Authorization() {
         super();
     }
@@ -74,6 +78,25 @@ public final class Authorization {
             return false;
         }
         if (!(authScheme.equalsIgnoreCase(BASIC_AUTH) || authScheme.equalsIgnoreCase(SPNEGO_AUTH))) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the client sends a correct digest authorization header.
+     *
+     * @param auth Authorization header.
+     * @return <code>true</code> if the client sent a correct authorization header.
+     */
+    public static boolean checkForDigestAuthorization(final String auth) {
+        if (null == auth) {
+            return false;
+        }
+        if (auth.length() <= DIGEST_AUTH.length()) {
+            return false;
+        }
+        if (!auth.substring(0, DIGEST_AUTH.length()).equalsIgnoreCase(DIGEST_AUTH)) {
             return false;
         }
         return true;
@@ -121,22 +144,58 @@ public final class Authorization {
         return true;
     }
 
+    /**
+     * The credentials providing login and password.
+     */
     public static class Credentials {
+
         private final String login;
         private final String password;
+
+        /**
+         * Initializes a new {@link Credentials}.
+         *
+         * @param login The login
+         * @param password The password
+         */
         public Credentials(final String login, final String password) {
             super();
             this.login = login;
             this.password = password;
         }
 
+        /**
+         * Gets the login
+         *
+         * @return The login
+         */
         public String getLogin() {
             return login;
         }
 
+        /**
+         * Gets the password
+         *
+         * @return The password
+         */
         public String getPassword() {
             return password;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(24);
+            builder.append("Credentials [");
+            if (login != null) {
+                builder.append("login=").append(login).append(", ");
+            }
+            if (password != null) {
+                builder.append("password=").append(password);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+
     }
 
     /**
@@ -169,6 +228,6 @@ public final class Authorization {
     public static boolean checkLogin(final String pass) {
         // check if the user wants to login without password.
         // ldap bind doesn't fail with empty password. so check it here.
-        return (pass != null && !StringCollection.isEmpty(pass));
+        return (pass != null && !com.openexchange.java.Strings.isEmpty(pass));
     }
 }

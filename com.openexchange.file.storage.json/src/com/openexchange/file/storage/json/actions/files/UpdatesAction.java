@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -77,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested infoitems."),
     @Parameter(name = "ignore", optional=true, description = "Which kinds of updates should be ignored. Currently, the only valid value - \"deleted\" - causes deleted object IDs not to be returned.")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted infoitems. New and modified infoitems are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted infoitems (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
-public class UpdatesAction extends AbstractFileAction {
+public class UpdatesAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
@@ -88,10 +90,26 @@ public class UpdatesAction extends AbstractFileAction {
         long timestamp = request.getTimestamp();
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
+
+        List<Field> columns = request.getFieldsToLoad();
+        boolean copy = false;
+        if(!columns.contains(File.Field.FOLDER_ID)) {
+            columns = new ArrayList<File.Field>(columns);
+            columns.add(File.Field.FOLDER_ID);
+            copy = true;
+        }
+        if(!columns.contains(File.Field.ID)) {
+            if(!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.ID);
+        }
+
         Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,
-            request.getColumns(),
+            columns,
             sortingField,
             sortingOrder,
             request.getIgnore().contains("deleted"));

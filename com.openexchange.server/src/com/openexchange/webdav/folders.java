@@ -89,7 +89,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     private static final String _invalidMethodError = "invalid method!";
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(folders.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(folders.class);
 
     /**
      * Initializes a new {@link folders}
@@ -284,7 +284,6 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
                 writeResponse(folderObject, HttpServletResponse.SC_OK, OK, clientId, os, xo);
             } catch (final OXException exc) {
-            	exc.log(LOG);
                 if (exc.isMandatory()) {
                     LOG.debug(_parsePropChilds, exc);
                     writeResponse(folderObject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc,

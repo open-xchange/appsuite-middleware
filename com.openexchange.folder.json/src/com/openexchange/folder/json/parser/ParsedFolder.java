@@ -83,11 +83,14 @@ public final class ParsedFolder implements SetterAwareFolder {
 
     protected String parent;
 
+    protected String accountId;
+
     protected Permission[] permissions;
 
     protected String[] subfolders;
 
     protected boolean subscribed;
+
     protected boolean containsSubscribed;
 
     protected ContentType contentType;
@@ -231,6 +234,11 @@ public final class ParsedFolder implements SetterAwareFolder {
     }
 
     @Override
+    public String getAccountID() {
+        return accountId;
+    }
+
+    @Override
     public Permission[] getPermissions() {
         return permissions;
     }
@@ -268,6 +276,11 @@ public final class ParsedFolder implements SetterAwareFolder {
     @Override
     public void setParentID(final String parentId) {
         parent = parentId;
+    }
+
+    @Override
+    public void setAccountID(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override

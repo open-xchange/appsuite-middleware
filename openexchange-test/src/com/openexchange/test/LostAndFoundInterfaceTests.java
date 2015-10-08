@@ -93,7 +93,6 @@ public class LostAndFoundInterfaceTests {
     	tests.addTestSuite(com.openexchange.ajax.importexport.Bug17392Test.class);
     	tests.addTestSuite(com.openexchange.ajax.importexport.Bug20360Test_UmlautBreaksImport.class);
     	tests.addTestSuite(com.openexchange.ajax.importexport.Bug20738Test.class);
-    	tests.addTestSuite(com.openexchange.ajax.importexport.FacebookFriendsImportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.importexport.ICalExportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.importexport.ICalImportExportServletTest.class);
     	tests.addTestSuite(com.openexchange.ajax.importexport.VCardImportExportServletTest.class);

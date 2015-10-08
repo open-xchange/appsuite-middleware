@@ -179,4 +179,14 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
         return md( args ).getMeta();
     }
 
+    @Override
+    public Object objectPermissions(Object... args) {
+        return md( args ).getObjectPermissions();
+    }
+
+    @Override
+    public Object shareable(Object... args) {
+        return md(args).isShareable();
+    }
+    
 }

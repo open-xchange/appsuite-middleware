@@ -55,15 +55,8 @@ import gnu.trove.list.array.TIntArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,12 +129,12 @@ public final class MimeStructureFixer {
         {
             final String mailer = message.getHeader(MessageHeaders.HDR_X_MAILER, null);
             final boolean noAppleMailer;
-            if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
+            if (null == mailer || (noAppleMailer = (com.openexchange.java.Strings.toLowerCase(mailer).indexOf("apple") < 0))) {
                 // Not composed by Apple mailer
                 return false;
             }
             final String boundary = contentType.getParameter("boundary");
-            if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
+            if (noAppleMailer && (null == boundary || com.openexchange.java.Strings.toLowerCase(boundary).indexOf("apple") < 0)) {
                 // Not composed by Apple mailer
                 return false;
             }
@@ -249,12 +242,12 @@ public final class MimeStructureFixer {
                 {
                     final String mailer = mimeMessage.getHeader(MessageHeaders.HDR_X_MAILER, null);
                     final boolean noAppleMailer;
-                    if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
+                    if (null == mailer || (noAppleMailer = (com.openexchange.java.Strings.toLowerCase(mailer).indexOf("apple") < 0))) {
                         // Not composed by Apple mailer
                         return mimeMessage;
                     }
                     final String boundary = contentType.getParameter("boundary");
-                    if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
+                    if (noAppleMailer && (null == boundary || com.openexchange.java.Strings.toLowerCase(boundary).indexOf("apple") < 0)) {
                         // Not composed by Apple mailer
                         return mimeMessage;
                     }
@@ -320,7 +313,7 @@ public final class MimeStructureFixer {
 
     private void handlePart(Multipart multipart) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
-        if (toLowerCase(multipart.getContentType()).startsWith("multipart/mixed")) {
+        if (com.openexchange.java.Strings.toLowerCase(multipart.getContentType()).startsWith("multipart/mixed")) {
             String prefixImage = "image/";
             String prefixHtm = "text/htm";
             String prefixText = "text/plain";
@@ -627,38 +620,4 @@ public final class MimeStructureFixer {
         }
         return isWhitespace;
     }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    private static final Set<String> EXCLUDE_BOUNDARY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("boundary")));
-
-    private static Map<String, String> getParametersFrom(final ContentType contentType, final Set<String> exclude) {
-        Map<String, String> retval = new LinkedHashMap<String, String>(4);
-        if (null == exclude || exclude.isEmpty()) {
-            for (Iterator<String> it = contentType.getParameterNames(); it.hasNext();) {
-                String name = it.next();
-                retval.put(name, contentType.getParameter(name));
-            }
-        } else {
-            for (Iterator<String> it = contentType.getParameterNames(); it.hasNext();) {
-                String name = it.next();
-                if (!exclude.contains(name)) {
-                    retval.put(name, contentType.getParameter(name));
-                }
-            }
-        }
-        return retval;
-    }
-
 }

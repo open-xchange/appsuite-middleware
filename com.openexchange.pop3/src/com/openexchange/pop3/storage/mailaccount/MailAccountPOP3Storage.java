@@ -82,7 +82,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -586,7 +585,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         POP3Store pop3Store = null;
         try {
             POP3Config pop3Config = pop3Access.getPOP3Config();
-            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
@@ -908,7 +907,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             } catch (final OXException e) {
                 LOG.debug("Batch append operation to POP3 storage failed", e);
                 final Throwable cause = e.getCause();
-                if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+                if ((cause instanceof MessagingException) && com.openexchange.java.Strings.toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
                     /*
                      * Apparently cause by exceeded quota constraint; abort immediately
                      */
@@ -973,7 +972,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             } catch (final OXException e) {
                 LOG.debug("Batch append operation to POP3 storage failed", e);
                 final Throwable cause = e.getCause();
-                if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+                if ((cause instanceof MessagingException) && com.openexchange.java.Strings.toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
                     /*
                      * Apparently cause by exceeded quota constraint; abort immediately
                      */
@@ -1079,19 +1078,4 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

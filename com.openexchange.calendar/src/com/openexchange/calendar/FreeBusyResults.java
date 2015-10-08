@@ -74,6 +74,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -207,6 +208,9 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 title = rs.getString(6);
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
+                if (!rs.wasNull()) {
+                    cdao.setPrivateFlag(pflag == 1);
+                }
                 owner = rs.getInt(9);
                 colorLabel = rs.getInt(17); // SQL NULL would return zero which is no color label
                 categories = rs.getString(18); // SQL NULL would return null
@@ -347,7 +351,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         al = null;
         title = null;
         rrs = null;
@@ -356,13 +360,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     public final void myclose() {
         recColl.closeResultSet(rs);
         recColl.closePreparedStatement(prep);
-        if (null != private_folder_information) {
-            try {
-                private_folder_information.close();
-            } catch (final OXException e) {
-                // Ignore
-            }
-        }
+        SearchIterators.close(private_folder_information);
         if (con != null) {
             DBPool.push(c, con);
         }

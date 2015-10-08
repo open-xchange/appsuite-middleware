@@ -55,76 +55,105 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.file.external.FileStorageCodes;
-import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.FileStorageService;
 
+/**
+ * {@link FileStorage} - The legacy file storage delegating to new <code>com.openexchange.filestore</code> API.
+ *
+ * @deprecated Please use new <code>com.openexchange.filestore</code> API
+ */
+@Deprecated
 public class FileStorage {
 
-    private static volatile FileStorageFactory fss;
+    private static volatile FileStorageService fss;
 
-    private com.openexchange.tools.file.external.FileStorage fs;
-
-    protected FileStorage() {
-        super();
-    }
-
-    public FileStorage(final com.openexchange.tools.file.external.FileStorage fs) {
-        super();
-        this.fs = fs;
-    }
-
+    /**
+     * Gets the legacy file storage for given URI
+     *
+     * @param uri The URI
+     * @return The legacy file storage
+     * @throws OXException If file storage cannot be returned
+     */
     public static final FileStorage getInstance(final URI uri) throws OXException {
+        FileStorageService fss = FileStorage.fss;
         if (fss == null) {
             throw FileStorageCodes.INSTANTIATIONERROR.create("No file storage starter registered.");
         }
         return new FileStorage(fss.getFileStorage(uri));
     }
 
-    public static void setFileStorageStarter(final FileStorageFactory fss) {
+    /**
+     * Sets the service instance.
+     *
+     * @param fss The service instance
+     */
+    public static void setFileStorageStarter(final FileStorageService fss) {
         FileStorage.fss = fss;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private com.openexchange.filestore.FileStorage delegate;
+
+    /**
+     * Initializes a new {@link FileStorage}.
+     */
+    protected FileStorage() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link FileStorage}.
+     *
+     * @param fs The delegate file storage
+     */
+    public FileStorage(final com.openexchange.filestore.FileStorage fs) {
+        super();
+        this.delegate = fs;
+    }
+
     public boolean deleteFile(final String identifier) throws OXException {
-        return fs.deleteFile(identifier);
+        return delegate.deleteFile(identifier);
     }
 
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         if (null == identifiers || 0 == identifiers.length) {
             return Collections.emptySet();
         }
-        return fs.deleteFiles(identifiers);
+        return delegate.deleteFiles(identifiers);
     }
 
     public InputStream getFile(final String name) throws OXException {
-        return fs.getFile(name);
+        return delegate.getFile(name);
     }
 
     public SortedSet<String> getFileList() throws OXException {
-        return fs.getFileList();
+        return delegate.getFileList();
     }
 
     public long getFileSize(final String name) throws OXException {
-        return fs.getFileSize(name);
+        return delegate.getFileSize(name);
     }
 
     public String getMimeType(final String name) throws OXException {
-        return fs.getMimeType(name);
+        return delegate.getMimeType(name);
     }
 
     public void recreateStateFile() throws OXException {
-        fs.recreateStateFile();
+        delegate.recreateStateFile();
     }
 
     public void remove() throws OXException {
-        fs.remove();
+        delegate.remove();
     }
 
     public String saveNewFile(final InputStream file) throws OXException {
-        return fs.saveNewFile(file);
+        return delegate.saveNewFile(file);
     }
 
     public void close() {
-        fs = null;
+        delegate = null;
     }
 
     /**
@@ -137,7 +166,7 @@ public class FileStorage {
      * @throws OXException If appending file fails
      */
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        return fs.appendToFile(file, name, offset);
+        return delegate.appendToFile(file, name, offset);
     }
 
     /**
@@ -148,7 +177,7 @@ public class FileStorage {
      * @throws OXException
      */
     public void setFileLength(long length, String name) throws OXException {
-        fs.setFileLength(length, name);
+        delegate.setFileLength(length, name);
     }
 
     /**
@@ -161,7 +190,7 @@ public class FileStorage {
      * @throws OXException
      */
     public InputStream getFile(String name, long offset, long length) throws OXException {
-        return fs.getFile(name, offset, length);
+        return delegate.getFile(name, offset, length);
     }
 
 }

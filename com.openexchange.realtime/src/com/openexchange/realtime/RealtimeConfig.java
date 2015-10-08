@@ -52,17 +52,14 @@ package com.openexchange.realtime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
-import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -73,18 +70,16 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link RealtimeConfig} Collects and exposes configuration parameters needed by the realtime stack.
- * 
+ *
  * @author <a href="mailto:marc .arens@open-xchange.com">Marc Arens</a>
  */
-public class RealtimeConfig implements Initialization, ManagementAware<RealtimeConfigMBean> {
+public class RealtimeConfig implements Initialization, ManagementAware<RealtimeConfigMBean>, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RealtimeConfig.class);
 
     private static final RealtimeConfig instance = new RealtimeConfig();
 
     private final AtomicBoolean started = new AtomicBoolean();
-
-    private HashMap<String, PropertyListener> changeListeners = new HashMap<String, PropertyListener>(2);
 
     private static final String isTraceAllUsersEnabledPropertyName = "com.openexchange.realtime.isTraceAllUsersEnabled";
 
@@ -93,6 +88,10 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     private boolean isTraceAllUsersEnabled = false;
 
     private Set<String> usersToTrace = new ConcurrentSet<String>();
+
+    private final String numberOfRunLoopsPropertyName = "com.openexchange.realtime.numberOfRunLoops";
+
+    private int numberOfRunLoops = 0;
 
     ManagementObject<RealtimeConfigMBean> managementObject;
 
@@ -106,7 +105,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
 
     /**
      * Gets the started
-     * 
+     *
      * @return The started
      */
     public AtomicBoolean getStarted() {
@@ -115,7 +114,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
 
     /**
      * Gets the isTraceAllUsersEnabled
-     * 
+     *
      * @return The isTraceAllUsersEnabled
      */
     public boolean isTraceAllUsersEnabled() {
@@ -128,7 +127,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
 
     /**
      * Gets the usersToTrace
-     * 
+     *
      * @return Returns an unmodifiable view of the users to trace
      */
     public Set<String> getUsersToTrace() {
@@ -162,6 +161,14 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
         return usersToTrace.remove(user);
     }
 
+    /**
+     * Get the number of {@link RunLoop}s to use per {@link Component}
+     * @return the number of {@link RunLoop}s to use per {@link Component}
+     */
+    public int getNumberOfRunLoops() {
+        return numberOfRunLoops;
+    }
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -177,21 +184,11 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
             LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
-        ConfigurationService configService = RealtimeServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (configService == null) {
-            LOG.error(
-                "Couldn't unregister PropertyListeners",
-                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName()));
-        } else {
-            for (Entry<String, PropertyListener> entry : changeListeners.entrySet()) {
-                configService.removePropertyListener(entry.getKey(), entry.getValue());
-            }
-        }
     }
 
     /**
-     * Reads the complete configuration and adds PropertyListeners so we are informed about property changes.
-     * 
+     * Reads the complete configuration.
+     *
      * @throws OXException
      */
     private void init() throws OXException {
@@ -199,91 +196,29 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
         if (configService == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
+        isTraceAllUsersEnabled = configService.getBoolProperty(isTraceAllUsersEnabledPropertyName,false);
 
-        PropertyListener isTraceAllUsersEnabledChangeListener = new PropertyListener() {
-            
-            @Override
-            public void onPropertyChange(PropertyEvent event) {
-                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                    String value = event.getValue();
-                    boolean enabled = false;
-                    if (!Strings.isEmpty(value)) {
-                        enabled = Boolean.parseBoolean(value.trim());
-                    }
-                    setTraceAllUsersEnabled(enabled);
-                }
-            }
+        usersToTrace = new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ","));
 
-        };
-//        = new ChangeListener() {
-//
-//            @Override
-//            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-//                realtimeConfig.setTraceAllUsersEnabled(configService.getBoolProperty(isTraceAllUsersEnabledPropertyName, false));
-//            }
-//        };
-        changeListeners.put(isTraceAllUsersEnabledPropertyName, isTraceAllUsersEnabledChangeListener);
-        isTraceAllUsersEnabled = configService.getBoolProperty(
-            isTraceAllUsersEnabledPropertyName,
-            false,
-            isTraceAllUsersEnabledChangeListener);
-
-        PropertyListener usersToTraceChangeListener = new PropertyListener() {
-            
-            @Override
-            public void onPropertyChange(PropertyEvent event) {
-                if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                    String value = event.getValue();
-                    List<String> splitAndTrimmed = Strings.splitAndTrim(value, ",");
-                    setUsersToTrace(new HashSet<String>(splitAndTrimmed));
-                }
-                
-            }
-        };
-//        = new ChangeListener() {
-//
-//            @Override
-//            void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService) {
-//                realtimeConfig.setUsersToTrace(new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ",")));
-//            }
-//        };
-        changeListeners.put(usersToTracePropertyName, usersToTraceChangeListener);
-        usersToTrace = new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", usersToTraceChangeListener, ","));
-    }
-
-    /**
-     * {@link ChangeListener} that reacts on property changes.
-     * 
-     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
-     */
-    private abstract class ChangeListener implements PropertyListener {
-
-        @Override
-        public void onPropertyChange(PropertyEvent event) {
-            try {
-                ConfigurationService configService = RealtimeServiceRegistry.getInstance().getService(ConfigurationService.class);
-                if (configService == null) {
-                    throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
-                }
-                doUpdate(RealtimeConfig.getInstance(), configService);
-            } catch (OXException e) {
-                LOG.error("", e);
-            }
-        }
-
-        /**
-         * Update the config property we are listening on in the RealtimeConfiguration
-         * 
-         * @param realtimeConfig The config to update
-         * @param configService the configService to use for getting the updated value
-         */
-        abstract void doUpdate(RealtimeConfig realtimeConfig, ConfigurationService configService);
-
+        numberOfRunLoops = configService.getIntProperty(numberOfRunLoopsPropertyName, 16);
     }
 
     @Override
     public ManagementObject<RealtimeConfigMBean> getManagementObject() {
         return managementObject;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        isTraceAllUsersEnabled = configService.getBoolProperty(isTraceAllUsersEnabledPropertyName,false);
+        usersToTrace = new HashSet<String>(configService.getProperty(usersToTracePropertyName, "", ","));
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("realtime.properties", new String[] {isTraceAllUsersEnabledPropertyName, usersToTracePropertyName});
+        return map;
     }
 
 }

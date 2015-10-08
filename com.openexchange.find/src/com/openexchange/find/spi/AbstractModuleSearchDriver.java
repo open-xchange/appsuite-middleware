@@ -109,7 +109,7 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
         checkActiveFacets(autocompleteRequest);
         AutocompleteResult autocompleteResult = doAutocomplete(autocompleteRequest, session);
         List<Facet> modifiedFacets = new LinkedList<Facet>(autocompleteResult.getFacets());
-        Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes());
+        Facet folderTypeFacet = getFolderTypeFacet(getSupportedFolderTypes(autocompleteRequest, session));
         if (folderTypeFacet != null) {
             modifiedFacets.add(folderTypeFacet);
         }
@@ -155,13 +155,14 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
     /**
      * Specifies if the {@link CommonFacetType#FOLDER_TYPE} facet is supported.
      *
+     * @param autocompleteRequest The auto-complete request
+     * @param session The session
      * @return A set of folder types.
      * Returns <code>null</code> or an empty set if the facet is not supported at all.
-     *
      * @see {@link AbstractModuleSearchDriver#ALL_FOLDER_TYPES} and {@link AbstractModuleSearchDriver#FOLDER_TYPE_NOT_SUPPORTED}
      * for convenience.
      */
-    protected abstract Set<FolderType> getSupportedFolderTypes();
+    protected abstract Set<FolderType> getSupportedFolderTypes(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
 
     protected LinkedList<Facet> filterFacets(List<Facet> facets, List<ActiveFacet> active) {
         if (facets.isEmpty() || active.isEmpty()) {

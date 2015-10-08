@@ -50,23 +50,21 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.Vector;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 
 /**
  * This step takes HtmlPages that each contain contact information in vcard-format and converts them to ContactObjects for OX
@@ -92,10 +90,6 @@ public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contac
     @Override
     public void execute(final WebClient webClient) {
         final Vector<Contact> contactObjects = new Vector<Contact>();
-        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
-        final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-        VersitDefinition.Reader versitReader;
-        final String encoding = "ISO-8859-1";
         // int counter=0;
         for (final HtmlAnchor anchor : input) {
             try {
@@ -119,24 +113,27 @@ public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contac
                 }
 
                 if (vcardPage != null) {
-                    final byte[] vcard = vcardPage.getWebResponse().getContentAsBytes();
-
-                    versitReader = def.getReader(Streams.newByteArrayInputStream(vcard), encoding);
-                    final VersitObject versitObject = def.parse(versitReader);
-                    contact = oxContainerConverter.convertContact(versitObject);
+                    VCardService vCardService = workflow.getActivator().getVCardService();
+                    VCardImport vCardImport = null;
+                    InputStream contentStream = null;
+                    try {
+                        contentStream = vcardPage.getWebResponse().getContentAsStream();
+                        vCardImport = vCardService.importVCard(contentStream, null, vCardService.createParameters());
+                        contact = vCardImport.getContact();
+                    } finally {
+                        Streams.close(contentStream, vCardImport);
+                    }
                 }
 
                 // add the image from a url to the contact
                 if (!imageUrl.equals("")) {
-                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                    HTTPToolkit.loadImageFromURL(contact, imageUrl);
                 }
 
                 SANITIZER.sanitize(contact);
                 contactObjects.add(contact);
 
-            } catch (final VersitException e) {
-                exception = e;
-            } catch (final ConverterException e) {
+            } catch (OXException e) {
                 exception = e;
             } catch (final IOException e) {
                 exception = e;

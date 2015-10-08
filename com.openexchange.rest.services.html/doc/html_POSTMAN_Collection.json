@@ -1,0 +1,67 @@
+{
+  "id": "ffb15b87-845a-93da-4815-dfb324befb2f",
+  "name": "REST HTML",
+  "timestamp": 1425387199649,
+  "requests": [
+    {
+      "collectionId": "ffb15b87-845a-93da-4815-dfb324befb2f",
+      "id": "9a00652f-7e90-ddb6-2b05-17251bbc5926",
+      "name": "Sanitize Html With Images",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/htmlproc/v1/sanitizeKeepImages",
+      "method": "PUT",
+      "headers": "Content-Type: text/html\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: text/html\n",
+      "data": "<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\"http://lorempixel.com/400/200/\" />",
+      "dataMode": "raw",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "ffb15b87-845a-93da-4815-dfb324befb2f",
+      "id": "b9f5fdcc-08d0-ef33-bc56-b2c20f2cbe16",
+      "name": "Sanitize Html (JSON) With Images",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/htmlproc/v1/sanitizeKeepImages",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\"content\":\"<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\\\"http://lorempixel.com/400/200/\\\" />\"}",
+      "dataMode": "raw",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "ffb15b87-845a-93da-4815-dfb324befb2f",
+      "id": "d24db030-0e7b-0b53-93a6-d8710f2cc874",
+      "name": "Sanitize Html (JSON)",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/htmlproc/v1/sanitize",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\"content\":\"<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\\\"http://lorempixel.com/400/200/\\\" />\"}",
+      "dataMode": "raw",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "ffb15b87-845a-93da-4815-dfb324befb2f",
+      "id": "de04b4dd-620a-0e0e-f8fd-2e9379aacfdc",
+      "name": "Sanitize Html",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/htmlproc/v1/sanitize",
+      "method": "PUT",
+      "headers": "Content-Type: text/html\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: text/html\n",
+      "data": "<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\"http://lorempixel.com/400/200/\" />",
+      "dataMode": "raw",
+      "responses": [
+        
+      ],
+      "version": 2
+    }
+  ]
+}

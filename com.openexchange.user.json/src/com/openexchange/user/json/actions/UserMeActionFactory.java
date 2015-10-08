@@ -53,11 +53,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -66,36 +67,21 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(name = "user/me", description = "Provides access to user information.")
+@OAuthModule
 public final class UserMeActionFactory implements AJAXActionServiceFactory {
 
-    /**
-     * The singleton instance.
-     */
-    private static final UserMeActionFactory SINGLETON = new UserMeActionFactory();
-
-    /**
-     * Gets the {@link UserMeActionFactory factory} instance.
-     *
-     * @return The {@link UserMeActionFactory factory} instance.
-     */
-    public static final UserMeActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    /*-
-     * Member section
-     */
-
-    /**
-     * The map to store actions.
-     */
+    /** The map to store actions. */
     private final Map<String, AJAXActionService> actions;
 
+    /** The service look-up */
+    private final ServiceLookup services;
+
     /**
-     * Initializes a new {@link UserMeActionFactory}.
+     * Initializes a new {@link UserActionFactory}.
      */
-    private UserMeActionFactory() {
+    public UserMeActionFactory(ServiceLookup services) {
         super();
+        this.services = services;
         actions = initActions();
     }
 
@@ -123,7 +109,7 @@ public final class UserMeActionFactory implements AJAXActionServiceFactory {
      */
     private Map<String, AJAXActionService> initActions() {
         final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(2);
-        tmp.put(MeAction.ACTION, new MeAction());
+        tmp.put(MeAction.ACTION, new MeAction(services));
         return Collections.unmodifiableMap(tmp);
     }
 

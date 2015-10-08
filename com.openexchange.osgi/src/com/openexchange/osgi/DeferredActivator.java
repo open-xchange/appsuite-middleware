@@ -111,8 +111,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
-    private <S> DeferredServiceTracker<S> newDeferredTracker(final BundleContext context, final Class<S> clazz, final int index) {
-        return new DeferredServiceTracker<S>(context, clazz, index);
+    private <S> DeferredServiceTracker<S> newDeferredTracker(BundleContext context, Class<S> clazz, int index, boolean stopOnUnavailability) {
+        return new DeferredServiceTracker<S>(context, clazz, index, stopOnUnavailability);
     }
 
     private final class DeferredServiceTracker<S> extends ServiceTracker<S, S> {
@@ -121,6 +121,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
         private final Class<? extends S> clazz;
         private final int index;
+        private final boolean stopOnUnavailability;
 
         /**
          * Initializes a new {@link DeferredServiceTracker}.
@@ -128,11 +129,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
          * @param context The bundle context
          * @param clazz The service's clazz
          * @param index The index
+         * @param stopOnUnavailability Whether to stop the activator in case a needed service becomes unavailbale
          */
-        protected DeferredServiceTracker(BundleContext context, Class<S> clazz, int index) {
+        protected DeferredServiceTracker(BundleContext context, Class<S> clazz, int index, boolean stopOnUnavailability) {
             super(context, clazz, null);
             this.clazz = clazz;
             this.index = index;
+            this.stopOnUnavailability = stopOnUnavailability;
         }
 
         @Override
@@ -154,10 +157,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 {
                     Object oRanking = reference.getProperty(SERVICE_RANKING);
                     if (null != oRanking) {
-                        try {
-                            ranking = Integer.parseInt(oRanking.toString().trim());
-                        } catch (NumberFormatException e) {
-                            ranking = 0;
+                        if (oRanking instanceof Integer) {
+                            ranking = ((Integer) oRanking).intValue();
+                        } else {
+                            try {
+                                ranking = Integer.parseInt(oRanking.toString().trim());
+                            } catch (NumberFormatException e) {
+                                ranking = 0;
+                            }
                         }
                     }
                 }
@@ -177,7 +184,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         @Override
         public void removedService(org.osgi.framework.ServiceReference<S> reference, S service) {
             // Signal unavailability
-            signalUnavailability(index, clazz);
+            signalUnavailability(index, clazz, stopOnUnavailability);
 
             // ... and remove from services
             ConcurrentMap<Class<?>, ServiceProvider<?>> services = DeferredActivator.this.services;
@@ -197,6 +204,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * An atomic boolean to keep track of started/stopped status.
      */
     protected final AtomicBoolean started;
+
+    /**
+     * A flag to indicate that a stop has been performed.
+     */
+    protected volatile boolean stopPerformed;
 
     /**
      * The bit mask reflecting already tracked needed services.
@@ -234,7 +246,16 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected DeferredActivator() {
         super();
         started = new AtomicBoolean();
-        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6);
+        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6, 0.9f, 1);
+    }
+
+    /**
+     * Specifies whether this activator is supposed to perform a stop operation once a needed service becomes unavailable.
+     *
+     * @return <code>true</code> to stop on service absence; otherwise <code>false</code>
+     */
+    protected boolean stopOnServiceUnavailability() {
+        return false;
     }
 
     /**
@@ -278,7 +299,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         updateServiceState();
         final Class<?>[] classes = getNeededServices();
         if (null == classes || 0 == classes.length) {
-            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1);
+            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
             startUp(false);
@@ -294,17 +315,19 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     }
                 }
             }
-            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len);
+            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[len];
             availability = 0;
             allAvailable = (1 << len) - 1;
             /*
              * Initialize service trackers for needed services
              */
+            boolean stopOnUnavailability = stopOnServiceUnavailability();
             for (int i = 0; i < len; i++) {
                 final Class<? extends Object> clazz = classes[i];
-                final DeferredServiceTracker<? extends Object> tracker = newDeferredTracker(context, clazz, i);
+                final DeferredServiceTracker<? extends Object> tracker = newDeferredTracker(context, clazz, i, stopOnUnavailability);
                 tracker.open();
+                ServiceTracker<?, ?>[] neededServiceTrackers = this.neededServiceTrackers;
                 if (null != neededServiceTrackers) {
                     // During tracker.open() an exception can occur and then the reset() method is called, which sets the
                     // neededServiceTrackers to null.
@@ -322,6 +345,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     private final void reset() {
         // Close trackers
+        ServiceTracker<?, ?>[] neededServiceTrackers = this.neededServiceTrackers;
         if (null != neededServiceTrackers) {
             for (int i = 0; i < neededServiceTrackers.length; i++) {
                 ServiceTracker<?, ?> tracker = neededServiceTrackers[i];
@@ -330,7 +354,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     neededServiceTrackers[i] = null;
                 }
             }
-            neededServiceTrackers = null;
+            this.neededServiceTrackers = null;
         }
         availability = 0;
         allAvailable = -1;
@@ -417,6 +441,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         errorBuilder.append(errorMsg);
                     }
                     LOG.error(errorBuilder.toString(), t);
+                    reset();
                     /*
                      * Shut-down
                      */
@@ -434,7 +459,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     } else {
                         shutDownBundle(bundle, errorBuilder);
                     }
-                    reset();
                 }
             }
         }
@@ -466,11 +490,20 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      *
      * @param index The class' index
      * @param clazz The service's class
+     * @param stop Whether to stop this activator
      */
-    final void signalUnavailability(final int index, final Class<?> clazz) {
+    final void signalUnavailability(int index, Class<?> clazz, boolean stop) {
         availability &= ~(1 << index);
         if (started.get()) {
-            handleUnavailability(clazz);
+            if (stop) {
+                try {
+                    doStop();
+                } catch (Exception e) {
+                    LOG.error("", e);
+                }
+            } else {
+                handleUnavailability(clazz);
+            }
         }
     }
 
@@ -489,6 +522,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     }
 
     private void startUp(final boolean async) throws Exception {
+        stopPerformed = false;
         if (async) {
             final Runnable task = new Runnable() {
 
@@ -525,13 +559,25 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            stopBundle();
-            started.set(false);
+            this.context = context;
+            doStop();
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
         } finally {
+            stopPerformed = true;
             reset();
+        }
+    }
+
+    /**
+     * Performs the stop operation.
+     *
+     * @throws Exception If stop operation fails
+     */
+    private void doStop() throws Exception {
+        if (started.compareAndSet(true, false)) {
+            stopBundle();
         }
     }
 
@@ -553,9 +599,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param <S> Type of service's class
      * @param clazz The service's class
      * @return The service obtained by service tracker or <code>null</code>
+     * @throws ShutDownRuntimeException If system is currently shutting down
      */
     @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
+        if (stopPerformed) {
+            throw new ShutDownRuntimeException();
+        }
+
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         if (null == services) {
             /*
@@ -580,6 +631,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @SuppressWarnings("unchecked")
     @Override
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        if (stopPerformed) {
+            throw new ShutDownRuntimeException();
+        }
+
         ServiceProvider<?> serviceProvider = services.get(clazz);
         if (null != serviceProvider) {
             Object service = serviceProvider.getService();
@@ -588,6 +643,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
         }
 
+        ConcurrentMap<Class<?>, ReferencedService<?>> additionalServices = this.additionalServices;
         ReferencedService<S> referencedService = (ReferencedService<S>) additionalServices.get(clazz);
         if (null == referencedService) {
             ServiceReference<S> serviceReference = (ServiceReference<S>) context.getServiceReference(clazz);

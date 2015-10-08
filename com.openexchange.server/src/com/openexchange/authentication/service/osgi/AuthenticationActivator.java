@@ -51,8 +51,13 @@ package com.openexchange.authentication.service.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.user.UserService;
 
 /**
  * Activator to start {@link ServiceTracker} to listen for {@link AutoLoginAuthenticationService}.
@@ -61,20 +66,52 @@ import com.openexchange.authentication.AuthenticationService;
  */
 public final class AuthenticationActivator implements BundleActivator {
 
-    private ServiceTracker<AuthenticationService, AuthenticationService> tracker;
+    private volatile ServiceTracker<AuthenticationService, AuthenticationService> authTracker;
+    private volatile ServiceTracker<Object, Object> basicAuthTracker;
 
+    /**
+     * Initializes a new {@link AuthenticationActivator}.
+     */
     public AuthenticationActivator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) {
-        tracker = new ServiceTracker<AuthenticationService, AuthenticationService>(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context));
-        tracker.open();
+    public void start(BundleContext context) throws Exception {
+        try {
+            {
+                ServiceTracker<AuthenticationService, AuthenticationService> tracker = new ServiceTracker<AuthenticationService, AuthenticationService>(context, AuthenticationService.class.getName(), new AuthenticationCustomizer(context));
+                this.authTracker = tracker;
+                tracker.open();
+            }
+
+            {
+                Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
+                BasicAuthenticationRegisterer registerer = new BasicAuthenticationRegisterer(context);
+                ServiceTracker<Object, Object> tracker = new ServiceTracker<Object, Object>(context, filter, registerer);
+                this.basicAuthTracker = tracker;
+                tracker.open();
+            }
+        } catch (Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(AuthenticationActivator.class);
+            logger.error("Failed to start-up bundle {}", context.getBundle().getSymbolicName(), e);
+            throw e;
+        }
     }
 
     @Override
     public void stop(BundleContext context) {
-        tracker.close();
+        ServiceTracker<AuthenticationService, AuthenticationService> authTracker = this.authTracker;
+        if (null != authTracker) {
+            authTracker.close();
+            this.authTracker = null;
+        }
+
+        ServiceTracker<Object, Object> basicAuthTracker = this.basicAuthTracker;
+        if (null != basicAuthTracker) {
+            basicAuthTracker.close();
+            this.basicAuthTracker = null;
+        }
     }
+
 }

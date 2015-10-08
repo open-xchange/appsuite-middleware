@@ -55,13 +55,13 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StoragePriority;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
 
 /**
  * {@link OutlookFolderStorageRegistry} - MS Outlook storage's registry for real folder storages.
@@ -97,7 +97,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
     private OutlookFolderStorageRegistry() {
         super();
         registry = new ConcurrentHashMap<String, Queue<FolderStorage>>();
-        genStorages = new Java7ConcurrentLinkedQueue<FolderStorage>();
+        genStorages = new ConcurrentLinkedQueue<FolderStorage>();
         contentTypes = new ConcurrentHashMap<ContentType, FolderStorage>();
     }
 
@@ -141,7 +141,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         } else {
             Queue<FolderStorage> storages = registry.get(treeId);
             if (null == storages) {
-                final Queue<FolderStorage> tmp = new Java7ConcurrentLinkedQueue<FolderStorage>();
+                final Queue<FolderStorage> tmp = new ConcurrentLinkedQueue<FolderStorage>();
                 storages = registry.putIfAbsent(treeId, tmp);
                 if (null == storages) {
                     storages = tmp;

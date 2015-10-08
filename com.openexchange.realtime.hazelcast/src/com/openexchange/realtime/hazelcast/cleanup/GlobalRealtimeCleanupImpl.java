@@ -61,6 +61,7 @@ import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.directory.Resource;
@@ -100,13 +101,17 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
         LOG.debug("Starting global realtime cleanup for ID: {}", id);
 
         // Do the local cleanup via a simple service call
-        LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
-        if (localRealtimeCleanup == null) {
-            LOG.error(
-                "Unable to start local cleanup. Shutting down?",
-                RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
-        } else {
-            localRealtimeCleanup.cleanForId(id);
+        LocalRealtimeCleanup localRealtimeCleanup;
+        try {
+            localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);
+            if (localRealtimeCleanup == null) {
+                LOG.error("Unable to start local cleanup.", RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(LocalRealtimeCleanup.class));
+            } else {
+                localRealtimeCleanup.cleanForId(id);
+            }
+        } catch (ShutDownRuntimeException shutDown) {
+            // Shutting down
+            LOG.debug("Unable to start local cleanup due to shut-down.", shutDown);
         }
 
         //Remove from directory after the RealtimeJanitors ran so we don't end up with an unreachable directory entry
@@ -168,7 +173,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
     public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
         return hazelcastResourceDirectory.remove(ids).keySet();
     }
-    
+
     private void doCleanupForId(ID id) {
         // Do the local cleanup via a simple service call
         LocalRealtimeCleanup localRealtimeCleanup = Services.optService(LocalRealtimeCleanup.class);

@@ -54,9 +54,9 @@ import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
 import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link BoxClosure}
@@ -100,7 +100,10 @@ public abstract class BoxClosure<R> {
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
-    private static final int SC_UNAUTHORIZED = 401;
+    protected static final int SC_UNAUTHORIZED = 401;
+
+    /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
+    protected static final int SC_CONFLICT = 409;
 
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxAccess boxAccess, Session session) throws OXException {
         try {
@@ -112,17 +115,15 @@ public abstract class BoxClosure<R> {
                 BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, newBoxAccess, session);
             }
-            throw AbstractBoxResourceAccess.handleHttpResponseError(null, e);
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getMessage());
         } catch (AuthFatalFailureException e) {
             if (!handleAuthError) {
-                throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
             }
             BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
             return innerPerform(false, resourceAccess, newBoxAccess, session);
-        } catch (final UnsupportedEncodingException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw BoxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final UnsupportedEncodingException | RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

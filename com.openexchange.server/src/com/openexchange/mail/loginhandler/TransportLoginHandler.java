@@ -86,7 +86,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
             final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
+            if (permissionBits.hasWebMail() && TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
                 // Get attachment storage
                 MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
 

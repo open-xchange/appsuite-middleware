@@ -39,8 +39,6 @@ package com.openexchange.groupware.contexts;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.Init;
 
 /**

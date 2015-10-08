@@ -60,19 +60,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.EventAdmin;
-import sessionstorage.TestSessionStorageService;
-import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.servlet.ServletConfigLoader;
-import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
+import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -84,9 +81,12 @@ import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
+import com.openexchange.cluster.timer.ClusterTimerService;
+import com.openexchange.cluster.timer.internal.ClusterTimerServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.config.cascade.impl.InMemoryConfigProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
@@ -99,6 +99,7 @@ import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
@@ -119,20 +120,28 @@ import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.impl.CompositeFileStorageService;
+import com.openexchange.filestore.impl.DBQuotaFileStorageService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
@@ -155,6 +164,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -166,6 +177,10 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessionstorage.SessionStorageService;
+import com.openexchange.sessionstorage.TestSessionStorageService;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.impl.DefaultShareService;
+import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -177,6 +192,7 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.internal.DelegateExecutorService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
@@ -185,9 +201,6 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
-import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
@@ -248,35 +261,6 @@ public final class Init {
          */
         new com.openexchange.charset.CustomCharsetProviderInit(),
         /**
-         * Starts HTTP servlet manager
-         */
-        new Initialization() {
-
-            @Override
-            public void start() throws OXException {
-                AJPv13Config.getInstance().start();
-                ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
-                if (null == AJPv13Server.getInstance()) {
-                    AJPv13Server.setInstance(new com.openexchange.ajp13.AJPv13ServerImpl());
-                }
-                try {
-                    AJPv13Server.startAJPServer();
-                    HttpManagersInit.getInstance().start();
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
-            }
-
-            @Override
-            public void stop() throws OXException {
-                HttpManagersInit.getInstance().stop();
-                AJPv13Server.stopAJPServer();
-                AJPv13Server.releaseInstrance();
-                ServletConfigLoader.resetDefaultInstance();
-                AJPv13Config.getInstance().stop();
-            }
-        },
-        /**
          * Setup of ContextStorage and LoginInfo.
          */
         com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
@@ -336,6 +320,7 @@ public final class Init {
     }
 
     public static void startServer() throws Exception {
+        long start = System.currentTimeMillis();
         if (!running.compareAndSet(false, true)) {
             /*
              * Already running
@@ -346,12 +331,19 @@ public final class Init {
          * Start-up
          */
         injectProperty();
+        long startTestServices = System.currentTimeMillis();
         injectTestServices();
+        System.out.println("Injecting the test services took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         for (final Initialization init : inits) {
+            long startInit = System.currentTimeMillis();
             init.start();
+            System.out.println("Starting init for " + init.toString() + " took " + (System.currentTimeMillis() - startInit) + "ms.");
             started.add(init);
         }
+
+        ServiceCallWrapperModifier.initTestRun(services);
+        System.out.println("Initializing the test setup took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     private static void injectTestServices() throws Exception {
@@ -359,41 +351,153 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        long startTestServices = System.currentTimeMillis();
         startVersionBundle();
+        System.out.println("startVersionBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectIDGeneratorService();
+        System.out.println("startAndInjectIDGeneratorService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConfigBundle();
+        System.out.println("startAndInjectConfigBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConfigViewFactory();
+        System.out.println("startAndInjectConfigViewFactory took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectThreadPoolBundle();
+        System.out.println("startAndInjectThreadPoolBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectBasicServices();
+        System.out.println("startAndInjectBasicServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectHTMLService();
+        System.out.println("startAndInjectHTMLService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectServerConfiguration();
+        System.out.println("startAndInjectServerConfiguration took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectNotification();
+        System.out.println("startAndInjectNotification took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCache();
+        System.out.println("startAndInjectCache took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCalendarServices();
+        System.out.println("startAndInjectCalendarServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseBundle();
-        startAndInjectFileStorage();
+        System.out.println("startAndInjectDatabaseBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseUpdate();
-        startAndInjectI18NBundle();
+        System.out.println("startAndInjectDatabaseUpdate took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+//        startAndInjectI18NBundle();
+        System.out.println("startAndInjectI18NBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMonitoringBundle();
+        System.out.println("startAndInjectMonitoringBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectEventBundle();
+        System.out.println("startAndInjectEventBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSessiondBundle();
+        System.out.println("startAndInjectSessiondBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContextService();
-        startAndInjectUserService();
+        System.out.println("startAndInjectContextService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectFileStorage();
+        System.out.println("startAndInjectFileStorage took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectGroupService();
+        System.out.println("startAndInjectGroupService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectFolderService();
+        System.out.println("startAndInjectFolderService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectResourceService();
+        System.out.println("startAndInjectResourceService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMailAccountStorageService();
+        System.out.println("startAndInjectMailAccountStorageService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMailBundle();
+        System.out.println("startAndInjectMailBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSpamHandler();
+        System.out.println("startAndInjectSpamHandler took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectICalServices();
+        System.out.println("startAndInjectICalServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConverterService();
+        System.out.println("startAndInjectConverterService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectXMLServices();
+        System.out.println("startAndInjectXMLServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSubscribeServices();
+        System.out.println("startAndInjectSubscribeServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactStorageServices();
+        System.out.println("startAndInjectContactStorageServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactServices();
+        System.out.println("startAndInjectContactServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactCollector();
+        System.out.println("startAndInjectContactCollector took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectImportExportServices();
+        System.out.println("startAndInjectImportExportServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCapabilitiesServices();
+        System.out.println("startAndInjectCapabilitiesServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectClusterTimerService();
+        System.out.println("startAndInjectClusterTimerService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectDefaultShareService();
+        System.out.println("startAndInjectDefaultShareService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectAliasService();
+        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
     }
 
     /**
@@ -443,10 +547,10 @@ public final class Init {
         /*
          * This one is properly dropped in stopServer() method
          */
-        final ConfigurationService config = new ConfigurationImpl();
+        final ConfigurationService config = new ConfigurationImpl(Collections.<ReinitializableConfigProviderService> emptyList());
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        com.openexchange.ajp13.Services.setServiceLookup(LOOKUP);
+        com.openexchange.http.grizzly.osgi.Services.setServiceLookup(LOOKUP);
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -457,6 +561,11 @@ public final class Init {
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
+
+            DelegateExecutorService delegateExecutorService = new DelegateExecutorService(threadPool.getThreadPoolExecutor());
+            services.put(ExecutorService.class, delegateExecutorService);
+            TestServiceRegistry.getInstance().addService(ExecutorService.class, delegateExecutorService);
+
             final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             services.put(TimerService.class, timer);
             TestServiceRegistry.getInstance().addService(TimerService.class, timer);
@@ -464,6 +573,16 @@ public final class Init {
     }
 
     private static void startAndInjectBasicServices() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
+                @Override
+                public synchronized List<UserServiceInterceptor> getInterceptors() {
+                    return Collections.emptyList();
+                }
+            }, new PasswordMechFactoryImpl());
+            services.put(UserService.class, us);
+            TestServiceRegistry.getInstance().addService(UserService.class, us);
+        }
         /*
          * Check for one service which is initialized below
          */
@@ -492,9 +611,11 @@ public final class Init {
             final ConfigurationService configService = (ConfigurationService) services.get(ConfigurationService.class);
             com.openexchange.html.services.ServiceRegistry.getInstance().addService(ConfigurationService.class, configService);
             final Object[] maps = HTMLServiceActivator.getHTMLEntityMaps(configService.getFileByName("HTMLEntities.properties"));
-            @SuppressWarnings("unchecked") final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+            @SuppressWarnings("unchecked")
+            final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
             htmlEntityMap.put("apos", Character.valueOf('\''));
-            @SuppressWarnings("unchecked") final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+            @SuppressWarnings("unchecked")
+            final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
             htmlCharMap.put(Character.valueOf('\''), "apos");
             final HtmlService service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
             services.put(HtmlService.class, service);
@@ -505,15 +626,16 @@ public final class Init {
     private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         new Component() {
-
             private static final long serialVersionUID = 2411378382745647554L;
-
             @Override
             public String getAbbreviation() {
                 return "TEST";
             }
         };
-        return new OXException(9999, null == message ? "[Not available]" : message, cause);
+        return new OXException(
+            9999,
+            null == message ? "[Not available]" : message,
+                cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -521,6 +643,7 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
             TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
             TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
+            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
 
             if (null == CalendarVolatileCache.getInstance()) {
                 try {
@@ -535,7 +658,20 @@ public final class Init {
                     /*
                      * Compose cache configuration
                      */
-                    final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=" + maxObjects + "\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=" + shrinkerIntervalSeconds + "\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=" + maxLifeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+                    final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                        "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                        "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                        "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                        "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                     final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
                     cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
                     CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
@@ -561,18 +697,17 @@ public final class Init {
     private static void startAndInjectImportExportServices() throws OXException {
         if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
             com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
-
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
-
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
             });
-            SubscriptionServiceRegistry.getInstance().addService(ContactService.class, services.get(ContactService.class));
+            SubscriptionServiceRegistry.getInstance().addService(
+                ContactService.class, services.get(ContactService.class));
         }
     }
 
@@ -596,12 +731,10 @@ public final class Init {
             registry.addStorage(new RdbContactStorage());
             TestServiceRegistry.getInstance().addService(ContactStorageRegistry.class, registry);
             com.openexchange.contact.storage.rdb.internal.RdbServiceLookup.set(new ServiceLookup() {
-
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
-
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -614,12 +747,10 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
             final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
             ContactServiceLookup.set(new ServiceLookup() {
-
                 @Override
                 public <S> S getService(final Class<? extends S> clazz) {
                     return TestServiceRegistry.getInstance().getService(clazz);
                 }
-
                 @Override
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
@@ -675,8 +806,9 @@ public final class Init {
             final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
             final TimerService timerService = (TimerService) services.get(TimerService.class);
             final CacheService cacheService = (CacheService) services.get(CacheService.class);
+            ConfigViewFactory configViewFactory = (ConfigViewFactory) services.get(ConfigViewFactory.class);
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
-            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null);
             services.put(DatabaseService.class, dbService);
             com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
             Database.setDatabaseService(dbService);
@@ -688,14 +820,29 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
+        final FileStorageService fileStorageStarter = new CompositeFileStorageService(null);
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
-        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
+        FileStorages.setFileStorageService(fileStorageStarter);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(DatabaseService.class, dbService);
+        ContextService contextService = (ContextService) services.get(ContextService.class);
+        serviceLookup.add(ContextService.class, contextService);
+        UserService userService = (UserService) services.get(UserService.class);
+        serviceLookup.add(UserService.class, userService);
+        com.openexchange.filestore.impl.osgi.Services.setServiceLookup(serviceLookup);
+
+        DBQuotaFileStorageService qfss = new DBQuotaFileStorageService(fileStorageStarter);
+        QuotaFileStorage.setQuotaFileStorageStarter(qfss);
+        InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
+        services.put(QuotaFileStorageService.class, qfss);
+        TestServiceRegistry.getInstance().addService(QuotaFileStorageService.class, qfss);
+        FileStorages.setQuotaFileStorageService(qfss);
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-        if (databaseUpdateinitialized) {
+        if(databaseUpdateinitialized ) {
             return;
         }
         // ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -733,7 +880,7 @@ public final class Init {
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
-            // reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
             reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -763,7 +910,9 @@ public final class Init {
             SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(), DefaultSpamHandler.getInstance());
         }
         if (null == SpamHandlerRegistry.getSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName())) {
-            SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(), SpamAssassinSpamHandler.getInstance());
+            SpamHandlerRegistry.registerSpamHandler(
+                SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
+                SpamAssassinSpamHandler.getInstance());
         }
     }
 
@@ -772,20 +921,6 @@ public final class Init {
             final ResourceService resources = ResourceServiceImpl.getInstance();
             services.put(ResourceService.class, resources);
             TestServiceRegistry.getInstance().addService(ResourceService.class, resources);
-        }
-    }
-
-    private static void startAndInjectUserService() {
-        if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
-            final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
-
-                @Override
-                public synchronized List<UserServiceInterceptor> getInterceptors() {
-                    return Collections.emptyList();
-                }
-            });
-            services.put(UserService.class, us);
-            TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
     }
 
@@ -862,7 +997,7 @@ public final class Init {
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
-            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService) services.get(CacheEventService.class));
+            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService)services.get(CacheEventService.class));
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
             final CacheService cache = JCSCacheService.getInstance();
             services.put(CacheService.class, cache);
@@ -894,7 +1029,7 @@ public final class Init {
 
     public static void startAndInjectConverterService() {
         if (null == TestServiceRegistry.getInstance().getService(ConversionService.class)) {
-            ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
+            ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler(TestServiceRegistry.getInstance()));
             ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard", new VCardMailPartDataSource());
 
             final ConversionService conversionService = new ConversionServiceImpl();
@@ -903,14 +1038,36 @@ public final class Init {
         }
     }
 
+    public static void startAndInjectClusterTimerService() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(ClusterTimerService.class)) {
+            ClusterTimerService clusterTimerService = new ClusterTimerServiceImpl(LOOKUP, null);
+            services.put(ClusterTimerService.class, clusterTimerService);
+            TestServiceRegistry.getInstance().addService(ClusterTimerService.class, clusterTimerService);
+        }
+    }
+
+    public static void startAndInjectAliasService() {
+        if (null == TestServiceRegistry.getInstance().getService(UserAliasStorage.class)) {
+            TestServiceRegistry.getInstance().addService(UserAliasStorage.class, new RdbAliasStorage());
+        }
+    }
+
+    public static void startAndInjectDefaultShareService() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(ShareService.class)) {
+            DefaultShareService service = new DefaultShareService(LOOKUP, new GuestCleaner(LOOKUP));
+            services.put(ShareService.class, service);
+            TestServiceRegistry.getInstance().addService(ShareService.class, service);
+        }
+    }
+
     public static void stopServer() throws Exception {
         // This causes NPEs everywhere in the tests.
         // for (final Initialization init: started) {
         // init.stop();
         // }
-        // stopMailBundle();
-        // stopDatabaseBundle();
-        // stopThreadPoolBundle();
+        //        stopMailBundle();
+        //        stopDatabaseBundle();
+        //        stopThreadPoolBundle();
         if (!running.compareAndSet(true, false)) {
             /*
              * Already stopped

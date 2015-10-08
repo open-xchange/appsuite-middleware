@@ -41,7 +41,7 @@
 package com.sun.mail.iap;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.io.*;
 import java.nio.charset.Charset;
 import com.sun.mail.util.*;
@@ -52,13 +52,13 @@ import com.sun.mail.util.*;
  */
 
 public class Argument {
-    protected List<Object> items;
+    protected final List<Object> items;
 
     /**
      * Constructor
      */
     public Argument() {
-	items = new ArrayList<Object>(1);
+	items = new LinkedList<Object>();
     }
 
     /**
@@ -227,35 +227,37 @@ public class Argument {
      * Write out all the buffered items into the output stream.
      */
     public void write(Protocol protocol) 
-		throws IOException, ProtocolException {
-	int size = items != null ? items.size() : 0;
-	DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
+        throws IOException, ProtocolException {
+    DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
 
-	for (int i=0; i < size; i++) {
-	    if (i > 0)	// write delimiter if not the first item
-		os.write(' ');
+    boolean first = true;
+    for (Object o : items) {
+        if (first) {
+            first = false;
+        } else {  // write delimiter if not the first item
+            os.write(' ');            
+        }
 
-	    Object o = items.get(i);
-	    if (o instanceof Atom) {
-		os.writeBytes(((Atom)o).string);
-	    } else if (o instanceof Number) {
-		os.writeBytes(((Number)o).toString());
-	    } else if (o instanceof AString) {
-		astring(((AString)o).bytes, protocol);
-	    } else if (o instanceof NString) {
-		nstring(((NString)o).bytes, protocol);
-	    } else if (o instanceof byte[]) {
-		literal((byte[])o, protocol);
-	    } else if (o instanceof ByteArrayOutputStream) {
-		literal((ByteArrayOutputStream)o, protocol);
-	    } else if (o instanceof Literal) {
-		literal((Literal)o, protocol);
-	    } else if (o instanceof Argument) {
-		os.write('('); // open parans
-		((Argument)o).write(protocol);
-		os.write(')'); // close parans
-	    }
-	}
+        if (o instanceof Atom) {
+        os.writeBytes(((Atom)o).string);
+        } else if (o instanceof Number) {
+        os.writeBytes(((Number)o).toString());
+        } else if (o instanceof AString) {
+        astring(((AString)o).bytes, protocol);
+        } else if (o instanceof NString) {
+        nstring(((NString)o).bytes, protocol);
+        } else if (o instanceof byte[]) {
+        literal((byte[])o, protocol);
+        } else if (o instanceof ByteArrayOutputStream) {
+        literal((ByteArrayOutputStream)o, protocol);
+        } else if (o instanceof Literal) {
+        literal((Literal)o, protocol);
+        } else if (o instanceof Argument) {
+        os.write('('); // open parans
+        ((Argument)o).write(protocol);
+        os.write(')'); // close parans
+        }
+    }
     }
 
     /**
@@ -392,6 +394,30 @@ public class Argument {
 	    }
 	}
 	return os;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream(256);
+            final DataOutputStream os = new DataOutputStream(bytes);
+            Protocol fakeProtocol = new Protocol(null, null, false) {
+
+                @Override
+                protected boolean supportsNonSyncLiterals() {
+                    return true;
+                }
+
+                @Override
+                protected OutputStream getOutputStream() {
+                    return os;
+                }
+            };
+            write(fakeProtocol);
+            return new String(bytes.toByteArray(), "ISO-8859-1");
+        } catch (Exception e) {
+            return super.toString();
+        }
     }
 }
 

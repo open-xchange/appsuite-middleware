@@ -91,7 +91,7 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
                             String[] keys = cacheKey.getKeys();
                             if (null != keys && 0 < keys.length && null != keys[0]) {
                                 try {
-                                    invalidateUser(Integer.valueOf(keys[0]), cacheKey.getContextId());
+                                    invalidateUser(Integer.parseInt(keys[0]), cacheKey.getContextId());
                                 } catch (NumberFormatException e) {
                                     org.slf4j.LoggerFactory.getLogger(CacheInvalidator.class).error(
                                         "Unexpected cache key for region {}: \"{}\", skipping invalidation.",

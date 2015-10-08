@@ -52,8 +52,11 @@ package com.openexchange.test;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
+import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
+import com.openexchange.ajax.share.ShareAJAXSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -98,10 +101,10 @@ public final class InterfaceTests {
         // TODO: enable when MSLiveOAuthClient is implemented
         // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
 
-        tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());
-        tests.addTest(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.suite());
-        tests.addTest(com.openexchange.dav.carddav.tests.CardDAVTestSuite.suite());
-        tests.addTest(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.tests.CalDAVTestSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.tests.CardDAVTestSuite.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class));
 
         tests.addTest(com.openexchange.grizzly.GrizzlyTestSuite.suite());
 
@@ -130,8 +133,12 @@ public final class InterfaceTests {
         tests.addTest(FindTestSuite.suite());
         tests.addTest(com.openexchange.ajax.quota.QuotaTestSuite.suite());
         tests.addTest(JSlobTestSuite.suite());
+        tests.addTest(ShareAJAXSuite.suite());
         // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
         // tests.addTest(ManifestsTestSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(OAuthProviderTests.class));
+        // TODO: enable
+        tests.addTest(DriveAJAXSuite.suite());
         return tests;
     }
 }

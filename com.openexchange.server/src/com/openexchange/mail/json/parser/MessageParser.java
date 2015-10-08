@@ -94,6 +94,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -127,6 +128,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}.
@@ -400,7 +402,14 @@ public final class MessageParser {
                         JSONObject jTextBody = attachmentArray.getJSONObject(0);
                         sContent = jTextBody.getString(CONTENT);
                         TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                        String contentType = parseContentType(jTextBody.getString(CONTENT_TYPE));
+                        String contentType;
+                        {
+                            String sContentType = jTextBody.optString(CONTENT_TYPE, null);
+                            if (null == sContentType) {
+                                sContentType = HTMLDetector.containsHTMLTags(sContent, true) ? "text/plain" : "text/html";
+                            }
+                            contentType = parseContentType(sContentType);
+                        }
                         part.setContentType(contentType);
                         if (contentType.startsWith("text/plain") && jTextBody.optBoolean("raw", false)) {
                             part.setPlainText(sContent);
@@ -428,7 +437,7 @@ public final class MessageParser {
              * TODO: Parse nested messages. Currently not used
              */
         } catch (JSONException e) {
-            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         } catch (AddressException e) {
             throw MimeMailException.handleMessagingException(e);
         }

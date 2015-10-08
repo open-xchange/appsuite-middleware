@@ -87,7 +87,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         }
 
         @Override
-        public void close() throws OXException {
+        public void close() {
             // empty must not be closed.
         }
 
@@ -160,7 +160,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
     }
 
     @Override
-    public void close() throws OXException {
+    public void close() {
         // delegate does not provide a close method.
     }
 

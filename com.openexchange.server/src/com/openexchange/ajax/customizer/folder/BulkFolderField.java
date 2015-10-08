@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -126,8 +127,8 @@ public class BulkFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object renderJSON(Object value) {
-        return delegate.renderJSON(value);
+    public Object renderJSON(AJAXRequestData requestData, Object value) {
+        return delegate.renderJSON(requestData, value);
     }
 
     /**

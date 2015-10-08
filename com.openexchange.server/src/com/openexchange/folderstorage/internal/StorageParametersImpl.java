@@ -123,7 +123,7 @@ public final class StorageParametersImpl implements StorageParameters {
         this.context = null == context ? session.getContext() : context;
         contextId = null == this.context ? -1 : this.context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
     }
 
     /**
@@ -140,7 +140,7 @@ public final class StorageParametersImpl implements StorageParameters {
         this.context = context;
         contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
     }
 
     /**
@@ -169,7 +169,7 @@ public final class StorageParametersImpl implements StorageParameters {
             }
         }
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
     }
 
     private ConcurrentMap<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
@@ -185,8 +185,11 @@ public final class StorageParametersImpl implements StorageParameters {
     }
 
     @Override
-    public void addWarning(final OXException warning) {
-        warning.addCategory(Category.CATEGORY_WARNING);
+    public void addWarning(OXException warning) {
+        if (false == Category.CATEGORY_WARNING.equals(warning.getCategory()) &&
+            (null == warning.getCategories() || false == warning.getCategories().contains(Category.CATEGORY_WARNING))) {
+            warning.addCategory(Category.CATEGORY_WARNING);
+        }
         warnings.put(warning, PRESENT);
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import java.io.Closeable;
 import com.openexchange.exception.OXException;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SearchIterator<T> {
+public interface SearchIterator<T> extends Closeable {
 
     /**
      * Returns <code>true</code> if the iteration has more elements. (In other words, returns <code>true</code> if {@link #next()} would
@@ -78,10 +79,9 @@ public interface SearchIterator<T> {
 
     /**
      * Closes the search iterator
-     *
-     * @throws OXException If closing fails
      */
-    void close() throws OXException;
+    @Override
+    void close();
 
     /**
      * This iterator's size

@@ -55,7 +55,7 @@ import java.sql.Types;
 
 /**
  * {@link BinaryMapping}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class BinaryMapping<O> extends DefaultDbMapping<byte[], O> {
@@ -65,8 +65,8 @@ public abstract class BinaryMapping<O> extends DefaultDbMapping<byte[], O> {
     }
 
     @Override
-    public byte[] get(ResultSet resultSet) throws SQLException {
-        return resultSet.getBytes(this.getColumnLabel());
+    public byte[] get(ResultSet resultSet, String columnLabel) throws SQLException {
+        return resultSet.getBytes(columnLabel);
     }
 
 }

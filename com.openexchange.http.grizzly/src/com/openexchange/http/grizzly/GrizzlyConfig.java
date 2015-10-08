@@ -112,12 +112,14 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
 
+    /** Do we want a fast or a clean shut-down */
+    private boolean shutdownFast = false;
+
+    /** The number of seconds to await the shut-down */
+    private int awaitShutDownSeconds = 90;
+
     /** The maximum header size for an HTTP request in bytes. */
     private int maxHttpHeaderSize = 8192;
-
-    /** Do we want to enable the AJP Filter for incoming requests */
-    private boolean isAJPEnabled = false;
-
 
     // server properties
 
@@ -176,6 +178,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Is autologin enabled in the session.d properties? */
     private boolean isSessionAutologin = false;
 
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -204,7 +207,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
-        this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
         this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
 
         // server properties
@@ -230,6 +232,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
         final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
         this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
+        this.shutdownFast = configService.getBoolProperty("com.openexchange.connector.shutdownFast", false);
+        this.awaitShutDownSeconds = configService.getIntProperty("com.openexchange.connector.awaitShutDownSeconds", 90);
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -463,11 +467,21 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     }
 
     /**
-     * Gets the isAJPEnabled property.
-     * @return the isAJPEnabled property.
+     * Gets the shutdown-fast flag
+     *
+     * @return The shutdown-fast flag
      */
-    public boolean isAJPEnabled() {
-        return isAJPEnabled;
+    public boolean isShutdownFast() {
+        return shutdownFast;
+    }
+
+    /**
+     * Gets the awaitShutDownSeconds
+     *
+     * @return The awaitShutDownSeconds
+     */
+    public int getAwaitShutDownSeconds() {
+        return awaitShutDownSeconds;
     }
 
     /**
@@ -482,7 +496,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     }
 
     /**
-     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id.
+     * Get the name of the echo header whose value is echoed for each request providing that header when using KippData's mod_id.
      * @return The name of the echo header whose value is echoed for each request providing that header.
      */
     public String getEchoHeader() {

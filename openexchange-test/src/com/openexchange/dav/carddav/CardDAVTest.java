@@ -49,6 +49,11 @@
 
 package com.openexchange.dav.carddav;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,7 +68,6 @@ import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
 import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -75,6 +79,11 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -97,6 +106,7 @@ import com.openexchange.test.ContactTestManager;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Parameterized.class)
 public abstract class CardDAVTest extends WebDAVTest {
 
 	protected static final int TIMEOUT = 10000;
@@ -105,13 +115,17 @@ public abstract class CardDAVTest extends WebDAVTest {
 	private int folderId;
 	private VCardEngine vCardEngine;
 
-	public CardDAVTest(final String name) {
-		super(name);
+	public CardDAVTest() {
+		super();
 	}
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Parameters(name = "AuthMethod={0}")
+    public static Iterable<Object[]> params() {
+        return availableAuthMethods();
+    }
+
+    @Before
+    public void setUpFixtures() throws Exception {
         /*
          * init
          */
@@ -121,12 +135,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void closeTestManager() throws Exception {
     	if (null != this.getManager()) {
     		this.getManager().cleanUp();
     	}
-        super.tearDown();
     }
 
     @Override
@@ -170,7 +183,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	return this.vCardEngine;
     }
 
-    protected int delete(final String uid) throws OXException, HttpException, IOException {
+    protected int delete(final String uid) throws Exception {
     	DeleteMethod delete = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -185,7 +198,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	getManager().deleteAction(contact);
     }
 
-    protected String getCTag() throws OXException, IOException, DavException {
+    protected String getCTag() throws Exception {
 		PropFindMethod propFind = null;
 		try {
 			DavPropertyNameSet props = new DavPropertyNameSet();
@@ -200,10 +213,14 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
     }
 
-	protected int putVCard(String uid, String vCard) throws HttpException, IOException, OXException {
+    protected int putVCard(String uid, String vCard) throws Exception {
+        return putVCard(uid, vCard, "Contacts");
+    }
+
+    protected int putVCard(String uid, String vCard, String collection) throws Exception {
         PutMethod put = null;
         try {
-            final String href = "/carddav/Contacts/" + uid + ".vcf";
+            final String href = "/carddav/" + collection + "/" + uid + ".vcf";
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
@@ -211,13 +228,13 @@ public abstract class CardDAVTest extends WebDAVTest {
         } finally {
             release(put);
         }
-	}
+    }
 
-	protected int putVCardUpdate(String uid, String vCard) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard) throws Exception {
 		return this.putVCardUpdate(uid, vCard, null);
 	}
 
-	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws Exception {
         PutMethod put = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -232,9 +249,14 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
 	}
 
-	protected String fetchSyncToken() throws OXException, IOException, DavException {
-		return super.fetchSyncToken("/carddav/Contacts");
-	}
+    protected String fetchSyncToken() throws Exception {
+        return fetchSyncToken("Contacts");
+    }
+
+    @Override
+    protected String fetchSyncToken(String collection) throws Exception {
+        return super.fetchSyncToken("/carddav/" + collection);
+    }
 
 	/**
 	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the
@@ -246,11 +268,16 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws ConfigurationException
 	 * @throws DavException
 	 */
-	protected Map<String, String> syncCollection(final String syncToken) throws OXException, IOException, DavException {
-		return super.syncCollection(syncToken, "/carddav/Contacts");
-	}
+    protected Map<String, String> syncCollection(final String syncToken) throws Exception {
+        return syncCollection("Contacts", syncToken);
+    }
 
-	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
+    @Override
+    protected Map<String, String> syncCollection(String collection, final String syncToken) throws Exception {
+        return super.syncCollection(syncToken, "/carddav/" + collection);
+    }
+
+	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
 		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
 
@@ -326,7 +353,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws IOException
 	 * @throws ConfigurationException
 	 */
-	protected Map<String, String> getAllETags() throws OXException, IOException, DavException {
+	protected Map<String, String> getAllETags() throws Exception {
 		final Map<String, String> eTags = new HashMap<String, String>();
     	final DavPropertyNameSet propertyNames = new DavPropertyNameSet();
     	propertyNames.add(PropertyNames.GETETAG);
@@ -355,7 +382,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws VCardParseException
 	 * @throws VCardException
 	 */
-	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws OXException, IOException, DavException, VCardParseException {
+	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws Exception {
 		final List<VCardResource> addressData = new ArrayList<VCardResource>();
     	final DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);

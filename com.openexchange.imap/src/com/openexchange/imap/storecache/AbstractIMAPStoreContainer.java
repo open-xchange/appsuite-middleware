@@ -50,13 +50,11 @@
 package com.openexchange.imap.storecache;
 
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
-import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -100,14 +98,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         if (propagateClientIp) {
             imapStore.setPropagateClientIpAddress(session.getLocalIp());
         }
-        {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
-        }
+        IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         /*
          * ... and connect it
          */
@@ -121,6 +112,12 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             imapStore = (IMAPStore) imapSession.getStore(name);
             doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         }
+
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
+
         return imapStore;
     }
 

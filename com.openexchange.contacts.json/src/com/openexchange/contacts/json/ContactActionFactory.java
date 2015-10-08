@@ -73,6 +73,7 @@ import com.openexchange.contacts.json.actions.UpdateAction;
 import com.openexchange.contacts.json.actions.UpdatesAction;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -83,13 +84,24 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Module(name = "contact", description = "Provides access to contact information.")
+@OAuthModule
 public class ContactActionFactory implements AJAXActionServiceFactory {
+
+    /**
+     * The read-only scope for OAuth requests
+     */
+    public static final String OAUTH_READ_SCOPE = "read_contacts";
+
+    /**
+     * The writable scope for OAuth requests
+     */
+    public static final String OAUTH_WRITE_SCOPE = "write_contacts";
 
     private final Map<String, ContactAction> actions;
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, ContactAction>(15);
+        actions = new ConcurrentHashMap<String, ContactAction>(15, 0.9f, 1);
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));

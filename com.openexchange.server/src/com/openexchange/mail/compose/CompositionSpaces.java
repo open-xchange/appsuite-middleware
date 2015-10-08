@@ -93,7 +93,7 @@ public final class CompositionSpaces {
         CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
         CompositionSpace space = registry.removeCompositionSpace(csid);
         if (null != space) {
-            Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+            Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
             try {
 
                 // Delete clean-ups
@@ -138,7 +138,7 @@ public final class CompositionSpaces {
      * @param session The session
      */
     public static void destroyFor(Session session) {
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             for (CompositionSpace space : CompositionSpace.getRegistry(session).removeAllCompositionSpaces()) {
 
@@ -185,7 +185,7 @@ public final class CompositionSpaces {
      * @param session The associated session
      */
     static void destroy(CompositionSpaceRegistry registry, Session session) {
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             for (CompositionSpace space : registry.removeAllCompositionSpaces()) {
 
@@ -229,7 +229,7 @@ public final class CompositionSpaces {
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session) throws OXException {
-        applyCompositionSpace(csid, session, null);
+        applyCompositionSpace(csid, session, null, true);
     }
 
     /**
@@ -238,19 +238,20 @@ public final class CompositionSpaces {
      * @param csid The composition space identifier
      * @param session The associated session
      * @param optMailAccess The optional pre-initialized mail access
+     * @param updateMailFlags Boolean value <code>true</code> if the messages flags should be updated; otherwiese <code>false</code>
      * @throws OXException If operation fails
      */
-    public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess) throws OXException {
+    public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess, boolean updateMailFlags) throws OXException {
         CompositionSpace space = CompositionSpace.optCompositionSpace(csid, session);
         if (null == space) {
             return;
         }
 
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             {
                 final MailPath replyFor = space.getReplyFor();
-                if (null != replyFor) {
+                if (null != replyFor && !updateMailFlags) {
                     if (null != optMailAccess && replyFor.getAccountId() == optMailAccess.getAccountId()) {
                         new SafeAction<Void>() {
 
@@ -281,7 +282,7 @@ public final class CompositionSpaces {
 
             {
                 Queue<MailPath> forwardsFor = space.getForwardsFor();
-                if (null != forwardsFor && !forwardsFor.isEmpty()) {
+                if ((null != forwardsFor && !forwardsFor.isEmpty()) && !updateMailFlags) {
                     for (final MailPath mailPath : forwardsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
                             new SafeAction<Void>() {

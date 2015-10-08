@@ -124,7 +124,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
     }
 
     @Override
-    public void save(final String newElement, final Object session) throws OXException {
+    public void save(final String newElement, final Object session, Collection<OXException> errors) throws OXException {
         savedElements.add(newElement);
     }
 

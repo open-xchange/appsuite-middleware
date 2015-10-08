@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -73,12 +74,14 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private final Pools pools;
     private final ConfigDatabaseServiceImpl configDatabaseService;
+    private final GlobalDatabaseServiceImpl globalDatabaseService;
     private final ReplicationMonitor monitor;
 
-    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, ReplicationMonitor monitor) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseServiceImpl configDatabaseService, GlobalDatabaseServiceImpl globalDatabaseService, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
+        this.globalDatabaseService = globalDatabaseService;
         this.monitor = monitor;
     }
 
@@ -201,6 +204,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getContextCountPerSchema(con, poolId, maxContexts);
+    }
+
+    @Override
     public void invalidate( int... contextIds) {
         configDatabaseService.invalidate(contextIds);
     }
@@ -216,8 +224,60 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        configDatabaseService.lock(con);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        configDatabaseService.lock(con, writePoolId);
+    }
+
+    // Delegate global database service methods.
+
+    @Override
+    public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+        return globalDatabaseService.isGlobalDatabaseAvailable(group);
+    }
+
+    @Override
+    public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
+        return globalDatabaseService.isGlobalDatabaseAvailable(contextId);
+    }
+
+    @Override
+    public Connection getReadOnlyForGlobal(String group) throws OXException {
+        return globalDatabaseService.getReadOnlyForGlobal(group);
+    }
+
+    @Override
+    public Connection getReadOnlyForGlobal(int contextId) throws OXException {
+        return globalDatabaseService.getReadOnlyForGlobal(contextId);
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(String group, Connection connection) {
+        globalDatabaseService.backReadOnlyForGlobal(group, connection);
+    }
+
+    @Override
+    public void backReadOnlyForGlobal(int contextId, Connection connection) {
+        globalDatabaseService.backReadOnlyForGlobal(contextId, connection);
+    }
+
+    @Override
+    public Connection getWritableForGlobal(String group) throws OXException {
+        return globalDatabaseService.getWritableForGlobal(group);
+    }
+
+    @Override
+    public Connection getWritableForGlobal(int contextId) throws OXException {
+        return globalDatabaseService.getWritableForGlobal(contextId);
+    }
+
+    @Override
+    public void backWritableForGlobal(String group, Connection connection) {
+        globalDatabaseService.backWritableForGlobal(group, connection);
+    }
+
+    @Override
+    public void backWritableForGlobal(int contextId, Connection connection) {
+        globalDatabaseService.backWritableForGlobal(contextId, connection);
     }
 
     // Implemented database service methods.

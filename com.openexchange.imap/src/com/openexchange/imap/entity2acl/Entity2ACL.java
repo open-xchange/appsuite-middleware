@@ -68,7 +68,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public abstract class Entity2ACL {
 
-    private static final ConcurrentMap<String, String> GREETING_CACHE = new ConcurrentHashMap<String, String>(16);
+    private static final ConcurrentMap<String, String> GREETING_CACHE = new ConcurrentHashMap<String, String>(16, 0.9f, 1);
 
     private static String getGreeting(final IMAPStore imapStore, final IMAPConfig imapConfig) throws MessagingException {
         String greeting = GREETING_CACHE.get(imapConfig.getServer());

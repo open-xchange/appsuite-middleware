@@ -92,7 +92,15 @@ public final class MimeHeaderNameChecker {
         }
         try {
             final HeaderCollection hc = new HeaderCollection(new UnsynchronizedByteArrayInputStream(bytes, 0, index));
-            final byte[] csb = hc.toString().getBytes(Charsets.ISO_8859_1);
+            String hcStr = hc.toString();
+            final byte[] csb;
+            if (hcStr.endsWith("\r\n")) {
+                byte[] src = hcStr.getBytes(Charsets.ISO_8859_1);
+                csb = new byte[src.length - 2];
+                System.arraycopy(src, 0, csb, 0, csb.length);
+            } else {
+                csb = hcStr.getBytes(Charsets.ISO_8859_1);
+            }
             return new CombinedInputStream(csb, new UnsynchronizedByteArrayInputStream(bytes, index, length));
         } catch (final Exception e) {
             return new UnsynchronizedByteArrayInputStream(bytes);

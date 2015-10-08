@@ -71,35 +71,40 @@ public class GroupWriter extends DataWriter {
     private final TimeZone utc;
 
     public GroupWriter() {
-		super(null, null);
-		utc = getTimeZone("utc");
-	}
-
-    public void writeArray(final Group group, final JSONArray json, final List<Group.Field> fields){
-    	for(Group.Field field: fields){
-    		if(field == Group.Field.MEMBERS){
-    			json.put(Strings.join(group.getMember(),","));
-    			continue;
-    		}
-    		json.put(group.get(field));
-    	}
+        super(null, null);
+        utc = getTimeZone("utc");
     }
 
-	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
+    public void writeArray(final Group group, final JSONArray json, final List<Group.Field> fields) {
+        for (Group.Field field : fields) {
+            if (field == Group.Field.MEMBERS) {
+                json.put(Strings.join(group.getMember(), ","));
+                continue;
+            }
+            json.put(group.get(field));
+        }
+    }
 
+    public void writeGroup(final Group group, final JSONObject json) throws JSONException {
         writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);
-		writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
-		writeParameter(GroupFields.NAME, group.getSimpleName(), json);
+        writeParameter(GroupFields.DISPLAY_NAME, group.getDisplayName(), json);
+        writeParameter(GroupFields.NAME, group.getSimpleName(), json);
         writeParameter(DataFields.LAST_MODIFIED_UTC, group.getLastModified(), utc, json);
 
         writeMembers(group, json);
-	}
+    }
 
-	protected void writeMembers(final Group group, final JSONObject json) throws JSONException {
-		final JSONArray jsonArray = new JSONArray();
-		for (final int member : group.getMember()) {
-			jsonArray.put(member);
-		}
-		json.put(GroupFields.MEMBERS, jsonArray);
-	}
+    protected void writeMembers(final Group group, final JSONObject json) throws JSONException {
+        int[] members = group.getMember();
+        if (null == members) {
+            json.put(GroupFields.MEMBERS, new JSONArray(0));
+        } else {
+            JSONArray jsonArray = new JSONArray(members.length);
+            for (int member : members) {
+                jsonArray.put(member);
+            }
+            json.put(GroupFields.MEMBERS, jsonArray);
+        }
+    }
+
 }

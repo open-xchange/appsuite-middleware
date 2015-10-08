@@ -51,13 +51,8 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.framework.CommonAllResponse;

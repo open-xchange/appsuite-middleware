@@ -49,6 +49,9 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +61,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler.CellPadding;
 import com.openexchange.test.mock.MockUtils;
 
 /**
@@ -113,4 +117,87 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(22222, valueFromField);
     }
 
+    @Test
+    public void testHandleTableCellpaddingAttribute_mapNull_return() {
+        filterJerichoHandler.handleTableCellpaddingAttribute(null);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(0, tablePaddings.size());
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_emptyMap_addEmptyCellpadding() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals(null, tablePaddings.getFirst().cellPadding);
+        Assert.assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingInAttributes_addCellpadding() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("cellpadding", "10");
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals("10", tablePaddings.getFirst().cellPadding);
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingZero_addCellpadding() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("cellpadding", "0");
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals("0", tablePaddings.getFirst().cellPadding);
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellsapcingZero_addCellpaddingAndBorderCollapse() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("cellpadding", "0");
+        map.put("cellspacing", "0");
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals("0", tablePaddings.getFirst().cellPadding);
+        Assert.assertEquals(3, map.size());
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_cellpaddingInStyle_addCellpadding() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("style", "border-collapse:collapse;margin:2px;padding:20;width:546px;background-color:#dbefff;");
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals("20", tablePaddings.getFirst().cellPadding);
+        Assert.assertEquals(1, map.size());
+    }
+
+    @Test
+    public void testHandleTableCellpaddingAttribute_styleAvailableButNoCellpadding_doNotAdd() {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("style", "border-collapse:collapse;margin:2px;width:546px;background-color:#dbefff;");
+
+        filterJerichoHandler.handleTableCellpaddingAttribute(map);
+
+        LinkedList<CellPadding> tablePaddings = (LinkedList<CellPadding>) MockUtils.getValueFromField(filterJerichoHandler, "tablePaddings");
+        Assert.assertEquals(1, tablePaddings.size());
+        Assert.assertEquals(null, tablePaddings.getFirst().cellPadding);
+        Assert.assertEquals(1, map.size());
+    }
 }

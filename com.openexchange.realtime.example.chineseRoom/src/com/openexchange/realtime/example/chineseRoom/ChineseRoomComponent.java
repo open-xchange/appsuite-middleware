@@ -52,6 +52,7 @@ package com.openexchange.realtime.example.chineseRoom;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.LoadFactorCalculator;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 
@@ -61,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ChineseRoomComponent implements Component{
+public class ChineseRoomComponent implements Component {
 
     private final ServiceLookup services;
 
@@ -96,6 +97,11 @@ public class ChineseRoomComponent implements Component{
     @Override
     public EvictionPolicy getEvictionPolicy() {
         return new Timeout(5, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public void setLoadFactorCalculator(LoadFactorCalculator loadFactorCalculator) {
+        //not interested
     }
 
 }

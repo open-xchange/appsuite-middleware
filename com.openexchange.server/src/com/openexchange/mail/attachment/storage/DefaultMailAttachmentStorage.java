@@ -71,11 +71,13 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -91,6 +93,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.DocumentDataSource;
 import com.openexchange.mail.mime.processing.MimeProcessingUtility;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
@@ -102,6 +105,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
@@ -177,34 +181,39 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
 
     @Override
     public void prepareStorage(String folderName, boolean checkForExpiredAttachments, long timeToLive, Session session) throws OXException {
+        prepareStorage0(folderName, checkForExpiredAttachments, timeToLive, session);
+    }
+
+    private int prepareStorage0(String folderName, boolean checkForExpiredAttachments, long timeToLive, Session session) throws OXException {
         try {
             Context ctx = getContext(session);
             ServerSession serverSession = getServerSessionFrom(session, ctx);
             UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
 
-            final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
-            final FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
-            if (defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
-                String name = folderName;
-                final int folderId;
-                final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
-                if (-1 == lookUpFolder) {
-                    synchronized (DefaultMailAttachmentStorage.class) {
-                        folderId = createIfAbsent(serverSession, ctx, name, defaultInfoStoreFolder);
-                    }
-                } else {
-                    folderId = lookUpFolder;
+            OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+            FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
+            if (!defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
+                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(session.getUserId(), defaultInfoStoreFolder.getObjectID(), ctx.getContextId());
+            }
+
+            String name = folderName;
+            final int folderId;
+            final int lookUpFolder = OXFolderSQL.lookUpFolder(defaultInfoStoreFolder.getObjectID(), name, FolderObject.INFOSTORE, null, ctx);
+            if (-1 == lookUpFolder) {
+                synchronized (DefaultMailAttachmentStorage.class) {
+                    folderId = createIfAbsent(serverSession, ctx, name, defaultInfoStoreFolder);
                 }
-                serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
-                /*
-                 * Check for elapsed documents inside infostore folder
-                 */
-                if (!checkForExpiredAttachments) {
-                    return;
-                }
-                final IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
-                final long now = System.currentTimeMillis();
-                final List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now, timeToLive);
+            } else {
+                folderId = lookUpFolder;
+            }
+            serverSession.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(folderId));
+            /*
+             * Check for elapsed documents inside infostore folder
+             */
+            if (checkForExpiredAttachments) {
+                IDBasedFileAccess fileAccess = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class).createAccess(serverSession);
+                long now = System.currentTimeMillis();
+                List<String> toRemove = getElapsedDocuments(folderId, fileAccess, serverSession, now, timeToLive);
                 if (!toRemove.isEmpty()) {
                     /*
                      * Remove elapsed documents
@@ -218,6 +227,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     }
                 }
             }
+            return folderId;
         } catch (SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -236,11 +246,18 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 folderId = sFolderId;
             } else if (publishStore) {
                 final String key = MailSessionParameterNames.getParamPublishingInfostoreFolderID();
-                if (!session.containsParameter(key)) {
-                    final Throwable t = new Throwable("Missing folder ID of publishing infostore folder.");
-                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create(t, new Object[0]);
+                if (session.containsParameter(key)) {
+                    folderId = ((Integer) session.getParameter(key)).toString();
+                } else {
+                    // Folder name
+                    String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
+                    if ("i18n-defined".equals(name)) {
+                        name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
+                    }
+                    int fuid = prepareStorage0(name, false, 0, session);
+                    folderId = Integer.toString(fuid);
+                    session.setParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID(), Integer.valueOf(fuid));
                 }
-                folderId = ((Integer) session.getParameter(key)).toString();
             } else {
                 throw MailExceptionCode.MISSING_PARAM.create("folder");
             }
@@ -442,7 +459,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         // Generate publication for current attachment
         final Publication publication = new Publication();
         publication.setModule("infostore/object");
-        publication.setEntityId(String.valueOf(id));
+        publication.setEntityId(new FileID(id).getFileId());
         publication.setContext(getContext(session));
         publication.setUserId(session.getUserId());
 

@@ -77,7 +77,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;

@@ -2,11 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.customizer.folder,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.openexchange.ajax.customizer.folder,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.api2,
  com.openexchange.calendar,
  com.openexchange.config,
@@ -22,6 +31,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.datatypes.genericonf.storage.osgi.tools,
  com.openexchange.event,
  com.openexchange.exception,
+ com.openexchange.file.storage,
  com.openexchange.folder,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
@@ -45,6 +55,7 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.login,
+ com.openexchange.mail.mime,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.publish,
@@ -66,11 +77,11 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  com.openexchange.tools.sql,
  com.openexchange.tools.ssl,
  com.openexchange.tools.update,
- com.openexchange.tools.versit,
- com.openexchange.tools.versit.converter,
  com.openexchange.tx,
  com.openexchange.user,
  com.openexchange.userconf,
+ javax.mail,
+ javax.mail.internet,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.cookie,
  org.apache.commons.httpclient.methods,

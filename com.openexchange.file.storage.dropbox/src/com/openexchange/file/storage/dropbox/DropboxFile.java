@@ -54,6 +54,8 @@ import java.util.Date;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.mime.MimeTypeMap;
@@ -77,7 +79,7 @@ public final class DropboxFile extends DefaultFile {
     public DropboxFile(Entry entry, int userID) throws OXException {
         super();
         if (entry.isDir) {
-            throw DropboxExceptionCodes.NOT_A_FILE.create(entry.path);
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, entry.path);
         }
         String parentPath = entry.parentPath();
         setId(entry.fileName());
@@ -97,6 +99,15 @@ public final class DropboxFile extends DefaultFile {
             DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
         setFileName(entry.fileName());
         setTitle(entry.fileName());
+    }
+
+    /**
+     * Gets the file's folder- and object-identifier inside an {@link IDTuple} structure.
+     *
+     * @return The ID tuple
+     */
+    public IDTuple getIDTuple() {
+        return new IDTuple(getFolderId(), getId());
     }
 
     @Override

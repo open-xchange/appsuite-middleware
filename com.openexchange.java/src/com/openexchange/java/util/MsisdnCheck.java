@@ -82,7 +82,7 @@ public class MsisdnCheck {
      * @return <code>true</code> if valid MSISDN number; otherwise <code>false</code>
      */
     public static boolean validate(final String number) {
-        if (isEmpty(number)) {
+        if (com.openexchange.java.Strings.isEmpty(number)) {
             return false;
         }
         return PATTERN_VALIDATE.matcher(number).matches();
@@ -95,7 +95,7 @@ public class MsisdnCheck {
      * @return returns either "invalid" if the given number is not valid (contains non-digits) or the phone number in the format xxyyyzzzzzzzz
      **/
     public static boolean checkMsisdn(final String number) {
-        if (isEmpty(number)) {
+        if (com.openexchange.java.Strings.isEmpty(number)) {
             return false;
         }
         String num = number;
@@ -112,19 +112,6 @@ public class MsisdnCheck {
             isDigit = Strings.isDigit(num.charAt(i));
         }
         return isDigit;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern PATTERN_CLEANUP = Pattern.compile("[+()/ ]");

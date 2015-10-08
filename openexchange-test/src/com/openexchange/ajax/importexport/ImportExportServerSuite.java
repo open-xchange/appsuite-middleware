@@ -65,7 +65,6 @@ public final class ImportExportServerSuite {
         //VCARD
         tests.addTest(VCardTestSuite.suite());
         tests.addTestSuite(Bug9475Test.class);
-        tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
 
         //CSV
         tests.addTestSuite(CSVImportExportServletTest.class);
@@ -79,6 +78,7 @@ public final class ImportExportServerSuite {
         tests.addTestSuite(Bug36943Test.class);
 
         // Overall bug tests.
+        tests.addTestSuite(Bug6825Test.class);
         tests.addTestSuite(Bug9209Test.class);
         tests.addTestSuite(DistributionListExportTest.class);
         return tests;

@@ -50,11 +50,7 @@
 package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
-import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -62,13 +58,13 @@ import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.folder.json.preferences.Tree;
-import com.openexchange.folder.json.services.MetaContributors;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.share.notification.ShareNotificationService;
 
 /**
  * {@link FolderJSONActivator} - Activator for JSON folder interface.
@@ -117,33 +113,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                 getInstance(),
                 ContentTypeDiscoveryService.class));
             track(AdditionalFolderField.class, new FolderFieldCollector(context, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
-            /*
-             * MetaContributors
-             */
-            {
-                class MetaContributorRegistryCustomizer extends ServiceTracker<MetaContributorRegistry, MetaContributorRegistry> {
-
-                    public MetaContributorRegistryCustomizer(final BundleContext context) {
-                        super(context, MetaContributorRegistry.class, null);
-                    }
-
-                    @Override
-                    public MetaContributorRegistry addingService(final ServiceReference<MetaContributorRegistry> serviceReference) {
-                        final MetaContributorRegistry registry = super.addingService(serviceReference);
-                        MetaContributors.setRegistry(registry);
-                        addService(MetaContributorRegistry.class, registry);
-                        return registry;
-                    }
-
-                    @Override
-                    public void removedService(final ServiceReference<MetaContributorRegistry> serviceReference, final MetaContributorRegistry o) {
-                        MetaContributors.setRegistry(null);
-                        removeService(MetaContributorRegistry.class);
-                        super.removedService(serviceReference, o);
-                    }
-                }
-                track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
-            }
+            track(ShareNotificationService.class, new RegistryServiceTrackerCustomizer<ShareNotificationService>(context, getInstance(), ShareNotificationService.class));
             /*
              * Open trackers
              */

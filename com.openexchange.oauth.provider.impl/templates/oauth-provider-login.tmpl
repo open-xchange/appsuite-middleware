@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${title?html}</title>
+    <style>
+      <#include "oauth-provider-common-css.tmpl">
+      #error-container span {
+        background-color: #f3ccaa;
+        border-radius: 5px;
+        padding: 10px 5px;
+        margin: 0 0 0 11em;
+        display: inline-block;
+      }
+      #error-container {
+        margin-bottom: 15px;
+      }
+      .pure-form input[type=text], .pure-form input[type=password] {
+        padding-left: 20px;
+      }
+      @media screen and (max-width: 480px) {
+        form input, form button {
+          width: 100%;
+        }
+        #error-container {
+          background-color: #f3ccaa;
+          padding: 10px 5px;
+        }
+        #error-container span {
+          background-color: inherit;
+          padding: 0;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <h1>${headline?html}</h1>
+      </div>
+      <#if error?has_content>
+        <div id="error-container">
+          <span>${error?html}</span>
+        </div>
+      </#if>
+      <div id="login-form">
+        <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded" class="pure-form pure-form-aligned">
+          <fieldset>
+            <div class="pure-control-group">
+              <label for="user_login">${usernameLabel?html}:</label>
+              <input id="user_login" name="login" type="text" autofocus>
+            </div>
+            <div class="pure-control-group">
+              <label for="user_password">${passwordLabel?html}:</label>
+              <input id="user_password" class="" name="password" type="password">
+            </div>
+          </fieldset>
+          <div class="pure-controls">
+            <button class="pure-button pure-button-primary" type="submit" name="sign_in" value="true">${loginLabel?html}</button>
+            <button class="pure-button" type="submit" name="access_denied" value="true">${cancelLabel?html}</button>
+          </div>
+
+          <input name="client_id" type="hidden" value="${clientId}">
+          <input name="redirect_uri" type="hidden" value="${redirectURI}">
+          <input name="scope" type="hidden" value="${scopes}">
+          <input name="state" type="hidden" value="${state}">
+          <input name="csrf_token" type="hidden" value="${csrfToken}">
+          <input name="response_type" type="hidden" value="code">
+          <input name="language" type="hidden" value="${language}">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

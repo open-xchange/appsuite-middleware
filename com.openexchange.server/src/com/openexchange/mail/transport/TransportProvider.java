@@ -132,9 +132,8 @@ public abstract class TransportProvider {
      *
      * @throws OXException If start-up fails
      */
-    protected final void startUp() throws OXException {
+    protected void startUp() throws OXException {
         getProtocolProperties().loadProperties();
-        MailTransport.startupImpl(createNewMailTransport(null));
     }
 
     /**
@@ -142,8 +141,7 @@ public abstract class TransportProvider {
      *
      * @throws OXException if shut-down fails
      */
-    protected final void shutDown() throws OXException {
-        MailTransport.shutdownImpl(createNewMailTransport(null));
+    protected void shutDown() throws OXException {
         getProtocolProperties().resetProperties();
     }
 
@@ -184,6 +182,16 @@ public abstract class TransportProvider {
      * @throws OXException If instantiation fails
      */
     public abstract MailTransport createNewMailTransport(Session session, int accountId) throws OXException;
+
+    /**
+     * Gets a newly created {@link MailTransport} instance, that can be used to
+     * send mails via the configured no-reply address.
+     *
+     * @param contextId The context ID
+     * @return The transport
+     * @throws OXException
+     */
+    public abstract MailTransport createNewNoReplyTransport(int contextId) throws OXException;
 
     /**
      * Gets the protocol properties

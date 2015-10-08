@@ -49,20 +49,26 @@
 
 package com.openexchange.oauth.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.oauth.json.proxy.OAuthProxyActionFactory;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OAuthJSONActivator} - Activator for JSON OAuth interface.
@@ -101,12 +107,27 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             this.secretService = secretService;
             secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
-
+            /*
+             * declare "oauth" capability & appropriate checker
+             */
             getService(CapabilityService.class).declareCapability("oauth");
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "oauth");
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                @Override
+                public boolean isEnabled(String capability, Session session) throws OXException {
+                    if ("oauth".equals(capability)) {
+                        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                        if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }, properties);
 
             trackService(HostnameService.class);
-            UtilizerRegistry registry = UtilizerRegistry.initInstance(context);
-            track(OAuthUtilizerCreator.class, registry);
 
             openTrackers();
         } catch (final Exception e) {
@@ -129,7 +150,6 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 oAuthService.stop();
                 this.oAuthService = null;
             }
-            UtilizerRegistry.freeInstance();
             AbstractOAuthAJAXActionService.setOAuthService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);
