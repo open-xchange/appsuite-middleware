@@ -94,7 +94,6 @@ import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -181,10 +180,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 // Ignore
                 org.slf4j.LoggerFactory.getLogger(FileStorageFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
             } finally {
-                storageParameters.putParameter(getFolderType(), PARAM, null);
-                Session session = storageParameters.getSession();
-                if (null != session && session.containsParameter(Connection.class.getName())) {
-                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+                if (null != storageParameters.putParameter(getFolderType(), PARAM, null)) {
+                    Session session = storageParameters.getSession();
+                    if (null != session && session.containsParameter(Connection.class.getName() + '@' + Thread.currentThread().getId())) {
+                        session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+                    }
                 }
             }
             addWarnings(storageParameters, folderAccess);
@@ -198,10 +198,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
             try {
                 folderAccess.commit();
             } finally {
-                storageParameters.putParameter(getFolderType(), PARAM, null);
-                Session session = storageParameters.getSession();
-                if (null != session && session.containsParameter(Connection.class.getName())) {
-                    session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+                if (null != storageParameters.putParameter(getFolderType(), PARAM, null)) {
+                    Session session = storageParameters.getSession();
+                    if (null != session && session.containsParameter(Connection.class.getName() + '@' + Thread.currentThread().getId())) {
+                        session.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), null);
+                    }
                 }
             }
             addWarnings(storageParameters, folderAccess);

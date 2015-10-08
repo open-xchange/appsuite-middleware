@@ -187,8 +187,9 @@ public interface StorageParameters {
      * @param folderType The folder type
      * @param name The parameter name
      * @param value The parameter value
+     * @return The previous value associated with the name, or <code>null</code> null if there was no mapping before
      */
-    void putParameter(FolderType folderType, String name, Object value);
+    Object putParameter(FolderType folderType, String name, Object value);
 
     /**
      * (Atomically) Puts given parameter only if the specified name is not already associated with a value.
