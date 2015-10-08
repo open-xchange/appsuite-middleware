@@ -61,8 +61,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
@@ -149,6 +147,11 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
              */
             final List<FolderStorage> openedStorages = Collections.emptyList();
             checkOpenedStorage(folderStorage, openedStorages);
+            Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+            if (folder.isDefault() || folder.getDefaultType() != 0) {
+                throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Deletion");
+            }
+
             try {
                 if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                     /*

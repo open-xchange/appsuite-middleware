@@ -227,6 +227,11 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
      */
     INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039),
+
+    /**
+     * "%1$s of a default folder is not allowed."
+     */
+    DEFAULT_FOLDER_ERROR("%1$s of a default folder is not allowed.", Category.CATEGORY_ERROR, 1040, FolderExceptionMessages.ILLEGAL_DEFAULT_FOLDER_OPERATION),
     ;
 
     private static final String PREFIX = "FLD";

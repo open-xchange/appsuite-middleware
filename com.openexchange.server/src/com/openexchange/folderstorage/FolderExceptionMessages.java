@@ -100,6 +100,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // The folder was not updated due to possible data loss. Please review the warnings for details.
     public static final String FOLDER_UPDATE_ABORTED_MSG_DISPLAY = "The folder was not updated due to possible data loss. Please review the warnings for details.";
 
+    // %1$s of a default folder is not allowed.
+    public static final String ILLEGAL_DEFAULT_FOLDER_OPERATION = "%1$s of a default folder is not allowed.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */
