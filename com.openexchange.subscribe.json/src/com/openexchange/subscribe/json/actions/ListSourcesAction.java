@@ -87,7 +87,7 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
         final List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(getAvailableSources(subscribeRequest.getServerSession()).getSources(module));
         for (final Iterator<SubscriptionSource> iterator = sources.iterator(); iterator.hasNext();) {
             final SubscriptionSource subscriptionSource = iterator.next();
-            if (IGNOREES.contains(subscriptionSource.getId())) {
+            if (IGNOREES.contains(subscriptionSource.getId()) || false == subscriptionSource.getSubscribeService().isCreateModifyEnabled()) {
                 iterator.remove();
             }
         }

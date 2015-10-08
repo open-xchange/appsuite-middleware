@@ -52,6 +52,8 @@ package com.openexchange.publish.helpers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -87,6 +89,23 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     public static PublicationStorage getDefaultStorage() {
         return STORAGE;
+    }
+
+    private static final AtomicReference<ConfigurationService> CONFIG_REFERENCE = new AtomicReference<ConfigurationService>();
+
+    /**
+     * Sets the configuration service reference to use.
+     *
+     * @param configurationService The configuration service.
+     */
+    public static void setConfigurationService(ConfigurationService configurationService) {
+        CONFIG_REFERENCE.set(configurationService);
+    }
+
+    @Override
+    public boolean isCreateModifyEnabled() {
+        ConfigurationService configService = CONFIG_REFERENCE.get();
+        return null != configService && configService.getBoolProperty("com.openexchange.publish.createModifyEnabled", false);
     }
 
     @Override

@@ -188,4 +188,9 @@ public class SimPublicationService implements PublicationService {
         return null;
     }
 
+    @Override
+    public boolean isCreateModifyEnabled() {
+        return true;
+    }
+
 }

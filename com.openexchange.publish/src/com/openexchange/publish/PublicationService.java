@@ -167,4 +167,11 @@ public interface PublicationService {
      */
     String getInformation(Publication publication);
 
+    /**
+     * Gets a value indicating whether creating new or modifying existing subscriptions is enabled or not.
+     *
+     * @return <code>true</code> if enabled, <code>false</code>, otherwise
+     */
+    boolean isCreateModifyEnabled();
+
 }

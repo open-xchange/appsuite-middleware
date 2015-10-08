@@ -56,6 +56,7 @@ import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
@@ -141,6 +142,13 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
 
     private JSONValue listTargets(final JSONObject request, final ServerSession session) throws JSONException, OXException, OXException {
         final Collection<PublicationTarget> targets = discoverer.listTargets();
+        if (null != targets && 0 < targets.size()) {
+            for (Iterator<PublicationTarget> iterator = targets.iterator(); iterator.hasNext();) {
+                if (false == iterator.next().getPublicationService().isCreateModifyEnabled()) {
+                    iterator.remove();
+                }
+            }
+        }
         final String[] columns = getColumns(request);
         final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserPermissionBits());
         return json;

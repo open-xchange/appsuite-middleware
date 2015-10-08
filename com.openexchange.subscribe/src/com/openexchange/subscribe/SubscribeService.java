@@ -106,5 +106,12 @@ public interface SubscribeService {
     public void cleanUp(String secret, Session session) throws OXException;
 
     public void removeUnrecoverableItems(String secret, Session session) throws OXException;
+    
+    /**
+     * Gets a value indicating whether creating new or modifying existing subscriptions is enabled or not.
+     * 
+     * @return <code>true</code> if enabled, <code>false</code>, otherwise
+     */
+    boolean isCreateModifyEnabled();
 
 }

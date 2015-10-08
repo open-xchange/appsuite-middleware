@@ -49,9 +49,16 @@
 
 package com.openexchange.folder.json.writer;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -71,6 +78,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.Tools;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
@@ -80,12 +88,11 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
@@ -562,7 +569,7 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                final Set<String> caps = folder.getSupportedCapabilities();
+                final Set<String> caps = getSupportedCapabilities(folder);
                 jsonPutter.put(jsonPutter.withKey() ? FolderField.SUPPORTED_CAPABILITIES.getName() : null, null == caps ? JSONObject.NULL : new JSONArray(caps));
             }
         });
@@ -798,6 +805,92 @@ public final class FolderWriter {
      */
     static final int getUnsignedInteger(final String s) {
         return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Determines the supported capabilities for a userized folder to indicate to clients. This is based on the storage folder
+     * capabilities, but may be restricted further based on the availability of further services.
+     *
+     * @param folder The folder to determine the supported capabilities for
+     * @return The supported capabilities
+     */
+    private static Set<String> getSupportedCapabilities(UserizedFolder folder) {
+        Set<String> capabilities = folder.getSupportedCapabilities();
+        if (null == capabilities || 0 == capabilities.size()) {
+            return capabilities;
+        }
+        Set<String> supportedCapabilities = new HashSet<String>(capabilities.size());
+        for (String capability : capabilities) {
+            try {
+                switch (capability) {
+                    case "publication":
+                        if (supportsPublications(folder)) {
+                            supportedCapabilities.add(capability);
+                        }
+                        break;
+                    case "subscription":
+                        if (supportsSubscriptions(folder)) {
+                            supportedCapabilities.add(capability);
+                        }
+                        break;
+                    default:
+                        supportedCapabilities.add(capability);
+                        break;
+                }
+            } catch (OXException e) {
+                LOG.warn("Error evaluating capability '{}' for folder {}", capability, folder.getID(), e);
+            }
+        }
+        return supportedCapabilities;
+    }
+
+    /**
+     * Gets a value indicating whether a specific folder supports publications.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if publications are supported, <code>false</code>, otherwise
+     */
+    private static boolean supportsPublications(UserizedFolder folder) throws OXException {
+        PublicationTargetDiscoveryService targetDiscoveryService = ServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
+        if (null != targetDiscoveryService) {
+            String module = String.valueOf(folder.getContentType());
+            Collection<PublicationTarget> targets = targetDiscoveryService.getTargetsForEntityType(module);
+            if (null != targets && 0 < targets.size()) {
+                for (PublicationTarget target : targets) {
+                    if (target.getPublicationService().isCreateModifyEnabled()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether a specific folder supports subscriptions.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if subscriptions are supported, <code>false</code>, otherwise
+     */
+    private static boolean supportsSubscriptions(UserizedFolder folder) throws OXException {
+        SubscriptionSourceDiscoveryService sourceDiscoveryService = ServiceRegistry.getInstance().getService(SubscriptionSourceDiscoveryService.class);
+        if (null != sourceDiscoveryService) {
+            sourceDiscoveryService = sourceDiscoveryService.filter(folder.getUser().getId(), folder.getContext().getContextId());
+            List<SubscriptionSource> sources;
+            if (null != folder.getContentType()) {
+                sources = sourceDiscoveryService.getSources(folder.getContentType().getModule());
+            } else {
+                sources = sourceDiscoveryService.getSources();
+            }
+            if (null != sources && 0 < sources.size()) {
+                for (SubscriptionSource source : sources) {
+                    if (source.getSubscribeService().isCreateModifyEnabled()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }

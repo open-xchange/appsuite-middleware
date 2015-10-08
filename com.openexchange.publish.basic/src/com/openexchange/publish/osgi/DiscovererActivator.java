@@ -51,6 +51,7 @@ package com.openexchange.publish.osgi;
 
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -96,6 +97,7 @@ public class DiscovererActivator extends HousekeepingActivator {
 
         AbstractPublicationService.setDefaultStorage( new PublicationSQLStorage(provider, confStorage, compositeDiscovererCollector) );
         AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(getService(UserConfigurationService.class));
+        AbstractPublicationService.setConfigurationService(getService(ConfigurationService.class));
 
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
@@ -121,7 +123,7 @@ public class DiscovererActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DBProvider.class, GenericConfigurationStorageService.class, UserConfigurationService.class };
+        return new Class[] { DBProvider.class, GenericConfigurationStorageService.class, UserConfigurationService.class, ConfigurationService.class };
     }
 
 }
