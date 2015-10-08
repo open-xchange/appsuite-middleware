@@ -253,16 +253,16 @@ public final class StorageParametersImpl implements StorageParameters {
     }
 
     @Override
-    public void putParameter(final FolderType folderType, final String name, final Object value) {
+    public Object putParameter(final FolderType folderType, final String name, final Object value) {
         if (null == value) {
             final Map<String, Object> m = getFolderTypeMap(folderType, false);
             if (null == m) {
-                return;
+                return null;
             }
-            m.remove(name);
+            return m.remove(name);
         } else {
             final Map<String, Object> m = getFolderTypeMap(folderType, true);
-            m.put(name, value);
+            return m.put(name, value);
         }
     }
 
