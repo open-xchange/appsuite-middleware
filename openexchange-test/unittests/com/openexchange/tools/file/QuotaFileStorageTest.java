@@ -462,6 +462,18 @@ public class QuotaFileStorageTest extends TestCase {
         public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
             return false;
         }
+
+        @Override
+        public Connection getWritable(Assignment assignment) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Connection getReadOnly(Assignment assignment) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
 
     private static void rmdir(final File tempFile) {
