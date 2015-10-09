@@ -54,10 +54,11 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -88,12 +89,16 @@ public final class QuotaAJAXRequest {
      *
      * @param session The session
      * @param request The request
+     * @param services A service lookup reference
      */
-    public QuotaAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+    public QuotaAJAXRequest(final AJAXRequestData request, final ServerSession session, ServiceLookup services) {
         super();
         try {
-            final Context ctx = session.getContext();
-            this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            QuotaFileStorageService fileStorageService = services.getOptionalService(QuotaFileStorageService.class);
+            if (null == fileStorageService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaFileStorageService.class.getName());
+            }
+            this.qfs = fileStorageService.getQuotaFileStorage(session.getUserId(), session.getContextId());
         } catch (final OXException e) {
             this.fsException = e;
         }

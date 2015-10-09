@@ -83,6 +83,8 @@ public final class FilestoreAction extends AbstractQuotaAction {
         if (req.getFsException() != null) {
             throw req.getFsException();
         }
+
+
         final long use = req.getQfs().getUsage();
         final long quota = req.getQfs().getQuota();
         final JSONObject data = new JSONObject();

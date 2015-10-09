@@ -129,6 +129,7 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -564,6 +565,11 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         track(OAuthResourceService.class, new RegistryCustomizer<OAuthResourceService>(context, OAuthResourceService.class));
         track(OAuthSessionProvider.class, new RegistryCustomizer<OAuthSessionProvider>(context, OAuthSessionProvider.class));
+
+        /*
+         * Track QuotaFileStorageService
+         */
+        track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
 
         /*
          * User Alias Service
