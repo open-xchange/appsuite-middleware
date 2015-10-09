@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.json.osgi.Services;
 
 /**
@@ -100,6 +101,9 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
 
         // Check if associated guest was invited by given user entity
         if (entity.getInternalUserId() > 0) {
+            if (entity.getInternalUserId() == ServerSessionAdapter.valueOf(session).getUser().getCreatedBy()) {
+                return entity;
+            }
             ShareService shareService = Services.getService(ShareService.class);
             if (null != shareService) {
                 Set<Integer> userIds = shareService.getSharingUsersFor(session.getContextId(), session.getUserId());
