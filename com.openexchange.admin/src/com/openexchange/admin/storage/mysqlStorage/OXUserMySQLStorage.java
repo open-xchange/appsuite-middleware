@@ -58,6 +58,7 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -71,6 +72,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -779,7 +781,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // Change quota size
-            changeQuotaForUser(usrdata, ctx, con);
+            Set<Integer> quotaAffectedUserIDs = changeQuotaForUser(usrdata, ctx, con);
 
             // Change storage data
             changeStorageDataImpl(usrdata, ctx, con);
@@ -1234,6 +1236,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         CacheKey key = cacheService.newCacheKey(contextId, userId);
                         Cache cache = cacheService.getCache("User");
                         cache.remove(key);
+                        if (null != quotaAffectedUserIDs) {
+                            List<Serializable> keys = new ArrayList<Serializable>(quotaAffectedUserIDs.size());
+                            for (Integer userID : quotaAffectedUserIDs) {
+                                keys.add(cacheService.newCacheKey(contextId, userID.intValue()));
+                            }
+                            cache.remove(keys);
+                        }
                         cache = cacheService.getCache("UserPermissionBits");
                         cache.remove(key);
                         cache = cacheService.getCache("UserConfiguration");
@@ -1247,6 +1256,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.invalidateGroup(ctx.getId().toString());
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+                        if (null != quotaAffectedUserIDs) {
+                            List<Serializable> keys = new ArrayList<Serializable>(quotaAffectedUserIDs.size());
+                            for (Integer userID : quotaAffectedUserIDs) {
+                                keys.add(userID);
+                            }
+                            cache.removeFromGroup(keys, String.valueOf(ctx.getId()));
+                        }
                         if (displayNameUpdate) {
                             final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
                             if (fuid > 0) {
@@ -1428,7 +1444,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void changeQuotaForUser(User user, Context ctx, Connection con) throws SQLException {
+    private Set<Integer> changeQuotaForUser(User user, Context ctx, Connection con) throws SQLException {
         // check if max quota is set for user
         Long maxQuota = user.getMaxQuota();
         if (maxQuota != null) {
@@ -1437,18 +1453,37 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 quota_max_temp = quota_max_temp << 20;
             }
 
+            int updated;
             PreparedStatement prep = null;
             try {
                 prep = con.prepareStatement("UPDATE user SET quota_max=? WHERE cid=? AND id=?");
                 prep.setLong(1, quota_max_temp);
                 prep.setInt(2, ctx.getId().intValue());
                 prep.setInt(3, user.getId().intValue());
-                prep.executeUpdate();
+                updated = prep.executeUpdate();
                 prep.close();
             } finally {
                 Databases.closeSQLStuff(prep);
             }
+            if (0 < updated) {
+                Set<Integer> affectedUserIDs = new HashSet<Integer>();
+                ResultSet result = null;
+                PreparedStatement stmt = null;
+                try {
+                    stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND filestore_owner=?;");
+                    stmt.setInt(1, ctx.getId().intValue());
+                    stmt.setInt(2, user.getId().intValue());
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        affectedUserIDs.add(Integer.valueOf(result.getInt(1)));
+                    }
+                } finally {
+                    Databases.closeSQLStuff(result, stmt);
+                }
+                return affectedUserIDs;
+            }
         }
+        return null;
     }
 
     private void changeStorageDataImpl(User user, Context ctx, Connection con) throws SQLException, StorageException {
