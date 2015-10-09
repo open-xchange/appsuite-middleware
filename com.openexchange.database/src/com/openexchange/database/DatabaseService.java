@@ -56,6 +56,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * Service interface class for accessing the database system.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @SingletonService
@@ -63,6 +64,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a read only connection to the database of the specified context.
+     *
      * @param ctx Context.
      * @return a read only connection to the database of the specified context.
      * @throws OXException if no connection can be obtained.
@@ -71,6 +73,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a read only connection to the database of the context with the specified identifier.
+     *
      * @param contextId identifier of the context.
      * @return a read only connection to the database of the specified context.
      * @throws OXException if no connection can be obtained.
@@ -79,6 +82,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection to the database of the specified context.
+     *
      * @param ctx Context.
      * @return a writable connection to the database of the specified context.
      * @throws OXException if no connection can be obtained.
@@ -87,6 +91,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection to the database of the context with the specified identifier.
+     *
      * @param contextId identifier of the context.
      * @return a writable connection to the database of the specified context.
      * @throws OXException if no connection can be obtained.
@@ -96,6 +101,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
     /**
      * Returns a writable connection to the database of the context with the specified identifier. This connection will not have a
      * connection timeout to support long running update tasks.
+     *
      * @param contextId identifier of the context.
      * @return a writable connection to the database of the specified context without a connection timeout.
      * @throws OXException if no connection can be obtained.
@@ -104,6 +110,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * This method is for moving contexts only.
+     *
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database from the given pool directed to the given schema.
@@ -113,6 +120,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * This method is only for administrative access to contexts.
+     *
      * @param poolId identifier of the database pool.
      * @param schema schema name.
      * @return a connection to the database without a time-out from the given pool directed to the given schema.
@@ -125,6 +133,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
      * in doubt just set this to 0 always and invalidate the whole schema.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -138,6 +147,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
      * in doubt just set this to 0 always and invalidate the whole schema.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -152,6 +162,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * replication state and an automatic fallback to the writedb if the slave has not caught up yet. The partitionId can be chosen arbitrarily by clients (just make sure a
      * corresponding entry is available in the replication monitoring table), and controls how parts of the database are invalidated with regards to the replication monitor. When
      * in doubt just set this to 0 always and invalidate the whole schema.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -162,6 +173,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * This method is only for administrative access to contexts.
+     *
      * @param poolId identifier of the pool the connection should be returned to.
      * @param con connection to return.
      */
@@ -169,6 +181,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a read only connection to the database of the specified context to the pool.
+     *
      * @param ctx Context.
      * @param con Read only connection to return.
      */
@@ -176,6 +189,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a read only connection to the database of the context with the specified identifier to the pool.
+     *
      * @param contextId identifier of the context.
      * @param con Read only connection to return.
      */
@@ -183,6 +197,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection to the database of the specified context to the pool.
+     *
      * @param ctx Context.
      * @param con Writable connection to return.
      */
@@ -190,6 +205,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection to the database of the context with the specified identifier to the pool.
+     *
      * @param contextId identifier of the context.
      * @param con Writable connection to return.
      */
@@ -201,6 +217,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
      * component can not determine when written information will be available on the slave.
      * This allows to reduce the write IO load on the database servers but keep in mind that reading from the master does not scale out.
+     *
      * @param ctx Context.
      * @param con Writable connection to return.
      */
@@ -212,6 +229,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
      * component can not determine when written information will be available on the slave.
      * This allows to reduce the write IO load on the database servers but keep in mind that reading from the master does not scale out.
+     *
      * @param contextId identifier of the context.
      * @param con Writable connection to return.
      */
@@ -220,6 +238,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
     /**
      * Returns a writable connection to the database of the context with the specified identifier to the pool. This method must be used if
      * the connection is obtained with {@link #getForUpdateTask(int)}.
+     *
      * @param contextId identifier of the context.
      * @param con Writable connection to return.
      */
@@ -229,6 +248,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * Returns a writable connection to the database of the context with the specified identifier to the pool. It should be used to return
      * a writable connection if it was only used for reading information from the master database server. This method must be used if
      * the connection is obtained with {@link #getForUpdateTask(int)}.
+     *
      * @param contextId identifier of the context.
      * @param con Writable connection to return.
      */
@@ -236,6 +256,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * This method is for moving contexts only.
+     *
      * @param poolId identifier of the pool the connection should be returned to.
      * @param con connection to return.
      */
@@ -243,6 +264,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a read only connection to the database master/slave pair referenced by the poolIds, schema and partitionId.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -253,6 +275,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection to the database master/slave pair referenced by the poolIds, schema and partitionId.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -263,6 +286,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Returns a writable connection without timeout to the database master/slave pair referenced by the poolIds, schema and partitionId.
+     *
      * @param readPoolId The id referencing the slave db server.
      * @param writePoolId The id referencing the master db server.
      * @param schema The database schema on both the master and slave.
@@ -273,6 +297,7 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Creates the replication monitoring tables in the schema on the given writePool. Does nothing if the tables already exist
+     *
      * @param writePoolId The id referencing the master db server
      * @param schema The name of the schema
      */
@@ -280,9 +305,44 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
 
     /**
      * Add these partition ids to the replication monitor table
+     *
      * @param writePoolId The id referencing the master db server
      * @param schema The database schema name
      * @param partitions The partitions to add to the replication monitor table
      */
-    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException;
+    public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException;
+
+    /**
+     * Returns a writable connection based on the given {@link Assignment}
+     *
+     * @param assignment The {@link Assignment} to get a {@link Connection} for
+     * @return a writable connection to the database of the specified {@link Assignment}
+     * @throws OXException
+     */
+    Connection getWritable(Assignment assignment) throws OXException;
+
+    /**
+     * Returns a writable connection to the database of the given {@link Assignment} to the pool.
+     *
+     * @param assignment The writable assignment to return the connection for.
+     * @param connection writable connection to return.
+     */
+//    void backWritable(Assignment assignment, Connection connection) throws OXException;
+
+    /**
+     * Returns a read only connection based on the given {@link Assignment}
+     *
+     * @param assignment The {@link Assignment} to get a {@link Connection} for
+     * @return a read only connection to the database of the specified {@link Assignment}
+     * @throws OXException
+     */
+    Connection getReadOnly(Assignment assignment) throws OXException;
+
+    /**
+     * Returns a read only connection to the database of the given {@link Assignment} to the pool.
+     *
+     * @param assignment The read only assignment to return the connection for.
+     * @param connection Read only connection to return.
+     */
+//    void backReadOnly(Assignment assignment, Connection connection) throws OXException;
 }

@@ -63,4 +63,7 @@ public interface AssignmentFactory {
 
     Assignment get(int contextId) throws OXException;
 
+    Assignment get(String schemaName);
+
+    void reload();
 }

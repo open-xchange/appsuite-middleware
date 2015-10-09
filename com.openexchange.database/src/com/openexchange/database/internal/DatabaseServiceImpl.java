@@ -66,6 +66,7 @@ import com.openexchange.pooling.PoolingException;
 /**
  * Interface class for accessing the database system.
  * TODO test threads.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class DatabaseServiceImpl implements DatabaseService {
@@ -209,7 +210,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void invalidate( int... contextIds) {
+    public void invalidate(int... contextIds) {
         configDatabaseService.invalidate(contextIds);
     }
 
@@ -477,7 +478,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void initPartitions(int writePoolId, String schema, int...partitions) throws OXException {
+    public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
         if (null == partitions || partitions.length <= 0) {
             return;
         }
@@ -489,7 +490,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             rollback = true;
             stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?, ?)");
             stmt.setInt(2, 0);
-            for (int partition: partitions) {
+            for (int partition : partitions) {
                 stmt.setInt(1, partition);
                 stmt.addBatch();
             }
@@ -510,4 +511,21 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Connection getReadOnly(Assignment assignment) throws OXException {
+        AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
+        return get(assignmentImpl, false, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Connection getWritable(Assignment assignment) throws OXException {
+        AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
+        return get(assignmentImpl, true, true);
+    }
 }
