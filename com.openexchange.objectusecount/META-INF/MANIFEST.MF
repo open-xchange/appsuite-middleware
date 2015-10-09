@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Objectusecount
+Bundle-SymbolicName: com.openexchange.objectusecount
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ javax.mail.internet;version="1.5.0"
+Export-Package: com.openexchange.objectusecount

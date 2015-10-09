@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Impl
+Bundle-SymbolicName: com.openexchange.objectusecount.impl
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.contact,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.search,
+ com.openexchange.log,
+ com.openexchange.objectusecount,
+ com.openexchange.osgi,
+ com.openexchange.search,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.iterator,
+ com.openexchange.user,
+ javax.mail.internet;version="1.5.0",
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.objectusecount.osgi.ObjectUseCountActivator

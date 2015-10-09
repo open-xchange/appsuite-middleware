@@ -112,6 +112,7 @@ public class AutocompleteAction extends ContactAction {
          */
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
+        parameters.put(AutocompleteParameters.USER_ID, request.getSession().getUserId());
         SearchIterator<Contact> searchIterator;
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),

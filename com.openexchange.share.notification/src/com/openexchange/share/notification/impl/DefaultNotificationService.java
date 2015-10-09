@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -369,6 +370,17 @@ public class DefaultNotificationService implements ShareNotificationService {
         if (null != ccs) {
             if (!collectedAddresses.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
+            }
+        }
+
+        ObjectUseCountService service = serviceLookup.getOptionalService(ObjectUseCountService.class);
+        if (null != service) {
+            if (!collectedAddresses.isEmpty()) {
+                try {
+                    service.incrementObjectUseCount(session, collectedAddresses);
+                } catch (OXException e) {
+                    warnings.add(e);
+                }
             }
         }
 

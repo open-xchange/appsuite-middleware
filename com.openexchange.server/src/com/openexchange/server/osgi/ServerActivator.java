@@ -207,6 +207,8 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -602,6 +604,8 @@ public final class ServerActivator extends HousekeepingActivator {
 
         UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
+
+        track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
 
         // Start up server the usual way
         starter.start();

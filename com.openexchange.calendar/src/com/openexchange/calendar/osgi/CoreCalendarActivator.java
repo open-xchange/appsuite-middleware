@@ -70,6 +70,7 @@ import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
 
@@ -111,6 +112,7 @@ public class CoreCalendarActivator extends HousekeepingActivator {
         registerCacheRegion();
 
         track(ContactCollectorService.class, new ContactCollectorServiceTracker(this.context));
+        track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         openTrackers();
     }
 

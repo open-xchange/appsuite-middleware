@@ -204,7 +204,8 @@ public enum ContactField{
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
     FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR),
     SORT_NAME(Contact.SPECIAL_SORTING, "", "SORT_NAME", "sort_name", ContactFields.SORT_NAME, 0),
-    VCARD_ID(Contact.VCARD_ID, "vCardId", "VCARD_ID", "vCardId", "", Types.VARCHAR)
+    VCARD_ID(Contact.VCARD_ID, "vCardId", "VCARD_ID", "vCardId", "", Types.VARCHAR),
+    //    VALUE(-1, "value", "", "", "", Types.INTEGER)
     ;
 
     private int columnNumber, sqlType;

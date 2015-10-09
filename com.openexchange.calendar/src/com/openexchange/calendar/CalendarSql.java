@@ -97,6 +97,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -152,6 +153,12 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     public static void setContactCollectorService(ContactCollectorService contactCollectorService) {
         CalendarSql.SERVICES_REF.set(contactCollectorService);
+    }
+
+    private static final AtomicReference<ObjectUseCountService> OBJECT_USE_COUNT_SERVICE = new AtomicReference<ObjectUseCountService>();
+
+    public static void setObjectUseCountService(ObjectUseCountService objectUseCountService) {
+        CalendarSql.OBJECT_USE_COUNT_SERVICE.set(objectUseCountService);
     }
 
     static {
@@ -486,6 +493,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                             try {
                                 final CalendarDataObject[] appointments = cimp.insertAppointment(cdao, writecon, session);
                                 collectAddresses(cdao);
+                                countObjectUse(cdao, writecon);
                                 modificationPerformed = true;
                                 return appointments;
                             } catch(final DataTruncation dt) {
@@ -565,6 +573,32 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
 
             contactCollectorService.memorizeAddresses(addresses, session);
+        }
+    }
+
+    private void countObjectUse(CalendarDataObject cdao, Connection con) throws OXException {
+        if (null == cdao) {
+            return;
+        }
+        ObjectUseCountService service = OBJECT_USE_COUNT_SERVICE.get();
+        if (null == service) {
+            return;
+        }
+        if (cdao.containsParticipants()) {
+            for (Participant p : cdao.getParticipants()) {
+                switch (p.getType()) {
+                    case Participant.USER:
+                        if (p.getIdentifier() != session.getUserId()) {
+                            service.incrementObjectUseCount(session, FolderObject.SYSTEM_LDAP_FOLDER_ID, p.getIdentifier(), con);
+                        }
+                        break;
+                    case Participant.EXTERNAL_USER:
+                        service.incrementObjectUseCount(session, p.getEmailAddress(), con);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -685,6 +719,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (difference != null) {
                         List<Object> added = difference.getAdded();
                         this.collectAddresses(added);
+                        countObjectUse(cdao, writecon);
                     }
 
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);

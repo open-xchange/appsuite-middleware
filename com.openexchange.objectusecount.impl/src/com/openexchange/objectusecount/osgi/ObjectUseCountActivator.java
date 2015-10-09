@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,38 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.objectusecount.osgi;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
-import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableService;
+import com.openexchange.contact.ContactService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * {@link ObjectUseCountActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.1
  */
-public class Activator extends HousekeepingActivator {
+public class ObjectUseCountActivator extends HousekeepingActivator {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    public Activator() {
-        super();
-    }
+    private final Class<?>[] NEEDED_SERVICES = new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return NEEDED_SERVICES;
     }
 
     @Override
-    public void startBundle() {
-        final ConfigurationService configService = getService(ConfigurationService.class);
-
-        ExcludedList.getInstance().configure(configService);
-        try {
-            InternalList.getInstance().start();
-        } catch (Error e) {
-            // Helps finding errors in a lot of static code initialization.
-            e.printStackTrace();
-        }
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-        registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
-        registerService(CreateTableService.class, new CreateObjectUseCountTableService());
+    protected void startBundle() throws Exception {
+        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+        unregisterServices();
     }
+
 }

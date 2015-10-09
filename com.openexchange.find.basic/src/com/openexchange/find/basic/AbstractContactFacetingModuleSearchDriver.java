@@ -95,7 +95,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     /**
      * The default sort order used to get pre-sorted results when retrieving contacts for auto-completion.
      */
-    private static final SortOrder[] SORT_ORDER = new SortOrder[] {
+    private static final SortOrder[] SORT_ORDER = new SortOrder[] { //new SortOrder(ContactField.VALUE, Order.DESCENDING),
         new SortOrder(ContactField.USE_COUNT, Order.DESCENDING), new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
     };
 
@@ -154,6 +154,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     protected List<Contact> autocompleteUsers(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
     	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
     	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
+        parameters.put(AutocompleteParameters.USER_ID, session.getUserId());
         return searchContacts(
             session,
             autocompleteRequest.getPrefix(),

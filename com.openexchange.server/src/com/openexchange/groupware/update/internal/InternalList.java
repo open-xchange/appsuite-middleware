@@ -107,6 +107,7 @@ import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
+import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -582,6 +583,9 @@ public final class InternalList {
 
         // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
+
+        // Create object_use_count table
+        list.add(new CreateObjectUseCountTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,40 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.sql;
+package com.openexchange.objectusecount;
+
+import java.sql.Connection;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Table} - Encapsulates the relevant database table names.
+ * {@link ObjectUseCountService}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.1
  */
-public enum Table {
-    /**
-     * The 'prg_contacts' table
-     */
-    CONTACTS("prg_contacts"),
-    /**
-     * The 'del_contacts' table
-     */
-    DELETED_CONTACTS("del_contacts"),
-    /**
-     * The 'prg_contacts_image' table
-     */
-    IMAGES("prg_contacts_image"),
-    /**
-     * The 'del_contacts_image' table
-     */
-    DELETED_IMAGES("del_contacts_image"),
-    /**
-     * The 'prg_dlist' table
-     */
-    DISTLIST("prg_dlist"),
-    /**
-     * The 'del_dlist' table
-     */
-    DELETED_DISTLIST("del_dlist"),
-    /**
-     * The 'prg_contacts_linkage' table
-     */
-    LINKS("prg_contacts_linkage"),
-    /**
-     * The 'del_contacts_linkage' table
-     */
-    DELETED_LINKS("del_contacts_linkage"),
-    /**
-     * The 'object_use_count' table
-     */
-    OBJECT_USE_COUNT("object_use_count"),
-    ;
+public interface ObjectUseCountService {
 
-    private final String name;
+    int getObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
-    private Table(final String name) {
-        this.name = name;
-    }
+    int getObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
-    /**
-     * Gets the name of the table.
-     *
-     * @return the name
-     */
-    public String getName() {
-        return this.name;
-    }
+    void incrementObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
-    public boolean isImageTable() {
-        return Table.IMAGES.equals(this) || Table.DELETED_IMAGES.equals(this);
-    }
+    void incrementObjectUseCount(Session session, String mail) throws OXException;
 
-    public boolean isDistListTable() {
-        return Table.DISTLIST.equals(this) || Table.DELETED_DISTLIST.equals(this);
-    }
+    void incrementObjectUseCount(Session session, Set<InternetAddress> addresses) throws OXException;
 
-    public boolean isContactTable() {
-        return Table.CONTACTS.equals(this) || Table.DELETED_CONTACTS.equals(this);
-    }
+    void incrementObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
-    @Override
-    public String toString() {
-        return this.getName();
-    }
+    void incrementObjectUseCount(Session session, String mail, Connection con) throws OXException;
+
+    void incrementObjectUseCount(Session session, Set<InternetAddress> addresses, Connection con) throws OXException;
+
+    void resetObjectUseCount(Session session, int folder, int objectId) throws OXException;
+
+    void resetObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
+
 }

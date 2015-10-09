@@ -90,8 +90,10 @@ import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -265,6 +267,18 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
         }
+    }
+
+    public static void countObjectUse(Session session, MailMessage mail) throws OXException {
+        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+        if (null == service) {
+            return;
+        }
+        Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+        addresses.addAll(Arrays.asList(mail.getTo()));
+        addresses.addAll(Arrays.asList(mail.getCc()));
+        addresses.addAll(Arrays.asList(mail.getBcc()));
+        service.incrementObjectUseCount(session, addresses);
     }
 
     protected static final String VIEW_RAW = "raw";

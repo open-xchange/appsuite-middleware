@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -209,6 +210,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.sentEvent(session);
 
         collectAddresses(task);
+        countObjectUse(task);
     }
 
     /**
@@ -242,6 +244,33 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    private void countObjectUse(Task task) throws OXException {
+        if (null == task) {
+            return;
+        }
+        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+        if (null == service) {
+            return;
+        }
+        if (task.containsParticipants()) {
+            for (Participant p : task.getParticipants()) {
+                switch (p.getType()) {
+                    case Participant.USER:
+                        if (p.getIdentifier() != session.getUserId()) {
+                            //TODO Get contact id
+                            service.incrementObjectUseCount(session, FolderObject.SYSTEM_LDAP_FOLDER_ID, p.getIdentifier());
+                        }
+                        break;
+                    case Participant.EXTERNAL_USER:
+                        service.incrementObjectUseCount(session, p.getEmailAddress());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     @Override
     public void updateTaskObject(Task task, int folderId, Date lastRead) throws OXException {
         final Context ctx;
@@ -267,6 +296,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.makeNextRecurrence(session);
 
             collectAddresses(update);
+            countObjectUse(task);
         } catch (final OXException e) {
             throw e;
         }

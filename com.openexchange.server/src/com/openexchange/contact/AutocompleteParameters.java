@@ -78,6 +78,8 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 */
 	public static final String REQUIRE_EMAIL = "require_email";
 
+    public static final String USER_ID = "user_id";
+
 	/**
 	 * The parameter key to specify if distribution lists shall be ignored and not be part of the
 	 * returned results. If so, the value must be {@link Boolean#TRUE}, otherwise <code>false</code>
