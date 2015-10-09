@@ -312,6 +312,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid permissions (%1$d) for entity \"%2$d\" on object \"%3$s\".
      */
     INVALID_OBJECT_PERMISSIONS("Invalid permissions (%1$d) for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 62),
+    /**
+     * The storage backend denied this request because of a exceeded rate limit.
+     */
+    STORAGE_RATE_LIMIT("The storage backend denied this request because of a exceeded rate limit.", Category.CATEGORY_CAPACITY, 63),
 
     ;
 
