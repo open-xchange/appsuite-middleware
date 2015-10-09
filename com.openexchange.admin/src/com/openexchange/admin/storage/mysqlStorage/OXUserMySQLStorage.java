@@ -2294,6 +2294,59 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id) throws StorageException {
+        int context_id = context.getId().intValue();
+
+        Connection read_ox_con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            read_ox_con = cache.getConnectionForContext(context_id);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT us.id FROM user us LEFT JOIN login2user lu ON us.id = lu.id AND us.cid = lu.cid ")
+                .append("LEFT JOIN prg_contacts con ON us.id = con.userid AND us.cid = con.cid WHERE us.cid = ? ");
+
+            if (filestore_id != null) {
+                sb.append("AND us.filestore_id = ?");
+            } else {
+                sb.append("AND us.filestore_id != 0");
+            }
+
+            String query = sb.toString();
+            stmt = read_ox_con.prepareStatement(query);
+            stmt.setInt(1, context_id);
+            if (filestore_id != null) {
+                stmt.setInt(2, filestore_id.intValue());
+            }
+            rs = stmt.executeQuery();
+            List<User> retval = new LinkedList<User>();
+            while (rs.next()) {
+                retval.add(new User(rs.getInt(1)));
+            }
+            return retval.toArray(new User[retval.size()]);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
     public User[] list(final Context ctx, final String search_pattern) throws StorageException {
         return list(ctx, search_pattern, false, false);
     }

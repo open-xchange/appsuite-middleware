@@ -436,7 +436,7 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
         this.unregister = setShortLongOpt(parser, UNREGISTER_SHORT, UNREGISTER_LONG, "Unregister a oauth client", false, AdminParser.NeededQuadState.notneeded);
         this.update = setShortLongOpt(parser, UPDATE_SHORT, UPDATE_LONG, "Update a oauth client", false, AdminParser.NeededQuadState.notneeded);
         this.list = setShortLongOpt(parser, LIST_SHORT, LIST_LONG, "List all registered oauth clients", false, AdminParser.NeededQuadState.notneeded);
-        this.get = setShortLongOpt(parser, GET_SHORT, GET_LONG, "Get a oauth clients by id", false, AdminParser.NeededQuadState.notneeded);
+        this.get = setShortLongOpt(parser, GET_SHORT, GET_LONG, "Get a oauth client by id", false, AdminParser.NeededQuadState.notneeded);
         this.revoke = setShortLongOpt(parser, REVOKE_SHORT, REVOKE_LONG, "Revokes a client's current secret and generates a new one.", false, AdminParser.NeededQuadState.notneeded);
 
         this.enable = setShortLongOpt(parser, ENABLE_SHORT, ENABLE_LONG, "Boolean flag", "Enables or disables the oauth client. ", false);

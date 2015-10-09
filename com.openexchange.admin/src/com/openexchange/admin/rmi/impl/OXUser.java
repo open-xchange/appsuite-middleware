@@ -2149,6 +2149,32 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
+    public User[] listUsersWithOwnFilestore(final Context context, final Credentials credentials, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(context);
+        } catch (final InvalidDataException e1) {
+            LOGGER.error("One of the given arguments for list is null", e1);
+            throw e1;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
+        LOGGER.debug("{} - {}", context, auth);
+
+        basicauth.doAuthentication(auth, context);
+
+        checkContextAndSchema(context);
+        if (null == filestore_id || filestore_id.intValue() <= 0) {
+            return oxu.listUsersWithOwnFilestore(context, null);
+        } else {
+            return oxu.listUsersWithOwnFilestore(context, filestore_id);
+        }
+    }
+
+    @Override
     public User[] listAll(final Context ctx, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
     }
