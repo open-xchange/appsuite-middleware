@@ -4277,6 +4277,11 @@ msgid ""
 "warnings for details."
 msgstr ""
 
+#. %1$s of a default folder is not allowed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:104
+msgid "%1$s of a default folder is not allowed."
+msgstr ""
+
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 msgid "No group given."
