@@ -53,105 +53,61 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.LockService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
- * {@link LockServiceImpl} - The default implementation based on {@link CacheService}.
+ * {@link LockServiceImpl} - The default implementation based on {@link com.openexchange.concurrent.TimeoutConcurrentMap}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LockServiceImpl implements LockService {
 
-    private final String region;
+    private final com.openexchange.concurrent.TimeoutConcurrentMap<String, Lock> locks;
 
     /**
      * Initializes a new {@link LockServiceImpl}.
+     *
+     * @throws OXException If initialization fails
      */
-    public LockServiceImpl() {
+    public LockServiceImpl() throws OXException {
         super();
-        region = "GenLocks";
+        locks = new com.openexchange.concurrent.TimeoutConcurrentMap<String, Lock>(30);
     }
 
-    private Cache getCache() throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null == cacheService) {
-            throw ServiceExceptionCode.absentService(CacheService.class);
-        }
-        return cacheService.getCache(region);
+    /**
+     * Disposes this lock service
+     */
+    public void dispose() {
+        locks.dispose();
     }
 
     @Override
     public Lock getLockFor(String identifier) throws OXException {
-        Cache cache = getCache();
-
-        Object object = cache.get(identifier);
-        if (object instanceof Lock) {
-            // Already present
-            return (Lock) object;
-        }
-
-        try {
-            ReentrantLock newLock = new ReentrantLock();
-            cache.putSafe(identifier, newLock);
-            return newLock;
-        } catch (OXException e) {
-            // Already present?
-            object = cache.get(identifier);
-            if (object instanceof Lock) {
-                return (Lock) object;
-            }
-            // Failed...
-            throw OXException.general("Could not create lock for identifier: " + identifier, e);
-        } catch (RuntimeException e) {
-            // Failed...
-            throw OXException.general("Could not create lock for identifier: " + identifier, e);
-        }
+        return getLockFor0(identifier, false);
     }
 
     @Override
     public Lock getSelfCleaningLockFor(String identifier) throws OXException {
-        Cache cache = getCache();
+        return getLockFor0(identifier, true);
+    }
 
-        Object object = cache.get(identifier);
-        if (object instanceof Lock) {
-            // Already present
-            return (Lock) object;
-        }
-
-        try {
+    private Lock getLockFor0(String identifier, boolean selfCleaning) {
+        Lock lock = locks.get(identifier);
+        if (null == lock) {
             ReentrantLock newLock = new ReentrantLock();
-            cache.putSafe(identifier, newLock);
-            return new SelfCleaningLock(newLock, identifier, this);
-        } catch (OXException e) {
-            // Already present?
-            object = cache.get(identifier);
-            if (object instanceof Lock) {
-                return (Lock) object;
+            lock = locks.putIfAbsent(identifier, newLock, 150, null);
+            if (null == lock) {
+                lock = selfCleaning ? new SelfCleaningLock(newLock, identifier, this) : newLock;
             }
-            // Failed...
-            throw OXException.general("Could not create lock for identifier: " + identifier, e);
-        } catch (RuntimeException e) {
-            // Failed...
-            throw OXException.general("Could not create lock for identifier: " + identifier, e);
         }
+        return lock;
     }
 
     @Override
     public void removeLockFor(String identifier) {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                cacheService.getCache(region).remove(identifier);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
+        locks.remove(identifier);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -191,8 +147,8 @@ public class LockServiceImpl implements LockService {
 
         @Override
         public void unlock() {
-            lock.unlock();
             lockServiceImpl.removeLockFor(identifier);
+            lock.unlock();
         }
 
         @Override
