@@ -49,20 +49,16 @@
 
 package com.openexchange.lock.impl;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import junit.framework.TestCase;
-import com.openexchange.caching.CacheKeyService;
-import com.openexchange.caching.CacheService;
-import com.openexchange.caching.internal.JCSCacheService;
-import com.openexchange.caching.internal.JCSCacheServiceInit;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.lock.LockService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.internal.CustomThreadPoolExecutor;
+import com.openexchange.timer.TimerService;
+import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 
 /**
  * {@link fBug41681Test}
@@ -71,7 +67,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class Bug41681Test extends TestCase {
 
-    private LockService lockService;
+    private CustomThreadPoolExecutorTimerService ts;
+    private CustomThreadPoolExecutor tpe;
+    LockServiceImpl lockService;
 
     private static final int THREAD_COUNT = 10;
     private static final int ACQUIRIES_PER_THREAD = 10;
@@ -79,49 +77,22 @@ public class Bug41681Test extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        final File propertyFile = File.createTempFile("cache", "ccf");
-        String regionName = "GenLocks";
-        PrintWriter out = new PrintWriter(propertyFile.getAbsolutePath());
-        out.write(
-            "jcs.default=LTCP\n" +
-            "jcs.region." + regionName + "=\n" +
-            "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-            "jcs.region." + regionName + ".cacheattributes.MaxObjects=20000000\n" +
-            "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-            "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" +
-            "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
-            "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=30\n" +
-            "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-            "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" +
-            "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=-1\n" +
-            "jcs.region." + regionName + ".elementattributes.IdleTime=150\n" +
-            "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
-            "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" +
-            "jcs.region." + regionName + ".elementattributes.IsLateral=false\n")
-        ;
-        out.flush();
-        out.close();
         ServerServiceRegistry services = ServerServiceRegistry.getInstance();
-        SimConfigurationService configService = new SimConfigurationService() {
 
-            @Override
-            public File getFileByName(String fileName) {
-                return propertyFile;
-            }
+        CustomThreadPoolExecutor tpe = new CustomThreadPoolExecutor(3, 10, 2000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        this.tpe = tpe;
+        CustomThreadPoolExecutorTimerService ts = new CustomThreadPoolExecutorTimerService(tpe);
+        this.ts = ts;
 
-        };
-        configService.stringProperties.put("com.openexchange.caching.configfile", propertyFile.getAbsolutePath());
-        configService.stringProperties.put("com.openexchange.caching.jcs.eventInvalidation", "false");
-        services.addService(ConfigurationService.class, configService);
-        JCSCacheServiceInit.initInstance();
-        JCSCacheServiceInit.getInstance().start(configService);
-        services.addService(CacheService.class, JCSCacheService.getInstance());
-        services.addService(CacheKeyService.class, JCSCacheService.getInstance());
+        services.addService(TimerService.class, ts);
         lockService = new LockServiceImpl();
     }
 
     @Override
     public void tearDown() throws Exception {
+        lockService.dispose();
+        ts.purge();
+        tpe.shutdownNow();
         super.tearDown();
     }
 
