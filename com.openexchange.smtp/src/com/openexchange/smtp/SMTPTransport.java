@@ -55,6 +55,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressLi
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -106,6 +107,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -665,6 +667,58 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         } finally {
             // Restore the ClassLoader
             // Thread.currentThread().setContextClassLoader(tcl);
+        }
+    }
+
+    @Override
+    public MailMessage sendRawMessage(byte[] asciiBytes, SendRawProperties properties) throws OXException {
+        final SMTPConfig smtpConfig = getTransportConfig0();
+        try {
+            InputStream rfc822IS;
+            if (properties.isSanitizeHeaders()) {
+                rfc822IS = MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes);
+            } else {
+                rfc822IS = new UnsynchronizedByteArrayInputStream(asciiBytes);
+            }
+            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), rfc822IS);
+            InternetAddress sender = properties.getSender();
+            if (sender != null) {
+                smtpMessage.setEnvelopeFrom(sender.getAddress());
+            }
+            /*
+             * Check recipients
+             */
+            Address[] recipients = properties.getRecipients();
+            if (recipients == null) {
+                recipients = smtpMessage.getAllRecipients();
+            }
+            if (properties.isValidateAddressHeaders()) {
+                processAddressHeader(smtpMessage);
+            }
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(smtpMessage, true);
+            } else {
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(smtpMessage, true);
+                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+            }
+            return MimeMessageConverter.convertMessage(smtpMessage);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }
 
