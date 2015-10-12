@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
+public class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
 
     public CalendarAddIndex2DatesMembers() {
         super();

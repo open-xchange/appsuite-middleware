@@ -580,6 +580,9 @@ public final class InternalList {
         // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
         list.add(new RemoveAliasInUserAttributesTable());
 
+        // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
