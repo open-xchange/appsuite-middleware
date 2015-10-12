@@ -92,6 +92,7 @@ public class DovecotPushActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         DovecotPushConfiguration configuration = new DovecotPushConfiguration();
         configuration.init(this);
 
@@ -116,6 +117,7 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         DovecotPushManagerService.dropInstance();
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 

@@ -37,6 +37,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
@@ -105,7 +106,7 @@ public class DovecotPushRESTService {
                     String folder = data.getString("folder");
                     long uid = data.getLong("imap-uid");
 
-                    SessiondService sessiondService = services.getService(SessiondService.class);
+                    SessiondService sessiondService = Services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
                         @Override
@@ -124,8 +125,8 @@ public class DovecotPushRESTService {
                     }
 
                     if (null == session) {
-                        HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-                        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+                        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
+                        ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
                         if (null != hzInstance && null != obfuscatorService) {
                             Cluster cluster = hzInstance.getCluster();
 

@@ -70,6 +70,8 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 prepare for 7.8.1
 * Fri Oct 02 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Sixth candidate for 7.8.0 release
+* Wed Sep 30 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-09-28  (2767)
 * Fri Sep 25 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

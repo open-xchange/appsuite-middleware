@@ -61,6 +61,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 prepare for 7.8.1
 * Fri Oct 02 2015 Thorben Betten <thorben.betten@open-xchange.com>
 Sixth candidate for 7.8.0 release
+* Wed Sep 30 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2015-10-12 (2784)
+* Tue Sep 29 2015 Thorben Betten <thorben.betten@open-xchange.com>
+Initial release
 * Fri Sep 25 2015 Thorben Betten <thorben.betten@open-xchange.com>
 Fith candidate for 7.8.0 release
 * Fri Sep 18 2015 Thorben Betten <thorben.betten@open-xchange.com>
