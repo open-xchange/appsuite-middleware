@@ -614,6 +614,18 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
      */
     public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, IFileHolder fileHolder, PreviewOutput output) {
+        return getRemoteInternalPreviewServiceFrom(previewService, fileHolder.getName(), output);
+    }
+
+    /**
+     * (Optionally) Gets the {@link RemoteInternalPreviewService} representation for given arguments.
+     *
+     * @param previewService The preview service
+     * @param fileName The name of the file
+     * @param output The desired preview output
+     * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
+     */
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceFrom(PreviewService previewService, String fileName, PreviewOutput output) {
         if (previewService instanceof RemoteInternalPreviewService) {
             return (RemoteInternalPreviewService) previewService;
         }
@@ -622,9 +634,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         if (!(previewService instanceof Delegating)) {
             return null;
         }
-        
+
         // Try to determine file MIME type
-        String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
+        String mimeType = MimeType2ExtMap.getContentType(fileName, null);
         if (null == mimeType) {
             // No MIME type available
             return null;
