@@ -96,7 +96,7 @@ public final class TimeoutConcurrentMap<K, V> {
     public TimeoutConcurrentMap(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws OXException {
         super();
         this.forceTimeout = forceTimeout;
-        map = new ConcurrentHashMap<K, ValueWrapper<V>>(16, 0.9F, 1);
+        map = new ConcurrentHashMap<K, ValueWrapper<V>>();
         final TimerService timer = getInstance().getService(TimerService.class, true);
         final int delay = shrinkerIntervalSeconds * 1000;
         timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), delay, delay);
