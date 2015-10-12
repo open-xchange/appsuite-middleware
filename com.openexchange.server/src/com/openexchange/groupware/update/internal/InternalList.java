@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -78,7 +79,6 @@ import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
-import com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -788,6 +788,9 @@ public final class InternalList {
 
         // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
+
+        // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
