@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
@@ -229,6 +230,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
         private final AJAXRequestData requestData;
         private final PreviewService previewService;
         private int numberOfPregeneratedPreviews;
+        private final boolean loadFileMetadata;
 
         TriggerPreviewServiceTask(List<File> files, int numberOfPregeneratedPreviews, InfostoreRequest request, PreviewService previewService, ThreadControlService threadControl) throws OXException {
             super();
@@ -244,6 +246,23 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             requestData.putParameter("delivery", "view");
             requestData.putParameter("scaleType", "cover");
             this.requestData = requestData;
+
+            List<Field> columns = request.getFieldsToLoad();
+            if (null == columns || columns.isEmpty()) {
+                loadFileMetadata = true;
+            } else {
+                boolean load = false;
+                if (!columns.contains(Field.FILENAME)) {
+                    load = true;
+                }
+                if (!load && !columns.contains(Field.FILE_MIMETYPE)) {
+                    load = true;
+                }
+                if (!load && !columns.contains(Field.FILE_SIZE)) {
+                    load = true;
+                }
+                loadFileMetadata = load;
+            }
         }
 
         @Override
@@ -256,38 +275,31 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             Thread currentThread = Thread.currentThread();
             boolean added = threadControl.addThread(currentThread);
             try {
-                IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
-                    final String id = iter.next().getId();
-
-                    try {
-                        File fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                if (loadFileMetadata) {
+                    // Load meta data
+                    IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                    for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                        File fileMetadata = iter.next();
+                        String id = fileMetadata.getId();
+                        try {
+                            fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                            triggerFor(id, fileMetadata);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                        }
+                    }
+                } else {
+                    // No need to load
+                    for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                        File fileMetadata = iter.next();
                         if (fileMetadata.getFileSize() != 0) {
-                            IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-
-                                @Override
-                                public InputStream newStream() throws OXException, IOException {
-                                    IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                                    InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                                    if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
-                                        return inputStream;
-                                    }
-                                    return new BufferedInputStream(inputStream, 65536);
-                                }
-                            };
-                            FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-
-                            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileHolder, PreviewOutput.IMAGE);
-                            if (null != candidate) {
-                                AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
-                                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
-                                numberOfPregeneratedPreviews--;
-                            } else {
-                                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+                            String id = fileMetadata.getId();
+                            try {
+                                triggerFor(id, fileMetadata);
+                            } catch (Exception e) {
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
                             }
                         }
-                    } catch (Exception e) {
-                        LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", id, session.getUserId(), session.getContextId(), e);
                     }
                 }
             } finally {
@@ -296,6 +308,32 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                 }
             }
             return null;
+        }
+
+        private void triggerFor(final String id, File fileMetadata) {
+            RemoteInternalPreviewService candidate = AbstractPreviewResultConverter.getRemoteInternalPreviewServiceFrom(previewService, fileMetadata.getFileName(), PreviewOutput.IMAGE);
+            if (null != candidate) {
+                // Create appropriate IFileHolder instance
+                IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
+                        InputStream inputStream = fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+                        if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                            return inputStream;
+                        }
+                        return new BufferedInputStream(inputStream, 65536);
+                    }
+                };
+                FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+
+                AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
+                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
+                numberOfPregeneratedPreviews--;
+            } else {
+                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+            }
         }
     }
 
