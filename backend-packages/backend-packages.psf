@@ -64,6 +64,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-passwordchange-script"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-publish"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-push-dovecot"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-push-imapidle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-push-malpoll"/>
