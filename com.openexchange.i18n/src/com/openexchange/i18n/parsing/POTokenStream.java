@@ -253,21 +253,14 @@ final class POTokenStream {
             break;
         case 'c':
             expect('t', 'x', 't');
-            byte c = -1;
-            while (Character.isWhitespace(c = read())) {
-            }
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            baos.write(c);
-            while ((c = read()) != '\n') {
-                baos.write(c);
-            }
-            msgctxtToken(toString(baos.toByteArray()));
+            msgctxtToken();
+            break;
         }
     }
 
-    private void msgctxtToken(final String context) {
+    private void msgctxtToken() {
         nextToken = POToken.MSGCTXT;
-        element(context);
+        element(null);
     }
 
     private void msgIdPluralToken() {

@@ -74,8 +74,35 @@ public class TranslationsI18N implements I18nService {
     }
 
     @Override
+    public String getL10NLocalized(String messageContext, String key) {
+        String t = translations.translate(messageContext, key);
+        if (t == null) {
+            return key;
+        }
+        return t;
+    }
+
+    @Override
+    public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
+        String t = translations.translate(messageContext, key, plural);
+        if (t == null) {
+            t = translations.translate(messageContext, keyPlural, plural);
+        }
+        if (t == null) {
+            return key;
+        }
+        return t;
+        
+    }
+
+    @Override
     public boolean hasKey(final String key) {
         return translations.getKnownStrings().contains(key);
+    }
+
+    @Override
+    public boolean hasKey(String context, String key) {
+        return translations.getKnownStrings(context).contains(key);
     }
 
     @Override
@@ -97,6 +124,5 @@ public class TranslationsI18N implements I18nService {
         builder.append('}');
         return builder.toString();
     }
-
 
 }

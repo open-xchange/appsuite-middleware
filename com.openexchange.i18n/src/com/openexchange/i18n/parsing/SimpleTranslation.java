@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,24 @@
  *
  */
 
-package com.openexchange.i18n.impl;
-
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.i18n.I18nService;
+package com.openexchange.i18n.parsing;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link SimpleTranslation}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class CompositeI18nTools implements I18nService {
+public class SimpleTranslation {
 
-    private Locale locale;
+    private Translation delegate;
 
-    private final List<I18nService> tools;
-
-    public CompositeI18nTools(final List<I18nService> i18n) {
-        super();
-        tools = i18n;
-        for (final I18nService i18nTool : i18n) {
-            if (null == locale) {
-                locale = i18nTool.getLocale();
-            } else if (!locale.equals(i18nTool.getLocale())) {
-                throw new IllegalArgumentException();
-            }
-        }
+    public SimpleTranslation(String id, String message) {
+        delegate = new Translation(null, id, null);
+        delegate.setMessage(0, message);
     }
 
-    @Override
-    public String getLocalized(final String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(key)) {
-                return tool.getLocalized(key);
-            }
-        }
-        return key;
+    public String getMessage() {
+        return delegate.getMessage();
     }
-
-    @Override
-    public String getL10NLocalized(String messageContext, String key) {
-        for (I18nService tool : tools) {
-            if (tool.hasKey(messageContext, key)) {
-                return tool.getL10NLocalized(messageContext, key);
-            }
-        }
-        return key;
-    }
-
-    @Override
-    public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
-        for (I18nService tool : tools) {
-            if (tool.hasKey(messageContext, key)) {
-                return tool.getL10NPluralLocalized(messageContext, key, keyPlural, plural);
-            }
-        }
-        return key;
-    }
-
-    @Override
-    public boolean hasKey(final String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean hasKey(String context, String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(context, key)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public Locale getLocale() {
-        return locale;
-    }
-
 }

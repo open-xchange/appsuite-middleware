@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n;
 
+import com.openexchange.i18n.parsing.BasicTests;
 import com.openexchange.i18n.parsing.Bug22803Test;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
@@ -67,6 +68,7 @@ public class UnitTests {
         final TestSuite suite = new TestSuite();
         suite.addTestSuite(TranslationToI18NAdapterTest.class);
         suite.addTest(new JUnit4TestAdapter(Bug22803Test.class));
+        suite.addTest(new JUnit4TestAdapter(BasicTests.class));
         return suite;
     }
 }

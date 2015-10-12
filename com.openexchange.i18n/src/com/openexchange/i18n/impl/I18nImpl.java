@@ -103,4 +103,19 @@ public class I18nImpl implements I18nService {
 
         return serverBundle.getLocale();
     }
+
+    @Override
+    public boolean hasKey(String context, String key) {
+        return context == null ? hasKey(key) : null;
+    }
+
+    @Override
+    public String getL10NLocalized(String messageContext, String key) {
+        return messageContext == null ? getLocalized(key) : key;
+    }
+
+    @Override
+    public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
+        return messageContext == null && plural == 0 && keyPlural == null ? getLocalized(key) : key;
+    }
 }

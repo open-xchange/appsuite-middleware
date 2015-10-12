@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,82 @@
  *
  */
 
-package com.openexchange.i18n.impl;
+package com.openexchange.i18n.parsing;
 
-import java.util.List;
-import java.util.Locale;
-import com.openexchange.i18n.I18nService;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link Translation}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class CompositeI18nTools implements I18nService {
+public class Translation {
 
-    private Locale locale;
+    private String context;
+    private String id;
+    private String idPlural;
+    private Map<Integer, String> messages;
 
-    private final List<I18nService> tools;
+    public Translation(String context, String id, String idPlural) {
+        setContext(context);
+        setId(id);
+        setIdPlural(idPlural);
+        messages = new HashMap<Integer, String>();
+    }
 
-    public CompositeI18nTools(final List<I18nService> i18n) {
-        super();
-        tools = i18n;
-        for (final I18nService i18nTool : i18n) {
-            if (null == locale) {
-                locale = i18nTool.getLocale();
-            } else if (!locale.equals(i18nTool.getLocale())) {
-                throw new IllegalArgumentException();
-            }
+    public String getMessage() {
+        return getMessage(0);
+    }
+
+    /**
+     * Returns the plural form of the message.
+     * 
+     * @param plural
+     * @return The plural form. The singular form if 0.
+     */
+    public String getMessage(Integer plural) {
+        if (messages.containsKey(plural)) {
+            return messages.get(plural);
+        } else {
+            return messages.get(Collections.max(messages.keySet()));
         }
     }
 
-    @Override
-    public String getLocalized(final String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(key)) {
-                return tool.getLocalized(key);
-            }
-        }
-        return key;
+    /**
+     * Sets one message (sinular or plural).
+     * 
+     * @param plural The singular version (0) or one of the plural versions (1..)
+     * @param message
+     */
+    public void setMessage(Integer plural, String message) {
+        messages.put(plural, message);
     }
 
-    @Override
-    public String getL10NLocalized(String messageContext, String key) {
-        for (I18nService tool : tools) {
-            if (tool.hasKey(messageContext, key)) {
-                return tool.getL10NLocalized(messageContext, key);
-            }
-        }
-        return key;
+    public String getContext() {
+        return context;
     }
 
-    @Override
-    public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
-        for (I18nService tool : tools) {
-            if (tool.hasKey(messageContext, key)) {
-                return tool.getL10NPluralLocalized(messageContext, key, keyPlural, plural);
-            }
-        }
-        return key;
+    public void setContext(String context) {
+        this.context = context;
     }
 
-    @Override
-    public boolean hasKey(final String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(key)) {
-                return true;
-            }
-        }
-        return false;
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public boolean hasKey(String context, String key) {
-        for (final I18nService tool : tools) {
-            if (tool.hasKey(context, key)) {
-                return true;
-            }
-        }
-        return false;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    @Override
-    public Locale getLocale() {
-        return locale;
+    public String getIdPlural() {
+        return idPlural;
+    }
+
+    public void setIdPlural(String idPlural) {
+        this.idPlural = idPlural;
     }
 
 }
