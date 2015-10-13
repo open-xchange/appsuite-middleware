@@ -50,13 +50,14 @@
 package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
-import gnu.inet.encoding.IDNAException;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
 import java.text.Normalizer;
@@ -70,14 +71,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -96,6 +90,7 @@ import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
+
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
@@ -118,6 +113,17 @@ import com.openexchange.java.Strings;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
+
+import gnu.inet.encoding.IDNAException;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlServiceImpl}
@@ -725,7 +731,35 @@ public final class HtmlServiceImpl implements HtmlService {
             prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
-            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            Renderer renderer = new Renderer(new Segment(new Source(prepared), 0, prepared.length())) {
+                @Override
+                public String renderHyperlinkURL(final StartTag startTag) {
+                    /*
+                     * The default returns the 'href' content in angle brackets, i.e.
+                     * <a href="http://www.example.com">Link</a> is transformed into
+                     * <http://www.example.com>. Some web mailers tend to remove text
+                     * within angle brackets in plain text modes, which leads to missing
+                     * links in plain text replies/forwards. We override this behavior
+                     * here, to return the href content as is as described in the JavaDoc
+                     * of Renderer().renderHyperlinkURL(StartTag).
+                     */
+                    final String href=startTag.getAttributeValue("href");
+                    if (href==null || href.startsWith("javascript:")) {
+                        return null;
+                    }
+                    try {
+                        URI uri=new URI(href);
+                        if (!uri.isAbsolute()) {
+                            return null;
+                        }
+                    } catch (URISyntaxException ex) {
+                        return null;
+                    }
+                    return href;
+                }
+            };
+            renderer.setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref);
+            String text = quoteText(renderer.toString());
             // Drop heading whitespaces
             text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
             // ... but keep enforced ones
@@ -1905,14 +1939,14 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private static final List<Pattern> P_HTMLE = Collections.unmodifiableList(Arrays.asList(
-        Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#8482;|&trade;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9829;|&hearts;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9824;|&spades;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9827;|&clubs;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9830;|&diams;", Pattern.CASE_INSENSITIVE)
+    private static final List<String[]> SA_HTMLE = Collections.unmodifiableList(Arrays.asList(
+        new String[] {"&#169;","&copy;"},
+        new String[] {"&#174;","&reg;"},
+        new String[] {"&#8482;","&trade;"},
+        new String[] {"&#9829;","&hearts;"},
+        new String[] {"&#9824;","&spades;"},
+        new String[] {"&#9827;","&clubs;"},
+        new String[] {"&#9830;","&diams;"}
         ));
 
     private static final List<String> S_HTMLE = Collections.unmodifiableList(Arrays.asList(
@@ -1926,14 +1960,22 @@ public final class HtmlServiceImpl implements HtmlService {
         ));
 
     private static String keepUnicodeForEntities(final String html) {
-        String ret = html;
+        StringBuilder ret = new StringBuilder(html);
 
-        final int size = P_HTMLE.size();
+        int size = SA_HTMLE.size();
         for (int i = 0; i < size; i++) {
-            ret = P_HTMLE.get(i).matcher(ret).replaceAll(S_HTMLE.get(i));
+            checkAndReplace(SA_HTMLE.get(i), S_HTMLE.get(i), ret);
         }
 
-        return ret;
+        return ret.toString();
+    }
+
+    private static void checkAndReplace(String[] entities, String replacement, StringBuilder html) {
+        for (String entity : entities) {
+            for (int index = 0; (index = html.indexOf(entity, index)) >= 0;) {
+                html.replace(index, index + entity.length(), replacement);
+            }
+        }
     }
 
     private static final Pattern END_TAG_FORBIDDEN_PATTERN = Pattern.compile("<(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)([ \\t\\n\\x0B\\f\\r])([^>]*)/>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
