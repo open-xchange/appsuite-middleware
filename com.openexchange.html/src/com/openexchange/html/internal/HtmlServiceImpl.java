@@ -677,10 +677,14 @@ public final class HtmlServiceImpl implements HtmlService {
                      * of Renderer().renderHyperlinkURL(StartTag).
                      */
                     final String href=startTag.getAttributeValue("href");
-                    if (href==null || href.startsWith("javascript:")) return null;
+                    if (href==null || href.startsWith("javascript:")) {
+                        return null;
+                    }
                     try {
                         URI uri=new URI(href);
-                        if (!uri.isAbsolute()) return null;
+                        if (!uri.isAbsolute()) {
+                            return null;
+                        }
                     } catch (URISyntaxException ex) {
                         return null;
                     }
@@ -1877,14 +1881,14 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html>" + Strings.getLineSeparator();
 
-    private static final List<Pattern> P_HTMLE = Collections.unmodifiableList(Arrays.asList(
-        Pattern.compile("&#169;|&copy;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#174;|&reg;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#8482;|&trade;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9829;|&hearts;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9824;|&spades;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9827;|&clubs;", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("&#9830;|&diams;", Pattern.CASE_INSENSITIVE)
+    private static final List<String[]> SA_HTMLE = Collections.unmodifiableList(Arrays.asList(
+        new String[] {"&#169;","&copy;"},
+        new String[] {"&#174;","&reg;"},
+        new String[] {"&#8482;","&trade;"},
+        new String[] {"&#9829;","&hearts;"},
+        new String[] {"&#9824;","&spades;"},
+        new String[] {"&#9827;","&clubs;"},
+        new String[] {"&#9830;","&diams;"}
         ));
 
     private static final List<String> S_HTMLE = Collections.unmodifiableList(Arrays.asList(
@@ -1898,14 +1902,22 @@ public final class HtmlServiceImpl implements HtmlService {
         ));
 
     private static String keepUnicodeForEntities(final String html) {
-        String ret = html;
+        StringBuilder ret = new StringBuilder(html);
 
-        final int size = P_HTMLE.size();
+        int size = SA_HTMLE.size();
         for (int i = 0; i < size; i++) {
-            ret = P_HTMLE.get(i).matcher(ret).replaceAll(S_HTMLE.get(i));
+            checkAndReplace(SA_HTMLE.get(i), S_HTMLE.get(i), ret);
         }
 
-        return ret;
+        return ret.toString();
+    }
+
+    private static void checkAndReplace(String[] entities, String replacement, StringBuilder html) {
+        for (String entity : entities) {
+            for (int index = 0; (index = html.indexOf(entity, index)) >= 0;) {
+                html.replace(index, index + entity.length(), replacement);
+            }
+        }
     }
 
     private static final Pattern END_TAG_FORBIDDEN_PATTERN = Pattern.compile("<(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)([ \\t\\n\\x0B\\f\\r])([^>]*)/>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
