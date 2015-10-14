@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -161,6 +162,11 @@ final class ActionCommandMapper implements Mapper<Rule> {
             final String fromFieldName = VacationActionFields.FROM.getFieldname();
             if (object.has(fromFieldName)) {
                 String from = object.getString(fromFieldName);
+                try {
+                     new QuotedInternetAddress(from, true);
+                } catch (AddressException e) {
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
+                }
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
                 arrayList.add(stringToList(from));
             }
