@@ -173,13 +173,21 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
+<<<<<<< HEAD
+=======
+                    if (storageFolder.isDefault() || storageFolder.getDefaultType() != 0) {
+                        throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Movement");
+                    }
+                    boolean checkForReservedName = true;
+>>>>>>> 11e7112... Fix for bug 41725: Mark the standard archive folder to be not rename-able + signal error message "Default folder must not be renamed" in case of an illegal rename attempt #3
                     if (null == folder.getName()) {
                         folder.setName(storageFolder.getName());
+                        checkForReservedName = false;
                     }
                     if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
                     }
-                    if (null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                 }
