@@ -52,6 +52,7 @@ package com.openexchange.mail.json.actions;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -451,7 +452,10 @@ public final class GetAction extends AbstractMailAction {
                         MailConverter.getInstance().convert2JSON(req.getRequest(), requestResult, session);
                         JSONObject jMail = (JSONObject) requestResult.getResultObject();
                         if (null != jMail) {
-                            jMail.put("source", new String(fileHolder.toByteArray(), Charsets.UTF_8));
+                            jMail.put("source", new InputStreamReader(fileHolder.getClosingStream(), Charsets.UTF_8));
+                            fileHolder = null; // Avoid preliminary closing
+
+                            //jMail.put("source", new String(fileHolder.toByteArray(), Charsets.UTF_8));
                         }
                         data = requestResult;
                     }
