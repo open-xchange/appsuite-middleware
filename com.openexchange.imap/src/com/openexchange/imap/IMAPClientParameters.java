@@ -49,8 +49,11 @@
 
 package com.openexchange.imap;
 
+import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
+import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.imap.util.Counter;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
@@ -99,12 +102,12 @@ public enum IMAPClientParameters {
 
     // --------------------------------------------------------------------------------------------------------------------
 
-    private static final Counter COUNTER = new Counter();
+    private static final Random RANDOM = new SecureRandom();
 
     /**
      * Generates the session information.
      * <pre>
-     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;next-long&gt;
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;random&gt;
      *
      *  Example:
      *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
@@ -114,13 +117,18 @@ public enum IMAPClientParameters {
      * @return The session information
      */
     public static String generateSessionInformation(Session session) {
-        return generateSessionInformation(session, null);
+        StringBuilder buf = new StringBuilder(64);
+        buf.append(session.getSessionID());
+        buf.append('-').append(session.getUserId());
+        buf.append('-').append(session.getContextId());
+        buf.append('-').append(RandomStringUtils.random(12, 0, 0, true, true, null, RANDOM));
+        return buf.toString();
     }
 
     /**
      * Generates the session information.
      * <pre>
-     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;next-long&gt;
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;random&gt;
      *
      *  Example:
      *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
@@ -131,12 +139,7 @@ public enum IMAPClientParameters {
      * @return The session information
      */
     public static String generateSessionInformation(Session session, IMAPStore imapStore) {
-        StringBuilder buf = new StringBuilder(64);
-        buf.append(session.getSessionID());
-        buf.append('-').append(session.getUserId());
-        buf.append('-').append(session.getContextId());
-        buf.append('-').append(COUNTER.nextLong());
-        return buf.toString();
+        return generateSessionInformation(session);
     }
 
     private static final class Generator implements com.sun.mail.imap.ExternalIdGenerator {
@@ -152,7 +155,7 @@ public enum IMAPClientParameters {
         public String generateExternalId() {
             return generateSessionInformation(session);
         }
-    };
+    }
 
     /**
      * Sets the default client parameters.

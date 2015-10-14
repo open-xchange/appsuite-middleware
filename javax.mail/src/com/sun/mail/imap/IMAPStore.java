@@ -1026,25 +1026,24 @@ public class IMAPStore extends Store
 	/*
 	 * Advertise client parameters (if any)
 	 */
-    {
+    if (p.getCapabilities().containsKey("ID")) {
         Map<String, String> clientParams = null;
         {
             ExternalIdGenerator generator = this.externalIdGenerator;
             if (null == generator) {
-                if (null != this.clientParameters && p.hasCapability("ID")) {
-                    clientParams = this.clientParameters;
+                if (null != this.clientParameters) {
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
                 }
-            } else if (p.hasCapability("ID")) {
+            } else {
                 // Generate external identifier & add to client parameters
                 String generatedExternalId = generator.generateExternalId();
-                clientParams = new LinkedHashMap<String, String>(6);
                 if (null == this.clientParameters) {
-                    clientParams.put("x-session-ext-id", generatedExternalId);
+                    clientParams = new LinkedHashMap<String, String>(2);
                 } else {
                     // Overwrite "x-session-ext-id" client parameter with the generated one
-                    this.clientParameters.put("x-session-ext-id", generatedExternalId);
-                    clientParams.putAll(clientParameters);
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
                 }
+                clientParams.put("x-session-ext-id", generatedExternalId);
             }
         }
         
