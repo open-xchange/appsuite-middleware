@@ -289,17 +289,19 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new TagArgument(token);
     }
 
-    static List<String> JSONArrayToStringList(final JSONArray jarray) throws JSONException {
-        final ArrayList<String> retval = new ArrayList<String>(jarray.length());
-        for (int i = 0; i < jarray.length(); i++) {
+    static List<String> JSONArrayToStringList(JSONArray jarray) throws JSONException {
+        int length = jarray.length();
+        List<String> retval = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
             retval.add(jarray.getString(i));
         }
         return retval;
     }
 
-    static List<String> JSONDateArrayToStringList(final JSONArray jarray, final String formatPattern) throws JSONException {
-        final ArrayList<String> retval = new ArrayList<String>(jarray.length());
-        for (int i = 0; i < jarray.length(); i++) {
+    static List<String> JSONDateArrayToStringList(JSONArray jarray, String formatPattern) throws JSONException {
+        int length = jarray.length();
+        List<String> retval = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
             retval.add(convertJSONDate2Sieve(jarray.getString(i), formatPattern));
         }
         return retval;
