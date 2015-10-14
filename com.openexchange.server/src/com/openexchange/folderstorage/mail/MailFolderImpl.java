@@ -226,10 +226,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             localizedName = folderName;
         }
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
-        parent =
-            mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(
-                accountId,
-                mailFolder.getParentFullname());
+        parent = mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
