@@ -193,4 +193,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Denied to rename a standard/default folder like Trash
     public static final String NO_DEFAULT_FOLDER_RENAME_MSG = "Default folder must not be renamed";
 
+    // Denied to delete a standard/default folder like Trash
+    public static final String NO_DEFAULT_FOLDER_DELETE_MSG = "Default folder must not be deleted";
+
 }
