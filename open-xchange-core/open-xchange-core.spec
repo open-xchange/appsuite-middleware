@@ -1215,6 +1215,10 @@ ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
+# SoftwareChange_Request-2630
+ox_add_property com.openexchange.capability.share_links true /opt/open-xchange/etc/permissions.properties
+ox_add_property com.openexchange.capability.invite_guests true /opt/open-xchange/etc/permissions.properties
+
 # SoftwareChange_Request-2652
 ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
 ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
@@ -1231,7 +1235,7 @@ ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xcha
 ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
-#SoftwareChange_Request-2698
+# SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-2811
