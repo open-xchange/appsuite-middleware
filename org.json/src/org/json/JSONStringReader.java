@@ -114,17 +114,29 @@ public class JSONStringReader extends Reader {
 
     @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
+        if ((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return 0;
+        }
+
+        boolean first = true;
         int offset = off;
         int end = offset + len;
         int count = 0;
         while (offset < end) {
             int next = read();
-            if (next >= 0) {
-                cbuf[offset++] = (char) next;
-                count++;
-            } else {
+
+            if (next < 0) {
                 // No more characters available
-                return count;
+                return first ? -1 : count;
+            }
+
+            cbuf[offset++] = (char) next;
+            count++;
+
+            if (first) {
+                first = false; // Switch flag
             }
         }
         return count;
