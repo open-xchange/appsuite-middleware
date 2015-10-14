@@ -64,7 +64,7 @@ import com.openexchange.configuration.ServerConfig.Property;
  */
 public class ClientUtil implements Reloadable {
 
-    private static volatile String uiWebPath;
+    private static volatile String uiWebPath = Property.UI_WEB_PATH.getDefaultValue();
     private static final String PROP_FILE = "server.properties";
     private static final String[] PROPERTY_LIST = new String[] { Property.UI_WEB_PATH.getPropertyName() };
 
