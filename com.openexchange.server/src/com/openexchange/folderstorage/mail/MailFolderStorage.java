@@ -712,6 +712,11 @@ public final class MailFolderStorage implements FolderStorage {
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullName = arg.getFullname();
+
+            if (isDefaultFolder(fullName, mailAccess)) {
+                throw MailExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullName);
+            }
+
             /*
              * Only backup if full name does not denote trash (sub)folder, and hardDelete property is not set in decorator
              */

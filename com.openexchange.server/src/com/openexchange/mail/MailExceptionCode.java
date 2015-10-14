@@ -532,7 +532,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Default folder %1$s must not be renamed
      */
-    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s must not be renamed", MailExceptionStrings.NO_DEFAULT_FOLDER_RENAME_MSG, CATEGORY_PERMISSION_DENIED, 97),
+    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s must not be renamed", MailExceptionStrings.NO_DEFAULT_FOLDER_RENAME_MSG, CATEGORY_PERMISSION_DENIED, 98),
+    /**
+     * Default folder %1$s must not be deleted
+     */
+    NO_DEFAULT_FOLDER_DELETE("Default folder %1$s must not be deleted", MailExceptionStrings.NO_DEFAULT_FOLDER_DELETE_MSG, CATEGORY_PERMISSION_DENIED, 99),
 
     ;
 
