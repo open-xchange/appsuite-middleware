@@ -70,7 +70,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
-import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.groupware.contexts.Context;
@@ -177,13 +176,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (storageFolder.isDefault() || storageFolder.getDefaultType() != 0) {
                         throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Movement");
                     }
+                    boolean checkForReservedName = true;
                     if (null == folder.getName()) {
                         folder.setName(storageFolder.getName());
+                        checkForReservedName = false;
                     }
                     if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
                     }
-                    if (null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                 }
