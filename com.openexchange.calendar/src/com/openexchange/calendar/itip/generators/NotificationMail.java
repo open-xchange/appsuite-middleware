@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.CalendarField;
@@ -67,7 +68,9 @@ import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.notify.State.Type;
 
 
@@ -330,7 +333,7 @@ public class NotificationMail {
 
         // Interested in other changes, but not in state changes
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
+            LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs() + getUserDiff());
             return !isAboutStateChangesOnly();
         }
         LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
@@ -347,8 +350,19 @@ public class NotificationMail {
     private String getUserDiff() {
         try {
             if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
+                StringBuilder sb = new StringBuilder(" Changed Users: ");
                 FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
-
+                Difference extraInfo = (Difference) userChange.getExtraInfo();
+                if (!extraInfo.getAdded().isEmpty()) {
+                    for (Object added : extraInfo.getAdded()) {
+                        sb.append(((UserParticipant) added).getIdentifier()).append(", ");
+                    }
+                }
+                if (!extraInfo.getRemoved().isEmpty()) {
+                    for (Object removed : extraInfo.getRemoved()) {
+                        sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
+                    }
+                }
             }
         } catch (Exception e) {
             return "Error";
