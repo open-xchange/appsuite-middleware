@@ -147,11 +147,6 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
              */
             final List<FolderStorage> openedStorages = Collections.emptyList();
             checkOpenedStorage(folderStorage, openedStorages);
-            Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
-            if (folder.isDefault() || folder.getDefaultType() != 0) {
-                throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Deletion");
-            }
-
             try {
                 if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
                     /*

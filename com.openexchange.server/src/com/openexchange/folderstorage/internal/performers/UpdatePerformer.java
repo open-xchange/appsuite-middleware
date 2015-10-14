@@ -173,9 +173,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
                 if (move) {
-                    if (storageFolder.isDefault() || storageFolder.getDefaultType() != 0) {
-                        throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Movement");
-                    }
                     boolean checkForReservedName = true;
                     if (null == folder.getName()) {
                         folder.setName(storageFolder.getName());
@@ -195,9 +192,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename && false == move) {
-                    if (storageFolder.isDefault() || storageFolder.getDefaultType() != 0) {
-                        throw FolderExceptionErrorMessage.DEFAULT_FOLDER_ERROR.create("Renaming");
-                    }
                     if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, storageFolder.getParentID()), treeId);
                     }
