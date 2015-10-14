@@ -160,6 +160,12 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.SUBJECT));
                 arrayList.add(stringToList(subject));
             }
+            final String fromFieldName = VacationActionFields.FROM.getFieldname();
+            if (object.has(fromFieldName)) {
+                String from = object.getString(fromFieldName);
+                arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
+                arrayList.add(stringToList(from));
+            }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionFields.TEXT.getFieldname() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
@@ -303,6 +309,11 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 if (null != subject) {
                     String decodedSubject = MimeMessageUtility.decodeEnvelopeSubject(subject.get(0));
                     tmp.put(VacationActionFields.SUBJECT.getFieldname(), decodedSubject);
+                }
+                final List<String> from = tagarguments.get(VacationActionFields.FROM.getTagname());
+                if (null != from) {
+                    String decodedFrom = MimeMessageUtility.decodeEnvelopeSubject(from.get(0));
+                    tmp.put(VacationActionFields.FROM.getFieldname(), decodedFrom);
                 }
                 tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
             } else if (ActionCommand.Commands.ENOTIFY.equals(actionCommand.getCommand())) {
