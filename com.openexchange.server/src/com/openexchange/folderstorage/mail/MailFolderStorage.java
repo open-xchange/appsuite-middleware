@@ -73,6 +73,7 @@ import java.util.Set;
 import javax.mail.Message;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -140,6 +141,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -192,7 +194,7 @@ public final class MailFolderStorage implements FolderStorage {
         return MailAccess.getInstance(ses, accountId);
     }
 
-    private String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
+    private static String optArchiveFullName(MailAccount mailAccount, MailAccess<?, ?> mailAccess) throws OXException {
         if (null == mailAccount) {
             return null;
         }
@@ -246,12 +248,24 @@ public final class MailFolderStorage implements FolderStorage {
 
         MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         MailAccount mailAccount = storageService.getMailAccount(mailAccess.getAccountId(), session.getUserId(), session.getContextId());
-        String archiveFullName = optArchiveFullName(mailAccount, mailAccess);
-        if (null != archiveFullName && archiveFullName.equals(fullName)) {
+        if (isArchiveFolder(fullName, mailAccess, mailAccount)) {
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Checks if specified full name denotes the standard archive folder (if defined for associated account).
+     *
+     * @param fullName The full name to check
+     * @param mailAccess The associated mail access
+     * @param mailAccount The mail account
+     * @return <code>true</code> if specified full name denotes the standard archive folder; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean isArchiveFolder(String fullName, MailAccess<?, ?> mailAccess, MailAccount mailAccount) throws OXException {
+        return fullName.equals(optArchiveFullName(mailAccount, mailAccess));
     }
 
     @Override
@@ -873,6 +887,10 @@ public final class MailFolderStorage implements FolderStorage {
             }
             TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<MailAccount>(2);
             List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+
+            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+
             for (String folderId : folderIds) {
                 FullnameArgument argument = prepareMailFolderParam(folderId);
                 int accountId = argument.getAccountId();
@@ -887,7 +905,7 @@ public final class MailFolderStorage implements FolderStorage {
                     mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                     accounts.put(accountId, mailAccount);
                 }
-                ret.add(getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount));
+                ret.add(getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount, translatePrimaryAccountDefaultFolders));
             }
             return ret;
         } finally {
@@ -918,7 +936,11 @@ public final class MailFolderStorage implements FolderStorage {
                 mailAccount = storageService.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
             }
             mailAccess = mailAccessFor(session, argument.getAccountId());
-            return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount);
+
+            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            boolean translatePrimaryAccountDefaultFolders = (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
+
+            return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount, translatePrimaryAccountDefaultFolders);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -926,7 +948,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     private static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
 
-    private Folder getFolder(final String treeId, final FullnameArgument argument, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccess, final ServerSession session, final MailAccount mailAccount) throws OXException {
+    private Folder getFolder(String treeId, FullnameArgument argument, StorageParameters storageParameters, MailAccess<?, ?> mailAccess, ServerSession session, MailAccount mailAccount, boolean translateDefaultFolders) throws OXException {
         final int accountId = argument.getAccountId();
         final String fullName = argument.getFullname();
         final Folder retval;
@@ -939,8 +961,9 @@ public final class MailFolderStorage implements FolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
             if (MailAccount.DEFAULT_ID == accountId) {
                 mailAccess.connect(false);
-                final MailFolder rootFolder = mailAccess.getRootFolder();
-                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess);
+
+                MailFolder rootFolder = mailAccess.getRootFolder();
+                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess, mailAccount, translateDefaultFolders);
                 addWarnings(mailAccess, storageParameters);
                 hasSubfolders = rootFolder.hasSubfolders();
                 /*
@@ -969,7 +992,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Generate mail folder from loaded one
              */
             {
-                final MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess), mailAccess);
+                MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess), mailAccess, mailAccount, translateDefaultFolders);
                 if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {
@@ -1725,7 +1748,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final String newName = mfd.getName();
                 if (!newName.equals(oldName)) { // rename
                     if (isDefaultFolder(fullname, mailAccess)) {
-                        throw MailExceptionCode.NO_DEFAULT_FOLDER_UPDATE.create(fullname);
+                        throw MailExceptionCode.NO_DEFAULT_FOLDER_RENAME.create(fullname);
                     }
                     final String oldFullName = fullname;
                     fullname = mailAccess.getFolderStorage().renameFolder(fullname, newName);
