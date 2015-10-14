@@ -451,7 +451,7 @@ public final class GetAction extends AbstractMailAction {
                         MailConverter.getInstance().convert2JSON(req.getRequest(), requestResult, session);
                         JSONObject jMail = (JSONObject) requestResult.getResultObject();
                         if (null != jMail) {
-                            jMail.put("source", new String(fileHolder.toByteArray(), Charsets.ISO_8859_1));
+                            jMail.put("source", new String(fileHolder.toByteArray(), Charsets.UTF_8));
                         }
                         data = requestResult;
                     }
