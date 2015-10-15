@@ -491,7 +491,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.setInt(1, contextId);
                 prep.setInt(2, userId);
                 prep.setLong(3, 0L);
-                prep.executeUpdate();
+
+                try {
+                    prep.executeUpdate();
+                } catch (SQLException exp) {
+                    if (Databases.isPrimaryKeyConflictInMySQL(exp)) {
+                        // All fine. The needed entry was already added in the meantime
+                        return;
+                    }
+                    // Otherwise re-throw...
+                    throw exp;
+                }
             }
         } catch (SQLException exp) {
             throw new StorageException(exp);

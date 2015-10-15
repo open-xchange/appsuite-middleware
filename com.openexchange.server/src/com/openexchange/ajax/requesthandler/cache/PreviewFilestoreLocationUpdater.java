@@ -58,7 +58,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
 
 
 /**
@@ -68,7 +68,7 @@ import com.openexchange.groupware.filestore.FileLocationHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class PreviewFilestoreLocationUpdater implements FileLocationHandler {
+public class PreviewFilestoreLocationUpdater extends AbstractFileLocationHandler {
 
     /**
      * Initializes a new {@link PreviewFilestoreLocationUpdater}.
@@ -79,19 +79,9 @@ public class PreviewFilestoreLocationUpdater implements FileLocationHandler {
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE preview SET refId = ? WHERE cid = ? AND refId = ?");
-            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-                stmt.setString(1, entry.getValue());
-                stmt.setInt(2, contextId);
-                stmt.setString(3, entry.getKey());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        String selectStmt = "SELECT refId FROM preview WHERE cid=? AND refId IN ";
+        String updateStmt = "UPDATE preview SET refId = ? WHERE cid = ? AND refId = ?";
+        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
     }
 
     @Override

@@ -49,12 +49,14 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
+import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
+import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -121,12 +123,21 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             // Copy each file from source to destination
             Set<String> srcFiles = srcStorage.getFileList();
             if (false == srcFiles.isEmpty()) {
-                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+                URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, srcBaseUri));
+                URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
+                CopyResult copyResult = copyFiles(srcFiles, srcStorage, dstStorage, srcFullUri, dstFullUri);
 
-                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                propagateNewLocations(prevFileName2newFileName);
+                if (Operation.COPIED.equals(copyResult.operation)) {
+                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                    propagateNewLocations(copyResult.prevFileName2newFileName);
 
-                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                } else {
+                    // Simply adjust filestore_usage entries
+                    long totalSize = copyResult.totalSize;
+                    decUsage(totalSize, userId, contextId);
+                    incUsage(totalSize, 0, contextId);
+                }
             }
 
             if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {

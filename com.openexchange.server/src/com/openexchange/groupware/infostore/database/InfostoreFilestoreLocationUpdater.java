@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Reference;
@@ -77,9 +77,10 @@ import com.openexchange.java.Reference;
  * {@link InfostoreFilestoreLocationUpdater}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
+public class InfostoreFilestoreLocationUpdater extends AbstractFileLocationHandler {
 
     /**
      * Initializes a new {@link InfostoreFilestoreLocationUpdater}.
@@ -90,19 +91,9 @@ public class InfostoreFilestoreLocationUpdater implements FileLocationHandler {
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location = ? WHERE cid = ? AND file_store_location = ?");
-            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-                stmt.setString(1, entry.getValue());
-                stmt.setInt(2, contextId);
-                stmt.setString(3, entry.getKey());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        String selectStmt = "SELECT file_store_location FROM infostore_document WHERE cid=? AND file_store_location IN ";
+        String updateStmt = "UPDATE infostore_document SET file_store_location = ? WHERE cid = ? AND file_store_location = ?";
+        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
     }
 
     @Override
