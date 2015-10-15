@@ -188,6 +188,8 @@ fi
 %doc docs/
 
 %changelog
+* Mon Oct 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-23 (2806)
 * Thu Oct 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.1
 * Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>

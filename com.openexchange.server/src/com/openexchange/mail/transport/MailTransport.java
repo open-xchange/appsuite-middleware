@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.transport;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.mail.Address;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -176,7 +179,7 @@ public abstract class MailTransport {
      * @throws OXException If sending fails
      */
     public MailMessage sendRawMessage(final byte[] asciiBytes) throws OXException {
-        return sendRawMessage(asciiBytes, null);
+        return sendRawMessage(asciiBytes, (Address[]) null);
     }
 
     /**
@@ -190,6 +193,22 @@ public abstract class MailTransport {
      * @throws OXException If sending fails
      */
     public abstract MailMessage sendRawMessage(byte[] asciiBytes, Address[] allRecipients) throws OXException;
+
+    /**
+     * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
+     * treated as an rfc822 MIME message. Some of the defined properties might only be supported by certain transport implementations.<br>
+     * <br>
+     * <i>Per default this methods delegates to {@link #sendRawMessage(byte[], Address[])}, ignoring any properties but the recipients.
+     * Any transport implementation must override this method explicitly if it wants to support further properties.</i>
+     *
+     * @param asciiBytes The raw ascii bytes
+     * @param properties The properties to define how the message shall be sent
+     * @return The sent mail message
+     * @throws OXException If sending fails
+     */
+    public MailMessage sendRawMessage(byte[] asciiBytes, SendRawProperties properties) throws OXException {
+        return sendRawMessage(asciiBytes, properties.getRecipients());
+    }
 
     /**
      * Sends a receipt acknowledgment for the specified message.
@@ -229,4 +248,122 @@ public abstract class MailTransport {
      * @throws OXException If creating a new instance of {@link ITransportProperties} fails
      */
     protected abstract ITransportProperties createNewMailProperties() throws OXException;
+
+    public static final class SendRawProperties {
+
+        private List<InternetAddress> recipients = new ArrayList<InternetAddress>(4);
+
+        private InternetAddress sender;
+
+        private boolean validateAddressHeaders = true;
+
+        private boolean sanitizeHeaders = true;
+
+        private SendRawProperties() {
+            super();
+        }
+
+        /**
+         * Creates and gets a new properties instance.
+         */
+        public static SendRawProperties newInstance() {
+            return new SendRawProperties();
+        }
+
+        /**
+         * Adds an address used as envelope recipient (i.e. <code>RCPT TO:&lt;jane.doe@example.com&gt;</code>).
+         * If no address is set, the mails <code>To</code>, <code>Cc</code>, <code>Bcc</code> and <code>Newsgroups</code>
+         * headers will be considered instead.
+         *
+         * @param recipient The recipient address
+         */
+        public SendRawProperties addRecipient(InternetAddress recipient) {
+            if (recipient != null) {
+                recipients.add(recipient);
+            }
+
+            return this;
+        }
+
+        /**
+         * Sets the address used as the envelope sender (i.e. <code>MAIL FROM:&lt;john.doe@example.com&gt;</code>).
+         * If no address is set, the mails <code>From:</code> header will be considered instead.
+         *
+         * @param sender The sender address
+         */
+        public SendRawProperties setSender(InternetAddress sender) {
+            this.sender = sender;
+            return this;
+        }
+
+        /**
+         * Sets whether the mails address headers shall be validated (i.e. checked for RFC822 compliance) before trying
+         * to send out the mail.<br>
+         * <br>
+         * Default: <code>true</code>
+         *
+         * @param validateAddressHeaders <code>true</code> to validate address headers
+         */
+        public SendRawProperties setValidateAddressHeaders(boolean validateAddressHeaders) {
+            this.validateAddressHeaders = validateAddressHeaders;
+            return this;
+        }
+
+        /**
+         * Sets whether the mails headers shall be sanitized before sending it out. I.e. all headers are parsed leniently
+         * and are then reconstructed, while restoring case-sensitive header names and ignoring invalid ones.<br>
+         * <br>
+         * Default: <code>true</code>
+         *
+         * @param sanitizeHeaders <code>true</code> to sanitize headers
+         */
+        public SendRawProperties setSanitizeHeaders(boolean sanitizeHeaders) {
+            this.sanitizeHeaders = sanitizeHeaders;
+            return this;
+        }
+
+        /**
+         * Gets the envelope recipients.
+         *
+         * @return An array of addresses or <code>null</code> if the mails <code>To</code>, <code>Cc</code>, <code>Bcc</code>
+         * and <code>Newsgroups</code> headers header shall be considered instead.
+         */
+        public InternetAddress[] getRecipients() {
+            int num = recipients.size();
+            if (num == 0) {
+                return null;
+            }
+
+            return recipients.toArray(new InternetAddress[num]);
+        }
+
+        /**
+         * Gets the envelope sender.
+         *
+         * @return The address or <code>null</code> if the mails <code>From:</code> header shall be considered instead.
+         */
+        public InternetAddress getSender() {
+            return sender;
+        }
+
+        /**
+         * Gets whether the mails address headers shall be validated (i.e. checked for RFC822 compliance) before trying
+         * to send out the mail.
+         *
+         * @return <code>true</code> to enable validation
+         */
+        public boolean isValidateAddressHeaders() {
+            return validateAddressHeaders;
+        }
+
+        /**
+         * Gets whether the mails headers shall be sanitized before trying to send out the mail.
+         *
+         * @return <code>true</code> to enable sanitizing
+         */
+        public boolean isSanitizeHeaders() {
+            return sanitizeHeaders;
+        }
+
+    }
 }
