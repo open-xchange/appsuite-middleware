@@ -1234,6 +1234,16 @@ ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xch
 #SoftwareChange_Request-2698
 ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-2811
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
+!com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
+EOF
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
