@@ -55,7 +55,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -135,12 +134,16 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                 // Copy each file from source to destination
                 Set<String> srcFiles = srcStorage.getFileList();
                 if (false == srcFiles.isEmpty()) {
-                    Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+                    CopyResult copyResult = copyFiles(srcFiles, srcStorage, dstStorage, srcFullUri, dstFullUri);
 
-                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                    propagateNewLocations(prevFileName2newFileName);
+                    if (Operation.COPIED.equals(copyResult.operation)) {
+                        // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                        propagateNewLocations(copyResult.prevFileName2newFileName);
 
-                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                        srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                    } else {
+                        // Nothing to do...
+                    }
                 }
 
                 if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {

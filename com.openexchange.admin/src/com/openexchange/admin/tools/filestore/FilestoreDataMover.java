@@ -49,12 +49,15 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,15 +73,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
@@ -311,23 +318,51 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @param files The files to copy
      * @param srcStorage The source storage
      * @param dstStorage The destination storage
+     * @param srcFullUri The fully qualifying URI from source storage
+     * @param dstFullUri The fully qualifying URI from destination storage
      * @return The old file name to new file name mapping; [src-file] --&gt; [dst-file]
-     * @throws OXException If copy operation fails
+     * @throws StorageException If copy operation fails
      */
-    protected Map<String, String> copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage) throws OXException {
+    protected CopyResult copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage, URI srcFullUri, URI dstFullUri) throws StorageException {
         if (files.isEmpty()) {
-            return Collections.emptyMap();
+            return new CopyResult(Collections.<String, String> emptyMap());
         }
-        Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
-        for (String file : files) {
-            InputStream is = srcStorage.getFile(file);
-            String newFile = dstStorage.saveNewFile(is);
-            if (null != newFile) {
-                prevFileName2newFileName.put(file, newFile);
-                LOGGER.info("Copied file {} to {}", file, newFile);
+
+
+        if ("file".equalsIgnoreCase(srcFullUri.getScheme()) && "file".equalsIgnoreCase(dstFullUri.getScheme())) {
+            // File-wise move possible
+            try {
+                File srcParent = new File(srcFullUri);
+                File dstParent = new File(dstFullUri);
+                long totalSize = 0L;
+                for (String file : files) {
+                    File srcFile = new File(srcParent, file);
+                    long length = srcFile.length();
+                    FileUtils.moveFile(srcFile, new File(dstParent, file));
+                    totalSize += length;
+                }
+
+                return new CopyResult(totalSize);
+            } catch (IOException e) {
+                throw new StorageException(e);
             }
         }
-        return prevFileName2newFileName;
+
+        // One-by-one...
+        try {
+            Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
+            for (String file : files) {
+                InputStream is = srcStorage.getFile(file);
+                String newFile = dstStorage.saveNewFile(is);
+                if (null != newFile) {
+                    prevFileName2newFileName.put(file, newFile);
+                    LOGGER.info("Copied file {} to {}", file, newFile);
+                }
+            }
+            return new CopyResult(prevFileName2newFileName);
+        } catch (OXException e) {
+            throw new StorageException(e);
+        }
     }
 
     /**
@@ -421,6 +456,195 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      */
     protected void postDoCopy(Throwable thrown) {
         // Initially empty
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Signals what operation was performed to pass files to new file storage location.
+     */
+    static enum Operation {
+        /**
+         * Signals that files were moved to the new location; keeping file identifiers
+         */
+        MOVED,
+        /**
+         * Signals that files were copied to new location; new file identifiers
+         */
+        COPIED;
+    }
+
+    /**
+     * The result for {@link FilestoreDataMover#copyFiles(Set, FileStorage, FileStorage, URI, URI)} invocation.
+     */
+    static class CopyResult {
+
+        /** Signals what operation was performed to pass files to new file storage location */
+        final Operation operation;
+
+        /** The total size of all files passed to new file storage location; <code>0</code> in case {@link #operation} is {@link Operation#COPIED} */
+        final long totalSize;
+
+        /** A mapping for previous to new file name; <code>null</code> in case {@link #operation} is {@link Operation#MOVED} */
+        final Map<String, String> prevFileName2newFileName;
+
+        CopyResult(long totalSize) {
+            super();
+            operation = Operation.MOVED;
+            this.totalSize = totalSize;
+            prevFileName2newFileName = null;
+        }
+
+        CopyResult(Map<String, String> prevFileName2newFileName) {
+            super();
+            operation = Operation.COPIED;
+            this.prevFileName2newFileName = prevFileName2newFileName;
+            totalSize = 0L;
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Increases the quota usage.
+     *
+     * @param usage The value by which the quota is supposed to be increased
+     * @throws StorageException If a database error occurs
+     */
+    protected static void incUsage(long usage, int ownerId, int contextId) throws StorageException {
+        Connection con = null;
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+
+            con.setAutoCommit(false);
+            rollback = true;
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
+            sstmt.setInt(1, contextId);
+            sstmt.setInt(2, ownerId);
+            rs = sstmt.executeQuery();
+            final long oldUsage;
+            if (rs.next()) {
+                oldUsage = rs.getLong(1);
+            } else {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
+            }
+
+            long newUsage = oldUsage + usage;
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
+            ustmt.setLong(1, newUsage);
+            ustmt.setInt(2, contextId);
+            ustmt.setInt(3, ownerId);
+            final int rows = ustmt.executeUpdate();
+            if (rows == 0) {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
+            }
+            con.commit();
+            rollback = false;
+        } catch (Exception s) {
+            throw new StorageException(s);
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(sstmt);
+            Databases.closeSQLStuff(ustmt);
+
+            if (null != con) {
+                try {
+                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    throw new StorageException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Decreases the QuotaUsage.
+     *
+     * @param usage by that the Quota has to be decreased
+     * @throws StorageException If a database error occurs
+     */
+    protected static void decUsage(long usage, int ownerId, int contextId) throws StorageException {
+        Connection con = null;
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
+            sstmt.setInt(1, contextId);
+            sstmt.setInt(2, ownerId);
+            rs = sstmt.executeQuery();
+
+            long oldUsage;
+            if (rs.next()) {
+                oldUsage = rs.getLong("used");
+            } else {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
+            }
+            long newUsage = oldUsage - usage;
+
+            if (newUsage < 0) {
+                newUsage = 0;
+                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
+                LOGGER.error("", e);
+            }
+
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
+            ustmt.setLong(1, newUsage);
+            ustmt.setInt(2, contextId);
+            ustmt.setInt(3, ownerId);
+
+            int rows = ustmt.executeUpdate();
+            if (1 != rows) {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (Exception s) {
+            throw new StorageException(s);
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(sstmt);
+            Databases.closeSQLStuff(ustmt);
+
+            if (null != con) {
+                try {
+                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    throw new StorageException(e);
+                }
+            }
+        }
     }
 
 }

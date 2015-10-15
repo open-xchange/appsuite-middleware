@@ -58,7 +58,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Databases;
-import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
 
 /**
  * {@link VCardFilestoreLocationUpdater} is responsible for updating persisted references on moved VCards
@@ -66,23 +66,20 @@ import com.openexchange.groupware.filestore.FileLocationHandler;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class VCardFilestoreLocationUpdater implements FileLocationHandler {
+public class VCardFilestoreLocationUpdater extends AbstractFileLocationHandler {
+
+    /**
+     * Initializes a new {@link VCardFilestoreLocationUpdater}.
+     */
+    public VCardFilestoreLocationUpdater() {
+        super();
+    }
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE prg_contacts SET vCardId = ? WHERE cid = ? AND vCardId = ?");
-            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-                stmt.setString(1, entry.getValue());
-                stmt.setInt(2, contextId);
-                stmt.setString(3, entry.getKey());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        String selectStmt = "SELECT vCardId FROM prg_contacts WHERE cid=? AND vCardId IN ";
+        String updateStmt = "UPDATE prg_contacts SET vCardId = ? WHERE cid = ? AND vCardId = ?";
+        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
     }
 
     @Override

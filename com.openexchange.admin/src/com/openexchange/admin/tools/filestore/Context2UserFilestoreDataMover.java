@@ -49,11 +49,13 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
+import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
+import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -121,12 +123,21 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
             Set<String> srcFiles = determineFileLocationsFor(userId, contextId);
             if (false == srcFiles.isEmpty()) {
                 // Copy each file from source to destination
-                Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, userStorage);
+                URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
+                URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, dstBaseUri));
+                CopyResult copyResult = copyFiles(srcFiles, srcStorage, userStorage, srcFullUri, dstFullUri);
 
-                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                propagateNewLocations(prevFileName2newFileName);
+                if (Operation.COPIED.equals(copyResult.operation)) {
+                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                    propagateNewLocations(copyResult.prevFileName2newFileName);
 
-                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                } else {
+                    // Simply adjust filestore_usage entries
+                    long totalSize = copyResult.totalSize;
+                    decUsage(totalSize, 0, contextId);
+                    incUsage(totalSize, userId, contextId);
+                }
             }
         } catch (OXException e) {
             throw new StorageException(e);
