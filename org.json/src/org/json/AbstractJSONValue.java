@@ -348,7 +348,7 @@ abstract class AbstractJSONValue implements JSONValue {
                 throw new JSONException(e);
             }
         } else if (v instanceof Reader) {
-            Reader reader = new JSONStringReader((Reader) v);
+            Reader reader = new JSONStringEncoderReader((Reader) v);
             try {
                 jGenerator.writeRawValue("\""); // String start
 
