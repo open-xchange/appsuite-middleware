@@ -54,12 +54,12 @@ import java.io.Reader;
 import com.fasterxml.jackson.core.io.CharTypes;
 
 /**
- * {@link JSONStringReader}
+ * {@link JSONStringEncoderReader} - A wrapper for a {@link Reader reader} suitable for directly outputting as a JSON string.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
-public class JSONStringReader extends Reader {
+public class JSONStringEncoderReader extends Reader {
 
     /**
      * This is the default set of escape codes, over 7-bit ASCII range (first 128 character codes), used for single-byte UTF-8 characters.
@@ -75,9 +75,9 @@ public class JSONStringReader extends Reader {
     private CharStack buffer;
 
     /**
-     * Initializes a new {@link JSONStringReader}.
+     * Initializes a new {@link JSONStringEncoderReader}.
      */
-    public JSONStringReader(Reader in) {
+    public JSONStringEncoderReader(Reader in) {
         super();
         this.in = in;
     }
