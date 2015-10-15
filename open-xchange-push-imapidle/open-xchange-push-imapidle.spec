@@ -76,6 +76,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Mon Oct 12 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-10-23 (2806)
 * Wed Sep 30 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>

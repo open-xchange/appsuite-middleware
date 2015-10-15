@@ -214,6 +214,12 @@ open-xchange-grizzly (7.6.2-0) unstable; urgency=medium
 
  -- Marc Arens <marc.arens@open-xchange.com>  Wed, 17 Sep 2014 12:36:06 +0200
 
+open-xchange-grizzly (7.6.1-32) stable; urgency=medium
+
+  * Build for patch 2015-10-23 (2806)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 12 Oct 2015 15:19:04 +0200
+
 open-xchange-grizzly (7.6.1-31) stable; urgency=medium
 
   * Build for patch 2015-08-17 (2666)

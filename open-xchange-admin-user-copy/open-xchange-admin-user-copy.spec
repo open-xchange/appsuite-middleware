@@ -63,6 +63,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Mon Oct 12 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-10-23 (2806)
 * Wed Sep 30 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>

@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.cloudmark;
 
+import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerServiceRegistry.getServiceRegistry;
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -58,6 +59,9 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MailTransport.SendRawProperties;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
@@ -105,9 +109,14 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
                     if (isEmpty(targetSpamEmailAddress)) {
-                        LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetHamEmailAddress', cannot process ham reporting to server.");
+                        LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress', cannot process spam reporting to server.");
                     } else {
-                        transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
+                        SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance()
+                            .addRecipient(new InternetAddress(targetSpamEmailAddress, true))
+                            .setSender(getSenderAddress(session))
+                            .setValidateAddressHeaders(false)
+                            .setSanitizeHeaders(false);
+                        transport.sendRawMessage(mailMessage[i].getSourceBytes(), sendRawProperties);
                     }
                 } catch (final AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
@@ -118,7 +127,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
             if (move) {
                 final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
-
                 if (targetSpamFolder.equals("1")) {
                     mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("2")) {
@@ -139,18 +147,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     @Override
     public void handleHam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
     	ConfigurationService configuration = services.getService(ConfigurationService.class);
@@ -168,7 +164,12 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                     if (isEmpty(targetHamEmailAddress)) {
                         LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetHamEmailAddress', cannot process ham reporting to server.");
                     } else {
-                        transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetHamEmailAddress, true) });
+                        SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance()
+                            .addRecipient(new InternetAddress(targetHamEmailAddress, true))
+                            .setSender(getSenderAddress(session))
+                            .setValidateAddressHeaders(false)
+                            .setSanitizeHeaders(false);
+                        transport.sendRawMessage(mailMessage[i].getSourceBytes(), sendRawProperties);
                     }
                 } catch (final AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
@@ -180,7 +181,13 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             if (move) {
             	String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
                 if (!targetSpamFolder.equals("0")) {
-                	mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
+                    try {
+                        mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
+                    } finally {
+                        if (null != mailAccess) {
+                            mailAccess.close(true);
+                        }
+                    }
                 }
             }
         } finally {
@@ -199,5 +206,40 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     @Override
     public boolean isCreateConfirmedHam() {
         return false;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Gets the session users sender address.
+     *
+     * @return The address or <code>null</code> if not configured
+     */
+    private static InternetAddress getSenderAddress(Session session) throws OXException {
+        UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session);
+        if (usm == null) {
+            return null;
+        }
+
+        String sendAddr = usm.getSendAddr();
+        if (sendAddr == null) {
+            return null;
+        }
+
+        try {
+            return new InternetAddress(sendAddr, true);
+        } catch (AddressException e) {
+            return null;
+        }
     }
 }
