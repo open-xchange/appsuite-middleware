@@ -2903,6 +2903,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     sentMail = transport.sendMailMessage(composedMail, ComposeType.NEW);
                 } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
+                    LOG.debug("Checking rate limit {} for request with IP {} from user {} in context {}", rateLimit, session.getLocalIp(), session.getUserId(), session.getContextId());
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                     setRateLimitTime(rateLimit);
