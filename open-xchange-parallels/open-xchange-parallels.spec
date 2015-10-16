@@ -67,6 +67,9 @@ if ! ox_exists_property ui/parallels/use_parallels_antispam_features $pfile; the
     ox_set_property ui/parallels/use_parallels_antispam_features true $pfile
 fi
 
+# SoftwareChange_Request-2723
+ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" /opt/open-xchange/etc/parallels.properties
+
 %clean
 %{__rm} -rf %{buildroot}
 
