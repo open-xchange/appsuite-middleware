@@ -295,6 +295,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         continue;
                     } else if (2 == state) {
                         if (c == ' ') { // Comment line: "-- " + <rest-of-line>
+                            searchcontext = false;
                             final String readLine = in.readLine();
                             final Matcher dbmatcher = database.matcher(readLine);
                             final Matcher tablematcher = table.matcher(readLine);
@@ -402,7 +403,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 // searchdbpool = false;
                                 // System.out.println(Arrays.toString(value));
                             } else {
-                                throw new OXContextRestoreException(Code.CONTEXT_NOT_FOUND_IN_POOL_MAPPING);
+                                state=5;
+                                continue;
                             }
                         } else if (null != bufferedWriter) {
                             // Here we should only search if a fitting db was found and thus the writer was set
