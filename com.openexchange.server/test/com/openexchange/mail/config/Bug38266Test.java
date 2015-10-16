@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,68 +49,49 @@
 
 package com.openexchange.mail.config;
 
-import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.java.Strings;
+import junit.framework.TestCase;
 
 /**
- * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
+ * {@link Bug38266Test}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class IPRange {
+public class Bug38266Test extends TestCase {
 
     /**
-     * Checks if specified IP address is contained in given collection of IP address ranges
-     *
-     * @param actual The IP address to check
-     * @param ranges The collection of IP address ranges
-     * @return <code>true</code> if contained; otherwise <code>false</code>
+     * Initializes a new {@link Bug38266Test}.
      */
-    public static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
-        for (IPRange range : ranges) {
-            if (range.contains(actual)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Parses specified string to an IP range.
-     *
-     * @param string The string to parse
-     * @return The resulting IP range or <code>null</code> if passed string is empty
-     * @throws IllegalArgumentException If parsing fails
-     */
-    public static IPRange parseRange(final String string) {
-        final com.openexchange.sessiond.impl.IPRange parsed = com.openexchange.sessiond.impl.IPRange.parseRange(string);
-        return null == parsed ? null : new IPRange(parsed);
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------------
-
-    private final com.openexchange.sessiond.impl.IPRange delegate;
-
-    /**
-     * Initializes a new {@link IPRange}.
-     */
-    private IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
+    public Bug38266Test() {
         super();
-        this.delegate = delegate;
     }
 
-    /**
-     * Checks if passed IP address is contained in this range.
-     *
-     * @param ipAddress The IP address to check
-     * @return <code>true</code> if contained; else <code>false</code>
-     */
-    public boolean contains(final String ipAddress) {
-        return delegate.contains(ipAddress);
-    }
+    public void testForBug38266() {
+        List<IPRange> ranges = new LinkedList<IPRange>();
+        for (String range : Strings.splitByComma("10.30.73.4,10.30.77.0/24,10.30.73.0/24")) {
+            if (null == range) {
+                System.err.println("Invalid IP range value: 'null'");
+            } else {
+                try {
+                    IPRange parsedRange = IPRange.parseRange(range.trim());
+                    if (null == parsedRange) {
+                        System.err.println("Invalid IP range value: "+ range);
+                    } else {
+                        ranges.add(parsedRange);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Invalid IP range value: "+ range);
+                    e.printStackTrace(System.err);
+                }
+            }
 
-    @Override
-    public String toString() {
-        return delegate.toString();
+        }
+
+        assertTrue("Unexpected number of IP ranges", ranges.size() > 0);
+        assertTrue("Should be white-listed, but is not", IPRange.isWhitelistedFromRateLimit("10.30.73.4", ranges));
     }
 
 }

@@ -103,7 +103,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.mail.json.actions.GetMultipleAttachmentActionTest.class,
     com.openexchange.mail.json.parser.MessageParserTest.class,
     OAuthDispatcherServletTest.class,
-    com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class
+    com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class,
+    com.openexchange.mail.config.Bug38266Test.class
 })
 public class UnitTests {
 
