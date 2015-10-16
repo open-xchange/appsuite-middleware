@@ -2878,10 +2878,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             long startTransport = System.currentTimeMillis();
             try {
                 MailProperties properties = MailProperties.getInstance();
-                if (isWhitelistedFromRateLimit(null == remoteAddress ? session.getLocalIp() : remoteAddress, properties.getDisabledRateLimitRanges())) {
+                String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
+                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                 } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
+                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
                     setRateLimitTime(rateLimit);
