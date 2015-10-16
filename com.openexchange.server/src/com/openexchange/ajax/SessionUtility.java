@@ -234,9 +234,8 @@ public final class SessionUtility {
         // Look-up & remember session
         SessionResult<ServerSession> result;
         {
-            String sSession = req.getParameter(PARAMETER_SESSION);
-            if (sSession != null && sSession.length() > 0) {
-                final String sessionId = getSessionId(req);
+            String sessionId = optSessionId(req);
+            if (sessionId != null && sessionId.length() > 0) {
                 result = getSession(req, resp, sessionId, sessiondService);
                 if (Reply.STOP == result.getReply()) {
                     return result;
@@ -439,14 +438,24 @@ public final class SessionUtility {
     }
 
     /**
-     * Gets the cookie identifier from the request.
+     * (Optionally) Gets the session identifier from the request.
      *
-     * @param req servlet request.
-     * @return the cookie identifier.
-     * @throws OXException if the cookie identifier can not be found.
+     * @param req The Servlet request
+     * @return The session identifier or <code>null</code>
      */
-    public static String getSessionId(final ServletRequest req) throws OXException {
-        final String retval = req.getParameter(PARAMETER_SESSION);
+    public static String optSessionId(ServletRequest req) {
+        return req.getParameter(PARAMETER_SESSION);
+    }
+
+    /**
+     * Gets the session identifier from the request.
+     *
+     * @param req The Servlet request
+     * @return The session identifier
+     * @throws OXException If the session identifier can not be found.
+     */
+    public static String getSessionId(ServletRequest req) throws OXException {
+        String retval = optSessionId(req);
         if (null == retval) {
             /*
              * Throw an error...
