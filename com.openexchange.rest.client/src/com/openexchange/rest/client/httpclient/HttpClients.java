@@ -216,7 +216,7 @@ public final class HttpClients {
 
         private String userAgent;
 
-        private ClientConfig() {
+        ClientConfig() {
             super();
         }
 
