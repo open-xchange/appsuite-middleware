@@ -57,9 +57,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -133,7 +131,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeReply {
+public final class MimeReply extends AbstractMimeProcessing {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeReply.class);
 
@@ -683,12 +681,6 @@ public final class MimeReply {
         return set;
     }
 
-    private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
-
-    private static final Pattern PATTERN_TIME = Pattern.compile(Pattern.quote("#TIME#"));
-
-    private static final Pattern PATTERN_SENDER = Pattern.compile(Pattern.quote("#SENDER#"));
-
     private static final String MULTIPART = "multipart/";
 
     private static final String TEXT = "text/";
@@ -729,41 +721,7 @@ public final class MimeReply {
         }
         if (found && !usm.isDropReplyForwardPrefix()) {
             final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
-            String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
-            {
-                final Date date = msg.getSentDate();
-                try {
-                    replyPrefix =
-                        PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(
-                                date,
-                                DateFormat.LONG,
-                                ltz.locale,
-                                ltz.timeZone)));
-                } catch (final Exception e) {
-                    LOG.warn("", e);
-                    replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
-                }
-
-                try {
-                    replyPrefix =
-                        PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedTime(
-                                date,
-                                DateFormat.SHORT,
-                                ltz.locale,
-                                ltz.timeZone)));
-                } catch (final Exception e) {
-                    LOG.warn("", e);
-                    replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
-                }
-            }
-            {
-                final InternetAddress[] from = msg.getFrom();
-                replyPrefix =
-                    PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
-                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addr2String(from[0])));
-            }
+            String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg);
             {
                 final char nextLine = '\n';
                 if (isHtml) {
