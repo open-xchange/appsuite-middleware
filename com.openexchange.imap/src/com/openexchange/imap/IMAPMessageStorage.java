@@ -86,6 +86,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.OperationKey.Type;
@@ -265,21 +268,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
-    private static volatile Boolean allowSORTDISPLAY;
     /** Whether SORT=DISPLAY is allowed to be utilized */
-    public static boolean allowSORTDISPLAY() {
-        Boolean b = allowSORTDISPLAY;
-        if (null == b) {
-            synchronized (IMAPMessageStorage.class) {
-                b = allowSORTDISPLAY;
-                if (null == b) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.allowSORTDISPLAY", false));
-                    allowSORTDISPLAY = b;
-                }
-            }
-        }
-        return b.booleanValue();
+    public static boolean allowSORTDISPLAY(Session session) throws OXException {
+        return allowSORTDISPLAY(session.getUserId(), session.getContextId());
+    }
+
+    /** Whether SORT=DISPLAY is allowed to be utilized */
+    public static boolean allowSORTDISPLAY(int userId, int contextId) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, contextId);
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.imap.allowSORTDISPLAY", boolean.class);
+        return property.isDefined() ? property.get().booleanValue() : false;
     }
 
     private static volatile ImmutableReference<String> allMessagesFolder;
@@ -312,7 +311,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             public void reloadConfiguration(final ConfigurationService configService) {
                 useImapThreaderIfSupported = null;
                 allowESORT = null;
-                allowSORTDISPLAY = null;
             }
 
             @Override
@@ -1704,7 +1702,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean sortedByLocalPart;
             int[] msgIds;
             {
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(), imapConfig);
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(session), imapConfig);
                 sortedByLocalPart = result.sortedByLocalPart;
                 msgIds = result.msgIds;
                 if (false == result.rangeApplied) {
@@ -2324,7 +2322,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Get ( & fetch) new messages
                  */
-                Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, imapServerInfo);
+                Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, imapServerInfo, session);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
                 }
