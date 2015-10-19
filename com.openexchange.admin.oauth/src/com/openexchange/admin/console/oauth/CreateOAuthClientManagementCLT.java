@@ -82,32 +82,17 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 
 /**
- * {@link OAuthClientManagementCLT}
+ * {@link CreateOAuthClientManagementCLT}
  * 
- * A CLT to interact with the management of oAuth clients
+ * A CLT to register an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class OAuthClientManagementCLT extends BasicCommandlineOptions {
-
-    private static final String REGISTER_LONG = "add";
-    private static final char REGISTER_SHORT = 'a';
-    private static final String UNREGISTER_LONG = "remove";
-    private static final char UNREGISTER_SHORT = 'r';
-    private static final String UPDATE_LONG = "update";
-    private static final char UPDATE_SHORT = 'u';
-    private static final String LIST_LONG = "list";
-    private static final char LIST_SHORT = 'l';
-    private static final String GET_LONG = "get";
-    private static final char GET_SHORT = 'g';
-    private static final String REVOKE_LONG = "revoke";
-    private static final char REVOKE_SHORT = 'v';
-    private static final String ENABLE_LONG = "enable";
-    private static final char ENABLE_SHORT = 'e';
+public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     private static final String GROUP_CTX_ID_LONG = "context-group-id";
-    private static final char GROUP_CTX_ID_SHORT = 'x';
+    private static final char GROUP_CTX_ID_SHORT = 'c';
     private static final String NAME_LONG = "name";
     private static final char NAME_Short = 'n';
     private static final String DESCRIPTION_LONG = "description";
@@ -121,18 +106,6 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
     private static final String DEFAULT_SCOPE_LONG = "default-scope";
     private static final char DEFAULT_SCOPE_SHORT = 's';
     private static final String REDIRECT_URL_LONG = "urls";
-    private static final String CLIENT_ID_LONG = "id";
-
-    //basic actions
-    private CLIOption register = null;
-    private CLIOption unregister = null;
-    private CLIOption update = null;
-    private CLIOption list = null;
-    private CLIOption get = null;
-    private CLIOption revoke = null;
-    private CLIOption enable = null;
-
-    private CLIOption clientID = null;
 
     //create and update options
     private CLIOption ctxGroupID = null;
@@ -145,7 +118,7 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
     private CLIOption redirect_urls = null;
 
     public static void main(String[] args) {
-        new OAuthClientManagementCLT().execute(args);
+        new CreateOAuthClientManagementCLT().execute(args);
     }
 
     private void execute(String[] args) {
@@ -163,35 +136,6 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
                 sysexit(1);
             }
 
-            if (null != parser.getOptionValue(this.list)) {
-                String contextGroup = (String) parser.getOptionValue(this.ctxGroupID);
-                if (null == contextGroup || contextGroup.isEmpty()) {
-                    contextGroup = RemoteClientManagement.DEFAULT_GID;
-                }
-
-                List<ClientDto> retval = remote.getClients(contextGroup, auth);
-                if (null == retval) {
-                    System.err.println("Error. Remote returns null!");
-                    sysexit(1);
-                }
-
-                System.out.println("Following clients are registered: ");
-                for (ClientDto client : retval) {
-                    printClient(client);
-                }
-
-            } else if (null != parser.getOptionValue(this.get)) {
-
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                ClientDto client = remote.getClientById(id, auth);
-
-                if (null == client) {
-                    System.out.println("Client not found.");
-                    sysexit(1);
-                } else {
-                    printClient(client);
-                }
-            } else if (null != parser.getOptionValue(this.register)) {
                 
                 String contextGroup = (String) parser.getOptionValue(this.ctxGroupID);
                 if (null == contextGroup || contextGroup.isEmpty()) {
@@ -240,124 +184,6 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
                     printClient(retval);
                     sysexit(0);
                 }
-
-            }else if(null != parser.getOptionValue(this.unregister)){
-                String id = checkEmpty(this.clientID, (String) parser.getOptionValue(this.clientID));
-                boolean retval = remote.unregisterClient(id, auth);
-                if (retval) {
-                    System.out.println("The removal of oauth client with id " + id + " was successful");
-                    sysexit(0);
-                } else {
-                    System.out.println("The removal of oauth client with id " + id + " has failed!!!");
-                    sysexit(1);
-                }
-            }else if(null != parser.getOptionValue(this.update)){
-                
-                String id = checkEmpty(this.clientID, (String) parser.getOptionValue(this.clientID));
-
-                String contextGroup = (String) parser.getOptionValue(this.ctxGroupID);
-                if (null == contextGroup || contextGroup.isEmpty()) {
-                    contextGroup = RemoteClientManagement.DEFAULT_GID;
-                }
-
-                String name = (String) parser.getOptionValue(this.name);
-                String desc = (String) parser.getOptionValue(this.description);
-                String website = (String) parser.getOptionValue(this.website);
-                String contact = (String) parser.getOptionValue(this.contact_address);
-                String icon_path = (String) parser.getOptionValue(this.icon_path);
-                String scope = (String) parser.getOptionValue(this.default_scope);
-                String urlsString = (String) parser.getOptionValue(this.redirect_urls);
-
-                ClientDataDto clientData = new ClientDataDto();
-                if (null != name) {
-                    clientData.setName(name);
-                }
-                if (null != desc) {
-                    clientData.setDescription(desc);
-                }
-                if (null != website) {
-                    clientData.setWebsite(website);
-                }
-                if (null != contact) {
-                    clientData.setContactAddress(contact);
-                }
-
-                if (icon_path != null && !icon_path.isEmpty()) {
-                    IconDto icon = new IconDto();
-                    Path path = Paths.get(icon_path);
-                    fis = new FileInputStream(new File(icon_path));
-                    bis = new BufferedInputStream(fis);
-                    byte[] byteArray = Files.readAllBytes(path);
-                    MimeTypes mimeTypes = TikaConfig.getDefaultConfig().getMimeRepository();
-                    MediaType mime = mimeTypes.detect(bis, new Metadata());
-                    icon.setMimeType(mime.toString());
-                    icon.setData(byteArray);
-                    clientData.setIcon(icon);
-                }
-
-                if (null != scope) {
-                    clientData.setDefaultScope(scope);
-                }
-
-                if (urlsString != null && !urlsString.isEmpty()) {
-                    List<String> urls = Arrays.asList(urlsString.trim().split("\\s*,\\s*"));
-                    clientData.setRedirectURIs(urls);
-                }
-                ClientDto retval = remote.updateClient(id, clientData, auth);
-
-                if (null == retval) {
-                    System.out.println("The update of oauth client with id " + id + " has failed");
-                    sysexit(1);
-                } else {
-                    System.out.println("The update of oauth client with id " + id + " was successful");
-                    System.out.println("The updated oauth client: ");
-                    printClient(retval);
-                    sysexit(0);
-                }
-
-            } else if (null != parser.getOptionValue(this.enable)) {
-
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                boolean flag = Boolean.parseBoolean((String) parser.getOptionValue(this.enable));
-                boolean retval = false;
-                if (flag) {
-                    retval = remote.enableClient(id, auth);
-                    if (retval) {
-                        System.out.println("Enabling the oauth client was successful!");
-                        sysexit(0);
-                    } else {
-                        System.out.println("Enabling the oauth client has failed!");
-                        sysexit(0);
-                    }
-                } else {
-                    retval = remote.disableClient(id, auth);
-                    if (retval) {
-                        System.out.println("Disabling the oauth client was successful!");
-                        sysexit(0);
-                    } else {
-                        System.out.println("Disabling the oauth client has failed!");
-                        sysexit(0);
-                    }
-                }
-
-            } else if (null != parser.getOptionValue(this.revoke)) {
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                ClientDto client = remote.revokeClientSecret(id, auth);
-                if (null == client) {
-                    System.out.println("The revocation of the client's current secret has failed!!!");
-                    sysexit(0);
-                } else {
-                    System.out.println("The revocation of the client's current secret was successfull!!!");
-                    System.out.println("Generated a new secret for following client: ");
-                    printClient(client);
-                    sysexit(0);
-                }
-
-            }else{
-                System.out.println(new StringBuilder("No option selected. One of the following options must be selected: (").append(REGISTER_LONG).append(", ")
-                    .append(UNREGISTER_LONG).append(", ").append(UPDATE_LONG).append(", ").append(LIST_LONG).append(", ").append(GET_LONG).append(", ").append(ENABLE_LONG).append(", ").append(REVOKE_LONG).append(")"));
-                parser.printUsage();
-            }
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
             parser.printUsage();
@@ -432,26 +258,14 @@ public class OAuthClientManagementCLT extends BasicCommandlineOptions {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.register = setShortLongOpt(parser, REGISTER_SHORT, REGISTER_LONG, "Register a new oauth client. If no contextgroup is defined the default value is used instead.", false, AdminParser.NeededQuadState.notneeded);
-        this.unregister = setShortLongOpt(parser, UNREGISTER_SHORT, UNREGISTER_LONG, "Unregister a oauth client", false, AdminParser.NeededQuadState.notneeded);
-        this.update = setShortLongOpt(parser, UPDATE_SHORT, UPDATE_LONG, "Update a oauth client", false, AdminParser.NeededQuadState.notneeded);
-        this.list = setShortLongOpt(parser, LIST_SHORT, LIST_LONG, "List all registered oauth clients", false, AdminParser.NeededQuadState.notneeded);
-        this.get = setShortLongOpt(parser, GET_SHORT, GET_LONG, "Get a oauth client by id", false, AdminParser.NeededQuadState.notneeded);
-        this.revoke = setShortLongOpt(parser, REVOKE_SHORT, REVOKE_LONG, "Revokes a client's current secret and generates a new one.", false, AdminParser.NeededQuadState.notneeded);
-
-        this.enable = setShortLongOpt(parser, ENABLE_SHORT, ENABLE_LONG, "Boolean flag", "Enables or disables the oauth client. ", false);
-        //setShortLongOpt(parser, ENABLE_SHORT, ENABLE_LONG, "Enables or disables the oauth client. ", true, AdminParser.NeededQuadState.notneeded);
-
-        this.clientID = setLongOpt(parser, CLIENT_ID_LONG, "id", "The id of the oauth client", true, false, false);
-
-        this.ctxGroupID = setShortLongOpt(parser, GROUP_CTX_ID_SHORT, GROUP_CTX_ID_LONG, "cgid", "The id of the context group", false);
-        this.name = setShortLongOpt(parser, NAME_Short, NAME_LONG, "name", "Define the name of the oauth client", false);
-        this.description = setShortLongOpt(parser, DESCRIPTION_SHORT, DESCRIPTION_LONG, "description", "The description of the oauth client", false);
-        this.website = setShortLongOpt(parser, WEBSITE_SHORT, WEBSITE_LONG, "website", "The client website", false);
-        this.contact_address = setShortLongOpt(parser, CONTACT_ADRESS_SHORT, CONTACT_ADRESS_LONG, "contact address", "The contact adress of the oauth client", false);
-        this.icon_path = setShortLongOpt(parser, ICON_PATH_SHORT, ICON_PATH_LONG, "icon path", "Path to a image file which acts as a icon for the oauth client", false);
-        this.default_scope = setShortLongOpt(parser, DEFAULT_SCOPE_SHORT, DEFAULT_SCOPE_LONG, "default scope", "The default scope of the oauth client", false);
-        this.redirect_urls = setLongOpt(parser, REDIRECT_URL_LONG, "The redirect urls of the oauth client as a comma separated list", true, false);
+        this.ctxGroupID = setShortLongOpt(parser, GROUP_CTX_ID_SHORT, GROUP_CTX_ID_LONG, "cgid", "The id of the context group", true);
+        this.name = setShortLongOpt(parser, NAME_Short, NAME_LONG, "name", "Define the name of the oauth client", true);
+        this.description = setShortLongOpt(parser, DESCRIPTION_SHORT, DESCRIPTION_LONG, "description", "The description of the oauth client", true);
+        this.website = setShortLongOpt(parser, WEBSITE_SHORT, WEBSITE_LONG, "website", "The client website", true);
+        this.contact_address = setShortLongOpt(parser, CONTACT_ADRESS_SHORT, CONTACT_ADRESS_LONG, "contact address", "The contact adress of the oauth client", true);
+        this.icon_path = setShortLongOpt(parser, ICON_PATH_SHORT, ICON_PATH_LONG, "icon path", "Path to a image file which acts as a icon for the oauth client", true);
+        this.default_scope = setShortLongOpt(parser, DEFAULT_SCOPE_SHORT, DEFAULT_SCOPE_LONG, "default scope", "The default scope of the oauth client", true);
+        this.redirect_urls = setLongOpt(parser, REDIRECT_URL_LONG, "The redirect urls of the oauth client as a comma separated list", true, true);
     }
 
     /**
