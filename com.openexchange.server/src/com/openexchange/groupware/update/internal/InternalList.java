@@ -769,7 +769,7 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
 
         // Drop redundant indices
-        list.add(new DropRendundantIndicesUpdateTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask());
 
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
