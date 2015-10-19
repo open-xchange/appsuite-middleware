@@ -55,22 +55,17 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
@@ -85,18 +80,14 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added google-common cache
  */
-public class ISPDB extends AbstractConfigSource {
+public class ISPDB extends AbstractProxyAwareConfigSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ISPDB.class);
 
     private static final String PROPERTY_ISPDB_URL = "com.openexchange.mail.autoconfig.ispdb";
-    private static final String PROPERTY_ISPDB_PROXY = "com.openexchange.mail.autoconfig.ispdb.proxy";
-    private static final String PROPERTY_ISPDB_PROXY_LOGIN = "com.openexchange.mail.autoconfig.ispdb.proxy.login";
-    private static final String PROPERTY_ISPDB_PROXY_PASSWORD = "com.openexchange.mail.autoconfig.ispdb.proxy.password";
 
     // -------------------------------------------------------------------------------------------------- //
 
-    private final ServiceLookup services;
     private final Cache<String, Autoconfig> autoConfigCache;
 
     /**
@@ -105,8 +96,7 @@ public class ISPDB extends AbstractConfigSource {
      * @param services The service look-up
      */
     public ISPDB(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
         autoConfigCache = CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(1, TimeUnit.DAYS).maximumSize(500).build();
     }
 
@@ -180,68 +170,6 @@ public class ISPDB extends AbstractConfigSource {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             httpclient.getConnectionManager().shutdown();
-        }
-    }
-
-    private HttpHost getHttpProxyIfEnabled(DefaultHttpClient client, ConfigView view) throws OXException {
-        ComposedConfigProperty<String> property = view.property(PROPERTY_ISPDB_PROXY, String.class);
-        if (!property.isDefined()) {
-            return null;
-        }
-
-        // Get & check proxy setting
-        String proxy = property.get();
-        if (false != Strings.isEmpty(proxy)) {
-            return null;
-        }
-
-        // Parse & apply proxy settings
-        try {
-            URL proxyUrl;
-            {
-                String sProxyUrl = Strings.asciiLowerCase(proxy.trim());
-                if (sProxyUrl.startsWith("://")) {
-                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 4).append("http").append(sProxyUrl).toString();
-                } else if (false == sProxyUrl.startsWith("http://") && false == sProxyUrl.startsWith("https://")) {
-                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 7).append("http://").append(sProxyUrl).toString();
-                }
-                proxyUrl = new URL(sProxyUrl);
-            }
-
-            boolean isHttps = proxyUrl.getProtocol().equalsIgnoreCase("https");
-            int prxyPort = proxyUrl.getPort();
-            if (prxyPort == -1) {
-                prxyPort = isHttps ? 443 : 80;
-            }
-
-            HttpHost httpHost = new HttpHost(proxyUrl.getHost(), prxyPort, proxyUrl.getProtocol());
-
-            ComposedConfigProperty<String> propLogin = view.property(PROPERTY_ISPDB_PROXY_LOGIN, String.class);
-            if (propLogin.isDefined()) {
-                ComposedConfigProperty<String> propPassword = view.property(PROPERTY_ISPDB_PROXY_PASSWORD, String.class);
-                if (propPassword.isDefined()) {
-                    String proxyLogin = propLogin.get();
-                    String proxyPassword = propPassword.get();
-                    if (false == Strings.isEmpty(proxyLogin) && false == Strings.isEmpty(proxyPassword)) {
-                        proxyLogin = proxyLogin.trim();
-                        proxyPassword = proxyPassword.trim();
-
-                        Credentials credentials = new UsernamePasswordCredentials(proxyLogin, proxyPassword);
-                        client.getCredentialsProvider().setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), credentials);
-                    }
-                }
-            }
-
-            return httpHost;
-        } catch (MalformedURLException e) {
-            LOG.warn("Unable to parse proxy URL: {}", proxy, e);
-            return null;
-        } catch (NumberFormatException e) {
-            LOG.warn("Invalid proxy setting: {}", proxy, e);
-            return null;
-        } catch (RuntimeException e) {
-            LOG.warn("Could not apply proxy: {}", proxy, e);
-            return null;
         }
     }
 
