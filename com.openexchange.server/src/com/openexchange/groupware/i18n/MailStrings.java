@@ -119,19 +119,29 @@ public class MailStrings implements LocalizableStrings {
     // #SUBJECT# is replaced with referenced email's subject
     public static final String ACK_NOTIFICATION_TEXT = "This is a delivery receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\".\n\nNote: This delivery receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
 
-    // The prefixed text on reply.
+    // The prefix text on reply.
+    //
+    // Supports the following placeholders:
     // #DATE# is replaced with the sent date of referenced email
     // #TIME# is replaced with time of referenced email
     // #SENDER# is replaced with personal and/or email address of the sender
-    public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
-
-    // The prefixed text on inline forward.
     // #FROM# is replaced with personal and/or email address of original message's From header
     // #TO# is replaced with personal and/or email address(es) of original message's To header
-    // #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not
-    // to be internationalized
+    // #CC# is replaced with personal and/or email address(es) of original message's Cc header
+    // #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not to be internationalized)
+    // #SUBJECT# is replaced with referenced email's subject
+    public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
+
+    // The prefix text on inline forward.
+    //
+    // Supports the following placeholders:
     // #DATE# is replaced with the sent date of referenced email
     // #TIME# is replaced with time of referenced email
+    // #SENDER# is replaced with personal and/or email address of the sender
+    // #FROM# is replaced with personal and/or email address of original message's From header
+    // #TO# is replaced with personal and/or email address(es) of original message's To header
+    // #CC# is replaced with personal and/or email address(es) of original message's Cc header
+    // #CC_LINE# is replaced with personal and/or email address(es) of original message's Cc header prefixed with "\nCc: " (which needs not to be internationalized)
     // #SUBJECT# is replaced with referenced email's subject
     public static final String FORWARD_PREFIX = "---------- Original Message ----------\nFrom: #FROM#\nTo: #TO##CC_LINE#\nDate: #DATE# at #TIME#\nSubject: #SUBJECT#";
 
