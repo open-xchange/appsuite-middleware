@@ -72,7 +72,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 
 /**
  * {@link ListOAuthClientManagementCLT}
- * 
+ *
  * A CLT to list oauth clients
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -91,7 +91,7 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
     }
 
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("oauth client management");
+        final AdminParser parser = new AdminParser("listoauthclient");
         setOptions(parser);
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -173,7 +173,7 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     /**
      * Checks if an argument string is null or empty
-     * 
+     *
      * @param opt
      * @param str
      * @return the string if not empty or null
@@ -196,7 +196,7 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     /**
      * Prints the information of a ClientDto to system.out
-     * 
+     *
      * @param client
      */
     private void printClient(ClientDto client) {

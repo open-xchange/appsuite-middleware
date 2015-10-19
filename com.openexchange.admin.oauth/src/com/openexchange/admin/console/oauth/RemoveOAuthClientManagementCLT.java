@@ -70,7 +70,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 
 /**
  * {@link RemoveOAuthClientManagementCLT}
- * 
+ *
  * A CLT to remove an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -87,7 +87,7 @@ public class RemoveOAuthClientManagementCLT extends BasicCommandlineOptions {
     }
 
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("oauth client management");
+        final AdminParser parser = new AdminParser("removeoauthclient");
         setOptions(parser);
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -163,7 +163,7 @@ public class RemoveOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     /**
      * Checks if an argument string is null or empty
-     * 
+     *
      * @param opt
      * @param str
      * @return the string if not empty or null

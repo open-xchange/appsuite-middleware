@@ -83,7 +83,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 
 /**
  * {@link CreateOAuthClientManagementCLT}
- * 
+ *
  * A CLT to register an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -122,7 +122,7 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
     }
 
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("oauth client management");
+        final AdminParser parser = new AdminParser("createoauthclient");
         setOptions(parser);
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -136,7 +136,7 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
                 sysexit(1);
             }
 
-                
+
                 String contextGroup = (String) parser.getOptionValue(this.ctxGroupID);
                 if (null == contextGroup || contextGroup.isEmpty()) {
                     contextGroup = RemoteClientManagement.DEFAULT_GID;
@@ -149,13 +149,13 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
                 String icon_path = checkEmpty(this.icon_path, (String) parser.getOptionValue(this.icon_path));
                 String scope = checkEmpty(this.default_scope, (String) parser.getOptionValue(this.default_scope));
                 String urlsString = checkEmpty(this.redirect_urls, (String) parser.getOptionValue(this.redirect_urls));
-                
+
                 ClientDataDto clientData = new ClientDataDto();
                 clientData.setName(name);
                 clientData.setDescription(desc);
                 clientData.setWebsite(website);
                 clientData.setContactAddress(contact);
-                
+
                 IconDto icon = new IconDto();
                 Path path = Paths.get(icon_path);
                 fis = new FileInputStream(new File(icon_path));
@@ -168,7 +168,7 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
                 icon.setMimeType(mime.toString());
                 icon.setData(byteArray);
                 clientData.setIcon(icon);
-                
+
                 clientData.setDefaultScope(scope);
 
                 List<String> urls = Arrays.asList(urlsString.trim().split("\\s*,\\s*"));
@@ -240,7 +240,7 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     /**
      * Checks if an argument string is null or empty
-     * 
+     *
      * @param opt
      * @param str
      * @return the string if not empty or null
@@ -270,7 +270,7 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     /**
      * Prints the information of a ClientDto to system.out
-     * 
+     *
      * @param client
      */
     private void printClient(ClientDto client) {
