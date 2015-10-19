@@ -53,8 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.Event;
@@ -66,6 +64,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
@@ -100,6 +99,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
@@ -124,7 +125,7 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class, GroupService.class, ContextService.class };
+            EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class };
     }
 
     @Override

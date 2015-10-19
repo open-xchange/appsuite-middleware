@@ -54,6 +54,7 @@ import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
@@ -206,7 +207,11 @@ public final class CapabilitiesCache {
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
-                imapCaps.setSortDisplay(allowSORTDISPLAY() && map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY));
+                try {
+                    imapCaps.setSortDisplay(map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY) && allowSORTDISPLAY(session));
+                } catch (OXException e) {
+                    throw new MessagingException("Failed to determine if SORT-DISPLAY extension is allowed", e);
+                }
             } else {
                 // The in-memory sorting does sort with primary respect to display name, the actual address
                 imapCaps.setSortDisplay(true);
