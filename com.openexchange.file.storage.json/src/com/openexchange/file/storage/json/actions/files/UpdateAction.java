@@ -110,9 +110,15 @@ public class UpdateAction extends AbstractWriteAction {
             original = fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION);
         }
         if (request.hasUploads()) {
-            // Save file metadata with binary payload
-            boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings);
+            int offset = AJAXRequestDataTools.parseIntParameter(request.getParameter("offset"), 0);
+            if (0 < offset) {
+                // Append file metadata with binary payload at given offset
+                newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, offset);
+            } else {
+                // Save file metadata with binary payload
+                boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
+                newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings);
+            }
         } else {
             // Save file metadata without binary payload
             newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings);
