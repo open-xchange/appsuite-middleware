@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public class UploadEvent {
      */
     public UploadEvent() {
         super();
-        uploadFilesByFieldName = new HashMap<String, List<UploadFile>>();
+        uploadFilesByFieldName = new LinkedHashMap<String, List<UploadFile>>();
         formFields = new HashMap<String, String>();
         parameters = new HashMap<String, Object>();
     }
