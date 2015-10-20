@@ -111,7 +111,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     /** The logger */
     final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorage.class);
 
-    private static final ThreadPools.ExpectedExceptionFactory<StorageException> EXCEPTION_FACTORY = new ThreadPools.ExpectedExceptionFactory<StorageException>() {
+    static final ThreadPools.ExpectedExceptionFactory<StorageException> EXCEPTION_FACTORY = new ThreadPools.ExpectedExceptionFactory<StorageException>() {
 
         @Override
         public StorageException newUnexpectedError(final Throwable t) {
@@ -2683,7 +2683,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
-    private static class PoolAndSchema {
+    static class PoolAndSchema {
 
         final int poolId;
         final String dbSchema;
