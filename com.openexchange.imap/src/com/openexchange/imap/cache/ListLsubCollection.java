@@ -1734,6 +1734,19 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Like {@link #getList(String)} but ignores if the collection is deprecated
+     *
+     * @param fullName The full name
+     * @return The LIST entry for specified full name or <code>null</code>
+     */
+    public ListLsubEntry getListIgnoreDeprecated(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
+        return listMap.get(fullName);
+    }
+
+    /**
      * Gets the LSUB entry for specified full name.
      *
      * @param fullName The full name
@@ -1748,6 +1761,19 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Like {@link #getLsub(String))} but ignores if the collection is deprecated.
+     *
+     * @param fullName The full name
+     * @return The LSUB entry for specified full name or <code>null</code>
+     */
+    public ListLsubEntry getLsubIgnoreDeprecated(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
+        return lsubMap.get(fullName);
+    }
+
+    /**
      * Gets the LSUB entries.
      *
      * @return The LSUB entries
@@ -1758,12 +1784,30 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Like {@link #getLsubs()} but ignores if the collection is deprecated
+     *
+     * @return The LSUB entries
+     */
+    public List<ListLsubEntry> getLsubsIgnoreDeprecated() {
+        return new ArrayList<ListLsubEntry>(lsubMap.values());
+    }
+
+    /**
      * Gets the LIST entries.
      *
      * @return The LIST entries
      */
     public List<ListLsubEntry> getLists() {
         checkDeprecated();
+        return new ArrayList<ListLsubEntry>(listMap.values());
+    }
+
+    /**
+     * Like {@link #getLists()} but ignores if the collection is deprecated
+     *
+     * @return The LIST entries
+     */
+    public List<ListLsubEntry> getListsIgnoreDeprecated() {
         return new ArrayList<ListLsubEntry>(listMap.values());
     }
 
