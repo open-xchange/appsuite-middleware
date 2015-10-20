@@ -389,6 +389,10 @@ public final class UploadUtility {
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (IOException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof java.util.concurrent.TimeoutException) {
+                throw UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]);
+            }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (RuntimeException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
