@@ -69,14 +69,15 @@ public class CalendarColor extends SingleXMLPropertyMixin {
 
     public static final String NAME = "calendar-color";
     public static final Namespace NAMESPACE = CaldavProtocol.APPLE_NS;
+    public static final String SYMBOLIC_COLOR = "symbolic-color";
 
-	private final CommonFolderCollection<?> collection;
+    private final CommonFolderCollection<?> collection;
 
-	/**
-	 * Initializes a new {@link CalendarColor}.
-	 *
-	 * @param collection The underlying collection
-	 */
+    /**
+     * Initializes a new {@link CalendarColor}.
+     *
+     * @param collection The underlying collection
+     */
     public CalendarColor(CommonFolderCollection<?> collection) {
         super(NAMESPACE.getURI(), NAME);
         this.collection = collection;
@@ -88,7 +89,7 @@ public class CalendarColor extends SingleXMLPropertyMixin {
         String value = getValue();
         property.setValue(value);
         if (null != value) {
-            property.addAttribute("symbolic-color", getSymbolicColor(value));
+            property.addAttribute(SYMBOLIC_COLOR, getSymbolicColor(value));
         }
     }
 
@@ -96,28 +97,29 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     protected String getValue() {
         return getValue(collection.getFolder());
     }
-    
+
     private static String getValue(UserizedFolder folder) {
         if (null != folder && PrivateType.getInstance().equals(folder.getType())) {
             Map<String, Object> meta = folder.getMeta();
             if (null != meta) {
-                if (meta.containsKey("color")) {
-                    Object value = meta.get("color");
-                    if (null != value && String.class.isInstance(value)) {
-                        return String.valueOf(value);
-                    }
-                }
                 if (meta.containsKey("color_label")) {
                     String value = mapColorLabel(meta.get("color_label"));
                     if (null != value) {
                         return value;
                     }
                 }
+                if (meta.containsKey("color")) {
+                    Object value = meta.get("color");
+                    if (null != value && String.class.isInstance(value)) {
+                        return String.valueOf(value);
+                    }
+                }
+
             }
         }
         return "#CEE7FFFF"; // Mac OS client does not like null or empty values
     }
-    
+
     /**
      * Parses the color value from the supplied WebDAV property.
      *
@@ -163,30 +165,30 @@ public class CalendarColor extends SingleXMLPropertyMixin {
 
     /**
      * Maps the OX color label to its corresponding hex color value.
-     * 
+     *
      * @param colorLabel The color label
      * @return The hex color, or <code>null</code> if their is no mapping
      */
     private static String mapColorLabel(int colorLabel) {
         switch (colorLabel) {
             case 1:
-                return "#D0EAFFFF";
+                return "#CEE7FFFF";
             case 2:
                 return "#96BBE8FF";
             case 3:
-                return "#BC99DFFF";
+                return "#C4AFE3FF";
             case 4:
-                return "#F4C4F4FF";
+                return "#F0D8F0FF";
             case 5:
-                return "#EDAFB1FF";
+                return "#F2D1D2FF";
             case 6:
-                return "#F4C18CFF";
+                return "#FFD1A3FF";
             case 7:
-                return "#F7ECB8FF";
+                return "#F7EBB6FF";
             case 8:
-                return "#CEDD87FF";
+                return "#D4DEA7FF";
             case 9:
-                return "#97B857FF";
+                return "#99AF6EFF";
             case 10:
                 return "#666666FF";
             default:
@@ -195,8 +197,37 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     }
 
     /**
+     * Maps the Apple Hex Code returns 'null' if no matching is available
+     *
+     * @param hex
+     * @return
+     */
+    public static Integer mapColorLabel(String symbolicColor) {
+        switch (symbolicColor) {
+            case "custom":
+                return null;
+            case "blue":
+                return 2;
+            case "purple":
+                return 3;
+            case "red":
+                return 5;
+            case "orange":
+                return 6;
+            case "yellow":
+                return 7;
+            case "green":
+                return 9;
+            case "brown":
+                return 10;
+            default:
+                return null;
+        }
+    }
+
+    /**
      * Gets the symbolic color as used by the Mac OS client.
-     * 
+     *
      * @param hexColor The hexadecimal color value
      * @return The symbolic color name, or <code>custom</code> if no symbolic color can be matched
      */

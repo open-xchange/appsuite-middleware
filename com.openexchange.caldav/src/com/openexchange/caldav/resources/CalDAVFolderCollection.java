@@ -55,10 +55,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +73,7 @@ import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.AllowedSharingModes;
+import com.openexchange.caldav.mixins.CalendarColor;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.CalendarOwner;
 import com.openexchange.caldav.mixins.Invite;
@@ -97,9 +100,11 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
@@ -124,8 +129,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this), new ScheduleDefaultCalendarURL(factory));
+        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this), new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this), new ScheduleDefaultCalendarURL(factory), new CalendarColor(this));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -161,11 +165,72 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     @Override
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
+            if (false == PrivateType.getInstance().equals(folder.getType())) {
+                return; // ignore
+            }
+            /*
+             * apply color to meta field
+             */
+            String value = CalendarColor.parse(prop);
+
+            Map<String, String> attributes = prop.getAttributes();
+
+
+            Map<String, Object> meta = folder.getMeta();
+            if (null == meta) {
+                meta = new HashMap<String, Object>();
+            } else {
+                meta = new HashMap<String, Object>(meta);
+            }
+
+            if (Strings.isEmpty(value)) {
+                meta.remove("color");
+            } else {
+                meta.put("color", value);
+            }
+
+            if (attributes.containsKey(CalendarColor.SYMBOLIC_COLOR)) {
+                Integer uiValue = CalendarColor.mapColorLabel(attributes.get(CalendarColor.SYMBOLIC_COLOR));
+                if (uiValue != null) {
+                    meta.put("color_label", uiValue);
+                }
+            }
+
+            /*
+             * update folder
+             */
+            AbstractFolder updatedFolder = new AbstractFolder() {
+
+                private static final long serialVersionUID = -367640273380922433L;
+
+                @Override
+                public boolean isGlobalID() {
+                    return false;
+                }
+            };
+            updatedFolder.setID(folder.getID());
+            updatedFolder.setTreeID(folder.getTreeID());
+            updatedFolder.setType(folder.getType());
+            updatedFolder.setParentID(folder.getParentID());
+            updatedFolder.setMeta(meta);
+            try {
+                factory.getFolderService().updateFolder(updatedFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
+            } catch (OXException e) {
+                throw protocolException(e);
+            }
+        }
+    }
+
+    @Override
+    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {}
+
+    @Override
     public void putBody(final InputStream data, final boolean guessSize) throws WebdavProtocolException {
         try {
             Document document = CalDAVServiceLookup.getService(JDOMParser.class).parse(data);
-            if (null == document.getRootElement() || false == "share".equals(document.getRootElement().getName()) ||
-                false == CaldavProtocol.CALENDARSERVER_NS.equals(document.getRootElement().getNamespace())) {
+            if (null == document.getRootElement() || false == "share".equals(document.getRootElement().getName()) || false == CaldavProtocol.CALENDARSERVER_NS.equals(document.getRootElement().getNamespace())) {
                 throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
             if (false == getFolder().getOwnPermission().isAdmin()) {
@@ -339,10 +404,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     }
 
-    protected static <T extends CalendarObject>boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
-        return null != object &&
-            (null == object.getEndDate() || object.getEndDate().after(intervalStart)) &&
-            (null == object.getStartDate() || object.getStartDate().before(intervalEnd));
+    protected static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
+        return null != object && (null == object.getEndDate() || object.getEndDate().after(intervalStart)) && (null == object.getStartDate() || object.getStartDate().before(intervalEnd));
     }
 
     protected List<T> filter(SearchIterator<T> searchIterator) throws OXException {
@@ -407,8 +470,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
             } else if (PublicType.getInstance().equals(folder.getType())) {
                 // evaluate own permission if folder shares can be edited or not
-                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix())
-                    .append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
+                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
             }
         }
         return StringBuilder.toString();
@@ -464,8 +526,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         } else {
             try {
-                factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(),
-                    this.folder.getLastModifiedUTC(), factory.getSession(), null);
+                factory.getFolderService().deleteFolder(factory.getState().getTreeID(), this.folder.getID(), this.folder.getLastModifiedUTC(), factory.getSession(), null);
             } catch (OXException e) {
                 throw protocolException(HttpServletResponse.SC_FORBIDDEN);
             }
@@ -474,22 +535,9 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     protected abstract List<T> getObjectsInRange(Date from, Date until) throws OXException;
 
-    private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
-        .compFilter("VCALENDAR")
-            .compFilter("VEVENT")
-                .timeRange().capture().end()
-            .end()
-        .end()
-    .build();
+    private static FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder().compFilter("VCALENDAR").compFilter("VEVENT").timeRange().capture().end().end().end().build();
 
-    private static FilterAnalyzer VTODO_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
-        .compFilter("VCALENDAR")
-            .compFilter("VTODO")
-                .timeRange().capture().end()
-            .end()
-        .end()
-    .build();
-
+    private static FilterAnalyzer VTODO_RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder().compFilter("VCALENDAR").compFilter("VTODO").timeRange().capture().end().end().end().build();
 
     @Override
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
