@@ -117,4 +117,12 @@ public class ObjectFactory {
         return new Credentials();
     }
 
+    /**
+     * Create an instance of {@link SchemaSelectStrategy }
+     *
+     */
+    public SchemaSelectStrategy createSchemaSelectStrategy() {
+        return new SchemaSelectStrategy();
+    }
+
 }

@@ -50,6 +50,8 @@
 package com.openexchange.index.solr.internal;
 
 import java.sql.Connection;
+import java.util.Map;
+
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
@@ -241,7 +243,7 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
-    public void lock(Connection con) {
+    public void lock(Connection con, int writePoolId) {
         // Nothing to do
     }
 
@@ -300,5 +302,11 @@ public class MockDBService implements DatabaseService {
     @Override
     public void initPartitions(int writePoolId, String schema, int... partitions) throws OXException {
     }
+
+	@Override
+	public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

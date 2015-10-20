@@ -462,6 +462,12 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthUtil
             return false;
         }
 
+        @Override
+        public Set<String> getParameterNames() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
 }

@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -82,14 +81,10 @@ import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.mail.internet.idn.IDNA;
-
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.ServiceException;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -97,12 +92,22 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
+import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
+import com.openexchange.admin.schemacache.SchemaCache;
+import com.openexchange.admin.schemacache.SchemaCacheProvider;
+import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -138,7 +143,6 @@ import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorages;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -194,7 +198,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-	public void delete(final Context ctx) throws StorageException {
+    public void delete(final Context ctx) throws StorageException {
         LOG.debug("Fetching connection and scheme for context {}", ctx.getId());
         // groupware context must be loaded before entry from user_setting_admin table is removed.
         com.openexchange.groupware.contexts.Context gwCtx = null;
@@ -257,7 +261,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             try {
                 // fetch tables which can contain context data and sort these tables magically by foreign keys
                 LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-                final Vector<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
+                final List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
                 LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
                 // sort the tables by references (foreign keys)
                 sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
@@ -284,6 +288,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
             conForConfigDB.commit();
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(poolId);
+            }
             LOG.info("Context {} deleted.", ctx.getId());
         } catch (final OXException e) {
             LOG.error("", e);
@@ -589,17 +598,21 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             source_database_id = cache.getDBPoolIdForContextId(ctx.getId().intValue());
             scheme = cache.getSchemeForContextId(ctx.getId().intValue());
         } catch (PoolException e) {
-            LOG.error("Pool exception caught!", e);
-            throw new StorageException(e);
+            LOG.error(e.getMessage(), e);
+            throw new StorageException(e.getMessage(), e);
         }
+        // backup old mapping in contextserver2dbpool for recovery if something breaks
+        LOG.debug("Backing up current configdb entries for context {}", ctx.getId());
+        final Database dbHandleBackup = OXToolStorageInterface.getInstance().loadDatabaseById(source_database_id);
+        dbHandleBackup.setScheme(scheme);
+        // ####### ##### geht hier was kaputt -> enableContext(); ########
+        LOG.debug("Backup complete!");
+
         Connection ox_db_write_con = null;
         Connection configdb_write_con = null;
         PreparedStatement stm = null;
         Connection target_ox_db_con = null;
-        TableObject contextserver2dbpool_backup = null;
-
         try {
-            configdb_write_con = cache.getConnectionForConfigDB();
             ox_db_write_con = cache.getWRITENoTimeoutConnectionForPoolId(source_database_id, scheme);
 
             /*
@@ -614,13 +627,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
              * 2. Fetch tables with cid column which could perhaps store data relevant for us
              */
             LOG.debug("Fetching table structure from database scheme!");
-            final Vector<TableObject> fetchTableObjects = fetchTableObjects(ox_db_write_con);
+            final List<TableObject> fetchTableObjects = fetchTableObjects(ox_db_write_con);
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Table structure fetched!");
 
             // this must sort the tables by references (foreign keys)
             LOG.debug("Try to find foreign key dependencies between tables and sort table!");
-            final ArrayList<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, ox_db_write_con);
+            final List<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, ox_db_write_con);
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Dependencies found and tables sorted!");
 
@@ -630,24 +643,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // ####### ##### geht hier was kaputt -> enableContext(); ########
             LOG.debug("Database handle information found!");
 
-            // backup old mapping in contextserver2dbpool for recovery if something breaks
-            LOG.debug("Backing up current configdb entries for context {}", ctx.getId());
-            contextserver2dbpool_backup = backupContextServer2DBPoolEntry(ctx.getId().intValue(), configdb_write_con);
-            LOG.debug("Backup complete!");
-
-            // create database or use existing database AND update the mapping
-            // in contextserver2dbpool
-            try {
-                LOG.debug("Creating new scheme or using existing scheme on target database system!");
-                startTransaction(configdb_write_con);
-                createDatabaseAndMappingForContext(db_handle, configdb_write_con, ctx.getId().intValue());
-                configdb_write_con.commit();
-                LOG.debug("Scheme found and mapping in configdb changed to new target database system!");
-            } catch (final SQLException sqle) {
-                rollback(configdb_write_con);
-                LOG.error("SQL Error", sqle);
-                throw new DatabaseContextMappingException("" + sqle.getMessage());
-            }
+            // create database or use existing database AND update the mapping in contextserver2dbpool
+            LOG.debug("Creating new scheme or using existing scheme on target database system!");
+            configdb_write_con = cache.getConnectionForConfigDB();
+            startTransaction(configdb_write_con);
+            createDatabaseAndMappingForContext(db_handle, configdb_write_con, ctx.getId().intValue());
+            LOG.debug("Scheme found and mapping in configdb changed to new target database system!");
 
             // now insert all data to target db
             LOG.debug("Now filling target database system {} with data of context {}!", target_database_id, ctx.getId());
@@ -685,28 +686,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             configdb_write_con.commit();
             ox_db_write_con.commit();
 
-            // all this was ok , then enable context back again
-            LOG.debug("Enabling context {} back again!", ctx.getId());
-            enable(ctx);
-        } catch (final DatabaseContextMappingException dcme) {
-            LOG.error("Exception caught while updating mapping in configdb", dcme);
-            // revoke contextserver2dbpool()
-            try {
-                LOG.error("Now revoking entries in configdb (cs2dbpool) for context {}", ctx.getId());
-                revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
-                cache.resetPoolMappingForContext(ctx.getId().intValue());
-            } catch (final Exception ecp) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ctx.getId(),
-                    ecp);
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(source_database_id);
+                schemaCache.clearFor(target_database_id.getId().intValue());
             }
-
-            // enableContext() back
-
-            enableContextBackAfterError(ctx);
-
-            throw new StorageException(dcme);
         } catch (final TargetDatabaseException tde) {
             LOG.error("Exception caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, tde);
             LOG.error("Target database rollback starts for context {}", ctx.getId());
@@ -714,28 +699,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // revoke contextserver2dbpool()
             try {
                 LOG.error("Now revoking entries in configdb (cs2dbpool) for context {}", ctx.getId());
-                revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getId().intValue());
-                cache.resetPoolMappingForContext(ctx.getId().intValue());
-            } catch (final SQLException ecp) {
+                updateContextServer2DbPool(dbHandleBackup, configdb_write_con, i(ctx.getId()));
+            } catch (PoolException e) {
                 LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ctx.getId(),
-                    ecp);
-            } catch (final PoolException ecp) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    ctx.getId(),
-                    ecp);
+                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
+                    e);
             }
-
-            // enableContext() back
-            enableContextBackAfterError(ctx);
-
             throw new StorageException(tde);
         } catch (final SQLException sql) {
             // enableContext back
             LOG.error("SQL Error caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, sql);
-            enable(ctx);
 
             // rollback
             if (ox_db_write_con != null) {
@@ -754,7 +727,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error("Error rollback connection", ecp);
                 }
             }
-
             throw new StorageException(sql);
         } catch (final PoolException pexp) {
             LOG.error("Pool exception caught!", pexp);
@@ -782,8 +754,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 e.initCause(pexp);
                 throw new StorageException(e);
             }
-
-            enableContextBackAfterError(ctx);
             throw new StorageException(pexp);
         } finally {
             if (ox_db_write_con != null) {
@@ -817,6 +787,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error("Error pushing connection", ex);
                 }
             }
+            LOG.debug("Enabling context {} back again!", ctx.getId());
+            enable(ctx);
         }
         if (LOG.isDebugEnabled()) {
             double time = (System.currentTimeMillis() - start) / 1000;
@@ -1024,9 +996,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxdb_read = cache.getConnectionForContext(context_id);
                 long quota_used = 0;
                 try {
-                    boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, context_id);
-
-                    stmt2 = oxdb_read.prepareStatement(hasUserColumn ? "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0" : "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
                     stmt2.setInt(1, context_id);
                     rs2 = stmt2.executeQuery();
 
@@ -1056,9 +1026,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (final OXException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -1120,9 +1087,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-
     @Override
-    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
+    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException {
         if (null == adminUser) {
             throw new StorageException("Context administrator is not defined.");
         }
@@ -1163,25 +1129,85 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             }
-            // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
+
+            // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
+            int contextId = ctx.getId().intValue();
+            SchemaCacheFinalize cacheFinalize = null;
+            boolean contextCreated = false;
+            boolean rollback = false;
+            boolean automaticStrategyUsed = true;
             try {
+                // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
-                findOrCreateSchema(configCon, db);
+                rollback = true;
+
+                // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
+                SchemaResult schemaResult = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                cacheFinalize = schemaResult.getCacheFinalize();
+                automaticStrategyUsed = Strategy.AUTOMATIC == schemaResult.getStrategy();
+
+                // Write other configdb data
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
-                final Context retval = writeContext(ctx, adminUser, access);
-                configCon.commit();
+
+                /*-
+                 * Continue with context creation depending on utilized schema-select strategy:
+                 *
+                 *
+                 * If AUTOMATIC was used, then write context data _before_ committing the configdb connection
+                 *
+                 * Otherwise commit the configdb connection and write context data _afterwards_
+                 */
+                Context retval;
+                if (automaticStrategyUsed) {
+                    // Write context data before COMMIT
+                    retval = writeContext(ctx, adminUser, access);
+
+                    // Commit transaction and unmark to perform a roll-back
+                    configCon.commit();
+                    rollback = false;
+                } else {
+                    // Commit transaction
+                    configCon.commit();
+
+                    // Write context data after COMMIT and unmark to perform a roll-back
+                    retval = writeContext(ctx, adminUser, access);
+                    rollback = false;
+                }
+
+                // Apparently, no error occurred
+                contextCreated = true;
+
                 LOG.info("Context {} created!", retval.getId());
                 return retval;
             } catch (SQLException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw new StorageException(e.getMessage(), e);
+            } catch (ContextExistsException e) {
+                throw e;
             } catch (StorageException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
+                if (null != cacheFinalize) {
+                    try { cacheFinalize.finalize(contextCreated); } catch (Exception x) { /*Ignore*/ }
+                }
+
+                if (automaticStrategyUsed) {
+                    if (rollback) {
+                        // A commit on configDb connection is guaranteed that is has not been performed
+                        rollback(configCon);
+                        OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+                    }
+                } else {
+                    if (rollback) {
+                        // Either commit on configDb connection or writeContext() invocation failed
+                        // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
+                        rollback(configCon);
+
+                        // Manually drop possibly already created data from configDb
+                        new OXContextMySQLStorageCommon().handleCreateContextRollback(configCon, contextId);
+                    }
+                }
+
                 autocommit(configCon);
             }
         } finally {
@@ -1191,15 +1217,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private Context writeContext(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        Connection oxCon;
+        Connection oxCon = null;
+        boolean rollback = false;
         try {
             oxCon = cache.getConnectionForContext(contextId);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        try {
             oxCon.setAutoCommit(false);
+            rollback = true;
 
             contextCommon.initSequenceTables(contextId, oxCon);
             contextCommon.initReplicationMonitor(oxCon, contextId);
@@ -1250,39 +1273,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
 
             oxCon.commit();
+            rollback = false;
+
             ctx.setEnabled(Boolean.TRUE);
             adminUser.setId(I(adminId));
             return ctx;
         } catch (final DataTruncation e) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
-            rollback(oxCon);
             throw AdminCache.parseDataTruncation(e);
         } catch (final OXException e) {
             LOG.error("Error", e);
-            rollback(oxCon);
             throw new StorageException(e.toString());
         } catch (final StorageException e) {
             LOG.error("Storage Error", e);
-            rollback(oxCon);
             throw e;
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
         } catch (final InvalidDataException e) {
             LOG.error("InvalidData Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
-        } catch (final Exception e) {
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final EnforceableDataObjectException e) {
+            LOG.error("Enforceable DataObject Error", e);
+            throw new StorageException(e);
+        } catch (final RuntimeException e) {
             LOG.error("Internal Error", e);
-            rollback(oxCon);
-            throw new StorageException("Internal server error occured");
+            throw new StorageException("Internal server error occured", e);
         } finally {
+            if (rollback) {
+                rollback(oxCon);
+            }
             autocommit(oxCon);
-            try {
-                cache.pushConnectionForContext(contextId, oxCon);
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing ox write connection to pool!", ecp);
+            if (null != oxCon) {
+                try {
+                    cache.pushConnectionForContext(contextId, oxCon);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing ox write connection to pool!", ecp);
+                }
             }
         }
     }
@@ -1384,75 +1414,101 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return retval;
     }
 
-    private TableObject backupContextServer2DBPoolEntry(final int context_id, final Connection configdb_write_con) throws SQLException {
-        final TableObject ret = new TableObject();
-        PreparedStatement pstm = null;
-
-        try {
-            ret.setName("context_server2db_pool");
-            pstm = configdb_write_con.prepareStatement("SELECT server_id,cid,read_db_pool_id,write_db_pool_id,db_schema FROM context_server2db_pool where cid = ?");
-            pstm.setInt(1, context_id);
-            final ResultSet rs = pstm.executeQuery();
-            while (rs.next()) {
-                final TableRowObject tro = new TableRowObject();
-
-                final TableColumnObject tco = new TableColumnObject();
-                final Object srv_id = rs.getObject("server_id");
-                tco.setData(srv_id);
-                tco.setName("server_id");
-                tco.setType(java.sql.Types.INTEGER);
-                tro.setColumn(tco);
-
-                final TableColumnObject tco2 = new TableColumnObject();
-                final Object cid = rs.getObject("cid");
-                tco2.setData(cid);
-                tco2.setName("cid");
-                tco2.setType(java.sql.Types.INTEGER);
-                tro.setColumn(tco2);
-
-                final TableColumnObject tco3 = new TableColumnObject();
-                final Object obj = rs.getObject("read_db_pool_id");
-                tco3.setData(obj);
-                tco3.setName("read_db_pool_id");
-                tco3.setType(java.sql.Types.INTEGER);
-                tro.setColumn(tco3);
-
-                final TableColumnObject tco4 = new TableColumnObject();
-                final Object obj2 = rs.getObject("write_db_pool_id");
-                tco4.setData(obj2);
-                tco4.setName("write_db_pool_id");
-                tco4.setType(java.sql.Types.INTEGER);
-                tro.setColumn(tco4);
-
-                final TableColumnObject tco5 = new TableColumnObject();
-                final Object obj3 = rs.getObject("db_schema");
-                tco5.setData(obj3);
-                tco5.setName("db_schema");
-                tco5.setType(java.sql.Types.VARCHAR);
-                tro.setColumn(tco5);
-
-                ret.setDataRow(tro);
-            }
-            rs.close();
-        } finally {
+    /**
+     * Looks-up the next suitable schema dependent on given strategy (fall-back is {@link Strategy#AUTOMATIC automatic}).
+     *
+     * @param configCon a write connection to the configuration database that is already in a transaction.
+     * @param db The database
+     * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
+     * @return The possible schema result from cache that is needed for further processing
+     */
+    private SchemaResult findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
+        if (CONTEXTS_PER_SCHEMA == 1) {
+            // Ignore strategy as there shall be only one schema per context
+            int schemaUnique;
             try {
-                if (pstm != null) {
-                    pstm.close();
-                }
-            } catch (final Exception e) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+                schemaUnique = IDGenerator.getId(configCon);
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
             }
+            String schemaName = db.getName() + '_' + schemaUnique;
+            db.setScheme(schemaName);
+            OXUtilStorageInterface.getInstance().createDatabase(db);
+            return SchemaResult.AUTOMATIC;
         }
-        return ret;
+
+        // The effective strategy
+        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
+
+        // Determine the schema name according to effective strategy
+        switch (effectiveStrategy.getStrategy()) {
+            case SCHEMA:
+                // Pre-defined schema name
+                applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
+                return SchemaResult.SCHEMA_NAME;
+            case IN_MEMORY:
+                // Get the schema name advertised by cache
+                SchemaCacheFinalize cacheFinalize = inMemoryLookupSchema(configCon, db);
+                return SchemaResult.inMemoryWith(cacheFinalize);
+            default:
+                automaticLookupSchema(configCon, db);
+                return SchemaResult.AUTOMATIC;
+        }
+    }
+
+    private void applyPredefinedSchemaName(String schemaName, Database db) throws StorageException {
+        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+        if (null != optCache) {
+            optCache.clearFor(db.getId().intValue());
+        }
+
+        // Pre-defined schema name
+        db.setScheme(schemaName);
+    }
+
+    private SchemaCacheFinalize inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+        // Get cache instance
+        SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
+        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
+
+        // Get next known suitable schema
+        int poolId = db.getId().intValue();
+        SchemaCacheResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
+        if (null != schemaResult) {
+            db.setScheme(schemaResult.getSchemaName());
+            return schemaResult.getFinalize();
+        }
+
+        // No suitable schema known to cache. Therefore clear cache state & perform regular schema look-up/creation
+        schemaCache.clearFor(poolId);
+        autoFindOrCreateSchema(configCon, db, false);
+        return null;
+    }
+
+    private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
+        autoFindOrCreateSchema(configCon, db, true);
     }
 
     /**
-     * @param configCon a write connection to the configuration database that is already in a transaction.
+     * Looks-up the next suitable schema.
+     *
+     * @param configCon The connection to configDb
+     * @param db The database to get the schema for
+     * @param clearSchemaCache Whether schema cache is supposed to be cleared
+     * @throws StorageException If a suitable schema cannot be found
      */
-    private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean clearSchemaCache) throws StorageException {
+        // Clear schema cache once "live" schema information is requested
+        if (clearSchemaCache) {
+            SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != optCache) {
+                optCache.clearFor(db.getId().intValue());
+            }
+        }
+
+        // Freshly determine the next schema to use
         String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
-        System.out.println("");
-        if (CONTEXTS_PER_SCHEMA == 1 || schemaName == null) {
+        if (schemaName == null) {
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
@@ -1467,56 +1523,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void createDatabaseAndMappingForContext(final Database db, final Connection configCon, final int context_id) throws SQLException, StorageException {
-
-        final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-        if (this.CONTEXTS_PER_SCHEMA == 1) {
-            String schema_name;
-            synchronized (ClientAdminThread.create_mutex) {
-                final int srv_id = IDGenerator.getId(configCon);
-                schema_name = db.getName() + "_" + srv_id;
-            }
-            db.setScheme(schema_name);
-            oxu.createDatabase(db);
-
-            // update contextserver2dbpool table with new infos
-        } else {
-            // check if there's a db schema which is not yet full
-            synchronized (ClientAdminThread.create_mutex) {
-                String schema_name = getNextUnfilledSchemaFromDB(db.getId(), configCon);
-                // there's none? create one
-                if (schema_name == null) {
-                    final int srv_id = IDGenerator.getId(configCon);
-                    schema_name = db.getName() + "_" + srv_id;
-
-                    db.setScheme(schema_name);
-                    oxu.createDatabase(db);
-
-                    // update contextserver2dbpool table with new infos
-                } else {
-                    db.setScheme(schema_name);
-                    // update contextserver2dbpool table with new infos
-                }
-            }
-        }
+    private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
+        findOrCreateSchema(con, db, null);
         try {
-            updateContextServer2DbPool(db, configCon, context_id);
+            updateContextServer2DbPool(db, con, contextId);
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
     }
 
     private static void updateContextServer2DbPool(final Database db, Connection con, final int contextId) throws PoolException {
-        // dbid is the id in db_pool of database engine to use for next context
-
-        // if read id -1 (not set by client ) or 0 (there is no read db for this
-        // cluster) then read id must be same as write id
-        // else the db pool cannot resolve the database
-        if (null == db.getRead_id() || 0 == db.getRead_id().intValue()) {
-            db.setRead_id(db.getId());
-        }
-
         final int serverId = ClientAdminThread.cache.getServerId();
+        ClientAdminThread.cache.getPool().deleteAssignment(con, contextId);
         ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
 
             @Override
@@ -1536,7 +1554,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             @Override
             public int getReadPoolId() {
-                return i(db.getRead_id());
+                Integer readId = db.getRead_id();
+                if (null == readId) {
+                    // Hints to a pool w/o a slave; return write-pool identifier instead
+                    return getWritePoolId();
+                }
+                return i(readId);
             }
 
             @Override
@@ -1553,7 +1576,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-            pool.lock(con);
+            pool.lock(con, i(poolId));
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
@@ -1609,76 +1632,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void revokeConfigdbMapping(final TableObject contextserver2dbpool_backup, final Connection configdb_write_con, final int context_id) throws SQLException {
-        for (int a = 0; a < contextserver2dbpool_backup.getDataRowCount(); a++) {
-            final TableRowObject tro = contextserver2dbpool_backup.getDataRow(a);
-
-            final StringBuilder prep_sql = new StringBuilder();
-
-            prep_sql.append("UPDATE " + contextserver2dbpool_backup.getName() + " SET ");
-
-            Enumeration<String> enumi = tro.getColumnNames();
-
-            // Save the order of the columns in this list, that all values are
-            // correct mapped to their fields
-            // for later use in prepared_statement
-            final ArrayList<String> columns_list = new ArrayList<String>();
-
-            while (enumi.hasMoreElements()) {
-                final String column = enumi.nextElement();
-                columns_list.add(column);
-                prep_sql.append("" + column + "=?,");
-            }
-
-            // set up the sql query for the prep statement
-            prep_sql.deleteCharAt(prep_sql.length() - 1);
-
-            prep_sql.append(" WHERE cid = ?");
-
-            // now create the statements for each row
-            PreparedStatement prep_ins = null;
-            try {
-                prep_ins = configdb_write_con.prepareStatement(prep_sql.toString());
-                enumi = tro.getColumnNames();
-                int ins_pos = 1;
-                for (int c = 0; c < columns_list.size(); c++) {
-                    final TableColumnObject tco = tro.getColumn(columns_list.get(c));
-                    prep_ins.setObject(ins_pos, tco.getData(), tco.getType());
-                    ins_pos++;
-                }
-                prep_ins.setInt(ins_pos++, context_id);
-                prep_ins.executeUpdate();
-                prep_ins.close();
-            } finally {
-                try {
-                    if (prep_ins != null) {
-                        prep_ins.close();
-                    }
-                } catch (final Exception e) {
-                    LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-                }
-            }
-            // end of test table
-        }
-        configdb_write_con.commit();
-    }
-
     private void enableContextBackAfterError(final Context ctx) throws StorageException {
         LOG.error("Try enabling context {} back again!", ctx.getId());
         enable(ctx);
         LOG.error("Context {} enabled back again!", ctx.getId());
     }
 
-    private void fillTargetDatabase(final ArrayList<TableObject> sorted_tables, final Connection target_ox_db_con, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {
+    private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
         // do the inserts for all tables!
-        for (int a = 0; a < sorted_tables.size(); a++) {
-            TableObject to = sorted_tables.get(a);
+        StringBuilder prep_sql = new StringBuilder();
+        StringBuilder sb_values = new StringBuilder();
+        for (TableObject to : sorted_tables) {
             to = getDataForTable(to, ox_db_connection, criteriaMatch);
             if (to.getDataRowCount() > 0) {
                 // ok data in table found, copy to db
                 for (int i = 0; i < to.getDataRowCount(); i++) {
-                    final StringBuilder prep_sql = new StringBuilder();
-                    final StringBuilder sb_values = new StringBuilder();
+                    prep_sql.setLength(0);
+                    sb_values.setLength(0);
 
                     prep_sql.append("INSERT INTO " + to.getName() + " ");
                     prep_sql.append("(");
@@ -1738,8 +1708,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }// end of table loop
     }
 
-    private Vector<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
-        final Vector<TableObject> tableObjects = new Vector<TableObject>();
+    private List<TableObject> fetchTableObjects(final Connection ox_db_write_connection) throws SQLException {
+        final List<TableObject> tableObjects = new LinkedList<TableObject>();
 
         // this.dbmetadata = this.dbConnection.getMetaData();
         final DatabaseMetaData db_metadata = ox_db_write_connection.getMetaData();
@@ -1786,17 +1756,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return tableObjects;
     }
 
-    private ArrayList<TableObject> sortTableObjects(final Vector<TableObject> tableObjects, final Connection ox_db_write_con) throws SQLException {
-        findReferences(tableObjects, ox_db_write_con);
+    private List<TableObject> sortTableObjects(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+        findReferences(fetchTableObjects, ox_db_write_con);
         // thx http://de.wikipedia.org/wiki/Topologische_Sortierung :)
-        return sortTablesByForeignKey(tableObjects);
+        return sortTablesByForeignKey(fetchTableObjects);
     }
 
-    private ArrayList<TableObject> sortTablesByForeignKey(final Vector<TableObject> tableObjects) {
-        final ArrayList<TableObject> nasty_order = new ArrayList<TableObject>();
+    private List<TableObject> sortTablesByForeignKey(List<TableObject> fetchTableObjects) {
+        List<TableObject> nastyOrder = new ArrayList<TableObject>(fetchTableObjects.size());
 
-        final ArrayList<TableObject> unsorted = new ArrayList<TableObject>();
-        unsorted.addAll(tableObjects);
+        List<TableObject> unsorted = new ArrayList<TableObject>(fetchTableObjects);
 
         // now sort the table with a topological sort mech :)
         // work with the unsorted vector
@@ -1805,7 +1774,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final TableObject to = unsorted.get(a);
                 if (!to.hasCrossReferences()) {
                     // log.error("removing {}", to.getName());
-                    nasty_order.add(to);
+                    nastyOrder.add(to);
                     // remove object from list and sort the references new
                     removeAndSortNew(unsorted, to);
                     a--;
@@ -1813,36 +1782,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
         // printTables(nasty_order);
-        return nasty_order;
+        return nastyOrder;
     }
 
     /**
      * Finds references for each table
      */
-    private void findReferences(final Vector<TableObject> tableObjects, final Connection ox_db_write_con) throws SQLException {
-        final DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
-        final String db_catalog = ox_db_write_con.getCatalog();
-        for (int v = 0; v < tableObjects.size(); v++) {
-            final TableObject to = tableObjects.get(v);
+    private void findReferences(List<TableObject> fetchTableObjects, Connection ox_db_write_con) throws SQLException {
+        DatabaseMetaData dbmeta = ox_db_write_con.getMetaData();
+        String dbCatalog = ox_db_write_con.getCatalog();
+        for (TableObject to : fetchTableObjects) {
             // get references from this table to another
-            final String table_name = to.getName();
+            String tableName = to.getName();
             // ResultSet table_references =
             // dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
-            final ResultSet table_references = dbmeta.getImportedKeys(db_catalog, null, table_name);
-            LOG.debug("Table {} has pk reference to table-column:", table_name);
-            while (table_references.next()) {
-                final String pk = table_references.getString("PKTABLE_NAME");
-                final String pkc = table_references.getString("PKCOLUMN_NAME");
+            final ResultSet tableReferences = dbmeta.getImportedKeys(dbCatalog, null, tableName);
+            LOG.debug("Table {} has pk reference to table-column:", tableName);
+            while (tableReferences.next()) {
+                final String pk = tableReferences.getString("PKTABLE_NAME");
+                final String pkc = tableReferences.getString("PKCOLUMN_NAME");
                 LOG.debug("--> Table: {} column ->{}", pk, pkc);
                 to.addCrossReferenceTable(pk);
-                final int pos_in_list = tableListContainsObject(pk, tableObjects);
-                if (pos_in_list != -1) {
-                    LOG.debug("Found referenced by {}<->{}->{}", table_name, pk, pkc);
-                    final TableObject edit_me = tableObjects.get(pos_in_list);
-                    edit_me.addReferencedBy(table_name);
+                final int pos = tableListContainsObject(pk, fetchTableObjects);
+                if (pos != -1) {
+                    LOG.debug("Found referenced by {}<->{}->{}", tableName, pk, pkc);
+                    final TableObject editMe = fetchTableObjects.get(pos);
+                    editMe.addReferencedBy(tableName);
                 }
             }
-            table_references.close();
+            tableReferences.close();
         }
     }
 
@@ -1850,10 +1818,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * remove no more needed element from list and remove the reference to removed element so that a new element exists which has now
      * references.
      */
-    private void removeAndSortNew(final ArrayList<TableObject> list, final TableObject to) {
-        list.remove(to);
-        for (int i = 0; i < list.size(); i++) {
-            final TableObject tob = list.get(i);
+    private void removeAndSortNew(List<TableObject> unsorted, TableObject to) {
+        unsorted.remove(to);
+        for (int i = 0; i < unsorted.size(); i++) {
+            TableObject tob = unsorted.get(i);
             tob.removeCrossReferenceTable(to.getName());
         }
     }
@@ -1861,15 +1829,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Returns -1 if not found else the position in the Vector where the object is located.
      */
-    private int tableListContainsObject(final String table_name, final Vector<TableObject> tableObjects) {
-        int found_at_position = -1;
-        for (int v = 0; v < tableObjects.size(); v++) {
-            final TableObject to = tableObjects.get(v);
+    private int tableListContainsObject(String table_name, List<TableObject> fetchTableObjects) {
+        int size = fetchTableObjects.size();
+        int pos = -1;
+        for (int v = 0; v < size; v++) {
+            TableObject to = fetchTableObjects.get(v);
             if (to.getName().equals(table_name)) {
-                found_at_position = v;
+                pos = v;
             }
         }
-        return found_at_position;
+        return pos;
     }
 
     private TableObject getDataForTable(final TableObject to, final Connection ox_db_connection, final Object criteriaMatch) throws SQLException {

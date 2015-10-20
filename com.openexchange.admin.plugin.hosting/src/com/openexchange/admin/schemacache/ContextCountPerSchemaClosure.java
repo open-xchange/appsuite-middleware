@@ -47,66 +47,26 @@
  *
  */
 
-package com.openexchange.admin.storage.sqlStorage;
+package com.openexchange.admin.schemacache;
 
-import java.sql.Connection;
 import java.util.Map;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.database.Assignment;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public interface OXAdminPoolInterface {
-
-    void setService(DatabaseService service);
-
-    Connection getConnectionForConfigDB() throws PoolException;
-
-    Connection getConnectionForContext(int contextId) throws PoolException;
-
-    Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
-
-    Connection getConnection(int poolId, String schema) throws PoolException;
-
-    boolean pushConnectionForConfigDB(Connection con) throws PoolException;
-
-    boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
-
-    boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException;
-
-    boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException;
-
-    boolean pushConnection(int poolId, Connection con) throws PoolException;
-
-    int getServerId() throws PoolException;
-
-    void writeAssignment(Connection con, Assignment assign) throws PoolException;
-
-    void deleteAssignment(Connection con, int contextId) throws PoolException;
-
-    void removeService();
-
-    int[] getContextInSameSchema(Connection con, int contextId) throws PoolException;
-
-    int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
-
-    int[] listContexts(int poolId) throws PoolException;
-
-    int getWritePool(int contextId) throws PoolException;
-
-    String getSchemaName(int contextId) throws PoolException;
-
-    String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException;
+/**
+ * {@link ContextCountPerSchemaClosure}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public interface ContextCountPerSchemaClosure {
 
     /**
      * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
      *
-     * @param con The connection to the config database
-     * @param poolId The pool identifier
-     * @param maxContexts The configured maximum allowed contexts for a database schema.
+     * @param poolId The identifier of the database pool
+     * @param maxContexts The configured max. number of contexts allowed per schema
      * @return A mapping providing the count per schema
-     * @throws PoolException If schema count cannot be returned
+     * @throws StorageException If schema count cannot be returned
      */
-    Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException;
-
-    void lock(Connection con, int writePoolId) throws PoolException;
+    Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException;
 }
