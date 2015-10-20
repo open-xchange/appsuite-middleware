@@ -72,6 +72,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -565,6 +566,58 @@ public class UserTest extends AbstractTest {
         }
 
         assertTrue("Expected to find added user in user list", founduser);
+    }
+
+    @Test
+    public void testListUsersWithOwnFilestore() throws Exception {
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        Filestore fs = null;
+        Credentials master = new Credentials("oxadminmaster", "secret");
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess client_access = new UserModuleAccess();
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
+        try {
+        final User createduser = oxu.create(ctx, urs, client_access, cred);
+
+        //create new filestore
+            fs = new Filestore();
+        fs.setMaxContexts(10);
+        fs.setSize(1024l);
+        fs.setUrl("file:///");
+
+        fs = oxutil.registerFilestore(fs, master);
+        //move user to new filestore
+            oxu.moveFromContextToUserFilestore(ctx, urs, fs, 10, cred);
+            Thread.sleep(500); //wait for move
+
+        final User[] srv_response = oxu.listUsersWithOwnFilestore(ctx, cred, fs.getId());
+
+        assertTrue("Expected list size > 0 ", srv_response.length > 0);
+
+        boolean founduser = false;
+        for (final User element : srv_response) {
+            if (element.getId().intValue() == createduser.getId().intValue()) {
+                founduser = true;
+            }
+        }
+
+        assertTrue("Expected to find added user in user list", founduser);
+        } finally {
+            oxu.delete(ctx, urs, cred);
+            if (fs != null) {
+                oxutil.unregisterFilestore(fs, master);
+            }
+        }
+    }
+
+    public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
+        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
     }
 
     @Test
