@@ -106,10 +106,10 @@ public class RevokeOAuthClientManagementCLT extends BasicCommandlineOptions {
                 String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
                 ClientDto client = remote.revokeClientSecret(id, auth);
                 if (null == client) {
-                    System.out.println("The revocation of the client's current secret has failed!!!");
+                System.out.println("The revocation of the client's current secret has failed!");
                     sysexit(0);
                 } else {
-                    System.out.println("The revocation of the client's current secret was successfull!!!");
+                System.out.println("The revocation of the client's current secret was successfull!");
                     System.out.println("Generated a new secret for following client: ");
                     printClient(client);
                     sysexit(0);

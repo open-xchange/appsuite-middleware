@@ -104,10 +104,10 @@ public class RemoveOAuthClientManagementCLT extends BasicCommandlineOptions {
                 String id = checkEmpty(this.clientID, (String) parser.getOptionValue(this.clientID));
                 boolean retval = remote.unregisterClient(id, auth);
                 if (retval) {
-                    System.out.println("The removal of oauth client with id " + id + " was successful");
+                System.out.println("The removal of oauth client with id " + id + " was successful!");
                     sysexit(0);
                 } else {
-                    System.out.println("The removal of oauth client with id " + id + " has failed!!!");
+                System.out.println("The removal of oauth client with id " + id + " has failed!");
                     sysexit(1);
                 }
         } catch (CLIParseException e) {

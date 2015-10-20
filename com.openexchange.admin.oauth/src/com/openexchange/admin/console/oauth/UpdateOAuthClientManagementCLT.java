@@ -193,10 +193,10 @@ public class UpdateOAuthClientManagementCLT extends BasicCommandlineOptions {
                 ClientDto retval = remote.updateClient(id, clientData, auth);
 
                 if (null == retval) {
-                    System.out.println("The update of oauth client with id " + id + " has failed");
+                System.out.println("The update of oauth client with id " + id + " has failed!");
                     sysexit(1);
                 } else {
-                    System.out.println("The update of oauth client with id " + id + " was successful");
+                System.out.println("The update of oauth client with id " + id + " was successful!");
                     System.out.println("The updated oauth client: ");
                     printClient(retval);
                     sysexit(0);

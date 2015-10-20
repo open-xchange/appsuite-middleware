@@ -109,7 +109,7 @@ public class GetOAuthClientManagementCLT extends BasicCommandlineOptions {
                 ClientDto client = remote.getClientById(id, auth);
 
                 if (null == client) {
-                    System.out.println("Client not found.");
+                System.out.println("Client not found!");
                     sysexit(1);
                 } else {
                     printClient(client);
