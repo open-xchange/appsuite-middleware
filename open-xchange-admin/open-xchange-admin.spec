@@ -206,10 +206,10 @@ if [ ${1:-0} -eq 2 ]; then
                 if [ -n "${PARTS[0]}" ] && [ -n "${PARTS[1]}" ]
                 then
                     echo ${PARTS[0]}:crypt:${PARTS[1]}
-                else 
+                else
                     echo $LINE
-                fi  
-                ;;  
+                fi
+                ;;
         esac
     done < /opt/open-xchange/etc/mpasswd >$TMPFILE
     cat $TMPFILE > /opt/open-xchange/etc/mpasswd
@@ -231,6 +231,8 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2699
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
+
+    ox_add_property AVERAGE_USER_SIZE 100 /opt/open-xchange/etc/AdminUser.properties
 fi
 
 %clean
