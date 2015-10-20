@@ -108,4 +108,12 @@ public interface WebdavRequest {
      */
     boolean isBrief();
 
+    /**
+     * Gets the value of a specific request parameter, as supplied by the underlying servlet request.
+     *
+     * @param name The name of the parameter to get
+     * @return The parameter value, or <code>null</code> if not specified in the underlying request
+     */
+    String getParameter(String name);
+
 }
