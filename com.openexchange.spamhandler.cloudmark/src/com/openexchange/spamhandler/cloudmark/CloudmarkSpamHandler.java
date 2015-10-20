@@ -49,8 +49,6 @@
 
 package com.openexchange.spamhandler.cloudmark;
 
-import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerServiceRegistry.getServiceRegistry;
-import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
