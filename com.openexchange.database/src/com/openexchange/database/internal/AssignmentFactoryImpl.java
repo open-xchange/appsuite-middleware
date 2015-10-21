@@ -56,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -77,7 +78,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
 
-    private final List<Assignment> assignments = new ArrayList<>();
+    private final List<Assignment> assignments = new CopyOnWriteArrayList<>();
 
     private final DatabaseService databaseService;
 
@@ -90,7 +91,6 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
      */
     @Override
     public void reload() {
-        assignments.clear();
         try {
             readPools();
         } catch (OXException e) {
@@ -99,6 +99,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
     }
 
     private void readPools() throws OXException {
+        assignments.clear();
         Connection readOnly = this.databaseService.getReadOnly();
 
         int readPoolId = 0;
@@ -152,8 +153,6 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /**
      * {@inheritDoc}
-     *
-     * @throws OXException
      */
     @Override
     public Assignment get(int contextId) {
@@ -167,8 +166,6 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /**
      * {@inheritDoc}
-     *
-     * @throws OXException
      */
     @Override
     public Assignment get(String schemaName) {

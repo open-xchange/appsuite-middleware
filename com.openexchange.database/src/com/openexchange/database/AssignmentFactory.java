@@ -59,11 +59,36 @@ import com.openexchange.exception.OXException;
  */
 public interface AssignmentFactory {
 
+    /**
+     * Returns an {@link Assignment} based on the given pool id and the read/write identifier
+     * 
+     * @param poolId The pool id to get an {@link Assignment} for
+     * @param write The identifier if read/write should be returned
+     * @return {@link Assignment} for the given parameters or <code>null</code> if no {@link Assignment} can be found
+     * @throws OXException
+     */
     Assignment get(int poolId, boolean write) throws OXException;
 
+    /**
+     * Returns an {@link Assignment} based on the given context identifier
+     * 
+     * @param poolId The context id to get an {@link Assignment} for
+     * @return {@link Assignment} for the given parameters or <code>null</code> if no {@link Assignment} can be found
+     * @throws OXException
+     */
     Assignment get(int contextId) throws OXException;
 
+    /**
+     * Returns an {@link Assignment} based on the given schema name
+     * 
+     * @param schemaName The schemaName to get an {@link Assignment} for
+     * @return {@link Assignment} for the given parameters or <code>null</code> if no {@link Assignment} can be found
+     * @throws OXException
+     */
     Assignment get(String schemaName);
 
+    /**
+     * Reloads the previously read {@link Assignment}s
+     */
     void reload();
 }
