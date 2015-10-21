@@ -102,19 +102,18 @@ public class CalendarColor extends SingleXMLPropertyMixin {
         if (null != folder && PrivateType.getInstance().equals(folder.getType())) {
             Map<String, Object> meta = folder.getMeta();
             if (null != meta) {
-                if (meta.containsKey("color_label")) {
-                    String value = mapColorLabel(meta.get("color_label"));
-                    if (null != value) {
-                        return value;
-                    }
-                }
                 if (meta.containsKey("color")) {
                     Object value = meta.get("color");
                     if (null != value && String.class.isInstance(value)) {
                         return String.valueOf(value);
                     }
                 }
-
+                if (meta.containsKey("color_label")) {
+                    String value = mapColorLabel(meta.get("color_label"));
+                    if (null != value) {
+                        return value;
+                    }
+                }
             }
         }
         return "#CEE7FFFF"; // Mac OS client does not like null or empty values
