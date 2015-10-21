@@ -56,6 +56,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 %doc com.openexchange.oauth.provider.rmi/javadoc
 
 %changelog
