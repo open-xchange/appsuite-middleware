@@ -191,10 +191,12 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 meta.put("color", value);
             }
 
-            if (attributes.containsKey(CalendarColor.SYMBOLIC_COLOR)) {
-                Integer uiValue = CalendarColor.mapColorLabel(attributes.get(CalendarColor.SYMBOLIC_COLOR));
-                if (uiValue != null) {
-                    meta.put("color_label", uiValue);
+            if (attributes != null) {
+                if (attributes.containsKey(CalendarColor.SYMBOLIC_COLOR)) {
+                    Integer uiValue = CalendarColor.mapColorLabel(attributes.get(CalendarColor.SYMBOLIC_COLOR));
+                    if (uiValue != null) {
+                        meta.put("color_label", uiValue);
+                    }
                 }
             }
 
