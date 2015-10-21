@@ -210,7 +210,7 @@ public class Executor {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContact(fields);
+            return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -231,7 +231,7 @@ public class Executor {
         stmt.setInt(2, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         stmt.setInt(3, userID);
         resultSet = logExecuteQuery(stmt);
-        return new ContactReader(contextID, connection, resultSet).readContact(fields);
+            return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
     } finally {
         closeSQLStuff(resultSet, stmt);
     }
@@ -362,7 +362,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -431,7 +431,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -458,7 +458,7 @@ public class Executor {
         SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions, true));
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
             }
@@ -477,7 +477,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, true);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -510,7 +510,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }

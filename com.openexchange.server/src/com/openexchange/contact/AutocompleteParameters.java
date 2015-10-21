@@ -78,8 +78,6 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 */
 	public static final String REQUIRE_EMAIL = "require_email";
 
-    public static final String USER_ID = "user_id";
-
 	/**
 	 * The parameter key to specify if distribution lists shall be ignored and not be part of the
 	 * returned results. If so, the value must be {@link Boolean#TRUE}, otherwise <code>false</code>
@@ -87,6 +85,8 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 * <b>Default value: <code>false</code></b>
 	 */
 	public static final String IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
+
+    public static final String USER_ID = "user_id";
 
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
 	private List<OXException> warnings;

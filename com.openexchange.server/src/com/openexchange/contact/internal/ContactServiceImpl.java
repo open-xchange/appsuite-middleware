@@ -1000,6 +1000,7 @@ public class ContactServiceImpl extends DefaultContactService {
     protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
+        parameters.put(AutocompleteParameters.USER_ID, userID);
         /*
          * check supplied search
          */

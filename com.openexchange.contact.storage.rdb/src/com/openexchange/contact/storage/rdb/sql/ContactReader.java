@@ -100,14 +100,15 @@ public class ContactReader {
      * Deserializes all contacts found in the result set, using the supplied fields.
      *
      * @param fields The contact fields to read
+     * @param withObjectUseCount ResultSet contains additional data for sorting contacts
      * @return The contacts, or an empty list if no there were no results
      * @throws SQLException
      * @throws OXException
      */
-    public List<Contact> readContacts(ContactField[] fields) throws SQLException, OXException {
+    public List<Contact> readContacts(ContactField[] fields, boolean withObjectUseCount) throws SQLException, OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         while (resultSet.next()) {
-            contacts.add(patch(Mappers.CONTACT.fromResultSet(resultSet, fields)));
+            contacts.add(patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount));
         }
         return contacts;
     }
@@ -116,15 +117,16 @@ public class ContactReader {
      * Deserializes the first contact found in the result set, using the supplied fields.
      *
      * @param fields The contact fields to read
+     * @param withObjectUseCount ResultSet contains additional data for sorting contacts
      * @return The contact, or <code>null</code> if there was no result
      * @throws SQLException
      * @throws OXException
      */
-    public Contact readContact(ContactField[] fields) throws SQLException, OXException {
-        return resultSet.next() ? patch(Mappers.CONTACT.fromResultSet(resultSet, fields)) : null;
+    public Contact readContact(ContactField[] fields, boolean withObjectUseCount) throws SQLException, OXException {
+        return resultSet.next() ? patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount) : null;
     }
 
-    private Contact patch(Contact contact) throws OXException {
+    private Contact patch(Contact contact, boolean withObjectUseCount) throws SQLException, OXException {
         if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
             String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
 
@@ -138,6 +140,9 @@ public class ContactReader {
             } else {
                 String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
                 contact.setEmail1(primaryMail);
+            }
+            if (withObjectUseCount && resultSet.getInt("value") > 0) {
+                contact.setUseCount(contact.getUseCount() + resultSet.getInt("value"));
             }
         }
         return contact;

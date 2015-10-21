@@ -273,7 +273,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
 
             AutocompleteParameters parameters = AutocompleteParameters.newInstance();
             parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
-            parameters.put(AutocompleteParameters.USER_ID, session.getUserId());
             List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
             if (null != contacts && !contacts.isEmpty()) {
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);

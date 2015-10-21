@@ -325,16 +325,25 @@ public final class Tools {
      * @throws OXException
      */
     public static String getOrderClause(final SortOptions sortOptions) throws OXException {
+        return getOrderClause(sortOptions, false);
+    }
+
+    public static String getOrderClause(final SortOptions sortOptions, boolean forAutocomplete) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions))) {
+            stringBuilder.append("ORDER BY ");
+            if (forAutocomplete) {
+                stringBuilder.append("value DESC, ");
+            }
             final SortOrder[] order = sortOptions.getOrder();
             if (null != order && 0 < order.length) {
-                stringBuilder.append("ORDER BY ");
                 final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
                 stringBuilder.append(getOrderClause(order[0], collator));
                 for (int i = 1; i < order.length; i++) {
                     stringBuilder.append(", ").append(getOrderClause(order[i], collator));
                 }
+            } else {
+                stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
             }
         }
         return stringBuilder.toString();

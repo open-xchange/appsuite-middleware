@@ -61,7 +61,6 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.SimpleTokenizer;
 import com.openexchange.java.Strings;
@@ -78,6 +77,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 
     private static final int MAX_PATTERNS = 5;
 	private final StringBuilder stringBuilder;
+    private final AutocompleteParameters autoCompleteParameters;
 
     /**
      * Initializes a new {@link AutocompleteAdapter}.
@@ -96,6 +96,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     AutocompleteAdapter(String query, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields, String charset, boolean checkPatternLength) throws OXException {
         super(charset);
         this.stringBuilder = new StringBuilder(2048);
+        this.autoCompleteParameters = parameters;
         /*
          * extract patterns & remove too short patterns
          */
@@ -144,15 +145,16 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         boolean ignoreDistributionLists = parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false);
         boolean ignoreNonWebmailUsers = false; // TODO: Maybe for future use
 		if (null == patterns || 0 == patterns.size()) {
-            stringBuilder.append(getSelectClause(fields, true, true, (Integer) parameters.get(AutocompleteParameters.USER_ID))).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
-                .append(getModuleClause(FolderObject.CONTACT)).append(" AND ").append(getFolderIDsClause(folderIDs));
+            stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
+                .append(getFolderIDsClause(folderIDs));
+            insertObjectUseCountClause(stringBuilder);
 	        if (requireEmail) {
 	            stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
 	        } else if (ignoreDistributionLists) {
 	        	stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
 	        }
 	    } else if (1 == patterns.size()) {
-            appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, parameters);
+            appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
 	    } else {
 	        stringBuilder.append("SELECT ");
 	        stringBuilder.append("o.").append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
@@ -160,10 +162,10 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	            stringBuilder.append(",o.").append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
 	        }
 	        stringBuilder.append(" FROM (");
-            appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, parameters);
+            appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
 	        for (int i = 1; i < patterns.size(); i++) {
 	            stringBuilder.append(" UNION ALL (");
-                appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, parameters);
+                appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
                 stringBuilder.append(')');
 	        }
 	        stringBuilder.append(") AS o GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
@@ -171,18 +173,24 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	    }
    }
 
-    private void appendAutocompletePattern(String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields, AutocompleteParameters parameters) throws OXException {
-        String contextIDClause = getContextIDClause(contextID);
+    private void appendAutocompletePattern(String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
+        StringBuilder contextIDBuilder = new StringBuilder();
+        contextIDBuilder.append(Table.CONTACTS).append(".").append(getContextIDClause(contextID));
+        String contextIDClause = contextIDBuilder.toString();
         String folderIDsClause = getFolderIDsClause(folderIDs);
-        String selectClause = getSelectClause(fields, true, true, (Integer) parameters.get(AutocompleteParameters.USER_ID));
+        StringBuilder selectBuilder = new StringBuilder();
+        selectBuilder.append(getSelectClause(fields));
+        insertObjectUseCountClause(selectBuilder);
+        String selectClause = selectBuilder.toString();
+
         boolean first = true;
         for (ContactField field : ALTERNATIVE_INDEXED_FIELDS) {
             if (first) {
-                appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists, true);
+                appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists);
                 first = false;
             } else {
                 stringBuilder.append(" UNION (");
-                appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists, true);
+                appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists);
                 stringBuilder.append(')');
             }
         }
@@ -193,30 +201,34 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         }
     }
 
-    private void appendAutocompletePattern(String tableAlias, String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields, AutocompleteParameters parameters) throws OXException {
+    private void insertObjectUseCountClause(StringBuilder stringBuilder) {
+        int offset = stringBuilder.indexOf("FROM");
+        StringBuilder sb = new StringBuilder(1024);
+        sb.append(",").append(Table.OBJECT_USE_COUNT).append(".value");
+        stringBuilder.insert(offset - 1, sb.toString());
+        stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(Table.CONTACTS).append(".cid=").append(Table.OBJECT_USE_COUNT)
+            .append(".cid AND ").append(autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1)).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+            .append(Table.CONTACTS).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+            .append(Table.CONTACTS).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+    }
+
+    private void appendAutocompletePattern(String tableAlias, String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         stringBuilder.append("SELECT ");
         stringBuilder.append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
         for (int i = 1; i < fields.length; i++) {
             stringBuilder.append(',').append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
         }
         stringBuilder.append(" FROM (");
-        appendAutocompletePattern(pattern, requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, parameters);
+        appendAutocompletePattern(pattern, requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
         stringBuilder.append(") AS ").append(tableAlias);
     }
 
     private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, String pattern, boolean needsEMail, boolean ignoreDistributionLists) throws OXException {
-        appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, needsEMail, ignoreDistributionLists, false);
-    }
-
-    private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, String pattern, boolean needsEMail, boolean ignoreDistributionLists, boolean withObjectUseCount) throws OXException {
         stringBuilder.append('(').append(selectClause);
-        if (IGNORE_INDEX_CID_FOR_UNIONS && ALTERNATIVE_INDEXED_FIELDS.contains(field) && !withObjectUseCount) {
-            stringBuilder.append(" IGNORE INDEX (cid)");
-        }
+        //        if (IGNORE_INDEX_CID_FOR_UNIONS && ALTERNATIVE_INDEXED_FIELDS.contains(field)) {
+        //            stringBuilder.append(" IGNORE INDEX (cid)");
+        //        }
         stringBuilder.append(" WHERE ");
-        if (withObjectUseCount) {
-            stringBuilder.append(Table.CONTACTS).append(".");
-        }
         stringBuilder.append(contextIDClause).append(" AND ");
         appendComparison(field, pattern);
         stringBuilder.append(" AND ").append(folderIDsClause);

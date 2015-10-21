@@ -154,7 +154,6 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     protected List<Contact> autocompleteUsers(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
     	AutocompleteParameters parameters = AutocompleteParameters.newInstance();
     	parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.FALSE);
-        parameters.put(AutocompleteParameters.USER_ID, session.getUserId());
         return searchContacts(
             session,
             autocompleteRequest.getPrefix(),
@@ -272,7 +271,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             return Collections.emptyList();
         }
         if (1 < contacts.size()) {
-            Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale()));
+            Collections.sort(contacts, new UseCountComparator(false, session.getUser().getLocale()));
             if (0 < sortOptions.getLimit() && contacts.size() > sortOptions.getLimit()) {
                 contacts.subList(0, sortOptions.getLimit()).clear();
             }

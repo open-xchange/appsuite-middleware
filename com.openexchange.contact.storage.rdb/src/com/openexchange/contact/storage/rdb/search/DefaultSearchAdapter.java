@@ -127,33 +127,13 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
     }
 
     protected static String getSelectClause(ContactField[] fields, boolean withTable) throws OXException {
-        return getSelectClause(fields, withTable, false, null);
-    }
-
-    protected static String getSelectClause(ContactField[] fields, boolean withTable, boolean withObjectUseCount, Integer userId) throws OXException {
         StringBuilder sb = new StringBuilder(256);
         sb.append("SELECT ");
-        if (withObjectUseCount) {
-            sb.append(Mappers.CONTACT.getColumns(fields, Table.CONTACTS.getName() + "."));
-        } else {
-            sb.append(Mappers.CONTACT.getColumns(fields));
-        }
+        sb.append(Mappers.CONTACT.getColumns(fields, Table.CONTACTS.getName() + "."));
         sb.append(" FROM ");
         if (withTable) {
             sb.append(Table.CONTACTS);
         }
-        if (withObjectUseCount && null != userId) {
-            sb.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(Table.CONTACTS).append(".cid=").append(Table.OBJECT_USE_COUNT).append(".cid AND ")
-                .append(userId.intValue()).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
-                .append(Table.CONTACTS).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
-                .append(Table.CONTACTS).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object");
-        }
-        return sb.toString();
-    }
-
-    protected static String getModuleClause(int module) {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(" AND ").append(Table.OBJECT_USE_COUNT).append(".module=").append(module);
         return sb.toString();
     }
 
