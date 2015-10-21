@@ -47,47 +47,64 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.tools.images;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationReloadable;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-import com.openexchange.tools.images.scheduler.Scheduler;
-
 
 /**
- * {@link ImageToolsActivator}
+ * {@link ImageTransformationReloadable} - Collects reloadables for image transformation module.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public final class ImageTransformationReloadable implements Reloadable {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    private static final ImageTransformationReloadable INSTANCE = new ImageTransformationReloadable();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ImageTransformationReloadable getInstance() {
+        return INSTANCE;
+    }
+
+    // --------------------------------------------------------------------------------------------------- //
+
+    private final List<Reloadable> reloadables;
+
+    /**
+     * Initializes a new {@link ImageTransformationReloadable}.
+     */
+    private ImageTransformationReloadable() {
+        super();
+        reloadables = new CopyOnWriteArrayList<Reloadable>();
+    }
+
+    /**
+     * Adds given {@link Reloadable} instance.
+     *
+     * @param reloadable The instance to add
+     */
+    public void addReloadable(Reloadable reloadable) {
+        reloadables.add(reloadable);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Initialize through acquiring instance
-        Scheduler.getInstance();
-
-        // Register services
-        registerService(ImageTransformationService.class, new JavaImageTransformationService());
-        registerService(Reloadable.class, ImageTransformationReloadable.getInstance());
+    public void reloadConfiguration(ConfigurationService configService) {
+        for (Reloadable reloadable : reloadables) {
+            reloadable.reloadConfiguration(configService);
+        }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
     }
 
 }
