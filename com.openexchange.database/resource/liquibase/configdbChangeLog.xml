@@ -116,4 +116,31 @@
             <dropIndex indexName="context_name_unique" tableName="context"/>
         </rollback>
     </changeSet>
+
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.1 starts here ************** -->
+    <!-- ******************************************************* -->
+
+    <changeSet id="7.8.1:replicationMonitor:createForConfigDB" author="martin.schneider@open-xchange.com" failOnError="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="replicationMonitor" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'replicationMonitor' for master/slave replication.
+        </comment>
+        <sql>
+            CREATE TABLE replicationMonitor (
+                cid int(10) unsigned NOT NULL,
+                transaction bigint(20) NOT NULL,
+                PRIMARY KEY (cid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            INSERT INTO replicationMonitor (cid,transaction) VALUES (0,0);
+        </sql>
+        <rollback>
+            <dropTable tableName="replicationMonitor" />
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>
