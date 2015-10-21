@@ -52,10 +52,16 @@ package com.openexchange.tools.images.transformations;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
+import com.openexchange.tools.images.ImageTransformationReloadable;
+import com.openexchange.tools.images.osgi.Services;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 /**
@@ -76,9 +82,48 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         @Override
         public IOException newUnexpectedError(final Throwable t) {
-            return new IOException(t);
+            if (t instanceof java.util.concurrent.TimeoutException) {
+                return new IOException("Image transformation timed out", t);
+            }
+            String message = t.getMessage();
+            return new IOException(null == message ? "Image transformation failed" : message, t);
         }
     };
+
+    private static volatile Integer waitTimeoutSeconds;
+    private static int waitTimeoutSeconds() {
+        Integer tmp = waitTimeoutSeconds;
+        if (null == tmp) {
+            synchronized (ImageTransformationsTask.class) {
+                tmp = waitTimeoutSeconds;
+                if (null == tmp) {
+                    int defaultValue = 15;
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.waitTimeoutSeconds", defaultValue));
+                    waitTimeoutSeconds = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    static {
+        ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                waitTimeoutSeconds = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
 
     // --------------------------------------------------------------------------------------------------------- //
 
@@ -103,14 +148,14 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     }
 
     @Override
-    protected BufferedImage getImage(final String formatName) throws IOException {
-        final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
+    protected BufferedImage getImage(String formatName) throws IOException {
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-        final boolean success = Scheduler.getInstance().execute(optSource, ft);
+        boolean success = Scheduler.getInstance().execute(optSource, ft);
         if (!success) {
             throw new IOException("Image transformation rejected");
         }
-        return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+        return ThreadPools.getFrom(ft, waitTimeoutSeconds(), TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     /**
@@ -130,7 +175,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         private final String formatName;
 
-        CallableImpl(final String formatName) {
+        CallableImpl(String formatName) {
             this.formatName = formatName;
         }
 
