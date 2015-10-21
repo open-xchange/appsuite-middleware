@@ -330,7 +330,7 @@ public final class Tools {
 
     public static String getOrderClause(final SortOptions sortOptions, boolean forAutocomplete) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions))) {
+        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
             stringBuilder.append("ORDER BY ");
             if (forAutocomplete) {
                 stringBuilder.append("value DESC, ");
