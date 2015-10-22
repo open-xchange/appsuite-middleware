@@ -159,6 +159,7 @@ public class MoveAction extends AbstractWriteAction {
 
         boolean error = true;
         try {
+            List<String> conflicting = new ArrayList<String>(pairs.size());
             for (IdVersionPair pair : pairs) {
                 if (pair.getIdentifier() == null) {
                     // Resource denotes a folder
@@ -189,7 +190,7 @@ public class MoveAction extends AbstractWriteAction {
                     }
 
                     deleteableFolders.addLast(newFolderID);
-                    fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID);
+                    conflicting.addAll(fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID));
 
                     deleteableFolders.removeLast();
                     deleteableFolders.addLast(folderId);
@@ -201,7 +202,7 @@ public class MoveAction extends AbstractWriteAction {
             }
 
             if (!oldFiles.isEmpty()) {
-                fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder);
+                conflicting.addAll(fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder));
             }
 
             {
@@ -211,7 +212,7 @@ public class MoveAction extends AbstractWriteAction {
             }
 
             error = false;
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+            return result(conflicting, request);
         } finally {
             if (error) {
                 for (String folderId : deleteableFolders) {
