@@ -159,9 +159,9 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error("", e);
+                LOG.error("Error pushing connection to pool!", e);
             }
         }
     }

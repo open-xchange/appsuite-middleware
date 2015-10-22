@@ -172,6 +172,36 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
+        try {
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb read connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backReadOnly(con);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
+        try {
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritable(con);
+        }
+        return true;
+    }
+
+    @Override
     public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
         try {
             if (con != null && !con.getAutoCommit() && !con.isClosed()) {

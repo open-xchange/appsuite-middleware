@@ -992,7 +992,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final PoolException e) {
                     log.error("Error pushing oxdb read connection to pool!", e);
                 }
@@ -1600,9 +1600,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
 
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
+                log.error("Error pushing configdb read connection to pool!", e);
             }
         }
         return retBool;
@@ -1966,7 +1966,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
@@ -2103,10 +2103,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     if (context_id != -1) {
                         cache.pushConnectionForContextAfterReading(context_id, con);
                     } else {
-                        cache.pushConnectionForConfigDB(con);
+                        cache.pushReadConnectionForConfigDB(con);
                     }
                 } catch (final PoolException e) {
-                    log.error("Error pushing configdb write connection to pool!", e);
+                    log.error("Error pushing connection to pool!", e);
                 }
             }
         }
@@ -2192,10 +2192,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     if (context_id != -1) {
                         cache.pushConnectionForContextAfterReading(context_id, con);
                     } else {
-                        cache.pushConnectionForConfigDB(con);
+                        cache.pushReadConnectionForConfigDB(con);
                     }
                 } catch (final PoolException e) {
-                    log.error("Error pushing configdb write connection to pool!", e);
+                    log.error("Error pushing connection to pool!", e);
                 }
             }
         }
@@ -2229,7 +2229,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
             if (null != con) {
                 try {
-                   cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
@@ -2271,7 +2271,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
             if (null != con) {
                 try {
-                   cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final PoolException e) {
                     log.error("Error pushing connection to pool!", e);
                 }
@@ -2401,7 +2401,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
 
             try {
-               cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
@@ -2743,7 +2743,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-               cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }

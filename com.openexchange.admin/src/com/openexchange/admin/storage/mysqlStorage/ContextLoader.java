@@ -151,7 +151,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("", e);
             }

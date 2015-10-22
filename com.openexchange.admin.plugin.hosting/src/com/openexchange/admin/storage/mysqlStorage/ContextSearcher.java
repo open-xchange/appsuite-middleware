@@ -112,7 +112,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e1) {
                 LOG.error("", e1);
             }

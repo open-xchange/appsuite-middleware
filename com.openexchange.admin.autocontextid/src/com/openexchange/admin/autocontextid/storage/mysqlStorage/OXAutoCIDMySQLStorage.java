@@ -98,7 +98,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
             if (rollback) {
                 doRollback(con);
             }
-            cache.closeConfigDBSqlStuff(con, null);
+            cache.closeWriteConfigDBSqlStuff(con, null);
         }
     }
 

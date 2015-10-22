@@ -438,8 +438,17 @@ public class AdminCache {
         return this.pool.getWriteConnectionForConfigDB();
     }
 
+    @Deprecated
     public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
         return this.pool.pushConnectionForConfigDB(con);
+    }
+
+    public boolean pushWriteConnectionForConfigDB(final Connection con) throws PoolException {
+        return this.pool.pushWriteConnectionForConfigDB(con);
+    }
+
+    public boolean pushReadConnectionForConfigDB(final Connection con) throws PoolException {
+        return this.pool.pushReadConnectionForConfigDB(con);
     }
 
     public int getServerId() throws PoolException {
@@ -672,6 +681,7 @@ public class AdminCache {
         }
     }
 
+    @Deprecated
     public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
         if (null != rs) {
             try {
@@ -683,6 +693,40 @@ public class AdminCache {
         closeConfigDBSqlStuff(con, stmt);
     }
 
+    public void closeConfigDBSqlStuff(final PreparedStatement stmt, final ResultSet rs) {
+        if (null != rs) {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset", e);
+            }
+        }
+        closeReadConfigDBSqlStuff(null, stmt);
+    }
+
+    public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+        if (null != rs) {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset", e);
+            }
+        }
+        closeReadConfigDBSqlStuff(con, stmt);
+    }
+
+    public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt, final ResultSet rs) {
+        if (null != rs) {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset", e);
+            }
+        }
+        closeWriteConfigDBSqlStuff(con, stmt);
+    }
+
+    @Deprecated
     public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
         try {
             if (stmt != null) {
@@ -694,6 +738,40 @@ public class AdminCache {
         try {
             if (con != null) {
                 pushConnectionForConfigDB(con);
+            }
+        } catch (final PoolException exp) {
+            log.error("Pool Error pushing connection to pool!", exp);
+        }
+    }
+
+    public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            log.error("Error closing statement", e);
+        }
+        try {
+            if (con != null) {
+                pushReadConnectionForConfigDB(con);
+            }
+        } catch (final PoolException exp) {
+            log.error("Pool Error pushing connection to pool!", exp);
+        }
+    }
+
+    public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            log.error("Error closing statement", e);
+        }
+        try {
+            if (con != null) {
+                pushWriteConnectionForConfigDB(con);
             }
         } catch (final PoolException exp) {
             log.error("Pool Error pushing connection to pool!", exp);

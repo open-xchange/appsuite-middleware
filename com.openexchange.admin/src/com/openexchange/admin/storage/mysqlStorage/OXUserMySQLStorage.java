@@ -226,9 +226,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             if (null != con) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final Exception e) {
-                    // Ignore
+                    log.error("Error pushing connection to pool!", e);
                 }
             }
         }

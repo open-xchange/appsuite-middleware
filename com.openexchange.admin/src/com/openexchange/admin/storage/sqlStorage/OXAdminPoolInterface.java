@@ -72,7 +72,12 @@ public interface OXAdminPoolInterface {
 
     Connection getConnection(int poolId, String schema) throws PoolException;
 
+    @Deprecated
     boolean pushConnectionForConfigDB(Connection con) throws PoolException;
+
+    boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException;
+
+    boolean pushReadConnectionForConfigDB(Connection con) throws PoolException;
 
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
 

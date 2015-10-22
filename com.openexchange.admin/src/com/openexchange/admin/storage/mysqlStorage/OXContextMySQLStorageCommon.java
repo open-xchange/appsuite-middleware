@@ -343,7 +343,7 @@ public class OXContextMySQLStorageCommon {
         } finally {
             autocommit(con);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 log.error("Error pushing configdb connection to pool!", e);
             }

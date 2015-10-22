@@ -129,7 +129,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("", e);
             }

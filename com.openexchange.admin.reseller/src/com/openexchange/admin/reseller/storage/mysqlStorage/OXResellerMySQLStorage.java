@@ -219,7 +219,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -290,7 +290,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -335,7 +335,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -379,7 +379,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -483,7 +483,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -557,7 +557,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -599,7 +599,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -654,7 +654,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -691,7 +691,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -735,7 +735,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -791,7 +791,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -847,7 +847,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -877,7 +877,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -913,7 +913,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -967,8 +967,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } finally {
             cache.closeContextSqlStuff(oxcon, cid, true);
-            cache.closeConfigDBSqlStuff(null, prep, rs);
-            cache.closeConfigDBSqlStuff(null, prep2, rs2);
+            cache.closeConfigDBSqlStuff(prep, rs);
+            cache.closeConfigDBSqlStuff(prep2, rs2);
         }
     }
 
@@ -1012,8 +1012,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } finally {
             cache.closeContextSqlStuff(oxcon, cid, true);
-            cache.closeConfigDBSqlStuff(null, prep, rs);
-            cache.closeConfigDBSqlStuff(null, prep2, rs2);
+            cache.closeConfigDBSqlStuff(prep, rs);
+            cache.closeConfigDBSqlStuff(prep2, rs2);
         }
     }
 
@@ -1034,7 +1034,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1125,7 +1125,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1161,7 +1161,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
             cache.closeContextSqlStuff(oxcon, cid);
             // set to null to prevent double pushback in finally
             oxcon = null;
@@ -1283,7 +1283,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, null);
+                cache.closeReadConfigDBSqlStuff(con, null);
             }
         }
     }
@@ -1362,7 +1362,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, null);
+            cache.closeReadConfigDBSqlStuff(con, null);
         }
 
     }
@@ -1393,7 +1393,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1447,7 +1447,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -1467,7 +1467,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, null, null);
+            cache.closeReadConfigDBSqlStuff(con, null, null);
         }
     }
 
@@ -1497,7 +1497,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1551,7 +1551,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep);
+            cache.closeWriteConfigDBSqlStuff(con, prep);
         }
     }
 
@@ -1578,7 +1578,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep);
+            cache.closeWriteConfigDBSqlStuff(con, prep);
         }
     }
 
@@ -1606,7 +1606,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1649,7 +1649,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, prep, rs);
+                cache.closeWriteConfigDBSqlStuff(con, prep, rs);
             }
         }
     }
@@ -1672,7 +1672,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1697,7 +1697,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1732,7 +1732,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1844,7 +1844,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1890,7 +1890,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 doRollback(con);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, prep);
+                cache.closeWriteConfigDBSqlStuff(con, prep);
             }
         }
     }

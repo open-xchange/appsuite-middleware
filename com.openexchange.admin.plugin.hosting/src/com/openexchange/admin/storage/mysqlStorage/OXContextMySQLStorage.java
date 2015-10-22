@@ -340,7 +340,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 try {
-                    adminCache.pushConnectionForConfigDB(conForConfigDB);
+                    adminCache.pushWriteConnectionForConfigDB(conForConfigDB);
                 } catch (PoolException exp) {
                     LOG.error("Pool Error", exp);
                 }
@@ -497,7 +497,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -581,7 +581,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -625,7 +625,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             try {
                 if (null != configCon) {
-                    cache.pushConnectionForConfigDB(configCon);
+                    cache.pushReadConnectionForConfigDB(configCon);
                 }
             } catch (final PoolException exp) {
                 LOG.error("Error pushing configdb connection to pool!", exp);
@@ -816,7 +816,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (configdb_write_con != null) {
                 Databases.autocommit(configdb_write_con);
                 try {
-                    cache.pushConnectionForConfigDB(configdb_write_con);
+                    cache.pushWriteConnectionForConfigDB(configdb_write_con);
                 } catch (final Exception ex) {
                     LOG.error("Error pushing connection", ex);
                 }
@@ -970,7 +970,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -1081,7 +1081,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             closePreparedStatement(logininfo);
             closeRecordset(rs);
-            pushConnectionToPoolConfigDB(con);
+            try {
+                cache.pushReadConnectionForConfigDB(con);
+            } catch (PoolException e) {
+                LOG.error("Error pushing ox read connection to pool!", e);
+            }
+
         }
     }
 
@@ -1228,7 +1233,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 autocommit(configCon);
             }
         } finally {
-            pushConnectionToPoolConfigDB(configCon);
+            try {
+                cache.pushWriteConnectionForConfigDB(configCon);
+            } catch (PoolException e) {
+                LOG.error("Error pushing ox write connection to pool!", e);
+            }
         }
     }
 
@@ -1949,7 +1958,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con_write);
+                    cache.pushWriteConnectionForConfigDB(con_write);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
@@ -2007,7 +2016,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con_write);
+                    cache.pushWriteConnectionForConfigDB(con_write);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
@@ -2504,7 +2513,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw e;
         } finally {
             try {
-                cache.pushConnectionForConfigDB(configCon);
+                cache.pushWriteConnectionForConfigDB(configCon);
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
@@ -2818,16 +2827,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void pushConnectionToPoolConfigDB(final Connection con) {
-        if (con != null) {
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
-            }
-        }
-    }
-
     @Override
     public void updateContextReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
         Connection con = null;
@@ -2873,7 +2872,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -2926,7 +2925,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             autocommit(configCon);
             try {
-                cache.pushConnectionForConfigDB(configCon);
+                cache.pushWriteConnectionForConfigDB(configCon);
             } catch (PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
