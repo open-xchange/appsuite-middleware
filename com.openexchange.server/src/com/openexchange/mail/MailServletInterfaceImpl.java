@@ -52,6 +52,9 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,10 +64,12 @@ import java.text.Collator;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -101,6 +106,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -116,7 +122,9 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -141,6 +149,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
+import com.openexchange.mail.json.actions.AbstractArchiveMailAction.ArchiveDataWrapper;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -152,9 +161,12 @@ import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mail.search.ComparisonType;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
@@ -168,15 +180,19 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.push.PushEventConstants;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -186,6 +202,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -766,7 +783,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return new int[] { totalCounter, newCounter, unreadCounter, f.getDeletedMessageCount() };
         }
         int totalCounter = mailAccess.getMessageStorage().searchMessages(fullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
-        int unreadCounter =  mailAccess.getMessageStorage().getUnreadMessages(fullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
+        int unreadCounter = mailAccess.getMessageStorage().getUnreadMessages(fullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
         return new int[] { totalCounter, f.getNewMessageCount(), unreadCounter, f.getDeletedMessageCount() };
     }
 
@@ -1103,6 +1120,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private static volatile Integer maxForwardCount;
+
     private static int maxForwardCount() {
         Integer tmp = maxForwardCount;
         if (null == tmp) {
@@ -1231,7 +1249,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
                             Long.valueOf(maxPerMsg),
                             null == fileName ? "" : fileName,
-                                Long.valueOf(size));
+                            Long.valueOf(size));
                     }
                     total += size;
                     if (max > 0 && total > max) {
@@ -2011,61 +2029,61 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; contained && i < length; i++) {
             MailField field = fields[i];
             switch (field) {
-            case ACCOUNT_NAME:
-                contained = candidate.containsAccountId() || candidate.containsAccountName();
-                break;
-            case BCC:
-                contained = candidate.containsBcc();
-                break;
-            case CC:
-                contained = candidate.containsCc();
-                break;
-            case COLOR_LABEL:
-                contained = candidate.containsColorLabel();
-                break;
-            case CONTENT_TYPE:
-                contained = candidate.containsContentType();
-                break;
-            case DISPOSITION_NOTIFICATION_TO:
-                contained = candidate.containsDispositionNotification();
-                break;
-            case FLAGS:
-                contained = candidate.containsFlags();
-                break;
-            case FOLDER_ID:
-                contained = true;
-                break;
-            case FROM:
-                contained = candidate.containsFrom();
-                break;
-            case ID:
-                contained = null != candidate.getMailId();
-                break;
-            case PRIORITY:
-                contained = candidate.containsPriority();
-                break;
-            case RECEIVED_DATE:
-                contained = candidate.containsReceivedDate();
-                break;
-            case SENT_DATE:
-                contained = candidate.containsSentDate();
-                break;
-            case SIZE:
-                contained = candidate.containsSize();
-                break;
-            case SUBJECT:
-                contained = candidate.containsSubject();
-                break;
-            case THREAD_LEVEL:
-                contained = candidate.containsThreadLevel();
-                break;
-            case TO:
-                contained = candidate.containsTo();
-                break;
+                case ACCOUNT_NAME:
+                    contained = candidate.containsAccountId() || candidate.containsAccountName();
+                    break;
+                case BCC:
+                    contained = candidate.containsBcc();
+                    break;
+                case CC:
+                    contained = candidate.containsCc();
+                    break;
+                case COLOR_LABEL:
+                    contained = candidate.containsColorLabel();
+                    break;
+                case CONTENT_TYPE:
+                    contained = candidate.containsContentType();
+                    break;
+                case DISPOSITION_NOTIFICATION_TO:
+                    contained = candidate.containsDispositionNotification();
+                    break;
+                case FLAGS:
+                    contained = candidate.containsFlags();
+                    break;
+                case FOLDER_ID:
+                    contained = true;
+                    break;
+                case FROM:
+                    contained = candidate.containsFrom();
+                    break;
+                case ID:
+                    contained = null != candidate.getMailId();
+                    break;
+                case PRIORITY:
+                    contained = candidate.containsPriority();
+                    break;
+                case RECEIVED_DATE:
+                    contained = candidate.containsReceivedDate();
+                    break;
+                case SENT_DATE:
+                    contained = candidate.containsSentDate();
+                    break;
+                case SIZE:
+                    contained = candidate.containsSize();
+                    break;
+                case SUBJECT:
+                    contained = candidate.containsSubject();
+                    break;
+                case THREAD_LEVEL:
+                    contained = candidate.containsThreadLevel();
+                    break;
+                case TO:
+                    contained = candidate.containsTo();
+                    break;
 
-            default:
-                contained = false;
-                break;
+                default:
+                    contained = false;
+                    break;
             }
         }
         return contained;
@@ -2317,10 +2335,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(
             fullName,
             fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                MailSortField.getField(sortCol),
-                OrderDirection.getOrderDirection(order),
-                searchTerm,
-                FIELDS_ID_INFO);
+            MailSortField.getField(sortCol),
+            OrderDirection.getOrderDirection(order),
+            searchTerm,
+            FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
@@ -3860,6 +3878,372 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             ret[i] = mails[i].getMailId();
         }
         return ret;
+    }
+
+    private static final int SUBFOLDERS_NOT_ALLOWED_ERROR_CODE = 2012;
+    private static final String SUBFOLDERS_NOT_ALLOWED_PREFIX = "IMAP";
+
+    @Override
+    public void archiveMailFolder(int days, String folderID, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException {
+
+        try {
+
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderID);
+            int accountId = fa.getAccountId();
+            initConnection(accountId);
+
+            // Check archive full name
+            int[] separatorRef = new int[1];
+            String archiveFullname = checkArchiveFullNameFor(session, separatorRef, useDefaultName, createIfAbsent);
+            char separator = (char) separatorRef[0];
+
+            // Check location
+            {
+                String fullName = fa.getFullname();
+                if (fullName.equals(archiveFullname) || fullName.startsWith(archiveFullname + separator)) {
+                    return;
+                }
+            }
+
+            // Move to archive folder
+            Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.add(Calendar.DATE, days * -1);
+
+            ReceivedDateTerm term = new ReceivedDateTerm(ComparisonType.LESS_THAN, cal.getTime());
+            MailMessage[] msgs = mailAccess.getMessageStorage().searchMessages(fa.getFullname(), null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, term, new MailField[] { MailField.ID, MailField.RECEIVED_DATE });
+            if (null == msgs || msgs.length <= 0) {
+                return;
+            }
+
+            Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
+            for (MailMessage mailMessage : msgs) {
+                Date receivedDate = mailMessage.getReceivedDate();
+                cal.setTime(receivedDate);
+                Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
+                List<String> ids = map.get(year);
+                if (null == ids) {
+                    ids = new LinkedList<String>();
+                    map.put(year, ids);
+                }
+                ids.add(mailMessage.getMailId());
+            }
+
+            for (Map.Entry<Integer, List<String>> entry : map.entrySet()) {
+                String sYear = entry.getKey().toString();
+                String fn = archiveFullname + separator + sYear;
+                if (!mailAccess.getFolderStorage().exists(fn)) {
+                    final MailFolderDescription toCreate = new MailFolderDescription();
+                    toCreate.setAccountId(accountId);
+                    toCreate.setParentAccountId(accountId);
+                    toCreate.setParentFullname(archiveFullname);
+                    toCreate.setExists(false);
+                    toCreate.setFullname(fn);
+                    toCreate.setName(sYear);
+                    toCreate.setSeparator(separator);
+                    {
+                        final DefaultMailPermission mp = new DefaultMailPermission();
+                        mp.setEntity(session.getUserId());
+                        final int p = MailPermission.ADMIN_PERMISSION;
+                        mp.setAllPermission(p, p, p, p);
+                        mp.setFolderAdmin(true);
+                        mp.setGroupPermission(false);
+                        toCreate.addPermission(mp);
+                    }
+                    mailAccess.getFolderStorage().createFolder(toCreate);
+                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+                }
+
+                List<String> ids = entry.getValue();
+                mailAccess.getMessageStorage().moveMessages(fa.getFullname(), fn, ids.toArray(new String[ids.size()]), true);
+            }
+
+            return;
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public List<ArchiveDataWrapper> archiveMail(final String folderID, List<String> ids, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+
+        final List<ArchiveDataWrapper> retval = new ArrayList<ArchiveDataWrapper>();
+
+        // Expect array of identifiers: ["1234","1235",...,"1299"]
+        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderID);
+        initConnection(fa.getAccountId());
+
+        // Check archive full name
+        int[] separatorRef = new int[1];
+        String archiveFullname = checkArchiveFullNameFor(session, separatorRef, useDefaultName, createIfAbsent);
+        char separator = (char) separatorRef[0];
+
+        // Check location
+        {
+            String fullName = fa.getFullname();
+            if (fullName.equals(archiveFullname) || fullName.startsWith(archiveFullname + separator)) {
+                return null;
+            }
+        }
+
+        String fullName = fa.getFullname();
+        MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, ids.toArray(new String[ids.size()]), new MailField[] { MailField.ID, MailField.RECEIVED_DATE });
+        if (null == msgs || msgs.length <= 0) {
+            return null;
+        }
+        try {
+            move2Archive(msgs, fullName, archiveFullname, separator, retval);
+        } catch (final OXException e) {
+            if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
+            }
+            throw e;
+        }
+        return retval;
+    }
+
+    @Override
+    public List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> entries, final ServerSession session, final boolean useDefaultName, final boolean createIfAbsent) throws OXException {
+        // Expect array of objects: [{"folder":"INBOX/foo", "id":"1234"},{"folder":"INBOX/foo", "id":"1235"},...,{"folder":"INBOX/bar", "id":"1299"}]
+        TIntObjectMap<Map<String, List<String>>> m = new TIntObjectHashMap<Map<String, List<String>>>(2);
+        final List<ArchiveDataWrapper> retval = new ArrayList<ArchiveDataWrapper>();
+        // Parse JSON body
+        for (String[] obj : entries) {
+
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj[0]);
+            int accountId = fa.getAccountId();
+
+            Map<String, List<String>> map = m.get(accountId);
+            if (null == map) {
+                map = new HashMap<String, List<String>>();
+                m.put(accountId, map);
+            }
+
+            String fullName = fa.getFullname();
+            List<String> list = map.get(fullName);
+            if (null == list) {
+                list = new LinkedList<String>();
+                map.put(fullName, list);
+            }
+
+            list.add(obj[1]);
+        }
+
+        // Iterate map
+        final Reference<OXException> exceptionRef = new Reference<OXException>();
+        final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        boolean success = m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
+
+            @Override
+            public boolean execute(int accountId, Map<String, List<String>> mapping) {
+                boolean proceed = false;
+                try {
+                    initConnection(accountId);
+
+                    // Check archive full name
+                    int[] separatorRef = new int[1];
+                    String archiveFullname = checkArchiveFullNameFor(session, separatorRef, useDefaultName, createIfAbsent);
+                    char separator = (char) separatorRef[0];
+
+                    // Move to archive folder
+                    for (Map.Entry<String, List<String>> mappingEntry : mapping.entrySet()) {
+                        String fullName = mappingEntry.getKey();
+
+                        // Check location
+                        if (!fullName.equals(archiveFullname) && !fullName.startsWith(archiveFullname + separator)) {
+                            List<String> mailIds = mappingEntry.getValue();
+
+                            MailMessage[] msgs = mailAccess.getMessageStorage().getMessages(fullName, mailIds.toArray(new String[mailIds.size()]), new MailField[] { MailField.ID, MailField.RECEIVED_DATE });
+                            if (null == msgs || msgs.length <= 0) {
+                                return true;
+                            }
+                                move2Archive(msgs, fullName, archiveFullname, separator, cal, retval);
+                        }
+                    }
+
+                    proceed = true;
+                } catch (OXException e) {
+                    if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                        exceptionRef.setValue(MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e));
+                    } else {
+                        exceptionRef.setValue(e);
+                    }
+                }
+                return proceed;
+            }
+        });
+
+        if (!success) {
+            throw exceptionRef.getValue();
+        }
+
+        return retval;
+    }
+
+    private void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, List<ArchiveDataWrapper> result) throws OXException {
+        Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        move2Archive(msgs, fullName, archiveFullname, separator, cal, result);
+    }
+
+    private void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, List<ArchiveDataWrapper> result) throws OXException {
+        Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
+        for (MailMessage mailMessage : msgs) {
+            Date receivedDate = mailMessage.getReceivedDate();
+            cal.setTime(receivedDate);
+            Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
+            List<String> ids = map.get(year);
+            if (null == ids) {
+                ids = new LinkedList<String>();
+                map.put(year, ids);
+            }
+            ids.add(mailMessage.getMailId());
+        }
+
+        int accountId = mailAccess.getAccountId();
+        Session session = mailAccess.getSession();
+        for (Map.Entry<Integer, List<String>> entry : map.entrySet()) {
+            String sYear = entry.getKey().toString();
+            String fn = archiveFullname + separator + sYear;
+            StringBuilder sb = new StringBuilder("default").append(mailAccess.getAccountId()).append(separator).append(fn);
+            result.add(new ArchiveDataWrapper(sb.toString(), !mailAccess.getFolderStorage().exists(fn)));
+            if (!mailAccess.getFolderStorage().exists(fn)) {
+                final MailFolderDescription toCreate = new MailFolderDescription();
+                toCreate.setAccountId(accountId);
+                toCreate.setParentAccountId(accountId);
+                toCreate.setParentFullname(archiveFullname);
+                toCreate.setExists(false);
+                toCreate.setFullname(fn);
+                toCreate.setName(sYear);
+                toCreate.setSeparator(separator);
+                {
+                    final DefaultMailPermission mp = new DefaultMailPermission();
+                    mp.setEntity(session.getUserId());
+                    final int p = MailPermission.ADMIN_PERMISSION;
+                    mp.setAllPermission(p, p, p, p);
+                    mp.setFolderAdmin(true);
+                    mp.setGroupPermission(false);
+                    toCreate.addPermission(mp);
+                }
+                mailAccess.getFolderStorage().createFolder(toCreate);
+                CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+            }
+
+            List<String> ids = entry.getValue();
+            mailAccess.getMessageStorage().moveMessages(fullName, fn, ids.toArray(new String[ids.size()]), true);
+        }
+    }
+
+    /**
+     * Checks the archive full name for given arguments
+     *
+     * @param session
+     * @param separatorRef
+     * @param useDefaultName
+     * @param createIfAbsent
+     * @return The archive full name
+     * @throws OXException If checking archive full name fails
+     */
+    private String checkArchiveFullNameFor(final ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
+        final int accountId = mailAccess.getAccountId();
+
+        MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailAccountStorageService.class.getName());
+        }
+        MailAccount mailAccount = service.getMailAccount(accountId, session.getUserId(), session.getContextId());
+
+        // Check archive full name
+        char separator;
+        String archiveFullName = mailAccount.getArchiveFullname();
+        final String parentFullName;
+        String archiveName;
+        if (Strings.isEmpty(archiveFullName)) {
+            archiveName = mailAccount.getArchive();
+            boolean updateAccount = false;
+            if (Strings.isEmpty(archiveName)) {
+                final User user = session.getUser();
+                if (!useDefaultName) {
+                    final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
+                    throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
+                }
+                // Select default name for archive folder
+                archiveName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
+                updateAccount = true;
+            }
+            final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
+            if (Strings.isEmpty(prefix)) {
+                separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+                archiveFullName = archiveName;
+                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+            } else {
+                separator = prefix.charAt(prefix.length() - 1);
+                archiveFullName = new StringBuilder(prefix).append(archiveName).toString();
+                parentFullName = prefix.substring(0, prefix.length() - 1);
+            }
+            // Update mail account
+            if (updateAccount) {
+                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    final String af = archiveFullName;
+                    ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            final MailAccountDescription mad = new MailAccountDescription();
+                            mad.setId(accountId);
+                            mad.setArchiveFullname(af);
+                            mass.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
+                            return null;
+                        }
+                    });
+                }
+            }
+        } else {
+            separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+            final int pos = archiveFullName.lastIndexOf(separator);
+            if (pos > 0) {
+                parentFullName = archiveFullName.substring(0, pos);
+                archiveName = archiveFullName.substring(pos + 1);
+            } else {
+                parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                archiveName = archiveFullName;
+            }
+        }
+        if (!mailAccess.getFolderStorage().exists(archiveFullName)) {
+            if (!createIfAbsent) {
+                throw MailExceptionCode.FOLDER_NOT_FOUND.create(archiveFullName);
+            }
+            final MailFolderDescription toCreate = new MailFolderDescription();
+            toCreate.setAccountId(accountId);
+            toCreate.setParentAccountId(accountId);
+            toCreate.setParentFullname(parentFullName);
+            toCreate.setExists(false);
+            toCreate.setFullname(archiveFullName);
+            toCreate.setName(archiveName);
+            toCreate.setSeparator(separator);
+            {
+                final DefaultMailPermission mp = new DefaultMailPermission();
+                mp.setEntity(session.getUserId());
+                final int p = MailPermission.ADMIN_PERMISSION;
+                mp.setAllPermission(p, p, p, p);
+                mp.setFolderAdmin(true);
+                mp.setGroupPermission(false);
+                toCreate.addPermission(mp);
+            }
+            mailAccess.getFolderStorage().createFolder(toCreate);
+            CacheFolderStorage.getInstance().removeFromCache(parentFullName, "0", true, session);
+        }
+
+        separatorRef[0] = separator;
+        return archiveFullName;
     }
 
 }
