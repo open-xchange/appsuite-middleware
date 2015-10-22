@@ -1,16 +1,16 @@
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011, 2012.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2012, 2013, 2014.
 # Antje Faber, 2011.
-# Nicolas Ternisien <nicolas@bureau-cornavin.com>, 2014.
+# Nicolas Ternisien <nicolas@bureau-cornavin.com>, 2014, 2015.
 # Sandrine Burriel <sandrine@bureau-cornavin.com>, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-16 20:15+0900\n"
-"Last-Translator: Sandrine <sandrine@bureau-cornavin.com>\n"
-"Language-Team: French <>\n"
+"PO-Revision-Date: 2015-10-19 19:30+0200\n"
+"Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
+"Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1749,7 +1749,7 @@ msgstr "Mot de passe"
 
 #. The folder you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid "The folder you requested does not exist."
 msgstr "Le dossier que vous avez demandé n'existe pas."
 
@@ -1765,22 +1765,19 @@ msgstr "La version du fichier que vous avez demandée n'existe pas."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid ""
 "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
 msgstr ""
 "Un dossier nommé « %1$s » existe déjà en dessous du dossier parent « %2$s »."
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
-#. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
 "folder \"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits requis pour créer un sous-dossier en dessous "
-"du dossier « %1$s »."
+"Vous n'avez pas les droits requis pour créer un sous-dossier en dessous du "
+"dossier « %1$s »."
 
 #. In order to accomplish the search, %1$d or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
@@ -2334,32 +2331,37 @@ msgstr "Type du dossier"
 msgid "Folder"
 msgstr "Dossier"
 
+#. Search within a certain account of a module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:79
+msgid "Account"
+msgstr "Compte"
+
 #. ------------------------- i18n strings for folder types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:83
 msgid "Private"
 msgstr "Privé"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:85
 msgid "Public"
 msgstr "Public"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:87
 msgid "Shared"
 msgstr "Partagé"
 
 #. ------------------------- i18n strings for facet values -------------------------------------- //
 #. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
 msgid "last week"
 msgstr "la semaine dernière"
 
 #. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:95
 msgid "last month"
 msgstr "le mois dernier"
 
 #. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:98
 msgid "last year"
 msgstr "l'année dernière"
 
@@ -2999,6 +3001,7 @@ msgid "No administer permission specified for folder"
 msgstr "Pas de droits d'administration spécifiés pour le dossier"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Default folder must not be updated"
 msgstr "Le dossier par défaut ne doit pas être mis à jour"
 
@@ -3788,8 +3791,7 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to access the mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits requis pour accéder au dossier de courrier "
-"%1$s"
+"Vous n'avez pas les droits requis pour accéder au dossier de courrier %1$s"
 
 #. *
 #. * No read access on mail folder %1$s
@@ -3805,8 +3807,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits requis pour supprimer le dossier de courrier "
-"%1$s"
+"Vous n'avez pas les droits requis pour supprimer le dossier de courrier %1$s"
 
 #. *
 #. * No insert access on mail folder %1$s
@@ -3815,8 +3816,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to insert to mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits requis pour ajouter dans le dossier de "
-"courrier %1$s"
+"Vous n'avez pas les droits requis pour ajouter dans le dossier de courrier "
+"%1$s"
 
 #. *
 #. * No administer access on mail folder %1$s
@@ -3825,8 +3826,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to administer mail folder %1$s"
 msgstr ""
-"Vous n'avez pas les droits requis pour administrer le dossier de "
-"courrier %1$s"
+"Vous n'avez pas les droits requis pour administrer le dossier de courrier "
+"%1$s"
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -4652,79 +4653,78 @@ msgstr "Élément tronqué : %s"
 msgid "You do not have a valid session. Please login again."
 msgstr "Vous n'avez pas de session valide. Veuillez vous reconnecter."
 
-#. You do not have appropriate permissions to view the folder \"%1$s\".
+#. You do not have appropriate permissions to view the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
-msgstr "Vous n'avez pas les droits requis pour voir le dossier « %1$s »."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Vous n'avez pas les droits requis pour voir le dossier."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:67
-msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
-msgstr ""
-"Le dossier « %1$s » n'est pas visible par l'utilisateur « %2$s » dans le "
-"contexte « %3$s »"
+#. "The content type you provided is not allowed for the given folder.";
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:68
+msgid "The content type you provided is not allowed for the given folder."
+msgstr "Le type de contenu fourni n'est pas autorisé dans le dossier précisé."
 
-#. "The content type you provided is not allowed for the given folder \"%1$s\".";
+#. You do not have appropriate permissions to move the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
-msgid ""
-"The content type you provided is not allowed for the given folder \"%1$s\"."
-msgstr ""
-"Le type de contenu que vous avez saisi n'est pas permis pour le dossier "
-"« %1$s » indiqué ."
+msgid "You do not have appropriate permissions to move the folder."
+msgstr "Vous n'avez pas les droits nécessaires pour déplacer le dossier."
 
-#. Move of the folder \"%1$s\" is not supported.
+#. A folder named "%1$s" already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-msgid "Move of the folder \"%1$s\" is not permitted."
-msgstr "Il n'est pas permis de déplacer le dossier « %1$s »."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
+msgid "A folder named \"%1$s\" already exists."
+msgstr "Un dossier nommé « %1$s » existe déjà."
 
-#. You do not have the appropriate permissions to delete the folder \"%1$s\".
+#. You do not have the appropriate permissions to delete the folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
+msgid "You do not have the appropriate permissions to delete the folder."
+msgstr "Vous n'avez pas les droits nécessaires pour supprimer le dossier."
+
+#. You do not have the appropriate permissions to move the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:83
-msgid ""
-"You do not have the appropriate permissions to delete the folder \"%1$s\"."
-msgstr "Vous n'avez pas les droits requis pour supprimer le dossier « %1$s »."
+msgid "You do not have the appropriate permissions to move the folder."
+msgstr "Vous n'avez pas les droits nécessaires pour déplacer le dossier."
 
-#. You do not have the appropriate permissions to move the folder \"%1$s\".
+#. You do not have the appropriate permissions to create a subfolder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:86
-msgid ""
-"You do not have the appropriate permissions to move the folder \"%1$s\"."
-msgstr "Vous n'avez pas les droits requis pour déplacer le dossier « %1$s »."
+msgid "You do not have the appropriate permissions to create a subfolder."
+msgstr "Vous n'avez pas les droits nécessaires pour créer un sous-dossier."
 
 #. It is not allowed to create a mail folder allowed below a public folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid "It is not allowed to create a mail folder below a public folder."
 msgstr ""
 "Il n'est pas permis de créer un dossier de courrier sous un dossier public."
 
 #. The folder name "%1$s" is reserved. Please choose another name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:120
 msgid "The folder name \"%1$s\" is reserved. Please choose another name."
 msgstr "Le nom de dossier « %1$s » est réservé. Veuillez choisir un autre nom."
 
-#. Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two
-#. folders with the same name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:99
+#. Found two folders named "%1$s" located below the parent folder. Please rename one of the folders. There should be no two folders with the same name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:95
 msgid ""
-"Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
-"Please rename one of the folders. There should be no two folders with the "
-"same name."
+"Found two folders named \"%1$s\" located below the parent folder. Please "
+"rename one of the folders. There should be no two folders with the same name."
 msgstr ""
-"Il y a deux dossiers nommés « %1$s » en dessous du dossier parent « %2$s ». "
-"Veuillez renommer l'un des deux, car deux dossiers ne peuvent pas porter le "
-"même nom."
+"Deux dossiers nommés « %1$s » ont été trouvés dans le dossier parent. "
+"Veuillez renommer l'un des dossiers. Il ne peut y avoir deux dossiers du même "
+"nom."
 
-#. Failed to delete following folder/s: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:102
-msgid "Failed to delete following folder/s: %1$s"
-msgstr "Impossible de supprimer le ou les dossiers suivants : %1$s"
+#. Failed to delete all folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
+msgid "Failed to delete all folders"
+msgstr "Impossible de supprimer tous les dossiers"
 
-#. The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:105
+#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
 msgid ""
-"The folder \"%1$s\" was not updated due to possible data loss. Please review "
-"the warnings for details."
+"The folder was not updated due to possible data loss. Please review the "
+"warnings for details."
 msgstr ""
-"Le dossier « %1$s » n'a pas été mis à jour car des données risquent d'être "
-"perdues. Pour plus de détails, veuillez consulter les avertissements."
+"Le dossier n'a pas été actualisé, du fait d'une potentielle perte de données. "
+"Veuillez vérifier les avertissements pour plus d'informations."
 
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -4799,6 +4799,11 @@ msgid "The display name \"%1$s\" is reserved. Please choose another one."
 msgstr ""
 "Le nom d'affichage « %1$s » est réservé. Veuillez choisir un autre nom."
 
+#. Group contains a guest user %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:110
+msgid "Group contains a guest user %1$d."
+msgstr "Le groupe contient un utilisateur invité %1$d."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:61
 msgid "Attachment cannot be saved. File store limit is exceeded."
 msgstr ""
@@ -4872,8 +4877,8 @@ msgid ""
 "You do not have the appropriate permissions to read appointments in folder "
 "%1$d."
 msgstr ""
-"Vous n'avez pas les droits requis pour lire les rendez-vous dans le "
-"dossier %1$d."
+"Vous n'avez pas les droits requis pour lire les rendez-vous dans le dossier "
+"%1$d."
 
 #. *
 #. * End date must not be before start date.
@@ -5117,8 +5122,8 @@ msgid ""
 "You do not have the appropriate permission to access objects in the folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits requis pour accéder aux objets dans le "
-"dossier « %1$s »."
+"Vous n'avez pas les droits requis pour accéder aux objets dans le dossier "
+"« %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid "Unable to scale image down."
@@ -6836,8 +6841,9 @@ msgstr "Vous n'avez pas les droits requis pour supprimer cette version."
 
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
-msgid "The document is already locked. Please try again later."
-msgstr "Ce document est déjà verrouillé. Veuillez réessayer plus tard."
+msgid "The document is currently locked. Please try again later."
+msgstr ""
+"Le document est actuellement verrouillé. Veuillez réessayer ultérieurement."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
@@ -7373,8 +7379,7 @@ msgid ""
 "You do not have the appropriate permissions to read the contents of folder "
 "\"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits requis pour lire le contenu du dossier "
-"« %1$s »."
+"Vous n'avez pas les droits requis pour lire le contenu du dossier « %1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -7412,8 +7417,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to edit tasks in folder \"%1$s\"."
 msgstr ""
-"Vous n'avez pas les droits requis pour modifier des tâches dans le "
-"dossier « %1$s »."
+"Vous n'avez pas les droits requis pour modifier des tâches dans le dossier « "
+"%1$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into shared folder \"%1$s\" is not allowed."
@@ -7469,8 +7474,8 @@ msgid ""
 "You do not have the appropriate permisson to see the task %1$d in folder "
 "%2$s."
 msgstr ""
-"Vous n'avez pas les droits requis pour voir la tâche %1$d dans le "
-"dossier %2$s."
+"Vous n'avez pas les droits requis pour voir la tâche %1$d dans le dossier "
+"%2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
@@ -7879,10 +7884,6 @@ msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr ""
 "Nom de dossier non valable. Veuillez éviter les caractères suivants : %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
-msgid "A folder named \"%1$s\" already exists."
-msgstr "Un dossier nommé « %1$s » existe déjà."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "No create access on mail folder \"%1$s\"."
 msgstr "Pas d'accès en création au dossier de courrier « %1$s »."
@@ -8040,12 +8041,12 @@ msgstr ""
 "dépassé. Le maximum est de %1$s."
 
 #. The client request is not permitted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:187
 msgid "The client request is not permitted."
 msgstr "La requête client n'est pas autorisée."
 
 #. Sending the message denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:190
 msgid "Sending the message denied."
 msgstr "Refus d'envoi du message."
 
@@ -8152,8 +8153,8 @@ msgid ""
 "You do not have the appropriate permissions to change the content of folder "
 "\"%1$s\" on mail server %2$s."
 msgstr ""
-"Vous n'avez pas les droits requis pour modifier le contenu du dossier « "
-"%1$s » sur le serveur de courrier %2$s."
+"Vous n'avez pas les droits requis pour modifier le contenu du dossier « %1$s "
+"» sur le serveur de courrier %2$s."
 
 #. *
 #. * Invalid search expression: %1$s
@@ -8306,8 +8307,8 @@ msgid ""
 "You do not have the appropriate permissions to delete the default mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits requis pour supprimer le compte de courrier "
-"par défaut."
+"Vous n'avez pas les droits requis pour supprimer le compte de courrier par "
+"défaut."
 
 #. You do not have the appropriate permissions to update the default mail account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
@@ -8315,8 +8316,8 @@ msgid ""
 "You do not have the appropriate permissions to update the default mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits requis pour mettre à jour le compte de "
-"courrier par défaut."
+"Vous n'avez pas les droits requis pour mettre à jour le compte de courrier "
+"par défaut."
 
 #. The default mail account already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
@@ -8346,8 +8347,7 @@ msgid ""
 "You do not have the appropriate permissions to create more than one mail "
 "account."
 msgstr ""
-"Vous n'avez pas les droits requis pour créer plus d'un compte de "
-"courrier."
+"Vous n'avez pas les droits requis pour créer plus d'un compte de courrier."
 
 #. A mail account with the given E-Mail address already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
@@ -8487,10 +8487,6 @@ msgstr ""
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Vous n'avez pas les droits requis pour le module « %2$s »."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
-msgid "You do not have appropriate permissions to view the folder."
-msgstr "Vous n'avez pas les droits requis pour voir le dossier."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "Les dossiers partagés ne sont pas disponibles avec votre compte."
@@ -8512,8 +8508,8 @@ msgid ""
 "The folder has been changed in the meantime. Please reload the view and try "
 "again."
 msgstr ""
-"Le dossier a changé entre-temps. Veuillez actualiser l'affichage et "
-"essayer à nouveau."
+"Le dossier a changé entre-temps. Veuillez actualiser l'affichage et essayer "
+"à nouveau."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
 msgid "This operation requires administrative permissions for the folder."
@@ -8578,15 +8574,12 @@ msgstr "Le dossier est un dossier système et ne peut pas être déplacé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
 msgid "The private folder can only be moved to another private folder."
-msgstr ""
-"Le dossier privé ne peut être déplacé que vers un autre dossier "
-"privé."
+msgstr "Le dossier privé ne peut être déplacé que vers un autre dossier privé."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
 msgid "The public folder can only be moved to another public folder."
 msgstr ""
-"Le dossier public ne peut être déplacé que vers un autre dossier "
-"public."
+"Le dossier public ne peut être déplacé que vers un autre dossier public."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
@@ -8608,8 +8601,7 @@ msgstr "Le dossier est un dossier par défaut et ne peut pas être supprimé."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:95
 msgid "You do not have appropriate permissions to delete all contained items."
 msgstr ""
-"Vous n'avez pas les droits requis pour supprimer tous les éléments "
-"contenus."
+"Vous n'avez pas les droits requis pour supprimer tous les éléments contenus."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:96
 msgid "The folder cannot be be moved to one of its subfolders."
@@ -8647,8 +8639,8 @@ msgid ""
 "Only the owner of the parent shared folder may hold administrative "
 "permissions."
 msgstr ""
-"Seul le propriétaire du dossier partagé parent peut détenir les "
-"droits administratifs."
+"Seul le propriétaire du dossier partagé parent peut détenir les droits "
+"administratifs."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:102
 msgid ""
@@ -8665,23 +8657,24 @@ msgstr "Vous n'avez pas les droits requis pour partager le dossier."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
 msgid "It is not possible to apply the changes due to limited permissions"
 msgstr ""
-"Il n'est pas possible d'appliquer les modifications du fait de droits limités."
+"Il n'est pas possible d'appliquer les modifications du fait de droits "
+"limités."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
 "The folder cannot be deleted since it contains a hidden subfolder you don't "
 "have the appropriate permissions for."
 msgstr ""
-"Le dossier ne peut pas être supprimé, car il contient un sous-"
-"dossier caché sur lequel vous n'avez pas les droits requis."
+"Le dossier ne peut pas être supprimé, car il contient un sous-dossier caché "
+"sur lequel vous n'avez pas les droits requis."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
 msgid ""
 "The folder already contains a folder with such a name. Please choose a "
 "different name and try again."
 msgstr ""
-"Le dossier contient déjà un dossier portant ce nom. Veuillez "
-"choisir un autre nom et réessayer."
+"Le dossier contient déjà un dossier portant ce nom. Veuillez choisir un "
+"autre nom et réessayer."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid "The folder name contains invalid characters."
@@ -8747,6 +8740,11 @@ msgstr "Les droits administratifs ont été restaurés."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "You must enter a folder name."
 msgstr "Vous devez saisir un nom de dossier."
+
+#. You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:129
+msgid "You are not allowed to share the folder to \"%2$s\""
+msgstr "Vous ne pouvez pas partager le dossier avec \"%2$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -8898,9 +8896,49 @@ msgstr "%1$s a partagé le dossier « %2$s » avec vous."
 msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s a partagé %2$s dossiers avec vous."
 
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:89
+msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s a partagé le fichier « %2$s » avec le groupe « %3$s »."
+
+#. * $username has shared $number_of_files files with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
+msgid "%1$s has shared %2$s files with the group \"%3$s\"."
+msgstr "%1$s a partagé les %2$s fichiers avec le groupe « %3$s »."
+
+#. * $username has shared image "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
+msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s a partagé l'image « %2$s »avec le groupe « %3$s »."
+
+#. * $username has shared $number_of_images images with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
+msgid "%1$s has shared %2$s images with the group \"%3$s\"."
+msgstr "%1$s a partagé les %2$s images avec le groupe « %3$s »."
+
+#. * $username has shared item "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
+msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s a partagé l'élément « %2$s »avec le groupe « %3$s »."
+
+#. * $username has shared $number items with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
+msgid "%1$s has shared %2$s items with the group \"%3$s\"."
+msgstr "%1$s a partagé les %2$s éléments avec le groupe « %3$s »."
+
+#. * $username has shared folder "$folder" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
+msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s a partagé le dossier « %2$s »avec le groupe « %3$s »."
+
+#. * $username has shared $number folders with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
+msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
+msgstr "%1$s a partagé les %2$s dossiers avec le groupe « %3$s »."
+
 #. detailed body
 #. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:114
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
@@ -8909,7 +8947,7 @@ msgstr ""
 "bouton ci-dessous pour l'afficher."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:117
 msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
@@ -8918,7 +8956,7 @@ msgstr ""
 "bouton ci-dessous pour les afficher."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:120
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
@@ -8927,7 +8965,7 @@ msgstr ""
 "bouton ci-dessous pour l'afficher."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:123
 msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
@@ -8936,7 +8974,7 @@ msgstr ""
 "ci-dessous pour les afficher."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:126
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
@@ -8945,7 +8983,7 @@ msgstr ""
 "bouton ci-dessous pour l'afficher."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:129
 msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
@@ -8954,7 +8992,7 @@ msgstr ""
 "ci-dessous pour les afficher."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:132
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
 "below to view it."
@@ -8963,7 +9001,7 @@ msgstr ""
 "bouton ci-dessous pour l'afficher."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:135
 msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
@@ -8971,8 +9009,87 @@ msgstr ""
 "%1$s (%2$s) a partagé %3$s dossiers avec vous. Veuillez cliquer sur le "
 "bouton ci-dessous pour les afficher."
 
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:138
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) a partagé le fichier « %3$s » avec le groupe « %4$s ». Veuillez "
+"cliquer sur le bouton ci-dessous pour l'afficher."
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s fichiers avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour les afficher."
+
+#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) a partagé l'image « %3$s » avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour l'afficher."
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s images avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour les afficher."
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) a partagé l'élément « %3$s » avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour l'afficher."
+
+#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s éléments avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour les afficher."
+
+#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) a partagé le dossier « %3$s » avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour l'afficher."
+
+#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s dossiers avec le groupe « %4$s ». Veuillez "
+"cliquer sur le "
+"bouton ci-dessous pour les afficher."
+
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:163
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
 msgstr ""
@@ -8980,13 +9097,13 @@ msgstr ""
 "message :"
 
 #. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:166
 msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
 msgstr ""
 "%1$s (%2$s) a partagé %3$s fichiers avec vous et vous a laissé un message :"
 
 #. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:169
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
 msgstr ""
@@ -8994,13 +9111,13 @@ msgstr ""
 "message :"
 
 #. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:172
 msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
 msgstr ""
 "%1$s (%2$s) a partagé %3$s images avec vous et vous a laissé un message :"
 
 #. * $username ($user_email) has shared a folder with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:175
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
 msgstr ""
@@ -9008,7 +9125,7 @@ msgstr ""
 "message :"
 
 #. * $username ($user_email) has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
 msgstr ""
@@ -9016,65 +9133,135 @@ msgstr ""
 "message :"
 
 #. * $username ($user_email) has shared $number_of_items items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
 msgstr ""
 "%1$s (%2$s) a partagé %3$s éléments avec vous et vous a laissé un message :"
 
 #. * $username ($user_email) has shared $number_of_folder items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
 msgstr ""
 "%1$s (%2$s) a partagé %3$s dossiers avec vous et vous a laissé un message :"
 
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) a partagé le fichier « %3$s » avec le groupe « %4$s » et a laissé "
+"un message :"
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s fichiers avec le groupe « %4$s » et a laissé "
+"un message :"
+
+#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) a partagé l'image « %3$s » avec le groupe « %4$s » et a laissé un "
+"message :"
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s images avec le groupe « %4$s » et a laissé un "
+"message :"
+
+#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
+msgstr ""
+"%1$s (%2$s) a partagé le dossier « %3$s » avec le groupe « %4$s » et a laissé "
+"un message :"
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:202
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) a partagé l'élément « %3$s » avec le groupe « %4$s » et a laissé "
+"un message :"
+
+#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:205
+msgid ""
+"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s éléments avec le groupe « %4$s » et a laissé "
+"un message :"
+
+#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:208
+msgid ""
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) a partagé les %3$s dossiers avec le groupe « %4$s » et a laissé "
+"un message :"
+
 #. button with label
 #. * View image
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
 msgid "View image"
 msgstr "Voir l'image"
 
 #. * View images
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
 msgid "View images"
 msgstr "Voir les images"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
 msgid "View file"
 msgstr "Voir le fichier"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:221
 msgid "View files"
 msgstr "Voir les fichiers"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:224
 msgid "View folder"
 msgstr "Voir le dossier"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:227
 msgid "View folders"
 msgstr "Voir les dossiers"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:230
 msgid "View item"
 msgstr "Voir l'élément"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
 msgstr "Voir les éléments"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
 msgid "The link will expire on %1$s"
 msgstr "Le lien expirera le %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr ""
@@ -9087,16 +9274,16 @@ msgstr ""
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:248
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Mot de passe oublié ?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
 msgid "Hello,"
 msgstr "Bonjour,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -9105,12 +9292,12 @@ msgstr ""
 "définir un nouveau mot de passe ici :"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
 msgid "Set password"
 msgstr "Définir mot de passe"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:259
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -9120,12 +9307,12 @@ msgstr ""
 "bouton ci-dessus et définissez un nouveau mot de passe."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:262
 msgid "This is an automated message, please do not reply."
 msgstr "Ce message est envoyé automatiquement, veuillez ne pas y répondre."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:265
 msgid "unknown"
 msgstr "inconnu"
 
@@ -9143,23 +9330,15 @@ msgstr "fichier"
 msgid "folder"
 msgstr "dossier"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
+#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 msgstr ""
 "%1$s a partagé l'objet %2$s « %3$s » avec vous. Veuillez vous connecter pour "
 "l'afficher."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:70
-msgid "Files have been shared with you. Please log in to view them. "
-msgstr ""
-"Des fichiers ont été partagés avec vous. Veuillez vous connecter pour les "
-"consulter."
-
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
-msgid "%1$s has shared some files with you. "
-msgstr "%1$s a partagé des fichiers avec vous. "
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -9167,17 +9346,217 @@ msgstr ""
 "Nous avons envoyé à %1$s un message comportant des instructions pour définir "
 "un nouveau mot de passe."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
 msgid "Please set a new password to regain access."
 msgstr "Veuillez définir un nouveau mot de passe pour rétablir votre accès."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
 msgid "The share you are looking for does not exist."
 msgstr "Le partage que vous recherchez n'existe pas."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
 msgid "We were unable to process your request."
 msgstr "Nous n'avons pas pu traiter votre requête."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid ""
+"The folder or item you are looking for is no longer available. Please click "
+"\"continue\" to view your other shares."
+msgstr ""
+"Le dossier ou l'élément que vous recherchez n'est plus disponible. Veuillez "
+"cliquer sur « Continuer » pour afficher les autres partages."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+msgid ""
+"Your guest account is currently not protected with a password. Resetting "
+"password will be aborted."
+msgstr ""
+"Votre compte invité n'est actuellement pas protégé à l'aide d'un mot de "
+"passe. La réinitialisation du mot de passe est annulée."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:103
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, cliquez sur « Continuer »."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, cliquez sur « Continuer »."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, cliquez sur « Continuer »."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, cliquez sur « Continuer »."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, cliquez sur « Continuer »."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, cliquez sur « Continuer »."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, veuillez vous authentifier."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, please log in."
+msgstr ""
+"L'accès au fichier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, veuillez vous authentifier."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, veuillez vous authentifier."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, please log "
+"in."
+msgstr ""
+"L'accès au dossier que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, veuillez vous authentifier."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter le "
+"propriétaire si vous souhaitez y accéder de nouveau. Pour afficher les autres "
+"fichiers partagés, veuillez vous authentifier."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, please log in."
+msgstr ""
+"L'accès au partage que vous recherchez a été supprimé. Veuillez contacter %"
+"1$s si vous souhaitez y accéder de nouveau. Pour afficher les autres fichiers "
+"partagés, veuillez vous authentifier."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
@@ -9215,8 +9594,8 @@ msgstr "Vous n'avez pas les droits requis pour modifier le partage."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
 msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
 msgstr ""
-"Vous n'avez pas les droits requis pour partager le dossier ou l'élément "
-"« %2$s »."
+"Vous n'avez pas les droits requis pour partager le dossier ou l'élément « "
+"%2$s »."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
 msgid "Module %1$s does not support sharing."
@@ -11791,6 +12170,65 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
+#~ msgstr "Vous n'avez pas les droits requis pour voir le dossier « %1$s »."
+
+#~ msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
+#~ msgstr ""
+#~ "Le dossier « %1$s » n'est pas visible par l'utilisateur « %2$s » dans le "
+#~ "contexte « %3$s »"
+
+#~ msgid ""
+#~ "The content type you provided is not allowed for the given folder \"%1$s"
+#~ "\"."
+#~ msgstr ""
+#~ "Le type de contenu que vous avez saisi n'est pas permis pour le dossier "
+#~ "« %1$s » indiqué ."
+
+#~ msgid "Move of the folder \"%1$s\" is not permitted."
+#~ msgstr "Il n'est pas permis de déplacer le dossier « %1$s »."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to delete the folder \"%1$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits requis pour supprimer le dossier « %1$s »."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to move the folder \"%1$s\"."
+#~ msgstr ""
+#~ "Vous n'avez pas les droits requis pour déplacer le dossier « %1$s »."
+
+#~ msgid ""
+#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
+#~ "\". Please rename one of the folders. There should be no two folders with "
+#~ "the same name."
+#~ msgstr ""
+#~ "Il y a deux dossiers nommés « %1$s » en dessous du dossier parent "
+#~ "« %2$s ». Veuillez renommer l'un des deux, car deux dossiers ne peuvent "
+#~ "pas porter le même nom."
+
+#~ msgid "Failed to delete following folder/s: %1$s"
+#~ msgstr "Impossible de supprimer le ou les dossiers suivants : %1$s"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" was not updated due to possible data loss. Please "
+#~ "review the warnings for details."
+#~ msgstr ""
+#~ "Le dossier « %1$s » n'a pas été mis à jour car des données risquent "
+#~ "d'être perdues. Pour plus de détails, veuillez consulter les "
+#~ "avertissements."
+
+#~ msgid "The document is already locked. Please try again later."
+#~ msgstr "Ce document est déjà verrouillé. Veuillez réessayer plus tard."
+
+#~ msgid "Files have been shared with you. Please log in to view them. "
+#~ msgstr ""
+#~ "Des fichiers ont été partagés avec vous. Veuillez vous connecter pour les "
+#~ "consulter."
+
+#~ msgid "%1$s has shared some files with you. "
+#~ msgstr "%1$s a partagé des fichiers avec vous. "
 
 #~ msgid ""
 #~ "You do not have appropriate permissions for the public folder \"%2$s\"."

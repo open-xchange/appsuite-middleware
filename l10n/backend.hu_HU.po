@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-09-14 09:35+0200\n"
+"PO-Revision-Date: 2015-10-11 12:08+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@bureau-cornavin.com>\n"
 "Language-Team: Hungarian <hu@bureau-cornavin.com>\n"
 "Language: hu\n"
@@ -1636,7 +1636,7 @@ msgstr "Jelszó"
 
 #. The folder you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid "The folder you requested does not exist."
 msgstr "A kért mappa nem létezik."
 
@@ -1652,15 +1652,12 @@ msgstr "A kért fájlverzió nem létezik."
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:77
 msgid ""
 "A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
 msgstr "Már létezik nevű mappa („%1$s”) a(z) „%2$s” szülőmappa alatt."
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
-#. You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid ""
 "You do not have the appropriate permissions to create a subfolder below the "
 "folder \"%1$s\"."
@@ -2160,32 +2157,37 @@ msgstr "Mappatípus"
 msgid "Folder"
 msgstr "Mappa"
 
+#. Search within a certain account of a module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:79
+msgid "Account"
+msgstr "Felhasználói fiók"
+
 #. ------------------------- i18n strings for folder types ------------------------------------- //
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:83
 msgid "Private"
 msgstr "Személyes"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:85
 msgid "Public"
 msgstr "Nyilvános"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:87
 msgid "Shared"
 msgstr "Megosztott"
 
 #. ------------------------- i18n strings for facet values -------------------------------------- //
 #. Search mails from last week
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:89
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
 msgid "last week"
 msgstr "múlt hét"
 
 #. Search mails from last month
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:95
 msgid "last month"
 msgstr "múlt hónap"
 
 #. Search mails from last year
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:98
 msgid "last year"
 msgstr "tavaly"
 
@@ -2780,6 +2782,7 @@ msgid "No administer permission specified for folder"
 msgstr "Nincs megadva adminisztrátori jogosultság a mappához"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Default folder must not be updated"
 msgstr "Az alapértelmezett mappát nem szabad frissíteni"
 
@@ -4207,69 +4210,72 @@ msgstr "Elem csonkítva: %s"
 msgid "You do not have a valid session. Please login again."
 msgstr "Nincs érvényes munkamenet. Jelentkezzen be újra."
 
-#. You do not have appropriate permissions to view the folder \"%1$s\".
+#. You do not have appropriate permissions to view the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:65
-msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) %1$s mappa megjelenítéséhez."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
+msgid "You do not have appropriate permissions to view the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa megjelenítéséhez."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:67
-msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
-msgstr "A(z) „%1$s” mappa nem látható a(z) „%3$s” kontextus „%2$s” felhasználója számára"
+#. "The content type you provided is not allowed for the given folder.";
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:68
+msgid "The content type you provided is not allowed for the given folder."
+msgstr "A megadott tartalomtípus nem engedélyezett a megadott mappához."
 
-#. "The content type you provided is not allowed for the given folder \"%1$s\".";
+#. You do not have appropriate permissions to move the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
-msgid ""
-"The content type you provided is not allowed for the given folder \"%1$s\"."
-msgstr "A megadott tartalomtípus nem engedélyezett a megadott „%1$s” mappához."
+msgid "You do not have appropriate permissions to move the folder."
+msgstr "Nincs megfelelő jogosultsága mappa áthelyezéséhez."
 
-#. Move of the folder \"%1$s\" is not supported.
+#. A folder named "%1$s" already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-msgid "Move of the folder \"%1$s\" is not permitted."
-msgstr "A(z) „%1$s” mappa áthelyezése nem engedélyezett."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
+msgid "A folder named \"%1$s\" already exists."
+msgstr "Már létezik „%1$s” nevű mappa."
 
-#. You do not have the appropriate permissions to delete the folder \"%1$s\".
+#. You do not have the appropriate permissions to delete the folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:80
+msgid "You do not have the appropriate permissions to delete the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa törléséhez."
+
+#. You do not have the appropriate permissions to move the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:83
-msgid ""
-"You do not have the appropriate permissions to delete the folder \"%1$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%1$s” mappa törléséhez."
+msgid "You do not have the appropriate permissions to move the folder."
+msgstr "Nincs megfelelő jogosultsága a mappa áthelyezéséhez."
 
-#. You do not have the appropriate permissions to move the folder \"%1$s\".
+#. You do not have the appropriate permissions to create a subfolder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:86
-msgid ""
-"You do not have the appropriate permissions to move the folder \"%1$s\"."
-msgstr "Nincs megfelelő jogosultsága a(z) „%1$s” mappa áthelyezéséhez."
+msgid "You do not have the appropriate permissions to create a subfolder."
+msgstr "Nincs megfelelő jogosultsága az almappa létrehozásához."
 
 #. It is not allowed to create a mail folder allowed below a public folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid "It is not allowed to create a mail folder below a public folder."
 msgstr "Nem engedélyezett a levélmappa létrehozása egy nyilvános mappa alatt."
 
 #. The folder name "%1$s" is reserved. Please choose another name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:120
 msgid "The folder name \"%1$s\" is reserved. Please choose another name."
 msgstr "A(z) \"%1$s\" mappanév foglalt. Válasszon másik nevet."
 
-#. Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two
-#. folders with the same name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:99
+#. Found two folders named "%1$s" located below the parent folder. Please rename one of the folders. There should be no two folders with the same name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:95
 msgid ""
-"Found two folders named \"%1$s\" located below the parent folder \"%2$s\". "
-"Please rename one of the folders. There should be no two folders with the "
-"same name."
-msgstr "Két „%1$s” nevű mappa található a(z) „%2$s” szülőmappa alatt. Nevezze át az egyik mappát. Nem lehetnek azonos nevű mappák."
+"Found two folders named \"%1$s\" located below the parent folder. Please "
+"rename one of the folders. There should be no two folders with the same name."
+msgstr "Két \"%1$s\" nevű mappa található szülőmappa alatt. Nevezze át az egyik mappát. Nem lehetnek azonos nevű mappák."
 
-#. Failed to delete following folder/s: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:102
-msgid "Failed to delete following folder/s: %1$s"
-msgstr "A következő mappák törlése meghiúsult: %1$s"
+#. Failed to delete all folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:98
+msgid "Failed to delete all folders"
+msgstr "Az összes mappa törlése sikertelen"
 
-#. The folder \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:105
+#. The folder was not updated due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:101
 msgid ""
-"The folder \"%1$s\" was not updated due to possible data loss. Please review "
-"the warnings for details."
-msgstr "A(z) \"%1$s\" mappa lehetséges adatvesztés miatt nem került frissítésre. Tekintse át a figyelmeztetés részleteit."
+"The folder was not updated due to possible data loss. Please review the "
+"warnings for details."
+msgstr "Lehetséges adatvesztés miatt a mappa nem került frissítésre. Tekintse át a figyelmeztetés részleteit."
 
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
@@ -4339,6 +4345,11 @@ msgstr "A(z) „%1$s” csoport nem módosítható."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:107
 msgid "The display name \"%1$s\" is reserved. Please choose another one."
 msgstr "A(z) \"%1$s\" megjelenő név foglalt. Válasszon másik nevet."
+
+#. Group contains a guest user %1$d.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:110
+msgid "Group contains a guest user %1$d."
+msgstr "A csoport %1$d vendégfelhasználót tartalmaz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:61
 msgid "Attachment cannot be saved. File store limit is exceeded."
@@ -5908,8 +5919,8 @@ msgstr "Nincs megfelelő jogosultsága ezen verzió törléséhez."
 
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
-msgid "The document is already locked. Please try again later."
-msgstr "A dokumentum már zárolva van. Próbálja újra később."
+msgid "The document is currently locked. Please try again later."
+msgstr "A dokumentum jelenleg zárolva van. Próbálja újra később."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
@@ -6817,10 +6828,6 @@ msgstr "A levélmappa nem hozható létre vagy nem nevezhető át. A mappanév �
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr "Érvénytelen mappanév. Ügyeljen rá, hogy ne használja a következő karaktereket: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
-msgid "A folder named \"%1$s\" already exists."
-msgstr "Már létezik „%1$s” nevű mappa."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "No create access on mail folder \"%1$s\"."
 msgstr "Nincs létrehozási hozzáférés a(z) „%1$s” levélmappához."
@@ -6950,12 +6957,12 @@ msgid ""
 msgstr "Túllépte az e-mailhez maximálisan csatolható fájlok számát. A maximális szám: %1$s."
 
 #. The client request is not permitted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:187
 msgid "The client request is not permitted."
 msgstr "Az ügyfélkérés nem megengedett."
 
 #. Sending the message denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:190
 msgid "Sending the message denied."
 msgstr "Az üzenet küldése letiltva."
 
@@ -7334,10 +7341,6 @@ msgstr "Kötelező mezők hiányoznak a megadott erőforrásban."
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr "Nincs megfelelő jogosultsága a(z) „%2$s” modulhoz."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:70
-msgid "You do not have appropriate permissions to view the folder."
-msgstr "Nincs megfelelő jogosultsága a mappa megjelenítéséhez."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
 msgstr "A megosztott mappák nem érhetők el a fiókjához."
@@ -7554,6 +7557,11 @@ msgstr "Az adminisztrátori jogosultságok visszaállítása megtörtént."
 msgid "You must enter a folder name."
 msgstr "Meg kell adnia egy mappanevet."
 
+#. You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:129
+msgid "You are not allowed to share the folder to \"%2$s\""
+msgstr "Nem megoszt meg mappát ezekkel: \"%2$s\""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr "A kért művelet nem engedélyezett nem biztonságos kapcsolaton."
@@ -7691,155 +7699,305 @@ msgstr "%1$s megosztotta a(z) \"%2$s\" mappát Önnel."
 msgid "%1$s has shared %2$d folders with you."
 msgstr "%1$s megosztott %2$s mappát Önnel."
 
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:89
+msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s megosztotta a(z) \"%2$s\" fájlt a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared $number_of_files files with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
+msgid "%1$s has shared %2$s files with the group \"%3$s\"."
+msgstr "%1$s megosztott %2$s fájlt a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared image "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
+msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s megosztotta a(z) \"%2$s\" képet a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared $number_of_images images with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
+msgid "%1$s has shared %2$s images with the group \"%3$s\"."
+msgstr "%1$s megosztott %2$s képet a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared item "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
+msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s megosztotta a(z) \"%2$s\" elemet a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared $number items with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
+msgid "%1$s has shared %2$s items with the group \"%3$s\"."
+msgstr "%1$s megosztott %2$s elemet a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared folder "$folder" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
+msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s megosztotta a(z) \"%2$s\" mappát a(z) \"%3$s\" csoporttal."
+
+#. * $username has shared $number folders with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
+msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
+msgstr "%1$s megosztott %2$s mappát a(z) \"%3$s\" csoporttal."
+
 #. detailed body
 #. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:114
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:117
 msgid ""
 "%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
 "view them."
 msgstr "%1$s (%2$s) megosztott %3$s fájlt Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:120
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:123
 msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr "%1$s (%2$s) megosztott %3$s képet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:126
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:129
 msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:132
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát Önnel. Megtekintéséhez kattintson az alatta lévő gombra."
 
 #. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:135
 msgid ""
 "%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
 "to view them."
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel. Megtekintésükhöz kattintson az alatta lévő gombra."
 
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:138
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) megosztott %3$s fájlt a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) megosztott %3$s képet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát a(z) \"%4$s\" csoporttal. Megtekintéséhez kattintson az alatta lévő gombra."
+
+#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal. Megtekintésükhöz kattintson az alatta lévő gombra."
+
 #. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:163
 msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:166
 msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s fájlt Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:121
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:169
 msgid ""
 "%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:172
 msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s képet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared a folder with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:127
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:175
 msgid ""
 "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:130
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
 msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
 msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_items items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:133
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
 msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s elemet Önnel és a következő üzenetet hagyta:"
 
 #. * $username ($user_email) has shared $number_of_folder items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
 msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
 msgstr "%1$s (%2$s) megosztott %3$s mappát Önnel és a következő üzenetet hagyta:"
 
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" fájlt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) megosztott %3$s fájlt a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" képet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztott %3$s képet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" mappát a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:202
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztotta a(z) \"%3$s\" elemet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:205
+msgid ""
+"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr "%1$s (%2$s) megosztott %3$s elemet a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
+#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:208
+msgid ""
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
+"message:"
+msgstr "%1$s (%2$s) megosztott %3$s mappát a(z) \"%4$s\" csoporttal és a következő üzenetet hagyta:"
+
 #. button with label
 #. * View image
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
 msgid "View image"
 msgstr "Kép megtekintése"
 
 #. * View images
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
 msgid "View images"
 msgstr "Képek megtekintése"
 
 #. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
 msgid "View file"
 msgstr "Fájl megtekintése"
 
 #. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:221
 msgid "View files"
 msgstr "Fájlok megtekintése"
 
 #. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:224
 msgid "View folder"
 msgstr "Mappa megtekintése"
 
 #. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:227
 msgid "View folders"
 msgstr "Mappák megtekintése"
 
 #. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:230
 msgid "View item"
 msgstr "Elem megtekintése"
 
 #. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
 msgstr "Elemek megtekintése"
 
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
 msgid "The link will expire on %1$s"
 msgstr "A hivatkozás lejárati ideje: %1$s"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
 msgid ""
 "This link is password protected. You need the following password to open it:"
 msgstr "Ez a hivatkozás jelszóval védett, megnyitásához a következő jelszóra van szükség:"
@@ -7850,40 +8008,40 @@ msgstr "Ez a hivatkozás jelszóval védett, megnyitásához a következő jelsz
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:176
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:248
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Elfelejtette a jelszót?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
 msgid "Hello,"
 msgstr "Üdvözöljük!"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
 msgstr "értesítést kaptunk arról, hogy elfelejtette a jelszavát. Itt új jelszót állíthat be."
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
 msgid "Set password"
 msgstr "Jelszó beállítása"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:259
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
 msgstr "Amennyiben nem kért ilyet, akkor hagyja figyelmen kívül ezt a levelet. A jelszava nem fog addig megváltozni, amíg a fenti gombbal nem állít be egy újat."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:262
 msgid "This is an automated message, please do not reply."
 msgstr "Ez egy automatikus üzenet, kérjük ne válaszoljon rá."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:265
 msgid "unknown"
 msgstr "ismeretlen"
 
@@ -7901,35 +8059,177 @@ msgstr "fájl"
 msgid "folder"
 msgstr "mappa"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
+#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
 msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 msgstr "%1$s megosztott %2$s \"%3$s\" Önnel. Jelentkezzen be és tekintse meg őket. "
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:70
-msgid "Files have been shared with you. Please log in to view them. "
-msgstr "Fájlokat osztottak meg Önnel. Jelentkezzen be és tekintse meg őket. "
-
+#. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
-msgid "%1$s has shared some files with you. "
-msgstr "%1$s megosztott néhány fájlt Önnel. "
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
 msgstr "Elküldtünk egy üzenetet %1$s felhasználónak, amely további információt tartalmaz az új jelszóbeállítással kapcsolatban."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
 msgid "Please set a new password to regain access."
 msgstr "Állítson be egy jelszót a hozzáférés visszaszerzéséhez."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
 msgid "The share you are looking for does not exist."
 msgstr "A keresett megosztás nem létezik."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:78
 msgid "We were unable to process your request."
 msgstr "Nem tudtuk feldolgozni a kérését."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
+msgid ""
+"The folder or item you are looking for is no longer available. Please click "
+"\"continue\" to view your other shares."
+msgstr "A keresett mappa vagy elem már nem érhető el. Kattintson a \"Folytatás\"-ra a többi megosztás megtekintéséhez."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:82
+msgid ""
+"Your guest account is currently not protected with a password. Resetting "
+"password will be aborted."
+msgstr "A vendégfiókja jelenleg nem jelszóval védett. A jelszó visszaállítása megszakításra kerül."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:85
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:88
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:94
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:97
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:100
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:103
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:106
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:109
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:112
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:115
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, click "
+"\"Continue\"."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, click "Continue".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:118
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, click \"Continue"
+"\"."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a(z) %1$s felhasználóval. Más megosztott fájlok megtekintéséhez kattintson a \"Folytatatás\"-ra."
+
+#. Access to the file you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:121
+msgid ""
+"Access to the file you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez jelentkezzen be."
+
+#. Access to the file you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:124
+msgid ""
+"Access to the file you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, please log in."
+msgstr "A keresett fájl hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval. Más megosztott fájlok megtekintéséhez jelentkezzen be."
+
+#. Access to the folder you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:127
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez jelentkezzen be."
+
+#. Access to the folder you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:130
+msgid ""
+"Access to the folder you're looking for has been removed. Please contact "
+"%1$s if you want access again. To view your other shared files, please log "
+"in."
+msgstr "A keresett mappa hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval. Más megosztott fájlok megtekintéséhez jelentkezzen be."
+
+#. Access to the share you're looking for has been removed. Please contact the owner if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:133
+msgid ""
+"Access to the share you're looking for has been removed. Please contact the "
+"owner if you want access again. To view your other shared files, please log "
+"in."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba a fájl tulajdonosával. Más megosztott fájlok megtekintéséhez jelentkezzen be."
+
+#. Access to the share you're looking for has been removed. Please contact <John Doe> if you want access again. To view your other shared files, please log in.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:136
+msgid ""
+"Access to the share you're looking for has been removed. Please contact %1$s "
+"if you want access again. To view your other shared files, please log in."
+msgstr "A keresett megosztás hozzáférése visszavonásra került. Ha újra hozzáférést szeretne, akkor lépjen kapcsolatba %1$s felhasználóval. Más megosztott fájlok megtekintéséhez jelentkezzen be."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:64
 msgid "The requested share does not exist."
@@ -10495,6 +10795,59 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) %1$s mappa megjelenítéséhez."
+
+#~ msgid "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\""
+#~ msgstr ""
+#~ "A(z) „%1$s” mappa nem látható a(z) „%3$s” kontextus „%2$s” felhasználója "
+#~ "számára"
+
+#~ msgid ""
+#~ "The content type you provided is not allowed for the given folder \"%1$s"
+#~ "\"."
+#~ msgstr ""
+#~ "A megadott tartalomtípus nem engedélyezett a megadott „%1$s” mappához."
+
+#~ msgid "Move of the folder \"%1$s\" is not permitted."
+#~ msgstr "A(z) „%1$s” mappa áthelyezése nem engedélyezett."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to delete the folder \"%1$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) „%1$s” mappa törléséhez."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to move the folder \"%1$s\"."
+#~ msgstr "Nincs megfelelő jogosultsága a(z) „%1$s” mappa áthelyezéséhez."
+
+#~ msgid ""
+#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
+#~ "\". Please rename one of the folders. There should be no two folders with "
+#~ "the same name."
+#~ msgstr ""
+#~ "Két „%1$s” nevű mappa található a(z) „%2$s” szülőmappa alatt. Nevezze át "
+#~ "az egyik mappát. Nem lehetnek azonos nevű mappák."
+
+#~ msgid "Failed to delete following folder/s: %1$s"
+#~ msgstr "A következő mappák törlése meghiúsult: %1$s"
+
+#~ msgid ""
+#~ "The folder \"%1$s\" was not updated due to possible data loss. Please "
+#~ "review the warnings for details."
+#~ msgstr ""
+#~ "A(z) \"%1$s\" mappa lehetséges adatvesztés miatt nem került frissítésre. "
+#~ "Tekintse át a figyelmeztetés részleteit."
+
+#~ msgid "The document is already locked. Please try again later."
+#~ msgstr "A dokumentum már zárolva van. Próbálja újra később."
+
+#~ msgid "Files have been shared with you. Please log in to view them. "
+#~ msgstr ""
+#~ "Fájlokat osztottak meg Önnel. Jelentkezzen be és tekintse meg őket. "
+
+#~ msgid "%1$s has shared some files with you. "
+#~ msgstr "%1$s megosztott néhány fájlt Önnel. "
 
 #~ msgid ""
 #~ "You do not have appropriate permissions for the public folder \"%2$s\"."
