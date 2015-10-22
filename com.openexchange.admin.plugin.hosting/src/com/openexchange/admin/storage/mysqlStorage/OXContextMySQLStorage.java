@@ -258,7 +258,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());
 
             // Get connection for ConfigDB
-            conForConfigDB = adminCache.getConnectionForConfigDB();
+            conForConfigDB = adminCache.getWriteConnectionForConfigDB();
 
             // Get connection and scheme for given context
             int poolId;
@@ -480,7 +480,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             stmt = con.prepareStatement("UPDATE context SET enabled = 0, reason_id = ? WHERE cid IN (SELECT cid FROM context_server2db_pool WHERE db_schema = ?) AND enabled = 1");
             stmt.setInt(1, reason.getId());
             stmt.setString(2, schema);
@@ -554,7 +554,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             String query;
             if (reason == null) {
@@ -604,7 +604,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // (disabled,enabled,text)
         final Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -694,7 +694,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // create database or use existing database AND update the mapping in contextserver2dbpool
             LOG.debug("Creating new scheme or using existing scheme on target database system!");
-            configdb_write_con = cache.getConnectionForConfigDB();
+            configdb_write_con = cache.getWriteConnectionForConfigDB();
             startTransaction(configdb_write_con);
             createDatabaseAndMappingForContext(db_handle, configdb_write_con, ctx.getId().intValue());
             LOG.debug("Scheme found and mapping in configdb changed to new target database system!");
@@ -951,7 +951,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schema);
             rs = stmt.executeQuery();
@@ -989,7 +989,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ResultSet rs2 = null;
         int context_id = -1;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
@@ -1121,7 +1121,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         final Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
@@ -1912,7 +1912,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con_write = null;
         PreparedStatement stmt = null;
         try {
-            con_write = cache.getConnectionForConfigDB();
+            con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
             if (reason_id != -1) {
                 stmt = con_write.prepareStatement("UPDATE context " + (additionaltable != null ? "," + additionaltable : "") + " SET enabled = ?, reason_id = ? " + (sqlconjunction != null ? sqlconjunction : ""));
@@ -1961,7 +1961,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con_write = null;
         PreparedStatement stmt = null;
         try {
-            con_write = cache.getConnectionForConfigDB();
+            con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
             stmt = con_write.prepareStatement("UPDATE context SET enabled = ?, reason_id = ? WHERE cid = ?");
 
@@ -2473,7 +2473,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public void change(final Context ctx) throws StorageException {
         final Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getWriteConnectionForConfigDB();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -2834,7 +2834,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             // Get the database pool identifier from the specified target cluster identifier
             String getPoolIds = "SELECT read_db_pool_id, write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
@@ -2887,7 +2887,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Get connection to 'configdb'
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }

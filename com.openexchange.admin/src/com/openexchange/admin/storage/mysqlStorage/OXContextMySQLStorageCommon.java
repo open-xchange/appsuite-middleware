@@ -323,7 +323,7 @@ public class OXContextMySQLStorageCommon {
     public static void deleteEmptySchema(int poolId, String dbSchema) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }

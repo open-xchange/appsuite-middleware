@@ -203,7 +203,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ? LIMIT 1");
             stmt.setInt(1, id.intValue());
             return stmt.executeQuery().next();

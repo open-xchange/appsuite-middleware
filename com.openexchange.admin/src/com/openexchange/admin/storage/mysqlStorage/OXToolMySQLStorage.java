@@ -967,7 +967,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schema);
             rs = stmt.executeQuery();
@@ -1581,7 +1581,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT enabled FROM context WHERE cid = ?;");
             prep_check.setInt(1, ctx.getId().intValue());
             rs = prep_check.executeQuery();
@@ -1802,7 +1802,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     private boolean hasUsers(int id) throws StorageException {
         Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             log.error("", e);
             throw new StorageException(e);
@@ -1945,7 +1945,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     private static int getByNameForConfigDB(String name, String objectName, String query) throws StorageException, NoSuchObjectException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             log.error("", e);
             throw new StorageException(e);
@@ -2075,7 +2075,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (context_id != -1) {
                 con = cache.getConnectionForContext(context_id);
             } else {
-                con = cache.getConnectionForConfigDB();
+                con = cache.getReadConnectionForConfigDB();
             }
             prep_check = con.prepareStatement(sql_select_string);
             int sql_counter = 1;
@@ -2164,7 +2164,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (context_id != -1) {
                 con = cache.getConnectionForContext(context_id);
             } else {
-                con = cache.getConnectionForConfigDB();
+                con = cache.getReadConnectionForConfigDB();
             }
             prep_check = con.prepareStatement(sql_select_string);
             int sql_counter = 1;
@@ -2209,7 +2209,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getConnectionForConfigDB();
+            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT cid FROM context WHERE name = ? and cid !=?");
             prep_check.setString(1, ctx.getName());
             prep_check.setInt(2,ctx.getId().intValue());
@@ -2250,7 +2250,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getConnectionForConfigDB();
+            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
 
             prep_check = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name = ? AND db_pool_id !=?");
             prep_check.setString(1, db.getName());
@@ -2380,7 +2380,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getConnectionForConfigDB();
+            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT server_id FROM server WHERE name = ? AND server_id != ?");
             prep_check.setString(1, srv.getName());
             prep_check.setInt(2, srv.getId().intValue());
@@ -2709,7 +2709,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public Database loadDatabaseById(int id) throws StorageException {
         final Connection con;
         try {
-            con = ClientAdminThread.cache.getConnectionForConfigDB();
+            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }

@@ -59,7 +59,12 @@ public interface OXAdminPoolInterface {
 
     void setService(DatabaseService service);
 
+    @Deprecated
     Connection getConnectionForConfigDB() throws PoolException;
+
+    Connection getWriteConnectionForConfigDB() throws PoolException;
+
+    Connection getReadConnectionForConfigDB() throws PoolException;
 
     Connection getConnectionForContext(int contextId) throws PoolException;
 

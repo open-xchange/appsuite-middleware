@@ -202,7 +202,7 @@ public class AdminCache {
         this.prop = new PropertyHandler(System.getProperties());
         configureAuthentication(); // disabling authentication mechs
         readMasterCredentials(service);
-        this.log.info("Init Cache");
+        log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
         this.adminAuthMechCache = new Hashtable<Integer, String>();
@@ -422,8 +422,20 @@ public class AdminCache {
         return this.pool.pushConnectionForContextNoTimeout(contextId, con);
     }
 
+    /**
+     * Use {@link #getReadConnectionForConfigDB()} or {@link #getWriteConnectionForConfigDB()} instead.
+     */
+    @Deprecated
     public Connection getConnectionForConfigDB() throws PoolException {
         return this.pool.getConnectionForConfigDB();
+    }
+
+    public Connection getReadConnectionForConfigDB() throws PoolException {
+        return this.pool.getReadConnectionForConfigDB();
+    }
+
+    public Connection getWriteConnectionForConfigDB() throws PoolException {
+        return this.pool.getWriteConnectionForConfigDB();
     }
 
     public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {

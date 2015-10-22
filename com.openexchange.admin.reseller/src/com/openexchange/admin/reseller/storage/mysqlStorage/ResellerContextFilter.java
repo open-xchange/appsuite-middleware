@@ -100,7 +100,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
     private List<Integer> filterContexts(Collection<Integer> cids) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e);
         }

@@ -136,7 +136,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             final int res_id = nextId(con);
 
@@ -178,7 +178,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         // Get connection
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -376,7 +376,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection configDbCon = null;
         boolean rollback = false;
         try {
-            configDbCon = cache.getConnectionForConfigDB();
+            configDbCon = cache.getWriteConnectionForConfigDB();
             configDbCon.setAutoCommit(false);
             rollback = true;
 
@@ -700,7 +700,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement prep = null;
 
         try {
-            configdb_write_con = cache.getConnectionForConfigDB();
+            configdb_write_con = cache.getWriteConnectionForConfigDB();
             configdb_write_con.setAutoCommit(false);
 
             final Integer id = fstore.getId();
@@ -797,7 +797,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
 
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
             for (final int element : reason_ids) {
                 stmt = con.prepareStatement("DELETE FROM reason_text WHERE id = ?");
@@ -843,7 +843,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
 
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT id,text FROM reason_text");
             final ResultSet rs = stmt.executeQuery();
@@ -885,7 +885,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         final String new_search_pattern = search_pattern.replace('*', '%');
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT id,text FROM reason_text WHERE text like ?");
             stmt.setString(1, new_search_pattern);
@@ -927,7 +927,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
 
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             final StringBuilder sb = new StringBuilder();
             sb.append("SELECT id,text FROM reason_text WHERE id IN ");
@@ -982,7 +982,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             throw new StorageException(e);
         }
@@ -1021,7 +1021,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     private static List<Integer> listAllFilestoreIds() throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             throw new StorageException(e);
         }
@@ -1073,7 +1073,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet rs = null;
         boolean rollback = false;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             final int db_id = nextId(con);
             final int c_id = db.isMaster() ? nextId(con) : -1;
@@ -1196,7 +1196,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             final int fstore_id = nextId(con);
 
@@ -1242,7 +1242,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -1293,7 +1293,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             // Define candidate class
             class Candidate {
@@ -1469,7 +1469,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement prep = null;
         boolean rollback = false;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             final int srv_id = nextId(con);
 
@@ -1522,7 +1522,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         try {
 
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             final String my_search_pattern = search_pattern.replace('*', '%');
 
             pstmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,hardlimit,max,initial,name,weight,max_units,read_db_pool_id,write_db_pool_id FROM db_pool JOIN db_cluster ON ( db_pool_id = db_cluster.write_db_pool_id OR db_pool_id = db_cluster.read_db_pool_id) WHERE name LIKE ? OR db_pool_id LIKE ? OR url LIKE ?");
@@ -1617,7 +1617,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         try {
 
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT name,server_id FROM server WHERE name LIKE ? OR server_id = ?");
 
@@ -1668,7 +1668,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void unregisterDatabase(final int dbId, final boolean isMaster) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -1734,7 +1734,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
 
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
             stmt.setInt(1, store_id);
@@ -1776,7 +1776,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             stmt = con.prepareStatement("DELETE FROM server WHERE server_id = ?");
             stmt.setInt(1, server_id);
             stmt.executeUpdate();
@@ -1813,7 +1813,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public URI getFilestoreURI(int filestoreId) throws StorageException {
         Connection con = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             return getFilestoreURI(filestoreId, con);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
@@ -1872,7 +1872,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public Filestore getFilestore(int id, boolean loadRealUsage) throws StorageException {
         Connection con = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             return getFilestore(id, loadRealUsage, con);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);
@@ -2008,7 +2008,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             int serverId = cache.getServerId();
 
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT d.cid,d.write_db_pool_id,d.db_schema,c.filestore_id FROM context_server2db_pool d JOIN context c ON d.cid=c.cid WHERE d.server_id=?");
             stmt.setInt(1, serverId);
             result = stmt.executeQuery();
@@ -2268,7 +2268,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             ResultSet result = null;
             try {
                 if (null == con) {
-                    con = cache.getConnectionForConfigDB();
+                    con = cache.getReadConnectionForConfigDB();
                     push = true;
                 }
                 stmt = con.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
@@ -2308,7 +2308,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             ResultSet result = null;
             try {
                 if (null == con) {
-                    con = cache.getConnectionForConfigDB();
+                    con = cache.getReadConnectionForConfigDB();
                     push = true;
                 }
                 stmt = con.prepareStatement("SELECT c.cid, s.write_db_pool_id, s.db_schema FROM context AS c JOIN context_server2db_pool AS s ON c.cid=s.cid WHERE c.filestore_id=? AND s.server_id=?");
@@ -2431,7 +2431,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             ResultSet result = null;
             try {
                 if (null == con) {
-                    con = cache.getConnectionForConfigDB();
+                    con = cache.getReadConnectionForConfigDB();
                     push = true;
                 }
                 stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
@@ -2763,7 +2763,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public int getWritePoolIdForCluster(int clusterId) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);

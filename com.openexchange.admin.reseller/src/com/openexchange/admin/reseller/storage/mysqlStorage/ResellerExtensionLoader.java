@@ -107,7 +107,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
     private void loadExtensionsForContexts(Map<Integer, Context> contexts) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e);
         }

@@ -97,6 +97,30 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public Connection getWriteConnectionForConfigDB() throws PoolException {
+        final Connection con;
+        try {
+            con = getService().getWritable();
+        } catch (OXException e) {
+            log.error("Error pickup configdb database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
+    @Override
+    public Connection getReadConnectionForConfigDB() throws PoolException {
+        final Connection con;
+        try {
+            con = getService().getReadOnly();
+        } catch (OXException e) {
+            log.error("Error pickup configdb database read connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
+    @Override
     public Connection getConnectionForContext(int contextId) throws PoolException {
         final Connection con;
         try {
