@@ -69,11 +69,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.json.actions.AbstractArchiveMailAction.ArchiveDataWrapper;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailServletInterface} - The mail interface which invokes the mail layer methods.
@@ -185,6 +187,43 @@ public abstract class MailServletInterface implements Closeable {
         close();
         super.finalize();
     }
+
+    /**
+     * Archives all mails within a given folder which are older than given days
+     * 
+     * @param days the minimum age of a mail to be archived
+     * @param folderID the id of the folder
+     * @param session
+     * @param useDefaultName if set to true, uses the default archive folder name if none is set
+     * @param createIfAbsent if set to true, creates a new archive folder if none exist
+     * @throws OXException
+     */
+    public abstract void archiveMailFolder(int days, String folderID, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException;
+
+    /**
+     * Archives given mails within given folder.
+     * 
+     * @param folderID the id of the folder
+     * @param ids the id's of the mails
+     * @param session
+     * @param useDefaultName if set to true, uses the default archive folder name if none is set
+     * @param createIfAbsent if set to true, creates a new archive folder if none exist
+     * @return a list of archived mails
+     * @throws OXException
+     */
+    public abstract List<ArchiveDataWrapper> archiveMail(String folderID, List<String> ids, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException;
+
+    /**
+     * Archives given mails
+     * 
+     * @param mails a list of String[] which contain a folderId and a mailId
+     * @param session
+     * @param useDefaultName if set to true, uses the default archive folder name if none is set
+     * @param createIfAbsent if set to true, creates a new archive folder if none exist
+     * @return a list of archived mails
+     * @throws OXException
+     */
+    public abstract List<ArchiveDataWrapper> archiveMultipleMail(List<String[]> mails, ServerSession session, boolean useDefaultName, boolean createIfAbsent) throws OXException;
 
     /**
      * Gets a mail's ID by specified "Message-Id" header.

@@ -537,6 +537,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Default folder %1$s must not be deleted
      */
     NO_DEFAULT_FOLDER_DELETE("Default folder %1$s must not be deleted", MailExceptionStrings.NO_DEFAULT_FOLDER_DELETE_MSG, CATEGORY_PERMISSION_DENIED, 99),
+    /**
+     * Archive folder does not allow subfolders.
+     */
+    ARCHIVE_SUBFOLDER_NOT_ALLOWED("Archive folder does not allow subfolders.", MailExceptionStrings.ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG, CATEGORY_PERMISSION_DENIED, 100),
 
     ;
 
