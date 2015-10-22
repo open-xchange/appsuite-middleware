@@ -6992,6 +6992,10 @@ msgstr ""
 msgid "Default folder must not be deleted"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:199
+msgid "Archive folder does not allow subfolders."
+msgstr ""
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
