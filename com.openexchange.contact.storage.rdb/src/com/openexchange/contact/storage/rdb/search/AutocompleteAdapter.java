@@ -161,6 +161,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	        for (int i = 1; i < fields.length; i++) {
 	            stringBuilder.append(",o.").append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
 	        }
+            stringBuilder.append(",").append(Table.OBJECT_USE_COUNT).append(".value");
 	        stringBuilder.append(" FROM (");
             appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
 	        for (int i = 1; i < patterns.size(); i++) {
@@ -168,7 +169,12 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
                 appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
                 stringBuilder.append(')');
 	        }
-	        stringBuilder.append(") AS o GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
+            stringBuilder.append(") AS o");
+            stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append("o.cid=").append(Table.OBJECT_USE_COUNT)
+                .append(".cid AND ").append(autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1)).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+                .append("o.fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+                .append("o.intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+            stringBuilder.append("GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
 	            .append(" HAVING COUNT(*) >= ").append(patterns.size());
 	    }
    }
@@ -206,10 +212,10 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         StringBuilder sb = new StringBuilder(1024);
         sb.append(",").append(Table.OBJECT_USE_COUNT).append(".value");
         stringBuilder.insert(offset - 1, sb.toString());
-        stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(Table.CONTACTS).append(".cid=").append(Table.OBJECT_USE_COUNT)
+        stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(Table.CONTACTS.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
             .append(".cid AND ").append(autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1)).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
-            .append(Table.CONTACTS).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
-            .append(Table.CONTACTS).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+            .append(Table.CONTACTS.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+            .append(Table.CONTACTS.getName()).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
     }
 
     private void appendAutocompletePattern(String tableAlias, String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
