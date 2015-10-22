@@ -154,6 +154,17 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     String copy(String sourceId, String version, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
 
     /**
+     * Moves denoted files to specified destination folder.
+     *
+     * @param sourceIds The file identifiers
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param destFolderId The identifier of the destination folder
+     * @return The identifiers of those files that could <b>not</b> be moved successfully
+     * @throws OXException If move fails
+     */
+    List<String> move(List<String> sourceIds, long sequenceNumber, String destFolderId) throws OXException;
+
+    /**
      * Loads the documents content
      *
      * @param id The id of the document

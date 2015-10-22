@@ -57,7 +57,9 @@ import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
@@ -72,6 +74,7 @@ import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageMultiMove;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
@@ -102,7 +105,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
     FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess,
-    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata {
+    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata, FileStorageMultiMove {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
@@ -684,6 +687,44 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         update.setId(source.getId());
         this.saveFileMetadata(update, sequenceNumber, modifiedFields);
         return new IDTuple(update.getFolderId(), update.getId());
+    }
+
+    @Override
+    public List<IDTuple> move(List<IDTuple> sources, String destFolder, long sequenceNumber) throws OXException {
+        int size;
+        if (null == sources || (size = sources.size()) <= 0) {
+            return Collections.emptyList();
+        }
+
+        // Check if all denoted files are located in the same folder
+        boolean sameFolder = true;
+        for (int i = size; sameFolder && i-- > 1;) {
+            sameFolder = sources.get(i).getFolder().equals(sources.get(i - 1).getFolder());
+        }
+
+        // All in the same folder...
+        if (sameFolder) {
+            // ... yes
+            return getInfostore(sources.get(0).getFolder()).moveDocuments(session, sources, sequenceNumber, destFolder, false);
+        }
+
+        // ... no, different folders. Split by folder identifiers,
+        Map<String, List<IDTuple>> folder2ids = new LinkedHashMap<String, List<IDTuple>>(size);
+        for (IDTuple idTuple : sources) {
+            String folder = idTuple.getFolder();
+            List<IDTuple> ids = folder2ids.get(folder);
+            if (null == ids) {
+                ids = new ArrayList<IDTuple>();
+                folder2ids.put(folder, ids);
+            }
+            ids.add(idTuple);
+        }
+
+        List<IDTuple> retval = new ArrayList<IDTuple>(size);
+        for (Map.Entry<String, List<IDTuple>> filesInFolder : folder2ids.entrySet()) {
+            retval.addAll(getInfostore(filesInFolder.getKey()).moveDocuments(session, filesInFolder.getValue(), sequenceNumber, destFolder, false));
+        }
+        return retval;
     }
 
     @Override

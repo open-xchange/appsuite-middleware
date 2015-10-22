@@ -100,6 +100,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageMultiMove;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
@@ -781,8 +782,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     private static final class SaveResult {
 
         private IDTuple idTuple;
-
         private List<FileStorageObjectPermission> addedPermissions;
+
+        SaveResult() {
+            super();
+        }
 
         public IDTuple getIDTuple() {
             return idTuple;
@@ -1154,6 +1158,65 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 return saveResult;
             }
         });
+    }
+
+    @Override
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId) throws OXException {
+        final FolderID destinationID;
+        if (null == destFolderId) {
+            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
+        }
+        destinationID = new FolderID(destFolderId);
+
+        boolean useMultiMove = false;
+        final String destService = destinationID.getService();
+        final String destAccountId = destinationID.getAccountId();
+        FileStorageFileAccess fileAccess = getFileAccess(destService, destAccountId);
+        if (FileStorageTools.supports(fileAccess, FileStorageCapability.MULTI_MOVE)) {
+            useMultiMove = true;
+            for (int i = sourceIds.size(); useMultiMove && i-- > 0;) {
+                FileID sourceID = new FileID(sourceIds.get(i));
+                useMultiMove = (sourceID.getService().equals(destService) && sourceID.getAccountId().equals(destAccountId));
+            }
+
+            if (useMultiMove) {
+                TransactionAwareFileAccessDelegation<List<String>> callable = new TransactionAwareFileAccessDelegation<List<String>>() {
+
+                    @Override
+                    protected List<String> callInTransaction(FileStorageFileAccess access) throws OXException {
+                        FileStorageMultiMove multiMove = (FileStorageMultiMove) access;
+
+                        List<IDTuple> sources = new ArrayList<IDTuple>(sourceIds.size());
+                        for (String sourceId : sourceIds) {
+                            FileID sourceID = new FileID(sourceId);
+                            sources.add(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()));
+                        }
+
+                        List<IDTuple> failedOnes = multiMove.move(sources, destinationID.getFolderId(), sequenceNumber);
+
+                        List<String> ids = new ArrayList<String>(sourceIds.size());
+                        for (IDTuple idTuple : failedOnes) {
+                            FileID fid = new FileID(destService, destAccountId, idTuple.getId(), idTuple.getId());
+                            ids.add(fid.toUniqueID());
+                        }
+                        return ids;
+                    }
+                };
+
+                return callable.call(fileAccess);
+            }
+        }
+
+        // One-by-one...
+        for (String sourceId : sourceIds) {
+            DefaultFile file = new DefaultFile();
+            file.setId(sourceId);
+            file.setFolderId(destFolderId);
+
+            // Save file metadata without binary payload
+            saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE);
+        }
+        return Collections.emptyList();
     }
 
     @Override

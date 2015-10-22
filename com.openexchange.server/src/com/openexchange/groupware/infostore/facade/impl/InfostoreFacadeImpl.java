@@ -1420,8 +1420,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform move
          */
-        List<DocumentMetadata> rejectedDocuments = moveDocuments(
-            session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        List<DocumentMetadata> rejectedDocuments = moveDocuments(session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
             return Collections.emptyList();
         }

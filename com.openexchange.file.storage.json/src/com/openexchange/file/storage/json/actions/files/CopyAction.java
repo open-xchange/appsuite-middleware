@@ -146,7 +146,7 @@ public class CopyAction extends AbstractWriteAction {
                         newFolder.addPermission(permission);
                     }
 
-                    String newFolderID = folderAccess.createFolder(srcFolder);
+                    String newFolderID = folderAccess.createFolder(newFolder);
                     newFolders.add(newFolderID);
 
                     TimedResult<File> documents = fileAccess.getDocuments(folderId);
