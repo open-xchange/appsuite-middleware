@@ -323,7 +323,7 @@ public class OXContextMySQLStorageCommon {
     public static void deleteEmptySchema(int poolId, String dbSchema) throws StorageException {
         final Connection con;
         try {
-            con = cache.getReadConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
@@ -343,7 +343,7 @@ public class OXContextMySQLStorageCommon {
         } finally {
             autocommit(con);
             try {
-                cache.pushReadConnectionForConfigDB(con);
+                cache.pushWriteConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 log.error("Error pushing configdb connection to pool!", e);
             }
