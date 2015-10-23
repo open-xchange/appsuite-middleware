@@ -697,14 +697,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             }
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(smtpMessage);
+                        saveChangesSafe(smtpMessage, true);
                         transport(smtpMessage, recipients, transport, smtpConfig);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
