@@ -1135,6 +1135,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             SchemaCacheFinalize cacheFinalize = null;
             boolean contextCreated = false;
             boolean rollback = false;
+            boolean configConCommitted = false;
             boolean automaticStrategyUsed = true;
             try {
                 // Start transaction & mark to perform a roll-back if any error occurs
@@ -1166,9 +1167,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     // Commit transaction and unmark to perform a roll-back
                     configCon.commit();
                     rollback = false;
+                    configConCommitted = true;
                 } else {
                     // Commit transaction
                     configCon.commit();
+                    configConCommitted = true;
 
                     // Write context data after COMMIT and unmark to perform a roll-back
                     retval = writeContext(ctx, adminUser, access);
@@ -1203,8 +1206,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         // Attempt to roll-back configDb connection (in case the commit on configDb connection failed)
                         rollback(configCon);
 
-                        // Manually drop possibly already created data from configDb
-                        new OXContextMySQLStorageCommon().handleCreateContextRollback(configCon, contextId);
+                        // Manually drop possibly already created data from configDb in case configDb connection has already been committed
+                        if (configConCommitted) {
+                            new OXContextMySQLStorageCommon().handleCreateContextRollback(configCon, contextId);
+                        }
                     }
                 }
 
