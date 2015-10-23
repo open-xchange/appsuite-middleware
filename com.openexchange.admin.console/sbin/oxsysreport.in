@@ -514,8 +514,6 @@ identify_and_move_ibm_dumps() {
             if [ -f "${file}" ]; then
                 mkdir -p ${TMP}/${LOGDIR}/$(dirname ${file})
                 mv -v ${file} $( normalize_path ${TMP}/${LOGDIR}/${file}) | \
-                sed 's|„||g' | \
-                sed 's|“||g' | \
                 sed 's|^|  |g'
             fi
         done
