@@ -4,6 +4,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.rmi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.rmi.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.soap"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.oauth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.clt"/>
 </provider>
 </psf>
