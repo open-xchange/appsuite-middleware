@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -79,6 +79,8 @@ fi
 %defattr(-,root,root)
 
 %changelog
+* Mon Oct 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.6.3 release
 * Mon Oct 12 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-10-23 (2806)
 * Wed Sep 30 2015 Steffen Templin <steffen.templin@open-xchange.com>
@@ -105,7 +107,7 @@ Build for patch 2015-07-27 (2626)
 Build for patch 2015-07-20 (2614)
 * Tue Jul 14 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Prepare for 7.6.2 hotfix
-* Wed Jun 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
-Build for patch 2015-06-26 (2573)
+* Wed Mar 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.3
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
 initial packaging for SAML core package
