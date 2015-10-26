@@ -148,10 +148,10 @@ public class GuestCleanupTask extends AbstractTask<Void> {
     }
 
     private void cleanGuest(int contextID, int guestID) throws OXException {
+        Context context = services.getService(ContextService.class).getContext(contextID);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
         try {
             connectionHelper.start();
-            Context context = services.getService(ContextService.class).getContext(contextID);
             User guestUser = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, context);
             if (false == guestUser.isGuest()) {
                 LOG.warn("Cancelling cleanup task for non-guest user {}.", guestUser);
