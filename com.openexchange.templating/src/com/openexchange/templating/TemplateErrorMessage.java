@@ -60,23 +60,27 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum TemplateErrorMessage implements DisplayableOXExceptionCode {
 
+    /** "An I/O error occurred." */
     IOException(CATEGORY_SERVICE_DOWN, 1, "An I/O error occurred.", null),
 
+    /** "The underlying templating system threw an exception: %1$s" */
     UnderlyingException(CATEGORY_ERROR, 2, "The underlying templating system threw an exception: %1$s", null),
 
+    /** "The template %1$s does not exist." */
     TemplateNotFound(CATEGORY_ERROR, 3, "The template %1$s does not exist.", null),
 
-    SQLException(CATEGORY_ERROR, 4, "A SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG),
+    /** "An SQL error occurred: %1$s" */
+    SQLException(CATEGORY_ERROR, 4, "An SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG),
 
+    /** "File access denied." */
     AccessDenied(CATEGORY_PERMISSION_DENIED, 5, "File access denied.", TemplateExceptionMessage.AccessDenied_MSG),
 
+    /** "This template was not whitelisted," */
     TemplateNotWhitelisted(CATEGORY_PERMISSION_DENIED, 6, "This template was not whitelisted,",
         TemplateExceptionMessage.TemplateNotWhitelisted_MSG),
     ;
 
-    /**
-     * The prefix.
-     */
+    /** The <code>"TMPL"</code> prefix. */
     public static final String PREFIX = "TMPL";
 
     private final Category category;
