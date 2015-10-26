@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,6 +87,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -250,15 +250,15 @@ public class ContactHaloImpl implements ContactHalo {
         }
 
         contactQuery.setUser(user);
-        final List<Contact> contactsToMerge = new LinkedList<Contact>();
+        List<Contact> contactsToMerge = new ArrayList<Contact>(4);
         if (user != null) {
             // Load the associated contact
             resultContact = contactService.getUser(session, user.getId(), fields);
             contactsToMerge.add(resultContact);
         } else if (false == Strings.isEmpty(resultContact.getEmail1())){
             // Try to find a contact
-            final ContactSearchObject contactSearch = new ContactSearchObject();
-            final String email = resultContact.getEmail1();
+            ContactSearchObject contactSearch = new ContactSearchObject();
+            String email = resultContact.getEmail1();
             contactSearch.setEmail1(email);
             contactSearch.setEmail2(email);
             contactSearch.setEmail3(email);
@@ -274,17 +274,23 @@ public class ContactHaloImpl implements ContactHalo {
                     }
                 }
             } finally {
-                if (null != iterator) {
-                    iterator.close();
-                }
+                SearchIterators.close(iterator);
             }
         }
         contactQuery.setMergedContacts(contactsToMerge);
 
-        final ContactMerger contactMerger = new ContactMerger(false);
-        for (final Contact c : contactsToMerge) {
-            resultContact = contactMerger.merge(resultContact, c);
+        int contactsToMergeSize = contactsToMerge.size();
+        if (1 == contactsToMergeSize) {
+            // There is only one
+            resultContact = contactsToMerge.get(0);
+        } else if (contactsToMergeSize > 0) {
+            // Need to merge...
+            ContactMerger contactMerger = new ContactMerger(false);
+            for (final Contact c : contactsToMerge) {
+                resultContact = contactMerger.merge(resultContact, c);
+            }
         }
+
         /*
          * try to decompose display name if no other "name" properties are already set and the contact is "new"
          */
@@ -299,14 +305,13 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     private boolean checkEmails(Contact c, String email1) {
-        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email1)) {
+        if (email1.equalsIgnoreCase(c.getEmail1())) {
             return true;
         }
-
-        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email1)) {
+        if (email1.equalsIgnoreCase(c.getEmail2())) {
             return true;
         }
-        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email1)) {
+        if (email1.equalsIgnoreCase(c.getEmail3())) {
             return true;
         }
 
