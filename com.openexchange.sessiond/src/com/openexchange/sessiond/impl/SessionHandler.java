@@ -233,25 +233,27 @@ public final class SessionHandler {
             retval[i] = control[i].getSession();
         }
         /*
-         * remove from storage if available, too
+         * remove local sessions from storage (if available), too
          */
-        Session[] retval2 = null;
         final SessionStorageService storageService = Services.getService(SessionStorageService.class);
-        if (storageService != null) {
-            try {
-                Task<Session[]> c = new AbstractTask<Session[]>() {
-
-                    @Override
-                    public Session[] call() throws Exception {
-                        return storageService.removeUserSessions(userId, contextId);
-                    }
-                };
-                retval2 = getFrom(c, new Session[0]);
-            } catch (RuntimeException e) {
-                LOG.error("", e);
-            }
+        if (null == storageService) {
+            LOG.info("Local removal of user sessions: User={}, Context={}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            return retval;
         }
-        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), Integer.valueOf(userId), Integer.valueOf(contextId));
+        Session[] retval2 = null;
+        try {
+            Task<Session[]> c = new AbstractTask<Session[]>() {
+
+                @Override
+                public Session[] call() throws Exception {
+                    return storageService.removeLocalUserSessions(userId, contextId);
+                }
+            };
+            retval2 = getFrom(c, new Session[0]);
+        } catch (RuntimeException e) {
+            LOG.error("", e);
+        }
+        LOG.info("Remote removal of user sessions: User={}, Context={}", Integer.valueOf(userId), Integer.valueOf(contextId));
         return merge(retval, retval2);
     }
 
