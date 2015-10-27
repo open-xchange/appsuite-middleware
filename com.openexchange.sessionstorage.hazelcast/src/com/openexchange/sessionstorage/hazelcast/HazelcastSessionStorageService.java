@@ -102,6 +102,34 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         REFERENCE.set(hazelcast);
     }
 
+    private static interface RemovedSessionHandler {
+
+        void handleRemovedSession(PortableSession removedSession);
+    }
+
+    private static final RemovedSessionHandler NOOP_REMOVED_SESSION_HANDLER = new RemovedSessionHandler() {
+
+        @Override
+        public void handleRemovedSession(PortableSession removedSession) {
+            // Nothing
+        }
+    };
+
+    private static final class CollectingRemovedSessionHandler implements RemovedSessionHandler {
+
+        final List<Session> removedSessions;
+
+        CollectingRemovedSessionHandler(int capacity) {
+            super();
+            removedSessions = new ArrayList<Session>(capacity);
+        }
+
+        @Override
+        public void handleRemovedSession(PortableSession removedSession) {
+            removedSessions.add(removedSession);
+        }
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------------------------------- //
 
     private final String sessionsMapName;
@@ -339,87 +367,36 @@ public class HazelcastSessionStorageService implements SessionStorageService {
      */
     @Override
     public List<Session> removeSessions(List<String> sessionIds) throws OXException {
-        List<Session> removedSessions = new ArrayList<Session>();
-
-        if ((sessionIds != null) && (sessionIds.size() > 0)) {
-            ensureActive();
-
-            IMap<String, PortableSession> sessions = sessions();
-            /*
-             * schedule remove operations
-             */
-            Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(sessionIds.size());
-            for (String sessionID : sessionIds) {
-                futures.put(sessionID, sessions.removeAsync(sessionID));
-            }
-            /*
-             * collect removed sessions
-             */
-            for (Entry<String, Future<PortableSession>> future : futures.entrySet()) {
-                try {
-                    PortableSession removedSession = future.getValue().get();
-                    if (null != removedSession) {
-                        removedSessions.add(removedSession);
-                    } else {
-                        LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
-                } catch (ExecutionException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof HazelcastInstanceNotActiveException) {
-                        throw handleNotActiveException((HazelcastInstanceNotActiveException) cause);
-                    }
-                    if (cause instanceof HazelcastException) {
-                        throw handleHazelcastException((HazelcastException) cause, SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey()));
-                    }
-
-                    // Launder...
-                    throw SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
-                }
-            }
+        int size;
+        if (null == sessionIds || 0 == (size = sessionIds.size())) {
+            return Collections.emptyList();
         }
-        return removedSessions;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Session[] removeUserSessions(final int userId, final int contextId) throws OXException {
+        /*
+         * check if still active
+         */
         ensureActive();
         /*
-         * search sessions by context- and user-ID
+         * remove sessions...
          */
         IMap<String, PortableSession> sessions = sessions();
-        Set<String> sessionIDs =
-            sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
-        if (null == sessionIDs || 0 == sessionIDs.size()) {
-            return new Session[0];
-        }
-
-        List<String> lSessionIds = new ArrayList<String>(sessionIDs);
-        List<Session> removedSessions = removeSessions(lSessionIds);
-        return removedSessions.toArray(new Session[removedSessions.size()]);
-    }
-
-    @Override
-    public void removeContextSessions(final int contextId) throws OXException {
-        ensureActive();
-        /*
-         * search sessions by context ID
-         */
-        IMap<String, PortableSession> sessions = sessions();
-        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId));
-        if (null == sessionIDs || 0 == sessionIDs.size()) {
-            return;
-        }
         /*
          * schedule remove operations
          */
-        Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(sessionIDs.size());
-        for (String sessionID : sessionIDs) {
+        return removeSessionsByIds(sessionIds, size, sessions);
+    }
+
+    private List<Session> removeSessionsByIds(Collection<String> sessionIds, int size, IMap<String, PortableSession> sessions) throws OXException {
+        CollectingRemovedSessionHandler removedSessionHandler = new CollectingRemovedSessionHandler(size);
+        removeSessionsByIds(sessionIds, size, removedSessionHandler, sessions);
+        return removedSessionHandler.removedSessions;
+    }
+
+    private void removeSessionsByIds(Collection<String> sessionIds, int size, RemovedSessionHandler removedSessionHandler, IMap<String, PortableSession> sessions) throws OXException {
+        /*
+         * schedule remove operations
+         */
+        Map<String, Future<PortableSession>> futures = new HashMap<String, Future<PortableSession>>(size);
+        for (String sessionID : sessionIds) {
             futures.put(sessionID, sessions.removeAsync(sessionID));
         }
         /*
@@ -430,6 +407,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 PortableSession removedSession = future.getValue().get();
                 if (null == removedSession) {
                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
+                } else {
+                    removedSessionHandler.handleRemovedSession(removedSession);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -447,6 +426,83 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 throw SessionStorageExceptionCodes.REMOVE_FAILED.create(ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Session[] removeLocalUserSessions(int userId, int contextId) throws OXException {
+        ensureActive();
+        /*
+         * search sessions by context- and user-ID
+         */
+        IMap<String, PortableSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.localKeySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
+        int size;
+        if (null == sessionIDs || 0 == (size = sessionIDs.size())) {
+            return new Session[0];
+        }
+        List<Session> removedSessions = removeSessionsByIds(sessionIDs, size, sessions);
+        return removedSessions.toArray(new Session[removedSessions.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Session[] removeUserSessions(final int userId, final int contextId) throws OXException {
+        ensureActive();
+        /*
+         * search sessions by context- and user-ID
+         */
+        IMap<String, PortableSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
+        int size;
+        if (null == sessionIDs || 0 == (size = sessionIDs.size())) {
+            return new Session[0];
+        }
+        List<Session> removedSessions = removeSessionsByIds(sessionIDs, size, sessions);
+        return removedSessions.toArray(new Session[removedSessions.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeLocalContextSessions(int contextId) throws OXException {
+        ensureActive();
+        /*
+         * search sessions by context ID
+         */
+        IMap<String, PortableSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.localKeySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId));
+        int size;
+        if (null == sessionIDs || 0 == (size = sessionIDs.size())) {
+            return;
+        }
+        /*
+         * schedule remove operations
+         */
+        removeSessionsByIds(sessionIDs, size, NOOP_REMOVED_SESSION_HANDLER, sessions);
+    }
+
+    @Override
+    public void removeContextSessions(final int contextId) throws OXException {
+        ensureActive();
+        /*
+         * search sessions by context ID
+         */
+        IMap<String, PortableSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId));
+        int size;
+        if (null == sessionIDs || 0 == (size = sessionIDs.size())) {
+            return;
+        }
+        /*
+         * schedule remove operations
+         */
+        removeSessionsByIds(sessionIDs, size, NOOP_REMOVED_SESSION_HANDLER, sessions);
     }
 
     @Override
