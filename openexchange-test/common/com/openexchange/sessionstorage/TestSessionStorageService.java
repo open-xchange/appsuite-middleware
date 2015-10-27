@@ -90,7 +90,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void addSession(Session session) throws OXException {
         // TODO Auto-generated method stub
@@ -100,7 +99,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void addSessionsIfAbsent(Collection<Session> sessions) throws OXException {
         // TODO Auto-generated method stub
@@ -110,7 +108,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public boolean addSessionIfAbsent(Session session) throws OXException {
         // TODO Auto-generated method stub
@@ -120,7 +117,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void removeSession(String sessionId) throws OXException {
         // TODO Auto-generated method stub
@@ -130,7 +126,15 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public Session[] removeLocalUserSessions(int userId, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Session[] removeUserSessions(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -140,7 +144,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void removeContextSessions(int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -150,7 +153,15 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public void removeLocalContextSessions(int contextId) throws OXException {
+        // TODO Auto-generated method stub
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasForContext(int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -160,7 +171,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session[] getUserSessions(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -170,7 +180,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session getAnyActiveSessionForUser(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -180,7 +189,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session findFirstSessionForUser(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
@@ -190,7 +198,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public List<Session> getSessions() {
         // TODO Auto-generated method stub
@@ -200,7 +207,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public int getNumberOfActiveSessions() {
         // TODO Auto-generated method stub
@@ -210,7 +216,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session getSessionByRandomToken(String randomToken, String newIP) throws OXException {
         // TODO Auto-generated method stub
@@ -220,7 +225,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session getSessionByAlternativeId(String altId) throws OXException {
         // TODO Auto-generated method stub
@@ -230,7 +234,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Session getCachedSession(String sessionId) throws OXException {
         // TODO Auto-generated method stub
@@ -240,7 +243,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void changePassword(String sessionId, String newPassword) throws OXException {
         // TODO Auto-generated method stub
@@ -250,7 +252,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void setLocalIp(String sessionId, String localIp) throws OXException {
         // TODO Auto-generated method stub
@@ -270,7 +271,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void setHash(String sessionId, String hash) throws OXException {
         // TODO Auto-generated method stub
@@ -280,7 +280,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void checkAuthId(String login, String authId) throws OXException {
         // TODO Auto-generated method stub
@@ -290,7 +289,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public void cleanUp() throws OXException {
         // TODO Auto-generated method stub
@@ -300,7 +298,6 @@ public class TestSessionStorageService implements SessionStorageService {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public int getUserSessionCount(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
