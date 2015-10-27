@@ -54,14 +54,12 @@ import java.util.Collection;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.RecipientStringTerm;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
@@ -69,22 +67,15 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ToTerm extends SearchTerm<String> {
+public final class ToTerm extends AbstractAddressTerm {
 
     private static final long serialVersionUID = 116199790983674520L;
-
-    private String addr;
 
     /**
      * Initializes a new {@link ToTerm}
      */
     public ToTerm(final String pattern) {
-        super();
-        try {
-            addr = new QuotedInternetAddress(pattern, false).getUnicodeAddress();
-        } catch (final AddressException e) {
-            addr = pattern;
-        }
+        super(pattern);
     }
 
     @Override
@@ -110,7 +101,7 @@ public final class ToTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(addr).matcher(getAllAddresses(mailMessage.getTo())).find();
         }
-        return (Strings.asciiLowerCase(getAllAddresses(mailMessage.getTo())).indexOf(Strings.asciiLowerCase(addr)) != -1);
+        return (Strings.asciiLowerCase(getAllAddresses(mailMessage.getTo())).indexOf(getLowerCaseAddr()) >= 0);
     }
 
     @Override
@@ -130,7 +121,7 @@ public final class ToTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(addr).matcher(getAllAddresses(addresses)).find();
             }
-            return (Strings.asciiLowerCase(getAllAddresses(addresses)).indexOf(Strings.asciiLowerCase(addr)) != -1);
+            return (Strings.asciiLowerCase(getAllAddresses(addresses)).indexOf(getLowerCaseAddr()) >= 0);
         } catch (final MessagingException e) {
             org.slf4j.LoggerFactory.getLogger(ToTerm.class).warn("Error during search.", e);
             return false;

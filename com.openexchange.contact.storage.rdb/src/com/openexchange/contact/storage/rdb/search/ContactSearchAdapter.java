@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
@@ -105,7 +106,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		/*
 		 * prefer startletter search if possible
 		 */
-		if (false == contactSearch.isStartLetter() || false == appendStartLetterComparison(contactSearch.getPattern())) {
+		if (false == contactSearch.isStartLetter() || false == appendStartLetterComparison(contactSearch.getPattern(), contactSearch.isExactMatch())) {
 			/*
 			 * display name search, otherwise
 			 */
@@ -126,31 +127,31 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 
 		Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
 		if (iterator.hasNext()) {
-		    if (contactSearch.isOrSearch() || contactSearch.isEmailAutoComplete()) {
+		    boolean exact = contactSearch.isExactMatch();
+		    boolean emailAutoComplete = contactSearch.isEmailAutoComplete();
+            if (contactSearch.isOrSearch() || emailAutoComplete) {
 	            /*
 	             * construct clause using UNION SELECTs
 	             */
                 Entry<ContactField, Object> entry = iterator.next();
                 appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
-                    contactSearch.isEmailAutoComplete());
+                    emailAutoComplete, exact);
 	            while (iterator.hasNext()) {
 	                stringBuilder.append(" UNION ");
 	                entry = iterator.next();
-	                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(),
-	                    contactSearch.isEmailAutoComplete());
+	                appendComparison(contextIDClause, folderIDsClause, selectClause, entry.getKey(), entry.getValue(), emailAutoComplete, exact);
 	            }
 	        } else {
 	            /*
 	             * construct clause using single SELECT
 	             */
-                stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ")
-                    .append(folderIDsClause).append(" AND ");
+                stringBuilder.append(selectClause).append(" WHERE ").append(contextIDClause).append(" AND ").append(folderIDsClause).append(" AND ");
                 Entry<ContactField, Object> entry = iterator.next();
-                appendComparison(entry.getKey(), entry.getValue());
+                appendComparison(entry.getKey(), entry.getValue(), exact);
                 while (iterator.hasNext()) {
                     entry = iterator.next();
                     stringBuilder.append(" AND ");
-                    appendComparison(entry.getKey(), entry.getValue());
+                    appendComparison(entry.getKey(), entry.getValue(), exact);
                 }
 	        }
 		} else {
@@ -161,7 +162,13 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 
-	private boolean appendStartLetterComparison(String pattern) throws OXException {
+	private static final Pattern P_DIGIT = Pattern.compile("\\d");
+
+	private static boolean isDigit(CharSequence input) {
+        return P_DIGIT.matcher(input).matches();
+    }
+
+	private boolean appendStartLetterComparison(String pattern, boolean exact) throws OXException {
 		String columnLabel = Mappers.CONTACT.get(getStartLetterField()).getColumnLabel();
 		if (".".equals(pattern) || "#".equals(pattern)) {
 			/*
@@ -170,7 +177,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			stringBuilder.append('(').append(columnLabel).append("<'0%' OR ").append(columnLabel).append(">'z%') AND ")
 				.append(columnLabel).append("NOT LIKE 'z%'");
 			return true;
-		} else if (pattern.matches("\\d")) {
+		} else if (isDigit(pattern)) {
 			/*
 			 * digit
 			 */
@@ -181,8 +188,15 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			 * match pattern with fallback
 			 */
 			String fallbackColumnLabel = Mappers.CONTACT.get(ContactField.DISPLAY_NAME).getColumnLabel();
-            stringBuilder.append('(').append(columnLabel).append(" LIKE ? OR (")
-            	.append(columnLabel).append(" IS NULL AND ").append(fallbackColumnLabel).append(" LIKE ?))");
+			stringBuilder.append('(').append(columnLabel).append(" LIKE ?");
+			if (exact) {
+			    stringBuilder.append(" COLLATE utf8_bin");
+            }
+            stringBuilder.append(" OR (").append(columnLabel).append(" IS NULL AND ").append(fallbackColumnLabel).append(" LIKE ?");
+            if (exact) {
+                stringBuilder.append(" COLLATE utf8_bin");
+            }
+            stringBuilder.append("))");
             String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
             this.parameters.add(preparedPattern);
             this.parameters.add(preparedPattern);
@@ -195,11 +209,10 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		}
 	}
 
-	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value,
-			boolean needsEMail) throws OXException {
+	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value, boolean needsEMail, boolean exact) throws OXException {
 		stringBuilder.append('(').append(selectClause);
 		stringBuilder.append(" WHERE ").append(contextIDClause).append(" AND ");
-		appendComparison(field, value);
+		appendComparison(field, value, exact);
 		stringBuilder.append(" AND ").append(folderIDsClause);
 		if (needsEMail) {
 			stringBuilder.append(" AND (").append(getEMailAutoCompleteClause()).append(')');
@@ -265,7 +278,7 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		return comparisons;
 	}
 
-	private void appendComparison(ContactField field, Object value) throws OXException {
+	private void appendComparison(ContactField field, Object value, boolean exact) throws OXException {
 		DbMapping<? extends Object, Contact> dbMapping = Mappers.CONTACT.get(field);
 		if (isTextColumn(dbMapping)) {
 			if (null != this.charset) {
@@ -277,9 +290,15 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			if (containsWildcards(preparedPattern)) {
 				// use "LIKE" search
 				stringBuilder.append(" LIKE ?");
+				if (exact) {
+				    stringBuilder.append(" COLLATE utf8_bin");
+                }
 				parameters.add(preparedPattern);
 			} else {
 				stringBuilder.append("=?");
+                if (exact) {
+                    stringBuilder.append(" COLLATE utf8_bin");
+                }
 				parameters.add(value);
 			}
 		} else {

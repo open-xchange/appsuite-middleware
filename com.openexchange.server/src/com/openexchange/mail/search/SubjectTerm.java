@@ -68,6 +68,7 @@ public final class SubjectTerm extends SearchTerm<String> {
     private static final long serialVersionUID = 1462060457742619720L;
 
     private final String unicodeSubject;
+    private String lowerCaseAddr;
 
     /**
      * Initializes a new {@link SubjectTerm}
@@ -75,6 +76,15 @@ public final class SubjectTerm extends SearchTerm<String> {
     public SubjectTerm(final String unicodeSubject) {
         super();
         this.unicodeSubject = unicodeSubject;
+    }
+
+    private String getLowerCaseAddr() {
+        String s = lowerCaseAddr;
+        if (null == s) {
+            s = Strings.asciiLowerCase(unicodeSubject);
+            lowerCaseAddr = s;
+        }
+        return s;
     }
 
     @Override
@@ -108,7 +118,7 @@ public final class SubjectTerm extends SearchTerm<String> {
             if (containsWildcard()) {
                 return toRegex(unicodeSubject).matcher(subject).find();
             }
-            return (Strings.asciiLowerCase(subject).indexOf(Strings.asciiLowerCase(unicodeSubject)) != -1);
+            return (Strings.asciiLowerCase(subject).indexOf(getLowerCaseAddr()) >= 0);
         }
         return false;
     }
@@ -128,7 +138,7 @@ public final class SubjectTerm extends SearchTerm<String> {
         if (containsWildcard()) {
             return toRegex(unicodeSubject).matcher(subject).find();
         }
-        return (Strings.asciiLowerCase(subject).indexOf(Strings.asciiLowerCase(unicodeSubject)) != -1);
+        return (Strings.asciiLowerCase(subject).indexOf(getLowerCaseAddr()) >= 0);
     }
 
     @Override
