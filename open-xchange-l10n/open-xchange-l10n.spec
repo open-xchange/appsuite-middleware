@@ -733,6 +733,8 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Tue Oct 20 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-26 (2813)
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-30 (2818)
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>

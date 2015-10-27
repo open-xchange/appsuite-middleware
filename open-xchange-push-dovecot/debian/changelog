@@ -52,6 +52,12 @@ open-xchange-push-dovecot (7.8.0-0) unstable; urgency=medium
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 01 Jul 2015 09:41:11 +0200
 
+open-xchange-push-dovecot (7.6.2-3) stable; urgency=medium
+
+  * Build for patch 2015-10-26 (2813)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 20 Oct 2015 09:57:05 +0200
+
 open-xchange-push-dovecot (7.6.2-2) stable; urgency=medium
 
   * Build for patch 2015-10-30 (2818)

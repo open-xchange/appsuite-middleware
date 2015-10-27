@@ -52,6 +52,12 @@ open-xchange-admin-reseller (7.8.0-0) unstable; urgency=medium
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 05 Nov 2014 09:40:35 +0100
 
+open-xchange-admin-reseller (7.6.2-36) stable; urgency=medium
+
+  * Build for patch 2015-10-26 (2813)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 20 Oct 2015 09:56:11 +0200
+
 open-xchange-admin-reseller (7.6.2-35) stable; urgency=medium
 
   * Build for patch 2015-10-30 (2818)
