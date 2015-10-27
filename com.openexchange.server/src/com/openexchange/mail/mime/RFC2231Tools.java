@@ -136,7 +136,7 @@ public final class RFC2231Tools {
     public static String rfc2231Decode(final String encoded, final String charset) {
         if ((encoded == null) || (encoded.length() == 0)) {
             return encoded;
-        } else if (!Charset.isSupported(charset)) {
+        } else if (null == charset || !Charset.isSupported(charset)) {
             return encoded;
         }
         final int length = encoded.length();
