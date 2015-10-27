@@ -1446,7 +1446,7 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND mail LIKE ?");
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND mail LIKE ? COLLATE utf8_bin");
         if (excludeUsers) {
             /*
              * exclude all regular users
