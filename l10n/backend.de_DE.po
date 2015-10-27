@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-10-21 10:18+0100\n"
+"PO-Revision-Date: 2015-10-27 09:26+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -5109,6 +5109,17 @@ msgstr ""
 msgid "Moving a recurring appointment to another folder is not supported."
 msgstr "Ein Serientermin darf nicht in einen anderen Ordner verschoben werden."
 
+#. *
+#. * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
+msgid ""
+"Cannot insert appointment (%1$s). An appointment with the unique identifier "
+"(%2$s) already exists."
+msgstr ""
+"Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
+"eindeutigen ID (%2$s) ist bereits vorhanden."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
 msgstr "Ungültige E-Mail-Adresse."
@@ -7697,6 +7708,11 @@ msgstr ""
 "Anfrage abgelehnt. Die Dateigröße übersteigt die konfigurierte maximale "
 "Dateigröße von %1$s."
 
+#. Read timed out. Waited too long for incoming data from client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
+msgid "Read timed out. Waited too long for incoming data from client."
+msgstr ""
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -8081,6 +8097,10 @@ msgstr "Ein Standardordner darf nicht umbenannt werden"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:197
 msgid "Default folder must not be deleted"
 msgstr "Ein Standardordner darf nicht gelöscht werden"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:199
+msgid "Archive folder does not allow subfolders."
+msgstr ""
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -16129,13 +16149,6 @@ msgstr "Zulu"
 
 #~ msgid "Changing an exception into a series is not supported."
 #~ msgstr "Das Ändern einer Ausnahme in eine Serie wird nicht unterstützt."
-
-#~ msgid ""
-#~ "Cannot insert appointment (%1$s). An appointment with the unique "
-#~ "identifier (%2$s) already exists."
-#~ msgstr ""
-#~ "Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
-#~ "eindeutigen ID (%2$s) ist bereits vorhanden."
 
 #~ msgid "SQL Problem."
 #~ msgstr "SQL-Problem."
