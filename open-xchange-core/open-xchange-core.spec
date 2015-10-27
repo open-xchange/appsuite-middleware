@@ -1246,8 +1246,6 @@ PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
     cat >> $PFILE <<EOF
 
-# v7.8.1 update tasks start here
-
 # Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
 !com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
 EOF
@@ -1302,6 +1300,8 @@ exit 0
 %changelog
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-30 (2818)
+* Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-26 (2812)
 * Mon Oct 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-23 (2806)
 * Thu Oct 08 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -61,6 +61,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.oauth.provider.rmi/javadoc
 
 %changelog
+* Mon Oct 19 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-10-26 (2812)
 * Thu Oct 08 2015 Steffen Templin <steffen.templin@open-xchange.com>
 prepare for 7.8.1
 * Fri Oct 02 2015 Steffen Templin <steffen.templin@open-xchange.com>

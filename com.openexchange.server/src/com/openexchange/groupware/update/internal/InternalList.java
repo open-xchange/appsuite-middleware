@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
@@ -554,7 +555,7 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.AddGuestCreatedByIndexForUserTable());
 
         // Drop redundant indices
-        list.add(new DropRendundantIndicesUpdateTask());
+        list.add(new com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask());
 
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
@@ -574,15 +575,15 @@ public final class InternalList {
         // Add primary key to dlist tables
         list.add(new MakeUUIDPrimaryForDListTablesV2());
 
+        // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
+
         // +++++++++++++++++++++++++++++++++ Version 7.8.1 starts here. +++++++++++++++++++++++++++++++++
 
         list.add(new DropVersionTableTask());
 
         // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
         list.add(new RemoveAliasInUserAttributesTable());
-
-        // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
-        list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
 
         // Create object_use_count table
         list.add(new CreateObjectUseCountTableTask());

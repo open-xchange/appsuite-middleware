@@ -4,6 +4,12 @@ open-xchange-push-malpoll (7.8.1-0) unstable; urgency=medium
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 08 Oct 2015 10:47:41 +0200
 
+open-xchange-push-malpoll (7.8.0-7) stable; urgency=medium
+
+  * Build for patch 2015-10-26 (2812)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 19 Oct 2015 10:57:22 +0200
+
 open-xchange-push-malpoll (7.8.0-6) stable; urgency=medium
 
   * Sixth candidate for 7.8.0 release

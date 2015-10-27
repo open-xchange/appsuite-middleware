@@ -540,9 +540,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Archive folder does not allow subfolders.
      */
-    ARCHIVE_SUBFOLDER_NOT_ALLOWED("Archive folder does not allow subfolders.", MailExceptionStrings.ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG, CATEGORY_PERMISSION_DENIED, 100),
-
-    ;
+    ARCHIVE_SUBFOLDER_NOT_ALLOWED("Archive folder does not allow subfolders.", MailExceptionStrings.ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG, CATEGORY_PERMISSION_DENIED, 100);
 
     private static String PREFIX = "MSG";
 
