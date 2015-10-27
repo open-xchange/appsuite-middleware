@@ -74,7 +74,7 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
     private static final ContactField[] WHITELIST_FIELDS = new ContactField[] {
         ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.CREATED_BY,
         ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
-        ContactField.LAST_MODIFIED_UTC, ContactField.USE_COUNT };
+        ContactField.LAST_MODIFIED_UTC };
 
     /**
      * Initializes a new {@link ContactAnonymizerService}.

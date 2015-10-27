@@ -3045,29 +3045,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>(ContactFields.USE_COUNT, 608) {
-
-            @Override
-            public void set(Contact contact, Integer value) {
-                contact.setUseCount(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsUseCount();
-            }
-
-            @Override
-            public Integer get(Contact contact) {
-                return contact.getUseCount();
-            }
-
-            @Override
-            public void remove(Contact contact) {
-                contact.removeUseCount();
-            }
-        });
-
         mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(DataFields.LAST_MODIFIED_UTC, DataObject.LAST_MODIFIED_UTC) {
 
 			@Override

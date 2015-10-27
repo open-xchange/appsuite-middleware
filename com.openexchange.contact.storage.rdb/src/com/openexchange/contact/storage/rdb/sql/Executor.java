@@ -308,14 +308,18 @@ public class Executor {
      * @throws OXException
      */
     public <O> List<Contact> select(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified,
-    		ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws SQLException, OXException {
+        ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions, int forUser) throws SQLException, OXException {
         /*
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
         StringBuilder StringBuilder = new StringBuilder(1024);
-        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
+            .append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(table.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
+            .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+            .append(table.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+            .append(table).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ")
+            .append(" WHERE ").append(table.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
         	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
@@ -357,6 +361,83 @@ public class Executor {
             }
             if (null != adapter) {
             	adapter.setParameters(stmt, parameterIndex);
+            }
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    /**
+     * Selects contacts from the database.
+     *
+     * @param connection
+     * @param table
+     * @param contextID
+     * @param folderID
+     * @param objectIDs
+     * @param minLastModified
+     * @param fields
+     * @param term
+     * @param sortOptions
+     * @return
+     * @throws SQLException
+     * @throws OXException
+     */
+    public <O> List<Contact> select(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified,
+        ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
+        StringBuilder StringBuilder = new StringBuilder(1024);
+        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (Integer.MIN_VALUE != folderID) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        }
+        if (null != objectIDs && 0 < objectIDs.length) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            if (1 == objectIDs.length) {
+                StringBuilder.append('=').append(objectIDs[0]);
+            } else {
+                StringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+            }
+        }
+        if (Long.MIN_VALUE != minLastModified) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+        }
+        if (null != adapter) {
+            StringBuilder.append(" AND ").append(adapter.getClause());
+        }
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            StringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                StringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        StringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(StringBuilder.toString());
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID) {
+                stmt.setInt(parameterIndex++, folderID);
+            }
+            if (Long.MIN_VALUE != minLastModified) {
+                stmt.setLong(parameterIndex++, minLastModified);
+            }
+            if (null != adapter) {
+                adapter.setParameters(stmt, parameterIndex);
             }
             /*
              * execute and read out results
@@ -484,11 +565,11 @@ public class Executor {
     }
 
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch,
-    		ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
+        ContactField[] fields, SortOptions sortOptions, int forUser) throws SQLException, OXException {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions), forUser);
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));

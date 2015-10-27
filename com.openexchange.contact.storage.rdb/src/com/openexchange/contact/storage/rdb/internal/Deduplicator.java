@@ -329,7 +329,7 @@ public class Deduplicator {
         ContactField[] syntheticFields =  {
             ContactField.CREATION_DATE, ContactField.CREATED_BY, ContactField.LAST_MODIFIED, ContactField.LAST_MODIFIED_UTC,
             ContactField.MODIFIED_BY, ContactField.FOLDER_ID, ContactField.CONTEXTID, //ContactField.INTERNAL_USERID,
-            ContactField.OBJECT_ID, ContactField.USE_COUNT, ContactField.UID, ContactField.FILENAME,
+            ContactField.OBJECT_ID, ContactField.UID, ContactField.FILENAME,
             ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1_URL
         };
         EnumSet<ContactField> contentFields = EnumSet.allOf(ContactField.class);
@@ -448,7 +448,7 @@ public class Deduplicator {
         return hash;
     }
 
-    static void duplicateContacts(int contextID, int folderID, int count) throws OXException {
+    static void duplicateContacts(int contextID, int folderID, int count, int forUser) throws OXException {
         Executor executor = new Executor();
         DatabaseService databaseService = RdbServiceLookup.getService(DatabaseService.class, true);
         Connection connection = null;
@@ -461,7 +461,7 @@ public class Deduplicator {
              * get contacts to duplicate
              */
             List<Contact> contacts = executor.select(
-                connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, Fields.CONTACT_DATABASE_ARRAY, null, null);
+                connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, Fields.CONTACT_DATABASE_ARRAY, null, null, forUser);
             for (Contact contact : contacts) {
                 if (0 < contact.getNumberOfAttachments()) {
                     continue;

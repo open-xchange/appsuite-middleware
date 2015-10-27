@@ -63,24 +63,130 @@ import com.openexchange.session.Session;
  */
 public interface ObjectUseCountService {
 
+    /**
+     * Get use count for object
+     *
+     * @param session
+     * @param folder
+     * @param objectId
+     * @return
+     * @throws OXException
+     */
     int getObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
+    /**
+     * Get use count for object
+     *
+     * @param session
+     * @param folder
+     * @param objectId
+     * @param con Existing connection to database
+     * @return
+     * @throws OXException
+     */
     int getObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
+    /**
+     * Set use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @param value
+     * @throws OXException
+     */
+    void setObjectUseCount(Session session, int folder, int objectId, int value) throws OXException;
+
+    /**
+     * Set use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @param value
+     * @param con Writable connection to database
+     * @throws OXException
+     */
+    void setObjectUseCount(Session session, int folder, int objectId, int value, Connection con) throws OXException;
+
+    /**
+     * Increment use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
+    /**
+     * Increment use count for contact identified by mail address
+     * 
+     * @param session
+     * @param mail
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, String mail) throws OXException;
 
+    /**
+     * Increment use count for set of contacts identified by mail addresses
+     * 
+     * @param session
+     * @param addresses
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, Set<InternetAddress> addresses) throws OXException;
 
+    /**
+     * Increment use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @param con Writable connection to database
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
+    /**
+     * Increment use count for contact identified by mail address
+     * 
+     * @param session
+     * @param mail
+     * @param con Writable connection to database
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, String mail, Connection con) throws OXException;
 
+    /**
+     * Increment use count for set of contacts identified by mail addresses
+     * 
+     * @param session
+     * @param addresses
+     * @param con Writable connection to database
+     * @throws OXException
+     */
     void incrementObjectUseCount(Session session, Set<InternetAddress> addresses, Connection con) throws OXException;
 
+    /**
+     * Reset use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @throws OXException
+     */
     void resetObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
+    /**
+     * Reset use count for object
+     * 
+     * @param session
+     * @param folder
+     * @param objectId
+     * @param con Writable connection to database
+     * @throws OXException
+     */
     void resetObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
 }

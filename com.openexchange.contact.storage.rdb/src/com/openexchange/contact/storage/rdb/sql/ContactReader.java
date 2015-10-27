@@ -141,9 +141,7 @@ public class ContactReader {
                 String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
                 contact.setEmail1(primaryMail);
             }
-            if (withObjectUseCount && resultSet.getInt("value") > 0) {
-                contact.setUseCount(contact.getUseCount() + resultSet.getInt("value"));
-            }
+            contact.setUseCount(resultSet.getInt("value"));
         }
         return contact;
     }

@@ -85,13 +85,13 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	 * @param charset The used charset
 	 * @throws OXException
 	 */
-	public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset) throws OXException {
+    public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset, int forUser) throws OXException {
 		super(charset);
 		this.stringBuilder = new StringBuilder(256);
 		if (null != contactSearch.getPattern()) {
-			appendSearch(contactSearch, contextID, fields);
+            appendSearch(contactSearch, contextID, fields, forUser);
 		} else {
-			appendSearchAlternative(contactSearch, contextID, fields);
+            appendSearchAlternative(contactSearch, contextID, fields, forUser);
 		}
 	}
 
@@ -100,8 +100,8 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		return Strings.trim(stringBuilder);
 	}
 
-	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
-		stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ");
+	private void appendSearch(ContactSearchObject contactSearch, int contextID, ContactField[] fields, int forUser) throws OXException {
+        stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ");
 		/*
 		 * prefer startletter search if possible
 		 */
@@ -118,11 +118,11 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 		stringBuilder.append(" AND ").append(getFolderIDsClause(contactSearch.getFolders()));
 	}
 
-	private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields) throws OXException {
+    private void appendSearchAlternative(ContactSearchObject contactSearch, int contextID, ContactField[] fields, int forUser) throws OXException {
 		Map<ContactField, Object> comparisons = extractComparisons(contactSearch);
 		String contextIDClause = getContextIDClause(contextID);
 		String folderIDsClause = getFolderIDsClause(contactSearch.getFolders());
-		String selectClause = getSelectClause(fields);
+        String selectClause = getSelectClause(fields, forUser);
 
 		Iterator<Entry<ContactField, Object>> iterator = comparisons.entrySet().iterator();
 		if (iterator.hasNext()) {
@@ -198,9 +198,6 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	private void appendComparison(String contextIDClause, String folderIDsClause, String selectClause, ContactField field, Object value,
 			boolean needsEMail) throws OXException {
 		stringBuilder.append('(').append(selectClause);
-		if (IGNORE_INDEX_CID_FOR_UNIONS && ALTERNATIVE_INDEXED_FIELDS.contains(field)) {
-		    stringBuilder.append(" IGNORE INDEX (cid)");
-		}
 		stringBuilder.append(" WHERE ").append(contextIDClause).append(" AND ");
 		appendComparison(field, value);
 		stringBuilder.append(" AND ").append(folderIDsClause);

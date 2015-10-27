@@ -192,7 +192,7 @@ public enum ContactField{
     NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , ContactFields.NUMBER_OF_ATTACHMENTS, Types.INTEGER),
     NUMBER_OF_IMAGES(596, "intfield04", "NUMBER_OF_IMAGES", "number_of_images", ContactFields.NUMBER_OF_IMAGES, Types.INTEGER),
     LAST_MODIFIED_OF_NEWEST_ATTACHMENT(105, "", "LAST_MODIFIED_OF_NEWEST_ATTACHMENT", "lastModifiedOfNewestAttachment", ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 0),
-    USE_COUNT(608, "useCount", "USE_COUNT", "useCount", ContactFields.USE_COUNT, Types.INTEGER),
+    //    USE_COUNT(608, "useCount", "USE_COUNT", "useCount", ContactFields.USE_COUNT, Types.INTEGER),
     IMAGE1_URL(606, "", "IMAGE1_URL", "image1_url", ContactFields.IMAGE1_URL, 0),
     LAST_MODIFIED_UTC(6, "", "LAST_MODIFIED_UTC", "last_modified_utc", ContactFields.LAST_MODIFIED_UTC, 0),
     YOMI_FIRST_NAME(Contact.YOMI_FIRST_NAME, "yomiFirstName", "YOMI_FIRST_NAME", "yomiFirstName", ContactFields.YOMI_FIRST_NAME, Types.VARCHAR),
@@ -464,7 +464,6 @@ public enum ContactField{
         case NUMBER_OF_ATTACHMENTS : return switcher.numberofattachments(objects);
         case NUMBER_OF_IMAGES: return switcher.numberofimages(objects);
         case LAST_MODIFIED_OF_NEWEST_ATTACHMENT: return switcher.lastmodifiedofnewestattachment(objects);
-        case USE_COUNT: return switcher.usecount(objects);
         case MARK_AS_DISTRIBUTIONLIST: return switcher.markasdistributionlist(objects);
         case YOMI_FIRST_NAME: return switcher.yomifirstname(objects);
         case YOMI_LAST_NAME: return switcher.yomilastname(objects);

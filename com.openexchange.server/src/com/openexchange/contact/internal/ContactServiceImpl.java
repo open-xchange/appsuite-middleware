@@ -75,11 +75,13 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -267,6 +269,12 @@ public class ContactServiceImpl extends DefaultContactService {
                 throw e;
             }
         }
+        if (delta.containsUseCount()) {
+            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != service) {
+                service.setObjectUseCount(session, Integer.valueOf(targetFolderId), Integer.valueOf(objectID), delta.getUseCount());
+            }
+        }
         /*
          * broadcast event
          */
@@ -345,6 +353,12 @@ public class ContactServiceImpl extends DefaultContactService {
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
+        if (delta.containsUseCount()) {
+            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != service) {
+                service.setObjectUseCount(session, Integer.valueOf(folderID), Integer.valueOf(objectID), delta.getUseCount());
+            }
+        }
         /*
          * merge back differences to supplied contact
          */

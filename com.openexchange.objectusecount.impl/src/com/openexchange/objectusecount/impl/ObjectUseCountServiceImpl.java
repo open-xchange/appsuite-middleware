@@ -266,4 +266,47 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
         }
     }
 
+    @Override
+    public void setObjectUseCount(Session session, int folder, int objectId, int value) throws OXException {
+        setObjectUseCount(session, folder, objectId, value, null);
+    }
+
+    @Override
+    public void setObjectUseCount(Session session, int folder, int objectId, int value, Connection con) throws OXException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        boolean newConnection = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (null == con) {
+                con = dbService.getWritable(session.getContextId());
+                newConnection = true;
+            }
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM object_use_count WHERE cid = ? AND user = ? AND folder = ? AND object = ?");
+            stmt.setInt(1, session.getContextId());
+            stmt.setInt(2, session.getUserId());
+            stmt.setInt(3, folder);
+            stmt.setInt(4, objectId);
+            rs = stmt.executeQuery();
+            if (rs.getInt(1) > 0) {
+                stmt.close();
+                stmt = con.prepareStatement("UPDATE object_use_count SET value = ? WHERE cid = ? AND user = ? AND folder = ? AND object = ?");
+                stmt.setInt(1, value);
+                stmt.setInt(2, session.getContextId());
+                stmt.setInt(3, session.getUserId());
+                stmt.setInt(4, folder);
+                stmt.setInt(5, objectId);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            closeSQLStuff(rs);
+            if (newConnection) {
+                dbService.backWritable(con);
+            }
+        }
+    }
+
 }

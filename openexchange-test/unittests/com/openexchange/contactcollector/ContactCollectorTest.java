@@ -209,7 +209,7 @@ public class ContactCollectorTest extends TestCase {
     }
 
     private List<Contact> searchContact(final String pattern) throws Exception {
-        
+
         ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
         final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
@@ -217,8 +217,8 @@ public class ContactCollectorTest extends TestCase {
         searchObject.setEmail3(pattern);
         searchObject.setOrSearch(true);
         searchObject.addFolder(contactFolder.getObjectID());
-        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, 
-            ContactField.USERFIELD20, ContactField.USE_COUNT };
+        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID,
+            ContactField.USERFIELD20 };
         SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields);
 
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -235,7 +235,7 @@ public class ContactCollectorTest extends TestCase {
         final List<Contact> contacts = searchContact(pattern);
         ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
         for (final Contact contact : contacts) {
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()), 
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()),
                 contact.getLastModified());
         }
     }

@@ -2983,29 +2983,6 @@ public class LdapMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USE_COUNT, new LdapIntegerMapping() {
-
-            @Override
-            public void set(Contact contact, Integer value) {
-                contact.setUseCount(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsUseCount();
-            }
-
-            @Override
-            public Integer get(Contact contact) {
-                return contact.getUseCount();
-            }
-
-            @Override
-            public void remove(Contact contact) {
-                contact.removeUseCount();
-            }
-        });
-
         mappings.put(ContactField.HOME_ADDRESS, new LdapStringMapping() {
 
             @Override

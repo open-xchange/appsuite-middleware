@@ -306,7 +306,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * get a list of object IDs to delete
              */
-            final List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            final List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, new ContactField[] { ContactField.OBJECT_ID }, null, null, session.getUserId());
             if (null == contacts || 0 == contacts.size()) {
                 return;// nothing to do
             }
@@ -764,9 +764,9 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                         availableFields.add(requestedField);
                     }
                 }
-                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions);
+                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions, session.getUserId());
             } else {
-                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions);
+                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions, session.getUserId());
                 if (null != contacts && 0 < contacts.size()) {
                     /*
                      * merge image data if needed
@@ -821,7 +821,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, contactSearch, queryFields.getContactDataFields(), sortOptions);
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, contactSearch, queryFields.getContactDataFields(), sortOptions, session.getUserId());
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed
