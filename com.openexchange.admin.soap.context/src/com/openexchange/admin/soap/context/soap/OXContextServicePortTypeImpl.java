@@ -1385,6 +1385,12 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         if (tmp != null) {
             user.setMail_folder_trash_name(tmp);
         }
+
+        tmp = soapUser.getMailFolderArchiveFullName();
+        if (tmp != null) {
+            user.setMail_folder_archive_full_name(tmp);
+        }
+
         Boolean mailEnabled = soapUser.isMailenabled();
         if (null != mailEnabled) {
             user.setMailenabled(mailEnabled);

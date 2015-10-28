@@ -55,6 +55,7 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -73,6 +74,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -80,8 +82,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
+
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -1013,6 +1017,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
             {
+                final String archiveFullName = usrdata.getMail_folder_archive_full_name();
+                if (null != archiveFullName) {
+                    folder_update = con.prepareStatement("UPDATE user_mail_account SET archive_fullname = ?, archive = ? WHERE cid = ? AND user = ? AND id = ?");
+                    folder_update.setString(1, archiveFullName);
+                    folder_update.setString(2, "");
+                    folder_update.setInt(3, contextId);
+                    folder_update.setInt(4, userId);
+                    folder_update.setInt(5, MailAccount.DEFAULT_ID);
+                    folder_update.executeUpdate();
+                    folder_update.close();
+                }
+            }
+            {
                 final String mailfolderconfirmedspam = usrdata.getMail_folder_confirmed_spam_name();
                 if (null != mailfolderconfirmedspam) {
                     folder_update = con.prepareStatement("UPDATE user_setting_mail SET confirmed_spam = ? WHERE cid = ? AND user = ?");
@@ -1301,6 +1318,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             changed.add(Attribute.TRASH_LITERAL);
             account.setTrash(user.getMail_folder_trash_name());
         }
+        if (null != user.getMail_folder_archive_full_name()) {
+            changed.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
+            account.setArchiveFullname(user.getMail_folder_archive_full_name());
+        }
         if (null != user.getMail_folder_confirmed_ham_name()) {
             changed.add(Attribute.CONFIRMED_HAM_LITERAL);
             account.setConfirmedHam(user.getMail_folder_confirmed_ham_name());
@@ -1551,34 +1572,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 // get mailfolder
-                String std_mail_folder_sent = prop.getUserProp("SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
+                String std_mail_folder_sent;
                 if (null != usrdata.getMail_folder_sent_name()) {
                     std_mail_folder_sent = usrdata.getMail_folder_sent_name();
+                } else {
+                    std_mail_folder_sent = prop.getUserProp("SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
                 }
 
-                String std_mail_folder_trash = prop.getUserProp("TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
+                String std_mail_folder_trash;
                 if (null != usrdata.getMail_folder_trash_name()) {
                     std_mail_folder_trash = usrdata.getMail_folder_trash_name();
+                } else {
+                    std_mail_folder_trash = prop.getUserProp("TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
                 }
 
-                String std_mail_folder_drafts = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
+                String std_mail_folder_drafts;
                 if (null != usrdata.getMail_folder_drafts_name()) {
                     std_mail_folder_drafts = usrdata.getMail_folder_drafts_name();
+                } else {
+                    std_mail_folder_drafts = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
                 }
 
-                String std_mail_folder_spam = prop.getUserProp("SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
+                String std_mail_folder_spam;
                 if (null != usrdata.getMail_folder_spam_name()) {
                     std_mail_folder_spam = usrdata.getMail_folder_spam_name();
+                } else {
+                    std_mail_folder_spam = prop.getUserProp("SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
                 }
 
-                String std_mail_folder_confirmed_spam = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
+                String std_mail_folder_confirmed_spam;
                 if (null != usrdata.getMail_folder_confirmed_spam_name()) {
                     std_mail_folder_confirmed_spam = usrdata.getMail_folder_confirmed_spam_name();
+                } else {
+                    std_mail_folder_confirmed_spam = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
                 }
 
-                String std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
+                String std_mail_folder_confirmed_ham;
                 if (null != usrdata.getMail_folder_confirmed_ham_name()) {
                     std_mail_folder_confirmed_ham = usrdata.getMail_folder_confirmed_ham_name();
+                } else {
+                    std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 }
 
                 // insert all multi valued attribs to the user_attribute table,
@@ -1816,19 +1849,33 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
-        final String lang = user.getLanguage();
-        String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
-        account.setDrafts(null == user.getMail_folder_drafts_name() ? defaultName : user.getMail_folder_drafts_name());
-        defaultName = prop.getUserProp("SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
-        account.setSent(null == user.getMail_folder_sent_name() ? defaultName : user.getMail_folder_sent_name());
-        defaultName = prop.getUserProp("SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
-        account.setSpam(null == user.getMail_folder_spam_name() ? defaultName : user.getMail_folder_spam_name());
-        defaultName = prop.getUserProp("TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
-        account.setTrash(null == user.getMail_folder_trash_name() ? defaultName : user.getMail_folder_trash_name());
-        defaultName = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
-        account.setConfirmedHam(null == user.getMail_folder_confirmed_ham_name() ? defaultName : user.getMail_folder_confirmed_ham_name());
-        defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
-        account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
+        {
+            String lang = user.getLanguage().toUpperCase();
+            // Drafts
+            String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang, "Drafts");
+            account.setDrafts(null == user.getMail_folder_drafts_name() ? defaultName : user.getMail_folder_drafts_name());
+            // Sent
+            defaultName = prop.getUserProp("SENT_MAILFOLDER_" + lang, "Sent");
+            account.setSent(null == user.getMail_folder_sent_name() ? defaultName : user.getMail_folder_sent_name());
+            // Spam/Junk
+            defaultName = prop.getUserProp("SPAM_MAILFOLDER_" + lang, "Spam");
+            account.setSpam(null == user.getMail_folder_spam_name() ? defaultName : user.getMail_folder_spam_name());
+            // Trash
+            defaultName = prop.getUserProp("TRASH_MAILFOLDER_" + lang, "Trash");
+            account.setTrash(null == user.getMail_folder_trash_name() ? defaultName : user.getMail_folder_trash_name());
+            // Confirmed-ham
+            defaultName = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang, "confirmed-ham");
+            account.setConfirmedHam(null == user.getMail_folder_confirmed_ham_name() ? defaultName : user.getMail_folder_confirmed_ham_name());
+            // Confirmed-spam
+            defaultName = prop.getUserProp("CONFIRMED_SPAM_MAILFOLDER_" + lang, "confirmed-spam");
+            account.setConfirmedSpam(null == user.getMail_folder_confirmed_spam_name() ? defaultName : user.getMail_folder_confirmed_spam_name());
+        }
+        {
+            String archiveFullname = user.getMail_folder_archive_full_name();
+            if (null != archiveFullname) {
+                account.setArchiveFullname(archiveFullname);
+            }
+        }
         account.setSpamHandler(SpamHandler.SPAM_HANDLER_FALLBACK);
         String smtpServer = user.getSmtpServerString();
         if (null == smtpServer) {
@@ -2138,10 +2185,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] getData(final Context ctx, final User[] users) throws StorageException {
-        final int cid = i(ctx.getId());
+    	final int contextId = i(ctx.getId());
         final Class<User> c = User.class;
         final Method[] theMethods = c.getMethods();
-        final ArrayList<Method> list = new ArrayList<Method>();
+        final List<Method> list = new LinkedList<Method>();
         final HashSet<String> notallowed = new HashSet<String>(9);
 
         // Define all those fields which are contained in the user table
@@ -2152,6 +2199,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         notallowed.add("setMailFolderConfirmedSpam");
         notallowed.add("setMailFolderConfirmedHam");
 
+        // TODO: load data for guests too
         final StringBuilder query = new StringBuilder("SELECT ");
 
         for (final Method method : theMethods) {
@@ -2172,38 +2220,36 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         query.delete(query.length() - 2, query.length() - 1);
 
         query.append(" FROM user JOIN login2user USING (cid,id) JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.id=prg_contacts.userid) ");
-        query.append("WHERE user.id = ? ");
-        query.append("AND user.cid = ? ");
+        query.append("WHERE user.cid = ? AND user.id = ?");
 
         Connection read_ox_con = null;
-        PreparedStatement stmt = null;
+        PreparedStatement stmtuid = null;
         PreparedStatement stmt2 = null;
-        PreparedStatement stmtusername = null;
+        PreparedStatement stmtid = null;
         PreparedStatement stmtuserattributes = null;
-        PreparedStatement stmtstd = null;
-
-        final ArrayList<User> userlist = new ArrayList<User>();
+        PreparedStatement stmtusm = null;
+        PreparedStatement stmtacc = null;
+        List<User> userlist = new LinkedList<User>();
 
         try {
-            read_ox_con = cache.getConnectionForContext(cid);
+            read_ox_con = cache.getConnectionForContext(contextId);
             final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
             boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
 
-            stmt = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");
-            stmt.setInt(1, cid);
             stmt2 = read_ox_con.prepareStatement(query.toString());
-            stmtusername = read_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
-            stmtusername.setInt(1, cid);
+            stmt2.setInt(1, contextId);
             stmtuserattributes = read_ox_con.prepareStatement("SELECT name, value FROM user_attribute WHERE cid=? and id=?");
-            stmtuserattributes.setInt(1, cid);
-            stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
-            stmtstd.setInt(1, cid);
+            stmtuserattributes.setInt(1, contextId);
+            stmtusm = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
+            stmtusm.setInt(1, contextId);
+            stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
+            stmtacc.setInt(1, contextId);
             ResultSet rs = null;
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
             for (final User user : users) {
-                int user_id = user.getId();
+                int user_id = user.getId().intValue();
                 final User newuser = (User) user.clone();
                 String username = user.getName();
                 if (autoLowerCase && null != username) {
@@ -2230,31 +2276,38 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (-1 != user_id) {
                     // TODO: Why do we make this clause?
                     if (null == username) {
-                        stmt.setInt(2, user_id);
-                        rs = stmt.executeQuery();
+                        stmtuid = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");
+                        stmtuid.setInt(1, contextId);
+                        stmtuid.setInt(2, user_id);
+                        rs = stmtuid.executeQuery();
                         if (rs.next()) {
                             username = rs.getString("uid");
                             user.setName(username);
                         }
                         rs.close();
+                        stmtuid.close();
+                        stmtuid = null;
                     }
-                    stmt2.setInt(1, user_id);
+                    stmt2.setInt(2, user_id);
                 } else if (null != user.getName()) {
                     String name = autoLowerCase ? user.getName().toLowerCase() : user.getName();
-                    stmtusername.setString(2, name);
-                    rs = stmtusername.executeQuery();
+                    stmtid = read_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
+                    stmtid.setInt(1, contextId);
+                    stmtid.setString(2, name);
+                    rs = stmtid.executeQuery();
                     if (rs.next()) {
                         user_id = rs.getInt("id");
                     }
                     rs.close();
+                    stmtid.close();
+                    stmtid = null;
 
-                    stmt2.setInt(1, user_id);
+                    stmt2.setInt(2, user_id);
                 } else {
-                    throw new StorageException("No user name oder user id given");
+                    throw new StorageException("Neither user name nor user id given");
                 }
                 newuser.setName(username);
 
-                stmt2.setInt(2, cid);
                 rs = stmt2.executeQuery();
                 if (rs.next()) {
                     for (final Method method : list) {
@@ -2265,14 +2318,22 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             final String fieldvalue = rs.getString(fieldname);
                             method.invoke(newuser, fieldvalue);
                         } else if (paramtype.equalsIgnoreCase("java.lang.Integer")) {
-                            method.invoke(newuser, rs.getInt(fieldname));
+                            method.invoke(newuser, Integer.valueOf(rs.getInt(fieldname)));
                         } else if (paramtype.equalsIgnoreCase("java.lang.Boolean")) {
                             if (methodnamewithoutset.equals(Mapper.PASSWORD_EXPIRED)) {
-                                method.invoke(newuser, getboolfromint(rs.getInt(fieldname)));
+                                method.invoke(newuser, Boolean.valueOf(getboolfromint(rs.getInt(fieldname))));
                             } else {
-                                method.invoke(newuser, rs.getBoolean(fieldname));
+                                method.invoke(newuser, Boolean.valueOf(rs.getBoolean(fieldname)));
                             }
 
+                        } else if (paramtype.equalsIgnoreCase("java.lang.Long")) {
+                            long longValue = rs.getLong(fieldname);
+                            if ("MaxQuota".equals(methodnamewithoutset)) {
+                                if (longValue != -1) {
+                                    longValue = longValue >> 20;
+                                }
+                            }
+                            method.invoke(newuser, Long.valueOf(longValue));
                         } else if (paramtype.equalsIgnoreCase("java.util.Date")) {
                             final Date fieldvalue = rs.getTimestamp(fieldname);
                             method.invoke(newuser, fieldvalue);
@@ -2289,7 +2350,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 rs.close();
 
                 //
-                Set<String> aliases = aliasStorage.getAliases(cid, user_id);
+                Set<String> aliases = aliasStorage.getAliases(contextId, user_id);
                 if(aliases != null && false == aliases.isEmpty()) {
                     for(String alias : aliases) {
                         newuser.addAlias(alias);
@@ -2308,65 +2369,68 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 rs.close();
 
-                stmtstd.setInt(2, user_id);
-                rs = stmtstd.executeQuery();
+                stmtacc.setInt(2, user_id);
+                rs = stmtacc.executeQuery();
                 if (rs.next()) {
-                    newuser.setMail_folder_drafts_name(rs.getString("std_drafts"));
-                    newuser.setMail_folder_sent_name(rs.getString("std_sent"));
-                    newuser.setMail_folder_spam_name(rs.getString("std_spam"));
-                    newuser.setMail_folder_trash_name(rs.getString("std_trash"));
+                    newuser.setMail_folder_drafts_name(rs.getString("drafts"));
+                    newuser.setMail_folder_sent_name(rs.getString("sent"));
+                    newuser.setMail_folder_spam_name(rs.getString("spam"));
+                    newuser.setMail_folder_trash_name(rs.getString("trash"));
+                    newuser.setMail_folder_archive_full_name(rs.getString("archive_fullname"));
                     newuser.setMail_folder_confirmed_ham_name(rs.getString("confirmed_ham"));
                     newuser.setMail_folder_confirmed_spam_name(rs.getString("confirmed_spam"));
-                    final int bits = rs.getInt("bits");
-                    if ((bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED) {
-                        newuser.setGui_spam_filter_enabled(true);
-                    } else {
-                        newuser.setGui_spam_filter_enabled(false);
-                    }
-                    newuser.setDefaultSenderAddress(rs.getString("send_addr"));
-                    newuser.setUploadFileSizeLimit(rs.getInt("upload_quota"));
-                    newuser.setUploadFileSizeLimitPerFile(rs.getInt("upload_quota_per_file"));
                 }
                 rs.close();
 
-                newuser.setContextadmin(newuser.getId().equals(adminForContext));
+                stmtusm.setInt(2, user_id);
+                rs = stmtusm.executeQuery();
+                if (rs.next()) {
+                    int bits = rs.getInt("bits");
+                    if ((bits & UserSettingMail.INT_SPAM_ENABLED) == UserSettingMail.INT_SPAM_ENABLED) {
+                        newuser.setGui_spam_filter_enabled(Boolean.TRUE);
+                    } else {
+                        newuser.setGui_spam_filter_enabled(Boolean.FALSE);
+                    }
+                    newuser.setDefaultSenderAddress(rs.getString("send_addr"));
+                    newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota")));
+                    newuser.setUploadFileSizeLimitPerFile(Integer.valueOf(rs.getInt("upload_quota_per_file")));
+                }
+                rs.close();
+
+                newuser.setContextadmin(newuser.getId().intValue() == adminForContext);
                 userlist.add(newuser);
             }
 
             return userlist.toArray(new User[userlist.size()]);
-        } catch (final PoolException e) {
+        } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final CloneNotSupportedException e) {
+        } catch (CloneNotSupportedException e) {
             log.error("Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("", e);
             throw e;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             log.error("GUI setting Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closePreparedStatement(stmt);
-            closePreparedStatement(stmt2);
-            closePreparedStatement(stmtusername);
-            closePreparedStatement(stmtuserattributes);
-            closePreparedStatement(stmtstd);
+            Databases.closeSQLStuff(stmtuid, stmt2, stmtid, stmtuserattributes, stmtusm, stmtacc);
             if (read_ox_con != null) {
                 try {
-                        cache.pushConnectionForContextAfterReading(cid, read_ox_con);
+                        cache.pushConnectionForContextAfterReading(contextId, read_ox_con);
                 } catch (final PoolException exp) {
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }

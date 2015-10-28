@@ -66,7 +66,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import au.com.bytecode.opencsv.CSVReader;
+
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
@@ -77,6 +77,8 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
@@ -297,78 +299,79 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         mail_folder_sent_name(INITIAL_CONSTANTS_VALUE + 42,OPT_MAIL_FOLDER_SENT_NAME_LONG, false),
         mail_folder_spam_name(INITIAL_CONSTANTS_VALUE + 43,OPT_MAIL_FOLDER_SPAM_NAME_LONG, false),
         mail_folder_trash_name(INITIAL_CONSTANTS_VALUE + 44,OPT_MAIL_FOLDER_TRASH_NAME_LONG, false),
-        manager_name(INITIAL_CONSTANTS_VALUE + 45,OPT_MANAGER_NAME_LONG, false),
-        marital_status(INITIAL_CONSTANTS_VALUE + 46,OPT_MARITAL_STATUS_LONG, false),
-        cellular_telephone1(INITIAL_CONSTANTS_VALUE + 47,OPT_CELLULAR_TELEPHONE1_LONG, false),
-        cellular_telephone2(INITIAL_CONSTANTS_VALUE + 48,OPT_CELLULAR_TELEPHONE2_LONG, false),
-        info(INITIAL_CONSTANTS_VALUE + 49,OPT_INFO_LONG, false),
-        nickname(INITIAL_CONSTANTS_VALUE + 50,OPT_NICKNAME_LONG, false),
-        number_of_children(INITIAL_CONSTANTS_VALUE + 51,OPT_NUMBER_OF_CHILDREN_LONG, false),
-        note(INITIAL_CONSTANTS_VALUE + 52,OPT_NOTE_LONG, false),
-        number_of_employee(INITIAL_CONSTANTS_VALUE + 53,OPT_NUMBER_OF_EMPLOYEE_LONG, false),
-        telephone_pager(INITIAL_CONSTANTS_VALUE + 54,OPT_TELEPHONE_PAGER_LONG, false),
-        password_expired(INITIAL_CONSTANTS_VALUE + 55,OPT_PASSWORD_EXPIRED_LONG, false),
-        telephone_assistant(INITIAL_CONSTANTS_VALUE + 56,OPT_TELEPHONE_ASSISTANT_LONG, false),
-        telephone_business1(INITIAL_CONSTANTS_VALUE + 57,OPT_TELEPHONE_BUSINESS1_LONG, false),
-        telephone_business2(INITIAL_CONSTANTS_VALUE + 58,OPT_TELEPHONE_BUSINESS2_LONG, false),
-        telephone_car(INITIAL_CONSTANTS_VALUE + 59,OPT_TELEPHONE_CAR_LONG, false),
-        telephone_company(INITIAL_CONSTANTS_VALUE + 60,OPT_TELEPHONE_COMPANY_LONG, false),
-        telephone_home1(INITIAL_CONSTANTS_VALUE + 61,OPT_TELEPHONE_HOME1_LONG, false),
-        telephone_home2(INITIAL_CONSTANTS_VALUE + 62,OPT_TELEPHONE_HOME2_LONG, false),
-        telephone_other(INITIAL_CONSTANTS_VALUE + 63,OPT_TELEPHONE_OTHER_LONG, false),
-        position(INITIAL_CONSTANTS_VALUE + 64,OPT_POSITION_LONG, false),
-        postal_code_home(INITIAL_CONSTANTS_VALUE + 65,OPT_POSTAL_CODE_HOME_LONG, false),
-        profession(INITIAL_CONSTANTS_VALUE + 66,OPT_PROFESSION_LONG, false),
-        telephone_radio(INITIAL_CONSTANTS_VALUE + 67,OPT_TELEPHONE_RADIO_LONG, false),
-        room_number(INITIAL_CONSTANTS_VALUE + 68,OPT_ROOM_NUMBER_LONG, false),
-        sales_volume(INITIAL_CONSTANTS_VALUE + 69,OPT_SALES_VOLUME_LONG, false),
-        city_other(INITIAL_CONSTANTS_VALUE + 70,OPT_CITY_OTHER_LONG, false),
-        country_other(INITIAL_CONSTANTS_VALUE + 71,OPT_COUNTRY_OTHER_LONG, false),
-        middle_name(INITIAL_CONSTANTS_VALUE + 72,OPT_MIDDLE_NAME_LONG, false),
-        postal_code_other(INITIAL_CONSTANTS_VALUE + 73,OPT_POSTAL_CODE_OTHER_LONG, false),
-        state_other(INITIAL_CONSTANTS_VALUE + 74,OPT_STATE_OTHER_LONG, false),
-        street_other(INITIAL_CONSTANTS_VALUE + 75,OPT_STREET_OTHER_LONG, false),
-        spouse_name(INITIAL_CONSTANTS_VALUE + 76,OPT_SPOUSE_NAME_LONG, false),
-        state_home(INITIAL_CONSTANTS_VALUE + 77,OPT_STATE_HOME_LONG, false),
-        street_home(INITIAL_CONSTANTS_VALUE + 78,OPT_STREET_HOME_LONG, false),
-        suffix(INITIAL_CONSTANTS_VALUE + 79,OPT_SUFFIX_LONG, false),
-        tax_id(INITIAL_CONSTANTS_VALUE + 80,OPT_TAX_ID_LONG, false),
-        telephone_telex(INITIAL_CONSTANTS_VALUE + 81,OPT_TELEPHONE_TELEX_LONG, false),
-        title(INITIAL_CONSTANTS_VALUE + 82,OPT_TITLE_LONG, false),
-        telephone_ttytdd(INITIAL_CONSTANTS_VALUE + 83,OPT_TELEPHONE_TTYTDD_LONG, false),
-        UPLOADFILESIZELIMIT(INITIAL_CONSTANTS_VALUE + 84,OPT_UPLOADFILESIZELIMIT_LONG, false),
-        uploadfilesizelimitperfile(INITIAL_CONSTANTS_VALUE + 85,OPT_UPLOADFILESIZELIMITPERFILE_LONG, false),
-        url(INITIAL_CONSTANTS_VALUE + 86,OPT_URL_LONG, false),
-        userfield01(INITIAL_CONSTANTS_VALUE + 87,OPT_USERFIELD01_LONG, false),
-        userfield02(INITIAL_CONSTANTS_VALUE + 88,OPT_USERFIELD02_LONG, false),
-        userfield03(INITIAL_CONSTANTS_VALUE + 89,OPT_USERFIELD03_LONG, false),
-        userfield04(INITIAL_CONSTANTS_VALUE + 90,OPT_USERFIELD04_LONG, false),
-        userfield05(INITIAL_CONSTANTS_VALUE + 91,OPT_USERFIELD05_LONG, false),
-        userfield06(INITIAL_CONSTANTS_VALUE + 92,OPT_USERFIELD06_LONG, false),
-        userfield07(INITIAL_CONSTANTS_VALUE + 93,OPT_USERFIELD07_LONG, false),
-        userfield08(INITIAL_CONSTANTS_VALUE + 94,OPT_USERFIELD08_LONG, false),
-        userfield09(INITIAL_CONSTANTS_VALUE + 95,OPT_USERFIELD09_LONG, false),
-        userfield10(INITIAL_CONSTANTS_VALUE + 96,OPT_USERFIELD10_LONG, false),
-        userfield11(INITIAL_CONSTANTS_VALUE + 97,OPT_USERFIELD11_LONG, false),
-        userfield12(INITIAL_CONSTANTS_VALUE + 98,OPT_USERFIELD12_LONG, false),
-        userfield13(INITIAL_CONSTANTS_VALUE + 99,OPT_USERFIELD13_LONG, false),
-        userfield14(INITIAL_CONSTANTS_VALUE + 100,OPT_USERFIELD14_LONG, false),
-        userfield15(INITIAL_CONSTANTS_VALUE + 101,OPT_USERFIELD15_LONG, false),
-        userfield16(INITIAL_CONSTANTS_VALUE + 102,OPT_USERFIELD16_LONG, false),
-        userfield17(INITIAL_CONSTANTS_VALUE + 103,OPT_USERFIELD17_LONG, false),
-        userfield18(INITIAL_CONSTANTS_VALUE + 104,OPT_USERFIELD18_LONG, false),
-        userfield19(INITIAL_CONSTANTS_VALUE + 105,OPT_USERFIELD19_LONG, false),
-        userfield20(INITIAL_CONSTANTS_VALUE + 106,OPT_USERFIELD20_LONG, false),
-        city_business(INITIAL_CONSTANTS_VALUE + 107,OPT_CITY_BUSINESS_LONG, false),
-        country_business(INITIAL_CONSTANTS_VALUE + 108,OPT_COUNTRY_BUSINESS_LONG, false),
-        assistant_name(INITIAL_CONSTANTS_VALUE + 109,OPT_ASSISTANT_NAME_LONG, false),
-        telephone_primary(INITIAL_CONSTANTS_VALUE + 110,OPT_TELEPHONE_PRIMARY_LONG, false),
-        categories(INITIAL_CONSTANTS_VALUE + 111,OPT_CATEGORIES_LONG, false),
-        PASSWORDMECH(INITIAL_CONSTANTS_VALUE + 112,OPT_PASSWORDMECH_LONG, false),
-        mail_folder_confirmed_ham_name(INITIAL_CONSTANTS_VALUE + 113,OPT_MAIL_FOLDER_CONFIRMED_HAM_NAME_LONG, false),
-        mail_folder_confirmed_spam_name(INITIAL_CONSTANTS_VALUE + 114,OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, false),
-        DEFAULTSENDERADDRESS(INITIAL_CONSTANTS_VALUE + 115,OPT_DEFAULTSENDERADDRESS_LONG, false),
-        gui_spam_filter_capabilities_enabled(INITIAL_CONSTANTS_VALUE + 116,OPT_GUI_LONG, false);
+        mail_folder_archive_full_name(INITIAL_CONSTANTS_VALUE + 45, OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG, false),
+        manager_name(INITIAL_CONSTANTS_VALUE + 46,OPT_MANAGER_NAME_LONG, false),
+        marital_status(INITIAL_CONSTANTS_VALUE + 47,OPT_MARITAL_STATUS_LONG, false),
+        cellular_telephone1(INITIAL_CONSTANTS_VALUE + 48,OPT_CELLULAR_TELEPHONE1_LONG, false),
+        cellular_telephone2(INITIAL_CONSTANTS_VALUE + 49,OPT_CELLULAR_TELEPHONE2_LONG, false),
+        info(INITIAL_CONSTANTS_VALUE + 50,OPT_INFO_LONG, false),
+        nickname(INITIAL_CONSTANTS_VALUE + 51,OPT_NICKNAME_LONG, false),
+        number_of_children(INITIAL_CONSTANTS_VALUE + 52,OPT_NUMBER_OF_CHILDREN_LONG, false),
+        note(INITIAL_CONSTANTS_VALUE + 53,OPT_NOTE_LONG, false),
+        number_of_employee(INITIAL_CONSTANTS_VALUE + 54,OPT_NUMBER_OF_EMPLOYEE_LONG, false),
+        telephone_pager(INITIAL_CONSTANTS_VALUE + 55,OPT_TELEPHONE_PAGER_LONG, false),
+        password_expired(INITIAL_CONSTANTS_VALUE + 56,OPT_PASSWORD_EXPIRED_LONG, false),
+        telephone_assistant(INITIAL_CONSTANTS_VALUE + 57,OPT_TELEPHONE_ASSISTANT_LONG, false),
+        telephone_business1(INITIAL_CONSTANTS_VALUE + 58,OPT_TELEPHONE_BUSINESS1_LONG, false),
+        telephone_business2(INITIAL_CONSTANTS_VALUE + 59,OPT_TELEPHONE_BUSINESS2_LONG, false),
+        telephone_car(INITIAL_CONSTANTS_VALUE + 60,OPT_TELEPHONE_CAR_LONG, false),
+        telephone_company(INITIAL_CONSTANTS_VALUE + 61,OPT_TELEPHONE_COMPANY_LONG, false),
+        telephone_home1(INITIAL_CONSTANTS_VALUE + 62,OPT_TELEPHONE_HOME1_LONG, false),
+        telephone_home2(INITIAL_CONSTANTS_VALUE + 63,OPT_TELEPHONE_HOME2_LONG, false),
+        telephone_other(INITIAL_CONSTANTS_VALUE + 64,OPT_TELEPHONE_OTHER_LONG, false),
+        position(INITIAL_CONSTANTS_VALUE + 65,OPT_POSITION_LONG, false),
+        postal_code_home(INITIAL_CONSTANTS_VALUE + 66,OPT_POSTAL_CODE_HOME_LONG, false),
+        profession(INITIAL_CONSTANTS_VALUE + 67,OPT_PROFESSION_LONG, false),
+        telephone_radio(INITIAL_CONSTANTS_VALUE + 68,OPT_TELEPHONE_RADIO_LONG, false),
+        room_number(INITIAL_CONSTANTS_VALUE + 69,OPT_ROOM_NUMBER_LONG, false),
+        sales_volume(INITIAL_CONSTANTS_VALUE + 70,OPT_SALES_VOLUME_LONG, false),
+        city_other(INITIAL_CONSTANTS_VALUE + 71,OPT_CITY_OTHER_LONG, false),
+        country_other(INITIAL_CONSTANTS_VALUE + 72,OPT_COUNTRY_OTHER_LONG, false),
+        middle_name(INITIAL_CONSTANTS_VALUE + 73,OPT_MIDDLE_NAME_LONG, false),
+        postal_code_other(INITIAL_CONSTANTS_VALUE + 74,OPT_POSTAL_CODE_OTHER_LONG, false),
+        state_other(INITIAL_CONSTANTS_VALUE + 75,OPT_STATE_OTHER_LONG, false),
+        street_other(INITIAL_CONSTANTS_VALUE + 76,OPT_STREET_OTHER_LONG, false),
+        spouse_name(INITIAL_CONSTANTS_VALUE + 77,OPT_SPOUSE_NAME_LONG, false),
+        state_home(INITIAL_CONSTANTS_VALUE + 78,OPT_STATE_HOME_LONG, false),
+        street_home(INITIAL_CONSTANTS_VALUE + 79,OPT_STREET_HOME_LONG, false),
+        suffix(INITIAL_CONSTANTS_VALUE + 80,OPT_SUFFIX_LONG, false),
+        tax_id(INITIAL_CONSTANTS_VALUE + 81,OPT_TAX_ID_LONG, false),
+        telephone_telex(INITIAL_CONSTANTS_VALUE + 82,OPT_TELEPHONE_TELEX_LONG, false),
+        title(INITIAL_CONSTANTS_VALUE + 83,OPT_TITLE_LONG, false),
+        telephone_ttytdd(INITIAL_CONSTANTS_VALUE + 84,OPT_TELEPHONE_TTYTDD_LONG, false),
+        UPLOADFILESIZELIMIT(INITIAL_CONSTANTS_VALUE + 85,OPT_UPLOADFILESIZELIMIT_LONG, false),
+        uploadfilesizelimitperfile(INITIAL_CONSTANTS_VALUE + 86,OPT_UPLOADFILESIZELIMITPERFILE_LONG, false),
+        url(INITIAL_CONSTANTS_VALUE + 87,OPT_URL_LONG, false),
+        userfield01(INITIAL_CONSTANTS_VALUE + 88,OPT_USERFIELD01_LONG, false),
+        userfield02(INITIAL_CONSTANTS_VALUE + 89,OPT_USERFIELD02_LONG, false),
+        userfield03(INITIAL_CONSTANTS_VALUE + 90,OPT_USERFIELD03_LONG, false),
+        userfield04(INITIAL_CONSTANTS_VALUE + 91,OPT_USERFIELD04_LONG, false),
+        userfield05(INITIAL_CONSTANTS_VALUE + 92,OPT_USERFIELD05_LONG, false),
+        userfield06(INITIAL_CONSTANTS_VALUE + 93,OPT_USERFIELD06_LONG, false),
+        userfield07(INITIAL_CONSTANTS_VALUE + 94,OPT_USERFIELD07_LONG, false),
+        userfield08(INITIAL_CONSTANTS_VALUE + 95,OPT_USERFIELD08_LONG, false),
+        userfield09(INITIAL_CONSTANTS_VALUE + 96,OPT_USERFIELD09_LONG, false),
+        userfield10(INITIAL_CONSTANTS_VALUE + 97,OPT_USERFIELD10_LONG, false),
+        userfield11(INITIAL_CONSTANTS_VALUE + 98,OPT_USERFIELD11_LONG, false),
+        userfield12(INITIAL_CONSTANTS_VALUE + 99,OPT_USERFIELD12_LONG, false),
+        userfield13(INITIAL_CONSTANTS_VALUE + 100,OPT_USERFIELD13_LONG, false),
+        userfield14(INITIAL_CONSTANTS_VALUE + 101,OPT_USERFIELD14_LONG, false),
+        userfield15(INITIAL_CONSTANTS_VALUE + 102,OPT_USERFIELD15_LONG, false),
+        userfield16(INITIAL_CONSTANTS_VALUE + 103,OPT_USERFIELD16_LONG, false),
+        userfield17(INITIAL_CONSTANTS_VALUE + 104,OPT_USERFIELD17_LONG, false),
+        userfield18(INITIAL_CONSTANTS_VALUE + 105,OPT_USERFIELD18_LONG, false),
+        userfield19(INITIAL_CONSTANTS_VALUE + 106,OPT_USERFIELD19_LONG, false),
+        userfield20(INITIAL_CONSTANTS_VALUE + 107,OPT_USERFIELD20_LONG, false),
+        city_business(INITIAL_CONSTANTS_VALUE + 108,OPT_CITY_BUSINESS_LONG, false),
+        country_business(INITIAL_CONSTANTS_VALUE + 109,OPT_COUNTRY_BUSINESS_LONG, false),
+        assistant_name(INITIAL_CONSTANTS_VALUE + 110,OPT_ASSISTANT_NAME_LONG, false),
+        telephone_primary(INITIAL_CONSTANTS_VALUE + 111,OPT_TELEPHONE_PRIMARY_LONG, false),
+        categories(INITIAL_CONSTANTS_VALUE + 112,OPT_CATEGORIES_LONG, false),
+        PASSWORDMECH(INITIAL_CONSTANTS_VALUE + 113,OPT_PASSWORDMECH_LONG, false),
+        mail_folder_confirmed_ham_name(INITIAL_CONSTANTS_VALUE + 114,OPT_MAIL_FOLDER_CONFIRMED_HAM_NAME_LONG, false),
+        mail_folder_confirmed_spam_name(INITIAL_CONSTANTS_VALUE + 115,OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, false),
+        DEFAULTSENDERADDRESS(INITIAL_CONSTANTS_VALUE + 116,OPT_DEFAULTSENDERADDRESS_LONG, false),
+        gui_spam_filter_capabilities_enabled(INITIAL_CONSTANTS_VALUE + 117,OPT_GUI_LONG, false);
 
         private final String string;
 
@@ -506,6 +509,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_MAIL_FOLDER_SENT_NAME_LONG = "mail_folder_sent_name";
     protected static final String OPT_MAIL_FOLDER_SPAM_NAME_LONG = "mail_folder_spam_name";
     protected static final String OPT_MAIL_FOLDER_TRASH_NAME_LONG = "mail_folder_trash_name";
+    protected static final String OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG = "mail_folder_archive_full_name";
     protected static final String OPT_MANAGER_NAME_LONG = "manager_name";
     protected static final String OPT_MARITAL_STATUS_LONG = "marital_status";
     protected static final String OPT_CELLULAR_TELEPHONE1_LONG = "cellular_telephone1";
@@ -706,6 +710,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption mail_folder_sent_nameOption;
     private CLIOption mail_folder_spam_nameOption;
     private CLIOption mail_folder_trash_nameOption;
+    private CLIOption mail_folder_archive_full_nameOption;
     private CLIOption manager_nameOption;
     private CLIOption marital_statusOption;
     private CLIOption cellular_telephone1Option;
@@ -1244,6 +1249,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_trash_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_archive_full_name, new MethodStringClosure() {
+            @Override
+            public void callMethod(final String value) {
+                user.setMail_folder_archive_full_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.manager_name, new MethodStringClosure() {
@@ -2390,6 +2401,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_sent_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_SENT_NAME_LONG, "stringvalue", "Mail_folder_sent_name", true, false, true);
         this.mail_folder_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_SPAM_NAME_LONG, "stringvalue", "Mail_folder_spam_name", true, false, true);
         this.mail_folder_trash_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_TRASH_NAME_LONG, "stringvalue", "Mail_folder_trash_name", true, false, true);
+        this.mail_folder_archive_full_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG, "stringvalue", "Mail_folder_archive_full_name", true, false, true);
         this.manager_nameOption = setLongOpt(parser, OPT_MANAGER_NAME_LONG, "stringvalue", "Manager_name", true, false, true);
         this.marital_statusOption = setLongOpt(parser, OPT_MARITAL_STATUS_LONG, "stringvalue", "Marital_status", true, false, true);
         this.cellular_telephone1Option = setLongOpt(parser, OPT_CELLULAR_TELEPHONE1_LONG, "stringvalue", "Cellular_telephone1", true, false, true);
@@ -2774,6 +2786,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 // On the command line an empty string can be used to clear that specific attribute.
                 if ("".equals(value)) { value = null; }
                 usr.setMail_folder_trash_name(value);
+            }
+        }
+        {
+            String value = (String)parser.getOptionValue(mail_folder_archive_full_nameOption);
+            if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                if ("".equals(value)) { value = null; }
+                usr.setMail_folder_archive_full_name(value);
             }
         }
         {
