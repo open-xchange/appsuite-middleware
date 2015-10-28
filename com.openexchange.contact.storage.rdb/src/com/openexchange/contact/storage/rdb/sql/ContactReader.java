@@ -57,6 +57,7 @@ import java.util.List;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -75,6 +76,8 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactReader {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ContactReader.class);
 
     private final Connection connection;
     private final int contextID;
@@ -141,7 +144,14 @@ public class ContactReader {
                 String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
                 contact.setEmail1(primaryMail);
             }
-            contact.setUseCount(resultSet.getInt("value"));
+            if (withObjectUseCount) {
+                try {
+                    contact.setUseCount(resultSet.getInt("value"));
+                } catch (SQLException e) {
+                    String query = Databases.getSqlStatement(resultSet.getStatement(), null);
+                    LOGGER.warn("Failed to determine use-count information from {}", null == query ? "<unknown>" : query, e);
+                }
+            }
         }
         return contact;
     }
