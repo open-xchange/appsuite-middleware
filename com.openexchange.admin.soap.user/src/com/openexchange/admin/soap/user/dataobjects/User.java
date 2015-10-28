@@ -212,6 +212,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "mailFolderSentName",
     "mailFolderSpamName",
     "mailFolderTrashName",
+    "mailFolderArchiveFullName",
     "mailenabled",
     "managerName",
     "maritalStatus",
@@ -395,6 +396,8 @@ public class User {
     protected String mailFolderSpamName;
     @XmlElement(name = "mail_folder_trash_name", nillable = true)
     protected String mailFolderTrashName;
+    @XmlElement(name = "mail_folder_archive_full_name", nillable = true)
+    protected String mailFolderArchiveFullName;
     @XmlElement(nillable = true)
     protected Boolean mailenabled;
     @XmlElement(name = "manager_name", nillable = true)
@@ -1784,6 +1787,30 @@ public class User {
      */
     public void setMailFolderTrashName(final String value) {
         this.mailFolderTrashName = value;
+    }
+
+    /**
+     * Ruft den Wert der mailFolderArchiveFullName-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getMailFolderArchiveFullName() {
+        return mailFolderArchiveFullName;
+    }
+
+    /**
+     * Legt den Wert der mailFolderArchiveFullName-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setMailFolderArchiveFullName(String value) {
+        this.mailFolderArchiveFullName = value;
     }
 
     /**

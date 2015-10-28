@@ -297,6 +297,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         mail_folder_sent_name(OPT_MAIL_FOLDER_SENT_NAME_LONG, false),
         mail_folder_spam_name(OPT_MAIL_FOLDER_SPAM_NAME_LONG, false),
         mail_folder_trash_name(OPT_MAIL_FOLDER_TRASH_NAME_LONG, false),
+        mail_folder_archive_full_name(OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG, false),
         manager_name(OPT_MANAGER_NAME_LONG, false),
         marital_status(OPT_MARITAL_STATUS_LONG, false),
         cellular_telephone1(OPT_CELLULAR_TELEPHONE1_LONG, false),
@@ -507,6 +508,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_MAIL_FOLDER_SENT_NAME_LONG = "mail_folder_sent_name";
     protected static final String OPT_MAIL_FOLDER_SPAM_NAME_LONG = "mail_folder_spam_name";
     protected static final String OPT_MAIL_FOLDER_TRASH_NAME_LONG = "mail_folder_trash_name";
+    protected static final String OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG = "mail_folder_archive_full_name";
     protected static final String OPT_MANAGER_NAME_LONG = "manager_name";
     protected static final String OPT_MARITAL_STATUS_LONG = "marital_status";
     protected static final String OPT_CELLULAR_TELEPHONE1_LONG = "cellular_telephone1";
@@ -707,6 +709,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption mail_folder_sent_nameOption;
     private CLIOption mail_folder_spam_nameOption;
     private CLIOption mail_folder_trash_nameOption;
+    private CLIOption mail_folder_archive_full_nameOption;
     private CLIOption manager_nameOption;
     private CLIOption marital_statusOption;
     private CLIOption cellular_telephone1Option;
@@ -1246,6 +1249,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_trash_name(value);
+            }
+        });
+        setValue(nextLine, idarray, Constants.mail_folder_archive_full_name, new MethodStringClosure() {
+            @Override
+            public void callMethod(final String value) {
+                user.setMail_folder_archive_full_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.manager_name, new MethodStringClosure() {
@@ -2395,6 +2404,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_sent_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_SENT_NAME_LONG, "stringvalue", "Mail_folder_sent_name", true, false, true);
         this.mail_folder_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_SPAM_NAME_LONG, "stringvalue", "Mail_folder_spam_name", true, false, true);
         this.mail_folder_trash_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_TRASH_NAME_LONG, "stringvalue", "Mail_folder_trash_name", true, false, true);
+        this.mail_folder_archive_full_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_ARCHIVE_FULL_NAME_LONG, "stringvalue", "Mail_folder_archive_full_name", true, false, true);
         this.manager_nameOption = setLongOpt(parser, OPT_MANAGER_NAME_LONG, "stringvalue", "Manager_name", true, false, true);
         this.marital_statusOption = setLongOpt(parser, OPT_MARITAL_STATUS_LONG, "stringvalue", "Marital_status", true, false, true);
         this.cellular_telephone1Option = setLongOpt(parser, OPT_CELLULAR_TELEPHONE1_LONG, "stringvalue", "Cellular_telephone1", true, false, true);
@@ -2779,6 +2789,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 // On the command line an empty string can be used to clear that specific attribute.
                 if ("".equals(value)) { value = null; }
                 usr.setMail_folder_trash_name(value);
+            }
+        }
+        {
+            String value = (String)parser.getOptionValue(mail_folder_archive_full_nameOption);
+            if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                if ("".equals(value)) { value = null; }
+                usr.setMail_folder_archive_full_name(value);
             }
         }
         {

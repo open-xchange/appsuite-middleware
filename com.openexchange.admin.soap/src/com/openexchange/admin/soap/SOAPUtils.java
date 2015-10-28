@@ -381,6 +381,9 @@ public final class SOAPUtils {
         if( null != in.getMail_folder_trash_name() ) {
             out.setMail_folder_trash_name(in.getMail_folder_trash_name());
         }
+        if( null != in.getMail_folder_archive_full_name() ) {
+            out.setMail_folder_archive_full_name(in.getMail_folder_archive_full_name());
+        }
         if( null != in.getManager_name() ) {
             out.setManager_name(in.getManager_name());
         }
@@ -753,6 +756,9 @@ public final class SOAPUtils {
         }
         if( null != u.getMail_folder_trash_name() ) {
             ret.setMail_folder_trash_name(u.getMail_folder_trash_name());
+        }
+        if( null != u.getMail_folder_archive_full_name() ) {
+            ret.setMail_folder_archive_full_name(u.getMail_folder_archive_full_name());
         }
         if( null != u.getManager_name() ) {
             ret.setManager_name(u.getManager_name());

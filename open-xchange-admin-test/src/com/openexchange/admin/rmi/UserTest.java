@@ -1428,6 +1428,7 @@ public class UserTest extends AbstractTest {
         usr.setMail_folder_sent_name("MailFolderSent");
         usr.setMail_folder_spam_name("MailFolderSpam");
         usr.setMail_folder_trash_name("MailFolderTrash");
+        usr.setMail_folder_archive_full_name("MailFolderArchive");
         usr.setManager_name("ManagersName");
         usr.setMarital_status("MaritalStatus");
         usr.setCellular_telephone1("Mobile1");
@@ -1587,6 +1588,7 @@ public class UserTest extends AbstractTest {
         assertEquals("MailFolderSent not equal", a.getMail_folder_sent_name(), b.getMail_folder_sent_name());
         assertEquals("MailFolderSpam not equal", a.getMail_folder_spam_name(), b.getMail_folder_spam_name());
         assertEquals("MailFolderTrash not equal", a.getMail_folder_trash_name(), b.getMail_folder_trash_name());
+        assertEquals("MailFolderArchiveFull not equal", a.getMail_folder_archive_full_name(), b.getMail_folder_archive_full_name());
         assertEquals("ManagersName not equal", a.getManager_name(), b.getManager_name());
         assertEquals("MaritalStatus not equal", a.getMarital_status(), b.getMarital_status());
         assertEquals("Mobile1 not equal", a.getCellular_telephone1(), b.getCellular_telephone1());
@@ -1756,6 +1758,7 @@ public class UserTest extends AbstractTest {
         retval.setMail_folder_sent_name(usr.getMail_folder_sent_name() + change_suffix);
         retval.setMail_folder_spam_name(usr.getMail_folder_spam_name() + change_suffix);
         retval.setMail_folder_trash_name(usr.getMail_folder_trash_name() + change_suffix);
+        retval.setMail_folder_archive_full_name(usr.getMail_folder_archive_full_name() + change_suffix);
         retval.setManager_name(usr.getManager_name() + change_suffix);
         retval.setMarital_status(usr.getMarital_status() + change_suffix);
         retval.setCellular_telephone1(usr.getCellular_telephone1() + change_suffix);
