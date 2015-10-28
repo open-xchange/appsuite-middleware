@@ -80,8 +80,10 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link OXFolderUtility} - Provides utility methods for folder operations.
@@ -566,7 +568,20 @@ public final class OXFolderUtility {
                 final UserPermissionBits userPermissionBits = permissionBitsStorage.getUserPermissionBits(con, assignedPerm.getEntity(), ctx);
                 final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userPermissionBits);
                 if (!isApplicable(maxApplicablePerm, assignedPerm)) {
-                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                    UserService service = ServerServiceRegistry.getServize(UserService.class);
+                    if (service == null) {
+                        throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                    }
+                    User usr = null;
+                    try {
+                        usr = service.getUser(Integer.valueOf(assignedPerm.getEntity()), ctx);
+                    } catch (OXException ex) {
+                        throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                    }
+                    if (usr == null) {
+                        throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM.create(Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                    }
+                    throw OXFolderExceptionCode.UNAPPLICABLE_FOLDER_PERM_EXTENDED.create(usr.getDisplayName(), Integer.valueOf(assignedPerm.getEntity()), Integer.valueOf(folderObj.getObjectID()), Integer.valueOf(ctx.getContextId()));
                 }
             }
         }

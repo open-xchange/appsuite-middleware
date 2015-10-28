@@ -474,6 +474,13 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     UNAPPLICABLE_FOLDER_PERM("The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in context %3$s.",
         OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG, Category.CATEGORY_PERMISSION_DENIED, 73),
     /**
+     * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in
+     * context %3$s.
+     */
+    UNAPPLICABLE_FOLDER_PERM_EXTENDED("The permissions for the user \"%1$s\" with the id %2$s are limited. It is not possible to grant this user the wanted permissions for the folder %3$s in context %4$s.",
+        OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG_EXTENDED, Category.CATEGORY_PERMISSION_DENIED, 73),
+
+    /**
      * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently cannot
      * delete its parent folder.
      */
