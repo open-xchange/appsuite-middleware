@@ -92,7 +92,7 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
