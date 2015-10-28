@@ -59,6 +59,7 @@ import org.opensaml.saml2.core.Response;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
+import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
@@ -152,6 +153,12 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
 
     @Override
     public AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion) throws OXException {
+        return doResolveAuthnResponse(response, assertion);
+    }
+
+    @Override
+    public AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion, AuthnRequestInfo requestInfo) throws OXException {
+        // if there is a need to use the AuthnRequestInfo, just override this method
         return doResolveAuthnResponse(response, assertion);
     }
 
