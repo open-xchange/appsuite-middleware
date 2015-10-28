@@ -60,6 +60,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLExceptionCode;
+import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.AssertionValidator;
 import com.openexchange.saml.validation.ResponseValidator;
@@ -137,6 +138,19 @@ public interface SAMLBackend {
      * @see SAMLExceptionCode#UNKNOWN_USER
      */
     AuthenticationInfo resolveAuthnResponse(Response response, Assertion assertion) throws OXException;
+
+    /**
+     * Resolves an authentication response based on the bearer assertion that was determined and validated
+     * by the validation strategy.
+     *
+     * @param response The SAML response
+     * @param bearerAssertion The bearer assertion whose subject shall be mapped to a principal
+     * @param requestInfo The AuthnRequestInfo
+     * @return The authentication information
+     * @throws OXException If the principal cannot be resolved
+     * @see SAMLExceptionCode#UNKNOWN_USER
+     */
+    AuthenticationInfo resolveAuthnResponse(Response response, Assertion bearerAssertion, AuthnRequestInfo requestInfo) throws OXException;
 
     /**
      * Resolves a logout request and determines which sessions are to be terminated. This method is only
