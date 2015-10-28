@@ -1,0 +1,51 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -x";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-x $showruntimestats) {
+        print "yes\n";
+        exit 0;
+    }
+    else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Rate Limiter\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "a.label Requests per minute\n";
+	print "a.draw LINE1\n";
+	print "b.label Client slot count\n";
+	print "b.draw LINE1\n";
+	exit 0;    
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /RateLimiterMonitor,ProcessedRequestsPerMinute/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "a.value $val\n";
+        next;
+    }
+    if ( $_ =~ /RateLimiterMonitor,SlotCount/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "b.value $val\n";
+        next;
+    }
+}
+
+close (SHOWRUNTIME);

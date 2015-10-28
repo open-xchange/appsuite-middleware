@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,42 @@
  *
  */
 
-package com.openexchange.tools.servlet;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.tools.servlet.ratelimit.RateLimiter;
-
+package com.openexchange.tools.servlet.ratelimit.monitoring;
 
 /**
- * {@link ServletInitialization} - The Servlet initialization.
+ * {@link RateLimiterMBean}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ServletInitialization implements Initialization {
+public interface RateLimiterMBean {
+
+    /** The name of the MBean */
+    static final String NAME = "RateLimiterMonitor";
 
     /**
-     * Initializes a new {@link ServletInitialization}.
+     * Gets the number of currently tracked rate limit slots held in the internal bucket map.
+     *
+     * @return The slot count
      */
-    public ServletInitialization() {
-        super();
-    }
+    long getSlotCount();
 
-    @Override
-    public void start() throws OXException {
-        // Starters here
-    }
+    /**
+     * Returns the average number of processed requests per minute.
+     *
+     * @return The requests per minute
+     */
+    long getProcessedRequestsPerMinute();
 
-    @Override
-    public void stop() throws OXException {
-        RateLimiter.stop();
-    }
+    /**
+     * Gets the total count of requests that have been processed until now.
+     *
+     * @return The total processed requests
+     */
+    long getTotalProcessedRequests();
+
+    /**
+     * Clears the internal bucket map.
+     */
+    void clear();
 
 }

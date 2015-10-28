@@ -48,6 +48,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Mon Oct 26 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 First candidate for 7.6.3 release
+* Tue Oct 20 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-10-26 (2813)
+* Mon Oct 19 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-10-30 (2818)
 * Mon Oct 12 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-10-23 (2806)
 * Wed Sep 30 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

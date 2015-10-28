@@ -65,13 +65,6 @@ public interface Rate {
     long getTimeInMillis();
 
     /**
-     * Sets the number of permits.
-     *
-     * @param permits
-     */
-    void setPermits(int permits);
-
-    /**
      * Sets the time window in milliseconds
      *
      * @param timeInMillis The time window

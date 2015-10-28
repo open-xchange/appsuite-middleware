@@ -57,6 +57,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -379,11 +380,13 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo());
+                HttpServletRequest servletRequest = request.optHttpServletRequest();
+                String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
                 for (int i = 1; i < composedMails.length; i++) {
                     ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
-                        mailInterface.sendMessage(cm, sendType, accountId, usm);
+                        mailInterface.sendMessage(cm, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
                     }
                 }
 

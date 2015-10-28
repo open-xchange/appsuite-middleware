@@ -10,6 +10,18 @@ open-xchange-guard-backend (7.6.3-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 25 Mar 2015 11:26:35 +0100
 
+open-xchange-guard-backend (7.6.2-18) stable; urgency=medium
+
+  * Build for patch 2015-10-26 (2813)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 20 Oct 2015 09:56:40 +0200
+
+open-xchange-guard-backend (7.6.2-17) stable; urgency=medium
+
+  * Build for patch 2015-10-30 (2818)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 19 Oct 2015 15:01:16 +0200
+
 open-xchange-guard-backend (7.6.2-16) stable; urgency=medium
 
   * Build for patch 2015-10-12 (2784)

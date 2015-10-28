@@ -390,7 +390,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @param session The session
      * @param from The from address
      * @param checkTransportSupport <code>true</code> to check transport support
-     * @param checkFrom <code>true</code> to check from validity
+     * @param checkFrom <code>true</code> to check for validity
      * @return The account identifier
      * @throws OXException If address cannot be resolved
      */
@@ -400,20 +400,30 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
          */
         int accountId;
         {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            final int user = session.getUserId();
-            final int cid = session.getContextId();
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            int user = session.getUserId();
+            int cid = session.getContextId();
+
             if (null == from) {
                 accountId = MailAccount.DEFAULT_ID;
             } else {
-                accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
-                if (accountId != -1) {
-                    // Retry with IDN representation
-                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), user, cid);
+                String address = from.getAddress();
+
+                // The special ACE notation always starts with "xn--" prefix
+                if (address.indexOf("xn--") >= 0) {
+                    // Seems to be in ACE notation; therefore try with its IDN representation
+                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(address), user, cid);
+                    if (accountId < 0) {
+                        // Retry with ACE representation
+                        accountId = storageService.getByPrimaryAddress(address, user, cid);
+                    }
+                } else {
+                    accountId = storageService.getByPrimaryAddress(address, user, cid);
                 }
             }
-            if (accountId != -1) {
-                if (!session.getUserPermissionBits().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+            if (accountId >= 0) {
+                // Found a candidate
+                if (accountId != MailAccount.DEFAULT_ID && !session.getUserPermissionBits().isMultipleMailAccounts()) {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
@@ -426,7 +436,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
             }
         }
-        if (accountId == -1) {
+        if (accountId < 0) {
             if (checkFrom && null != from) {
                 /*
                  * Check aliases

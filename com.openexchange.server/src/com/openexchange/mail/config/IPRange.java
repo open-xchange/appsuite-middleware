@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import java.util.Collection;
 
 /**
  * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
@@ -56,6 +57,22 @@ package com.openexchange.mail.config;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IPRange {
+
+    /**
+     * Checks if specified IP address is contained in given collection of IP address ranges
+     *
+     * @param actual The IP address to check
+     * @param ranges The collection of IP address ranges
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean isWhitelistedFromRateLimit(String actual, Collection<IPRange> ranges) {
+        for (IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Parses specified string to an IP range.

@@ -691,6 +691,11 @@ public class LoginServlet extends AJAXServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, false);
+    }
+
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final String action = req.getParameter(PARAMETER_ACTION);

@@ -66,7 +66,7 @@ public class GoogleRate implements Rate {
     private final AtomicLong lastAccessTime;
     private volatile RateLimiter googleRateLimiter;
     private volatile boolean deprecated;
-    private volatile int permits;
+    private final int permits;
     private volatile long millis;
 
     /**
@@ -119,13 +119,6 @@ public class GoogleRate implements Rate {
         }
         boolean permitted = googleRateLimiter.tryAcquire(1);
         return permitted ? Rate.Result.SUCCESS : Rate.Result.FAILED;
-    }
-
-    @Override
-    public void setPermits(int permits) {
-        this.permits = permits;
-        double rate = ((double) permits) / ((double) millis);
-        googleRateLimiter = RateLimiter.create(rate);
     }
 
     @Override
