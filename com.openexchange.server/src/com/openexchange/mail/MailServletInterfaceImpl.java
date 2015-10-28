@@ -4131,8 +4131,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             String sYear = entry.getKey().toString();
             String fn = archiveFullname + separator + sYear;
             StringBuilder sb = new StringBuilder("default").append(mailAccess.getAccountId()).append(separator).append(fn);
-            result.add(new ArchiveDataWrapper(sb.toString(), !mailAccess.getFolderStorage().exists(fn)));
-            if (!mailAccess.getFolderStorage().exists(fn)) {
+            boolean exists = mailAccess.getFolderStorage().exists(fn);
+            result.add(new ArchiveDataWrapper(sb.toString(), !exists));
+            if (!exists) {
                 final MailFolderDescription toCreate = new MailFolderDescription();
                 toCreate.setAccountId(accountId);
                 toCreate.setParentAccountId(accountId);
