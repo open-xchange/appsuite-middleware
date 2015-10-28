@@ -257,7 +257,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             }
 
             Assertion bearerAssertion = validationResult.getBearerAssertion();
-            AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion);
+            AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion, requestInfo);
             LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
 
             enhanceAuthInfo(authInfo, bearerAssertion);
