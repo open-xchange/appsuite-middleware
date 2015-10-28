@@ -690,7 +690,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public List<IDTuple> move(List<IDTuple> sources, String destFolder, long sequenceNumber) throws OXException {
+    public List<IDTuple> move(List<IDTuple> sources, String destFolder, long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
         int size;
         if (null == sources || (size = sources.size()) <= 0) {
             return Collections.emptyList();
@@ -705,7 +705,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         // All in the same folder...
         if (sameFolder) {
             // ... yes
-            return getInfostore(sources.get(0).getFolder()).moveDocuments(session, sources, sequenceNumber, destFolder, false);
+            return getInfostore(sources.get(0).getFolder()).moveDocuments(session, sources, sequenceNumber, destFolder, adjustFilenamesAsNeeded);
         }
 
         // ... no, different folders. Split by folder identifiers,
@@ -722,7 +722,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         List<IDTuple> retval = new ArrayList<IDTuple>(size);
         for (Map.Entry<String, List<IDTuple>> filesInFolder : folder2ids.entrySet()) {
-            retval.addAll(getInfostore(filesInFolder.getKey()).moveDocuments(session, filesInFolder.getValue(), sequenceNumber, destFolder, false));
+            retval.addAll(getInfostore(filesInFolder.getKey()).moveDocuments(session, filesInFolder.getValue(), sequenceNumber, destFolder, adjustFilenamesAsNeeded));
         }
         return retval;
     }

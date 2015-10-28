@@ -150,6 +150,8 @@ public class MoveAction extends AbstractWriteAction {
     private AJAXRequestResult handlePairs(List<IdVersionPair> pairs, InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID);
 
+        boolean adjustFilenamesAsNeeded = AJAXRequestDataTools.parseBoolParameter("autorename", request.getRequestData(), true);
+
         IDBasedFileAccess fileAccess = request.getFileAccess();
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
         String destFolder = request.getFolderId();
@@ -190,7 +192,7 @@ public class MoveAction extends AbstractWriteAction {
                     }
 
                     deleteableFolders.addLast(newFolderID);
-                    conflicting.addAll(fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID));
+                    conflicting.addAll(fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID, adjustFilenamesAsNeeded));
 
                     deleteableFolders.removeLast();
                     deleteableFolders.addLast(folderId);
@@ -202,7 +204,7 @@ public class MoveAction extends AbstractWriteAction {
             }
 
             if (!oldFiles.isEmpty()) {
-                conflicting.addAll(fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder));
+                conflicting.addAll(fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder, adjustFilenamesAsNeeded));
             }
 
             {

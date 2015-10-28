@@ -66,9 +66,10 @@ public interface FileStorageMultiMove {
      * @param sources The files to move
      * @param destFolder Where to move the files to. This is a folder id.
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
      * @return The identifiers of those files that could <b>not</b> be moved successfully
      * @throws OXException If operation fails
      */
-    List<IDTuple> move(List<IDTuple> sources, String destFolder, long sequenceNumber) throws OXException;
+    List<IDTuple> move(List<IDTuple> sources, String destFolder, long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException;
 
 }

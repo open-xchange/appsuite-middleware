@@ -159,10 +159,11 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param sourceIds The file identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @param destFolderId The identifier of the destination folder
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
      * @return The identifiers of those files that could <b>not</b> be moved successfully
      * @throws OXException If move fails
      */
-    List<String> move(List<String> sourceIds, long sequenceNumber, String destFolderId) throws OXException;
+    List<String> move(List<String> sourceIds, long sequenceNumber, String destFolderId, boolean adjustFilenamesAsNeeded) throws OXException;
 
     /**
      * Loads the documents content

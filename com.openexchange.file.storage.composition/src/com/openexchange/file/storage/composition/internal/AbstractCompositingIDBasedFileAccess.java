@@ -1161,7 +1161,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     @Override
-    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId) throws OXException {
+    public List<String> move(final List<String> sourceIds, final long sequenceNumber, String destFolderId, final boolean adjustFilenamesAsNeeded) throws OXException {
         final FolderID destinationID;
         if (null == destFolderId) {
             throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
@@ -1192,7 +1192,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                             sources.add(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()));
                         }
 
-                        List<IDTuple> failedOnes = multiMove.move(sources, destinationID.getFolderId(), sequenceNumber);
+                        List<IDTuple> failedOnes = multiMove.move(sources, destinationID.getFolderId(), sequenceNumber, adjustFilenamesAsNeeded);
 
                         List<String> ids = new ArrayList<String>(sourceIds.size());
                         for (IDTuple idTuple : failedOnes) {
