@@ -248,9 +248,13 @@ public final class RateLimiter {
                     /*
                      * configure cache where entries expire after not being used for a bit longer than the rate limit window
                      */
+                    long maximumSize = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+                    if (0 >= maximumSize) {
+                        maximumSize = 250000;
+                    }
                     CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
                         .concurrencyLevel(16)
-                        .maximumSize(configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000))
+                        .maximumSize(maximumSize)
                         .initialCapacity(16)
                         .expireAfterAccess((int) (1.1 * maxRateTimeWindow()), TimeUnit.MILLISECONDS)
                     ;
