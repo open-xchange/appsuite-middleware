@@ -49,6 +49,8 @@
 
 package com.openexchange.serverconfig.impl;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -179,8 +181,36 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             computed.addValue(serverConfiguration, hostName, userID, contextID);
         }
 
+        serverConfiguration = correctLanguageConfiguration(serverConfiguration);
+
         ServerConfigImpl serverConfigImpl = new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
         return serverConfigImpl;
+    }
+
+    /**
+     * The languages config item in the as-config.yml can be:
+     *  - A String "all" which then gets replaced with an ArrayList containing all installed langauges
+     *  - A Hash as shown in Bug 24171, 41992 specifying a set of languages
+     *  - Missing which gets replaced with an ArrayList containing all installed languages 
+     *  
+     * What we have to deliver is an ArrayList of entries like [{de_DE=Deutsch},{en_US=English}]. As customers might be using this kind
+     * of configuration already we have to stay backwards compatible and thus rewrite the entry as workaround.
+     *
+     * @param serverConfiguration The configuration that might contain the languages entry.
+     * @return The configuration with the adjusted languages entry.
+     */
+    private Map<String, Object> correctLanguageConfiguration(Map<String, Object> serverConfiguration) {
+        Object languagesConfig = serverConfiguration.get("languages");
+
+        if (languagesConfig instanceof Map) {
+            ArrayList<SimpleEntry<String, String>> languageList = new ArrayList<SimpleEntry<String, String>>();
+            Map<String, String> languageMap = (Map<String, String>) languagesConfig;
+            for (Entry<String, String> entry : languageMap.entrySet()) {
+                languageList.add(new SimpleEntry<>(entry));
+            }
+            serverConfiguration.put("languages", languageList);
+        }
+        return serverConfiguration;
     }
 
     /**

@@ -53,10 +53,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import org.ho.yaml.Yaml;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +79,7 @@ import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
+import com.openexchange.serverconfig.impl.values.Languages;
 import com.openexchange.test.mock.MockUtils;
 
 /**
@@ -121,6 +125,8 @@ public class ServerConfigServiceImplTest {
     private static Map<String, Object> asConfigDefaults;
 
     private static Map<String, ComposedConfigProperty<String>> composedConfigPropertyMap = new HashMap<>();
+    
+    private static Properties languageProperties;
 
     @Mock
     private ComposedConfigProperty<String> defaultingProperty;
@@ -134,10 +140,15 @@ public class ServerConfigServiceImplTest {
     public void setUp() throws Exception {
         asConfigDefaults = (Map<String, Object>) Yaml.load(getClass().getResourceAsStream("as-config-defaults.yml"));
         asConfig = (Map<String, Object>) Yaml.load(getClass().getResourceAsStream("as-config.yml"));
+        languageProperties = new Properties();
+        languageProperties.put("en_US", "English");
+        languageProperties.put("fr_FR", "Francais");
 
         PowerMockito.when(this.serviceLookup.getService(ConfigurationService.class)).thenReturn(this.configurationService);
         PowerMockito.when(this.configurationService.getYaml(Matchers.eq("as-config.yml"))).thenReturn(asConfig);
         PowerMockito.when(this.configurationService.getYaml(Matchers.eq("as-config-defaults.yml"))).thenReturn(asConfigDefaults);
+        PowerMockito.when(this.configurationService.getPropertiesInFolder(Matchers.eq("languages/appsuite"))).thenReturn(languageProperties);
+
 
         PowerMockito.when(this.serviceLookup.getService(ConfigViewFactory.class)).thenReturn(this.configViewFactory);
         PowerMockito.when(this.configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(this.configView);
@@ -290,6 +301,36 @@ public class ServerConfigServiceImplTest {
         assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
         assertEquals("Wrong footer image name", null, nmc.getFooterImage());
         assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
+    }
+    
+    @Test
+    public void testCustomSingleLanguageConfiguration() throws Exception {
+        ComputedServerConfigValueService languages = new Languages(serviceLookup);
+        setConfigValues(Collections.singletonList(languages));
+        ServerConfig host1 = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", 1, 1);
+        List<SimpleEntry<String, String>> configLanguages = host1.getLanguages();
+        // host1 is restricted to use only one language as per yaml
+        assertEquals(1, configLanguages.size());
+    }
+
+    @Test
+    public void testCustomAllLanguageConfiguration() throws Exception {
+        ComputedServerConfigValueService languages = new Languages(serviceLookup);
+        setConfigValues(Collections.singletonList(languages));
+        ServerConfig host2 = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", 1, 1);
+        List<SimpleEntry<String, String>> configLanguages = host2.getLanguages();
+        // host2 is configured to use all(2) available languages
+        assertEquals(2, configLanguages.size());
+    }
+
+    @Test
+    public void testMissingLanguageConfiguration() throws Exception {
+        ComputedServerConfigValueService languages = new Languages(serviceLookup);
+        setConfigValues(Collections.singletonList(languages));
+        ServerConfig host2 = serverConfigServiceImpl.getServerConfig("host3.mycloud.net", 1, 1);
+        List<SimpleEntry<String, String>> configLanguages = host2.getLanguages();
+        // host3 has no language config so it should use all(2) available languages
+        assertEquals(2, configLanguages.size());
     }
 
 }

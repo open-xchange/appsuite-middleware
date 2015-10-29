@@ -122,7 +122,7 @@ public class Languages implements ComputedServerConfigValueService {
     @Override
     public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-        String existingLanguages = String.class.cast(serverConfig.get("languages"));
+        Object existingLanguages = serverConfig.get("languages");
         if (existingLanguages == null || existingLanguages.equals("all")) {
             serverConfig.put("languages", languages);
         }

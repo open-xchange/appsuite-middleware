@@ -51,9 +51,11 @@ package com.openexchange.serverconfig.impl;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +107,17 @@ public class ServerConfigImpl implements ServerConfig {
     @SuppressWarnings("unchecked")
     @Override
     public List<SimpleEntry<String, String>> getLanguages() {
-        return (List<SimpleEntry<String, String>>) mappings.get("languages");
+        List<SimpleEntry<String,String>> retVal = new ArrayList<>();
+        Object foundLanguages = mappings.get("languages");
+        try {
+            List<SimpleEntry<String, String>> languagesList = (List<SimpleEntry<String, String>>) mappings.get("languages");
+            if (languagesList != null) {
+                retVal = languagesList;
+            }
+        } catch (ClassCastException cce) {
+            LOG.warn("Invalid language mapping found in ServerConfig. Expected List but got {}", foundLanguages.getClass());
+        }
+        return retVal;
     }
 
     @Override

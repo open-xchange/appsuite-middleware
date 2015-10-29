@@ -16,6 +16,8 @@ host1.mycloud.net:
     pageHeader: ''
     signinTheme: 'host1.mycloud.net'
     contact: 'E-Mail: cloudservice@host1-support.de'
+    languages:
+        de_DE: Deutsch
     notificationMails:
         button:
             textColor: '#ffffff'
@@ -31,6 +33,7 @@ host2.mycloud.net:
     pageHeaderPrefix: 'OX'
     pageHeader: 'Cloud Service'
     forgotPassword: false
+    languages: all
     notificationMails:
         button:
             textColor: '#ffffff'
