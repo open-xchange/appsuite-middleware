@@ -141,6 +141,7 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.mail.IndexRange;
@@ -918,24 +919,41 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return null;
             }
             /*
+             * Check Content-Type
+             */
+            boolean useGetPart = true;
+            {
+                IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                if (null == msg) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
+                }
+                String sContentType = msg.getContentType();
+                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                    useGetPart = false;
+                }
+            }
+            /*
              * Try by Content-ID
              */
-            try {
-                final MailPart part = IMAPCommandsCollection.getPart(imapFolder, msgUID, sequenceId, false);
-                if (null != part) {
-                    // Appropriate part found -- check for special content
-                    final ContentType contentType = part.getContentType();
-                    if (!isTNEFMimeType(contentType) && !isUUEncoded(part, contentType)) {
-                        return part;
+            if (useGetPart) {
+                try {
+                    final MailPart part = IMAPCommandsCollection.getPart(imapFolder, msgUID, sequenceId, false);
+                    if (null != part) {
+                        // Appropriate part found -- check for special content
+                        final ContentType contentType = part.getContentType();
+                        if (!isTNEFMimeType(contentType) && !isUUEncoded(part, contentType)) {
+                            return part;
+                        }
                     }
+                } catch (final IOException e) {
+                    if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
+                    }
+                    // Ignore
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.trace("", e);
                 }
-            } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
-                }
-                // Ignore
-            } catch (final Exception e) {
-                // Ignore
             }
             /*
              * Regular look-up
@@ -995,15 +1013,32 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return null;
             }
             /*
+             * Check Content-Type
+             */
+            boolean useGetPart = true;
+            {
+                IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+                if (null == msg) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
+                }
+                String sContentType = msg.getContentType();
+                if (null != sContentType && Strings.asciiLowerCase(sContentType.trim()).startsWith("multipart/signed")) {
+                    useGetPart = false;
+                }
+            }
+            /*
              * Try by Content-ID
              */
-            try {
-                final MailPart partByContentId = IMAPCommandsCollection.getPartByContentId(imapFolder, msgUID, contentId, false);
-                if (null != partByContentId) {
-                    return partByContentId;
+            if (useGetPart) {
+                try {
+                    final MailPart partByContentId = IMAPCommandsCollection.getPartByContentId(imapFolder, msgUID, contentId, false);
+                    if (null != partByContentId) {
+                        return partByContentId;
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.trace("", e);
                 }
-            } catch (final Exception e) {
-                // Ignore
             }
             /*
              * Regular look-up
