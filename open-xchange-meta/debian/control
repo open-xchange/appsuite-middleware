@@ -84,5 +84,5 @@ Description: The Open-Xchange Meta package for the OX App Suite UI
 Package: open-xchange-meta-backend-ox6
 Architecture: all
 Provides: open-xchange-meta-backend
-Depends: ${ox6-common}
+Depends: open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 Description: The Open-Xchange Meta package for OX6 backend packages
