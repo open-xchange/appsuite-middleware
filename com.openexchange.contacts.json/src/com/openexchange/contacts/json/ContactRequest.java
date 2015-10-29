@@ -200,7 +200,7 @@ public class ContactRequest {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
                 return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
+                Collections.sort(contacts, new UseCountComparator(false, user.getLocale()));
                 return true;
             }
         }
