@@ -37,19 +37,6 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
-%package -n     open-xchange-meta-admin
-Group:          Applications/Productivity
-Summary:        The Open-Xchange Meta package for User/Group Provisioning
-Requires:       open-xchange-admin
-
-%description -n open-xchange-meta-admin
-The Open-Xchange Meta package for User/Group Provisioning
-
-Authors:
---------
-    Open-Xchange
-
-# ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-pubsub
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for Publish and Subscribe
@@ -79,7 +66,7 @@ Authors:
 %package -n     open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX on a single server
-Requires:       open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+Requires:       open-xchange-meta-server, open-xchange-meta-gui, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 
 %description -n open-xchange-meta-singleserver
 The Open-Xchange Meta package for OX on a single server
@@ -149,7 +136,7 @@ Summary:        The Open-Xchange Meta package for OX into Parallels integration
 Requires:       open-xchange-meta-backend
 Requires:       open-xchange-meta-gui
 Requires:       %{all_lang_backend}
-Requires:       open-xchange-parallels, open-xchange-meta-parallels-ui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
+Requires:       open-xchange-parallels, open-xchange-meta-parallels-ui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
 Conflicts:      open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
 
 %description -n open-xchange-meta-parallels
@@ -207,7 +194,7 @@ Summary:        The Open-Xchange Meta package for OX into cPanel integration
 Requires:       open-xchange-meta-backend
 Requires:       open-xchange-meta-gui
 Requires:       %{all_lang_backend}
-Requires:       open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
+Requires:       open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
 
 %description -n open-xchange-meta-cpanel
 The Open-Xchange Meta package for OX into cPanel integration
@@ -316,10 +303,6 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-ui-appsuite
-%defattr(-,root,root)
-%doc README.TXT
-
-%files -n open-xchange-meta-admin
 %defattr(-,root,root)
 %doc README.TXT
 
