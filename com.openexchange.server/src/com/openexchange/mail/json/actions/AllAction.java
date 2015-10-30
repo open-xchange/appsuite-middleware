@@ -316,7 +316,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 } else {
-                    int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                    int sortCol;
+                    try {
+                        sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                    } catch (NumberFormatException e) {
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
+                    }
 
                     if (filterApplied) {
                         mailInterface.openFor(folderId);
