@@ -153,7 +153,7 @@ public class TemplateServiceImpl implements TemplateService {
         {
             Template template = loadTemplate(templatePath, templateName, properties);
             if (null == template) {
-                throw TemplateErrorMessage.TemplateNotFound.create(templatePath);
+                throw TemplateErrorMessage.TemplateNotFound.create(templatePath + File.separator + templateName);
             }
             retval.setTemplate(template);
         }
