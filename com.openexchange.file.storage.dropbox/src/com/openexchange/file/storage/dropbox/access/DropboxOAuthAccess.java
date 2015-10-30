@@ -192,8 +192,6 @@ public final class DropboxOAuthAccess {
             // Re-auth specific stuff
             final AccessTokenPair reAuthTokens = new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret());
             dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-        } catch (OXException e) {
-            throw e;
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

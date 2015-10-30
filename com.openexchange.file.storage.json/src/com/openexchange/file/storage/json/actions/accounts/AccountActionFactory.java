@@ -66,6 +66,9 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
+    /**
+     * Initializes a new {@link AccountActionFactory}.
+     */
     public AccountActionFactory(final FileStorageServiceRegistry registry) {
         actions = new HashMap<String, AJAXActionService>(8, 0.9F);
         actions.put("all", new AllAction(registry));
